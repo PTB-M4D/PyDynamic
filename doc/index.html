@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDynamic - Analysis of Dynamic Measurements &mdash; PyDynamic - Analysis of Dynamic Measurements 0.01a documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/style.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.01a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyDynamic - Analysis of Dynamic Measurements 0.01a documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">PyDynamic - Analysis of Dynamic Measurements 0.01a documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pydynamic-analysis-of-dynamic-measurements">
+<h1>PyDynamic - Analysis of Dynamic Measurements<a class="headerlink" href="#pydynamic-analysis-of-dynamic-measurements" title="Permalink to this headline">¶</a></h1>
+<p>PyDynamic is a Python software package developed jointly by mathematicians from <a class="reference external" href="www.ptb.de">Physikalisch-Technische
+Bundesanstalt</a> (Germany) and <a class="reference external" href="www.npl.co.uk">National Physical Laboratory</a> (UK) as part of a joint European Research Project.</p>
+<p>Find out more about the project itself at the <a class="reference external" href="http://mathmet.org/projects/14SIP08">project homepage</a></p>
+</div>
+<div class="section" id="module-PyDynamic.identification.fit_filter">
+<span id="identification"></span><h1>Identification<a class="headerlink" href="#module-PyDynamic.identification.fit_filter" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="PyDynamic.identification.fit_filter.LSIIR">
+<tt class="descclassname">PyDynamic.identification.fit_filter.</tt><tt class="descname">LSIIR</tt><big>(</big><em>Hvals</em>, <em>Nb</em>, <em>Na</em>, <em>f</em>, <em>Fs</em>, <em>tau=0</em>, <em>justFit=False</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/identification/fit_filter.html#LSIIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.identification.fit_filter.LSIIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares IIR filter fit to a given frequency response</p>
+<p>This method uses Gauss-Newton non-linear optimization and pole mapping for filter stabilization</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Hvals</strong> (<em>ndarray</em>) &#8211; frequency response values</li>
+<li><strong>Nb</strong> (<em>int</em>) &#8211; numerator polynomial order</li>
+<li><strong>Na</strong> (<em>int</em>) &#8211; denominator polynomial order</li>
+<li><strong>f</strong> (<em>ndarray</em>) &#8211; frequencies</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; initial time delay</li>
+<li><strong>justFit</strong> (<em>boolean</em>) &#8211; whether to do stabilization</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>b,a</strong> (<em>ndarray</em>) &#8211; IIR filter coefficients</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; filter time delay in samples</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<ul class="simple">
+<li>Eichstädt et al. 2010 <a class="reference internal" href="#eichst2010" id="id1">[Eichst2010]</a></li>
+<li>Vuerinckx et al. 1996 <a class="reference internal" href="#vuer1996" id="id2">[Vuer1996]</a></li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="module-PyDynamic.misc.SecondOrderSystem">
+<span id="second-order-systems"></span><h1>Second Order Systems<a class="headerlink" href="#module-PyDynamic.misc.SecondOrderSystem" title="Permalink to this headline">¶</a></h1>
+<p>A collection of modules and methods that are used throughout the whole package.
+Methods specialized for second order dynamic systems, such as the ones used
+for high-class accelerometers.</p>
+<dl class="function">
+<dt id="PyDynamic.misc.SecondOrderSystem.FreqResp">
+<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">FreqResp</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em>, <em>freqs</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#FreqResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.FreqResp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculation of the system frequency response</p>
+<p>The frequency response is calculated from the continuous physical model
+of a second order system such as</p>
+<p><span class="math">\(H(f) = \frac{4S\pi^2f_0^2}{(2\pi f_0)^2 + 2jd(2\pi f_0)f - f^2}\)</span></p>
+<p>If the provided system parameters are vectors then <span class="math">\(H(f)\)</span> is calculated for
+each set of parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>S</strong> (<em>float or ndarray shape (K,)</em>) &#8211; static gain</li>
+<li><strong>d</strong> (<em>float or ndarray shape (K,)</em>) &#8211; damping parameter</li>
+<li><strong>f0</strong> (<em>float or ndarray shape (K,)</em>) &#8211; resonance frequency</li>
+<li><strong>freqs</strong> (<em>ndarray shape (N,)</em>) &#8211; frequencies at which to calculate the freq response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>H</strong> &#8211; complex frequency response values</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray shape (N,) or ndarray shape (K,N)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.SecondOrderSystem.phys2filter">
+<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">phys2filter</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#phys2filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.phys2filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculation of continuous filter coefficients from physical parameters.</p>
+<p>If the provided system parameters are vectors then the filter coefficients
+are calculated for each set of parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>S</strong> (<em>float</em>) &#8211; static gain</li>
+<li><strong>d</strong> (<em>float</em>) &#8211; damping parameter</li>
+<li><strong>f0</strong> (<em>float</em>) &#8211; resonance frequency</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211; analogue filter coefficients</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.SecondOrderSystem.unc_absphase">
+<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">unc_absphase</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em>, <em>uS</em>, <em>ud</em>, <em>uf0</em>, <em>f</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#unc_absphase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.unc_absphase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagation of uncertainty from physical parameters to real and imaginary
+part of system&#8217;s transfer function using GUM S2 Monte Carlo.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>S</strong> (<em>float</em>) &#8211; static gain</li>
+<li><strong>d</strong> (<em>float</em>) &#8211; damping</li>
+<li><strong>f0</strong> (<em>float</em>) &#8211; resonance frequency</li>
+<li><strong>uS</strong> (<em>float</em>) &#8211; uncertainty associated with static gain</li>
+<li><strong>ud</strong> (<em>float</em>) &#8211; uncertainty associated with damping</li>
+<li><strong>uf0</strong> (<em>float</em>) &#8211; uncertainty associated with resonance frequency</li>
+<li><strong>f</strong> (<em>ndarray, shape (N,)</em>) &#8211; frequency values at which to calculate amplitue and phase</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211; best estimate of complex frequency response values</li>
+<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211; covariance matrix [ [u(abs,abs), u(abs,phase)], [u(phase,abs), u(phase,phase)] ]</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.SecondOrderSystem.unc_realimag">
+<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">unc_realimag</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em>, <em>uS</em>, <em>ud</em>, <em>uf0</em>, <em>f</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#unc_realimag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.unc_realimag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagation of uncertainty from physical parameters to real and imaginary
+part of system&#8217;s transfer function using GUM S2 Monte Carlo.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>S</strong> (<em>float</em>) &#8211; static gain</li>
+<li><strong>d</strong> (<em>float</em>) &#8211; damping</li>
+<li><strong>f0</strong> (<em>float</em>) &#8211; resonance frequency</li>
+<li><strong>uS</strong> (<em>float</em>) &#8211; uncertainty associated with static gain</li>
+<li><strong>ud</strong> (<em>float</em>) &#8211; uncertainty associated with damping</li>
+<li><strong>uf0</strong> (<em>float</em>) &#8211; uncertainty associated with resonance frequency</li>
+<li><strong>f</strong> (<em>ndarray, shape (N,)</em>) &#8211; frequency values at which to calculate real and imaginary part</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211; best estimate of complex frequency response values</li>
+<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211; covariance matrix [ [u(real,real), u(real,imag)], [u(imag,real), u(imag,imag)] ]</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-PyDynamic.misc.filterstuff">
+<span id="miscellaneous"></span><h1>Miscellaneous<a class="headerlink" href="#module-PyDynamic.misc.filterstuff" title="Permalink to this headline">¶</a></h1>
+<p>A collection of methods which are related to filter design.</p>
+<dl class="function">
+<dt id="PyDynamic.misc.filterstuff.grpdelay">
+<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">grpdelay</tt><big>(</big><em>b</em>, <em>a</em>, <em>Fs</em>, <em>nfft=512</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#grpdelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.grpdelay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculation of the group deleay of a digital filter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>b</strong> (<em>ndarray</em>) &#8211; IIR filter numerator coefficients</li>
+<li><strong>a</strong> (<em>ndarray</em>) &#8211; IIR filter denominator coefficients</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency of the filter</li>
+<li><strong>nfft</strong> (<em>int</em>) &#8211; number of FFT bins</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>group delay</strong> (<em>ndarray</em>) &#8211; group delay values</li>
+<li><strong>frequencies</strong> (<em>ndarray</em>) &#8211; frequencies at which the group delay is calculated</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<ul class="simple">
+<li>Smith, online book <a class="reference internal" href="#smith" id="id3">[Smith]</a></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.filterstuff.isstable">
+<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">isstable</tt><big>(</big><em>b</em>, <em>a</em>, <em>ftype='digital'</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#isstable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.isstable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine whether IIR filter (b,a) is stable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>b</strong> (<em>ndarray</em>) &#8211; filter numerator coefficients</li>
+<li><strong>a</strong> (<em>ndarray</em>) &#8211; filter denominator coefficients</li>
+<li><strong>ftype</strong> (<em>string</em>) &#8211; type of filter (<cite>digital</cite> or <cite>analog</cite>)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stable</strong> &#8211; flag whether filter is stable or not</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The test for analog filters is not implemented yet.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.filterstuff.kaiser_lowpass">
+<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">kaiser_lowpass</tt><big>(</big><em>L</em>, <em>fcut</em>, <em>Fs</em>, <em>beta=8.0</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#kaiser_lowpass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.kaiser_lowpass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Design of a FIR lowpass filter using the window technique with a Kaiser window.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>L</strong> (<em>int</em>) &#8211; filter order (window length)</li>
+<li><strong>fcut</strong> (<em>float</em>) &#8211; desired cut-off frequency</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency</li>
+<li><strong>beta</strong> (<em>float</em>) &#8211; scaling parameter for the Kaiser window</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>blow</strong> (<em>ndarray</em>) &#8211; FIR filter coefficients</li>
+<li><strong>shift</strong> (<em>int</em>) &#8211; delay of the filter (in samples)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.filterstuff.mapinside">
+<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">mapinside</tt><big>(</big><em>a</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#mapinside"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.mapinside" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maps the roots of polynomial with coefficients a inside the unit circle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a</strong> (<em>ndarray</em>) &#8211; polynomial coefficients</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>a</strong> &#8211; polynomial coefficients with all roots inside or on the unit circle</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.filterstuff.savitzky_golay">
+<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">savitzky_golay</tt><big>(</big><em>y</em>, <em>window_size</em>, <em>order</em>, <em>deriv=0</em>, <em>rate=1</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#savitzky_golay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.savitzky_golay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooth (and optionally differentiate) data with a Savitzky-Golay filter.</p>
+<p>The Savitzky-Golay filter removes high frequency noise from data.
+It has the advantage of preserving the original shape and
+features of the signal better than other types of filtering
+approaches, such as moving averages techniques.</p>
+<p>Source obtained from scipy cookbook (online), downloaded 2013-09-13</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>y</strong> (<em>ndarray, shape (N,)</em>) &#8211; the values of the time history of the signal</li>
+<li><strong>window_size</strong> (<em>int</em>) &#8211; the length of the window. Must be an odd integer number</li>
+<li><strong>order</strong> (<em>int</em>) &#8211; the order of the polynomial used in the filtering. Must be less then <cite>window_size</cite> - 1.</li>
+<li><strong>deriv</strong> (<em>int</em>) &#8211; the order of the derivative to compute (default = 0 means only smoothing)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ys</strong> &#8211; the smoothed signal (or it&#8217;s n-th derivative).</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray, shape (N,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The Savitzky-Golay is a type of low-pass filter, particularly
+suited for smoothing noisy data. The main idea behind this
+approach is to make for each point a least-square fit with a
+polynomial of high order over a odd-sized window centered at
+the point.</p>
+<p class="rubric">Example</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">t</span><span class="o">**</span><span class="mi">2</span> <span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">ysg</span> <span class="o">=</span> <span class="n">savitzky_golay</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">31</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Noisy signal&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Original signal&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">ysg</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Filtered signal&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<ul class="simple">
+<li>Savitzky et al. <a class="reference internal" href="#savitzky" id="id4">[Savitzky]</a></li>
+<li>Numerical Recipes <a class="reference internal" href="#numrec" id="id5">[NumRec]</a></li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+<div class="section" id="references">
+<h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
+<table class="docutils citation" frame="void" id="eichst2010" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Eichst2010]</a></td><td>S. Eichstädt, C. Elster, T. J. Esward and J. P. Hessling
+Deconvolution filters for the analysis of dynamic measurement processes: a tutorial
+Metrologia, vol. 47, nr. 5
+<a class="reference external" href="http://stacks.iop.org/0026-1394/47/i=5/a=003?key=crossref.310be1c501bb6b6c2056bc9d22ec93d4">http://stacks.iop.org/0026-1394/47/i=5/a=003?key=crossref.310be1c501bb6b6c2056bc9d22ec93d4</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="vuer1996" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[Vuer1996]</a></td><td>R. Vuerinckx, Y. Rolain, J. Schoukens and R. Pintelon
+Design of stable IIR filters in the complex domain by automatic delay selection
+IEEE Trans. Signal Proc., 44, 2339-44, 1996 <a class="reference external" href="http://dx.doi.org/10.1109/78.536690">http://dx.doi.org/10.1109/78.536690</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="smith" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[Smith]</a></td><td>Smith, J.O. Introduction to Digital Filters with Audio Applications,
+<a class="reference external" href="http://ccrma.stanford.edu/~jos/filters/">http://ccrma.stanford.edu/~jos/filters/</a>, online book</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="savitzky" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[Savitzky]</a></td><td>A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of
+Data by Simplified Least Squares Procedures. Analytical
+Chemistry, 1964, 36 (8), pp 1627-1639.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="numrec" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[NumRec]</a></td><td>Numerical Recipes 3rd Edition: The Art of Scientific Computing
+W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
+Cambridge University Press ISBN-13: 9780521880688</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="acknowledgment">
+<h1>Acknowledgment<a class="headerlink" href="#acknowledgment" title="Permalink to this headline">¶</a></h1>
+<p>This work is part of the Joint Support for Impact project <a class="reference external" href="http://mathmet.org/projects/14SIP08">14SIP08</a> of the European Metrology Programme for Innovation and Research (EMPIR).
+The <a class="reference external" href="http://msu.euramet.org">EMPIR</a> is jointly funded by the EMPIR participating countries within EURAMET and the European Union.</p>
+</div>
+<div class="section" id="disclaimer">
+<h1>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this headline">¶</a></h1>
+<p>This software was developed at Physikalisch-Technische Bundesanstalt (PTB) and National Physical Laboratory (NPL).
+The software is made available &#8220;as is&#8221; free of cost. PTB and NPL assume no responsibility whatsoever for its use by other parties,
+and makes no guarantees, expressed or implied, about its quality, reliability, safety, suitability or any other characteristic.
+In no event will PTB and NPL be liable for any direct, indirect or consequential damage arising in connection with the use of this software.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PyDynamic - Analysis of Dynamic Measurements</a></li>
+<li><a class="reference internal" href="#module-PyDynamic.identification.fit_filter">Identification</a></li>
+<li><a class="reference internal" href="#module-PyDynamic.misc.SecondOrderSystem">Second Order Systems</a></li>
+<li><a class="reference internal" href="#module-PyDynamic.misc.filterstuff">Miscellaneous</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#acknowledgment">Acknowledgment</a></li>
+<li><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">PyDynamic - Analysis of Dynamic Measurements 0.01a documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Sascha Eichstädt (PTB), Ian Smith (NPL).
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

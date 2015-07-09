@@ -1,0 +1,49 @@
+.. Python Analysis of Dynamic Measurements documentation master file
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+PyDynamic - Analysis of Dynamic Measurements
+********************************************
+ 
+Identification
+==============
+
+.. automodule:: PyDynamic.identification.fit_filter
+	:members:
+
+	
+Miscellaneous
+=============
+
+Calculations for filters
+------------------------
+
+.. automodule:: PyDynamic.misc.filterstuff
+	:members:
+	
+
+Second order systems
+--------------------
+
+.. automodule:: PyDynamic.misc.SecondOrderSystem
+	:members:
+
+Examples
+========
+
+The Examples package contains some simulations to demonstrate usage of the methods. 
+
+Identification
+--------------	
+	
+.. automodule:: PyDynamic.examples.identification
+	:members:
+	
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
