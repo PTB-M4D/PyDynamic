@@ -10,10 +10,9 @@
     
 .. seealso:: :mod:`ADM.identification.fit_filter`
 """
-
 from numpy import pi,linspace, angle, exp
 from scipy.signal import freqz
-from matplotlib.pyplot import figure, cla
+from matplotlib.pyplot import figure, cla, show
     
 from PyDynamic.misc.filterstuff import db
 import PyDynamic.identification.fit_filter as fit_filter
@@ -31,7 +30,7 @@ Hvals = FreqResp(S0, delta, f0, f)      # frequency response of the 2nd order sy
 #%% fitting the IIR filter
 
 Fs = 500e3          # sampling frequency
-Na = 4; Nb = 4;     # IIR filter order (Na - denominator, Nb - numerator)
+Na = 4; Nb = 4     # IIR filter order (Na - denominator, Nb - numerator)
 
 b, a, tau = fit_filter.LSIIR(Hvals, Na, Nb, f, Fs)
 
@@ -56,3 +55,4 @@ ax2.legend(('System', 'LSIIR fit'))
 ax2.set_xlabel("frequency / Hz",fontsize=18)
 ax2.set_ylabel("freq. response angle / rad",fontsize=18)
 
+show()
