@@ -83,4 +83,19 @@ def print_mat(matrix,prec=5,vertical=False,retS=False):
         return s
     else:
         print s    
-    
+
+
+def make_semiposdef(matrix,maxiter=10,tol=1e-16):
+    from numpy.linalg import eigvals
+    from numpy import eye,real
+
+    n,m = matrix.shape
+    if n!=m:
+        raise ValueError("Matrix has to be quadratic")
+    e = real(eigvals(matrix)).min()
+    count = 0
+    while e<tol and count<maxiter:
+        M = matrix + (abs(e)+tol)*eye(n)
+        e = real(eigvals(M)).min()
+        count += 1
+    return M

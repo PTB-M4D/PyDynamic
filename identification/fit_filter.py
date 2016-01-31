@@ -2,6 +2,11 @@
 '''
 .. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 '''
+if __name__=="identification.fit_filter": # module is imported from within package
+    from misc.filterstuff import grpdelay, mapinside
+else:
+    from ..misc.filterstuff import grpdelay, mapinside
+
 
 def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     """Least-squares IIR filter fit to a given frequency response
@@ -43,7 +48,6 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     from numpy import count_nonzero,roots,ceil,median,sqrt
     from numpy.linalg import lstsq
     from scipy.signal import freqz
-    from PyDynamic.misc.filterstuff import grpdelay, mapinside
 
     print "\nLeast-squares fit of an order %d digital IIR filter" % max(Nb,Na)
     print "to a frequency response given by %d values.\n" % len(Hvals)
