@@ -11,6 +11,7 @@ import numpy as np
 import scipy.signal as dsp
 import matplotlib.pyplot as plt
 
+# if run as script, add parent path for relative importing
 if __name__ == '__main__' and __package__ is None:
     from os import sys, path
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
@@ -18,10 +19,11 @@ if __name__ == '__main__' and __package__ is None:
 import deconvolution.fit_filter as deconv
 import misc.SecondOrderSystem as sos
 from misc.testsignals import shocklikeGaussian
-from misc.filterstuff import db, kaiser_lowpass
+from misc.filterstuff import kaiser_lowpass
 from uncertainty.propagate_FIR import FIRuncFilter
-from misc.tools import col_hstack, make_semiposdef
+from misc.tools import make_semiposdef
 
+rst = np.random.RandomState(10)
 
 ##### FIR filter parameters
 N = 12  # filter order
@@ -49,20 +51,21 @@ yn = y + np.random.randn(np.size(y)) * noise
 
 # Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]
 runs = 10000
-MCS0 = S0 + np.random.randn(runs)*uS0
-MCd  = delta+ np.random.randn(runs)*udelta
-MCf0 = f0 + np.random.randn(runs)*uf0
+MCS0 = S0 + rst.randn(runs)*uS0
+MCd  = delta+ rst.randn(runs)*udelta
+MCf0 = f0 + rst.randn(runs)*uf0
 f = np.linspace(0, 120e3, 200)
 HMC = sos.FreqResp(MCS0, MCd, MCf0, f)
 
 H = np.mean(HMC,dtype=complex,axis=1)
 UH= np.cov(np.vstack((np.real(HMC),np.imag(HMC))),rowvar=1)
 UH= make_semiposdef(UH)
+
 # Calculation of FIR deconvolution filter and its assoc. unc.
 bF, UbF = deconv.LSFIR_unc(H,UH,N,tau,f,Fs)
 
 # correlation of filter coefficients
-CbF = UbF/(np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis],(1,N+1))*\
+CbF = UbF/(np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis],(1,N+1))*
 		   np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis].T,(N+1,1)))
 
 # Deconvolution Step1: lowpass filter for noise attenuation
@@ -74,34 +77,34 @@ xhat,Uxhat = FIRuncFilter(yn,noise,bF,UbF,shift,blow)
 
 
 # Plot of results
-fplot = np.linspace(0, 80e3, 1000)
-Hc = sos.FreqResp(S0, delta, f0, fplot)
-Hif = dsp.freqz(bF, 1.0, 2 * np.pi * fplot / Fs)[1]
-
-plt.figure(1); plt.clf()
-plt.plot(fplot, db(Hc), fplot, db(Hif), fplot, db(Hc*Hif))
-plt.legend(('System', 'FIR deconv fit','compensation result'))
-plt.title('Amplitude of frequency responses')
-
-fig = plt.figure(2);plt.clf()
-ax = fig.add_subplot(1,1,1)
-plt.imshow(UbF,interpolation="none")
-plt.colorbar(ax=ax)
-plt.title('Uncertainty of deconvolution filter coefficients')
-
-fig = plt.figure(21);plt.clf()
-ax = fig.add_subplot(1,1,1)
-plt.imshow(CbF,interpolation="none")
-plt.colorbar(ax=ax)
-
-
-plt.figure(3); plt.clf()
-plt.plot(time,col_hstack([x,yn,xhat]))
-plt.legend(('input','output','estimate'))
-plt.title('time domain signals')
-
-plt.figure(4);plt.clf()
-plt.plot(time,Uxhat)
-plt.title('Uncertainty of estimated input signal')
-
-plt.show()
+# fplot = np.linspace(0, 80e3, 1000)
+# Hc = sos.FreqResp(S0, delta, f0, fplot)
+# Hif = dsp.freqz(bF, 1.0, 2 * np.pi * fplot / Fs)[1]
+#
+# plt.figure(1); plt.clf()
+# plt.plot(fplot, db(Hc), fplot, db(Hif), fplot, db(Hc*Hif))
+# plt.legend(('System', 'FIR deconv fit','compensation result'))
+# plt.title('Amplitude of frequency responses')
+#
+# fig = plt.figure(2);plt.clf()
+# ax = fig.add_subplot(1,1,1)
+# plt.imshow(UbF,interpolation="none")
+# plt.colorbar(ax=ax)
+# plt.title('Uncertainty of deconvolution filter coefficients')
+#
+# fig = plt.figure(21);plt.clf()
+# ax = fig.add_subplot(1,1,1)
+# plt.imshow(CbF,interpolation="none")
+# plt.colorbar(ax=ax)
+#
+#
+# plt.figure(3); plt.clf()
+# plt.plot(time,col_hstack([x,yn,xhat]))
+# plt.legend(('input','output','estimate'))
+# plt.title('time domain signals')
+#
+# plt.figure(4);plt.clf()
+# plt.plot(time,Uxhat)
+# plt.title('Uncertainty of estimated input signal')
+#
+# plt.show()

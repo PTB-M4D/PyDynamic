@@ -2,7 +2,7 @@
 """
 .. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 """
-
+import numpy as np
 
 def col_hstack(vectors):
     """
@@ -13,15 +13,13 @@ def col_hstack(vectors):
     :returns matrix: 2D ndarray of shape (N,K)
     
     """
-    
-    from numpy import hstack, newaxis
 
     if isinstance(vectors,list):
-        col_vectors = map(lambda x: x[:,newaxis], vectors)
+        col_vectors = map(lambda x: x[:,np.newaxis], vectors)
     else:
         raise ValueError("Input must be of type list\n")    
     
-    return hstack(col_vectors)
+    return np.hstack(col_vectors)
             
             
 def find(assertions):
@@ -29,14 +27,12 @@ def find(assertions):
     MATLAB-like determination of occurence of assertion in an array using the
     numpy nonzero function
     """
-    from numpy import arange, nonzero
-    
     if not isinstance(assertions,tuple):
         raise ValueError("Input to 'find' needs to be a tuple.")
         
-    inds = arange(len(assertions[0]))
+    inds = np.arange(len(assertions[0]))
     for assertion in assertions:
-        inds = inds[nonzero(assertion[inds])[0]]
+        inds = inds[np.nonzero(assertion[inds])[0]]
     
     return inds
             
@@ -49,14 +45,13 @@ def zerom(shape):
     
     
 def stack(elements):
-    from numpy import shape, newaxis, hstack
     def make_matrix(v):
-        if len(shape(v))>1:
+        if len(v.shape())>1:
             return v
         else:
-            return v[:,newaxis]
+            return v[:,np.newaxis]
             
-    return hstack(map(lambda x: make_matrix(x), elements))    
+    return np.hstack(map(lambda x: make_matrix(x), elements))
     
 
 def print_vec(vector,prec=5,retS=False,vertical=False):
@@ -85,17 +80,16 @@ def print_mat(matrix,prec=5,vertical=False,retS=False):
         print s    
 
 
-def make_semiposdef(matrix,maxiter=10,tol=1e-16):
-    from numpy.linalg import eigvals
-    from numpy import eye,real
+def make_semiposdef(matrix,maxiter=10,tol=1e-12):
 
     n,m = matrix.shape
     if n!=m:
         raise ValueError("Matrix has to be quadratic")
-    e = real(eigvals(matrix)).min()
+    matrix = 0.5*(matrix+matrix.T)
+    e = np.real(np.linalg.eigvals(matrix)).min()
     count = 0
     while e<tol and count<maxiter:
-        M = matrix + (abs(e)+tol)*eye(n)
-        e = real(eigvals(M)).min()
+        matrix += (np.abs(e)+tol)*np.eye(n)
+        e = np.real(np.linalg.eigvals(matrix)).min()
         count += 1
-    return M
+    return matrix

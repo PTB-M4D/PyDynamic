@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,16 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyDynamic - Analysis of Dynamic Measurements &mdash; PyDynamic - Analysis of Dynamic Measurements 0.01a documentation</title>
+    <title>PyDynamic - Analysis of Dynamic Measurements &mdash; PyDynamic 1.0alpha documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/style.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.01a',
+        VERSION:     '1.0alpha',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,70 +23,291 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="PyDynamic - Analysis of Dynamic Measurements 0.01a documentation" href="#" /> 
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyDynamic 1.0alpha documentation" href="#" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
   </head>
-  <body>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li><a href="#">PyDynamic - Analysis of Dynamic Measurements 0.01a documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="pydynamic-analysis-of-dynamic-measurements">
 <h1>PyDynamic - Analysis of Dynamic Measurements<a class="headerlink" href="#pydynamic-analysis-of-dynamic-measurements" title="Permalink to this headline">¶</a></h1>
 <p>PyDynamic is a Python software package developed jointly by mathematicians from <a class="reference external" href="www.ptb.de">Physikalisch-Technische
 Bundesanstalt</a> (Germany) and <a class="reference external" href="www.npl.co.uk">National Physical Laboratory</a> (UK) as part of a joint European Research Project.</p>
 <p>Find out more about the project itself at the <a class="reference external" href="http://mathmet.org/projects/14SIP08">project homepage</a></p>
+<p>The whole package <em>PyDynamic</em> is written in python 2.7x.</p>
 </div>
 <div class="section" id="module-PyDynamic.identification.fit_filter">
 <span id="identification"></span><h1>Identification<a class="headerlink" href="#module-PyDynamic.identification.fit_filter" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="PyDynamic.identification.fit_filter.LSIIR">
-<tt class="descclassname">PyDynamic.identification.fit_filter.</tt><tt class="descname">LSIIR</tt><big>(</big><em>Hvals</em>, <em>Nb</em>, <em>Na</em>, <em>f</em>, <em>Fs</em>, <em>tau=0</em>, <em>justFit=False</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/identification/fit_filter.html#LSIIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.identification.fit_filter.LSIIR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Least-squares IIR filter fit to a given frequency response</p>
-<p>This method uses Gauss-Newton non-linear optimization and pole mapping for filter stabilization</p>
+<dt id="PyDynamic.identification.fit_filter.LSFIR">
+<code class="descclassname">PyDynamic.identification.fit_filter.</code><code class="descname">LSFIR</code><span class="sig-paren">(</span><em>H</em>, <em>N</em>, <em>tau</em>, <em>f</em>, <em>Fs</em>, <em>Wt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/identification/fit_filter.html#LSFIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.identification.fit_filter.LSFIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares fit of a digital FIR filter to a given frequency response.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>Hvals</strong> (<em>ndarray</em>) &#8211; frequency response values</li>
-<li><strong>Nb</strong> (<em>int</em>) &#8211; numerator polynomial order</li>
-<li><strong>Na</strong> (<em>int</em>) &#8211; denominator polynomial order</li>
+<li><strong>H</strong> (<em>ndarray</em>) &#8211; frequency response values</li>
+<li><strong>N</strong> (<em>int</em>) &#8211; FIR filter order</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; delay of filter</li>
 <li><strong>f</strong> (<em>ndarray</em>) &#8211; frequencies</li>
-<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency</li>
-<li><strong>tau</strong> (<em>int</em>) &#8211; initial time delay</li>
-<li><strong>justFit</strong> (<em>boolean</em>) &#8211; whether to do stabilization</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency of digital filter</li>
+<li><strong>Wt</strong> &#8211; (optional) vector of weights</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>b,a</strong> (<em>ndarray</em>) &#8211; IIR filter coefficients</li>
-<li><strong>tau</strong> (<em>int</em>) &#8211; filter time delay in samples</li>
-</ul>
-</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">filter coefficients bFIR (ndarray) of shape (N,)</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">References</p>
-<ul class="simple">
-<li>Eichstädt et al. 2010 <a class="reference internal" href="#eichst2010" id="id1">[Eichst2010]</a></li>
-<li>Vuerinckx et al. 1996 <a class="reference internal" href="#vuer1996" id="id2">[Vuer1996]</a></li>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.identification.fit_filter.LSIIR">
+<code class="descclassname">PyDynamic.identification.fit_filter.</code><code class="descname">LSIIR</code><span class="sig-paren">(</span><em>Hvals</em>, <em>Nb</em>, <em>Na</em>, <em>f</em>, <em>Fs</em>, <em>tau=0</em>, <em>justFit=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/identification/fit_filter.html#LSIIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.identification.fit_filter.LSIIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares IIR filter fit to a given frequency response</p>
+<p>This method uses Gauss-Newton non-linear optimization and pole mapping for filter stabilization</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>Hvals:   ndarray</dt>
+<dd>frequency response values</dd>
+<dt>Nb:      int</dt>
+<dd>numerator polynomial order</dd>
+<dt>Na:      int </dt>
+<dd>denominator polynomial order</dd>
+<dt>f:       ndarray</dt>
+<dd>frequencies</dd>
+<dt>Fs:      float</dt>
+<dd>sampling frequency</dd>
+<dt>tau:     int</dt>
+<dd>initial time delay</dd>
+<dt>justFit: boolean</dt>
+<dd>whether to do stabilization</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>b,a:    ndarray</dt>
+<dd>IIR filter coefficients</dd>
+<dt>tau:    int</dt>
+<dd>filter time delay in samples</dd>
+</dl>
+</dd>
+</dl>
+<p>References:
+* Eichstädt et al. 2010 <a class="reference internal" href="#eichst2010" id="id1">[Eichst2010]</a>
+* Vuerinckx et al. 1996 <a class="reference internal" href="#vuer1996" id="id2">[Vuer1996]</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-PyDynamic.deconvolution.fit_filter">
+<span id="deconvolution"></span><h1>Deconvolution<a class="headerlink" href="#module-PyDynamic.deconvolution.fit_filter" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-LSIIR"></span><p>This module contains methods to fit a digital filter to a given frequency response
+such that the resulting filter acts as deconvolution/inverse filter for the corresponding
+measurement system. For an example see <code class="xref py py-mod docutils literal"><span class="pre">ADM.examples.LSIIR_deconvolution</span></code> 
+Methods in this package are</p>
+<p>LSFIR(H,N,tau,f,Fs,Wt=None)
+LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True)
+LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True)
+LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True)
+LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0)
+FreqResp2realimag(Abs,Phase,Unc,MCruns=1e4)</p>
+<dl class="function">
+<dt id="PyDynamic.deconvolution.fit_filter.FreqResp2RealImag">
+<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">FreqResp2RealImag</code><span class="sig-paren">(</span><em>Abs</em>, <em>Phase</em>, <em>Unc</em>, <em>MCruns=10000.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#FreqResp2RealImag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.FreqResp2RealImag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculation of real and imaginary parts from amplitude and phase with associated
+uncertainties.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Abs</strong> &#8211; ndarray of shape N - amplitude values</li>
+<li><strong>Phase</strong> &#8211; ndarray of shape N - phase values in rad</li>
+<li><strong>Unc</strong> &#8211; ndarray of shape 2Nx2N or 2N - uncertainties</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Re,Im:</th><td class="field-body"><p class="first">ndarrays of shape N - real and imaginary parts (best estimate)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns URI:</th><td class="field-body"><p class="first last">ndarray of shape 2Nx2N - uncertainties assoc. with Re and Im</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.deconvolution.fit_filter.LSFIR">
+<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">LSFIR</code><span class="sig-paren">(</span><em>H</em>, <em>N</em>, <em>tau</em>, <em>f</em>, <em>Fs</em>, <em>Wt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#LSFIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.LSFIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares fit of a digital FIR filter to the reciprocal of a given frequency response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>H</strong> (<em>ndarray</em>) &#8211; frequency response values</li>
+<li><strong>N</strong> (<em>int</em>) &#8211; FIR filter order</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; delay of filter</li>
+<li><strong>f</strong> (<em>ndarray</em>) &#8211; frequencies</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency of digital filter</li>
+<li><strong>Wt</strong> &#8211; (optional) vector of weights</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">filter coefficients bFIR (ndarray) of shape (N,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.deconvolution.fit_filter.LSFIR_unc">
+<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">LSFIR_unc</code><span class="sig-paren">(</span><em>H</em>, <em>UH</em>, <em>N</em>, <em>tau</em>, <em>f</em>, <em>Fs</em>, <em>wt=None</em>, <em>verbose=True</em>, <em>returnHi=False</em>, <em>trunc_svd_tol=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#LSFIR_unc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.LSFIR_unc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares fit of a digital FIR filter to the reciprocal of a frequency response
+for which associated uncertainties are given for its real and imaginary part.
+Uncertainties are propagated using a truncated svd and linear matrix propagation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>H</strong> &#8211; frequency response values</li>
+<li><strong>UH</strong> &#8211; matrix of uncertainties associated with the real and imaginary part of H</li>
+<li><strong>N</strong> &#8211; FIR filter order</li>
+<li><strong>tau</strong> &#8211; delay of filter</li>
+<li><strong>f</strong> &#8211; frequencies</li>
+<li><strong>Fs</strong> &#8211; sampling frequency of digital filter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>optional input parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wt</strong> &#8211; vector of weights (length 2K) or string &#8216;unc&#8217; for using uncertainties, default=None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns b:</th><td class="field-body">filter coefficients of shape (N,)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns Ub:</th><td class="field-body">matrix of uncertainties associated with b. shape (N,N)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.deconvolution.fit_filter.LSFIR_uncMC">
+<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">LSFIR_uncMC</code><span class="sig-paren">(</span><em>H</em>, <em>UH</em>, <em>N</em>, <em>tau</em>, <em>f</em>, <em>Fs</em>, <em>wt=None</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#LSFIR_uncMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.LSFIR_uncMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares fit of a FIR filter to the reciprocal of a frequency response
+for which associated uncertainties are given for its real and imaginary parts.
+Uncertainties are propagated using a Monte Carlo method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>H</strong> (<em>ndarray, shape (K,)</em>) &#8211; frequency response values</li>
+<li><strong>UH</strong> (<em>ndarray, shape (2K,2K)</em>) &#8211; matrix of uncertainties associated with the real and imaginary part of H</li>
+<li><strong>N</strong> (<em>int</em>) &#8211; FIR filter order</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; delay of filter</li>
+<li><strong>f</strong> (<em>ndarray, shape (K,)</em>) &#8211; frequencies</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency of digital filter</li>
+<li><strong>wt</strong> &#8211; (optional) vector of weights</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns b:</th><td class="field-body"><p class="first">filter coefficients of shape (N,)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns Ub:</th><td class="field-body"><p class="first last">matrix of uncertainties associated with b. shape (N,N)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.deconvolution.fit_filter.LSIIR">
+<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">LSIIR</code><span class="sig-paren">(</span><em>Hvals</em>, <em>Nb</em>, <em>Na</em>, <em>f</em>, <em>Fs</em>, <em>tau</em>, <em>justFit=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#LSIIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.LSIIR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares fit of a digital IIR filter to the reciprocal of a given set 
+of frequency response values unp.sing the equation-error method and stabilization 
+by pole mapnp.ping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Hvals</strong> (<em>ndarray</em>) &#8211; frequency response values.</li>
+<li><strong>Nb</strong> (<em>int</em>) &#8211; order of IIR numerator polynomial.</li>
+<li><strong>Na</strong> (<em>int</em>) &#8211; order of IIR denominator polynomial.</li>
+<li><strong>f</strong> (<em>ndarray</em>) &#8211; frequencies.</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency for digital IIR filter.</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; initial estimate of time delay for filter stabilization.</li>
+<li><strong>justFit</strong> (<em>bool.</em>) &#8211; if True then no stabilization is carried out.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">ndarray b, a &#8211; IIR filter coefficients, int tau &#8211; time delay (in samples)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-mod docutils literal"><span class="pre">examples.deconvolution</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.deconvolution.fit_filter.LSIIR_unc">
+<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">LSIIR_unc</code><span class="sig-paren">(</span><em>H</em>, <em>UH</em>, <em>Nb</em>, <em>Na</em>, <em>f</em>, <em>Fs</em>, <em>tau=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#LSIIR_unc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.LSIIR_unc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Least-squares fit of a digital IIR filter to the reciprocal of a given set 
+of frequency response values with given associated uncertainty.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>H</strong> (<em>ndarray of shape (N,)</em>) &#8211; frequency response values.</li>
+<li><strong>UH</strong> (<em>ndarray of shape (2N,2N)</em>) &#8211; matrix of uncertainties associated with np.real and np.imaginary part of H</li>
+<li><strong>Nb</strong> (<em>int</em>) &#8211; order of IIR numerator polynomial.</li>
+<li><strong>Na</strong> (<em>int</em>) &#8211; order of IIR denominator polynomial.</li>
+<li><strong>f</strong> (<em>ndarray</em>) &#8211; frequencies.</li>
+<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency for digital IIR filter.</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; initial estimate of time delay for filter stabilization.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns b,a:</th><td class="field-body"><p class="first">ndarray IIR filter coefficients</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns tau:</th><td class="field-body"><p class="first">time delay (in samples)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Uba:</th><td class="field-body"><p class="first last">uncertainties associated with <span class="math">\((a_1,...,a_{N_a},b_0,...,b_{N_b})\)</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-mod docutils literal"><span class="pre">examples.deconvolution</span></code></p>
+</div>
 </dd></dl>
 
 </div>
@@ -100,122 +318,125 @@ Methods specialized for second order dynamic systems, such as the ones used
 for high-class accelerometers.</p>
 <dl class="function">
 <dt id="PyDynamic.misc.SecondOrderSystem.FreqResp">
-<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">FreqResp</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em>, <em>freqs</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#FreqResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.FreqResp" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.SecondOrderSystem.</code><code class="descname">FreqResp</code><span class="sig-paren">(</span><em>S</em>, <em>d</em>, <em>f0</em>, <em>freqs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#FreqResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.FreqResp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculation of the system frequency response</p>
 <p>The frequency response is calculated from the continuous physical model
 of a second order system such as</p>
 <p><span class="math">\(H(f) = \frac{4S\pi^2f_0^2}{(2\pi f_0)^2 + 2jd(2\pi f_0)f - f^2}\)</span></p>
 <p>If the provided system parameters are vectors then <span class="math">\(H(f)\)</span> is calculated for
 each set of parameters.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>S</strong> (<em>float or ndarray shape (K,)</em>) &#8211; static gain</li>
-<li><strong>d</strong> (<em>float or ndarray shape (K,)</em>) &#8211; damping parameter</li>
-<li><strong>f0</strong> (<em>float or ndarray shape (K,)</em>) &#8211; resonance frequency</li>
-<li><strong>freqs</strong> (<em>ndarray shape (N,)</em>) &#8211; frequencies at which to calculate the freq response</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>H</strong> &#8211; complex frequency response values</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray shape (N,) or ndarray shape (K,N)</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>S:      float or ndarray shape (K,)</dt>
+<dd>static gain</dd>
+<dt>d:      float or ndarray shape (K,)</dt>
+<dd>damping parameter</dd>
+<dt>f0:     float or ndarray shape (K,)</dt>
+<dd>resonance frequency</dd>
+<dt>freqs:  ndarray shape (N,)</dt>
+<dd>frequencies at which to calculate the freq response</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>H:  ndarray shape (N,) or ndarray shape (K,N)</dt>
+<dd>complex frequency response values</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDynamic.misc.SecondOrderSystem.phys2filter">
-<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">phys2filter</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#phys2filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.phys2filter" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.SecondOrderSystem.</code><code class="descname">phys2filter</code><span class="sig-paren">(</span><em>S</em>, <em>d</em>, <em>f0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#phys2filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.phys2filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculation of continuous filter coefficients from physical parameters.</p>
 <p>If the provided system parameters are vectors then the filter coefficients
 are calculated for each set of parameters.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>S</strong> (<em>float</em>) &#8211; static gain</li>
-<li><strong>d</strong> (<em>float</em>) &#8211; damping parameter</li>
-<li><strong>f0</strong> (<em>float</em>) &#8211; resonance frequency</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211; analogue filter coefficients</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>S:  float</dt>
+<dd>static gain</dd>
+<dt>d:  float</dt>
+<dd>damping parameter</dd>
+<dt>f0: float</dt>
+<dd>resonance frequency</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>b,a: ndarray</dt>
+<dd>analogue filter coefficients</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDynamic.misc.SecondOrderSystem.unc_absphase">
-<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">unc_absphase</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em>, <em>uS</em>, <em>ud</em>, <em>uf0</em>, <em>f</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#unc_absphase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.unc_absphase" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.SecondOrderSystem.</code><code class="descname">unc_absphase</code><span class="sig-paren">(</span><em>S</em>, <em>d</em>, <em>f0</em>, <em>uS</em>, <em>ud</em>, <em>uf0</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#unc_absphase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.unc_absphase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Propagation of uncertainty from physical parameters to real and imaginary
 part of system&#8217;s transfer function using GUM S2 Monte Carlo.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>S</strong> (<em>float</em>) &#8211; static gain</li>
-<li><strong>d</strong> (<em>float</em>) &#8211; damping</li>
-<li><strong>f0</strong> (<em>float</em>) &#8211; resonance frequency</li>
-<li><strong>uS</strong> (<em>float</em>) &#8211; uncertainty associated with static gain</li>
-<li><strong>ud</strong> (<em>float</em>) &#8211; uncertainty associated with damping</li>
-<li><strong>uf0</strong> (<em>float</em>) &#8211; uncertainty associated with resonance frequency</li>
-<li><strong>f</strong> (<em>ndarray, shape (N,)</em>) &#8211; frequency values at which to calculate amplitue and phase</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211; best estimate of complex frequency response values</li>
-<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211; covariance matrix [ [u(abs,abs), u(abs,phase)], [u(phase,abs), u(phase,phase)] ]</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>S:    float</dt>
+<dd>static gain</dd>
+<dt>d:    float</dt>
+<dd>damping</dd>
+<dt>f0:   float</dt>
+<dd>resonance frequency</dd>
+<dt>uS:   float</dt>
+<dd>uncertainty associated with static gain</dd>
+<dt>ud:   float</dt>
+<dd>uncertainty associated with damping</dd>
+<dt>uf0:  float</dt>
+<dd>uncertainty associated with resonance frequency</dd>
+<dt>f:    ndarray, shape (N,)</dt>
+<dd>frequency values at which to calculate amplitue and phase</dd>
+<dt>Hmean:   ndarray, shape (N,)</dt>
+<dd>best estimate of complex frequency response values</dd>
+<dt>Hcov:    ndarray, shape (2N,2N)</dt>
+<dd>covariance matrix [ [u(abs,abs), u(abs,phase)], [u(phase,abs), u(phase,phase)] ]</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDynamic.misc.SecondOrderSystem.unc_realimag">
-<tt class="descclassname">PyDynamic.misc.SecondOrderSystem.</tt><tt class="descname">unc_realimag</tt><big>(</big><em>S</em>, <em>d</em>, <em>f0</em>, <em>uS</em>, <em>ud</em>, <em>uf0</em>, <em>f</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#unc_realimag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.unc_realimag" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.SecondOrderSystem.</code><code class="descname">unc_realimag</code><span class="sig-paren">(</span><em>S</em>, <em>d</em>, <em>f0</em>, <em>uS</em>, <em>ud</em>, <em>uf0</em>, <em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/SecondOrderSystem.html#unc_realimag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.SecondOrderSystem.unc_realimag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Propagation of uncertainty from physical parameters to real and imaginary
 part of system&#8217;s transfer function using GUM S2 Monte Carlo.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>S</strong> (<em>float</em>) &#8211; static gain</li>
-<li><strong>d</strong> (<em>float</em>) &#8211; damping</li>
-<li><strong>f0</strong> (<em>float</em>) &#8211; resonance frequency</li>
-<li><strong>uS</strong> (<em>float</em>) &#8211; uncertainty associated with static gain</li>
-<li><strong>ud</strong> (<em>float</em>) &#8211; uncertainty associated with damping</li>
-<li><strong>uf0</strong> (<em>float</em>) &#8211; uncertainty associated with resonance frequency</li>
-<li><strong>f</strong> (<em>ndarray, shape (N,)</em>) &#8211; frequency values at which to calculate real and imaginary part</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211; best estimate of complex frequency response values</li>
-<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211; covariance matrix [ [u(real,real), u(real,imag)], [u(imag,real), u(imag,imag)] ]</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>S:    float</dt>
+<dd>static gain</dd>
+<dt>d:    float</dt>
+<dd>damping</dd>
+<dt>f0:   float</dt>
+<dd>resonance frequency</dd>
+<dt>uS:   float</dt>
+<dd>uncertainty associated with static gain</dd>
+<dt>ud:   float</dt>
+<dd>uncertainty associated with damping</dd>
+<dt>uf0:  float</dt>
+<dd>uncertainty associated with resonance frequency</dd>
+<dt>f:    ndarray, shape (N,)</dt>
+<dd>frequency values at which to calculate real and imaginary part</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>Hmean:   ndarray, shape (N,)</dt>
+<dd>best estimate of complex frequency response values</dd>
+<dt>Hcov:    ndarray, shape (2N,2N)</dt>
+<dd>covariance matrix [ [u(real,real), u(real,imag)], [u(imag,real), u(imag,imag)] ]</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -224,170 +445,251 @@ part of system&#8217;s transfer function using GUM S2 Monte Carlo.</p>
 <p>A collection of methods which are related to filter design.</p>
 <dl class="function">
 <dt id="PyDynamic.misc.filterstuff.grpdelay">
-<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">grpdelay</tt><big>(</big><em>b</em>, <em>a</em>, <em>Fs</em>, <em>nfft=512</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#grpdelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.grpdelay" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.filterstuff.</code><code class="descname">grpdelay</code><span class="sig-paren">(</span><em>b</em>, <em>a</em>, <em>Fs</em>, <em>nfft=512</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#grpdelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.grpdelay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculation of the group deleay of a digital filter</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>b</strong> (<em>ndarray</em>) &#8211; IIR filter numerator coefficients</li>
-<li><strong>a</strong> (<em>ndarray</em>) &#8211; IIR filter denominator coefficients</li>
-<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency of the filter</li>
-<li><strong>nfft</strong> (<em>int</em>) &#8211; number of FFT bins</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>group delay</strong> (<em>ndarray</em>) &#8211; group delay values</li>
-<li><strong>frequencies</strong> (<em>ndarray</em>) &#8211; frequencies at which the group delay is calculated</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">References</p>
-<ul class="simple">
-<li>Smith, online book <a class="reference internal" href="#smith" id="id3">[Smith]</a></li>
-</ul>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>b:    ndarray</dt>
+<dd>IIR filter numerator coefficients</dd>
+<dt>a:    ndarray</dt>
+<dd>IIR filter denominator coefficients</dd>
+<dt>Fs:   float</dt>
+<dd>sampling frequency of the filter</dd>
+<dt>nfft: int</dt>
+<dd>number of FFT bins</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>group delay: ndarray</dt>
+<dd>group delay values</dd>
+<dt>frequencies: ndarray</dt>
+<dd>frequencies at which the group delay is calculated</dd>
+</dl>
+</dd>
+</dl>
+<p>References
+* Smith, online book <a class="reference internal" href="#smith" id="id3">[Smith]</a></p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDynamic.misc.filterstuff.isstable">
-<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">isstable</tt><big>(</big><em>b</em>, <em>a</em>, <em>ftype='digital'</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#isstable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.isstable" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.filterstuff.</code><code class="descname">isstable</code><span class="sig-paren">(</span><em>b</em>, <em>a</em>, <em>ftype='digital'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#isstable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.isstable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine whether IIR filter (b,a) is stable</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>b</strong> (<em>ndarray</em>) &#8211; filter numerator coefficients</li>
-<li><strong>a</strong> (<em>ndarray</em>) &#8211; filter denominator coefficients</li>
-<li><strong>ftype</strong> (<em>string</em>) &#8211; type of filter (<cite>digital</cite> or <cite>analog</cite>)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stable</strong> &#8211; flag whether filter is stable or not</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The test for analog filters is not implemented yet.</p>
-</div>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>b:      ndarray</dt>
+<dd>filter numerator coefficients</dd>
+<dt>a:      ndarray</dt>
+<dd>filter denominator coefficients</dd>
+<dt>ftype:  string</dt>
+<dd>type of filter (<cite>digital</cite> or <cite>analog</cite>)</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>stable: boolean</dt>
+<dd>flag whether filter is stable or not</dd>
+</dl>
+</dd>
+</dl>
+<p>Note
+The test for analog filters is not implemented yet.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDynamic.misc.filterstuff.kaiser_lowpass">
-<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">kaiser_lowpass</tt><big>(</big><em>L</em>, <em>fcut</em>, <em>Fs</em>, <em>beta=8.0</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#kaiser_lowpass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.kaiser_lowpass" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.filterstuff.</code><code class="descname">kaiser_lowpass</code><span class="sig-paren">(</span><em>L</em>, <em>fcut</em>, <em>Fs</em>, <em>beta=8.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#kaiser_lowpass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.kaiser_lowpass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Design of a FIR lowpass filter using the window technique with a Kaiser window.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>L</strong> (<em>int</em>) &#8211; filter order (window length)</li>
-<li><strong>fcut</strong> (<em>float</em>) &#8211; desired cut-off frequency</li>
-<li><strong>Fs</strong> (<em>float</em>) &#8211; sampling frequency</li>
-<li><strong>beta</strong> (<em>float</em>) &#8211; scaling parameter for the Kaiser window</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>blow</strong> (<em>ndarray</em>) &#8211; FIR filter coefficients</li>
-<li><strong>shift</strong> (<em>int</em>) &#8211; delay of the filter (in samples)</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>L: int</dt>
+<dd>filter order (window length)</dd>
+<dt>fcut: float</dt>
+<dd>desired cut-off frequency</dd>
+<dt>Fs: float</dt>
+<dd>sampling frequency</dd>
+<dt>beta: float</dt>
+<dd>scaling parameter for the Kaiser window</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>blow: ndarray</dt>
+<dd>FIR filter coefficients</dd>
+<dt>shift: int</dt>
+<dd>delay of the filter (in samples)</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDynamic.misc.filterstuff.mapinside">
-<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">mapinside</tt><big>(</big><em>a</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#mapinside"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.mapinside" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.filterstuff.</code><code class="descname">mapinside</code><span class="sig-paren">(</span><em>a</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#mapinside"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.mapinside" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maps the roots of polynomial with coefficients a inside the unit circle</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a</strong> (<em>ndarray</em>) &#8211; polynomial coefficients</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>a</strong> &#8211; polynomial coefficients with all roots inside or on the unit circle</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
-</tr>
-</tbody>
-</table>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>a: ndarray</dt>
+<dd>polynomial coefficients</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>a: ndarray</dt>
+<dd>polynomial coefficients with all roots inside or on the unit circle</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDynamic.misc.filterstuff.savitzky_golay">
-<tt class="descclassname">PyDynamic.misc.filterstuff.</tt><tt class="descname">savitzky_golay</tt><big>(</big><em>y</em>, <em>window_size</em>, <em>order</em>, <em>deriv=0</em>, <em>rate=1</em><big>)</big><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#savitzky_golay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.savitzky_golay" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.misc.filterstuff.</code><code class="descname">savitzky_golay</code><span class="sig-paren">(</span><em>y</em>, <em>window_size</em>, <em>order</em>, <em>deriv=0</em>, <em>rate=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/filterstuff.html#savitzky_golay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.filterstuff.savitzky_golay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Smooth (and optionally differentiate) data with a Savitzky-Golay filter.</p>
 <p>The Savitzky-Golay filter removes high frequency noise from data.
 It has the advantage of preserving the original shape and
 features of the signal better than other types of filtering
 approaches, such as moving averages techniques.</p>
 <p>Source obtained from scipy cookbook (online), downloaded 2013-09-13</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>y</strong> (<em>ndarray, shape (N,)</em>) &#8211; the values of the time history of the signal</li>
-<li><strong>window_size</strong> (<em>int</em>) &#8211; the length of the window. Must be an odd integer number</li>
-<li><strong>order</strong> (<em>int</em>) &#8211; the order of the polynomial used in the filtering. Must be less then <cite>window_size</cite> - 1.</li>
-<li><strong>deriv</strong> (<em>int</em>) &#8211; the order of the derivative to compute (default = 0 means only smoothing)</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ys</strong> &#8211; the smoothed signal (or it&#8217;s n-th derivative).</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray, shape (N,)</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Notes</p>
-<p>The Savitzky-Golay is a type of low-pass filter, particularly
+<dl class="docutils">
+<dt>Parameters</dt>
+<dd><dl class="first last docutils">
+<dt>y: ndarray, shape (N,)</dt>
+<dd>the values of the time history of the signal</dd>
+<dt>window_size: int</dt>
+<dd>the length of the window. Must be an odd integer number</dd>
+<dt>order: int</dt>
+<dd>the order of the polynomial used in the filtering. Must be less then <cite>window_size</cite> - 1.</dd>
+<dt>deriv: int</dt>
+<dd>the order of the derivative to compute (default = 0 means only smoothing)</dd>
+</dl>
+</dd>
+<dt>Returns</dt>
+<dd><dl class="first last docutils">
+<dt>ys: ndarray, shape (N,)</dt>
+<dd>the smoothed signal (or it&#8217;s n-th derivative).</dd>
+</dl>
+</dd>
+</dl>
+<p>Notes
+The Savitzky-Golay is a type of low-pass filter, particularly
 suited for smoothing noisy data. The main idea behind this
 approach is to make for each point a least-square fit with a
 polynomial of high order over a odd-sized window centered at
 the point.</p>
-<p class="rubric">Example</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="o">-</span><span class="n">t</span><span class="o">**</span><span class="mi">2</span> <span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="n">ysg</span> <span class="o">=</span> <span class="n">savitzky_golay</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="mi">31</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Noisy signal&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="s">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Original signal&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">ysg</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&#39;Filtered signal&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-<p class="rubric">References</p>
-<ul class="simple">
-<li>Savitzky et al. <a class="reference internal" href="#savitzky" id="id4">[Savitzky]</a></li>
-<li>Numerical Recipes <a class="reference internal" href="#numrec" id="id5">[NumRec]</a></li>
-</ul>
+<p>Example 
+.. code-block:: python</p>
+<blockquote>
+<div>t = np.linspace(-4, 4, 500)
+y = np.exp( -t**2 ) + np.random.normal(0, 0.05, t.shape)
+ysg = savitzky_golay(y, window_size=31, order=4)
+import matplotlib.pyplot as plt
+plt.plot(t, y, label=&#8217;Noisy signal&#8217;)
+plt.plot(t, np.exp(-t**2), &#8216;k&#8217;, lw=1.5, label=&#8217;Original signal&#8217;)
+plt.plot(t, ysg, &#8216;r&#8217;, label=&#8217;Filtered signal&#8217;)
+plt.legend()
+plt.show()</div></blockquote>
+<p>References
+* Savitzky et al. <a class="reference internal" href="#savitzky" id="id4">[Savitzky]</a>
+* Numerical Recipes <a class="reference internal" href="#numrec" id="id5">[NumRec]</a></p>
+</dd></dl>
+
+<span class="target" id="module-PyDynamic.misc.testsignals"></span><dl class="function">
+<dt id="PyDynamic.misc.testsignals.GaussianPulse">
+<code class="descclassname">PyDynamic.misc.testsignals.</code><code class="descname">GaussianPulse</code><span class="sig-paren">(</span><em>time</em>, <em>t0</em>, <em>m0</em>, <em>sigma</em>, <em>noise=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/testsignals.html#GaussianPulse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.testsignals.GaussianPulse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a Gaussian pulse at t0 with height m0 and std sigma
+Args:</p>
+<blockquote>
+<div>time - numpy array of time instants (equidistant)
+t0   - time instant of signal maximum
+m0   - signal maximum
+sigma- std of pulse
+noise- std of simulated signal noise (optional)</div></blockquote>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>x - signal amplitudes at time instants</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.testsignals.GaussianPulseDeriv">
+<code class="descclassname">PyDynamic.misc.testsignals.</code><code class="descname">GaussianPulseDeriv</code><span class="sig-paren">(</span><em>time</em>, <em>t0</em>, <em>m0</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/testsignals.html#GaussianPulseDeriv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.testsignals.GaussianPulseDeriv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pulse like signal as derivative of a Gaussian pulse</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><p class="first">time  - numpy array of time instants (equidistant)
+t0    - time instant of signal maximum</p>
+<blockquote class="last">
+<div>m0    - maximum of Gaussian pulse
+sigma - std of Gaussian pulse</div></blockquote>
+</dd>
+<dt>Returns:</dt>
+<dd>x  - signal amplitudes at time instants</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.testsignals.rect">
+<code class="descclassname">PyDynamic.misc.testsignals.</code><code class="descname">rect</code><span class="sig-paren">(</span><em>time</em>, <em>t0</em>, <em>t1</em>, <em>height</em>, <em>noise=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/testsignals.html#rect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.testsignals.rect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a rectangular signal of given height and width t1-t0</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>time   - numpy array of time instants (equidistant)
+t0     - time instant of rect lhs
+t1     - time instant of rect rhs
+height - signal maximum
+noise  - std of simulated signal noise (optional)</dd>
+<dt>Returns:</dt>
+<dd>x  - signal amplitudes at time instants</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.testsignals.shocklikeGaussian">
+<code class="descclassname">PyDynamic.misc.testsignals.</code><code class="descname">shocklikeGaussian</code><span class="sig-paren">(</span><em>time</em>, <em>t0</em>, <em>m0</em>, <em>sigma</em>, <em>noise=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/testsignals.html#shocklikeGaussian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.testsignals.shocklikeGaussian" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Generates a signal that resembles a shock excitation as a Gaussian followed by a smaller Gaussian of opposite sign.</dt>
+<dd><dl class="first last docutils">
+<dt>Args:</dt>
+<dd>time - numpy array of time instants (equidistant)
+t0   - time instant of signal maximum
+m0   - signal maximum
+sigma- std of main pulse
+noise- std of simulated signal noise (optional)</dd>
+<dt>Returns:</dt>
+<dd>x - signal amplitudes at time instants</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDynamic.misc.testsignals.squarepulse">
+<code class="descclassname">PyDynamic.misc.testsignals.</code><code class="descname">squarepulse</code><span class="sig-paren">(</span><em>time</em>, <em>height</em>, <em>numpulse=4</em>, <em>noise=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/misc/testsignals.html#squarepulse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.misc.testsignals.squarepulse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a series of rect functions to represent a square pulse signal</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>time - numpy array of time instants
+height - height of the rectangular pulses
+numpulse - number of pulses
+noise - std of simulated signal noise (optional)</dd>
+<dt>Returns:</dt>
+<dd>x - signal amplitude at time instants</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
 </ul>
 </div>
 <div class="section" id="references">
@@ -450,12 +752,13 @@ In no event will PTB and NPL be liable for any direct, indirect or consequential
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">PyDynamic - Analysis of Dynamic Measurements</a></li>
 <li><a class="reference internal" href="#module-PyDynamic.identification.fit_filter">Identification</a></li>
+<li><a class="reference internal" href="#module-PyDynamic.deconvolution.fit_filter">Deconvolution</a></li>
 <li><a class="reference internal" href="#module-PyDynamic.misc.SecondOrderSystem">Second Order Systems</a></li>
 <li><a class="reference internal" href="#module-PyDynamic.misc.filterstuff">Miscellaneous</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
@@ -463,13 +766,21 @@ In no event will PTB and NPL be liable for any direct, indirect or consequential
 <li><a class="reference internal" href="#acknowledgment">Acknowledgment</a></li>
 <li><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
 </ul>
-
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -486,21 +797,20 @@ In no event will PTB and NPL be liable for any direct, indirect or consequential
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li><a href="#">PyDynamic - Analysis of Dynamic Measurements 0.01a documentation</a> &raquo;</li> 
-      </ul>
-    </div>
     <div class="footer">
-        &copy; Copyright 2015, Sascha Eichstädt (PTB), Ian Smith (NPL).
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      &copy;2016, S. Eichstädt, I. Smith, T. Esward.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/index.txt"
+          rel="nofollow">Page source</a>
     </div>
+
+    
+
+    
   </body>
 </html>

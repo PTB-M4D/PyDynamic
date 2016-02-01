@@ -21,9 +21,8 @@ def ua(vals):
 def grpdelay(b,a,Fs,nfft=512):
     """Calculation of the group deleay of a digital filter
    
-    Parameters
-    ----------
-        b:    ndarray  
+    Parameters:
+        b:    ndarray
               IIR filter numerator coefficients
         a:    ndarray
               IIR filter denominator coefficients
@@ -32,15 +31,13 @@ def grpdelay(b,a,Fs,nfft=512):
         nfft: int
               number of FFT bins
 
-    Returns
-    -------
+    Returns:
         group delay: ndarray
                      group delay values
         frequencies: ndarray
                      frequencies at which the group delay is calculated    
 
     References
-    ----------
     * Smith, online book [Smith]_
 
     """
@@ -72,13 +69,11 @@ def grpdelay(b,a,Fs,nfft=512):
 def mapinside(a):
     """Maps the roots of polynomial with coefficients a inside the unit circle
     
-    Parameters
-    ----------
+    Parameters:
         a: ndarray
            polynomial coefficients    
-    Returns
-    -------
-        a: ndarray 
+    Returns:
+        a: ndarray
            polynomial coefficients with all roots inside or on the unit circle
     """
     from numpy import roots,conj,poly,nonzero
@@ -92,8 +87,7 @@ def kaiser_lowpass(L,fcut,Fs,beta=8.0):
     """
     Design of a FIR lowpass filter using the window technique with a Kaiser window.
     
-    Parameters
-    ----------
+    Parameters:
         L: int
            filter order (window length)
         fcut: float
@@ -102,8 +96,7 @@ def kaiser_lowpass(L,fcut,Fs,beta=8.0):
             sampling frequency
         beta: float
               scaling parameter for the Kaiser window
-    Returns
-    -------
+    Returns:
         blow: ndarray
               FIR filter coefficients
         shift: int
@@ -123,21 +116,18 @@ def kaiser_lowpass(L,fcut,Fs,beta=8.0):
 def isstable(b,a,ftype='digital'):
     """Determine whether IIR filter (b,a) is stable
     
-    Parameters
-    ----------
+    Parameters:
         b:      ndarray
                 filter numerator coefficients
         a:      ndarray
                 filter denominator coefficients
         ftype:  string
                 type of filter (`digital` or `analog`)
-    Returns
-    -------
+    Returns:
         stable: boolean
                 flag whether filter is stable or not
                 
     Note
-    ----
     The test for analog filters is not implemented yet.
     
     """    
@@ -165,7 +155,6 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     Source obtained from scipy cookbook (online), downloaded 2013-09-13    
 
     Parameters
-    ----------
         y: ndarray, shape (N,)
            the values of the time history of the signal
         window_size: int
@@ -176,12 +165,10 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
                the order of the derivative to compute (default = 0 means only smoothing)
     
     Returns
-    -------
          ys: ndarray, shape (N,)
              the smoothed signal (or it's n-th derivative).
     
     Notes
-    -----
     The Savitzky-Golay is a type of low-pass filter, particularly
     suited for smoothing noisy data. The main idea behind this
     approach is to make for each point a least-square fit with a
@@ -189,7 +176,6 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     the point.
     
     Example 
-    -------
     .. code-block:: python
     
         t = np.linspace(-4, 4, 500)
@@ -203,8 +189,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         plt.show()
     
     References
-    ----------
-    * Savitzky et al. [Savitzky]_       
+    * Savitzky et al. [Savitzky]_
     * Numerical Recipes [NumRec]_
        
     """

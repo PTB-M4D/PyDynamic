@@ -13,8 +13,7 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     
     This method uses Gauss-Newton non-linear optimization and pole mapping for filter stabilization
     
-    Parameters
-    ----------
+    Parameters:
         Hvals:   ndarray
                  frequency response values
         Nb:      int
@@ -30,16 +29,13 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
         justFit: boolean
                  whether to do stabilization
     
-    Returns
-    -------
+    Returns:
         b,a:    ndarray
                 IIR filter coefficients 
         tau:    int
                 filter time delay in samples
     
-    References
-    ----------
-    
+    References:
     * Eichstädt et al. 2010 [Eichst2010]_
     * Vuerinckx et al. 1996 [Vuer1996]_
     
@@ -115,4 +111,59 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
 
     return b,a,int(tau)    
 
-    
+
+def LSFIR(H,N,tau,f,Fs,Wt=None):
+    """
+    Least-squares fit of a digital FIR filter to a given frequency response.
+
+
+    :param H: frequency response values
+    :param N: FIR filter order
+    :param tau: delay of filter
+    :param f: frequencies
+    :param Fs: sampling frequency of digital filter
+    :param Wt: (optional) vector of weights
+
+    :type H: ndarray
+    :type N: int
+    :type tau: int
+    :type f: ndarray
+    :type Fs: float
+
+    :returns: filter coefficients bFIR (ndarray) of shape (N,)
+
+    """
+    import numpy as np
+
+    print "\nLeast-squares fit of an order %d digital FIR filter to the" % N
+    print "reciprocal of a frequency response given by %d values.\n" % len(H)
+
+    H = H[:,np.np.newaxis]
+
+    w = 2*np.np.pi*f/Fs
+    w = w[:,np.np.newaxis]
+
+    ords = np.np.arange(N+1)[:,np.np.newaxis]
+    ords = ords.T
+
+    E = np.np.exp(-1j*np.np.dot(w,ords))
+
+    if not Wt == None:
+        if len(np.shape(Wt))==2: # is matrix
+            weights = np.np.diag(Wt)
+        else:
+            weights = np.eye(len(f))*Wt
+        X = np.np.vstack([np.np.real(np.np.dot(weights,E)), np.np.imag(np.np.dot(weights,E))])
+    else:
+        X = np.np.vstack([np.np.real(E), np.np.imag(E)])
+
+    H = H*np.np.exp(1j*w*tau)
+    iRI = np.np.vstack([np.np.real(1.0/H), np.np.imag(1.0/H)])
+
+    bFIR, res = np.linalg.lstsq(X,iRI)[:2]
+
+    if not isinstance(res,np.ndarray):
+        print "Calculation of FIR filter coefficients finished with residual norm %e" % res
+
+    return np.reshape(bFIR,(N+1,))
+

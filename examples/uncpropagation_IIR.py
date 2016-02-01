@@ -5,7 +5,7 @@
 Uncertainty propagation for an IIR lowpass filter with uncertain
 cut-off frequency for a rectangular signal.
 
-.. seealso:: :mod:`PyDynamic.uncpropagation.IIR`
+.. seealso:: :mod:`uncertainty.propagate_IIR`
 
 """
 

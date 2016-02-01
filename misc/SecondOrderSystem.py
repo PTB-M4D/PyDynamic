@@ -29,8 +29,7 @@ def FreqResp(S, d, f0, freqs):
 	If the provided system parameters are vectors then :math:`H(f)` is calculated for
 	each set of parameters.
 
-	Parameters
-	----------
+	Parameters:
 		S:      float or ndarray shape (K,)
 				static gain
 		d:      float or ndarray shape (K,)
@@ -40,8 +39,7 @@ def FreqResp(S, d, f0, freqs):
 		freqs:  ndarray shape (N,)
 				frequencies at which to calculate the freq response
 
-	Returns
-	-------
+	Returns:
 		H:  ndarray shape (N,) or ndarray shape (K,N)
 			complex frequency response values
 
@@ -65,8 +63,7 @@ def phys2filter(S, d, f0):
 	If the provided system parameters are vectors then the filter coefficients
 	are calculated for each set of parameters.
 
-	Parameters
-	----------
+	Parameters:
 		S:  float
 			static gain
 		d:  float
@@ -74,8 +71,7 @@ def phys2filter(S, d, f0):
 		f0: float
 			resonance frequency
 
-	Returns
-	-------
+	Returns:
 		b,a: ndarray
 			 analogue filter coefficients
 
@@ -95,8 +91,7 @@ def unc_realimag(S, d, f0, uS, ud, uf0, f):
 	"""Propagation of uncertainty from physical parameters to real and imaginary
 	part of system's transfer function using GUM S2 Monte Carlo.
 
-	Parameters
-	----------
+	Parameters:
 		S:    float
 			  static gain
 		d:    float
@@ -112,8 +107,7 @@ def unc_realimag(S, d, f0, uS, ud, uf0, f):
 		f:    ndarray, shape (N,)
 			  frequency values at which to calculate real and imaginary part
 
-	Returns
-	-------
+	Returns:
 		Hmean:   ndarray, shape (N,)
 				 best estimate of complex frequency response values
 		Hcov:    ndarray, shape (2N,2N)
@@ -135,8 +129,7 @@ def unc_absphase(S, d, f0, uS, ud, uf0, f):
 	"""Propagation of uncertainty from physical parameters to real and imaginary
 	part of system's transfer function using GUM S2 Monte Carlo.
 
-	Parameters
-	----------
+	Parameters:
 		S:    float
 			  static gain
 		d:    float
@@ -152,8 +145,6 @@ def unc_absphase(S, d, f0, uS, ud, uf0, f):
 		f:    ndarray, shape (N,)
 			  frequency values at which to calculate amplitue and phase
 
-	Returns
-	-------
 		Hmean:   ndarray, shape (N,)
 				 best estimate of complex frequency response values
 		Hcov:    ndarray, shape (2N,2N)
@@ -169,7 +160,4 @@ def unc_absphase(S, d, f0, uS, ud, uf0, f):
 	HMC = FreqResp(SMC,dMC,fMC,f)
 
 	return np.mean(HMC,dtype=complex,axis=1), np.cov(np.vstack((np.abs(HMC),ua(HMC))),rowvar=1)
-
-
-
 

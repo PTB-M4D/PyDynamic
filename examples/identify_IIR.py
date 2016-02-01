@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
-
-    Fit of an IIR filter to a simulated frequency response of a second-order dynamic system. 
-    This is a python script which can, for instance, be run directly by calling "python identify_IIR.py" from
-    a command line.
+    Fit of an IIR filter to a simulated frequency response of a second-order dynamic system.
     
     Try to play with this script by changing the parameters of the 2nd order system or the order of the fitted filter.
     
-.. seealso:: :mod:`ADM.identification.fit_filter`
+.. seealso:: :mod:`..identification.fit_filter`
 """
+
 # if run as script, add parent path for relative importing
 if __name__ == "__main__" and __package__ is None:
 	from os import sys, path
@@ -18,7 +15,6 @@ if __name__ == "__main__" and __package__ is None:
 import numpy as np
 from scipy.signal import freqz
 from matplotlib.pyplot import figure, cla, show
-
 
 from misc.filterstuff import db
 import identification.fit_filter as fit_filter

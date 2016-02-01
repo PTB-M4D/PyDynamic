@@ -1,8 +1,3 @@
-.. PyDynamic - Analysis of Dynamic Measurements documentation master file, created by
-   sphinx-quickstart on Wed Jul 08 15:12:35 2015.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 PyDynamic - Analysis of Dynamic Measurements
 ============================================
 
@@ -10,13 +5,20 @@ PyDynamic is a Python software package developed jointly by mathematicians from 
 Bundesanstalt <www.ptb.de>`_ (Germany) and `National Physical Laboratory <www.npl.co.uk>`_ (UK) as part of a joint European Research Project.
 
 Find out more about the project itself at the `project homepage <http://mathmet.org/projects/14SIP08>`_
- 
+
+The whole package *PyDynamic* is written in python 2.7x.
    
 Identification
 ==============
 
 .. automodule:: PyDynamic.identification.fit_filter
 	:members:
+
+Deconvolution
+=============
+
+.. automodule:: PyDynamic.deconvolution.fit_filter
+    :members:
        
 Second Order Systems
 ====================
@@ -29,7 +31,9 @@ Miscellaneous
 
 .. automodule:: PyDynamic.misc.filterstuff
     :members:
-       
+.. automodule:: PyDynamic.misc.testsignals
+    :members:
+
 
 Indices and tables
 ==================
@@ -73,3 +77,5 @@ This software was developed at Physikalisch-Technische Bundesanstalt (PTB) and N
 The software is made available "as is" free of cost. PTB and NPL assume no responsibility whatsoever for its use by other parties, 
 and makes no guarantees, expressed or implied, about its quality, reliability, safety, suitability or any other characteristic. 
 In no event will PTB and NPL be liable for any direct, indirect or consequential damage arising in connection with the use of this software.
+
+

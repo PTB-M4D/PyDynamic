@@ -13,7 +13,7 @@ LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True)
 LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True)
 LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True)
 LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0)
-FreqResp2np.realnp.imag(Abs,Phase,Unc,MCruns=1e4)
+FreqResp2realimag(Abs,Phase,Unc,MCruns=1e4)
 
 """
 
@@ -75,7 +75,7 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
     
     bFIR, res = np.linalg.lstsq(X,iRI)[:2]
 
-    if not inp.sinstance(res,np.ndarray):
+    if not isinstance(res,np.ndarray):
         print "Calculation of FIR filter coefficients finished with residual norm %e" % res
 
     return np.reshape(bFIR,(N+1,))
@@ -112,7 +112,7 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
     
     :returns: ndarray b, a -- IIR filter coefficients, int tau -- time delay (in samples)
      
-    .. seealso:: :mod:`ADM.examples.deconvolution`
+    .. seealso:: :mod:`..examples.deconvolution`
     """
     from numpy import conj,count_nonzero,roots,ceil,median
     from numpy.linalg import lstsq
@@ -178,11 +178,11 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=None):
     """
     Least-squares fit of a digital FIR filter to the reciprocal of a frequency response
-    for which associated uncertainties are given for its np.real and np.imaginary part.
-    Uncertainties are propagated unp.sing np.linalg.svd and linear matrix propagation.
+    for which associated uncertainties are given for its real and imaginary part.
+    Uncertainties are propagated using a truncated svd and linear matrix propagation.
     
     :param H: frequency response values
-    :param UH: matrix of uncertainties associated with the np.real and np.imaginary part of H
+    :param UH: matrix of uncertainties associated with the real and imaginary part of H
     :param N: FIR filter order
     :param tau: delay of filter
     :param f: frequencies
@@ -190,7 +190,7 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
     
     optional input parameters
     
-    :param wt: vector of weights (length 2K) or string 'unc' for unp.sing uncertainties, default=None    
+    :param wt: vector of weights (length 2K) or string 'unc' for using uncertainties, default=None
     
     :type H: ndarray, shape (K,)
     :type UH: ndarray, shape (2K,2K)
@@ -262,12 +262,12 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
     
 def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
     """
-    Least-squares fit of a digital FIR filter to the reciprocal of a frequency response
-    for which associated uncertainties are given for its np.real and np.imaginary part.
-    Uncertainties are propagated unp.sing Monte Carlo method.
+    Least-squares fit of a FIR filter to the reciprocal of a frequency response
+    for which associated uncertainties are given for its real and imaginary parts.
+    Uncertainties are propagated using a Monte Carlo method.
     
     :param H: frequency response values
-    :param UH: matrix of uncertainties associated with the np.real and np.imaginary part of H
+    :param UH: matrix of uncertainties associated with the real and imaginary part of H
     :param N: FIR filter order
     :param tau: delay of filter
     :param f: frequencies
@@ -285,9 +285,7 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
     :returns Ub: matrix of uncertainties associated with b. shape (N,N)
     
     """
-        
-    import numpy as np
-    
+
     if verbose:
         print "\nLeast-squares fit of an order %d digital FIR filter to the" % N
         print "reciprocal of a frequency response given by %d values" % len(H)
@@ -314,7 +312,7 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
 
 
     bFIR = np.mean(bF,axis=1)
-    UbFIR= np.np.cov(bF,rowvar=1)    
+    UbFIR= np.cov(bF,rowvar=1)
    
     return bFIR, UbFIR    
     
@@ -344,7 +342,7 @@ def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
     :returns tau: time delay (in samples)
     :returns Uba: uncertainties associated with :math:`(a_1,...,a_{N_a},b_0,...,b_{N_b})`
      
-    .. seealso:: :mod:`ADM.examples.deconvolution`
+    .. seealso:: :mod:`..examples.deconvolution`
     """
     import numpy as np
     
@@ -352,7 +350,7 @@ def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
 
     print "\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb,Na)
     print "reciprocal of a frequency response given by %d values.\n" % len(H)
-    print "Uncerainties of the filter coefficients are evaluated unp.sing\n"\
+    print "Uncertainties of the filter coefficients are evaluated using\n"\
           "the GUM S2 Monte Carlo method with %d runs.\n" % runs
   
     
@@ -375,14 +373,14 @@ def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
 
 def FreqResp2RealImag(Abs,Phase,Unc,MCruns=1e4):
     """
-    Calculation of np.real and np.imaginary part from amplitude and phase with associated
+    Calculation of real and imaginary parts from amplitude and phase with associated
     uncertainties.
     
     :param Abs: ndarray of shape N - amplitude values
     :param Phase: ndarray of shape N - phase values in rad
     :param Unc: ndarray of shape 2Nx2N or 2N - uncertainties 
     
-    :returns Re,Im: ndarrays of shape N - np.real and np.imaginary part (best estimate)
+    :returns Re,Im: ndarrays of shape N - real and imaginary parts (best estimate)
     :returns URI: ndarray of shape 2Nx2N - uncertainties assoc. with Re and Im
     """
     
@@ -405,8 +403,3 @@ def FreqResp2RealImag(Abs,Phase,Unc,MCruns=1e4):
     
     return Re,Im, URI
 
-    
-    
-    
-    
-    

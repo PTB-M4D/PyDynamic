@@ -2,10 +2,9 @@
 
 """
 
-Uncertainty propagation for a FIR lowpass filter with uncertain
-cut-off frequency for a rectangular signal.
+Uncertainty propagation for a FIR lowpass filter with uncertain cut-off frequency for a rectangular signal.
 
-.. seealso:: :mod:`PyDynamic.uncpropagation.FIR`
+.. seealso:: :mod:`uncertainty.propagate_FIR`
 
 """
 
