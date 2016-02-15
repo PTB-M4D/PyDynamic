@@ -11,7 +11,8 @@ import numpy as np
 from scipy.signal import lfilter
 from scipy.linalg import toeplitz
 
-
+# TODO Implement formula for non-trivial noise
+# TODO Implement formula for covariance calculation
 def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
     """
     Uncertainty propagation for signal y and uncertain FIR filter theta
@@ -24,7 +25,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
     :param blow: optional FIR low-pass filter
 
     :returns x: FIR filter output
-    :returns Ux: associated uncertainties
+    :returns ux: associated point-wise uncertainties
 
     Application of the FIR propagation formula from
 
@@ -65,7 +66,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
         XL = xlow[m:m-L:-1]
         unc[m] = np.dot(XL[:,np.newaxis].T,np.dot(Utheta,XL[:,np.newaxis]))
 
-    Ux = np.sqrt(np.abs(UncCov + unc))
-    Ux = np.roll(Ux,shift)
+    ux = np.sqrt(np.abs(UncCov + unc))
+    ux = np.roll(ux,shift)
 
-    return x, Ux
+    return x, ux

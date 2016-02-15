@@ -9,7 +9,6 @@ for high-class accelerometers.
 """
 
 import numpy as np
-print __name__
 if __name__=="misc.SecondOrderSystem": # module is imported from within package
 	from misc.filterstuff import ua
 	from misc.tools import col_hstack

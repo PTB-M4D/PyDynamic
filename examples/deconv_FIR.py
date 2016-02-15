@@ -19,9 +19,9 @@ if __name__ == '__main__' and __package__ is None:
 import deconvolution.fit_filter as deconv
 import misc.SecondOrderSystem as sos
 from misc.testsignals import shocklikeGaussian
-from misc.filterstuff import kaiser_lowpass
+from misc.filterstuff import kaiser_lowpass, db
 from uncertainty.propagate_FIR import FIRuncFilter
-from misc.tools import make_semiposdef
+from misc.tools import make_semiposdef, col_hstack
 
 rst = np.random.RandomState(10)
 
@@ -34,9 +34,9 @@ Fs = 500e3
 Ts = 1 / Fs
 
 # sensor/measurement system
-f0 = 36e3; uf0 = 0.04e3
-S0 = 0.124; uS0= 1.3e-5
-delta = 0.0055; udelta = 1e-3
+f0 = 36e3; uf0 = 0.1e3
+S0 = 0.124; uS0= 1.5e-4
+delta = 0.0055; udelta = 5e-3
 
 # transform continuous system to digital filter
 bc, ac = sos.phys2filter(S0,delta,f0)
@@ -60,7 +60,6 @@ HMC = sos.FreqResp(MCS0, MCd, MCf0, f)
 H = np.mean(HMC,dtype=complex,axis=1)
 UH= np.cov(np.vstack((np.real(HMC),np.imag(HMC))),rowvar=1)
 UH= make_semiposdef(UH)
-
 # Calculation of FIR deconvolution filter and its assoc. unc.
 bF, UbF = deconv.LSFIR_unc(H,UH,N,tau,f,Fs)
 
@@ -77,34 +76,41 @@ xhat,Uxhat = FIRuncFilter(yn,noise,bF,UbF,shift,blow)
 
 
 # Plot of results
-# fplot = np.linspace(0, 80e3, 1000)
-# Hc = sos.FreqResp(S0, delta, f0, fplot)
-# Hif = dsp.freqz(bF, 1.0, 2 * np.pi * fplot / Fs)[1]
-#
-# plt.figure(1); plt.clf()
-# plt.plot(fplot, db(Hc), fplot, db(Hif), fplot, db(Hc*Hif))
-# plt.legend(('System', 'FIR deconv fit','compensation result'))
+fplot = np.linspace(0, 80e3, 1000)
+Hc = sos.FreqResp(S0, delta, f0, fplot)
+Hif = dsp.freqz(bF, 1.0, 2 * np.pi * fplot / Fs)[1]
+
+plt.figure(1); plt.clf()
+plt.plot(fplot*1e-3, db(Hc), fplot*1e-3, db(Hif), fplot*1e-3, db(Hc*Hif))
+plt.legend(('System freq. resp.', 'compensation filter','compensation result'))
 # plt.title('Amplitude of frequency responses')
-#
-# fig = plt.figure(2);plt.clf()
-# ax = fig.add_subplot(1,1,1)
-# plt.imshow(UbF,interpolation="none")
+plt.xlabel('frequency / kHz',fontsize=22)
+plt.ylabel('amplitude / dB',fontsize=22)
+plt.tick_params(which="both",labelsize=16)
+
+fig = plt.figure(2);plt.clf()
+ax = fig.add_subplot(1,1,1)
+plt.imshow(UbF,interpolation="none")
 # plt.colorbar(ax=ax)
 # plt.title('Uncertainty of deconvolution filter coefficients')
-#
-# fig = plt.figure(21);plt.clf()
-# ax = fig.add_subplot(1,1,1)
-# plt.imshow(CbF,interpolation="none")
-# plt.colorbar(ax=ax)
-#
-#
-# plt.figure(3); plt.clf()
-# plt.plot(time,col_hstack([x,yn,xhat]))
-# plt.legend(('input','output','estimate'))
+
+plt.figure(3); plt.clf()
+plt.plot(time*1e3,col_hstack([x,yn,xhat]))
+plt.legend(('input signal','output signal','estimate of input'))
 # plt.title('time domain signals')
-#
-# plt.figure(4);plt.clf()
-# plt.plot(time,Uxhat)
+plt.xlabel('time / ms',fontsize=22)
+plt.ylabel('signal amplitude / au',fontsize=22)
+plt.tick_params(which="both",labelsize=16)
+plt.xlim(1.5,4)
+plt.ylim(-0.41,0.81)
+
+plt.figure(4);plt.clf()
+plt.plot(time*1e3,Uxhat)
 # plt.title('Uncertainty of estimated input signal')
-#
-# plt.show()
+plt.xlabel('time / ms',fontsize=22)
+plt.ylabel('signal uncertainty / au',fontsize=22)
+plt.subplots_adjust(left=0.15,right=0.95)
+plt.tick_params(which='both', labelsize=16)
+plt.xlim(1.5,4)
+
+plt.show()

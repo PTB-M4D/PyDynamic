@@ -50,16 +50,22 @@ noise = 1e-3
 x = rect(time,t0,t1,height,noise=noise)
 
 y,Uy = IIR.IIR_uncFilter(x,noise,b,a,Uab)
-yMC,UyMC = MC.MC(x,noise,b,a,Uab,runs=10000)
+yMC,UyMC = MC.SMC(x,noise,b,a,Uab,runs=10000)
 
 plt.figure(1);plt.cla()
-plt.plot(time,col_hstack([x,y]))
-plt.legend(('input','output'))
+plt.plot(time*1e3,col_hstack([x,y]))
+plt.legend(('input signal','output signal'))
+plt.xlabel('time / ms',fontsize=22)
+plt.ylabel('signal amplitude / au',fontsize=22)
+plt.tick_params(which="both",labelsize=16)
 
 plt.figure(2);plt.cla()
-plt.plot(time,col_hstack([Uy,UyMC]))
-plt.title('uncertainty of filter output')
+plt.plot(time*1e3,col_hstack([Uy,UyMC]))
+# plt.title('uncertainty of filter output')
 plt.legend(('IIR formula', 'Monte Carlo'))
+plt.xlabel('time / ms',fontsize=22)
+plt.ylabel('uncertainty / au',fontsize=22)
+plt.tick_params(which='both',labelsize=16)
 
 plt.show()
 
