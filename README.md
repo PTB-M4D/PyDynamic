@@ -5,7 +5,9 @@ The goal of this package is to provide a starting point for users in metrology a
 The software is part of a joint research project of the national metrology institutes from Germany and the UK, i.e. [Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html)
 and the [National Physical Laboratory](http://www.npl.co.uk).
 
-Note that this python software is written in Python 2.7.
+Note that currently this software is written in Python 2.7. The next release will be written in Python 3.5 to ensure future compatibility.
+
+If you have downloaded this software, we would be very thankful for letting us know. You may, for instance, drop an email to one of the authors (e.g. [Sascha Eichstädt](mailto:sascha.eichstaedt@ptb.de) )
 
 ##### Acknowledgement
 This work is part of the Joint Support for Impact project [14SIP08](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for Innovation and Research (EMPIR). 
