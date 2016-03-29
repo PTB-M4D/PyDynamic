@@ -54,8 +54,8 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
 	"""
 	import numpy as np
 
-	print "\nLeast-squares fit of an order %d digital FIR filter to the" % N
-	print "reciprocal of a frequency response given by %d values.\n" % len(H)
+	print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
+	print("reciprocal of a frequency response given by %d values.\n" % len(H))
 
 	H = H[:,np.np.newaxis]
 
@@ -82,7 +82,7 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
 	bFIR, res = np.linalg.lstsq(X,iRI)[:2]
 
 	if not isinstance(res,np.ndarray):
-		print "Calculation of FIR filter coefficients finished with residual norm %e" % res
+		print("Calculation of FIR filter coefficients finished with residual norm %e" % res)
 
 	return np.reshape(bFIR,(N+1,))
 
@@ -130,8 +130,8 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 	from numpy.linalg import lstsq
 
 	if verbose:
-		print "\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb,Na)
-		print "reciprocal of a frequency response given by %d values.\n" % len(Hvals)
+		print("\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb,Na))
+		print("reciprocal of a frequency response given by %d values.\n" % len(Hvals))
   
 	w = 2*np.pi*f/Fs
 	Ns= np.arange(0,max(Nb,Na)+1)[:,np.newaxis]
@@ -178,11 +178,11 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 		run = run + 1
 
 	if count_nonzero(abs(roots(ai))>1)>0 and verbose:
-		print "Caution: The algorithm did NOT result in a stable IIR filter!"
-		print "Maybe try again with a higher value of tau0 or a higher filter order?"
+		print( "Caution: The algorithm did NOT result in a stable IIR filter!")
+		print("Maybe try again with a higher value of tau0 or a higher filter order?")
 
 	if verbose:
-		print "Least squares fit finished after %d iterations (tau=%d).\n" % (run,tau)
+		print("Least squares fit finished after %d iterations (tau=%d).\n" % (run,tau))
 
 	return bi,ai,int(tau)
 
@@ -223,12 +223,12 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
 	"""
 
 	if verbose:
-		print "\nLeast-squares fit of an order %d digital FIR filter to the" % N
-		print "reciprocal of a frequency response given by %d values" % len(H)
-		print "and propagation of associated uncertainties."
+		print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
+		print("reciprocal of a frequency response given by %d values" % len(H))
+		print("and propagation of associated uncertainties.")
 
   
-  # Step 1: Propagation of uncertainties to reciprocal of frequency response
+	# Step 1: Propagation of uncertainties to reciprocal of frequency response
 	runs = 10000
 	Nf = len(f)
 	if not len(H)==UH.shape[0]: # assume that H is given as complex valued frequency response
@@ -240,7 +240,7 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
 	omtau = 2*np.pi*f/Fs*tau
 
 	absHMC= HRI[:,:Nf]**2 + HRI[:,Nf:]**2
-  # Monte Carlo vectorized
+	# Monte Carlo vectorized
 	HiMC = np.hstack(((HRI[:,:Nf]*np.tile(np.cos(omtau),(runs,1)) + HRI[:,Nf:]*np.tile(np.sin(omtau),(runs,1)))/absHMC, \
 					 (HRI[:,Nf:]*np.tile(np.cos(omtau),(runs,1)) - HRI[:,:Nf]*np.tile(np.sin(omtau),(runs,1)))/absHMC ) )
 	UiH = np.cov(HiMC,rowvar=0)
@@ -317,13 +317,13 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
 	"""
 
 	if verbose:
-		print "\nLeast-squares fit of an order %d digital FIR filter to the" % N
-		print "reciprocal of a frequency response given by %d values" % len(H)
-		print "and propagation of associated uncertainties."
+		print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
+		print("reciprocal of a frequency response given by %d values" % len(H))
+		print("and propagation of associated uncertainties.")
 
 
   
-  # Step 1: Propagation of uncertainties to reciprocal of frequency response
+	# Step 1: Propagation of uncertainties to reciprocal of frequency response
 	runs = 10000
 	HRI  = np.random.np.random.multivariate_normal(np.np.hstack((np.np.real(H),np.np.imag(H))),UH,runs)
 
@@ -384,10 +384,10 @@ def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
 
 	runs = 1000
 
-	print "\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb,Na)
-	print "reciprocal of a frequency response given by %d values.\n" % len(H)
-	print "Uncertainties of the filter coefficients are evaluated using\n"\
-		  "the GUM S2 Monte Carlo method with %d runs.\n" % runs
+	print("\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb,Na))
+	print("reciprocal of a frequency response given by %d values.\n" % len(H))
+	print("Uncertainties of the filter coefficients are evaluated using\n"\
+		  "the GUM S2 Monte Carlo method with %d runs.\n" % runs)
   
 
 	HRI = np.random.multivariate_normal(np.hstack((np.real(H),np.imag(H))),UH,runs)
