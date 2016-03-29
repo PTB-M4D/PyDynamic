@@ -55,29 +55,26 @@ def stack(elements):
     
 
 def print_vec(vector,prec=5,retS=False,vertical=False):
-    from string import join
-    
     if vertical:
         t = "\n"
     else:
         t = "\t"
-    s = join(["%1.*g %s" % (int(prec),s,t) for s in vector])
+    s = "".join(["%1.*g %s" % (int(prec),s,t) for s in vector])
     if retS:
         return s
     else:
-        print s
+        print(s)
         
 def print_mat(matrix,prec=5,vertical=False,retS=False):
-    from string import join
     if vertical:
         matrix = matrix.T
         
-    s = join([ print_vec(matrix[k,:],prec=prec,vertical=False,retS=True)+"\n" for k in range(matrix.shape[0])])
+    s = "".join([ print_vec(matrix[k,:],prec=prec,vertical=False,retS=True)+"\n" for k in range(matrix.shape[0])])
     
     if retS:
         return s
     else:
-        print s    
+        print(s)
 
 
 def make_semiposdef(matrix,maxiter=10,tol=1e-12):

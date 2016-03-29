@@ -25,11 +25,12 @@ def IIR_uncFilter(x,noise,b,a,Uab):
 	:returns y: filter output signal
 	:returns Uy: uncertainty associated with y
 
-	Implementation of the IIR formula for uncertainty propagation:\n
+	Implementation of the IIR formula for uncertainty propagation:
 
-	A. Link and C. Elster\n
-	Uncertainty evaluation for IIR filtering using a state-space approach\n
-	Meas. Sci. Technol. vol. 20, 2009
+	A. Link and C. Elster
+	Uncertainty evaluation for IIR filtering using a state-space approach
+	Meas. Sci. Technol. vol. 20, 2009, [DOI](http://dx.doi.org/10.1088/0957-0233/20/5/055104)
+	
 	"""
 
 	if not isinstance(noise,np.ndarray):

@@ -42,6 +42,12 @@ def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,sh
 	:returns y, Uy: filter output and associated uncertainty
 	Otherwise:
 	:returns Y: matrix of Monte Carlo results
+	
+	Application of Monte Carlo method from
+	
+	S. Eichstädt, A. Link, P. M. Harris und C. Elster 
+	Efficient implementation of a Monte Carlo method for uncertainty evaluation in dynamic measurements. 
+	Metrologia, 49(3), 401, 2012. [DOI](http://dx.doi.org/10.1088/0026-1394/49/3/401)
 
 	"""
 
@@ -119,11 +125,11 @@ def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 	Otherwise:
 	:returns Y: matrix of Monte Carlo results
 
-	Implementation of Monte Carlo method from
-
-	S. Eichstädt, A. Link, P. M. Harris und C. Elster
-	Efficient implementation of a Monte Carlo method for uncertainty evaluation in dynamic measurements.
-	Metrologia, 49(3), 401, 2012. [DOI: 10.1088/0026-1394/49/3/401]
+	Application of Monte Carlo method from
+	
+	S. Eichstädt, A. Link, P. M. Harris und C. Elster 
+	Efficient implementation of a Monte Carlo method for uncertainty evaluation in dynamic measurements. 
+	Metrologia, 49(3), 401, 2012. [DOI](http://dx.doi.org/10.1088/0026-1394/49/3/401)
 
 	"""
 

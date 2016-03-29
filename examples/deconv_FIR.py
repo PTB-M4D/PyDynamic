@@ -71,7 +71,7 @@ CbF = UbF/(np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis],(1,N+1))*
 fcut = 35e3; low_order = 100
 blow, lshift = kaiser_lowpass(low_order, fcut, Fs)
 shift = -tau - lshift
-# Deconvolution Step2: Deconvolution filter
+# Deconvolution Step2: Application of deconvolution filter
 xhat,Uxhat = FIRuncFilter(yn,noise,bF,UbF,shift,blow)
 
 
@@ -79,9 +79,10 @@ xhat,Uxhat = FIRuncFilter(yn,noise,bF,UbF,shift,blow)
 fplot = np.linspace(0, 80e3, 1000)
 Hc = sos.FreqResp(S0, delta, f0, fplot)
 Hif = dsp.freqz(bF, 1.0, 2 * np.pi * fplot / Fs)[1]
+Hl = dsp.freqz(blow, 1.0, 2 * np.pi * fplot / Fs)[1]
 
 plt.figure(1); plt.clf()
-plt.plot(fplot*1e-3, db(Hc), fplot*1e-3, db(Hif), fplot*1e-3, db(Hc*Hif))
+plt.plot(fplot*1e-3, db(Hc), fplot*1e-3, db(Hif*Hl), fplot*1e-3, db(Hc*Hif*Hl))
 plt.legend(('System freq. resp.', 'compensation filter','compensation result'))
 # plt.title('Amplitude of frequency responses')
 plt.xlabel('frequency / kHz',fontsize=22)
@@ -90,7 +91,7 @@ plt.tick_params(which="both",labelsize=16)
 
 fig = plt.figure(2);plt.clf()
 ax = fig.add_subplot(1,1,1)
-plt.imshow(UbF,interpolation="none")
+plt.imshow(UbF,interpolation="nearest")
 # plt.colorbar(ax=ax)
 # plt.title('Uncertainty of deconvolution filter coefficients')
 

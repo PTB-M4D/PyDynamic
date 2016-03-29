@@ -54,7 +54,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
 
 
     x = lfilter(theta,1.0,xlow)
-    x = np.roll(x,shift)
+    x = np.roll(x,int(shift))
 
     UncCov = np.dot(theta[:,np.newaxis].T,np.dot(Ulow,theta)) + np.abs(np.trace(np.dot(Ulow,Utheta)))
 
@@ -67,6 +67,6 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
         unc[m] = np.dot(XL[:,np.newaxis].T,np.dot(Utheta,XL[:,np.newaxis]))
 
     ux = np.sqrt(np.abs(UncCov + unc))
-    ux = np.roll(ux,shift)
+    ux = np.roll(ux,int(shift))
 
     return x, ux

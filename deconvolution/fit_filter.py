@@ -42,8 +42,14 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
 	:type tau: int
 	:type f: ndarray
 	:type Fs: float
-
+	
 	:returns: filter coefficients bFIR (ndarray) of shape (N,)
+	
+	Application of deconvolution filter design method from
+	
+	C. Elster und A. Link 
+	Uncertainty evaluation for dynamic measurements modelled by a linear time-invariant system. 
+	Metrologia, 45(4), 464-473, 2008. [DOI](http://dx.doi.org/10.1088/0026-1394/45/4/013)
 
 	"""
 	import numpy as np
@@ -111,6 +117,12 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 	:type tau: int
 
 	:returns: ndarray b, a -- IIR filter coefficients, int tau -- time delay (in samples)
+	
+	Application of filter design method from
+	
+	S. Eichstädt, C. Elster, T. J. Esward und J. P. Hessling 
+	Deconvolution filters for the analysis of dynamic measurement processes: a tutorial. 
+	Metrologia, 47(5), 522-533, 2010. [DOI](http://dx.doi.org/10.1088/0026-1394/47/5/003)
 
 	.. seealso:: :mod:`..examples.deconvolution`
 	"""
@@ -201,6 +213,12 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
 
 	:returns b: filter coefficients of shape (N,)
 	:returns Ub: matrix of uncertainties associated with b. shape (N,N)
+	
+	Application of deconvolution filter design method from
+	
+	C. Elster und A. Link 
+	Uncertainty evaluation for dynamic measurements modelled by a linear time-invariant system. 
+	Metrologia, 45(4), 464-473, 2008. [DOI](http://dx.doi.org/10.1088/0026-1394/45/4/013)	
 
 	"""
 
@@ -290,6 +308,12 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
 	:returns b: filter coefficients of shape (N,)
 	:returns Ub: matrix of uncertainties associated with b. shape (N,N)
 
+	Application of deconvolution filter design method from
+	
+	C. Elster und A. Link 
+	Uncertainty evaluation for dynamic measurements modelled by a linear time-invariant system. 
+	Metrologia, 45(4), 464-473, 2008. [DOI](http://dx.doi.org/10.1088/0026-1394/45/4/013)	
+	
 	"""
 
 	if verbose:
@@ -348,6 +372,12 @@ def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
 	:returns tau: time delay (in samples)
 	:returns Uba: uncertainties associated with :math:`(a_1,...,a_{N_a},b_0,...,b_{N_b})`
 
+	Application of filter design method from
+	
+	S. Eichstädt, C. Elster, T. J. Esward und J. P. Hessling 
+	Deconvolution filters for the analysis of dynamic measurement processes: a tutorial. 
+	Metrologia, 47(5), 522-533, 2010. [DOI](http://dx.doi.org/10.1088/0026-1394/47/5/003)	
+	
 	.. seealso:: :mod:`..examples.deconvolution`
 	"""
 	import numpy as np
