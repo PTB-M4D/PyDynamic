@@ -21,7 +21,7 @@ import numpy as np
 from misc.testsignals import rect
 import uncertainty.propagate_IIR as IIR
 import uncertainty.propagate_MonteCarlo as MC
-from misc.tools import col_hstack
+from misc.tools import col_hstack, make_semiposdef
 
 # parameters of simulated measurement
 Fs = 100e3
@@ -41,7 +41,7 @@ for k in range(runs):
 	bb,aa = dsp.butter(L,2*FC[k]/Fs,btype='lowpass')
 	AB[k,:] = np.hstack((aa[1:],bb))
 
-Uab = np.cov(AB,rowvar=0)
+Uab = make_semiposdef(np.cov(AB,rowvar=0))
 
 time = np.arange(0,499*Ts,Ts)
 t0 = 100*Ts; t1 = 300*Ts

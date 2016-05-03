@@ -17,7 +17,7 @@ import numpy as np
 
 from misc.testsignals import rect
 from uncertainty.propagate_FIR import FIRuncFilter
-from misc.tools import col_hstack
+from misc.tools import col_hstack, make_semiposdef
 from misc.filterstuff import kaiser_lowpass
 import uncertainty.propagate_MonteCarlo as MC
 
@@ -38,7 +38,7 @@ B = np.zeros((runs,L+1))
 for k in range(runs):
 	B[k,:] = kaiser_lowpass(L,FC[k],Fs)[0]
 
-Ub = np.cov(B,rowvar=0)
+Ub = make_semiposdef(np.cov(B,rowvar=0))
 
 # simulate input and output signals
 time = np.arange(0,499*Ts,Ts)

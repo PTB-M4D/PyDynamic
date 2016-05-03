@@ -81,9 +81,9 @@ def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,sh
 		sys.stdout.write(" 100%\n")
 
 	if unst_count > 0:
-		print "In %d Monte Carlo %d filters have been unstable" % (runs,unst_count)
-		print "These results will not be considered for calculation of mean and std"
-		print "However, if return_samples is 'True' then ALL samples are returned."
+		print("In %d Monte Carlo %d filters have been unstable" % (runs,unst_count))
+		print("These results will not be considered for calculation of mean and std")
+		print("However, if return_samples is 'True' then ALL samples are returned.")
 
 	Y = np.roll(Y,int(shift),axis=1)
 
