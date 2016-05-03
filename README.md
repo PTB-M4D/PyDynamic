@@ -14,12 +14,10 @@ If you have downloaded this software, we would be very thankful for letting us k
 
 ### Roadmap - next steps
 
-1. Transfer the current code basis to Python 3.5 for future compatibility.
-2. Extend the exisiting examples using improved signals and systems.
-3. Merge [GUM2DFT](https://www.ptb.de/cms/en/ptb/fachabteilungen/abt8/fb-84/ag-842/dynamischemessungen-842/download-gum2dft.html) into PyDynamic.
-4. Extend the code to more advanced noise processes and uncertainty evaluation.
-5. Add IPython notebooks as a way of documentation.
-6. Provide graphical user interfaces for specific use cases (Any suggestions? Let us know!)
+1. Extend the exisiting examples using improved signals and systems.
+2. Extend the code to more advanced noise processes and uncertainty evaluation.
+3. Add IPython notebooks as a way of documentation.
+4. Provide graphical user interfaces for specific use cases (Any suggestions? Let us know!)
 
 ##### Acknowledgement
 This work is part of the Joint Support for Impact project [14SIP08](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for Innovation and Research (EMPIR). 
