@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 
 Application of the formula for the calculation of variance for the case of FIR filtering
 
