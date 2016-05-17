@@ -28,3 +28,6 @@ This software was developed at Physikalisch-Technische Bundesanstalt (PTB) and N
 The software is made available "as is" free of cost. PTB and NPL assume no responsibility whatsoever for its use by other parties, 
 and makes no guarantees, expressed or implied, about its quality, reliability, safety, suitability or any other characteristic. 
 In no event will PTB and NPL be liable for any direct, indirect or consequential damage arising in connection with the use of this software.
+
+##### License
+PyDynamic is distributed under the LGPLv3 license with the exception of the module `impinvar.py` in the package `misc`, which is distributed under the GPLv3 license.
