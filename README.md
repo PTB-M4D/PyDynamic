@@ -5,12 +5,12 @@ The goal of this package is to provide a starting point for users in metrology a
 The software is part of a joint research project of the national metrology institutes from Germany and the UK, i.e. [Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html)
 and the [National Physical Laboratory](http://www.npl.co.uk).
 
-Note that currently this software is written in Python 2.7. The next release will be written in Python 3.5 to ensure future compatibility.
-
 ### Installation
 Since this software is still under active development, we highly recommend to not download the zip-file of the current version only. Instead, we recommend using [Github Desktop](https://desktop.github.com) or any other git-compatible version control software and cloning the repository (https://github.com/eichstaedtPTB/PyDynamic.git). In this way, any updates to the software will be highlighted in the version control software and can be applied very easily.
 
-If you have downloaded this software, we would be very thankful for letting us know. You may, for instance, drop an email to one of the authors (e.g. [Sascha Eichst√§dt](mailto:sascha.eichstaedt@ptb.de) or [Ian Smith](mailto:ian.smith@npl.co.uk) )
+In the source folder there is a setup script for installation. To run this script, open a command prompt at the location of the 'setup.py' file and run: 'python setup.py install'. This will install the PyDynamic package into your default PYTHONPATH site-packages folder. See 'python setup.py --help' for further instructions. After installation, one can import any module from the PyDynamic package by calling 'import PyDynamic' or similar means, see your favorite Python tutorial for further instructions.
+
+If you have downloaded this software, we would be very thankful for letting us know. You may, for instance, drop an email to one of the authors (e.g. [Sascha Eichst‰dt](mailto:sascha.eichstaedt@ptb.de) or [Ian Smith](mailto:ian.smith@npl.co.uk) )
 
 ### Roadmap - next steps
 
