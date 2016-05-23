@@ -6,19 +6,13 @@
     
 .. seealso:: :mod:`..identification.fit_filter`
 """
-
-# if run as script, add parent path for relative importing
-if __name__ == "__main__" and __package__ is None:
-	from os import sys, path
-	sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 import numpy as np
 from scipy.signal import freqz
 from matplotlib.pyplot import figure, cla, show
 
-from misc.filterstuff import db
-import identification.fit_filter as fit_filter
-from misc.SecondOrderSystem import FreqResp
+from PyDynamic.misc.filterstuff import db
+import PyDynamic.identification.fit_filter as fit_filter
+from PyDynamic.misc.SecondOrderSystem import FreqResp
 
 #%% sensor/measuring system
 

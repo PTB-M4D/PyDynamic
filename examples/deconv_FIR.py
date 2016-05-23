@@ -16,12 +16,12 @@ if __name__ == '__main__' and __package__ is None:
     from os import sys, path
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
-import deconvolution.fit_filter as deconv
-import misc.SecondOrderSystem as sos
-from misc.testsignals import shocklikeGaussian
-from misc.filterstuff import kaiser_lowpass, db
-from uncertainty.propagate_FIR import FIRuncFilter
-from misc.tools import make_semiposdef, col_hstack
+import PyDynamic.deconvolution.fit_filter as deconv
+import PyDynamic.misc.SecondOrderSystem as sos
+from PyDynamic.misc.testsignals import shocklikeGaussian
+from PyDynamic.misc.filterstuff import kaiser_lowpass, db
+from PyDynamic.uncertainty.propagate_FIR import FIRuncFilter
+from PyDynamic.misc.tools import make_semiposdef, col_hstack
 
 rst = np.random.RandomState(10)
 

@@ -52,36 +52,35 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
 	Metrologia, 45(4), 464-473, 2008. [DOI](http://dx.doi.org/10.1088/0026-1394/45/4/013)
 
 	"""
-	import numpy as np
 
 	print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
 	print("reciprocal of a frequency response given by %d values.\n" % len(H))
 
-	H = H[:,np.np.newaxis]
+	H = H[:,np.newaxis]
 
-	w = 2*np.np.pi*f/Fs
-	w = w[:,np.np.newaxis]
+	w = 2*np.pi*f/Fs
+	w = w[:,np.newaxis]
 
-	ords = np.np.arange(N+1)[:,np.np.newaxis]
+	ords = np.arange(N+1)[:,np.newaxis]
 	ords = ords.T
 
-	E = np.np.exp(-1j*np.np.dot(w,ords))
+	E = np.exp(-1j*np.dot(w,ords))
 
 	if not Wt == None:
 		if len(np.shape(Wt))==2: # is matrix
-			weights = np.np.diag(Wt)
+			weights = np.diag(Wt)
 		else:
 			weights = np.eye(len(f))*Wt
-		X = np.np.vstack([np.np.real(np.np.dot(weights,E)), np.np.imag(np.np.dot(weights,E))])
+		X = np.np.vstack([np.real(np.dot(weights,E)), np.imag(np.dot(weights,E))])
 	else:
-		X = np.np.vstack([np.np.real(E), np.np.imag(E)])
+		X = np.vstack([np.real(E), np.imag(E)])
 
-	H = H*np.np.exp(1j*w*tau)
-	iRI = np.np.vstack([np.np.real(1.0/H), np.np.imag(1.0/H)])
+	H = H*np.exp(1j*w*tau)
+	iRI = np.vstack([np.real(1.0/H), np.imag(1.0/H)])
 
 	bFIR, res = np.linalg.lstsq(X,iRI)[:2]
 
-	if not isinstance(res,np.ndarray):
+	if (not isinstance(res,np.ndarray)) or (len(res)==1):
 		print("Calculation of FIR filter coefficients finished with residual norm %e" % res)
 
 	return np.reshape(bFIR,(N+1,))
@@ -325,18 +324,18 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
   
 	# Step 1: Propagation of uncertainties to reciprocal of frequency response
 	runs = 10000
-	HRI  = np.random.np.random.multivariate_normal(np.np.hstack((np.np.real(H),np.np.imag(H))),UH,runs)
+	HRI  = np.random.multivariate_normal(np.hstack((np.real(H),np.imag(H))),UH,runs)
 
-	E = np.np.exp(-1j*2*np.np.pi*np.np.dot(f[:,np.np.newaxis]/Fs,np.np.arange(N+1)[:,np.np.newaxis].T))
-	X = np.np.vstack((np.np.real(E),np.np.imag(E)))
+	E = np.exp(-1j*2*np.pi*np.dot(f[:,np.newaxis]/Fs,np.arange(N+1)[:,np.newaxis].T))
+	X = np.vstack((np.real(E),np.imag(E)))
 
 	Nf = len(f)
 	bF= np.zeros((N+1,runs))
 	resn =np.zeros((runs,))
 	for k in range(runs):
 		Hk = HRI[k,:Nf] + 1j*HRI[k,Nf:]
-		Hkt= Hk*np.np.exp(1j*2*np.np.pi*f/Fs*tau)
-		iRI= np.np.hstack([np.np.real(1.0/Hkt),np.np.imag(1.0/Hkt)])
+		Hkt= Hk*np.exp(1j*2*np.pi*f/Fs*tau)
+		iRI= np.hstack([np.real(1.0/Hkt),np.imag(1.0/Hkt)])
 		bF[:,k],res = np.linalg.lstsq(X,iRI)[:2]
 		resn[k]= np.linalg.norm(res)
 
@@ -380,7 +379,6 @@ def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
 	
 	.. seealso:: :mod:`..examples.deconvolution`
 	"""
-	import numpy as np
 
 	runs = 1000
 

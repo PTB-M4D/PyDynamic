@@ -9,17 +9,14 @@ Uncertainty propagation for a FIR lowpass filter with uncertain cut-off frequenc
 """
 
 # if run as script, add parent path for relative importing
-if __name__ == '__main__' and __package__ is None:
-	from os import sys, path
-	sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 import matplotlib.pyplot as plt
 import numpy as np
 
-from misc.testsignals import rect
-from uncertainty.propagate_FIR import FIRuncFilter
-from misc.tools import col_hstack, make_semiposdef
-from misc.filterstuff import kaiser_lowpass
-import uncertainty.propagate_MonteCarlo as MC
+from PyDynamic.misc.testsignals import rect
+from PyDynamic.uncertainty.propagate_FIR import FIRuncFilter
+from PyDynamic.misc.tools import col_hstack, make_semiposdef
+from PyDynamic.misc.filterstuff import kaiser_lowpass
+import PyDynamic.uncertainty.propagate_MonteCarlo as MC
 
 # parameters of simulated measurement
 Fs = 100e3

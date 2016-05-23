@@ -9,19 +9,14 @@ cut-off frequency for a rectangular signal.
 
 """
 
-# if run as script, add parent path for relative importing
-if __name__ == '__main__' and __package__ is None:
-	from os import sys, path
-	sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 import matplotlib.pyplot as plt
 import scipy.signal as dsp
 import numpy as np
 
-from misc.testsignals import rect
-import uncertainty.propagate_IIR as IIR
-import uncertainty.propagate_MonteCarlo as MC
-from misc.tools import col_hstack, make_semiposdef
+from PyDynamic.misc.testsignals import rect
+import PyDynamic.uncertainty.propagate_IIR as IIR
+import PyDynamic.uncertainty.propagate_MonteCarlo as MC
+from PyDynamic.misc.tools import col_hstack, make_semiposdef
 
 # parameters of simulated measurement
 Fs = 100e3

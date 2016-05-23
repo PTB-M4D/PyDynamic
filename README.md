@@ -14,7 +14,7 @@ If you have downloaded this software, we would be very thankful for letting us k
 
 ### Roadmap - next steps
 
-1. Extend the exisiting examples using improved signals and systems.
+1. Extend the existing examples using improved signals and systems.
 2. Extend the code to more advanced noise processes and uncertainty evaluation.
 3. Add IPython notebooks as a way of documentation.
 4. Provide graphical user interfaces for specific use cases (Any suggestions? Let us know!)

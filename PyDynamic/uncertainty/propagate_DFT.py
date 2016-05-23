@@ -121,13 +121,15 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
 	Cxkc = lambda k: np.cos(k*beta)[np.newaxis,:]
 	Cxks = lambda k: -np.sin(k*beta)[np.newaxis,:]
 
-	if isinstance(Ux,float) or len(Ux.shape)==1:
+	if isinstance(Ux,float):
 		UF = np.zeros(M)
 		for k in range(M//2):   # Block cos/cos
 				UF[k] = sum(Ux*Cxkc(k)**2)
 		for k in range(M//2): # Block sin/sin
 				UF[M//2+k] = sum(Ux*Cxks(k)**2)
 	else:   # general method
+		if len(Ux.shape)==1:
+			Ux = np.diag(Ux)
 		if not isinstance(CxCos,np.ndarray):
 			CxCos = np.zeros((M//2,N-L))
 			CxSin = np.zeros((M//2,N-L))
