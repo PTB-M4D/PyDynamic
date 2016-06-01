@@ -401,9 +401,10 @@ def AmpPhase2Time(A,P,UAP):
 
 	return x,Ux/N**2
 
+# for backward compatibility
+GUMdeconv = lambda H, Y, UH, UY: GUM_deconv(H, Y, UH, UY)
 
-
-def GUMdeconv(H,Y,UH,UY):
+def GUM_deconv(H,Y,UH,UY):
 	"""GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
 	and of the system's impulse response, respectively.
 
@@ -454,6 +455,63 @@ def GUMdeconv(H,Y,UH,UY):
 
 	return X,UX
 
+
+def GUM_multiply(Y, UY, F, UF=None):
+	"""
+	GUM uncertainty propagation for multiplication in the frequency domain, where the second factor F may have an
+	associated uncertainty.
+
+	Args:
+	    Y: real and imaginary parts of the first factor
+	    UY: covariance matrix or squared uncertainty associated with Y
+	    F: real and imaginary parts of the second factor
+	    UF: covariance matrix associated with F (optional), default is None
+
+	Returns:
+		The product YF and the associated uncertainty.
+	"""
+
+	assert(len(Y)==len(F))
+
+	def calcU(A, UB):
+		# uncertainty propagation for A*B with B uncertain
+		n = len(A)
+		RA = A[:n//2]
+		IA = A[n//2:]
+		if isinstance(UB, float):
+			uRR = RA * UB * RA + IA * UB * IA
+			uRI = RA * UB * IA - IA * UB * RA
+			uII = IA * UB * IA + RA * UB * RA
+		elif len(UB.shape)==1:
+			UBRR = UB[:n//2]
+			UBII = UB[n//2:]
+			uRR = RA*UBRR*RA + IA*UBII*IA
+			uRI = RA*UBRR*IA - IA*UBII*RA
+			uII = IA*UBRR*IA + RA*UBII*RA
+		else:
+			UBRR = UB[:n//2,:n//2]
+			UBRI = UB[:n//2,n//2:]
+			UBII = UB[n//2:,n//2:]
+			uRR = prod(RA, prod(UBRR, RA)) - prod(IA,prod(UBRI.T, RA)) - prod(RA, prod(UBRI,IA)) + prod(IA,prod(UBII,IA))
+			uRI = prod(RA, prod(UBRR, IA)) - prod(IA,prod(UBRI.T, IA)) + prod(RA, prod(UBRI,RA)) - prod(IA,prod(UBII,RA))
+			uII = prod(IA, prod(UBRR, IA)) + prod(RA,prod(UBRI.T, IA)) + prod(IA, prod(UBRI,RA)) + prod(RA,prod(UBII,RA))
+		return uRR, uRI, uII
+
+	N = len(Y)
+	RY = Y[:N//2]; IY = Y[N//2:]
+	RF = F[:N//2]; IF = F[N//2:]
+	YF = np.r_[RY*RF - IY*IF, RY*IF + IY*RF]
+	if not isinstance(UF, np.ndarray):  # second factor is known exactly
+		UYRR, UYRI, UYII = calcU(F, UY)
+		UYF  = np.vstack((np.hstack((UYRR, UYRI)), np.hstack((UYRI.T, UYII))))
+	else:
+		URR_Y, URI_Y, UII_Y = calcU(F, UY)
+		URR_F, URI_F, UII_F = calcU(Y, UF)
+		URR = URR_Y + URR_F
+		URI = URI_Y + URI_F
+		UII = UII_Y + UII_F
+		UYF = np.vstack((np.hstack((URR, URI)), np.hstack((URI.T, UII))))
+	return YF, UYF
 
 
 

@@ -18,6 +18,7 @@ If you have downloaded this software, we would be very thankful for letting us k
 2. Extend the code to more advanced noise processes and uncertainty evaluation.
 3. Add IPython notebooks as a way of documentation.
 4. Provide graphical user interfaces for specific use cases (Any suggestions? Let us know!)
+5. Make package available via `pip`.
 
 ##### Acknowledgement
 This work is part of the Joint Support for Impact project [14SIP08](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for Innovation and Research (EMPIR). 

@@ -185,7 +185,6 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 
 	return bi,ai,int(tau)
 
-# TODO Implement with non-trivial weighting
 def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=None):
 	"""
 	Least-squares fit of a digital FIR filter to the reciprocal of a frequency response
@@ -244,12 +243,12 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
 					 (HRI[:,Nf:]*np.tile(np.cos(omtau),(runs,1)) - HRI[:,:Nf]*np.tile(np.sin(omtau),(runs,1)))/absHMC ) )
 	UiH = np.cov(HiMC,rowvar=0)
 
-#    if inp.sinstance(wt,str) and wt=='unc':
-#        wt = np.sqrt(np.np.diag(UiH)**(-1))
 
-#    if wt.shape != np.diag(UiH).shape:
-#        raise ValueError("User provided weighting has wrong dimensions")        
-	wt = np.ones(2*Nf)
+	if isinstance(wt, np.ndarray):
+		if wt.shape != np.diag(UiH).shape:
+			raise ValueError("User defined weighting has wrong dimension.")
+	else:
+		wt = np.ones(2 * Nf)
 
 	E = np.exp(-1j*2*np.pi*np.dot(f[:,np.newaxis]/Fs,np.arange(N+1)[:,np.newaxis].T))
 	X = np.vstack((np.real(E),np.imag(E)))
