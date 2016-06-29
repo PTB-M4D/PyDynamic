@@ -16,6 +16,8 @@ PyDynamic offers propagation of *uncertainties* for
 
 For the validation of the propagation of uncertainties, the Monte-Carlo method can be applied using a memory-efficient implementation of Monte-Carlo for digital filtering
 
+The documentation for PyDynamic can be found at [http://pydynamic.readthedocs.io/en/latest/](http://pydynamic.readthedocs.io/en/latest/)
+
 ### Examples
 Uncertainty propagation for the application of a FIR filter with coefficients *b* with which an uncertainty *ub* is associated. The filter input signal is *x* with known 
 noise standard deviation *sigma*. The filter output signal is *y* with associated uncertainty *uy*.
