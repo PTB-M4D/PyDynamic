@@ -2,14 +2,14 @@
 '''
 .. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 '''
-if __name__=="identification.fit_filter": # module is imported from within package
-    from misc.filterstuff import grpdelay, mapinside
-else:
-    from ..misc.filterstuff import grpdelay, mapinside
+
+from ..misc.filterstuff import grpdelay, mapinside
 
 import numpy as np
 import scipy.signal as dsp
 
+
+#Todo: Include fitting of transfer function (continuous)
 def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     """Least-squares IIR filter fit to a given frequency response.
     
@@ -124,32 +124,31 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
     :returns: filter coefficients bFIR (ndarray) of shape (N,)
 
     """
-    import numpy as np
 
     print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
     print("reciprocal of a frequency response given by %d values.\n" % len(H))
 
-    H = H[:,np.np.newaxis]
+    H = H[:,np.newaxis]
 
-    w = 2*np.np.pi*f/Fs
-    w = w[:,np.np.newaxis]
+    w = 2*np.pi*f/Fs
+    w = w[:,np.newaxis]
 
-    ords = np.np.arange(N+1)[:,np.np.newaxis]
+    ords = np.arange(N+1)[:,np.newaxis]
     ords = ords.T
 
-    E = np.np.exp(-1j*np.np.dot(w,ords))
+    E = np.exp(-1j*np.dot(w,ords))
 
     if not Wt == None:
         if len(np.shape(Wt))==2: # is matrix
-            weights = np.np.diag(Wt)
+            weights = np.diag(Wt)
         else:
             weights = np.eye(len(f))*Wt
-        X = np.np.vstack([np.np.real(np.np.dot(weights,E)), np.np.imag(np.np.dot(weights,E))])
+        X = np.vstack([np.real(np.dot(weights,E)), np.imag(np.dot(weights,E))])
     else:
-        X = np.np.vstack([np.np.real(E), np.np.imag(E)])
+        X = np.vstack([np.real(E), np.imag(E)])
 
-    H = H*np.np.exp(1j*w*tau)
-    iRI = np.np.vstack([np.np.real(1.0/H), np.np.imag(1.0/H)])
+    H = H*np.exp(1j*w*tau)
+    iRI = np.vstack([np.real(1.0/H), np.imag(1.0/H)])
 
     bFIR, res = np.linalg.lstsq(X,iRI)[:2]
 

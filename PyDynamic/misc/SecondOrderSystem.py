@@ -8,27 +8,26 @@ for high-class accelerometers.
 
 """
 
+__all__ = ['sos_FreqResp', 'sos_phys2filter', 'sos_absphase', 'sos_realimag']
+
 import numpy as np
-if __name__=="misc.SecondOrderSystem": # module is imported from within package
-	from misc.filterstuff import ua
-	from misc.tools import col_hstack
-else:
-	from ..misc.filterstuff import ua
-	from ..misc.tools import col_hstack
 
+ua = lambda a: np.unwrap(np.angle(a))
 
-def FreqResp(S, d, f0, freqs):
+def sos_FreqResp(S, d, f0, freqs):
 	""" Calculation of the system frequency response
 
 	The frequency response is calculated from the continuous physical model
-	of a second order system such as
+	of a second order system given by
 
 	:math:`H(f) = \\frac{4S\\pi^2f_0^2}{(2\\pi f_0)^2 + 2jd(2\\pi f_0)f - f^2}`
 
 	If the provided system parameters are vectors then :math:`H(f)` is calculated for
-	each set of parameters.
+	each set of parameters. This is helpful for Monte Carlo simulations by using
+	draws from the model parameters
 
-	Parameters:
+	Parameters
+	----------
 		S:      float or ndarray shape (K,)
 				static gain
 		d:      float or ndarray shape (K,)
@@ -38,7 +37,8 @@ def FreqResp(S, d, f0, freqs):
 		freqs:  ndarray shape (N,)
 				frequencies at which to calculate the freq response
 
-	Returns:
+	Returns
+	-------
 		H:  ndarray shape (N,) or ndarray shape (K,N)
 			complex frequency response values
 
@@ -56,13 +56,15 @@ def FreqResp(S, d, f0, freqs):
 	return H
 
 
-def phys2filter(S, d, f0):
+def sos_phys2filter(S, d, f0):
 	"""Calculation of continuous filter coefficients from physical parameters.
 
 	If the provided system parameters are vectors then the filter coefficients
-	are calculated for each set of parameters.
+	are calculated for each set of parameters. This is helpful for Monte Carlo simulations by using
+	draws from the model parameters
 
-	Parameters:
+	Parameters
+	----------
 		S:  float
 			static gain
 		d:  float
@@ -70,7 +72,8 @@ def phys2filter(S, d, f0):
 		f0: float
 			resonance frequency
 
-	Returns:
+	Returns
+	-------
 		b,a: ndarray
 			 analogue filter coefficients
 
@@ -78,7 +81,7 @@ def phys2filter(S, d, f0):
 
 	if isinstance(S,np.ndarray):
 		bc = S*(2*np.pi*f0)**2
-		ac = col_hstack([np.ones((len(S),)),4*d*np.pi*f0,(2*np.pi*f0)**2])
+		ac = np.c_[np.ones((len(S),)),4*d*np.pi*f0,(2*np.pi*f0)**2]
 	else:
 		bc = S*(2*np.pi*f0)**2
 		ac = np.array([1, 2 * d * 2 * np.pi * f0, (2 * np.pi * f0) ** 2])
@@ -86,11 +89,12 @@ def phys2filter(S, d, f0):
 	return bc,ac
 
 
-def unc_realimag(S, d, f0, uS, ud, uf0, f):
+def sos_realimag(S, d, f0, uS, ud, uf0, f):
 	"""Propagation of uncertainty from physical parameters to real and imaginary
 	part of system's transfer function using GUM S2 Monte Carlo.
 
-	Parameters:
+	Parameters
+	----------
 		S:    float
 			  static gain
 		d:    float
@@ -106,7 +110,8 @@ def unc_realimag(S, d, f0, uS, ud, uf0, f):
 		f:    ndarray, shape (N,)
 			  frequency values at which to calculate real and imaginary part
 
-	Returns:
+	Returns
+	-------
 		Hmean:   ndarray, shape (N,)
 				 best estimate of complex frequency response values
 		Hcov:    ndarray, shape (2N,2N)
@@ -119,16 +124,17 @@ def unc_realimag(S, d, f0, uS, ud, uf0, f):
 	dMC = d + np.random.randn(runs)*ud
 	fMC = f0+ np.random.randn(runs)*uf0
 
-	HMC = FreqResp(SMC,dMC,fMC,f)
+	HMC = sos_FreqResp(SMC,dMC,fMC,f)
 
 	return np.mean(HMC,dtype=complex,axis=1), np.cov(np.vstack((np.real(HMC),np.imag(HMC))),rowvar=1)
 
 
-def unc_absphase(S, d, f0, uS, ud, uf0, f):
+def sos_absphase(S, d, f0, uS, ud, uf0, f):
 	"""Propagation of uncertainty from physical parameters to real and imaginary
 	part of system's transfer function using GUM S2 Monte Carlo.
 
-	Parameters:
+	Parameters
+	----------
 		S:    float
 			  static gain
 		d:    float
@@ -144,6 +150,8 @@ def unc_absphase(S, d, f0, uS, ud, uf0, f):
 		f:    ndarray, shape (N,)
 			  frequency values at which to calculate amplitue and phase
 
+	Returns
+	-------
 		Hmean:   ndarray, shape (N,)
 				 best estimate of complex frequency response values
 		Hcov:    ndarray, shape (2N,2N)
@@ -156,7 +164,7 @@ def unc_absphase(S, d, f0, uS, ud, uf0, f):
 	dMC = d + np.random.randn(runs)*ud
 	fMC = f0+ np.random.randn(runs)*uf0
 
-	HMC = FreqResp(SMC,dMC,fMC,f)
+	HMC = sos_FreqResp(SMC,dMC,fMC,f)
 
 	return np.mean(HMC,dtype=complex,axis=1), np.cov(np.vstack((np.abs(HMC),ua(HMC))),rowvar=1)
 

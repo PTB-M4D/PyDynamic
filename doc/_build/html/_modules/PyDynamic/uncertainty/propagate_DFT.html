@@ -1,0 +1,820 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyDynamic.uncertainty.propagate_DFT &mdash; PyDynamic 1.2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PyDynamic 1.2.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyDynamic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../PyDynamic.uncertainty.html">Evaluation of uncertainties</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../PyDynamic.deconvolution.html">Design of deconvolution filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../PyDynamic.misc.html">Miscellaneous</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">PyDynamic</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>PyDynamic.uncertainty.propagate_DFT</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for PyDynamic.uncertainty.propagate_DFT</h1><div class="highlight"><pre>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The :mod:`PyDynamic.uncertainty.propagate_DFT` module implements methods for the propagation of uncertainties in the</span>
+<span class="sd">application of the DFT, inverse DFT, deconvolution and multiplication in the frequency domain, transformation from</span>
+<span class="sd">amplitude and phase to real and imaginary parts and vice versa.</span>
+
+<span class="sd">The correspoding scientific publications is</span>
+<span class="sd">	S. Eichstädt und V. Wilkens</span>
+<span class="sd">	GUM2DFT — a software tool for uncertainty evaluation of transient signals in the frequency domain.</span>
+<span class="sd">	*Measurement Science and Technology*, 27(5), 055001, 2016.</span>
+<span class="sd">	[DOI: `10.1088/0957-0233/27/5/055001 &lt;http://dx.doi.org/10.1088/0957-0233/27/5/055001&gt;`_]</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GUM_DFT&#39;</span><span class="p">,</span><span class="s1">&#39;GUM_iDFT&#39;</span><span class="p">,</span> <span class="s1">&#39;DFT_deconv&#39;</span><span class="p">,</span> <span class="s1">&#39;DFT_multiply&#39;</span><span class="p">,</span> <span class="s1">&#39;AmpPhase2DFT&#39;</span><span class="p">,</span> <span class="s1">&#39;DFT2AmpPhase&#39;</span><span class="p">,</span> <span class="s1">&#39;AmpPhase2Time&#39;</span><span class="p">,</span> <span class="s1">&#39;Time2AmpPhase&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">apply_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="p">,</span><span class="n">window</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Apply a time domain window to the signal x of equal length and propagate uncertainties</span>
+
+<span class="sd">	Args:</span>
+<span class="sd">		x: vector of time domain signal values</span>
+<span class="sd">		Ux: covariance matrix associated with x or noise variance as float</span>
+<span class="sd">		window: vector of time domain window (same length as x)</span>
+<span class="sd">	Returns:</span>
+<span class="sd">		xw,Uxw</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">window</span><span class="p">))</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+		<span class="k">assert</span><span class="p">(</span><span class="n">Ux</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">Ux</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">Ux</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+	<span class="n">xw</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">*</span><span class="n">window</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+		<span class="n">Uxw</span> <span class="o">=</span> <span class="n">Ux</span><span class="o">*</span><span class="n">window</span><span class="o">**</span><span class="mi">2</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">Uxw</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">window</span><span class="p">))</span>
+	<span class="k">return</span> <span class="n">xw</span><span class="p">,</span><span class="n">Uxw</span>
+
+<span class="k">def</span> <span class="nf">prod</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Calculate the matrix-vector product, or vector-matrix product</span>
+<span class="sd">	that corresponds to diag(A)*B or A*diag(B), respectively; depending</span>
+<span class="sd">	on which of A,B is the matrix and which the vector.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>  <span class="c1"># A is the vector and B the matrix</span>
+		<span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="n">C</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">B</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span>
+		<span class="k">return</span> <span class="n">C</span>
+	<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># A is the matrix and B the vector</span>
+		<span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+			<span class="n">C</span><span class="p">[:,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[:,</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">B</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+		<span class="k">return</span> <span class="n">C</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong dimension of inputs&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">matprod</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">W</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2) for V=(V1,V2)</span>
+<span class="sd">	and W=(W1,W2). M can be sparse, one-dimensional or a full (quadratic) matrix.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="k">assert</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+	<span class="k">assert</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="k">assert</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+	<span class="n">N</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+	<span class="n">v1</span> <span class="o">=</span> <span class="n">V</span><span class="p">[:</span><span class="n">N</span><span class="p">];</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span>
+	<span class="n">w1</span> <span class="o">=</span> <span class="n">W</span><span class="p">[:</span><span class="n">N</span><span class="p">];</span> <span class="n">w2</span> <span class="o">=</span> <span class="n">W</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+		<span class="n">nrows</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">offset</span><span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">offsets</span>
+		<span class="n">diags</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">data</span>
+		<span class="n">A</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">N</span><span class="p">]</span>
+		<span class="n">B</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">nrows</span><span class="o">+</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+		<span class="n">D</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">N</span><span class="p">:]</span>
+		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">v1</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">w1</span> <span class="o">+</span> <span class="n">v2</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="n">w1</span> <span class="o">+</span> <span class="n">v1</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="n">w2</span> <span class="o">+</span> <span class="n">v2</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="n">w2</span><span class="p">)</span>
+	<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">A</span> <span class="o">=</span> <span class="n">M</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
+		<span class="n">D</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span>
+		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">v1</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">w1</span> <span class="o">+</span> <span class="n">v2</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="n">w2</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">A</span> <span class="o">=</span> <span class="n">M</span><span class="p">[:</span><span class="n">N</span><span class="p">,:</span><span class="n">N</span><span class="p">]</span>
+		<span class="n">B</span> <span class="o">=</span> <span class="n">M</span><span class="p">[:</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">:]</span>
+		<span class="n">D</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="n">N</span><span class="p">:,</span><span class="n">N</span><span class="p">:]</span>
+		<span class="k">return</span> <span class="n">prod</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">w1</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">w1</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">w2</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">w2</span><span class="p">))</span>
+
+
+
+
+<div class="viewcode-block" id="GUM_DFT"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFT">[docs]</a><span class="k">def</span> <span class="nf">GUM_DFT</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="p">,</span><span class="n">N</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">window</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">CxCos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">CxSin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">returnC</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Calculation of the DFT of the time domain signal x and propagation of the squared uncertainty Ux</span>
+<span class="sd">	associated with the time domain sequence x to the real and imaginary parts of the DFT of x.</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		x : numpy.ndarray</span>
+<span class="sd">			vector of time domain signal values</span>
+<span class="sd">		Ux : numpy.ndarray</span>
+<span class="sd">			covariance matrix associated with x, shape (N,N) or noise variance as float</span>
+<span class="sd">		N : int, optional</span>
+<span class="sd">			length of time domain signal for DFT; N&gt;=len(x)</span>
+<span class="sd">		window : numpy.ndarray, optional</span>
+<span class="sd">			vector of the time domain window values</span>
+<span class="sd">		CxCos : numpy.ndarray, optional</span>
+<span class="sd">			cosine part of sensitivity matrix</span>
+<span class="sd">		CxSin : numpy.ndarray, optional</span>
+<span class="sd">			sine part of sensitivity matrix</span>
+<span class="sd">		returnC : bool, optional</span>
+<span class="sd">			if true, return sensitivity matrix blocks for later use</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		F : numpy.ndarray</span>
+<span class="sd">			vector of complex valued DFT values or of its real and imaginary parts</span>
+<span class="sd">		UF : numpy.ndarray</span>
+<span class="sd">			covariance matrix associated with real and imaginary part of F</span>
+
+<span class="sd">	References</span>
+<span class="sd">	----------</span>
+<span class="sd">		* Eichstädt and Wilkens [Eichst2016]_</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">L</span><span class="o">=</span><span class="mi">0</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">window</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+		<span class="n">x</span><span class="p">,</span><span class="n">Ux</span> <span class="o">=</span> <span class="n">apply_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="p">,</span><span class="n">window</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="nb">int</span><span class="p">):</span>
+		<span class="n">L</span> <span class="o">=</span> <span class="n">N</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="k">assert</span><span class="p">(</span><span class="n">L</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">L</span><span class="p">,)]</span>
+	<span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># N is even</span>
+		<span class="n">M</span> <span class="o">=</span> <span class="n">N</span><span class="o">+</span><span class="mi">2</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">M</span> <span class="o">=</span> <span class="n">N</span><span class="o">+</span><span class="mi">1</span>
+
+	<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+	<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">F</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">F</span><span class="p">)]</span>
+
+	<span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
+
+	<span class="n">Cxkc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">beta</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+	<span class="n">Cxks</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">beta</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
+
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+		<span class="n">UF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>   <span class="c1"># Block cos/cos</span>
+				<span class="n">UF</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ux</span><span class="o">*</span><span class="n">Cxkc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span> <span class="c1"># Block sin/sin</span>
+				<span class="n">UF</span><span class="p">[</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ux</span><span class="o">*</span><span class="n">Cxks</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>   <span class="c1"># general method</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ux</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">Ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Ux</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CxCos</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+			<span class="n">CxCos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">))</span>
+			<span class="n">CxSin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">))</span>
+			<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>
+				<span class="n">CxCos</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Cxkc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+				<span class="n">CxSin</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Cxks</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+		<span class="n">UFCC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">CxCos</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">CxCos</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+		<span class="n">UFCS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">CxCos</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">CxSin</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+		<span class="n">UFSS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">CxSin</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">CxSin</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">UF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">UFCC</span><span class="p">,</span><span class="n">UFCS</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">UFCS</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">UFSS</span><span class="p">))))</span>
+		<span class="k">except</span> <span class="ne">MemoryError</span><span class="p">:</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Could not put covariance matrix together due to memory constraints.&quot;</span><span class="p">)</span>
+			<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Returning the three blocks (A,B,C) such that U = [[A,B],[B.T,C]] instead.&quot;</span><span class="p">)</span>
+			<span class="n">UF</span> <span class="o">=</span> <span class="p">(</span><span class="n">UFCC</span><span class="p">,</span><span class="n">UFCS</span><span class="p">,</span><span class="n">UFSS</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="n">returnC</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,{</span><span class="s2">&quot;CxCos&quot;</span><span class="p">:</span><span class="n">CxCos</span><span class="p">,</span><span class="s2">&quot;CxSin&quot;</span><span class="p">:</span><span class="n">CxSin</span><span class="p">}</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">F</span><span class="p">,</span><span class="n">UF</span></div>
+
+
+<div class="viewcode-block" id="GUM_iDFT"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_iDFT">[docs]</a><span class="k">def</span> <span class="nf">GUM_iDFT</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,</span><span class="n">Nx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">Cc</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">Cs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">returnC</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;GUM propagation of the squared uncertainty UF associated with the DFT values F through the</span>
+<span class="sd">	inverse DFT</span>
+
+<span class="sd">	The matrix UF is assumed to be for real and imaginary part with blocks:</span>
+<span class="sd">	UF = [[u(R,R), u(R,I)],[u(I,R),u(I,I)]]</span>
+<span class="sd">	and real and imaginary part obtained from calling rfft (DFT for real-valued signal)</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		F : np.ndarray</span>
+<span class="sd">			vector of real and imaginary parts of a DFT result</span>
+<span class="sd">		UF: np.ndarray</span>
+<span class="sd">			covariance matrix associated with real and imaginary parts of F</span>
+<span class="sd">		Nx: int, optional</span>
+<span class="sd">			number of samples of iDFT result</span>
+<span class="sd">		Cc: np.ndarray, optional</span>
+<span class="sd">			cosine part of sensitivities</span>
+<span class="sd">		Cs: np.ndarray, optional</span>
+<span class="sd">			sine part of sensitivities</span>
+<span class="sd">		returnC: if true, return sensitivity matrix blocks</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		x: np.ndarry</span>
+<span class="sd">			vector of time domain signal values</span>
+<span class="sd">		Ux: np.ndarray</span>
+<span class="sd">		 	covariance matrix associated with x</span>
+
+<span class="sd">	References</span>
+<span class="sd">	----------</span>
+<span class="sd">		* Eichstädt and Wilkens [Eichst2016]_</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">N</span> <span class="o">=</span> <span class="n">UF</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span>
+
+	<span class="k">if</span> <span class="n">Nx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+		<span class="n">Nx</span> <span class="o">=</span> <span class="n">N</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">assert</span><span class="p">(</span><span class="n">Nx</span><span class="o">&lt;=</span><span class="n">UF</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+	<span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nx</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
+
+	<span class="c1"># calculate inverse DFT</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">irfft</span><span class="p">(</span><span class="n">F</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1j</span><span class="o">*</span><span class="n">F</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:])[:</span><span class="n">Nx</span><span class="p">]</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span><span class="c1"># calculate sensitivities</span>
+		<span class="n">Cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nx</span><span class="p">,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+		<span class="n">Cc</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span> <span class="n">Cc</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nx</span><span class="p">))</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>
+			<span class="n">Cc</span><span class="p">[:,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+		<span class="n">Cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nx</span><span class="p">,</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+		<span class="n">Cs</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span> <span class="n">Cs</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nx</span><span class="p">))</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>
+			<span class="n">Cs</span><span class="p">[:,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+
+	<span class="c1"># calculate blocks of uncertainty matrix</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="n">RR</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">RI</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="n">II</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:,</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="c1"># propagate uncertainties</span>
+		<span class="n">Ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">RR</span><span class="p">,</span><span class="n">Cc</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+		<span class="n">Ux</span> <span class="o">=</span> <span class="n">Ux</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">RI</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+		<span class="n">Ux</span> <span class="o">=</span> <span class="n">Ux</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">II</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">RR</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">II</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="n">Ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">RR</span><span class="p">,</span><span class="n">Cc</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">II</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+
+	<span class="k">if</span> <span class="n">returnC</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="o">/</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span><span class="p">,{</span><span class="s2">&quot;Cc&quot;</span><span class="p">:</span><span class="n">Cc</span><span class="p">,</span><span class="s2">&quot;Cs&quot;</span><span class="p">:</span><span class="n">Cs</span><span class="p">}</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="o">/</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="DFT2AmpPhase"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase">[docs]</a><span class="k">def</span> <span class="nf">DFT2AmpPhase</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Transformation from real and imaginary parts to amplitude and phase</span>
+
+<span class="sd">	Calculate the matrix</span>
+<span class="sd">	U_AP = [[U1,U2],[U2^T,U3]]</span>
+<span class="sd">	associated with amplitude and phase of the vector F=[real,imag]</span>
+<span class="sd">	with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		F: np.ndarray</span>
+<span class="sd">			vector of real and imaginary parts of a DFT result</span>
+<span class="sd">		UF: np.ndarray</span>
+<span class="sd">			covariance matrix associated with F</span>
+<span class="sd">		keep_sparse: bool, optional</span>
+<span class="sd">			if true then UAP will be sparse if UF is one-dimensional</span>
+<span class="sd">		tol: float, optional</span>
+<span class="sd">			lower bound for A/uF below which a warning will be issued concerning unreliable results</span>
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		A: np.ndarray</span>
+<span class="sd">			vector of amplitude values</span>
+<span class="sd">		P: np.ndarray</span>
+<span class="sd">			vector of phase values</span>
+<span class="sd">		UAP: np.ndarray</span>
+<span class="sd">			covariance matrix associated with (A,P)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># calculate inverse DFT</span>
+	<span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span>
+	<span class="n">R</span> <span class="o">=</span> <span class="n">F</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span> <span class="n">I</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+
+	<span class="n">A</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">R</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">I</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">P</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">R</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">uF</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">uF</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]))</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">):</span>
+		<span class="k">print</span><span class="p">(</span> <span class="s1">&#39;Some amplitude values are below the defined threshold.&#39;</span><span class="p">)</span>
+		<span class="k">print</span><span class="p">(</span><span class="s1">&#39;The GUM formulas may become unreliable and a Monte Carlo approach is recommended instead.&#39;</span><span class="p">)</span>
+		<span class="k">print</span><span class="p">(</span><span class="s1">&#39;minimum value of A/uF is </span><span class="si">%.2e</span><span class="s1"> and the threshold is </span><span class="si">%.2e</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">tol</span><span class="p">))</span>
+	<span class="n">aR</span> <span class="o">=</span> <span class="n">R</span><span class="o">/</span><span class="n">A</span>
+	<span class="n">aI</span> <span class="o">=</span> <span class="n">I</span><span class="o">/</span><span class="n">A</span>
+	<span class="n">pR</span> <span class="o">=</span> <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">A</span><span class="o">**</span><span class="mi">2</span>
+	<span class="n">pI</span> <span class="o">=</span> <span class="n">R</span><span class="o">/</span><span class="n">A</span><span class="o">**</span><span class="mi">2</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">URR</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">UII</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="n">U11</span> <span class="o">=</span> <span class="n">URR</span><span class="o">*</span><span class="n">aR</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">UII</span><span class="o">*</span><span class="n">aI</span><span class="o">**</span><span class="mi">2</span>
+		<span class="n">U12</span> <span class="o">=</span> <span class="n">aR</span><span class="o">*</span><span class="n">URR</span><span class="o">*</span><span class="n">pR</span> <span class="o">+</span> <span class="n">aI</span><span class="o">*</span><span class="n">UII</span><span class="o">*</span><span class="n">pI</span>
+		<span class="n">U22</span> <span class="o">=</span> <span class="n">URR</span><span class="o">*</span><span class="n">pR</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">UII</span><span class="o">*</span><span class="n">pI</span><span class="o">**</span><span class="mi">2</span>
+		<span class="n">UAP</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">diags</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">U11</span><span class="p">,</span><span class="n">U22</span><span class="p">],</span><span class="n">U12</span><span class="p">,</span><span class="n">U12</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="p">(</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">keep_sparse</span><span class="p">:</span>
+			<span class="n">UAP</span> <span class="o">=</span> <span class="n">UAP</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">URR</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">URI</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="n">UII</span> <span class="o">=</span> <span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="n">U11</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">aR</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URR</span><span class="p">,</span><span class="n">aR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">aR</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="p">,</span><span class="n">aI</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">aI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">aR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">aI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UII</span><span class="p">,</span><span class="n">aI</span><span class="p">))</span>
+		<span class="n">U12</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">aR</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URR</span><span class="p">,</span><span class="n">pR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">aI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="p">,</span><span class="n">pI</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">aI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">pR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">aI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UII</span><span class="p">,</span><span class="n">pI</span><span class="p">))</span>
+		<span class="n">U22</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">pR</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URR</span><span class="p">,</span><span class="n">pR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">pR</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="p">,</span><span class="n">pI</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">pI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">pR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">pI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UII</span><span class="p">,</span><span class="n">pI</span><span class="p">))</span>
+		<span class="n">UAP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">U11</span><span class="p">,</span><span class="n">U12</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">U12</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">U22</span><span class="p">))))</span>
+
+	<span class="k">return</span> <span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span></div>
+
+
+<div class="viewcode-block" id="AmpPhase2DFT"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT">[docs]</a><span class="k">def</span> <span class="nf">AmpPhase2DFT</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Transformation from amplitude and phase to real and imaginary parts</span>
+
+<span class="sd">	Calculate the vector F=[real,imag] and propagate the covariance matrix UAP associated with [A, P]</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		A: np.ndarray</span>
+<span class="sd">			vector of amplitude values</span>
+<span class="sd">		P: np.ndarray</span>
+<span class="sd">			vector of phase values (in radians)</span>
+<span class="sd">		UAP: np.ndarray</span>
+<span class="sd">			covariance matrix associated with (A,P)</span>
+<span class="sd">			or vector of squared standard uncertainties [u^2(A),u^2(P)]</span>
+<span class="sd">		keep_sparse: bool, optional</span>
+<span class="sd">			whether to transform sparse matrix to numpy array or not</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		F: np.ndarray</span>
+<span class="sd">			vector of real and imaginary parts of DFT result</span>
+<span class="sd">		UF: np.ndarray</span>
+<span class="sd">			covariance matrix associated with F</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
+	<span class="k">assert</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+	<span class="k">assert</span><span class="p">(</span><span class="n">UAP</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">),</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="ow">or</span> <span class="n">UAP</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">),))</span>
+	<span class="c1"># calculation of F</span>
+	<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">P</span><span class="p">),</span><span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">P</span><span class="p">)]</span>
+
+	<span class="c1"># calculation of sensitivities</span>
+	<span class="n">CRA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+	<span class="n">CRP</span> <span class="o">=</span> <span class="o">-</span><span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+	<span class="n">CIA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+	<span class="n">CIP</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+	<span class="c1"># assignment of uncertainty blocks in UAP</span>
+	<span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">UAP</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">,):</span> <span class="c1"># zero correlation; just standard deviations</span>
+		<span class="n">Ua</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
+		<span class="n">Up</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span>
+		<span class="n">U11</span> <span class="o">=</span> <span class="n">CRA</span><span class="o">*</span><span class="n">Ua</span><span class="o">*</span><span class="n">CRA</span> <span class="o">+</span> <span class="n">CRP</span><span class="o">*</span><span class="n">Up</span><span class="o">*</span><span class="n">CRP</span>
+		<span class="n">U12</span> <span class="o">=</span> <span class="n">CRA</span><span class="o">*</span><span class="n">Ua</span><span class="o">*</span><span class="n">CIA</span> <span class="o">+</span> <span class="n">CRP</span><span class="o">*</span><span class="n">Up</span><span class="o">*</span><span class="n">CIP</span>
+		<span class="n">U22</span> <span class="o">=</span> <span class="n">CIA</span><span class="o">*</span><span class="n">Ua</span><span class="o">*</span><span class="n">CIA</span> <span class="o">+</span> <span class="n">CIP</span><span class="o">*</span><span class="n">Up</span><span class="o">*</span><span class="n">CIP</span>
+		<span class="n">UF</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">diags</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">U11</span><span class="p">,</span><span class="n">U22</span><span class="p">],</span><span class="n">U12</span><span class="p">,</span><span class="n">U12</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="o">-</span><span class="n">N</span><span class="p">])</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">keep_sparse</span><span class="p">:</span>
+			<span class="n">UF</span> <span class="o">=</span> <span class="n">UF</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">UAP</span><span class="p">,</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+			<span class="n">nrows</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">N</span>
+			<span class="n">offset</span><span class="o">=</span> <span class="n">UAP</span><span class="o">.</span><span class="n">offsets</span>
+			<span class="n">diags</span> <span class="o">=</span> <span class="n">UAP</span><span class="o">.</span><span class="n">data</span>
+			<span class="n">Uaa</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">N</span><span class="p">]</span>
+			<span class="n">Uap</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">nrows</span><span class="o">+</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+			<span class="n">Upp</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">N</span><span class="p">:]</span>
+
+			<span class="n">U11</span> <span class="o">=</span> <span class="n">Uaa</span><span class="o">*</span><span class="n">CRA</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">CRP</span><span class="o">*</span><span class="n">Uap</span><span class="o">*</span><span class="n">CRA</span> <span class="o">+</span> <span class="n">CRA</span><span class="o">*</span><span class="n">Uap</span><span class="o">*</span><span class="n">CRP</span> <span class="o">+</span> <span class="n">Upp</span><span class="o">*</span><span class="n">CRP</span><span class="o">**</span><span class="mi">2</span>
+			<span class="n">U12</span> <span class="o">=</span> <span class="n">CRA</span><span class="o">*</span><span class="n">Uaa</span><span class="o">*</span><span class="n">CIA</span> <span class="o">+</span> <span class="n">CRP</span><span class="o">*</span><span class="n">Uap</span><span class="o">*</span><span class="n">CIA</span> <span class="o">+</span> <span class="n">CRA</span><span class="o">*</span><span class="n">Uap</span><span class="o">*</span><span class="n">CIA</span> <span class="o">+</span> <span class="n">CRP</span><span class="o">*</span><span class="n">Upp</span><span class="o">*</span><span class="n">CIP</span>
+			<span class="n">U22</span> <span class="o">=</span> <span class="n">Uaa</span><span class="o">*</span><span class="n">CIA</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">CIP</span><span class="o">*</span><span class="n">Uap</span><span class="o">*</span><span class="n">CIA</span> <span class="o">+</span> <span class="n">CIA</span><span class="o">*</span><span class="n">Uap</span><span class="o">*</span><span class="n">CIP</span> <span class="o">+</span> <span class="n">Upp</span><span class="o">*</span><span class="n">CIP</span><span class="o">**</span><span class="mi">2</span>
+
+			<span class="n">UF</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">diags</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">U11</span><span class="p">,</span><span class="n">U22</span><span class="p">],</span><span class="n">U12</span><span class="p">,</span><span class="n">U12</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="o">-</span><span class="n">N</span><span class="p">])</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">keep_sparse</span><span class="p">:</span>
+				<span class="n">UF</span> <span class="o">=</span> <span class="n">UF</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">Uaa</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[:</span><span class="n">N</span><span class="p">,:</span><span class="n">N</span><span class="p">]</span>
+			<span class="n">Uap</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[:</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">:]</span>
+			<span class="n">Upp</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[</span><span class="n">N</span><span class="p">:,</span><span class="n">N</span><span class="p">:]</span>
+
+			<span class="n">U11</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uaa</span><span class="p">,</span><span class="n">CRA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRP</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uap</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">CRA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uap</span><span class="p">,</span><span class="n">CRP</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRP</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Upp</span><span class="p">,</span><span class="n">CRP</span><span class="p">))</span>
+			<span class="n">U12</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uaa</span><span class="p">,</span><span class="n">CIA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRP</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uap</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">CIA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uap</span><span class="p">,</span><span class="n">CIA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CRP</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Upp</span><span class="p">,</span><span class="n">CIP</span><span class="p">))</span>
+			<span class="n">U22</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">CIA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uaa</span><span class="p">,</span><span class="n">CIA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CIP</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uap</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">CIA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CIA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Uap</span><span class="p">,</span><span class="n">CIP</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">CIP</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">Upp</span><span class="p">,</span><span class="n">CIP</span><span class="p">))</span>
+
+			<span class="n">UF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">U11</span><span class="p">,</span><span class="n">U12</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">U12</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">U22</span><span class="p">))))</span>
+
+	<span class="k">return</span> <span class="n">F</span><span class="p">,</span> <span class="n">UF</span></div>
+
+<div class="viewcode-block" id="Time2AmpPhase"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase">[docs]</a><span class="k">def</span> <span class="nf">Time2AmpPhase</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Transformation from time domain to amplitude and phase</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		 x: np.ndarray</span>
+<span class="sd">		  	time domain signal</span>
+<span class="sd">		 Ux: np.ndarray</span>
+<span class="sd">		 	squared uncertainty associated with x</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		A: np.ndarray</span>
+<span class="sd">			amplitude values</span>
+<span class="sd">		P: np.ndarray</span>
+<span class="sd">			phase values</span>
+<span class="sd">		UAP: np.ndarray</span>
+<span class="sd">			covariance matrix associated with [A,P]</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">F</span><span class="p">,</span><span class="n">UF</span> <span class="o">=</span> <span class="n">GUM_DFT</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="p">)</span>
+	<span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span> <span class="o">=</span> <span class="n">DFT2AmpPhase</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span></div>
+
+
+<div class="viewcode-block" id="AmpPhase2Time"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2Time">[docs]</a><span class="k">def</span> <span class="nf">AmpPhase2Time</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Transformation from amplitude and phase to time domain</span>
+
+<span class="sd">	GUM propagation of covariance matrix UAP associated with DFT amplitude A and phase P to the result of</span>
+<span class="sd">	the inverse DFT. Uncertainty UAP is assumed to be given for amplitude and phase with blocks:</span>
+<span class="sd">	UAP = [[u(A,A), u(A,P)],[u(P,A),u(P,P)]]</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		A: np.ndarray</span>
+<span class="sd">			vector of amplitude values</span>
+<span class="sd">		P: np.ndarray</span>
+<span class="sd">			vector of phase values (in rad)</span>
+<span class="sd">		UAP: np.ndarray</span>
+<span class="sd">			covariance matrix associated with [A,P]</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		x: np.ndarray</span>
+<span class="sd">			vector of time domain values</span>
+<span class="sd">		Ux: np.ndarray</span>
+<span class="sd">			covariance matrix associated with x</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">N</span> <span class="o">=</span> <span class="n">UAP</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span>
+	<span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
+
+	<span class="c1"># calculate inverse DFT</span>
+	<span class="n">F</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1j</span><span class="o">*</span><span class="n">P</span><span class="p">)</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">irfft</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+
+	<span class="n">Pf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">P</span><span class="p">,</span><span class="o">-</span><span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+	<span class="n">Cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+	<span class="n">Cc</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="n">Cc</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+	<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="p">):</span>
+		<span class="n">Cc</span><span class="p">[:,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Pf</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+
+	<span class="n">Cs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+	<span class="n">Cs</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span> <span class="n">Cs</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+	<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="p">):</span>
+		<span class="n">Cs</span><span class="p">[:,</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">Pf</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span>
+
+	<span class="c1"># calculate blocks of uncertainty matrix</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UAP</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">AA</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">PP</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+		<span class="n">Ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span><span class="n">Cc</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">PP</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">UAP</span><span class="p">,</span><span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">):</span>
+			<span class="n">nrows</span> <span class="o">=</span> <span class="n">UAP</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">n</span> <span class="o">=</span> <span class="n">nrows</span><span class="o">/</span><span class="mi">2</span>
+			<span class="n">offset</span><span class="o">=</span> <span class="n">UAP</span><span class="o">.</span><span class="n">offsets</span>
+			<span class="n">diags</span> <span class="o">=</span> <span class="n">UAP</span><span class="o">.</span><span class="n">data</span>
+			<span class="n">AA</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">n</span><span class="p">]</span>
+			<span class="n">AP</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">nrows</span><span class="o">+</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+			<span class="n">PP</span> <span class="o">=</span> <span class="n">diags</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">n</span><span class="p">:]</span>
+			<span class="n">Ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span><span class="n">Cc</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">AP</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">PP</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">AA</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+			<span class="n">AP</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+			<span class="n">PP</span> <span class="o">=</span> <span class="n">UAP</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:,</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+			<span class="c1"># propagate uncertainties</span>
+			<span class="n">Ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">AA</span><span class="p">,</span><span class="n">Cc</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cc</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">AP</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Cs</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">PP</span><span class="p">,</span><span class="n">Cs</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+
+	<span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="o">/</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span></div>
+
+<span class="c1"># for backward compatibility</span>
+<span class="n">GUMdeconv</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">H</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UH</span><span class="p">,</span> <span class="n">UY</span><span class="p">:</span> <span class="n">DFT_deconv</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UH</span><span class="p">,</span> <span class="n">UY</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DFT_deconv"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_deconv">[docs]</a><span class="k">def</span> <span class="nf">DFT_deconv</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UH</span><span class="p">,</span> <span class="n">UY</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Deconvolution in the frequency domain</span>
+
+<span class="sd">	GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal</span>
+<span class="sd">	and of the system&#39;s impulse response, respectively.</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		H: np.ndarray</span>
+<span class="sd">			real and imaginary parts of frequency response values (N an even integer)</span>
+<span class="sd">		Y: np.ndarray</span>
+<span class="sd">			real and imaginary parts of DFT values</span>
+<span class="sd">		UH: np.ndarray</span>
+<span class="sd">			covariance matrix associated with real and imaginary parts of H</span>
+<span class="sd">		UY: np.ndarray</span>
+<span class="sd">			covariance matrix associated with real and imaginary parts of X</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		X: np.ndarray</span>
+<span class="sd">			real and imaginary parts of DFT values of deconv result</span>
+<span class="sd">		UX: np.ndarray</span>
+<span class="sd">			covariance matrix associated with real and imaginary part of X</span>
+
+<span class="sd">	References</span>
+<span class="sd">	----------</span>
+<span class="sd">		* Eichstädt and Wilkens [Eichst2016]_</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span>
+	<span class="k">assert</span><span class="p">(</span><span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)))</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UY</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="k">assert</span><span class="p">(</span><span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">UY</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+	<span class="n">N</span> <span class="o">=</span> <span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span>
+	<span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># real and imaginary parts of system and signal</span>
+	<span class="n">rH</span><span class="p">,</span> <span class="n">iH</span> <span class="o">=</span> <span class="n">H</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">H</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+	<span class="n">rY</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+
+	<span class="n">Yc</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1j</span><span class="o">*</span><span class="n">Y</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+	<span class="n">Hc</span> <span class="o">=</span> <span class="n">H</span><span class="p">[:</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1j</span><span class="o">*</span><span class="n">H</span><span class="p">[</span><span class="n">N</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+	<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">Yc</span><span class="o">/</span><span class="n">Hc</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">Yc</span><span class="o">/</span><span class="n">Hc</span><span class="p">)]</span>
+
+<span class="c1"># sensitivities</span>
+	<span class="n">norm</span> <span class="o">=</span> <span class="n">rH</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">iH</span><span class="o">**</span><span class="mi">2</span>
+	<span class="n">RY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">rH</span><span class="o">/</span><span class="n">norm</span><span class="p">,</span><span class="n">iH</span><span class="o">/</span><span class="n">norm</span><span class="p">]</span>
+	<span class="n">IY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="o">-</span><span class="n">iH</span><span class="o">/</span><span class="n">norm</span><span class="p">,</span><span class="n">rH</span><span class="o">/</span><span class="n">norm</span><span class="p">]</span>
+	<span class="n">RH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[(</span><span class="o">-</span><span class="n">rY</span><span class="o">*</span><span class="n">rH</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">rY</span><span class="o">*</span><span class="n">iH</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">iY</span><span class="o">*</span><span class="n">iH</span><span class="o">*</span><span class="n">rH</span><span class="p">)</span><span class="o">/</span><span class="n">norm</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">iY</span><span class="o">*</span><span class="n">rH</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">iH</span><span class="o">*</span><span class="n">iH</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">rY</span><span class="o">*</span><span class="n">rH</span><span class="o">*</span><span class="n">iH</span><span class="p">)</span><span class="o">/</span><span class="n">norm</span><span class="o">**</span><span class="mi">2</span><span class="p">]</span>
+	<span class="n">IH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[(</span><span class="o">-</span><span class="n">iY</span><span class="o">*</span><span class="n">rH</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">iY</span><span class="o">*</span><span class="n">iH</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">rY</span><span class="o">*</span><span class="n">iH</span><span class="o">*</span><span class="n">rH</span><span class="p">)</span><span class="o">/</span><span class="n">norm</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="n">rY</span><span class="o">*</span><span class="n">rH</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">rY</span><span class="o">*</span><span class="n">iH</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">iY</span><span class="o">*</span><span class="n">rH</span><span class="o">*</span><span class="n">iH</span><span class="p">)</span><span class="o">/</span><span class="n">norm</span><span class="o">**</span><span class="mi">2</span><span class="p">]</span>
+<span class="c1"># calculate blocks of uncertainty matrix</span>
+	<span class="n">URRX</span> <span class="o">=</span> <span class="n">matprod</span><span class="p">(</span><span class="n">UY</span><span class="p">,</span><span class="n">RY</span><span class="p">,</span><span class="n">RY</span><span class="p">)</span> <span class="o">+</span> <span class="n">matprod</span><span class="p">(</span><span class="n">UH</span><span class="p">,</span><span class="n">RH</span><span class="p">,</span><span class="n">RH</span><span class="p">)</span>
+	<span class="n">URIX</span> <span class="o">=</span> <span class="n">matprod</span><span class="p">(</span><span class="n">UY</span><span class="p">,</span><span class="n">RY</span><span class="p">,</span><span class="n">IY</span><span class="p">)</span> <span class="o">+</span> <span class="n">matprod</span><span class="p">(</span><span class="n">UH</span><span class="p">,</span><span class="n">RH</span><span class="p">,</span><span class="n">IH</span><span class="p">)</span>
+	<span class="n">UIIX</span> <span class="o">=</span> <span class="n">matprod</span><span class="p">(</span><span class="n">UY</span><span class="p">,</span><span class="n">IY</span><span class="p">,</span><span class="n">IY</span><span class="p">)</span> <span class="o">+</span> <span class="n">matprod</span><span class="p">(</span><span class="n">UH</span><span class="p">,</span><span class="n">IH</span><span class="p">,</span><span class="n">IH</span><span class="p">)</span>
+
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">UX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">URRX</span><span class="p">,</span><span class="n">URIX</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">URIX</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">UIIX</span><span class="p">))))</span>
+	<span class="k">except</span> <span class="ne">MemoryError</span><span class="p">:</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Could not put covariance matrix together due to memory constraints.&quot;</span><span class="p">)</span>
+		<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Returning the three blocks (A,B,C) such that U = [[A,B],[B.T,C]] instead.&quot;</span><span class="p">)</span>
+		<span class="n">UX</span> <span class="o">=</span> <span class="p">(</span><span class="n">URRX</span><span class="p">,</span><span class="n">URIX</span><span class="p">,</span><span class="n">UIIX</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">X</span><span class="p">,</span><span class="n">UX</span></div>
+
+
+<div class="viewcode-block" id="DFT_multiply"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_multiply">[docs]</a><span class="k">def</span> <span class="nf">DFT_multiply</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">UY</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">UF</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Multiplication in the frequency domain</span>
+
+<span class="sd">	GUM uncertainty propagation for multiplication in the frequency domain, where the second factor F may have an</span>
+<span class="sd">	associated uncertainty. This method can be used, for instance, for the application of a low-pass filter in</span>
+<span class="sd">	the frequency domain or the application of deconvolution as a multiplication with an inverse of known uncertainty.</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">	    Y: np.ndarray</span>
+<span class="sd">	    	real and imaginary parts of the first factor</span>
+<span class="sd">	    UY: np.ndarray</span>
+<span class="sd">	    	covariance matrix or squared uncertainty associated with Y</span>
+<span class="sd">	    F: np.ndarray</span>
+<span class="sd">	    	real and imaginary parts of the second factor</span>
+<span class="sd">	    UF: np.ndarray</span>
+<span class="sd">	    	covariance matrix associated with F (optional), default is None</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		YF: np.ndarray</span>
+<span class="sd">			the product of Y and F</span>
+<span class="sd">		UYF: np.ndarray</span>
+<span class="sd">			the uncertainty associated with YF</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">))</span>
+
+	<span class="k">def</span> <span class="nf">calcU</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">UB</span><span class="p">):</span>
+		<span class="c1"># uncertainty propagation for A*B with B uncertain</span>
+		<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+		<span class="n">RA</span> <span class="o">=</span> <span class="n">A</span><span class="p">[:</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
+		<span class="n">IA</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">UB</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+			<span class="n">uRR</span> <span class="o">=</span> <span class="n">RA</span> <span class="o">*</span> <span class="n">UB</span> <span class="o">*</span> <span class="n">RA</span> <span class="o">+</span> <span class="n">IA</span> <span class="o">*</span> <span class="n">UB</span> <span class="o">*</span> <span class="n">IA</span>
+			<span class="n">uRI</span> <span class="o">=</span> <span class="n">RA</span> <span class="o">*</span> <span class="n">UB</span> <span class="o">*</span> <span class="n">IA</span> <span class="o">-</span> <span class="n">IA</span> <span class="o">*</span> <span class="n">UB</span> <span class="o">*</span> <span class="n">RA</span>
+			<span class="n">uII</span> <span class="o">=</span> <span class="n">IA</span> <span class="o">*</span> <span class="n">UB</span> <span class="o">*</span> <span class="n">IA</span> <span class="o">+</span> <span class="n">RA</span> <span class="o">*</span> <span class="n">UB</span> <span class="o">*</span> <span class="n">RA</span>
+		<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">UB</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">UBRR</span> <span class="o">=</span> <span class="n">UB</span><span class="p">[:</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
+			<span class="n">UBII</span> <span class="o">=</span> <span class="n">UB</span><span class="p">[</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+			<span class="n">uRR</span> <span class="o">=</span> <span class="n">RA</span><span class="o">*</span><span class="n">UBRR</span><span class="o">*</span><span class="n">RA</span> <span class="o">+</span> <span class="n">IA</span><span class="o">*</span><span class="n">UBII</span><span class="o">*</span><span class="n">IA</span>
+			<span class="n">uRI</span> <span class="o">=</span> <span class="n">RA</span><span class="o">*</span><span class="n">UBRR</span><span class="o">*</span><span class="n">IA</span> <span class="o">-</span> <span class="n">IA</span><span class="o">*</span><span class="n">UBII</span><span class="o">*</span><span class="n">RA</span>
+			<span class="n">uII</span> <span class="o">=</span> <span class="n">IA</span><span class="o">*</span><span class="n">UBRR</span><span class="o">*</span><span class="n">IA</span> <span class="o">+</span> <span class="n">RA</span><span class="o">*</span><span class="n">UBII</span><span class="o">*</span><span class="n">RA</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">UBRR</span> <span class="o">=</span> <span class="n">UB</span><span class="p">[:</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">,:</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span>
+			<span class="n">UBRI</span> <span class="o">=</span> <span class="n">UB</span><span class="p">[:</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+			<span class="n">UBII</span> <span class="o">=</span> <span class="n">UB</span><span class="p">[</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">:,</span><span class="n">n</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+			<span class="n">uRR</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">RA</span><span class="p">,</span> <span class="n">prod</span><span class="p">(</span><span class="n">UBRR</span><span class="p">,</span> <span class="n">RA</span><span class="p">))</span> <span class="o">-</span> <span class="n">prod</span><span class="p">(</span><span class="n">IA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UBRI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">RA</span><span class="p">))</span> <span class="o">-</span> <span class="n">prod</span><span class="p">(</span><span class="n">RA</span><span class="p">,</span> <span class="n">prod</span><span class="p">(</span><span class="n">UBRI</span><span class="p">,</span><span class="n">IA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">IA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UBII</span><span class="p">,</span><span class="n">IA</span><span class="p">))</span>
+			<span class="n">uRI</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">RA</span><span class="p">,</span> <span class="n">prod</span><span class="p">(</span><span class="n">UBRR</span><span class="p">,</span> <span class="n">IA</span><span class="p">))</span> <span class="o">-</span> <span class="n">prod</span><span class="p">(</span><span class="n">IA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UBRI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">IA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">RA</span><span class="p">,</span> <span class="n">prod</span><span class="p">(</span><span class="n">UBRI</span><span class="p">,</span><span class="n">RA</span><span class="p">))</span> <span class="o">-</span> <span class="n">prod</span><span class="p">(</span><span class="n">IA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UBII</span><span class="p">,</span><span class="n">RA</span><span class="p">))</span>
+			<span class="n">uII</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">IA</span><span class="p">,</span> <span class="n">prod</span><span class="p">(</span><span class="n">UBRR</span><span class="p">,</span> <span class="n">IA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">RA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UBRI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">IA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">IA</span><span class="p">,</span> <span class="n">prod</span><span class="p">(</span><span class="n">UBRI</span><span class="p">,</span><span class="n">RA</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">RA</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UBII</span><span class="p">,</span><span class="n">RA</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">uRR</span><span class="p">,</span> <span class="n">uRI</span><span class="p">,</span> <span class="n">uII</span>
+
+	<span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+	<span class="n">RY</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">];</span> <span class="n">IY</span> <span class="o">=</span> <span class="n">Y</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+	<span class="n">RF</span> <span class="o">=</span> <span class="n">F</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">];</span> <span class="n">IF</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">:]</span>
+	<span class="n">YF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">RY</span><span class="o">*</span><span class="n">RF</span> <span class="o">-</span> <span class="n">IY</span><span class="o">*</span><span class="n">IF</span><span class="p">,</span> <span class="n">RY</span><span class="o">*</span><span class="n">IF</span> <span class="o">+</span> <span class="n">IY</span><span class="o">*</span><span class="n">RF</span><span class="p">]</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">UF</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>  <span class="c1"># second factor is known exactly</span>
+		<span class="n">UYRR</span><span class="p">,</span> <span class="n">UYRI</span><span class="p">,</span> <span class="n">UYII</span> <span class="o">=</span> <span class="n">calcU</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">UY</span><span class="p">)</span>
+		<span class="n">UYF</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">UYRR</span><span class="p">,</span> <span class="n">UYRI</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">UYRI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">UYII</span><span class="p">))))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">URR_Y</span><span class="p">,</span> <span class="n">URI_Y</span><span class="p">,</span> <span class="n">UII_Y</span> <span class="o">=</span> <span class="n">calcU</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">UY</span><span class="p">)</span>
+		<span class="n">URR_F</span><span class="p">,</span> <span class="n">URI_F</span><span class="p">,</span> <span class="n">UII_F</span> <span class="o">=</span> <span class="n">calcU</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">UF</span><span class="p">)</span>
+		<span class="n">URR</span> <span class="o">=</span> <span class="n">URR_Y</span> <span class="o">+</span> <span class="n">URR_F</span>
+		<span class="n">URI</span> <span class="o">=</span> <span class="n">URI_Y</span> <span class="o">+</span> <span class="n">URI_F</span>
+		<span class="n">UII</span> <span class="o">=</span> <span class="n">UII_Y</span> <span class="o">+</span> <span class="n">UII_F</span>
+		<span class="n">UYF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">URR</span><span class="p">,</span> <span class="n">URI</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">URI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">UII</span><span class="p">))))</span>
+	<span class="k">return</span> <span class="n">YF</span><span class="p">,</span> <span class="n">UYF</span></div>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, S Eichstädt (PTB), I Smith (NPL).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

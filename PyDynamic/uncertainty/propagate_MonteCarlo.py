@@ -3,12 +3,14 @@
 
 The propagation of uncertainties via the FIR and IIR formulae alone does not
 enable the derivation of credible intervals, because the underlying distribution
-remains unknown. To this end, the GUM-S2 Monte Carlo is carried out.
+remains unknown. The GUM-S2 Monte Carlo method provides a reference method for the
+calculation of uncertainties for such cases.
 
-Therefore, this module contains several approaches to a Monte Carlo based
-propagation of uncertainties.
+This module implements Monte Carlo methods for the propagation of uncertainties for digital filtering.
 
 """
+
+# TODO: Implement updating Monte Carlo method
 
 import numpy as np
 import scipy as sp
@@ -16,39 +18,53 @@ from numpy import matrix
 import sys
 from scipy.signal import lfilter
 
-if __name__=="uncertainty.propagate_MonteCarlo":	 #module is imported from within package
-	from misc.tools import zerom
-	from misc.filterstuff import isstable
-else:
-	from ..misc.tools import zerom
-	from ..misc.filterstuff import isstable
+from ..misc.tools import zerom
+from ..misc.filterstuff import isstable
 
 
 def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,verbose=True):
-	"""
+	"""Standard Monte Carlo method
+
 	Monte Carlo based propagation of uncertainties for a digital filter (b,a)
 	with uncertainty matrix
 	:math:`U_{\theta}` for :math:`\theta=(a_1,\ldots,a_{N_a},b_0,\ldots,b_{N_b})^T`
 
-	:param x: filter input signal
-	:param noise_std: standard deviation of signal noise
-	:param b: filter numerator coefficients
-	:param a: filter denominator coefficients
-	:param Uab: uncertainty matrix :math:`U_\theta`
-	:param runs: number of Monte Carlo runs
-	:param return_samples: boolean whether samples or mean and std are returned
+	Parameters
+	----------
+		x: np.ndarray
+			filter input signal
+		noise_std: float
+			standard deviation of signal noise
+		b: np.ndarray
+			filter numerator coefficients
+		a: np.ndarray
+			filter denominator coefficients
+		Uab: np.ndarray
+			uncertainty matrix :math:`U_\theta`
+		runs: int,optional
+			number of Monte Carlo runs
+		return_samples: bool, optional
+			whether samples or mean and std are returned
 
-	If return_samples is set to False:
-	:returns y, Uy: filter output and associated uncertainty
-	Otherwise:
-	:returns Y: matrix of Monte Carlo results
-	
-	Application of Monte Carlo method from
-	
-	S. Eichstädt, A. Link, P. M. Harris und C. Elster 
-	Efficient implementation of a Monte Carlo method for uncertainty evaluation in dynamic measurements. 
-	Metrologia, 49(3), 401, 2012. [DOI](http://dx.doi.org/10.1088/0026-1394/49/3/401)
+	If 'return_sampes' is false, the method returns:
 
+	Returns
+	-------
+		y: np.ndarray
+			filter output signal
+		Uy: np.ndarray
+			uncertainty associated with
+
+	Other wise the method returns
+
+	Returns
+	-------
+		Y: np.ndarray
+			array of Monte Carlo results
+	
+	References
+	----------
+		* Eichstädt, Link, Harris and Elster [Eichst2012]_
 	"""
 
 	Na = len(a)
@@ -98,39 +114,63 @@ def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,sh
 
 def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 			return_samples=False,phi=None,theta=None,Delta=0.0):
-	"""
+	"""Sequential Monte Carlo method
+
 	Sequential Monte Carlo propagation for a digital filter (b,a) with uncertainty
 	matrix :math:`U_{\theta}` for :math:`\theta=(a_1,\ldots,a_{N_a},b_0,\ldots,b_{N_b})^T`
 
-	:param x: filter input signal
-	:param noise_std: standard deviation of signal noise
-	:param b: filter numerator coefficients
-	:param a: filter denominator coefficients
-	:param Uab: uncertainty matrix :math:`U_\theta`
-	:param runs: number of Monte Carlo runs
-	:param Perc: (default None) optional ndarray of percentiles for quantile calculation
-	:param blow, alow: optional lowpass filter coefficients (blow,alow)
-	:param shift: optional integer for time shift of output signals
-	:param return_samples: boolean whether to return y and Uy or the matrix Y of MC results
-	:param phi,theta: parameters for AR(MA) noise model
-		::math:`\epsilon(n)  = \sum_k \phi_k\epsilon(n-k) + \sum_k \theta_k w(n-k) + w(n)`
-		with ::math:`w(n)\sim N(0,noise_std^2)`
-	:param Delta: (float) upper bound on systematic error, default is 0.0
+	Parameters
+	----------
+		x: np.ndarray
+			filter input signal
+		noise_std: float
+			standard deviation of signal noise
+		b: np.ndarray
+			filter numerator coefficients
+		a: np.ndarray
+			filter denominator coefficients
+		Uab: np.ndarray
+			uncertainty matrix :math:`U_\theta`
+		runs: int, optional
+			number of Monte Carlo runs
+		Perc: list, optional
+			list of percentiles for quantile calculation
+		blow: np.ndarray
+			optional low-pass filter numerator coefficients
+		alow: np.ndarray
+			optional low-pass filter denominator coefficients
+		shift: int
+			integer for time delay of output signals
+		return_samples: bool, otpional
+			whether to return y and Uy or the matrix Y of MC results
+		phi, theta: np.ndarray, optional
+			parameters for AR(MA) noise model
+			::math:`\epsilon(n)  = \sum_k \phi_k\epsilon(n-k) + \sum_k \theta_k w(n-k) + w(n)`
+			with ::math:`w(n)\sim N(0,noise_std^2)`
+		Delta: float,optional
+		 	upper bound on systematic error of the filter
 
-	If return_samples is False (default):
-	:returns y: filter output signal (Monte Carlo mean)
-	:returns Uy: uncertainties associated with y (Monte Carlo point-wise std)
-	:returns Quant: ndarray of quantiles corresponding to percentiles Perc (if not None) at
-	each time instant
+	If return_samples is False:
+
+	Returns
+	-------
+		y: np.ndarray
+			filter output signal (Monte Carlo mean)
+		Uy: np.ndarray
+			uncertainties associated with y (Monte Carlo point-wise std)
+		Quant: np.ndarray
+			quantiles corresponding to percentiles Perc (if not None) at
+
 	Otherwise:
-	:returns Y: matrix of Monte Carlo results
 
-	Application of Monte Carlo method from
-	
-	S. Eichstädt, A. Link, P. M. Harris und C. Elster 
-	Efficient implementation of a Monte Carlo method for uncertainty evaluation in dynamic measurements. 
-	Metrologia, 49(3), 401, 2012. [DOI](http://dx.doi.org/10.1088/0026-1394/49/3/401)
+	Returns
+	-------
+		Y: np.ndarray
+			array of all Monte Carlo results
 
+	References
+	----------
+		* Eichstädt, Link, Harris, Elster [Eichst2012]_
 	"""
 
 	runs = int(runs)

@@ -6,61 +6,62 @@ A collection of methods which are related to filter design.
 
 """
 
+import numpy as np
+
+__all__ = ['grpdelay', 'kaiser_lowpass', 'isstable', 'savitzky_golay']
+
 def db(vals):
     # Calculation of decibel values :math:`20\log_{10}(x)` for a vector of values    
-    from numpy import log10,abs
-    dbvals = 20*log10(abs(vals))
-    return dbvals
-    
+    return 20*np.log10(np.abs(vals))
+
 def ua(vals):
     # Calculation of unwrapped angle of complex values    
-    from numpy import unwrap,angle
-    return unwrap(angle(vals))
+    return np.unwrap(np.angle(vals))
 
     
 def grpdelay(b,a,Fs,nfft=512):
-    """Calculation of the group deleay of a digital filter
+    """Calculation of the group delay of a digital filter
    
-    Parameters:
-        b:    ndarray
-              IIR filter numerator coefficients
-        a:    ndarray
-              IIR filter denominator coefficients
-        Fs:   float
-              sampling frequency of the filter
+    Parameters
+    ----------
+        b: ndarray
+            IIR filter numerator coefficients
+        a: ndarray
+            IIR filter denominator coefficients
+        Fs: float
+            sampling frequency of the filter
         nfft: int
-              number of FFT bins
+            number of FFT bins
 
-    Returns:
-        group delay: ndarray
-                     group delay values
+    Returns
+    -------
+        group_delay: np.ndarray
+            group delay values
         frequencies: ndarray
-                     frequencies at which the group delay is calculated    
+            frequencies at which the group delay is calculated
 
     References
     * Smith, online book [Smith]_
 
     """
-    from numpy import convolve,arange,nonzero,real
-    from numpy.fft import fft
-            
+
     Na = len(a)-1
     Nb = len(b)-1
     
-    c = convolve(b,a[::-1]) # c(z) = b(z)*a(1/z)*z^(-oa)
-    cr = c*arange(Na+Nb+1)  # derivative of c wrt 1/z
-    num = fft(cr,2*nfft);
-    den = fft(c,2*nfft);
+    c = np.convolve(b,a[::-1]) # c(z) = b(z)*a(1/z)*z^(-oa)
+    cr = c*np.arange(Na+Nb+1)  # derivative of c wrt 1/z
+    num = np.fft.fft(cr,2*nfft)
+    den = np.fft.fft(c,2*nfft)
     tol = 1e-12
     
-    polebins = nonzero(abs(den)<tol) 
+    polebins = np.nonzero(abs(den)<tol)
     for p in polebins:        
         num[p] = 0.0
         den[p] = 1.0
         
-    gd = real(num/den) - Na
+    gd = np.real(num/den) - Na
     
-    f = arange(0.0,2*nfft-1)/(2*nfft)*Fs
+    f = np.arange(0.0,2*nfft-1)/(2*nfft)*Fs
     f = f[:nfft+1]
     gd = gd[:len(f)]
     return gd,f
@@ -76,18 +77,19 @@ def mapinside(a):
         a: ndarray
            polynomial coefficients with all roots inside or on the unit circle
     """
-    from numpy import roots,conj,poly,nonzero
-    v = roots(a)
-    inds = nonzero(abs(v)>1)
-    v[inds] = 1/conj(v[inds])
-    return poly(v)    
+    v = np.roots(a)
+    inds = np.nonzero(abs(v)>1)
+    v[inds] = 1/np.conj(v[inds])
+    return np.poly(v)
     
 
 def kaiser_lowpass(L,fcut,Fs,beta=8.0):
-    """
-    Design of a FIR lowpass filter using the window technique with a Kaiser window.
+    """Design of a FIR lowpass filter using the window technique with a Kaiser window.
+
+    This a filter type which is often used as an FIR low-pass filter due to its linear phase.
     
-    Parameters:
+    Parameters
+    ----------
         L: int
            filter order (window length)
         fcut: float
@@ -96,7 +98,8 @@ def kaiser_lowpass(L,fcut,Fs,beta=8.0):
             sampling frequency
         beta: float
               scaling parameter for the Kaiser window
-    Returns:
+    Returns
+    -------
         blow: ndarray
               FIR filter coefficients
         shift: int
@@ -104,8 +107,7 @@ def kaiser_lowpass(L,fcut,Fs,beta=8.0):
     
     """
     from scipy.signal import firwin    
-    from numpy import mod
-    if mod(L,2)==0:
+    if np.mod(L,2)==0:
         L = L+1
     blow = firwin(L,2*fcut/Fs,window=('kaiser',beta))
     shift = L/2
@@ -116,31 +118,33 @@ def kaiser_lowpass(L,fcut,Fs,beta=8.0):
 def isstable(b,a,ftype='digital'):
     """Determine whether IIR filter (b,a) is stable
     
-    Parameters:
-        b:      ndarray
-                filter numerator coefficients
-        a:      ndarray
-                filter denominator coefficients
-        ftype:  string
-                type of filter (`digital` or `analog`)
-    Returns:
-        stable: boolean
-                flag whether filter is stable or not
+    Parameters
+    ----------
+        b: ndarray
+            filter numerator coefficients
+        a: ndarray
+            filter denominator coefficients
+        ftype: string
+            type of filter (`digital` or `analog`)
+    Returns
+    -------
+        stable: bool
+            whether filter is stable or not
                 
-    Note
-    The test for analog filters is not implemented yet.
-    
-    """    
-    from numpy import roots, any, abs
-    
+    """
+
     if ftype=='digital':
-        v = roots(a)
-        if any(abs(v)>1.0):
+        v = np.roots(a)
+        if np.any(np.abs(v)>1.0):
             return False
         else:
             return True
     elif ftype=='analog':
-        raise NotImplemented
+        v = np.roots(a)
+        if np.any(np.real(v)<0):
+            return False
+        else:
+            return True
         
         
     
@@ -155,45 +159,36 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     Source obtained from scipy cookbook (online), downloaded 2013-09-13    
 
     Parameters
+    ----------
         y: ndarray, shape (N,)
            the values of the time history of the signal
         window_size: int
-                     the length of the window. Must be an odd integer number
+           the length of the window. Must be an odd integer number
         order: int
-               the order of the polynomial used in the filtering. Must be less then `window_size` - 1.
+           the order of the polynomial used in the filtering. Must be less then `window_size` - 1.
         deriv: int
-               the order of the derivative to compute (default = 0 means only smoothing)
+           the order of the derivative to compute (default = 0 means only smoothing)
     
     Returns
+    -------
          ys: ndarray, shape (N,)
-             the smoothed signal (or it's n-th derivative).
+            the smoothed signal (or it's n-th derivative).
     
     Notes
+    -----
     The Savitzky-Golay is a type of low-pass filter, particularly
     suited for smoothing noisy data. The main idea behind this
     approach is to make for each point a least-square fit with a
     polynomial of high order over a odd-sized window centered at
     the point.
     
-    Example 
-    .. code-block:: python
-    
-        t = np.linspace(-4, 4, 500)
-        y = np.exp( -t**2 ) + np.random.normal(0, 0.05, t.shape)
-        ysg = savitzky_golay(y, window_size=31, order=4)
-        import matplotlib.pyplot as plt
-        plt.plot(t, y, label='Noisy signal')
-        plt.plot(t, np.exp(-t**2), 'k', lw=1.5, label='Original signal')
-        plt.plot(t, ysg, 'r', label='Filtered signal')
-        plt.legend()
-        plt.show()
-    
+
     References
+    ----------
     * Savitzky et al. [Savitzky]_
     * Numerical Recipes [NumRec]_
        
     """
-    import numpy as np
     from math import factorial
 
     try:

@@ -5,6 +5,44 @@ The goal of this package is to provide a starting point for users in metrology a
 The software is part of a joint research project of the national metrology institutes from Germany and the UK, i.e. [Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html)
 and the [National Physical Laboratory](http://www.npl.co.uk).
 
+PyDynamic offers propagation of *uncertainties* for
+- application of the discrete Fourier transform and its inverse
+- filtering with an FIR or IIR filter with uncertain coefficients
+- design of a FIR filter as the inverse of a frequency response with uncertain coefficients
+- design on an IIR filter as the inverse of a frequency response with uncertain coefficients
+- deconvolution in the frequency domain by division
+- multiplication in the frequency domain
+- transformation from amplitude and phase to a representation by real and imaginary parts
+
+For the validation of the propagation of uncertainties, the Monte-Carlo method can be applied using a memory-efficient implementation of Monte-Carlo for digital filtering
+
+### Examples
+Uncertainty propagation for the application of a FIR filter with coefficients *b* with which an uncertainty *ub* is associated. The filter input signal is *x* with known 
+noise standard deviation *sigma*. The filter output signal is *y* with associated uncertainty *uy*.
+```python
+    from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+    y, uy = FIRuncFilter(x, sigma, b, ub)    
+```
+
+
+Uncertainty propagation through the application of the discrete Fourier transform (DFT). The time domain signal is *x* with associated squared uncertainty *ux*. The result
+of the DFT is the vector *X* of real and imaginary parts of the DFT applied to *x* and the associated uncertainty *UX*.
+```python
+    from PyDynamic.uncertainty.propagate_DFT import GUM_DFT
+    X, UX = GUM_DFT(x, ux)
+```
+
+
+Sequential application of the Monte Carlo method for uncertainty propagation for the case of filtering a time domain signal *x* with an IIR filter *b,a* with uncertainty associated with
+the filter coefficients *Uab* and signal noise standard deviation *sigma*. The filter output is the signal *y and the Monte Carlo method calculates point-wise uncertainties *uy* and
+coverage intervals *Py* corresponding to the specified percentiles.
+
+```python
+    from PyDynamic.uncertainty.propagate_MonteCarlo import SMC
+    y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
+```
+
+
 ### Installation
 If you just want to use the software, the easiest way is to run from your system's command line
 ```

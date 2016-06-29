@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from PyDynamic.misc.testsignals import rect
-from PyDynamic.uncertainty.propagate_FIR import FIRuncFilter
+from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 from PyDynamic.misc.tools import col_hstack, make_semiposdef
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 import PyDynamic.uncertainty.propagate_MonteCarlo as MC

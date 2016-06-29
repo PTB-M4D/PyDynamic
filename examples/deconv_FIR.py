@@ -11,17 +11,12 @@ import numpy as np
 import scipy.signal as dsp
 import matplotlib.pyplot as plt
 
-# if run as script, add parent path for relative importing
-if __name__ == '__main__' and __package__ is None:
-    from os import sys, path
-    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 import PyDynamic.deconvolution.fit_filter as deconv
-import PyDynamic.misc.SecondOrderSystem as sos
+from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.testsignals import shocklikeGaussian
 from PyDynamic.misc.filterstuff import kaiser_lowpass, db
-from PyDynamic.uncertainty.propagate_FIR import FIRuncFilter
-from PyDynamic.misc.tools import make_semiposdef, col_hstack
+from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from PyDynamic.misc.tools import make_semiposdef
 
 rst = np.random.RandomState(10)
 
@@ -34,12 +29,12 @@ Fs = 500e3
 Ts = 1 / Fs
 
 # sensor/measurement system
-f0 = 36e3; uf0 = 0.1e3
-S0 = 0.124; uS0= 1.5e-4
-delta = 0.0055; udelta = 5e-3
+f0 = 36e3; uf0 = 0.01*f0
+S0 = 0.124; uS0= 0.001*S0
+delta = 0.0055; udelta = 0.1*delta
 
 # transform continuous system to digital filter
-bc, ac = sos.phys2filter(S0,delta,f0)
+bc, ac = sos_phys2filter(S0,delta,f0)
 b, a = dsp.bilinear(bc, ac, Fs)
 
 # simulate input and output signals
@@ -55,10 +50,15 @@ MCS0 = S0 + rst.randn(runs)*uS0
 MCd  = delta+ rst.randn(runs)*udelta
 MCf0 = f0 + rst.randn(runs)*uf0
 f = np.linspace(0, 120e3, 200)
-HMC = sos.FreqResp(MCS0, MCd, MCf0, f)
+HMC = np.zeros((runs, len(f)),dtype=complex)
+for k in range(runs):
+    bc_,ac_ = sos_phys2filter(MCS0[k], MCd[k], MCf0[k])
+    b_,a_ = dsp.bilinear(bc_,ac_,Fs)
+    HMC[k,:] = dsp.freqz(b_,a_,2*np.pi*f/Fs)[1]
 
-H = np.mean(HMC,dtype=complex,axis=1)
-UH= np.cov(np.vstack((np.real(HMC),np.imag(HMC))),rowvar=1)
+Hc = np.mean(HMC,dtype=complex,axis=0)
+H = np.r_[np.real(Hc), np.imag(Hc)]
+UH= np.cov(np.c_[np.real(HMC),np.imag(HMC)],rowvar=0)
 UH= make_semiposdef(UH)
 # Calculation of FIR deconvolution filter and its assoc. unc.
 bF, UbF = deconv.LSFIR_unc(H,UH,N,tau,f,Fs)
@@ -68,7 +68,7 @@ CbF = UbF/(np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis],(1,N+1))*
 		   np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis].T,(N+1,1)))
 
 # Deconvolution Step1: lowpass filter for noise attenuation
-fcut = 35e3; low_order = 100
+fcut = f0+20e3; low_order = 100
 blow, lshift = kaiser_lowpass(low_order, fcut, Fs)
 shift = -tau - lshift
 # Deconvolution Step2: Application of deconvolution filter
@@ -77,7 +77,7 @@ xhat,Uxhat = FIRuncFilter(yn,noise,bF,UbF,shift,blow)
 
 # Plot of results
 fplot = np.linspace(0, 80e3, 1000)
-Hc = sos.FreqResp(S0, delta, f0, fplot)
+Hc = dsp.freqz(b,a, 2*np.pi*fplot/Fs)[1]
 Hif = dsp.freqz(bF, 1.0, 2 * np.pi * fplot / Fs)[1]
 Hl = dsp.freqz(blow, 1.0, 2 * np.pi * fplot / Fs)[1]
 
@@ -92,11 +92,11 @@ plt.tick_params(which="both",labelsize=16)
 fig = plt.figure(2);plt.clf()
 ax = fig.add_subplot(1,1,1)
 plt.imshow(UbF,interpolation="nearest")
-# plt.colorbar(ax=ax)
+plt.colorbar(ax=ax)
 # plt.title('Uncertainty of deconvolution filter coefficients')
 
 plt.figure(3); plt.clf()
-plt.plot(time*1e3,col_hstack([x,yn,xhat]))
+plt.plot(time*1e3,np.c_[x,yn,xhat])
 plt.legend(('input signal','output signal','estimate of input'))
 # plt.title('time domain signals')
 plt.xlabel('time / ms',fontsize=22)
@@ -113,5 +113,8 @@ plt.ylabel('signal uncertainty / au',fontsize=22)
 plt.subplots_adjust(left=0.15,right=0.95)
 plt.tick_params(which='both', labelsize=16)
 plt.xlim(1.5,4)
+
+plt.figure(5);plt.clf()
+plt.errorbar(range(N+1), bF, np.sqrt(np.diag(UbF)))
 
 plt.show()

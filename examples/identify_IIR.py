@@ -12,7 +12,7 @@ from matplotlib.pyplot import figure, cla, show
 
 from PyDynamic.misc.filterstuff import db
 import PyDynamic.identification.fit_filter as fit_filter
-from PyDynamic.misc.SecondOrderSystem import FreqResp
+from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
 
 #%% sensor/measuring system
 
@@ -21,7 +21,7 @@ S0 = 0.124          # system static gain
 delta = 0.0055      # system damping
 
 f = np.linspace(0, 80e3, 30)               # frequencies for fitting the system
-Hvals = FreqResp(S0, delta, f0, f)      # frequency response of the 2nd order system
+Hvals = sos_FreqResp(S0, delta, f0, f)      # frequency response of the 2nd order system
 
 #%% fitting the IIR filter
 
@@ -33,7 +33,7 @@ b, a, tau = fit_filter.LSIIR(Hvals, Na, Nb, f, Fs)
 #%% plot the result
 
 fplot = np.linspace(0, 80e3, 1000)             # frequency range for the plot
-Hc = FreqResp(S0, delta, f0, fplot)         # frequency response of the 2nd order system
+Hc = sos_FreqResp(S0, delta, f0, fplot)         # frequency response of the 2nd order system
 Hf = freqz(b, a, 2 * np.pi * fplot / Fs)[1]    # frequency response of the fitted IIR filter
 Hf = Hf*np.exp(2j*np.pi*fplot/Fs*tau)             # take into account the filter time delay tau
 

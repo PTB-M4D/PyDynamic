@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>PyDynamic.misc.tools &mdash; PyDynamic 1.2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PyDynamic 1.2.1 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> PyDynamic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../PyDynamic.uncertainty.html">Evaluation of uncertainties</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../PyDynamic.deconvolution.html">Design of deconvolution filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../PyDynamic.misc.html">Miscellaneous</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">PyDynamic</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>PyDynamic.misc.tools</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for PyDynamic.misc.tools</h1><div class="highlight"><pre>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="col_hstack"><a class="viewcode-back" href="../../../PyDynamic.misc.html#PyDynamic.misc.tools.col_hstack">[docs]</a><span class="k">def</span> <span class="nf">col_hstack</span><span class="p">(</span><span class="n">vectors</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From tuple of 1D ndarrays make a 2D ndarray where the tuple</span>
+<span class="sd">    elements are as column vectors horizontally stacked</span>
+<span class="sd">    </span>
+<span class="sd">    :param vectors: list of K 1D-ndarrays of dimension N</span>
+<span class="sd">    :returns matrix: 2D ndarray of shape (N,K)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
+        <span class="n">col_vectors</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">vectors</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input must be of type list</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>    
+    
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">col_vectors</span><span class="p">)</span></div>
+            
+            
+<div class="viewcode-block" id="find"><a class="viewcode-back" href="../../../PyDynamic.misc.html#PyDynamic.misc.tools.find">[docs]</a><span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="n">assertions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    MATLAB-like determination of occurence of assertion in an array using the</span>
+<span class="sd">    numpy nonzero function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">assertions</span><span class="p">,</span><span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input to &#39;find&#39; needs to be a tuple.&quot;</span><span class="p">)</span>
+        
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assertions</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">for</span> <span class="n">assertion</span> <span class="ow">in</span> <span class="n">assertions</span><span class="p">:</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">assertion</span><span class="p">[</span><span class="n">inds</span><span class="p">])[</span><span class="mi">0</span><span class="p">]]</span>
+    
+    <span class="k">return</span> <span class="n">inds</span></div>
+            
+<div class="viewcode-block" id="zerom"><a class="viewcode-back" href="../../../PyDynamic.misc.html#PyDynamic.misc.tools.zerom">[docs]</a><span class="k">def</span> <span class="nf">zerom</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a numpy.matrix of zeros of given shape</span>
+<span class="sd">    &quot;&quot;&quot;</span>      
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">matrix</span>      
+    <span class="k">return</span> <span class="n">matrix</span><span class="p">(</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span></div>
+    
+    
+<div class="viewcode-block" id="stack"><a class="viewcode-back" href="../../../PyDynamic.misc.html#PyDynamic.misc.tools.stack">[docs]</a><span class="k">def</span> <span class="nf">stack</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_matrix</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">v</span><span class="p">[:,</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">make_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">elements</span><span class="p">))</span></div>
+    
+
+<div class="viewcode-block" id="print_vec"><a class="viewcode-back" href="../../../PyDynamic.misc.html#PyDynamic.misc.tools.print_vec">[docs]</a><span class="k">def</span> <span class="nf">print_vec</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span><span class="n">prec</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">retS</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">vertical</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">%1.*g</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="n">s</span><span class="p">,</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">vector</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">retS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="print_mat"><a class="viewcode-back" href="../../../PyDynamic.misc.html#PyDynamic.misc.tools.print_mat">[docs]</a><span class="k">def</span> <span class="nf">print_mat</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="n">prec</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span><span class="n">vertical</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">retS</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">vertical</span><span class="p">:</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">T</span>
+        
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="n">print_vec</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">k</span><span class="p">,:],</span><span class="n">prec</span><span class="o">=</span><span class="n">prec</span><span class="p">,</span><span class="n">vertical</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">retS</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+    
+    <span class="k">if</span> <span class="n">retS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_semiposdef"><a class="viewcode-back" href="../../../PyDynamic.misc.html#PyDynamic.misc.tools.make_semiposdef">[docs]</a><span class="k">def</span> <span class="nf">make_semiposdef</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="n">maxiter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">tol</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+
+    <span class="n">n</span><span class="p">,</span><span class="n">m</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="n">n</span><span class="o">!=</span><span class="n">m</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Matrix has to be quadratic&quot;</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">matrix</span><span class="o">+</span><span class="n">matrix</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">matrix</span><span class="p">))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">e</span><span class="o">&lt;</span><span class="n">tol</span> <span class="ow">and</span> <span class="n">count</span><span class="o">&lt;</span><span class="n">maxiter</span><span class="p">:</span>
+        <span class="n">matrix</span> <span class="o">+=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">+</span><span class="n">tol</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvals</span><span class="p">(</span><span class="n">matrix</span><span class="p">))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">matrix</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, S Eichstädt (PTB), I Smith (NPL).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

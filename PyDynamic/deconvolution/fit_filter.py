@@ -3,53 +3,43 @@
 
 .. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 
-This module contains methods to fit a digital filter to a given frequency response
-such that the resulting filter acts as deconvolution/inverse filter for the corresponding
-measurement system. For an example see :mod:`ADM.examples.LSIIR_deconvolution` 
-Methods in this package are
-
-LSFIR(H,N,tau,f,Fs,Wt=None)
-LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True)
-LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True)
-LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True)
-LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0)
-FreqResp2realimag(Abs,Phase,Unc,MCruns=1e4)
-
 """
 
 import numpy as np
+import scipy.signal as dsp
 
-if __name__=="deconvolution.fit_filter":
-	from misc.filterstuff import grpdelay
-else:
-	from ..misc.filterstuff import grpdelay
+from ..misc.filterstuff import grpdelay
 
+__all__ = ['LSFIR', 'LSFIR_unc', 'LSIIR', 'LSIIR_unc', 'LSFIR_uncMC']
 
 def LSFIR(H,N,tau,f,Fs,Wt=None):
-	"""
-	Least-squares fit of a digital FIR filter to the reciprocal of a given frequency response.
+	"""	Least-squares fit of a digital FIR filter to the reciprocal of a given frequency response.
 
+	Parameters
+	----------
+		H: np.ndarray
+			frequency response values
+		N: int
+			FIR filter order
+		tau: float
+			delay of filter
+		f: np.ndarray
+			frequencies
+		Fs: float
+			sampling frequency of digital filter
+		Wt: np.ndarray, optional
+			vector of weights
 
-	:param H: frequency response values
-	:param N: FIR filter order
-	:param tau: delay of filter
-	:param f: frequencies
-	:param Fs: sampling frequency of digital filter
-	:param Wt: (optional) vector of weights
+	Returns
+	-------
+		bFIR: np.ndarray
+			filter coefficients
 
-	:type H: ndarray
-	:type N: int
-	:type tau: int
-	:type f: ndarray
-	:type Fs: float
-	
-	:returns: filter coefficients bFIR (ndarray) of shape (N,)
-	
-	Application of deconvolution filter design method from
-	
-	C. Elster und A. Link 
-	Uncertainty evaluation for dynamic measurements modelled by a linear time-invariant system. 
-	Metrologia, 45(4), 464-473, 2008. [DOI](http://dx.doi.org/10.1088/0026-1394/45/4/013)
+	References
+	----------
+		* Elster and Link [Elster2008]_
+
+	.. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
 
 	"""
 
@@ -75,15 +65,20 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
 	else:
 		X = np.vstack([np.real(E), np.imag(E)])
 
-	H = H*np.exp(1j*w*tau)
-	iRI = np.vstack([np.real(1.0/H), np.imag(1.0/H)])
+	Hs = H*np.exp(1j*w*tau)
+	iRI = np.vstack([np.real(1.0/Hs), np.imag(1.0/Hs)])
 
 	bFIR, res = np.linalg.lstsq(X,iRI)[:2]
 
 	if (not isinstance(res,np.ndarray)) or (len(res)==1):
 		print("Calculation of FIR filter coefficients finished with residual norm %e" % res)
-
-	return np.reshape(bFIR,(N+1,))
+		Hd = dsp.freqz(bFIR,1,2*np.pi*f/Fs)[1]
+		Hd = Hd*np.exp(1j*2*np.pi*f/Fs*tau)
+		res= np.hstack((np.real(Hd) - np.real(H), np.imag(Hd) - np.imag(H)))
+		rms= np.sqrt( np.sum( res**2 )/len(f))
+		print("Final rms error = %e \n\n" % rms)
+	
+	return bFIR.flatten()
 
 
 def mapinside(a):
@@ -95,35 +90,38 @@ def mapinside(a):
 
 
 def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
-	"""
+	"""Design of a stable IIR filter as fit to reciprocal of frequency response values
+
 	Least-squares fit of a digital IIR filter to the reciprocal of a given set
-	of frequency response values unp.sing the equation-error method and stabilization
-	by pole mapnp.ping.
+	of frequency response values using the equation-error method and stabilization
+	by pole mapping and introduction of a time delay.
 
-	:param Hvals: frequency response values.
-	:param Nb: order of IIR numerator polynomial.
-	:param Na: order of IIR denominator polynomial.
-	:param f: frequencies.
-	:param Fs: sampling frequency for digital IIR filter.
-	:param tau: initial estimate of time delay for filter stabilization.
-	:param justFit: if True then no stabilization is carried out.
-	:type justFit: bool.
-	:type Hvals: ndarray
-	:type Nb: int
-	:type Na: int
-	:type f: ndarray
-	:type Fs: float
-	:type tau: int
+	Parameters
+	----------
+		Hvals: np.ndarray
+			frequency response values.
+		Nb: int
+			order of IIR numerator polynomial.
+		Na: int
+			order of IIR denominator polynomial.
+		f: np.ndarray
+			frequencies corresponding to Hvals
+		Fs: float
+			sampling frequency for digital IIR filter.
+		tau: float
+			initial estimate of time delay for filter stabilization.
+		justFit: bool
+			if True then no stabilization is carried out.
 
-	:returns: ndarray b, a -- IIR filter coefficients, int tau -- time delay (in samples)
+	Returns
+	-------
+		b,a : np.ndarray
+			IIR filter coefficients, int tau -- time delay (in samples)
 	
-	Application of filter design method from
-	
-	S. Eichstädt, C. Elster, T. J. Esward und J. P. Hessling 
-	Deconvolution filters for the analysis of dynamic measurement processes: a tutorial. 
-	Metrologia, 47(5), 522-533, 2010. [DOI](http://dx.doi.org/10.1088/0026-1394/47/5/003)
+	References
+	----------
+		* Eichstädt, Elster, Esward, Hessling [Eichst2010]_
 
-	.. seealso:: :mod:`..examples.deconvolution`
 	"""
 	from numpy import conj,count_nonzero,roots,ceil,median
 	from numpy.linalg import lstsq
@@ -175,49 +173,62 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 		else:
 			stable = True
 		run = run + 1
-
+		
 	if count_nonzero(abs(roots(ai))>1)>0 and verbose:
 		print( "Caution: The algorithm did NOT result in a stable IIR filter!")
 		print("Maybe try again with a higher value of tau0 or a higher filter order?")
 
 	if verbose:
 		print("Least squares fit finished after %d iterations (tau=%d).\n" % (run,tau))
-
+		Hd = dsp.freqz(bi,ai,2*np.pi*f/Fs)[1]
+		Hd = Hd*np.exp(1j*2*np.pi*f/Fs*tau)
+		res= np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
+		rms= np.sqrt( np.sum( res**2 )/len(f))
+		print("Final rms error = %e \n\n" % rms)
+	
 	return bi,ai,int(tau)
 
-def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=None):
-	"""
+
+#Todo: Replace Monte Carlo with propagate_DFT.AmpPhase2DFT
+def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,trunc_svd_tol=None):
+	"""Design of FIR filter as fit to reciprocal of frequency response values with uncertainty
+
+
 	Least-squares fit of a digital FIR filter to the reciprocal of a frequency response
 	for which associated uncertainties are given for its real and imaginary part.
 	Uncertainties are propagated using a truncated svd and linear matrix propagation.
 
-	:param H: frequency response values
-	:param UH: matrix of uncertainties associated with the real and imaginary part
-	:param N: FIR filter order
-	:param tau: delay of filter
-	:param f: frequencies
-	:param Fs: sampling frequency of digital filter
+	Parameters
+	----------
+		H: np.ndarray
+			frequency response values
+		UH: np.ndarray
+			uncertainties associated with the real and imaginary part
+		N: int
+			FIR filter order
+		tau: float
+			delay of filter
+		f: np.ndarray
+			frequencies
+		Fs: float
+			sampling frequency of digital filter
+		wt: np.ndarray, optional
+			array of weights for a weighted least-squares method
+		verbose: bool, optional
+			whether to print statements to the command line
+		trunc_svd_tol: float
+			lower bound for singular values to be considered for pseudo-inverse
 
-	optional input parameters
-
-	:param wt: vector of weights (length 2K) or string 'unc' for using uncertainties, default=None
-
-	:type H: ndarray, shape (K,)
-	:type UH: ndarray, shape (2K,2K)
-	:type N: int
-	:type tau: int
-	:type f: ndarray, shape (K,)
-	:type Fs: float
-
-	:returns b: filter coefficients of shape (N,)
-	:returns Ub: matrix of uncertainties associated with b. shape (N,N)
+	Returns
+	-------
+		b: np.ndarray
+			filter coefficients of shape
+		Ub: np.ndarray
+			uncertainties associated with b
 	
-	Application of deconvolution filter design method from
-	
-	C. Elster und A. Link 
-	Uncertainty evaluation for dynamic measurements modelled by a linear time-invariant system. 
-	Metrologia, 45(4), 464-473, 2008. [DOI](http://dx.doi.org/10.1088/0026-1394/45/4/013)	
-
+	References
+	----------
+		* Elster and Link [Elster2008]_
 	"""
 
 	if verbose:
@@ -239,7 +250,7 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
 
 	absHMC= HRI[:,:Nf]**2 + HRI[:,Nf:]**2
 	# Monte Carlo vectorized
-	HiMC = np.hstack(((HRI[:,:Nf]*np.tile(np.cos(omtau),(runs,1)) + HRI[:,Nf:]*np.tile(np.sin(omtau),(runs,1)))/absHMC, \
+	HiMC = np.hstack(((HRI[:,:Nf]*np.tile(np.cos(omtau),(runs,1)) + HRI[:,Nf:]*np.tile(np.sin(omtau),(runs,1)))/absHMC,
 					 (HRI[:,Nf:]*np.tile(np.cos(omtau),(runs,1)) - HRI[:,:Nf]*np.tile(np.sin(omtau),(runs,1)))/absHMC ) )
 	UiH = np.cov(HiMC,rowvar=0)
 
@@ -271,47 +282,57 @@ def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,returnHi=False,trunc_svd_tol=
 	bFIR = np.dot(M,Hri[:,np.newaxis])
 	UbFIR= np.dot(np.dot(M,UiH),M.T)
 
-	bFIR = bFIR.reshape((N+1,))
+	bFIR = bFIR.flatten()
+	
+	if verbose:
+		Hd = dsp.freqz(bFIR,1,2*np.pi*f/Fs)[1]
+		Hd = Hd*np.exp(1j*2*np.pi*f/Fs*tau)
+		res= np.hstack((np.real(Hd) - np.real(H), np.imag(Hd) - np.imag(H)))
+		rms= np.sqrt( np.sum( res**2 )/len(f))
+		print("Final rms error = %e \n\n" % rms)
+	
 
-	if returnHi:
-		return bFIR,UbFIR,UiH
-	else:
-		return bFIR, UbFIR
-
-
-
+	return bFIR, UbFIR
 
 
 def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
-	"""
+	"""Design of FIR filter as fit to reciprocal of frequency response values with uncertainty
+
 	Least-squares fit of a FIR filter to the reciprocal of a frequency response
 	for which associated uncertainties are given for its real and imaginary parts.
-	Uncertainties are propagated using a Monte Carlo method.
+	Uncertainties are propagated using a Monte Carlo method. This method may help in cases where
+	the weighting matrix or the Jacobian are ill-conditioned, resulting in false uncertainties
+	associated with the filter coefficients.
 
-	:param H: frequency response values
-	:param UH: matrix of uncertainties associated with the real and imaginary part of H
-	:param N: FIR filter order
-	:param tau: delay of filter
-	:param f: frequencies
-	:param Fs: sampling frequency of digital filter
-	:param wt: (optional) vector of weights
+	Parameters
+	----------
+		H: np.ndarray
+			frequency response values
+		UH: np.ndarray
+			uncertainties associated with the real and imaginary part of H
+		N: int
+			FIR filter order
+		tau: int
+			time delay of filter in samples
+		f: np.ndarray
+			frequencies corresponding to H
+		Fs: float
+			sampling frequency of digital filter
+		wt: np.ndarray, optional
+		 	vector of weights
+		verbose: bool, optional
+			whether to print statements to the command line
 
-	:type H: ndarray, shape (K,)
-	:type UH: ndarray, shape (2K,2K)
-	:type N: int
-	:type tau: int
-	:type f: ndarray, shape (K,)
-	:type Fs: float
+	Returns
+	-------
+		b: np.ndarray
+			filter coefficients of shape
+		Ub: np.ndarray
+			uncertainties associated with b
 
-	:returns b: filter coefficients of shape (N,)
-	:returns Ub: matrix of uncertainties associated with b. shape (N,N)
-
-	Application of deconvolution filter design method from
-	
-	C. Elster und A. Link 
-	Uncertainty evaluation for dynamic measurements modelled by a linear time-invariant system. 
-	Metrologia, 45(4), 464-473, 2008. [DOI](http://dx.doi.org/10.1088/0026-1394/45/4/013)	
-	
+	References
+	----------
+		* Elster and Link [Elster2008]_
 	"""
 
 	if verbose:
@@ -346,37 +367,45 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
 
 
 def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
-	"""
+	"""Design of stabel IIR filter as fit to reciprocal of given frequency response with uncertainty
+
 	Least-squares fit of a digital IIR filter to the reciprocal of a given set
-	of frequency response values with given associated uncertainty.
+	of frequency response values with given associated uncertainty. Propagation of uncertainties is
+	carried out using the Monte Carlo method.
 
-	:param H: frequency response values.
-	:param UH: matrix of uncertainties associated with np.real and np.imaginary part of H
-	:param Nb: order of IIR numerator polynomial.
-	:param Na: order of IIR denominator polynomial.
-	:param f: frequencies.
-	:param Fs: sampling frequency for digital IIR filter.
-	:param tau: initial estimate of time delay for filter stabilization.
+	Parameters
+	----------
 
-	:type H: ndarray of shape (N,)
-	:type UH: ndarray of shape (2N,2N)
-	:type Nb: int
-	:type Na: int
-	:type f: ndarray
-	:type Fs: float
-	:type tau: int
+		H: np.ndarray
+			frequency response values.
+		UH: np.ndarray
+			uncertainties associated with real and imaginary part of H
+		Nb: int
+			order of IIR numerator polynomial.
+		Na: int
+			order of IIR denominator polynomial.
+		f: np.ndarray
+			frequencies corresponding to H
+		Fs: float
+			sampling frequency for digital IIR filter.
+		tau: float
+			initial estimate of time delay for filter stabilization.
 
-	:returns b,a: ndarray IIR filter coefficients
-	:returns tau: time delay (in samples)
-	:returns Uba: uncertainties associated with :math:`(a_1,...,a_{N_a},b_0,...,b_{N_b})`
+	Returns
+	-------
+		b,a: np.ndarray
+			IIR filter coefficients
+		tau: int
+			time delay (in samples)
+		Uba: np.ndarray
+			uncertainties associated with [a[1:],b]
 
-	Application of filter design method from
-	
-	S. Eichstädt, C. Elster, T. J. Esward und J. P. Hessling 
-	Deconvolution filters for the analysis of dynamic measurement processes: a tutorial. 
-	Metrologia, 47(5), 522-533, 2010. [DOI](http://dx.doi.org/10.1088/0026-1394/47/5/003)	
-	
-	.. seealso:: :mod:`..examples.deconvolution`
+	References
+	----------
+		* Eichstädt, Elster, Esward and Hessling [Eichst2010]_
+
+	.. seealso:: :mod:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
+				 :mod:`PyDynamic.deconvolution.fit_filter.LSIIR`
 	"""
 
 	runs = 1000

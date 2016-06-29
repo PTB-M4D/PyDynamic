@@ -1,16 +1,22 @@
 # -*- coding: utf-8 -*-
 
 """
-Propagation of uncertainty for application of FFT, inverse FFT and deconvolution in the frequency domain
-Methods originally developed for GUM2DFT
+The :mod:`PyDynamic.uncertainty.propagate_DFT` module implements methods for the propagation of uncertainties in the
+application of the DFT, inverse DFT, deconvolution and multiplication in the frequency domain, transformation from
+amplitude and phase to real and imaginary parts and vice versa.
+
+The correspoding scientific publications is
 	S. Eichstädt und V. Wilkens
 	GUM2DFT — a software tool for uncertainty evaluation of transient signals in the frequency domain.
-	Measurement Science and Technology, 27(5), 055001, 2016. [DOI: 10.1088/0957-0233/27/5/055001]
+	*Measurement Science and Technology*, 27(5), 055001, 2016.
+	[DOI: `10.1088/0957-0233/27/5/055001 <http://dx.doi.org/10.1088/0957-0233/27/5/055001>`_]
 
 """
 
 import numpy as np
 from scipy import sparse
+
+__all__ = ['GUM_DFT','GUM_iDFT', 'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase', 'AmpPhase2Time', 'Time2AmpPhase']
 
 def apply_window(x,Ux,window):
 	"""Apply a time domain window to the signal x of equal length and propagate uncertainties
@@ -83,21 +89,36 @@ def matprod(M,V,W):
 
 
 def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
-	"""Calculation of DFT of time domain signal x and propagation of uncertainty U_x
-	associated with the time domain sequence x to real and imaginary part of the DFT of x.
+	"""Calculation of the DFT of the time domain signal x and propagation of the squared uncertainty Ux
+	associated with the time domain sequence x to the real and imaginary parts of the DFT of x.
 
-	Args:
-		x: vector of time domain signal values
-		Ux: covariance matrix associated with x, shape (N,N) or noise variance as single float
-		N: (optional) length of time domain signal for DFT; N>=Nx
-		window: (optional) vector of the time domain window values
-		CxCos: cosine part of sensitivity matrix
-		CxSin: sine part of sensitivity matrix
-		returnC: if true, return sensitivity matrix blocks for later use
+	Parameters
+	----------
+		x : numpy.ndarray
+			vector of time domain signal values
+		Ux : numpy.ndarray
+			covariance matrix associated with x, shape (N,N) or noise variance as float
+		N : int, optional
+			length of time domain signal for DFT; N>=len(x)
+		window : numpy.ndarray, optional
+			vector of the time domain window values
+		CxCos : numpy.ndarray, optional
+			cosine part of sensitivity matrix
+		CxSin : numpy.ndarray, optional
+			sine part of sensitivity matrix
+		returnC : bool, optional
+			if true, return sensitivity matrix blocks for later use
 
-	Returns:
-		F: vector of complex valued DFT values or of its real and imaginary parts
-		UF: covariance matrix associated with real and imaginary part of F
+	Returns
+	-------
+		F : numpy.ndarray
+			vector of complex valued DFT values or of its real and imaginary parts
+		UF : numpy.ndarray
+			covariance matrix associated with real and imaginary part of F
+
+	References
+	----------
+		* Eichstädt and Wilkens [Eichst2016]_
 	"""
 	L=0
 	if isinstance(window,np.ndarray):
@@ -124,9 +145,9 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
 	if isinstance(Ux,float):
 		UF = np.zeros(M)
 		for k in range(M//2):   # Block cos/cos
-				UF[k] = sum(Ux*Cxkc(k)**2)
+				UF[k] = np.sum(Ux*Cxkc(k)**2)
 		for k in range(M//2): # Block sin/sin
-				UF[M//2+k] = sum(Ux*Cxks(k)**2)
+				UF[M//2+k] = np.sum(Ux*Cxks(k)**2)
 	else:   # general method
 		if len(Ux.shape)==1:
 			Ux = np.diag(Ux)
@@ -153,22 +174,38 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
 
 
 def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
-	"""GUM propagation of covariance UF associated with DFT values F to result of
-	inverse DFT. The matrix UF is assumed to be for real and imaginary part with blocks:
+	"""GUM propagation of the squared uncertainty UF associated with the DFT values F through the
+	inverse DFT
+
+	The matrix UF is assumed to be for real and imaginary part with blocks:
 	UF = [[u(R,R), u(R,I)],[u(I,R),u(I,I)]]
 	and real and imaginary part obtained from calling rfft (DFT for real-valued signal)
 
-	Args:
-		F: vector of real and imaginary parts of a DFT result
-		UF: covariance matrix associated with real and imaginary parts of F
-		Nx: number of samples of iDFT result
-		Cc: cosine part of sensitivities
-		Cs: sine part of sensitivities
+	Parameters
+	----------
+		F : np.ndarray
+			vector of real and imaginary parts of a DFT result
+		UF: np.ndarray
+			covariance matrix associated with real and imaginary parts of F
+		Nx: int, optional
+			number of samples of iDFT result
+		Cc: np.ndarray, optional
+			cosine part of sensitivities
+		Cs: np.ndarray, optional
+			sine part of sensitivities
 		returnC: if true, return sensitivity matrix blocks
 
-	Returns:
-		x: vector of time domain signal values
-		Ux: covariance matrix associated with x
+	Returns
+	-------
+		x: np.ndarry
+			vector of time domain signal values
+		Ux: np.ndarray
+		 	covariance matrix associated with x
+
+	References
+	----------
+		* Eichstädt and Wilkens [Eichst2016]_
+
 	"""
 	N = UF.shape[0]-2
 
@@ -214,18 +251,31 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 
 
 def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
-	"""Calculate the matrix U_AP = [[U1,U2],[U2^T,U3]] associated with amplitude and phase of the vector F=[real,imag]
+	"""Transformation from real and imaginary parts to amplitude and phase
+
+	Calculate the matrix
+	U_AP = [[U1,U2],[U2^T,U3]]
+	associated with amplitude and phase of the vector F=[real,imag]
 	with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]
 
-	Args:
-		F: vector of real and imaginary parts of a DFT result
-		UF: covariance matrix associated with F
-		keep_sparse: if true then UAP will be sparse if UF is one-dimensional
-		tol: lower bound for A/uF below which a warning will be issued concerning unreliable results
-	Returns:
-		A: vector of amplitude values
-		P: vector of phase values
-		UAP: covariance matrix associated with (A,P)
+	Parameters
+	----------
+		F: np.ndarray
+			vector of real and imaginary parts of a DFT result
+		UF: np.ndarray
+			covariance matrix associated with F
+		keep_sparse: bool, optional
+			if true then UAP will be sparse if UF is one-dimensional
+		tol: float, optional
+			lower bound for A/uF below which a warning will be issued concerning unreliable results
+	Returns
+	-------
+		A: np.ndarray
+			vector of amplitude values
+		P: np.ndarray
+			vector of phase values
+		UAP: np.ndarray
+			covariance matrix associated with (A,P)
 	"""
 	# calculate inverse DFT
 	N = len(F)-2
@@ -268,17 +318,28 @@ def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
 
 
 def AmpPhase2DFT(A,P,UAP,keep_sparse=False):
-	"""Calculate the vector F=[real,imag] and propagate the covariance matrix UAP
+	"""Transformation from amplitude and phase to real and imaginary parts
 
-	Args:
-		A: vector of amplitude values
-		P: vector of phase values (in radians)
-		UAP: covariance matrix associated with (A,P)
+	Calculate the vector F=[real,imag] and propagate the covariance matrix UAP associated with [A, P]
+
+	Parameters
+	----------
+		A: np.ndarray
+			vector of amplitude values
+		P: np.ndarray
+			vector of phase values (in radians)
+		UAP: np.ndarray
+			covariance matrix associated with (A,P)
 			or vector of squared standard uncertainties [u^2(A),u^2(P)]
+		keep_sparse: bool, optional
+			whether to transform sparse matrix to numpy array or not
 
-	Returns:
-		F: vector of real and imaginary parts of DFT result
-		UF: covariance matrix associated with F
+	Returns
+	-------
+		F: np.ndarray
+			vector of real and imaginary parts of DFT result
+		UF: np.ndarray
+			covariance matrix associated with F
 
 	"""
 
@@ -335,27 +396,51 @@ def AmpPhase2DFT(A,P,UAP,keep_sparse=False):
 	return F, UF
 
 def Time2AmpPhase(x,Ux):
+	"""Transformation from time domain to amplitude and phase
+
+	Parameters
+	----------
+		 x: np.ndarray
+		  	time domain signal
+		 Ux: np.ndarray
+		 	squared uncertainty associated with x
+
+	Returns
+	-------
+		A: np.ndarray
+			amplitude values
+		P: np.ndarray
+			phase values
+		UAP: np.ndarray
+			covariance matrix associated with [A,P]
+	"""
 	F,UF = GUM_DFT(x,Ux)
-	A,P,UPA = DFT2AmpPhase(F,UF)
-	return A,P,UPA
+	A,P,UAP = DFT2AmpPhase(F,UF)
+	return A,P,UAP
 
 
 def AmpPhase2Time(A,P,UAP):
-	"""GUM propagation of covariance matrix UPA associated with DFT amplitude A and phase P to result of
-	inverse DFT. Uncertainty UPA is assumed to be given for amplitude and phase with blocks:
-	UPA = [[u(A,A), u(A,P)],[u(P,A),u(P,P)]]
+	"""Transformation from amplitude and phase to time domain
 
-	Sensitivity matrix is designed block-wise as CF = [C_cos,C_sin] such that
-	C*UF*C^T = C_cos*u(A,A)*C_cos^T + 2*C_cos*u(A,P)*C_sin^T + C_sin*u(P,P)*C_sin^T
+	GUM propagation of covariance matrix UAP associated with DFT amplitude A and phase P to the result of
+	the inverse DFT. Uncertainty UAP is assumed to be given for amplitude and phase with blocks:
+	UAP = [[u(A,A), u(A,P)],[u(P,A),u(P,P)]]
 
-	Args:
-		A: vector of amplitude values
-		P: vector of phase values (in rad)
-		UAP: covariance matrix associated with [A,P]
+	Parameters
+	----------
+		A: np.ndarray
+			vector of amplitude values
+		P: np.ndarray
+			vector of phase values (in rad)
+		UAP: np.ndarray
+			covariance matrix associated with [A,P]
 
-	Returns:
-		x: vector of time domain values
-		Ux: covariance matrix associated with x
+	Returns
+	-------
+		x: np.ndarray
+			vector of time domain values
+		Ux: np.ndarray
+			covariance matrix associated with x
 	"""
 
 	N = UAP.shape[0]-2
@@ -402,22 +487,35 @@ def AmpPhase2Time(A,P,UAP):
 	return x,Ux/N**2
 
 # for backward compatibility
-GUMdeconv = lambda H, Y, UH, UY: GUM_deconv(H, Y, UH, UY)
+GUMdeconv = lambda H, Y, UH, UY: DFT_deconv(H, Y, UH, UY)
 
-def GUM_deconv(H,Y,UH,UY):
-	"""GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
+def DFT_deconv(H, Y, UH, UY):
+	"""Deconvolution in the frequency domain
+
+	GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
 	and of the system's impulse response, respectively.
 
-	Args:
-		H: real and imaginary parts of frequency response values (N an even integer)
-		Y: real and imaginary parts of DFT values
-		UH: covariance matrix associated with real and imaginary parts of H
-		UY: covariance matrix associated with real and imaginary parts of X
+	Parameters
+	----------
+		H: np.ndarray
+			real and imaginary parts of frequency response values (N an even integer)
+		Y: np.ndarray
+			real and imaginary parts of DFT values
+		UH: np.ndarray
+			covariance matrix associated with real and imaginary parts of H
+		UY: np.ndarray
+			covariance matrix associated with real and imaginary parts of X
 
-	Returns:
-		X: real and imaginary parts of DFT values of deconv result
-		UX: covariance matrix associated with real and imaginary part of X
+	Returns
+	-------
+		X: np.ndarray
+			real and imaginary parts of DFT values of deconv result
+		UX: np.ndarray
+			covariance matrix associated with real and imaginary part of X
 
+	References
+	----------
+		* Eichstädt and Wilkens [Eichst2016]_
 	"""
 	assert(len(H)==len(Y))
 	assert(UH.shape==(len(H),len(H)))
@@ -456,19 +554,30 @@ def GUM_deconv(H,Y,UH,UY):
 	return X,UX
 
 
-def GUM_multiply(Y, UY, F, UF=None):
-	"""
+def DFT_multiply(Y, UY, F, UF=None):
+	"""Multiplication in the frequency domain
+
 	GUM uncertainty propagation for multiplication in the frequency domain, where the second factor F may have an
-	associated uncertainty.
+	associated uncertainty. This method can be used, for instance, for the application of a low-pass filter in
+	the frequency domain or the application of deconvolution as a multiplication with an inverse of known uncertainty.
 
-	Args:
-	    Y: real and imaginary parts of the first factor
-	    UY: covariance matrix or squared uncertainty associated with Y
-	    F: real and imaginary parts of the second factor
-	    UF: covariance matrix associated with F (optional), default is None
+	Parameters
+	----------
+	    Y: np.ndarray
+	    	real and imaginary parts of the first factor
+	    UY: np.ndarray
+	    	covariance matrix or squared uncertainty associated with Y
+	    F: np.ndarray
+	    	real and imaginary parts of the second factor
+	    UF: np.ndarray
+	    	covariance matrix associated with F (optional), default is None
 
-	Returns:
-		The product YF and the associated uncertainty.
+	Returns
+	-------
+		YF: np.ndarray
+			the product of Y and F
+		UYF: np.ndarray
+			the uncertainty associated with YF
 	"""
 
 	assert(len(Y)==len(F))

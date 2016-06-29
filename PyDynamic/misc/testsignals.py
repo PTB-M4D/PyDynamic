@@ -1,49 +1,60 @@
-'''
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
-'''
-from numpy.random import RandomState
 from numpy import diff, sqrt, sum, array, corrcoef
 import numpy as np
 from scipy.misc import comb
 from scipy.signal import periodogram
 
+__all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse']
+
 
 def shocklikeGaussian(time, t0, m0, sigma, noise = 0.0):
-	"""
-    Generates a signal that resembles a shock excitation as a Gaussian followed by a smaller Gaussian of opposite sign.
-	Args:
-	    time - numpy array of time instants (equidistant)
-	    t0   - time instant of signal maximum
-	    m0   - signal maximum
-	    sigma- std of main pulse
-	    noise- std of simulated signal noise (optional)
+	"""Generates a signal that resembles a shock excitation as a Gaussian followed by a smaller Gaussian of opposite sign.
 
-	Returns:
-	    x - signal amplitudes at time instants
+	Parameters
+	----------
+	    time : np.ndarray
+	    	time instants (equidistant)
+	    t0: float
+	    	time instant of signal maximum
+	    m0: float
+	     	signal maximum
+	    sigma: float
+	     	std of main pulse
+	    noise: float, optional
+	    	std of simulated signal noise
+
+	Returns
+	-------
+	    x: np.ndarray
+	    	signal amplitudes at time instants
 
     """
 
-	sigm1 = sigma  # width of first pulse
-	sigm2 = 1.2 * sigma  # width of second pulse
-	x = m0 * np.exp(-(time - t0) ** 2 / (2 * sigm1 ** 2)) - m0 * 0.5 * np.exp(
-		-(time - t0 * 1.1) ** 2 / (2 * sigm2 ** 2))
+	x = -m0*(time-t0)/sigma * np.exp(0.5) * np.exp(-(time-t0)**2/(2*sigma**2))
 	if noise > 0:
 		x += np.random.randn(len(time)) * noise
 	return x
 
 
 def GaussianPulse(time, t0, m0, sigma, noise = 0.0):
-	"""
-    Generates a Gaussian pulse at t0 with height m0 and std sigma
-    Args:
-        time - numpy array of time instants (equidistant)
-        t0   - time instant of signal maximum
-        m0   - signal maximum
-        sigma- std of pulse
-        noise- std of simulated signal noise (optional)
+	"""Generates a Gaussian pulse at t0 with height m0 and std sigma
 
-    Returns:
-        x - signal amplitudes at time instants
+    Parameters
+    ----------
+        time: np.ndarray
+         	time instants (equidistant)
+        t0 : float
+        	time instant of signal maximum
+        m0 : float
+         	signal maximum
+        sigma : float
+         	std of pulse
+        noise: float, optional
+         	std of simulated signal noise
+
+    Returns
+    -------
+        x : np.ndarray
+         	signal amplitudes at time instants
     """
 
 	x = m0 * np.exp(-(time - t0) ** 2 / (2 * sigma ** 2))
@@ -53,17 +64,25 @@ def GaussianPulse(time, t0, m0, sigma, noise = 0.0):
 
 
 def rect(time, t0, t1, height, noise = 0.0):
-	"""
-    Generates a rectangular signal of given height and width t1-t0
+	"""Rectangular signal of given height and width t1-t0
 
-    Args:
-        time   - numpy array of time instants (equidistant)
-        t0     - time instant of rect lhs
-        t1     - time instant of rect rhs
-        height - signal maximum
-        noise  - std of simulated signal noise (optional)
-    Returns:
-        x  - signal amplitudes at time instants
+    Parameters
+    ----------
+        time : np.ndarray
+        	time instants (equidistant)
+        t0 : float
+        	time instant of rect lhs
+        t1 : float
+        	time instant of rect rhs
+        height : float
+         	signal maximum
+        noise :float, optional
+        	std of simulated signal noise
+
+    Returns
+    -------
+        x : np.ndarray
+         	signal amplitudes at time instants
     """
 
 	x = np.zeros((len(time),))
@@ -75,34 +94,24 @@ def rect(time, t0, t1, height, noise = 0.0):
 	return x
 
 
-def GaussianPulseDeriv(time, t0, m0, sigma):
-	"""
-	Pulse like signal as derivative of a Gaussian pulse
-
-	Args:
-	    time  - numpy array of time instants (equidistant)
-	    t0    - time instant of signal maximum
-		m0    - maximum of Gaussian pulse
-		sigma - std of Gaussian pulse
-
-	Returns:
-	     x  - signal amplitudes at time instants
-	"""
-
-	return -2.0 * m0 * (time - t0) / (2 * sigma ** 2) * np.exp(-(time - t0) ** 2 / (2 * sigma ** 2))
-
-
 def squarepulse(time, height, numpulse = 4, noise = 0.0):
-	"""
-    Generates a series of rect functions to represent a square pulse signal
+	"""Generates a series of rect functions to represent a square pulse signal
 
-    Args:
-        time - numpy array of time instants
-        height - height of the rectangular pulses
-        numpulse - number of pulses
-        noise - std of simulated signal noise (optional)
-    Returns:
-        x - signal amplitude at time instants
+    Parameters
+    ----------
+        time : np.ndarray
+        	time instants
+        height : float
+         	height of the rectangular pulses
+        numpulse : int
+         	number of pulses
+        noise : float, optional
+        	std of simulated signal noise
+
+    Returns
+    -------
+        x : np.ndarray
+        	signal amplitude at time instants
     """
 	width = (time[-1] - time[0]) / (2 * numpulse + 1)  # width of each individual rect
 	x = np.zeros_like(time)
@@ -114,10 +123,12 @@ def squarepulse(time, height, numpulse = 4, noise = 0.0):
 
 
 class corr_noise(object):
+	"""colored (i.e. correlated) noise process
+	"""
 	def __init__(self, w, sigma, seed = None):
 		self.w = w
 		self.sigma = sigma
-		self.rst = RandomState(seed)
+		self.rst = np.random.RandomState(seed)
 
 	def calc_noise(self, N = 100):
 		z = self.rst.randn(N + 4)
