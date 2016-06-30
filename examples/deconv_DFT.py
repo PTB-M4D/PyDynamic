@@ -45,8 +45,7 @@ print( "Propagating uncertainty associated with measurement through DFT")
 Y,UY = GUM_DFT(y,Uy,N=Nf)
 # propagation to real/imag
 print("Propagating uncertainty associated with calibration data to real and imag part")
-H = np.r_[np.real(FR), np.imag(FR)]
-UH = AmpPhase2DFT(np.abs(FR),np.unwrap(np.angle(FR))*np.pi/180,UAP)[1]
+H,UH = AmpPhase2DFT(np.abs(FR),np.angle(FR),UAP)
 # propagation through deconvolution equation
 print('Propagating uncertainty through the inverse system')
 XH,UXH = DFT_deconv(H,Y,UH,UY)
@@ -60,7 +59,7 @@ XH, UXH = DFT_multiply(XH, UXH, HL)
 print("Propagating uncertainty associated with the estimate back to time domain\n")
 xh,Uxh = GUM_iDFT(XH,UXH,Nx=N)
 ux = np.sqrt(np.diag(Uxh))
-    
+
 
 #%% plotting results
 plt.figure(1)
@@ -73,7 +72,7 @@ plt.ylabel("signal amplitude / MPa", fontsize=22)
 plt.tick_params(which= "major", labelsize=18)
 plt.legend(loc= "upper left", fontsize=18, fancybox=True)
 plt.xlim(0, 2)
-    
+
 dB = lambda a: 20*np.log10(np.abs(a))
 plt.figure(2)
 plt.clf()
@@ -100,7 +99,8 @@ plt.xlim(0.5, 80)
 plt.ylim(-0.2, 0.3)
 plt.xlabel("frequency / MHz", fontsize=22); plt.tick_params(which= "both", labelsize=18)
 plt.ylabel("phase / rad", fontsize=22)
-    
+
+
 plt.figure(4)
 plt.clf()
 plt.plot(time * 1e6, ux, label= "uncertainty", linewidth=2, color=colors[0])

@@ -14,6 +14,7 @@ Contents:
 .. toctree::
    :maxdepth: 1
 
+   Getting started.rst
    PyDynamic.uncertainty.rst
    PyDynamic.deconvolution.rst
    PyDynamic.misc.rst

@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting started &mdash; PyDynamic 1.2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="PyDynamic 1.2.1 documentation" href="index.html"/>
+        <link rel="next" title="Design of a digital deconvolution filter (FIR type)" href="Deconvolution by FIR.html"/>
+        <link rel="prev" title="PyDynamic - Analysis of dynamic measurements" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyDynamic
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-examples">Quick Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#detailed-examples">Detailed examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Deconvolution by FIR.html">Design of a digital deconvolution filter (FIR type)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Uncertainty propagation for IIR filters.html">Uncertainty propagation for IIR filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Deconvolution in the DFT domain.html">Deconvolution in the frequency domain (DFT)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="PyDynamic.uncertainty.html">Evaluation of uncertainties</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDynamic.deconvolution.html">Design of deconvolution filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDynamic.misc.html">Miscellaneous</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">PyDynamic</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Getting started</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/Getting started.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>If you just want to use the software, the easiest way is to run from your system&#8217;s command line</dt>
+<dd>pip install PyDynamic</dd>
+</dl>
+<p>This will download the latest version from the Python package repository and copy it into your local folder of third-party libraries. Usage in any Python environment on your computer is then possible by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">PyDynamic</span>
+</pre></div>
+</div>
+<p>or, for example, for the module containing the Fourier domain uncertainty methods:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty</span> <span class="kn">import</span> <span class="n">propagate_DFT</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Updates of the software can be installed via</dt>
+<dd>pip install &#8211;upgrade PyDynamic</dd>
+</dl>
+<p>For collaboration we recommend using <a class="reference external" href="https://desktop.github.com">Github Desktop</a> or any other git-compatible version
+control software and cloning the <a class="reference external" href="https://github.com/eichstaedtPTB/PyDynamic.git">repository</a>.
+In this way, any updates to the software will be highlighted in the version control software and can be applied very easily.</p>
+<p>If you have downloaded this software, we would be very thankful for letting us know.
+You may, for instance, drop an email to one of the authors (e.g. <a class="reference external" href="mailto:sascha&#46;eichstaedt&#37;&#52;&#48;ptb&#46;de">Sascha Eichstädt</a> or
+<a class="reference external" href="mailto:ian&#46;smith&#37;&#52;&#48;npl&#46;co&#46;uk">Ian Smith</a>)</p>
+</div>
+<div class="section" id="quick-examples">
+<h2>Quick Examples<a class="headerlink" href="#quick-examples" title="Permalink to this headline">¶</a></h2>
+<p>On the project website you can find various examples illustrating the application of the software in the examples folder.
+Here is just a short list to get you started.</p>
+<p>Uncertainty propagation for the application of a FIR filter with coefficients <em>b</em> with which an uncertainty <em>ub</em> is associated. The filter input signal is <em>x</em> with known
+noise standard deviation <em>sigma</em>. The filter output signal is <em>y</em> with associated uncertainty <em>uy</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_filter</span> <span class="kn">import</span> <span class="n">FIRuncFilter</span>
+<span class="n">y</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">FIRuncFilter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Uncertainty propagation through the application of the discrete Fourier transform (DFT). The time domain signal is <em>x</em> with associated squared uncertainty <em>ux</em>. The result
+of the DFT is the vector <em>X</em> of real and imaginary parts of the DFT applied to <em>x</em> and the associated uncertainty <em>UX</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_DFT</span> <span class="kn">import</span> <span class="n">GUM_DFT</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">UX</span> <span class="o">=</span> <span class="n">GUM_DFT</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ux</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sequential application of the Monte Carlo method for uncertainty propagation for the case of filtering a time domain signal <em>x</em> with an IIR filter <em>b,a</em> with uncertainty associated with
+the filter coefficients <em>Uab</em> and signal noise standard deviation <em>sigma</em>. The filter output is the signal <em>y and the Monte Carlo method calculates point-wise uncertainties *uy</em> and
+coverage intervals <em>Py</em> corresponding to the specified percentiles.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_MonteCarlo</span> <span class="kn">import</span> <span class="n">SMC</span>
+<span class="n">y</span><span class="p">,</span> <span class="n">uy</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="n">SMC</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Uab</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">Perc</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span><span class="mf">0.975</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="detailed-examples">
+<h2>Detailed examples<a class="headerlink" href="#detailed-examples" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Deconvolution by FIR.html">Design of a digital deconvolution filter (FIR type)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Uncertainty propagation for IIR filters.html">Uncertainty propagation for IIR filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Deconvolution in the DFT domain.html">Deconvolution in the frequency domain (DFT)</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Deconvolution by FIR.html" class="btn btn-neutral float-right" title="Design of a digital deconvolution filter (FIR type)" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="PyDynamic - Analysis of dynamic measurements" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, S Eichstädt (PTB), I Smith (NPL).
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
