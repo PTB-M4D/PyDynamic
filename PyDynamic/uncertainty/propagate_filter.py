@@ -9,7 +9,8 @@ from scipy.linalg import toeplitz
 from ..misc.tools import zerom
 
 # TODO Implement formula for colored noise
-# TODO Implement formula for covariance calculation
+# TODO Implement formula for covariance calculation#
+# TODO Allow zero uncertainty for filter
 def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
 
@@ -85,7 +86,8 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
 
 #TODO: Remove utilization of numpy.matrix
 #TODO: Extend to colored noise
-def IIR_uncFilter(x, noise, b, a, Uab):
+#TODO: Allow zero uncertainty for filter
+def IIRuncFilter(x, noise, b, a, Uab):
     """Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
     Parameters
@@ -98,7 +100,7 @@ def IIR_uncFilter(x, noise, b, a, Uab):
 	        filter numerator coefficients
 	    a: np.ndarray
 	        filter denominator coefficients
-	    Uba: np.ndarray
+	    Uab: np.ndarray
 	        covariance matrix for (a[1:],b)
 
     Returns

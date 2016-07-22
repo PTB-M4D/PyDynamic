@@ -44,7 +44,7 @@ height = 0.9
 noise = 1e-3
 x = rect(time,t0,t1,height,noise=noise)
 
-y,Uy = IIR_uncFilter(x,noise,b,a,Uab)
+y,Uy = IIR_uncFilter(x, noise, b, a, Uab)
 yMC,UyMC = MC.SMC(x,noise,b,a,Uab,runs=10000)
 
 plt.figure(1);plt.cla()

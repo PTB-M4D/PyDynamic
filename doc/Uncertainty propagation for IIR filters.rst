@@ -16,7 +16,7 @@ Uncertainty propagation for IIR filters
 .. code:: python
 
     from PyDynamic.misc.testsignals import rect
-    from PyDynamic.uncertainty.propagate_filter import IIR_uncFilter
+    from PyDynamic.uncertainty.propagate_filter import IIRuncFilter
     from PyDynamic.uncertainty.propagate_MonteCarlo import SMC
     from PyDynamic.misc.tools import make_semiposdef
 
@@ -91,7 +91,7 @@ provides
 Implementation in PyDynamic
 ---------------------------
 
-``y,Uy = IIR_uncFilter(x,noise,b,a,Uab)``
+``y,Uy = IIRuncFilter(x,noise,b,a,Uab)``
 
 with - x the filter input signal sequency - noise the standard deviation
 of the measurement noise in x - b,a the IIR filter coefficient - Uab,
@@ -189,7 +189,7 @@ Estimate of the filter output signal and its associated uncertainty
 
 .. code:: python
 
-    y,Uy = IIR_uncFilter(x,noise,b,a,Uab)
+    y,Uy = IIRuncFilter(x,noise,b,a,Uab)
 
     figure(figsize=(16,8))
     plot(time*1e3, x, label="input signal")
@@ -266,7 +266,7 @@ Using GUM linearization
 
 .. code:: python
 
-    y,Uy = IIR_uncFilter(x,noise,b,a,Uab)
+    y,Uy = IIRuncFilter(x,noise,b,a,Uab)
 
 Using sequential GUM Monte Carlo method
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
