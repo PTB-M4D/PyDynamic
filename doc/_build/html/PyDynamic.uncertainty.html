@@ -32,7 +32,7 @@
   
     <link rel="top" title="PyDynamic 1.2.1 documentation" href="index.html"/>
         <link rel="next" title="Design of deconvolution filters" href="PyDynamic.deconvolution.html"/>
-        <link rel="prev" title="PyDynamic - Analysis of dynamic measurements" href="index.html"/> 
+        <link rel="prev" title="Deconvolution in the frequency domain (DFT)" href="Deconvolution in the DFT domain.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -82,6 +82,7 @@
             
             
                 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Getting started.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Evaluation of uncertainties</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.uncertainty.propagate_DFT">Uncertainty evaluation for the DFT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.uncertainty.propagate_filter">Uncertainty evaluation for digital filtering</a></li>
@@ -89,6 +90,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="PyDynamic.deconvolution.html">Design of deconvolution filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDynamic.misc.html">Miscellaneous</a></li>
 </ul>
 
             
@@ -426,7 +428,7 @@ covariance matrix associated with [A,P]</li>
 <span id="uncertainty-evaluation-for-digital-filtering"></span><h2>Uncertainty evaluation for digital filtering<a class="headerlink" href="#module-PyDynamic.uncertainty.propagate_filter" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_filter.FIRuncFilter">
-<code class="descclassname">PyDynamic.uncertainty.propagate_filter.</code><code class="descname">FIRuncFilter</code><span class="sig-paren">(</span><em>y</em>, <em>sigma_noise</em>, <em>theta</em>, <em>Utheta</em>, <em>shift=0</em>, <em>blow=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_filter.html#FIRuncFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_filter.FIRuncFilter" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.uncertainty.propagate_filter.</code><code class="descname">FIRuncFilter</code><span class="sig-paren">(</span><em>y</em>, <em>sigma_noise</em>, <em>theta</em>, <em>Utheta=None</em>, <em>shift=0</em>, <em>blow=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_filter.html#FIRuncFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_filter.FIRuncFilter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uncertainty propagation for signal y and uncertain FIR filter theta</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -484,7 +486,7 @@ point-wise uncertainties associated with x</li>
 <li><strong>noise</strong> (<em>float</em>) &#8211; signal noise standard deviation</li>
 <li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter numerator coefficients</li>
 <li><strong>a</strong> (<em>np.ndarray</em>) &#8211; filter denominator coefficients</li>
-<li><strong>Uba</strong> (<em>np.ndarray</em>) &#8211; covariance matrix for (a[1:],b)</li>
+<li><strong>Uab</strong> (<em>np.ndarray</em>) &#8211; covariance matrix for (a[1:],b)</li>
 </ul>
 </td>
 </tr>
@@ -519,7 +521,7 @@ calculation of uncertainties for such cases.</p>
 <p>This module implements Monte Carlo methods for the propagation of uncertainties for digital filtering.</p>
 <dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_MonteCarlo.MC">
-<code class="descclassname">PyDynamic.uncertainty.propagate_MonteCarlo.</code><code class="descname">MC</code><span class="sig-paren">(</span><em>x</em>, <em>noise_std</em>, <em>b</em>, <em>a</em>, <em>Uab</em>, <em>runs=1000</em>, <em>blow=None</em>, <em>alow=None</em>, <em>return_samples=False</em>, <em>shift=0</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_MonteCarlo.html#MC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_MonteCarlo.MC" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.uncertainty.propagate_MonteCarlo.</code><code class="descname">MC</code><span class="sig-paren">(</span><em>x</em>, <em>Ux</em>, <em>b</em>, <em>a</em>, <em>Uab</em>, <em>runs=1000</em>, <em>blow=None</em>, <em>alow=None</em>, <em>return_samples=False</em>, <em>shift=0</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_MonteCarlo.html#MC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_MonteCarlo.MC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Standard Monte Carlo method</p>
 <p>Monte Carlo based propagation of uncertainties for a digital filter (b,a)
 with uncertainty matrix
@@ -530,7 +532,7 @@ with uncertainty matrix
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>x</strong> (<em>np.ndarray</em>) &#8211; filter input signal</li>
-<li><strong>noise_std</strong> (<em>float</em>) &#8211; standard deviation of signal noise</li>
+<li><strong>Ux</strong> (<em>float or np.ndarray</em>) &#8211; standard deviation of signal noise or covariance matrix associated with x</li>
 <li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter numerator coefficients</li>
 <li><strong>a</strong> (<em>np.ndarray</em>) &#8211; filter denominator coefficients</li>
 <li><strong>Uab</strong> (<em>np.ndarray</em>) &#8211; uncertainty matrix <span class="math">\(U_    heta\)</span></li>
@@ -576,7 +578,7 @@ array of Monte Carlo results</td>
 
 <dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_MonteCarlo.SMC">
-<code class="descclassname">PyDynamic.uncertainty.propagate_MonteCarlo.</code><code class="descname">SMC</code><span class="sig-paren">(</span><em>x</em>, <em>noise_std</em>, <em>b</em>, <em>a</em>, <em>Uab</em>, <em>runs=1000</em>, <em>Perc=None</em>, <em>blow=None</em>, <em>alow=None</em>, <em>shift=0</em>, <em>return_samples=False</em>, <em>phi=None</em>, <em>theta=None</em>, <em>Delta=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_MonteCarlo.html#SMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_MonteCarlo.SMC" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.uncertainty.propagate_MonteCarlo.</code><code class="descname">SMC</code><span class="sig-paren">(</span><em>x</em>, <em>noise_std</em>, <em>b</em>, <em>a</em>, <em>Uab=None</em>, <em>runs=1000</em>, <em>Perc=None</em>, <em>blow=None</em>, <em>alow=None</em>, <em>shift=0</em>, <em>return_samples=False</em>, <em>phi=None</em>, <em>theta=None</em>, <em>Delta=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_MonteCarlo.html#SMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_MonteCarlo.SMC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sequential Monte Carlo method</p>
 <p>Sequential Monte Carlo propagation for a digital filter (b,a) with uncertainty
 matrix <span class="math">\(U_{       heta}\)</span> for :math:`      heta=(a_1,ldots,a_{N_a},b_0,ldots,b_{N_b})^T`</p>
@@ -653,7 +655,7 @@ array of all Monte Carlo results</td>
         <a href="PyDynamic.deconvolution.html" class="btn btn-neutral float-right" title="Design of deconvolution filters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="PyDynamic - Analysis of dynamic measurements" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="Deconvolution in the DFT domain.html" class="btn btn-neutral" title="Deconvolution in the frequency domain (DFT)" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -11,7 +11,7 @@ def read(fname):
 
 setup(
     name = "PyDynamic",
-    version = "1.2.1",
+    version = "1.2.2",
     author = u"Sascha Eichstädt, Ian Smith",
     author_email = "sascha.eichstaedt@ptb.de",
     description = ("A software package for the analysis of dynamic measurements"),

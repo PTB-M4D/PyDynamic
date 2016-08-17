@@ -9,9 +9,9 @@ from scipy.linalg import toeplitz
 from ..misc.tools import zerom
 
 # TODO Implement formula for colored noise
-# TODO Implement formula for covariance calculation#
+# TODO Implement formula for covariance calculation
 # TODO Allow zero uncertainty for filter
-def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
+def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
 
     Parameters
@@ -48,12 +48,20 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
         * Implement formula for covariance calculation
 
     """
-
+    if not isinstance(Utheta, np.ndarray):
+        Utheta = np.zeros((len(theta), len(theta)))
 
     if isinstance(blow,np.ndarray):
         LR = 600
         Bcorr = np.correlate(blow,blow,mode='full')
-        ycorr = np.convolve(sigma_noise**2,Bcorr)
+        if isinstance(sigma_noise,float):
+            ycorr = np.convolve(sigma_noise**2,Bcorr)
+        else:
+            if len(sigma_noise.shape)==1:
+                assert (len(sigma_noise)==len(y)), "Length of uncertainty and signal are inconsistent"
+                ycorr = np.convolve(sigma_noise, Bcorr)
+            else:
+                raise NotImplementedError("FIR formula for covariance propagation not implemented. Suggest Monte Carlo propagation instead.")
         Lr = len(ycorr)
         Lstart = np.ceil(Lr/2.0)
         Lend = Lstart + LR -1
@@ -61,7 +69,13 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta,shift=0,blow=1.0):
         Ulow= Ryy[:len(theta),:len(theta)]
         xlow = lfilter(blow,1.0,y)
     else:
-        Ulow = blow*np.eye(len(theta))*sigma_noise**2
+        if isinstance(sigma_noise, float):
+            Ulow = np.eye(len(theta))*sigma_noise**2
+        else:
+            if len(sigma_noise.shape)==1:
+                Ulow = np.diag(sigma_noise)
+            else:
+                Ulow = sigma_noise
         xlow = y
 
 

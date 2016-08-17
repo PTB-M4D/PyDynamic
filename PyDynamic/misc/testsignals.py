@@ -63,7 +63,7 @@ def GaussianPulse(time, t0, m0, sigma, noise = 0.0):
 	return x
 
 
-def rect(time, t0, t1, height, noise = 0.0):
+def rect(time, t0, t1, height=1, noise = 0.0):
 	"""Rectangular signal of given height and width t1-t0
 
     Parameters

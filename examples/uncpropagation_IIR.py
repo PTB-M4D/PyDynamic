@@ -14,7 +14,7 @@ import scipy.signal as dsp
 import numpy as np
 
 from PyDynamic.misc.testsignals import rect
-from PyDynamic.uncertainty.propagate_filter import IIR_uncFilter
+from PyDynamic.uncertainty.propagate_filter import IIRuncFilter
 import PyDynamic.uncertainty.propagate_MonteCarlo as MC
 from PyDynamic.misc.tools import make_semiposdef
 
@@ -44,7 +44,7 @@ height = 0.9
 noise = 1e-3
 x = rect(time,t0,t1,height,noise=noise)
 
-y,Uy = IIR_uncFilter(x, noise, b, a, Uab)
+y,Uy = IIRuncFilter(x, noise, b, a, Uab)
 yMC,UyMC = MC.SMC(x,noise,b,a,Uab,runs=10000)
 
 plt.figure(1);plt.cla()

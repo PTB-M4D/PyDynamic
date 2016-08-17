@@ -11,18 +11,52 @@ This module implements Monte Carlo methods for the propagation of uncertainties 
 """
 
 # TODO: Implement updating Monte Carlo method
-
+# TODO: Implement repeated random number drawing from multivariate normal like in mvnrnd with re-using cholesky
 import numpy as np
 import scipy as sp
 from numpy import matrix
 import sys
 from scipy.signal import lfilter
+import scipy.stats as stats
 
 from ..misc.tools import zerom
 from ..misc.filterstuff import isstable
 
+__all__ = ["MC", "SMC"]
 
-def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,verbose=True):
+class Normal_ZeroCorr():
+	"""
+	Multivariate normal distribution with zero correlation
+	"""
+	def __init__(self, loc=None, scale=None):
+		"""
+		Parameters
+		----------
+			loc: np.ndarray, optional
+				mean values, default is zero
+			scale: np.ndarray, optional
+				standard deviations for the elements in loc, default is zero
+		"""
+		if isinstance(loc, np.ndarray):
+			self.mean = loc
+			if isinstance(scale, np.ndarray):
+				assert (len(scale)==len(loc))
+				self.std = scale
+			elif isinstance(scale, float):
+				self.std = scale * np.ones_like(loc)
+			else:
+				self.std = np.zeros_like(loc)
+		elif isinstance(scale, np.ndarray):
+			self.std = scale
+			self.mean = np.zeros_like(scale)
+
+	def rvs(self, size=1):
+		return np.tile(self.mean, (size, 1)) + np.random.randn(size, len(self.mean))*np.tile(self.std, (size, 1))
+
+
+
+
+def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,verbose=True):
 	"""Standard Monte Carlo method
 
 	Monte Carlo based propagation of uncertainties for a digital filter (b,a)
@@ -33,8 +67,8 @@ def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,sh
 	----------
 		x: np.ndarray
 			filter input signal
-		noise_std: float
-			standard deviation of signal noise
+		Ux: float or np.ndarray
+			standard deviation of signal noise or covariance matrix associated with x
 		b: np.ndarray
 			filter numerator coefficients
 		a: np.ndarray
@@ -73,13 +107,19 @@ def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,sh
 	Y = np.zeros((runs,len(x)))
 	theta = np.hstack((a[1:],b))
 	Theta = np.random.multivariate_normal(theta,Uab,runs)
+	if isinstance(Ux, np.ndarray):
+		dist = stats.multivariate_normal(x, Ux)
+	elif isinstance(Ux, float):
+		dist = Normal_ZeroCorr(loc=x, scale=Ux)
+	else:
+		raise NotImplementedError("The supplied type of uncertainty is not implemented")
 
 	unst_count = 0
 	st_inds  = list()
 	if verbose:
 		sys.stdout.write('MC progress: ')
 	for k in range(runs):
-		xn = x + np.random.randn(len(x))*noise_std
+		xn = dist.rvs()
 		if not blow is None:
 			if alow is None:
 				alow = 1.0
@@ -112,7 +152,7 @@ def MC(x,noise_std,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,sh
 
 
 
-def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
+def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 			return_samples=False,phi=None,theta=None,Delta=0.0):
 	"""Sequential Monte Carlo method
 
@@ -186,36 +226,32 @@ def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 
 	if isinstance(theta,np.ndarray) or isinstance(theta,float):
 		if isinstance(theta,float):
-			W = zerom((runs,1))
+			W = np.zeros((runs,1))
 		else:
-			W = zerom((runs,len(theta)))
-			theta = matrix(theta[:])
+			W = np.zeros((runs,len(theta)))
 	else:
 		MA = False
 
 	if isinstance(phi,np.ndarray) or isinstance(phi,float):
 		AR = True
 		if isinstance(phi,float):
-			E = zerom((runs,1))
+			E = np.zeros((runs,1))
 		else:
-			E = zerom((runs,len(phi)))
-			phi = matrix(phi[:])
+			E = np.zeros((runs,len(phi)))
 	else:
 		AR = False
 
 
 
 	if isinstance(blow,np.ndarray):
-		X = zerom((runs,len(blow)))
-		blow = matrix(blow[:])
+		X = np.zeros((runs,len(blow)))
 	else:
-		X = zerom((runs,1))
+		X = np.zeros(runs)
 
 	if isinstance(alow,np.ndarray):
-		Xl = zerom((runs,len(alow)-1))
-		alow = matrix(alow[:])
+		Xl = np.zeros((runs,len(alow)-1))
 	else:
-		Xl = zerom((runs,1))
+		Xl = np.zeros((runs,1))
 
 
 
@@ -224,7 +260,10 @@ def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 	else:
 		coefs = np.hstack((a[1:],b))
 
-	Coefs = matrix(np.random.multivariate_normal(coefs,Uab,runs))
+	if isinstance(Uab, np.ndarray):
+		Coefs = np.random.multivariate_normal(coefs, Uab, runs)
+	else:
+		Coefs = np.tile(coefs, (runs, 1))
 
 	b0 = Coefs[:,Na]
 
@@ -233,10 +272,10 @@ def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 		if Nb>Na:
 			A = np.hstack((A,zerom((runs,Nb-Na))))
 	else: # filter is FIR -> zero state equations
-		A = zerom((runs,Nb))
+		A = np.zeros((runs,Nb))
 
-	c = Coefs[:,Na+1:] - np.multiply(np.tile(b0,(1,Nb)),A)
-	States = zerom(np.shape(A))
+	c = Coefs[:,Na+1:] - np.multiply(np.tile(b0[:, np.newaxis],(1,Nb)),A)
+	States = np.zeros(np.shape(A))
 
 	calcP = False
 	if not Perc is None:
@@ -247,34 +286,35 @@ def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 	Uy= np.zeros_like(x)
 
 
-	sys.stdout.write("SMC progress: ")
+	print("Sequential Monte Carlo progress", end="")
 	for k in range(len(x)):
 
 		w  = np.random.randn(runs)*noise_std
 		if AR and MA:
-			E  = np.hstack( ( E*phi + W*theta + w, E[:-1]) )
+			E  = np.hstack( ( E.dot(phi) + W.dot(theta) + w, E[:-1]) )
 			W  = np.hstack( (w, W[:-1] ) )
 		elif AR:
-			E  = np.hstack( (E*phi + w, E[:-1]) )
+			E  = np.hstack( (E.dot(phi) + w, E[:-1]) )
 		elif MA:
-			E  = W*theta + w
+			E  = W.dot(theta) + w
 			W  = np.hstack( (w, W[:-1] ) )
 		else:
-			w  = np.random.randn(runs)*noise_std
-			E  = matrix(w).T
+			w  = np.random.randn(runs,1)*noise_std
+			E  = w
 
-		X  = np.hstack( (x[k] + E,  X[:,:-1]) )
-		if isinstance(alow,np.matrix):
-			Xl = np.hstack( ( X*blow.T - Xl[:,:len(alow)]*alow[1:], Xl[:,:-1] ) )
-		elif isinstance(blow,np.matrix):
-			Xl = X*blow.T
+
+		if isinstance(alow,np.ndarray):
+			X = np.hstack((x[k] + E, X[:, :-1]))
+			Xl = np.hstack( ( X.dot(blow.T) - Xl[:,:len(alow)].dot(alow[1:]), Xl[:,:-1] ) )
+		elif isinstance(blow,np.ndarray):
+			X = np.hstack((x[k] + E, X[:, :-1]))
+			Xl = X.dot(blow.T)
 		else:
-			Xl = X
+			Xl = x[k] + E
 
-
-		Y = np.sum(np.multiply(c,States),axis=1) + np.multiply(b0,Xl[:,0]) + (np.random.rand(runs,1)*2*Delta - Delta)
+		Y = np.sum(np.multiply(c,States),axis=1) + np.multiply(b0,Xl[:,0]) + (np.random.rand(runs)*2*Delta - Delta)
 		Z = -np.sum(np.multiply(A,States),axis=1) + Xl[:,0]
-		States = np.hstack((Z, States[:,:-1]))
+		States = np.hstack((Z[:,np.newaxis], States[:,:-1]))
 
 		y[k] = np.mean(Y)
 		Uy[k]= np.std(Y)
@@ -282,9 +322,9 @@ def SMC(x,noise_std,b,a,Uab,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 			P[:,k] = sp.stats.mstats.mquantiles(np.asarray(Y),prob=Perc)
 
 		if np.mod(k, np.round(0.1*len(x))) == 0:
-			sys.stdout.write(' %d%%' % (np.round(100.0*k/len(x))))
+			print(' %d%%' % (np.round(100.0*k/len(x))), end="")
 
-	sys.stdout.write(" 100%\n")
+	print(" 100%")
 
 
 	y = np.roll(y,int(shift))

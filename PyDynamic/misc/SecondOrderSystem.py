@@ -39,7 +39,7 @@ def sos_FreqResp(S, d, f0, freqs):
 
 	Returns
 	-------
-		H:  ndarray shape (N,) or ndarray shape (K,N)
+		H:  ndarray shape (N,) or ndarray shape (N,K)
 			complex frequency response values
 
 	"""
@@ -80,16 +80,16 @@ def sos_phys2filter(S, d, f0):
 	"""
 
 	if isinstance(S,np.ndarray):
-		bc = S*(2*np.pi*f0)**2
+		bc = [S*(2*np.pi*f0)**2]
 		ac = np.c_[np.ones((len(S),)),4*d*np.pi*f0,(2*np.pi*f0)**2]
 	else:
-		bc = S*(2*np.pi*f0)**2
+		bc = [S*(2*np.pi*f0)**2]
 		ac = np.array([1, 2 * d * 2 * np.pi * f0, (2 * np.pi * f0) ** 2])
 
 	return bc,ac
 
 
-def sos_realimag(S, d, f0, uS, ud, uf0, f):
+def sos_realimag(S, d, f0, uS, ud, uf0, f, runs=10000):
 	"""Propagation of uncertainty from physical parameters to real and imaginary
 	part of system's transfer function using GUM S2 Monte Carlo.
 
@@ -119,7 +119,7 @@ def sos_realimag(S, d, f0, uS, ud, uf0, f):
 
 	"""
 
-	runs = 10000
+	runs = int(runs)
 	SMC = S + np.random.randn(runs)*uS
 	dMC = d + np.random.randn(runs)*ud
 	fMC = f0+ np.random.randn(runs)*uf0
@@ -129,7 +129,7 @@ def sos_realimag(S, d, f0, uS, ud, uf0, f):
 	return np.mean(HMC,dtype=complex,axis=1), np.cov(np.vstack((np.real(HMC),np.imag(HMC))),rowvar=1)
 
 
-def sos_absphase(S, d, f0, uS, ud, uf0, f):
+def sos_absphase(S, d, f0, uS, ud, uf0, f, runs = 10000):
 	"""Propagation of uncertainty from physical parameters to real and imaginary
 	part of system's transfer function using GUM S2 Monte Carlo.
 
@@ -159,7 +159,7 @@ def sos_absphase(S, d, f0, uS, ud, uf0, f):
 
 	"""
 
-	runs = 10000
+	runs = int(runs)
 	SMC = S + np.random.randn(runs)*uS
 	dMC = d + np.random.randn(runs)*ud
 	fMC = f0+ np.random.randn(runs)*uf0
