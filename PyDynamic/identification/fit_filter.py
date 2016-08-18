@@ -9,7 +9,6 @@ import numpy as np
 import scipy.signal as dsp
 
 
-#Todo: Include fitting of transfer function (continuous)
 def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     """Least-squares IIR filter fit to a given frequency response.
     
