@@ -6,24 +6,23 @@ Collection of methods for the identification of transfer function models
 """
 import numpy as np
 
-def fit_sos(f, H, UH=None, unc_type="realimag", weighting=None, MCruns = None, scaling = 1e-3):
+def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 	"""Fit second-order model (spring-damper model) with parameters S0, delta and f0
-	to complex-valued frequency response with uncertainty associated with amplitude and phase
-	or associated with real and imaginary parts
+	to complex-valued frequency response with uncertainty associated with real and imaginary parts
+
+	For a transformation of an uncertainty associated with amplitude and phase to one associated
+	with real and imaginary parts, see `mod`::PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT
 
 	Parameters
 	----------
 		f: np.ndarray
 			vector of frequencies
 		H: np.ndarray
-			complex-valued frequency response values at frequencies f
+			real and imaginary parts of measured frequency response values at frequencies f
 		UH: np.ndarray
-			uncertainties associated either with amplitude and phase of H or real and imaginary parts
+			uncertainties associated with real and imaginary parts
 			When UH is one-dimensional, it is assumed to contain standard uncertainties; otherwise it
 			is taken as covariance matrix. When UH is not specified no uncertainties assoc. with the fit are calculated.
-		unc_type: str
-			Determining type of uncertainty. "ampphase" for uncertainties associated with amplitude and
-			phase. "realimag" for uncertainties associated with real and imaginary parts
 		weighting: str or array
 			Type of weighting (None, 'diag', 'cov') or array of weights (length two times of f)
 		MCruns: int
@@ -39,12 +38,12 @@ def fit_sos(f, H, UH=None, unc_type="realimag", weighting=None, MCruns = None, s
 		Up: np.ndarray
 			covariance associated with parameter estimate
 	"""
-
-	assert(len(f)==len(H))
-	assert(H.dtype==complex)
+	assert(2*len(f) == len(H))
+	Hr = H[:len(f)]
+	Hi = H[len(f):]
 
 	if isinstance(UH, np.ndarray):
-		assert(UH.shape[0]==2*len(H))
+		assert(UH.shape[0]==2*len(f))
 		if len(UH.shape)==2:
 			assert(UH.shape[0]==UH.shape[1])
 
@@ -53,23 +52,13 @@ def fit_sos(f, H, UH=None, unc_type="realimag", weighting=None, MCruns = None, s
 			runs = int(MCruns)
 		else:
 			runs = 10000
-		if unc_type=="ampphase":
-			if len(UH.shape)==1:
-				Habs = np.tile(np.abs(H), (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[:len(f)], (runs, 1))
-				Hang = np.tile(np.angle(H),(runs,1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))
-				HMC = Habs * np.exp( 1j * Hang)
-			else:
-				HMC = np.random.multivariate_normal(np.r_[np.abs(H), np.angle(H)], UH, runs)
-		elif unc_type=="realimag":
-			if len(UH.shape)==1:
-				HR = np.tile(np.real(H), (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[:len(f)], (runs, 1))
-				HI = np.tile(np.imag(H), (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))
-				HMC = HR + 1j*HI
-			else:
-				HRI = np.random.multivariate_normal(np.r_[np.real(H), np.imag(H)], UH, runs)
-				HMC = HRI[:,:len(f)] + 1j*HRI[:,len(f):]
+		if len(UH.shape)==1:
+			HR = np.tile(Hr, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[:len(f)], (runs, 1))
+			HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))
+			HMC = HR + 1j*HI
 		else:
-			raise ValueError("Wrong type of uncertainty")
+			HRI = np.random.multivariate_normal(H, UH, runs)
+			HMC = HRI[:,:len(f)] + 1j*HRI[:,len(f):]
 
 		iRI = np.c_[np.real(1/HMC), np.imag(1/HMC)]
 		iURI= np.cov(iRI, rowvar = False)
@@ -78,7 +67,7 @@ def fit_sos(f, H, UH=None, unc_type="realimag", weighting=None, MCruns = None, s
 	if isinstance(weighting, str):
 		if weighting == "diag":
 			W = np.diag(np.diag(iURI))
-		if weighting == "cov":
+		elif weighting == "cov":
 			W = iURI
 		else:
 			print("Warning: Specified wrong type of weighting.")
@@ -143,7 +132,6 @@ def fit_sos(f, H, UH=None, unc_type="realimag", weighting=None, MCruns = None, s
 		mu[2] *= scaling**2
 		pars  = np.r_[1/mu[0], mu[1]/np.sqrt(np.abs(mu[0]*mu[2])), np.sqrt(np.abs(mu[0]/mu[2]))/2/np.pi]
 		return pars
-
 
 
 

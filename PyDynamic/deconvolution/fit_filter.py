@@ -89,7 +89,7 @@ def mapinside(a):
 	return poly(v)
 
 
-def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
+def LSIIR(Hvals,Nb,Na,f,Fs,tau=1,justFit=False,verbose=True):
 	"""Design of a stable IIR filter as fit to reciprocal of frequency response values
 
 	Least-squares fit of a digital IIR filter to the reciprocal of a given set
@@ -150,7 +150,7 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 	bi,ai = fitIIR(Hvals,tau,E,Na,Nb)
 
 	if justFit:
-		return bi,ai
+		return bi,ai, tau
 
 	if count_nonzero(abs(roots(ai))>1)>0:
 		stable = False

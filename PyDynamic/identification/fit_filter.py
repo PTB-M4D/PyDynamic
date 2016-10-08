@@ -22,7 +22,7 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
         f:       numpy array of frequencies at which Hvals is given
         Fs:      sampling frequency
         tau:     integer initial estimate of time delay
-        justFit: boolean, when true stabilization is carried out
+        justFit: boolean, when true then no stabilization is carried out
     
     Returns:
         b,a:    IIR filter coefficients as numpy arrays

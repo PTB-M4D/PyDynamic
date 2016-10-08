@@ -13,6 +13,7 @@ The correspoding scientific publications is
 
 """
 
+# Todo: allow user to select specific frequencies
 import numpy as np
 from scipy import sparse
 
@@ -64,7 +65,7 @@ def matprod(M,V,W):
 		assert(M.shape[0]==M.shape[1])
 	assert(M.shape[0]==V.shape[0])
 	assert(V.shape==W.shape)
-	N = V.shape[0]/2
+	N = V.shape[0]//2
 	v1 = V[:N]; v2 = V[N:]
 	w1 = W[:N]; w2 = W[N:]
 	if isinstance(M,sparse.dia_matrix):
@@ -217,7 +218,7 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 	beta = 2*np.pi*np.arange(Nx)/N
 
 	# calculate inverse DFT
-	x = np.fft.irfft(F[:N/2+1]+1j*F[N/2+1:])[:Nx]
+	x = np.fft.irfft(F[:N//2+1]+1j*F[N//2+1:])[:Nx]
 	if not isinstance(Cc,np.ndarray):# calculate sensitivities
 		Cc = np.zeros((Nx,N//2+1))
 		Cc[:,0] = 1.0; Cc[:,-1] = np.cos(np.pi*np.arange(Nx))
@@ -225,23 +226,23 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 			Cc[:,k] = 2*np.cos(k*beta)
 
 	if not isinstance(Cs,np.ndarray):
-		Cs = np.zeros((Nx,N/2+1))
+		Cs = np.zeros((Nx,N//2+1))
 		Cs[:,0] = 0.0; Cs[:,-1] = -np.sin(np.pi*np.arange(Nx))
 		for k in range(1,N//2):
 			Cs[:,k] = -2*np.sin(k*beta)
 
 	# calculate blocks of uncertainty matrix
 	if len(UF.shape)==2:
-		RR = UF[:N/2+1,:N/2+1]
-		RI = UF[:N/2+1, N/2+1:]
-		II = UF[N/2+1:,N/2+1:]
+		RR = UF[:N//2+1,:N//2+1]
+		RI = UF[:N//2+1, N//2+1:]
+		II = UF[N//2+1:,N//2+1:]
 		# propagate uncertainties
 		Ux = np.dot(Cc,np.dot(RR,Cc.T))
 		Ux = Ux + 2*np.dot(Cc,np.dot(RI,Cs.T))
 		Ux = Ux + np.dot(Cs,np.dot(II,Cs.T))
 	else:
-		RR = UF[:N/2+1]
-		II = UF[N/2+1:]
+		RR = UF[:N//2+1]
+		II = UF[N//2+1:]
 		Ux = np.dot(Cc,prod(RR,Cc.T)) + np.dot(Cs,prod(II,Cs.T))
 
 	if returnC:
@@ -249,6 +250,29 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 	else:
 		return x,Ux/N**2
 
+
+def GUM_DFTfreq(N, dt=1):
+	"""Return the Discrete Fourier Transform sample frequencies
+
+	Parameters
+	----------
+		N: int
+			window length
+		dt: float
+			sample spacing (inverse of sampling rate)
+
+	Returns
+	-------
+		f: ndarray
+			Array of length ``n//2 + 1`` containing the sample frequencies
+
+	See also
+	--------
+		`mod`::numpy.fft.rfftfreq
+
+	"""
+
+	return np.fft.rfftfreq(N, dt)
 
 def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
 	"""Transformation from real and imaginary parts to amplitude and phase
@@ -489,6 +513,32 @@ def AmpPhase2Time(A,P,UAP):
 # for backward compatibility
 GUMdeconv = lambda H, Y, UH, UY: DFT_deconv(H, Y, UH, UY)
 
+def DFT_transferfunction(X, Y, UX, UY):
+	"""Calculation of the transfer function H = Y/X in the frequency domain with X beign the Fourier transform
+	of the system's input signal and Y that of the output signal.
+
+	Parameters
+	----------
+		X: np.ndarray
+			real and imaginary parts of the system's input signal
+		Y: np.ndarray
+			real and imaginary parts of the system's output signal
+		UX: np.ndarray
+			covariance matrix associated with X
+		UY: np.ndarray
+			covariance matrix associated with Y
+
+	Returns
+	-------
+		H: np.ndarray
+			real and imaginary parts of the system's frequency response
+		UH: np.ndarray
+			covariance matrix associated with H
+
+	This function uses `DFT_deconv`.
+	"""
+	return DFT_deconv(X, Y, UX, UY)
+
 def DFT_deconv(H, Y, UH, UY):
 	"""Deconvolution in the frequency domain
 
@@ -526,11 +576,11 @@ def DFT_deconv(H, Y, UH, UY):
 	assert(np.mod(N,2)==0)
 
 # real and imaginary parts of system and signal
-	rH, iH = H[:N/2+1], H[N/2+1:]
-	rY, iY = Y[:N/2+1], Y[N/2+1:]
+	rH, iH = H[:N//2+1], H[N//2+1:]
+	rY, iY = Y[:N//2+1], Y[N//2+1:]
 
-	Yc = Y[:N/2+1] + 1j*Y[N/2+1:]
-	Hc = H[:N/2+1] + 1j*H[N/2+1:]
+	Yc = Y[:N//2+1] + 1j*Y[N//2+1:]
+	Hc = H[:N//2+1] + 1j*H[N//2+1:]
 	X = np.r_[np.real(Yc/Hc),np.imag(Yc/Hc)]
 
 # sensitivities
