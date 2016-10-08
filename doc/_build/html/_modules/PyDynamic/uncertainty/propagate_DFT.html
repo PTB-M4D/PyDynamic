@@ -220,7 +220,7 @@
 
 
 
-<div class="viewcode-block" id="GUM_DFT"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFT">[docs]</a><span class="k">def</span> <span class="nf">GUM_DFT</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="p">,</span><span class="n">N</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">window</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">CxCos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">CxSin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">returnC</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="GUM_DFT"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFT">[docs]</a><span class="k">def</span> <span class="nf">GUM_DFT</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="p">,</span><span class="n">N</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">window</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">CxCos</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">CxSin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">returnC</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Calculation of the DFT of the time domain signal x and propagation of the squared uncertainty Ux</span>
 <span class="sd">	associated with the time domain sequence x to the real and imaginary parts of the DFT of x.</span>
 
@@ -240,6 +240,8 @@
 <span class="sd">			sine part of sensitivity matrix</span>
 <span class="sd">		returnC : bool, optional</span>
 <span class="sd">			if true, return sensitivity matrix blocks for later use</span>
+<span class="sd">		mask: ndarray of dtype bool</span>
+<span class="sd">			calculate DFT values and uncertainties only at those frequencies where mask is `True`</span>
 
 <span class="sd">	Returns</span>
 <span class="sd">	-------</span>
@@ -266,8 +268,14 @@
 	<span class="k">else</span><span class="p">:</span>
 		<span class="n">M</span> <span class="o">=</span> <span class="n">N</span><span class="o">+</span><span class="mi">1</span>
 
-	<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-	<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">F</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">F</span><span class="p">)]</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">F</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">F</span><span class="p">)]</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">F</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">F</span><span class="p">)]</span>
+		<span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+	<span class="n">Nm</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
 
 	<span class="n">beta</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">)</span><span class="o">/</span><span class="n">N</span>
 
@@ -275,20 +283,29 @@
 	<span class="n">Cxks</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="n">beta</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,:]</span>
 
 	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
-		<span class="n">UF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+		<span class="n">UF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nm</span><span class="p">)</span>
+		<span class="n">km</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>   <span class="c1"># Block cos/cos</span>
-				<span class="n">UF</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ux</span><span class="o">*</span><span class="n">Cxkc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">mask</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+				<span class="n">UF</span><span class="p">[</span><span class="n">km</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ux</span><span class="o">*</span><span class="n">Cxkc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+				<span class="n">km</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="n">km</span> <span class="o">=</span> <span class="mi">0</span>
 		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span> <span class="c1"># Block sin/sin</span>
-				<span class="n">UF</span><span class="p">[</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ux</span><span class="o">*</span><span class="n">Cxks</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">mask</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+				<span class="n">UF</span><span class="p">[</span><span class="n">Nm</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="n">km</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Ux</span><span class="o">*</span><span class="n">Cxks</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+				<span class="n">km</span> <span class="o">+=</span> <span class="mi">1</span>
 	<span class="k">else</span><span class="p">:</span>   <span class="c1"># general method</span>
 		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ux</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
 			<span class="n">Ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Ux</span><span class="p">)</span>
 		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">CxCos</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-			<span class="n">CxCos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">))</span>
-			<span class="n">CxSin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">))</span>
+			<span class="n">CxCos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nm</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">))</span>
+			<span class="n">CxSin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nm</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="o">-</span><span class="n">L</span><span class="p">))</span>
+			<span class="n">km</span> <span class="o">=</span> <span class="mi">0</span>
 			<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">//</span><span class="mi">2</span><span class="p">):</span>
-				<span class="n">CxCos</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Cxkc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-				<span class="n">CxSin</span><span class="p">[</span><span class="n">k</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Cxks</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">mask</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+					<span class="n">CxCos</span><span class="p">[</span><span class="n">km</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Cxkc</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+					<span class="n">CxSin</span><span class="p">[</span><span class="n">km</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">Cxks</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+					<span class="n">km</span> <span class="o">+=</span> <span class="mi">1</span>
 		<span class="n">UFCC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">CxCos</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">CxCos</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
 		<span class="n">UFCS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">CxCos</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">CxSin</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
 		<span class="n">UFSS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">CxSin</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span><span class="n">CxSin</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
@@ -381,6 +398,28 @@
 	<span class="k">else</span><span class="p">:</span>
 		<span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">Ux</span><span class="o">/</span><span class="n">N</span><span class="o">**</span><span class="mi">2</span></div>
 
+<span class="k">def</span> <span class="nf">GUM_DFTfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Return the Discrete Fourier Transform sample frequencies</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		N: int</span>
+<span class="sd">			window length</span>
+<span class="sd">		dt: float</span>
+<span class="sd">			sample spacing (inverse of sampling rate)</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		f: ndarray</span>
+<span class="sd">			Array of length ``n//2 + 1`` containing the sample frequencies</span>
+
+<span class="sd">	See also</span>
+<span class="sd">	--------</span>
+<span class="sd">		`mod`::numpy.fft.rfftfreq</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DFT2AmpPhase"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase">[docs]</a><span class="k">def</span> <span class="nf">DFT2AmpPhase</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Transformation from real and imaginary parts to amplitude and phase</span>
@@ -621,10 +660,36 @@
 <span class="c1"># for backward compatibility</span>
 <span class="n">GUMdeconv</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">H</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UH</span><span class="p">,</span> <span class="n">UY</span><span class="p">:</span> <span class="n">DFT_deconv</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UH</span><span class="p">,</span> <span class="n">UY</span><span class="p">)</span>
 
+<span class="k">def</span> <span class="nf">DFT_transferfunction</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UX</span><span class="p">,</span> <span class="n">UY</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Calculation of the transfer function H = Y/X in the frequency domain with X beign the Fourier transform</span>
+<span class="sd">	of the system&#39;s input signal and Y that of the output signal.</span>
+
+<span class="sd">	Parameters</span>
+<span class="sd">	----------</span>
+<span class="sd">		X: np.ndarray</span>
+<span class="sd">			real and imaginary parts of the system&#39;s input signal</span>
+<span class="sd">		Y: np.ndarray</span>
+<span class="sd">			real and imaginary parts of the system&#39;s output signal</span>
+<span class="sd">		UX: np.ndarray</span>
+<span class="sd">			covariance matrix associated with X</span>
+<span class="sd">		UY: np.ndarray</span>
+<span class="sd">			covariance matrix associated with Y</span>
+
+<span class="sd">	Returns</span>
+<span class="sd">	-------</span>
+<span class="sd">		H: np.ndarray</span>
+<span class="sd">			real and imaginary parts of the system&#39;s frequency response</span>
+<span class="sd">		UH: np.ndarray</span>
+<span class="sd">			covariance matrix associated with H</span>
+
+<span class="sd">	This function uses `DFT_deconv`.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="n">DFT_deconv</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UX</span><span class="p">,</span> <span class="n">UY</span><span class="p">)</span>
+
 <div class="viewcode-block" id="DFT_deconv"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_deconv">[docs]</a><span class="k">def</span> <span class="nf">DFT_deconv</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">UH</span><span class="p">,</span> <span class="n">UY</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Deconvolution in the frequency domain</span>
 
-<span class="sd">	GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal</span>
+<span class="sd">	GUM propagation of uncertainties for the deconvolution X = Y/H with Y and H being the Fourier transform of the measured signal</span>
 <span class="sd">	and of the system&#39;s impulse response, respectively.</span>
 
 <span class="sd">	Parameters</span>
@@ -634,9 +699,9 @@
 <span class="sd">		Y: np.ndarray</span>
 <span class="sd">			real and imaginary parts of DFT values</span>
 <span class="sd">		UH: np.ndarray</span>
-<span class="sd">			covariance matrix associated with real and imaginary parts of H</span>
+<span class="sd">			covariance matrix associated with H</span>
 <span class="sd">		UY: np.ndarray</span>
-<span class="sd">			covariance matrix associated with real and imaginary parts of X</span>
+<span class="sd">			covariance matrix associated with X</span>
 
 <span class="sd">	Returns</span>
 <span class="sd">	-------</span>

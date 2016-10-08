@@ -156,7 +156,7 @@ GUM2DFT — a software tool for uncertainty evaluation of transient signals in t
 </dl>
 <dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_DFT.GUM_DFT">
-<code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">GUM_DFT</code><span class="sig-paren">(</span><em>x</em>, <em>Ux</em>, <em>N=None</em>, <em>window=None</em>, <em>CxCos=None</em>, <em>CxSin=None</em>, <em>returnC=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#GUM_DFT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.GUM_DFT" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">GUM_DFT</code><span class="sig-paren">(</span><em>x</em>, <em>Ux</em>, <em>N=None</em>, <em>window=None</em>, <em>CxCos=None</em>, <em>CxSin=None</em>, <em>returnC=False</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#GUM_DFT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.GUM_DFT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculation of the DFT of the time domain signal x and propagation of the squared uncertainty Ux
 associated with the time domain sequence x to the real and imaginary parts of the DFT of x.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -171,6 +171,7 @@ associated with the time domain sequence x to the real and imaginary parts of th
 <li><strong>CxCos</strong> (<em>numpy.ndarray, optional</em>) &#8211; cosine part of sensitivity matrix</li>
 <li><strong>CxSin</strong> (<em>numpy.ndarray, optional</em>) &#8211; sine part of sensitivity matrix</li>
 <li><strong>returnC</strong> (<em>bool, optional</em>) &#8211; if true, return sensitivity matrix blocks for later use</li>
+<li><strong>mask</strong> (<em>ndarray of dtype bool</em>) &#8211; calculate DFT values and uncertainties only at those frequencies where mask is <cite>True</cite></li>
 </ul>
 </td>
 </tr>
@@ -234,7 +235,7 @@ covariance matrix associated with x</li>
 <dt id="PyDynamic.uncertainty.propagate_DFT.DFT_deconv">
 <code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">DFT_deconv</code><span class="sig-paren">(</span><em>H</em>, <em>Y</em>, <em>UH</em>, <em>UY</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#DFT_deconv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.DFT_deconv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deconvolution in the frequency domain</p>
-<p>GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
+<p>GUM propagation of uncertainties for the deconvolution X = Y/H with Y and H being the Fourier transform of the measured signal
 and of the system&#8217;s impulse response, respectively.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -243,8 +244,8 @@ and of the system&#8217;s impulse response, respectively.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>H</strong> (<em>np.ndarray</em>) &#8211; real and imaginary parts of frequency response values (N an even integer)</li>
 <li><strong>Y</strong> (<em>np.ndarray</em>) &#8211; real and imaginary parts of DFT values</li>
-<li><strong>UH</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with real and imaginary parts of H</li>
-<li><strong>UY</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with real and imaginary parts of X</li>
+<li><strong>UH</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with H</li>
+<li><strong>UY</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with X</li>
 </ul>
 </td>
 </tr>
