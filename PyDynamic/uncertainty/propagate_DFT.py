@@ -89,7 +89,7 @@ def matprod(M,V,W):
 
 
 
-def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
+def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False,mask=None):
 	"""Calculation of the DFT of the time domain signal x and propagation of the squared uncertainty Ux
 	associated with the time domain sequence x to the real and imaginary parts of the DFT of x.
 
@@ -109,6 +109,8 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
 			sine part of sensitivity matrix
 		returnC : bool, optional
 			if true, return sensitivity matrix blocks for later use
+		mask: ndarray of dtype bool
+			calculate DFT values and uncertainties only at those frequencies where mask is `True`
 
 	Returns
 	-------
@@ -135,8 +137,14 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
 	else:
 		M = N+1
 
-	F = np.fft.rfft(x)
-	F = np.r_[np.real(F),np.imag(F)]
+	if isinstance(mask, np.ndarray):
+		F = np.fft.rfft(x)[mask]
+		F = np.r_[np.real(F), np.imag(F)]
+	else:
+		F = np.fft.rfft(x)
+		F = np.r_[np.real(F),np.imag(F)]
+		mask = np.ones(len(F)//2, dtype=bool)
+	Nm = 2*np.sum(mask)
 
 	beta = 2*np.pi*np.arange(N-L)/N
 
@@ -144,20 +152,29 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False):
 	Cxks = lambda k: -np.sin(k*beta)[np.newaxis,:]
 
 	if isinstance(Ux,float):
-		UF = np.zeros(M)
+		UF = np.zeros(Nm)
+		km = 0
 		for k in range(M//2):   # Block cos/cos
-				UF[k] = np.sum(Ux*Cxkc(k)**2)
+			if mask[k]:
+				UF[km] = np.sum(Ux*Cxkc(k)**2)
+				km += 1
+		km = 0
 		for k in range(M//2): # Block sin/sin
-				UF[M//2+k] = np.sum(Ux*Cxks(k)**2)
+			if mask[k]:
+				UF[Nm//2+km] = np.sum(Ux*Cxks(k)**2)
+				km += 1
 	else:   # general method
 		if len(Ux.shape)==1:
 			Ux = np.diag(Ux)
 		if not isinstance(CxCos,np.ndarray):
-			CxCos = np.zeros((M//2,N-L))
-			CxSin = np.zeros((M//2,N-L))
+			CxCos = np.zeros((Nm//2,N-L))
+			CxSin = np.zeros((Nm//2,N-L))
+			km = 0
 			for k in range(M//2):
-				CxCos[k,:] = Cxkc(k)
-				CxSin[k,:] = Cxks(k)
+				if mask[k]:
+					CxCos[km,:] = Cxkc(k)
+					CxSin[km,:] = Cxks(k)
+					km += 1
 		UFCC = np.dot(CxCos,np.dot(Ux,CxCos.T))
 		UFCS = np.dot(CxCos,np.dot(Ux,CxSin.T))
 		UFSS = np.dot(CxSin,np.dot(Ux,CxSin.T))

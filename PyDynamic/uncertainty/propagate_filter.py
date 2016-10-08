@@ -17,12 +17,12 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     ----------
         y: np.ndarray
             filter input signal
-        sigma_noise: np.ndarray
-            standard deviation of white noise in y
+        sigma_noise: float or np.ndarray
+            when float then standard deviation of white noise in y; when ndarray then point-wise standard uncertainties
         theta: np.ndarray
             FIR filter coefficients
         Utheta: np.ndarray
-            squared uncertainty associated with theta
+            covariance matrix associated with theta
         shift: int
             time delay of filter output signal (in samples)
         blow: np.ndarray
@@ -61,7 +61,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
                 assert (len(sigma_noise)==len(y)), "Length of uncertainty and signal are inconsistent"
                 ycorr = np.convolve(sigma_noise, Bcorr)
             else:
-                raise NotImplementedError("FIR formula for covariance propagation not implemented. Suggest Monte Carlo propagation instead.")
+                raise NotImplementedError("FIR formula for covariance propagation not implemented. Suggesting Monte Carlo propagation instead.")
         Lr = len(ycorr)
         Lstart = np.ceil(Lr/2.0)
         Lend = Lstart + LR -1

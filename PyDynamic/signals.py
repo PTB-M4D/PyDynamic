@@ -11,7 +11,7 @@ import numpy as np
 from matplotlib.pyplot import *
 import scipy.signal as dsp
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter, IIRuncFilter
-from PyDynamic.uncertainty.propagate_MonteCarlo import SMC
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 from PyDynamic.misc.testsignals import rect
 
 __all__ = ["Signal"]
@@ -70,20 +70,27 @@ class Signal():
 	def plot(self, fignr=1, figsize=(10,8)):
 		figure(fignr,figsize = figsize)
 		plot(self.time, self.values, label=self.name)
+		fill_between(self.time, self.values-self.uncertainty, self.values+self.uncertainty, color="gray", alpha=0.2)
 		xlabel("time / %s"%self.unit_time)
 		ylabel("%s / %s"%(self.name, self.unit_values))
 		legend(loc="best")
-		show()
 
-	def apply_filter(self, b, a=1, Uab=None, MonteCarloRuns=None):
+	def plot_uncertainty(self, fignr=2, **kwargs):
+		figure(fignr, **kwargs)
+		plot(self.time, self.uncertainty, label="uncertainty associated with %s"%self.name)
+		xlabel("time / %s"%self.unit_time)
+		ylabel("uncertainty / %s"%self.unit_values)
+		legend(loc="best")
+
+	def apply_filter(self, b, a=1, filter_uncertainty=None, MonteCarloRuns=None):
 		"""Apply digital filter (b,a) to the signal values and propagate the uncertainty associated with the signal
 		Parameters
 		----------
 			b: np.ndarray
 				filter numerator coefficients
 			a: np.ndarray
-				filter denominator coefficients, use a=1 for FIR type filter
-			Uab: np.ndarray
+				filter denominator coefficients, use a=1 for FIR-type filter
+			filter_uncertainty: np.ndarray
 				covariance matrix associated with filter coefficients, Uab=None if no uncertainty associated with filter
 			MonteCarloRuns: int
 				number of Monte Carlo runs, if `None` then GUM linearization will be used
@@ -91,14 +98,27 @@ class Signal():
 		-------
 			no return variables
 		"""
-		if not (isinstance(a, np.ndarray) or isinstance(a, list)): # FIR type filter
+		if isinstance(a, list):
+			a = np.array(a)
+		if not (isinstance(a, np.ndarray)): # FIR type filter
 			if len(self.uncertainty.shape)==1:
 				if not isinstance(MonteCarloRuns,int):
 					self.values, self.uncertainty = \
-						FIRuncFilter(self.values, self.uncertainty, b, Utheta = Uab)
+						FIRuncFilter(self.values, self.uncertainty, b, Utheta = filter_uncertainty)
 				else:
 					self.values, self.uncertainty = \
-						SMC(self.values, self.uncertainty, b, a, Uab, runs=MonteCarloRuns)
+						MC(self.values, self.uncertainty, b, a, filter_uncertainty, runs=MonteCarloRuns)
+			else:
+				if not isinstance(MonteCarloRuns, int):
+					MonteCarloRuns = 10000
+				self.values, self.uncertainty = \
+					MC(self.values, self.uncertainty, b, a, filter_uncertainty, runs=MonteCarloRuns)
+		else:	# IIR-type filter
+			if not isinstance(MonteCarloRuns, int):
+				MonteCarloRuns = 10000
+				self.values, self.uncertainty = \
+					MC(self.values, self.uncertainty, b, a, filter_uncertainty, runs=MonteCarloRuns)
+
 
 
 
@@ -107,7 +127,13 @@ if __name__=="__main__":
 	Ts = 0.01
 	time = np.arange(0, N*Ts, Ts)
 	x = rect(time, Ts*N//4, Ts*N//4*3)
-	signal = Signal(time, x, Ts = Ts)
+	ux= 0.02
+	signal = Signal(time, x, Ts = Ts, uncertainty = ux)
 	b  = dsp.firls(15, [0, 0.2*signal.Fs/2, 0.25*signal.Fs/2, signal.Fs/2 ], [1, 1, 0, 0], nyq=signal.Fs/2)
-	signal.apply_filter(b)
-	signal.plot()
+	Ub = np.diag(b*1e-1)
+	signal.apply_filter(b, filter_uncertainty=Ub)
+	signal.plot_uncertainty()
+	bl, al = dsp.bessel(4, 0.2)
+	Ul = np.diag(np.r_[al[1:]*1e-3, bl*1e-2]**2)
+	signal.apply_filter(bl, al, filter_uncertainty = Ul)
+	signal.plot_uncertainty(fignr = 3)
