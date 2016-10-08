@@ -249,6 +249,28 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 	else:
 		return x,Ux/N**2
 
+def GUM_DFTfreq(N, dt=1):
+	"""Return the Discrete Fourier Transform sample frequencies
+
+	Parameters
+	----------
+		N: int
+			window length
+		dt: float
+			sample spacing (inverse of sampling rate)
+
+	Returns
+	-------
+		f: ndarray
+			Array of length ``n//2 + 1`` containing the sample frequencies
+
+	See also
+	--------
+		`mod`::numpy.fft.rfftfreq
+
+	"""
+
+	return np.fft.rfftfreq(N, dt)
 
 def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
 	"""Transformation from real and imaginary parts to amplitude and phase
@@ -489,10 +511,36 @@ def AmpPhase2Time(A,P,UAP):
 # for backward compatibility
 GUMdeconv = lambda H, Y, UH, UY: DFT_deconv(H, Y, UH, UY)
 
+def DFT_transferfunction(X, Y, UX, UY):
+	"""Calculation of the transfer function H = Y/X in the frequency domain with X beign the Fourier transform
+	of the system's input signal and Y that of the output signal.
+
+	Parameters
+	----------
+		X: np.ndarray
+			real and imaginary parts of the system's input signal
+		Y: np.ndarray
+			real and imaginary parts of the system's output signal
+		UX: np.ndarray
+			covariance matrix associated with X
+		UY: np.ndarray
+			covariance matrix associated with Y
+
+	Returns
+	-------
+		H: np.ndarray
+			real and imaginary parts of the system's frequency response
+		UH: np.ndarray
+			covariance matrix associated with H
+
+	This function uses `DFT_deconv`.
+	"""
+	return DFT_deconv(X, Y, UX, UY)
+
 def DFT_deconv(H, Y, UH, UY):
 	"""Deconvolution in the frequency domain
 
-	GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
+	GUM propagation of uncertainties for the deconvolution X = Y/H with Y and H being the Fourier transform of the measured signal
 	and of the system's impulse response, respectively.
 
 	Parameters
@@ -502,9 +550,9 @@ def DFT_deconv(H, Y, UH, UY):
 		Y: np.ndarray
 			real and imaginary parts of DFT values
 		UH: np.ndarray
-			covariance matrix associated with real and imaginary parts of H
+			covariance matrix associated with H
 		UY: np.ndarray
-			covariance matrix associated with real and imaginary parts of X
+			covariance matrix associated with X
 
 	Returns
 	-------
