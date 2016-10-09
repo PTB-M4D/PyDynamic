@@ -64,7 +64,7 @@ def matprod(M,V,W):
 		assert(M.shape[0]==M.shape[1])
 	assert(M.shape[0]==V.shape[0])
 	assert(V.shape==W.shape)
-	N = V.shape[0]/2
+	N = V.shape[0]//2
 	v1 = V[:N]; v2 = V[N:]
 	w1 = W[:N]; w2 = W[N:]
 	if isinstance(M,sparse.dia_matrix):
@@ -234,7 +234,7 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 	beta = 2*np.pi*np.arange(Nx)/N
 
 	# calculate inverse DFT
-	x = np.fft.irfft(F[:N/2+1]+1j*F[N/2+1:])[:Nx]
+	x = np.fft.irfft(F[:N//2+1]+1j*F[N//2+1:])[:Nx]
 	if not isinstance(Cc,np.ndarray):# calculate sensitivities
 		Cc = np.zeros((Nx,N//2+1))
 		Cc[:,0] = 1.0; Cc[:,-1] = np.cos(np.pi*np.arange(Nx))
@@ -242,23 +242,23 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 			Cc[:,k] = 2*np.cos(k*beta)
 
 	if not isinstance(Cs,np.ndarray):
-		Cs = np.zeros((Nx,N/2+1))
+		Cs = np.zeros((Nx,N//2+1))
 		Cs[:,0] = 0.0; Cs[:,-1] = -np.sin(np.pi*np.arange(Nx))
 		for k in range(1,N//2):
 			Cs[:,k] = -2*np.sin(k*beta)
 
 	# calculate blocks of uncertainty matrix
 	if len(UF.shape)==2:
-		RR = UF[:N/2+1,:N/2+1]
-		RI = UF[:N/2+1, N/2+1:]
-		II = UF[N/2+1:,N/2+1:]
+		RR = UF[:N//2+1,:N//2+1]
+		RI = UF[:N//2+1, N//2+1:]
+		II = UF[N//2+1:,N//2+1:]
 		# propagate uncertainties
 		Ux = np.dot(Cc,np.dot(RR,Cc.T))
 		Ux = Ux + 2*np.dot(Cc,np.dot(RI,Cs.T))
 		Ux = Ux + np.dot(Cs,np.dot(II,Cs.T))
 	else:
-		RR = UF[:N/2+1]
-		II = UF[N/2+1:]
+		RR = UF[:N//2+1]
+		II = UF[N//2+1:]
 		Ux = np.dot(Cc,prod(RR,Cc.T)) + np.dot(Cs,prod(II,Cs.T))
 
 	if returnC:
@@ -591,11 +591,11 @@ def DFT_deconv(H, Y, UH, UY):
 	assert(np.mod(N,2)==0)
 
 # real and imaginary parts of system and signal
-	rH, iH = H[:N/2+1], H[N/2+1:]
-	rY, iY = Y[:N/2+1], Y[N/2+1:]
+	rH, iH = H[:N//2+1], H[N//2+1:]
+	rY, iY = Y[:N//2+1], Y[N//2+1:]
 
-	Yc = Y[:N/2+1] + 1j*Y[N/2+1:]
-	Hc = H[:N/2+1] + 1j*H[N/2+1:]
+	Yc = Y[:N//2+1] + 1j*Y[N//2+1:]
+	Hc = H[:N//2+1] + 1j*H[N//2+1:]
 	X = np.r_[np.real(Yc/Hc),np.imag(Yc/Hc)]
 
 # sensitivities
