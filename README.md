@@ -18,6 +18,32 @@ For the validation of the propagation of uncertainties, the Monte-Carlo method c
 
 The documentation for PyDynamic can be found at [http://pydynamic.readthedocs.io](http://pydynamic.readthedocs.io)
 
+![PyDynamic packages](http://mathmet.org/projects/14SIP08/PyDynamic_scheme.png)
+
+
+### Installation
+If you just want to use the software, the easiest way is to run from your system's command line
+```
+  pip install PyDynamic
+```
+This will download the latest version from the Python package repository and copy it into your local folder of third-party libraries. Usage in any Python environment on your computer is then possible by
+```python
+  import PyDynamic
+```
+or, for example, for the module containing the Fourier domain uncertainty methods:
+```python
+  from PyDynamic.uncertainty import propagate_DFT
+```
+Updates can then be installed via
+```
+  pip install --upgrade PyDynamic
+```
+
+For collaboration we recommend using [Github Desktop](https://desktop.github.com) or any other git-compatible version control software and cloning the repository (https://github.com/eichstaedtPTB/PyDynamic.git). In this way, any updates to the software will be highlighted in the version control software and can be applied very easily.
+
+If you have downloaded this software, we would be very thankful for letting us know. You may, for instance, drop an email to one of the authors (e.g. [Sascha Eichstädt](mailto:sascha.eichstaedt@ptb.de) or [Ian Smith](mailto:ian.smith@npl.co.uk) )
+
+
 ### Examples
 Uncertainty propagation for the application of a FIR filter with coefficients *b* with which an uncertainty *ub* is associated. The filter input signal is *x* with known 
 noise standard deviation *sigma*. The filter output signal is *y* with associated uncertainty *uy*.
@@ -44,28 +70,7 @@ coverage intervals *Py* corresponding to the specified percentiles.
     y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
 ```
 
-
-### Installation
-If you just want to use the software, the easiest way is to run from your system's command line
-```
-  pip install PyDynamic
-```
-This will download the latest version from the Python package repository and copy it into your local folder of third-party libraries. Usage in any Python environment on your computer is then possible by
-```python
-  import PyDynamic
-```
-or, for example, for the module containing the Fourier domain uncertainty methods:
-```python
-  from PyDynamic.uncertainty import propagate_DFT
-```
-Updates can then be installed via
-```
-  pip install --upgrade PyDynamic
-```
-
-For collaboration we recommend using [Github Desktop](https://desktop.github.com) or any other git-compatible version control software and cloning the repository (https://github.com/eichstaedtPTB/PyDynamic.git). In this way, any updates to the software will be highlighted in the version control software and can be applied very easily.
-
-If you have downloaded this software, we would be very thankful for letting us know. You may, for instance, drop an email to one of the authors (e.g. [Sascha Eichstädt](mailto:sascha.eichstaedt@ptb.de) or [Ian Smith](mailto:ian.smith@npl.co.uk) )
+![PyDynamic Workflow Deconvolution](http://mathmet.org/projects/14SIP08/Deconvolution.png) 
 
 ### Roadmap - next steps
 
