@@ -5,13 +5,14 @@ Installation of PyDynamic in Python path
 
 import os
 from setuptools import setup, find_packages
+from PyDynamic import __version__ as version
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name = "PyDynamic",
-    version = "1.2.2",
+    version = version,
     author = u"Sascha Eichstädt, Ian Smith",
     author_email = "sascha.eichstaedt@ptb.de",
     description = ("A software package for the analysis of dynamic measurements"),

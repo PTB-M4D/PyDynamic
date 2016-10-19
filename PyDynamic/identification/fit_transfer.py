@@ -57,10 +57,7 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 			HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))
 			HMC = HR + 1j*HI
 		else:
-			try:
-				HRI = np.random.multivariate_normal(H, UH, runs)
-			except RuntimeWarning:
-				print("Your covariance matrix is not positive-semidefinite. You may try PyDynamic.misc.tools.make_semiposdef first.")
+			HRI = np.random.multivariate_normal(H, UH, runs)
 			HMC = HRI[:,:len(f)] + 1j*HRI[:,len(f):]
 
 		iRI = np.c_[np.real(1/HMC), np.imag(1/HMC)]
