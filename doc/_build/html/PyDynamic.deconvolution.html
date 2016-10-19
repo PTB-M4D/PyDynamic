@@ -84,7 +84,7 @@
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Getting started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PyDynamic.uncertainty.html">Evaluation of uncertainties</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Design of deconvolution filters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Design of deconvolution filters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PyDynamic.misc.html">Miscellaneous</a></li>
 </ul>
 
@@ -108,7 +108,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -156,8 +156,7 @@ for the measurement system.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bFIR</strong> &#8211;
-filter coefficients</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bFIR</strong> &#8211; filter coefficients</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
@@ -196,10 +195,8 @@ Uncertainties are propagated using a truncated svd and linear matrix propagation
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>b</strong> (<em>np.ndarray</em>) &#8211;
-filter coefficients of shape</li>
-<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211;
-uncertainties associated with b</li>
+<li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter coefficients of shape</li>
+<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211; uncertainties associated with b</li>
 </ul>
 </p>
 </td>
@@ -234,8 +231,7 @@ by pole mapping and introduction of a time delay.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211;
-IIR filter coefficients, int tau &#8211; time delay (in samples)</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211; IIR filter coefficients, int tau &#8211; time delay (in samples)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
@@ -272,12 +268,9 @@ carried out using the Monte Carlo method.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>b,a</strong> (<em>np.ndarray</em>) &#8211;
-IIR filter coefficients</li>
-<li><strong>tau</strong> (<em>int</em>) &#8211;
-time delay (in samples)</li>
-<li><strong>Uba</strong> (<em>np.ndarray</em>) &#8211;
-uncertainties associated with [a[1:],b]</li>
+<li><strong>b,a</strong> (<em>np.ndarray</em>) &#8211; IIR filter coefficients</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; time delay (in samples)</li>
+<li><strong>Uba</strong> (<em>np.ndarray</em>) &#8211; uncertainties associated with [a[1:],b]</li>
 </ul>
 </p>
 </td>
@@ -321,10 +314,8 @@ associated with the filter coefficients.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>b</strong> (<em>np.ndarray</em>) &#8211;
-filter coefficients of shape</li>
-<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211;
-uncertainties associated with b</li>
+<li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter coefficients of shape</li>
+<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211; uncertainties associated with b</li>
 </ul>
 </p>
 </td>

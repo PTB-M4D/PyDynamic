@@ -87,7 +87,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Getting started.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Getting started.html#quick-examples">Quick Examples</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="Getting started.html#detailed-examples">Detailed examples</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="">Design of a digital deconvolution filter (FIR type)</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Design of a digital deconvolution filter (FIR type)</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#problem-description">Problem description</a></li>
 </ul>
 </li>
@@ -122,7 +122,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -146,34 +146,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="code python highlight-python"><div class="highlight"><pre>%pylab inline
-import numpy as np
-import scipy.signal as dsp
-from palettable.colorbrewer.qualitative import Dark2_8
+  <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">pylab</span> <span class="n">inline</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">dsp</span>
+<span class="kn">from</span> <span class="nn">palettable.colorbrewer.qualitative</span> <span class="k">import</span> <span class="n">Dark2_8</span>
 
-colors = Dark2_8.mpl_colors
-rst = np.random.RandomState(1)
+<span class="n">colors</span> <span class="o">=</span> <span class="n">Dark2_8</span><span class="o">.</span><span class="n">mpl_colors</span>
+<span class="n">rst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>Populating the interactive namespace from numpy and matplotlib
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Populating</span> <span class="n">the</span> <span class="n">interactive</span> <span class="n">namespace</span> <span class="kn">from</span> <span class="nn">numpy</span> <span class="ow">and</span> <span class="n">matplotlib</span>
 </pre></div>
 </div>
 <div class="section" id="design-of-a-digital-deconvolution-filter-fir-type">
 <h1>Design of a digital deconvolution filter (FIR type)<a class="headerlink" href="#design-of-a-digital-deconvolution-filter-fir-type" title="Permalink to this headline">¶</a></h1>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.deconvolution.fit_filter</span> <span class="kn">import</span> <span class="n">LSFIR_unc</span>
-<span class="kn">from</span> <span class="nn">PyDynamic.misc.SecondOrderSystem</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">PyDynamic.misc.testsignals</span> <span class="kn">import</span> <span class="n">shocklikeGaussian</span>
-<span class="kn">from</span> <span class="nn">PyDynamic.misc.filterstuff</span> <span class="kn">import</span> <span class="n">kaiser_lowpass</span><span class="p">,</span> <span class="n">db</span>
-<span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_filter</span> <span class="kn">import</span> <span class="n">FIRuncFilter</span>
-<span class="kn">from</span> <span class="nn">PyDynamic.misc.tools</span> <span class="kn">import</span> <span class="n">make_semiposdef</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyDynamic.deconvolution.fit_filter</span> <span class="k">import</span> <span class="n">LSFIR_unc</span>
+<span class="kn">from</span> <span class="nn">PyDynamic.misc.SecondOrderSystem</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PyDynamic.misc.testsignals</span> <span class="k">import</span> <span class="n">shocklikeGaussian</span>
+<span class="kn">from</span> <span class="nn">PyDynamic.misc.filterstuff</span> <span class="k">import</span> <span class="n">kaiser_lowpass</span><span class="p">,</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_filter</span> <span class="k">import</span> <span class="n">FIRuncFilter</span>
+<span class="kn">from</span> <span class="nn">PyDynamic.misc.tools</span> <span class="k">import</span> <span class="n">make_semiposdef</span>
 </pre></div>
 </div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c1"># parameters of simulated measurement</span>
-<span class="n">Fs</span> <span class="o">=</span> <span class="mf">500e3</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># parameters of simulated measurement</span>
+<span class="n">Fs</span> <span class="o">=</span> <span class="mi">500</span><span class="n">e3</span>
 <span class="n">Ts</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">Fs</span>
 
 <span class="c1"># sensor/measurement system</span>
-<span class="n">f0</span> <span class="o">=</span> <span class="mf">36e3</span><span class="p">;</span> <span class="n">uf0</span> <span class="o">=</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">f0</span>
+<span class="n">f0</span> <span class="o">=</span> <span class="mi">36</span><span class="n">e3</span><span class="p">;</span> <span class="n">uf0</span> <span class="o">=</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">f0</span>
 <span class="n">S0</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">;</span> <span class="n">uS0</span><span class="o">=</span> <span class="mf">0.001</span><span class="o">*</span><span class="n">S0</span>
 <span class="n">delta</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">;</span> <span class="n">udelta</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">delta</span>
 
@@ -182,7 +182,7 @@ rst = np.random.RandomState(1)
 <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">bilinear</span><span class="p">(</span><span class="n">bc</span><span class="p">,</span> <span class="n">ac</span><span class="p">,</span> <span class="n">Fs</span><span class="p">)</span>
 
 <span class="c1"># Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]</span>
-<span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">120e3</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="n">e3</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 <span class="n">Hfc</span> <span class="o">=</span> <span class="n">sos_FreqResp</span><span class="p">(</span><span class="n">S0</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 <span class="n">Hf</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">freqz</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span><span class="o">/</span><span class="n">Fs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -211,8 +211,8 @@ system to be available in terms of its frequency response values
 uncertainties:</p>
 <div class="math">
 \[u(\mathbf{H}) = (u(\vert H(j\omega_1)\vert),\ldots,u(\vert H(j\omega_N)\vert),u(\angle H(j\omega_1)),\ldots,u(\angle H(j\omega_N)))\]</div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
-<span class="n">errorbar</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Hf</span><span class="p">),</span> <span class="n">uAbs</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">errorbar</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Hf</span><span class="p">),</span> <span class="n">uAbs</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="n">title</span><span class="p">(</span><span class="s2">&quot;measured amplitude spectrum with associated uncertainties&quot;</span><span class="p">)</span>
 <span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
 <span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;frequency / kHz&quot;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
@@ -220,8 +220,8 @@ uncertainties:</p>
 </pre></div>
 </div>
 <img alt="_images/FIR_5_0.png" src="_images/FIR_5_0.png" />
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
-<span class="n">errorbar</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Hf</span><span class="p">),</span> <span class="n">uPhas</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">errorbar</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">Hf</span><span class="p">),</span> <span class="n">uPhas</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">title</span><span class="p">(</span><span class="s2">&quot;measured phase spectrum with associated uncertainties&quot;</span><span class="p">)</span>
 <span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
 <span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;frequency / kHz&quot;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
@@ -239,19 +239,19 @@ system&#8217;s impulse response</p>
 conversion producing the measured signal</p>
 <div class="math">
 \[y[n] = (h\ast x)(t_n) \qquad n=1,\ldots,M\]</div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c1"># simulate input and output signals</span>
-<span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">4e-3</span> <span class="o">-</span> <span class="n">Ts</span><span class="p">,</span> <span class="n">Ts</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># simulate input and output signals</span>
+<span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span> <span class="o">-</span> <span class="n">Ts</span><span class="p">,</span> <span class="n">Ts</span><span class="p">)</span>
 <span class="c1">#x = shocklikeGaussian(time, t0 = 2e-3, sigma = 1e-5, m0=0.8)</span>
-<span class="n">m0</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">;</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">;</span> <span class="n">t0</span> <span class="o">=</span> <span class="mf">2e-3</span>
+<span class="n">m0</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">;</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">;</span> <span class="n">t0</span> <span class="o">=</span> <span class="mi">2</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
 <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">m0</span><span class="o">*</span><span class="p">(</span><span class="n">time</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">time</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sigma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">lfilter</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-<span class="n">noise</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
 <span class="n">yn</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">rst</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">*</span> <span class="n">noise</span>
 </pre></div>
 </div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;system input signal&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">yn</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;measured output signal&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;system input signal&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span> <span class="n">yn</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;measured output signal&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">xlim</span><span class="p">(</span><span class="mf">1.8</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span> <span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;time / ms&quot;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
@@ -267,7 +267,7 @@ conversion producing the measured signal</p>
 \[g(z) = \sum_{k=0}^K b_k z^{-k}\]</div>
 <p>such that the filtered signal</p>
 <div class="math">
-\[\hat{x}[n] = (g\ast y)[n] \qquad n=1,\ldots,M\]\[is an estimate of the system's input signal at the discrete time points\]</div>
+\[ \begin{align}\begin{aligned}\hat{x}[n] = (g\ast y)[n] \qquad n=1,\ldots,M\\is an estimate of the system's input signal at the discrete time points\end{aligned}\end{align} \]</div>
 <p>Publication</p>
 <ul class="simple">
 <li>Elster and Link &#8220;Uncertainty evaluation for dynamic measurements
@@ -294,18 +294,18 @@ the uncertainties associated with the frequency response measurements</p>
 \[b = \left( X^TW^{-1}X \right)^{-1}X^TW^{-1}y\]</div>
 <div class="math">
 \[u_b= \left( X^TW^{-1}X \right)^{-1} X^TW^{-1}U_yW^{-1}X\left( X^TW^{-1}X \right)^{-1}\]</div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="c1"># Calculation of FIR deconvolution filter and its assoc. unc.</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Calculation of FIR deconvolution filter and its assoc. unc.</span>
 <span class="n">N</span> <span class="o">=</span> <span class="mi">12</span><span class="p">;</span> <span class="n">tau</span> <span class="o">=</span> <span class="n">N</span><span class="o">//</span><span class="mi">2</span>
 <span class="n">bF</span><span class="p">,</span> <span class="n">UbF</span> <span class="o">=</span> <span class="n">deconv</span><span class="o">.</span><span class="n">LSFIR_unc</span><span class="p">(</span><span class="n">H</span><span class="p">,</span><span class="n">UH</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">tau</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">Fs</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python"><div class="highlight"><pre>Least-squares fit of an order 12 digital FIR filter to the
-reciprocal of a frequency response given by 400 values
-and propagation of associated uncertainties.
-Final rms error = 1.545423e+01
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Least</span><span class="o">-</span><span class="n">squares</span> <span class="n">fit</span> <span class="n">of</span> <span class="n">an</span> <span class="n">order</span> <span class="mi">12</span> <span class="n">digital</span> <span class="n">FIR</span> <span class="nb">filter</span> <span class="n">to</span> <span class="n">the</span>
+<span class="n">reciprocal</span> <span class="n">of</span> <span class="n">a</span> <span class="n">frequency</span> <span class="n">response</span> <span class="n">given</span> <span class="n">by</span> <span class="mi">400</span> <span class="n">values</span>
+<span class="ow">and</span> <span class="n">propagation</span> <span class="n">of</span> <span class="n">associated</span> <span class="n">uncertainties</span><span class="o">.</span>
+<span class="n">Final</span> <span class="n">rms</span> <span class="n">error</span> <span class="o">=</span> <span class="mf">1.545423e+01</span>
 </pre></div>
 </div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
 <span class="n">errorbar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">bF</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">UbF</span><span class="p">)),</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
 <span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;FIR coefficient index&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;FIR coefficient value&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">);</span>
@@ -321,27 +321,27 @@ carried out as</p>
 <p>with point-wise associated uncertainties calculated as</p>
 <div class="math">
 \[u^2(\hat{x}[n-n_0] = b^TU_{x_{low}[n]}b + x_{low}^T[n]U_bx_{low}[n] + trace(U_{x_{low}[n]}U_b)\]</div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">fcut</span> <span class="o">=</span> <span class="n">f0</span><span class="o">+</span><span class="mf">10e3</span><span class="p">;</span> <span class="n">low_order</span> <span class="o">=</span> <span class="mi">100</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">fcut</span> <span class="o">=</span> <span class="n">f0</span><span class="o">+</span><span class="mi">10</span><span class="n">e3</span><span class="p">;</span> <span class="n">low_order</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">blow</span><span class="p">,</span> <span class="n">lshift</span> <span class="o">=</span> <span class="n">kaiser_lowpass</span><span class="p">(</span><span class="n">low_order</span><span class="p">,</span> <span class="n">fcut</span><span class="p">,</span> <span class="n">Fs</span><span class="p">)</span>
 <span class="n">shift</span> <span class="o">=</span> <span class="o">-</span><span class="n">tau</span> <span class="o">-</span> <span class="n">lshift</span>
 </pre></div>
 </div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
 <span class="n">HbF</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">freqz</span><span class="p">(</span><span class="n">bF</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span><span class="o">/</span><span class="n">Fs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">dsp</span><span class="o">.</span><span class="n">freqz</span><span class="p">(</span><span class="n">blow</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span><span class="o">/</span><span class="n">Fs</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">semilogy</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Hf</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;measured frequency response&quot;</span><span class="p">)</span>
-<span class="n">semilogy</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">HbF</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;inverse filter&quot;</span><span class="p">)</span>
-<span class="n">semilogy</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Hf</span><span class="o">*</span><span class="n">HbF</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;compensation result&quot;</span><span class="p">)</span>
+<span class="n">semilogy</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Hf</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;measured frequency response&quot;</span><span class="p">)</span>
+<span class="n">semilogy</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">HbF</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;inverse filter&quot;</span><span class="p">)</span>
+<span class="n">semilogy</span><span class="p">(</span><span class="n">f</span><span class="o">*</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Hf</span><span class="o">*</span><span class="n">HbF</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;compensation result&quot;</span><span class="p">)</span>
 <span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
 <img alt="_images/FIR_20_0.png" src="_images/FIR_20_0.png" />
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">xhat</span><span class="p">,</span><span class="n">Uxhat</span> <span class="o">=</span> <span class="n">FIRuncFilter</span><span class="p">(</span><span class="n">yn</span><span class="p">,</span><span class="n">noise</span><span class="p">,</span><span class="n">bF</span><span class="p">,</span><span class="n">UbF</span><span class="p">,</span><span class="n">shift</span><span class="p">,</span><span class="n">blow</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">xhat</span><span class="p">,</span><span class="n">Uxhat</span> <span class="o">=</span> <span class="n">FIRuncFilter</span><span class="p">(</span><span class="n">yn</span><span class="p">,</span><span class="n">noise</span><span class="p">,</span><span class="n">bF</span><span class="p">,</span><span class="n">UbF</span><span class="p">,</span><span class="n">shift</span><span class="p">,</span><span class="n">blow</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span><span class="n">x</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;input signal&#39;</span><span class="p">)</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span><span class="n">yn</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;output signal&#39;</span><span class="p">)</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span><span class="n">xhat</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;estimate of input&#39;</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span><span class="n">x</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;input signal&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span><span class="n">yn</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;output signal&#39;</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span><span class="n">xhat</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;estimate of input&#39;</span><span class="p">)</span>
 <span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time / ms&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
 <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;signal amplitude / au&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
@@ -350,8 +350,8 @@ carried out as</p>
 </pre></div>
 </div>
 <img alt="_images/FIR_22_0.png" src="_images/FIR_22_0.png" />
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
-<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mf">1e3</span><span class="p">,</span><span class="n">Uxhat</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span><span class="n">Uxhat</span><span class="p">)</span>
 <span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;time / ms&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
 <span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;signal uncertainty / au&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">22</span><span class="p">)</span>
 <span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span><span class="n">right</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
@@ -364,8 +364,8 @@ carried out as</p>
 <div class="section" id="basic-workflow-in-pydynamic">
 <h3>Basic workflow in PyDynamic<a class="headerlink" href="#basic-workflow-in-pydynamic" title="Permalink to this headline">¶</a></h3>
 <p>Fit an FIR filter to the reciprocal of the measured frequency response</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.deconvolution.fit_filter</span> <span class="kn">import</span> <span class="n">LSFIR_unc</span>
-<span class="n">bF</span><span class="p">,</span> <span class="n">UbF</span> <span class="o">=</span> <span class="n">LSFIR_unc</span><span class="p">(</span><span class="n">H</span><span class="p">,</span><span class="n">UH</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">tau</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">Fs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyDynamic.deconvolution.fit_filter</span> <span class="k">import</span> <span class="n">LSFIR_unc</span>
+<span class="n">bF</span><span class="p">,</span> <span class="n">UbF</span> <span class="o">=</span> <span class="n">LSFIR_unc</span><span class="p">(</span><span class="n">H</span><span class="p">,</span><span class="n">UH</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">tau</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">Fs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>with - <code class="docutils literal"><span class="pre">H</span></code> the measured frequency response values - <code class="docutils literal"><span class="pre">UH</span></code> the
@@ -375,7 +375,7 @@ of H - <code class="docutils literal"><span class="pre">N</span></code> the filt
 sampling frequency for the digital FIR filter</p>
 <p>Propagate the uncertainty associated with the measurement noise and the
 FIR filter through the deconvolution process</p>
-<div class="code python highlight-python"><div class="highlight"><pre><span class="n">xhat</span><span class="p">,</span><span class="n">Uxhat</span> <span class="o">=</span> <span class="n">FIRuncFilter</span><span class="p">(</span><span class="n">yn</span><span class="p">,</span><span class="n">noise</span><span class="p">,</span><span class="n">bF</span><span class="p">,</span><span class="n">UbF</span><span class="p">,</span><span class="n">shift</span><span class="p">,</span><span class="n">blow</span><span class="p">)</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">xhat</span><span class="p">,</span><span class="n">Uxhat</span> <span class="o">=</span> <span class="n">FIRuncFilter</span><span class="p">(</span><span class="n">yn</span><span class="p">,</span><span class="n">noise</span><span class="p">,</span><span class="n">bF</span><span class="p">,</span><span class="n">UbF</span><span class="p">,</span><span class="n">shift</span><span class="p">,</span><span class="n">blow</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>with - <code class="docutils literal"><span class="pre">yn</span></code> the noisy measurement - <code class="docutils literal"><span class="pre">noise</span></code> the std of the noise -

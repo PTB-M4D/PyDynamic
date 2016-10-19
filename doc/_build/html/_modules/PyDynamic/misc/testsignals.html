@@ -130,10 +130,10 @@
            <div itemprop="articleBody">
             
   <h1>Source code for PyDynamic.misc.testsignals</h1><div class="highlight"><pre>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">diff</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">corrcoef</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="kn">import</span> <span class="n">comb</span>
-<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">periodogram</span>
+<span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">diff</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">corrcoef</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.misc</span> <span class="k">import</span> <span class="n">comb</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="k">import</span> <span class="n">periodogram</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;shocklikeGaussian&#39;</span><span class="p">,</span> <span class="s1">&#39;GaussianPulse&#39;</span><span class="p">,</span> <span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="s1">&#39;squarepulse&#39;</span><span class="p">]</span>
 
@@ -257,7 +257,7 @@
 <span class="k">class</span> <span class="nc">corr_noise</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;colored (i.e. correlated) noise process</span>
 <span class="sd">	&quot;&quot;&quot;</span>
-	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">seed</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">w</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">rst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
@@ -307,7 +307,7 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">Sigma</span> <span class="o">=</span> <span class="n">Sigma</span> <span class="o">+</span> <span class="n">Sigma</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Sigma</span><span class="p">))</span>
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sigma</span>
 
-	<span class="k">def</span> <span class="nf">calc_psd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">noise</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Fs</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="k">def</span> <span class="nf">calc_psd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">noise</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Fs</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 			<span class="k">return</span> <span class="n">periodogram</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">Fs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>

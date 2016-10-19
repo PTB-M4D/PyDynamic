@@ -82,7 +82,7 @@
             
             
                 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Getting started</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#quick-examples">Quick Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#detailed-examples">Detailed examples</a><ul>
@@ -118,7 +118,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -149,11 +149,11 @@
 <dd>pip install PyDynamic</dd>
 </dl>
 <p>This will download the latest version from the Python package repository and copy it into your local folder of third-party libraries. Usage in any Python environment on your computer is then possible by</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">PyDynamic</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">PyDynamic</span>
 </pre></div>
 </div>
 <p>or, for example, for the module containing the Fourier domain uncertainty methods:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty</span> <span class="kn">import</span> <span class="n">propagate_DFT</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty</span> <span class="kn">import</span> <span class="n">propagate_DFT</span>
 </pre></div>
 </div>
 <dl class="docutils">
@@ -173,20 +173,20 @@ You may, for instance, drop an email to one of the authors (e.g. <a class="refer
 Here is just a short list to get you started.</p>
 <p>Uncertainty propagation for the application of a FIR filter with coefficients <em>b</em> with which an uncertainty <em>ub</em> is associated. The filter input signal is <em>x</em> with known
 noise standard deviation <em>sigma</em>. The filter output signal is <em>y</em> with associated uncertainty <em>uy</em>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_filter</span> <span class="kn">import</span> <span class="n">FIRuncFilter</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_filter</span> <span class="kn">import</span> <span class="n">FIRuncFilter</span>
 <span class="n">y</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">FIRuncFilter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Uncertainty propagation through the application of the discrete Fourier transform (DFT). The time domain signal is <em>x</em> with associated squared uncertainty <em>ux</em>. The result
 of the DFT is the vector <em>X</em> of real and imaginary parts of the DFT applied to <em>x</em> and the associated uncertainty <em>UX</em>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_DFT</span> <span class="kn">import</span> <span class="n">GUM_DFT</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_DFT</span> <span class="kn">import</span> <span class="n">GUM_DFT</span>
 <span class="n">X</span><span class="p">,</span> <span class="n">UX</span> <span class="o">=</span> <span class="n">GUM_DFT</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ux</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Sequential application of the Monte Carlo method for uncertainty propagation for the case of filtering a time domain signal <em>x</em> with an IIR filter <em>b,a</em> with uncertainty associated with
 the filter coefficients <em>Uab</em> and signal noise standard deviation <em>sigma</em>. The filter output is the signal <em>y and the Monte Carlo method calculates point-wise uncertainties *uy</em> and
 coverage intervals <em>Py</em> corresponding to the specified percentiles.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_MonteCarlo</span> <span class="kn">import</span> <span class="n">SMC</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyDynamic.uncertainty.propagate_MonteCarlo</span> <span class="kn">import</span> <span class="n">SMC</span>
 <span class="n">y</span><span class="p">,</span> <span class="n">uy</span><span class="p">,</span> <span class="n">Py</span> <span class="o">=</span> <span class="n">SMC</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Uab</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">Perc</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span><span class="mf">0.975</span><span class="p">])</span>
 </pre></div>
 </div>
