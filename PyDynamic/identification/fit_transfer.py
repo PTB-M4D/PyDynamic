@@ -57,7 +57,10 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 			HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))
 			HMC = HR + 1j*HI
 		else:
-			HRI = np.random.multivariate_normal(H, UH, runs)
+			try:
+				HRI = np.random.multivariate_normal(H, UH, runs)
+			except RuntimeWarning:
+				print("Your covariance matrix is not positive-semidefinite. You may try PyDynamic.misc.tools.make_semiposdef first.")
 			HMC = HRI[:,:len(f)] + 1j*HRI[:,len(f):]
 
 		iRI = np.c_[np.real(1/HMC), np.imag(1/HMC)]
@@ -79,7 +82,7 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 		W = np.eye(2*len(f))
 
 	if isinstance(UH, np.ndarray):
-		if isinstance(MCruns, int) or isinstance(MCruns, float):
+		if isinstance(MCruns, int) or isinstance(MCruns, float):	# apply GUM S2 Monte Carlo
 			runs = int(MCruns)
 			MU = np.zeros((runs, 3))
 			for k in range(runs):
@@ -101,8 +104,10 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 
 			pars = PARS.mean(axis=0)
 			Upars= np.cov(PARS, rowvar = False)
-		else:
-			iri = np.r_[np.real(1 / H), np.imag(1 / H)]
+		else:		# apply GUM S2 linear propagation
+			Hc = Hr + 1j*Hi
+			assert (np.min(np.abs(Hc)>0)),"Frequency response cannot be equal to zero for inversion."
+			iri = np.r_[np.real(1 / Hc), np.imag(1 / Hc)]
 			n = len(f)
 			om = 2 * np.pi * f
 			E = np.c_[np.ones(n), 2j * om, - om ** 2]
@@ -112,13 +117,21 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 			XVy = (X.T).dot(np.linalg.solve(W, iri))
 
 			mu = np.linalg.solve(XVX, XVy)
-			Umu= np.linalg.solve( XVX, (X.T).dot(np.linalg.solve(W, iURI))  )
+			iXVX = np.linalg.inv(XVX)
+			XVUVX = np.dot((X.T).dot(np.linalg.solve(W, iURI)), np.linalg.solve(W, X))
+			Umu = iXVX.dot(XVUVX).dot(iXVX)
 
 			pars = np.r_[1 / mu[0], mu[1] / np.sqrt(np.abs(mu[0] * mu[2])), np.sqrt(np.abs(mu[0] / mu[2])) / 2 / np.pi]
+			C = np.array([[-1/mu[0]**2, 0, 0],
+						  [-mu[1]/(2*(np.abs(mu[0]+mu[2]))**(3/2)), 1/np.sqrt(np.abs(mu[0]+mu[2])), -mu[1]/(2*np.abs(mu[0]+mu[2])**(3/2))],
+						  [1/(4*np.pi*mu[2]*np.sqrt(np.abs(mu[0]/mu[2]))), 0, -mu[0]/(4*np.pi*mu[2]**2*np.sqrt(np.abs(mu[0]/mu[2])))]])
+			Upars = C.dot(Umu.dot(C.T))
 
 		return pars, Upars
 	else:
-		iri = np.r_[np.real(1/H), np.imag(1/H)]
+		Hc = Hr + 1j*Hi
+		assert (np.min(np.abs(Hc))>0), "Frequency response cannot be equal to zero for inversion."
+		iri = np.r_[np.real(1/Hc), np.imag(1/Hc)]
 		n = len(f)
 		om = 2 * np.pi * f * scaling
 		E = np.c_[np.ones(n), 2j * om, - om**2]
@@ -132,6 +145,3 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 		mu[2] *= scaling**2
 		pars  = np.r_[1/mu[0], mu[1]/np.sqrt(np.abs(mu[0]*mu[2])), np.sqrt(np.abs(mu[0]/mu[2]))/2/np.pi]
 		return pars
-
-
-
