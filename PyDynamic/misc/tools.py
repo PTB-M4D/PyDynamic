@@ -3,6 +3,9 @@
 .. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 """
 import numpy as np
+from scipy.sparse import eye, issparse
+from scipy.sparse.linalg import eigs
+
 
 def col_hstack(vectors):
     """
@@ -82,11 +85,21 @@ def make_semiposdef(matrix,maxiter=10,tol=1e-12):
     n,m = matrix.shape
     if n!=m:
         raise ValueError("Matrix has to be quadratic")
-    matrix = 0.5*(matrix+matrix.T)
-    e = np.real(np.linalg.eigvals(matrix)).min()
-    count = 0
-    while e<tol and count<maxiter:
-        matrix += (np.abs(e)+tol)*np.eye(n)
+    if issparse(matrix):
+        matrix = 0.5*(matrix+matrix.T)
+        e = np.real(eigs(matrix,which="SR",return_eigenvectors=False)).min()
+        count = 0
+        while e<tol and count<maxiter:
+            matrix += (np.absolute(e)+tol)*eye(n,format=matrix.format)
+            e = np.real(eigs(matrix,which="SR",return_eigenvectors=False)).min()
+            count += 1
+                    
+    else:
+        matrix = 0.5*(matrix+matrix.T)
         e = np.real(np.linalg.eigvals(matrix)).min()
-        count += 1
+        count = 0
+        while e<tol and count<maxiter:
+            matrix += (np.abs(e)+tol)*np.eye(n)
+            e = np.real(np.linalg.eigvals(matrix)).min()
+            count += 1
     return matrix
