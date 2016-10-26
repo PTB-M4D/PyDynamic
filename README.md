@@ -18,6 +18,8 @@ For the validation of the propagation of uncertainties, the Monte-Carlo method c
 
 The documentation for PyDynamic can be found at [http://pydynamic.readthedocs.io](http://pydynamic.readthedocs.io)
 
+Get in contact via [@PyDynamic](https://twitter.com/PyDynamic)
+
 ![PyDynamic packages](http://mathmet.org/projects/14SIP08/PyDynamic_scheme.png)
 
 
