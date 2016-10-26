@@ -267,7 +267,6 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 	else:
 		return x,Ux/N**2
 
-
 def GUM_DFTfreq(N, dt=1):
 	"""Return the Discrete Fourier Transform sample frequencies
 
@@ -290,6 +289,7 @@ def GUM_DFTfreq(N, dt=1):
 	"""
 
 	return np.fft.rfftfreq(N, dt)
+
 
 def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
 	"""Transformation from real and imaginary parts to amplitude and phase
@@ -559,7 +559,7 @@ def DFT_transferfunction(X, Y, UX, UY):
 def DFT_deconv(H, Y, UH, UY):
 	"""Deconvolution in the frequency domain
 
-	GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
+	GUM propagation of uncertainties for the deconvolution X = Y/H with Y and H being the Fourier transform of the measured signal
 	and of the system's impulse response, respectively.
 
 	Parameters
@@ -569,9 +569,9 @@ def DFT_deconv(H, Y, UH, UY):
 		Y: np.ndarray
 			real and imaginary parts of DFT values
 		UH: np.ndarray
-			covariance matrix associated with real and imaginary parts of H
+			covariance matrix associated with H
 		UY: np.ndarray
-			covariance matrix associated with real and imaginary parts of X
+			covariance matrix associated with X
 
 	Returns
 	-------
