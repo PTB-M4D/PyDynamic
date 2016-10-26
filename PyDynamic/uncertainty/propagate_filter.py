@@ -63,7 +63,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
             else:
                 raise NotImplementedError("FIR formula for covariance propagation not implemented. Suggesting Monte Carlo propagation instead.")
         Lr = len(ycorr)
-        Lstart = np.ceil(Lr/2.0)
+        Lstart = int(np.ceil(Lr/2.0))
         Lend = Lstart + LR -1
         Ryy = toeplitz(ycorr[Lstart:Lend])
         Ulow= Ryy[:len(theta),:len(theta)]

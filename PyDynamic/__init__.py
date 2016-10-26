@@ -9,7 +9,7 @@ from .deconvolution.fit_filter import LSFIR, LSFIR_unc, LSIIR, LSIIR_unc, LSFIR_
 from .uncertainty import *
 from .misc import *
 
-__version__ = "1.3.0beta1"
+__version__ = "1.3.0beta2"
 
 __all__ = ['LSFIR','LSIIR','LSFIR_unc','LSFIR_uncMC','LSIIR_unc','FreqResp2RealImag',
 		   'GUM_DFT', 'GUM_iDFT', 'DFT_deconv', 'DFT_multiply', 'DFT2AmpPhase', 'AmpPhase2DFT', 'AmpPhase2Time',
