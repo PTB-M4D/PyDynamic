@@ -10,7 +10,6 @@ from ..misc.tools import zerom
 
 # TODO Implement formula for colored noise
 # TODO Implement formula for covariance calculation
-# TODO Allow zero uncertainty for filter
 def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
 
@@ -18,12 +17,12 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     ----------
         y: np.ndarray
             filter input signal
-        sigma_noise: np.ndarray
-            standard deviation of white noise in y
+        sigma_noise: float or np.ndarray
+            when float then standard deviation of white noise in y; when ndarray then point-wise standard uncertainties
         theta: np.ndarray
             FIR filter coefficients
         Utheta: np.ndarray
-            squared uncertainty associated with theta
+            covariance matrix associated with theta
         shift: int
             time delay of filter output signal (in samples)
         blow: np.ndarray
@@ -48,8 +47,9 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
         * Implement formula for covariance calculation
 
     """
+    L = len(theta)
     if not isinstance(Utheta, np.ndarray):
-        Utheta = np.zeros((len(theta), len(theta)))
+        Utheta = np.zeros((L, L))
 
     if isinstance(blow,np.ndarray):
         LR = 600
@@ -61,7 +61,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
                 assert (len(sigma_noise)==len(y)), "Length of uncertainty and signal are inconsistent"
                 ycorr = np.convolve(sigma_noise, Bcorr)
             else:
-                raise NotImplementedError("FIR formula for covariance propagation not implemented. Suggest Monte Carlo propagation instead.")
+                raise NotImplementedError("FIR formula for covariance propagation not implemented. Suggesting Monte Carlo propagation instead.")
         Lr = len(ycorr)
         Lstart = int(np.ceil(Lr/2.0))
         Lend = Lstart + LR -1
@@ -82,17 +82,24 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     x = lfilter(theta,1.0,xlow)
     x = np.roll(x,int(shift))
 
-    UncCov = np.dot(theta[:,np.newaxis].T,np.dot(Ulow,theta)) + np.abs(np.trace(np.dot(Ulow,Utheta)))
+    if isinstance(sigma_noise, float):
+        UncCov = np.dot(theta[:,np.newaxis].T,np.dot(Ulow,theta)) + np.abs(np.trace(np.dot(Ulow,Utheta)))
+        unc = np.zeros_like(y)
+        unc[:L] = 0.0
+        for m in range(L,len(y)):
+            XL = xlow[m:m-L:-1]
+            unc[m] = np.dot(XL[:,np.newaxis].T,np.dot(Utheta,XL[:,np.newaxis]))
 
-    L = len(theta)
+        ux = np.sqrt(np.abs(UncCov + unc))
+    else:
+        ux = np.zeros_like(y)
+        ux[:L] = 0.0
+        for m in range(L, len(y)):
+            XL = xlow[m:m-L:-1]
+            UL = Ulow[m:m-L:-1, m:m-L:-1]
+            ux[m] = np.dot(theta[:,np.newaxis].T, UL.dot(theta)) + np.abs(np.trace( UL.dot(Utheta))) + \
+                     np.dot(XL[:,np.newaxis].T, Utheta.dot(XL[:,np.newaxis]))
 
-    unc = np.zeros_like(y)
-    unc[:L] = 0.0
-    for m in range(L,len(y)):
-        XL = xlow[m:m-L:-1]
-        unc[m] = np.dot(XL[:,np.newaxis].T,np.dot(Utheta,XL[:,np.newaxis]))
-
-    ux = np.sqrt(np.abs(UncCov + unc))
     ux = np.roll(ux,int(shift))
 
     return x, ux
