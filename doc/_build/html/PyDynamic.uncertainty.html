@@ -419,9 +419,9 @@ UAP = [[u(A,A), u(A,P)],[u(P,A),u(P,P)]]</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>np.ndarray</em>) &#8211; filter input signal</li>
-<li><strong>sigma_noise</strong> (<em>np.ndarray</em>) &#8211; standard deviation of white noise in y</li>
+<li><strong>sigma_noise</strong> (<em>float or np.ndarray</em>) &#8211; when float then standard deviation of white noise in y; when ndarray then point-wise standard uncertainties</li>
 <li><strong>theta</strong> (<em>np.ndarray</em>) &#8211; FIR filter coefficients</li>
-<li><strong>Utheta</strong> (<em>np.ndarray</em>) &#8211; squared uncertainty associated with theta</li>
+<li><strong>Utheta</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with theta</li>
 <li><strong>shift</strong> (<em>int</em>) &#8211; time delay of filter output signal (in samples)</li>
 <li><strong>blow</strong> (<em>np.ndarray</em>) &#8211; optional FIR low-pass filter</li>
 </ul>
