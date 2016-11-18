@@ -293,14 +293,14 @@ the frequency domain or the application of deconvolution as a multiplication wit
 <dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT">
 <code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">AmpPhase2DFT</code><span class="sig-paren">(</span><em>A</em>, <em>P</em>, <em>UAP</em>, <em>keep_sparse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#AmpPhase2DFT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transformation from amplitude and phase to real and imaginary parts</p>
+<dd><p>Transformation from magnitude and phase to real and imaginary parts</p>
 <p>Calculate the vector F=[real,imag] and propagate the covariance matrix UAP associated with [A, P]</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<em>np.ndarray</em>) &#8211; vector of amplitude values</li>
+<li><strong>A</strong> (<em>np.ndarray</em>) &#8211; vector of magnitude values</li>
 <li><strong>P</strong> (<em>np.ndarray</em>) &#8211; vector of phase values (in radians)</li>
 <li><strong>UAP</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with (A,P)
 or vector of squared standard uncertainties [u^2(A),u^2(P)]</li>
@@ -321,11 +321,11 @@ or vector of squared standard uncertainties [u^2(A),u^2(P)]</li>
 
 <dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase">
-<code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">DFT2AmpPhase</code><span class="sig-paren">(</span><em>F</em>, <em>UF</em>, <em>keep_sparse=False</em>, <em>tol=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#DFT2AmpPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transformation from real and imaginary parts to amplitude and phase</p>
+<code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">DFT2AmpPhase</code><span class="sig-paren">(</span><em>F</em>, <em>UF</em>, <em>keep_sparse=False</em>, <em>tol=1.0</em>, <em>return_type='separate'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#DFT2AmpPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transformation from real and imaginary parts to magnitude and phase</p>
 <p>Calculate the matrix
 U_AP = [[U1,U2],[U2^T,U3]]
-associated with amplitude and phase of the vector F=[real,imag]
+associated with magnitude and phase of the vector F=[real,imag]
 with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -336,13 +336,34 @@ with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]</p>
 <li><strong>UF</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with F</li>
 <li><strong>keep_sparse</strong> (<em>bool, optional</em>) &#8211; if true then UAP will be sparse if UF is one-dimensional</li>
 <li><strong>tol</strong> (<em>float, optional</em>) &#8211; lower bound for A/uF below which a warning will be issued concerning unreliable results</li>
+<li><strong>return_type</strong> (<em>str, optional</em>) &#8211; If &#8220;separate&#8221; then magnitude and phase are returned as seperate arrays. Otherwise the array [A, P] is returned</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>A</strong> (<em>np.ndarray</em>) &#8211; vector of amplitude values</li>
-<li><strong>P</strong> (<em>np.ndarray</em>) &#8211; vector of phase values</li>
-<li><strong>UAP</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with (A,P)</li>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul>
+<li><p class="first">If <cite>return_type</cite> is <cite>separate</cite> &#8211;</p>
+<dl class="docutils">
+<dt>A: np.ndarray</dt>
+<dd><p class="first last">vector of magnitude values</p>
+</dd>
+<dt>P: np.ndarray</dt>
+<dd><p class="first last">vector of phase values in radians, in the range [-pi, pi]</p>
+</dd>
+<dt>UAP: np.ndarray</dt>
+<dd><p class="first last">covariance matrix associated with (A,P)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><em>Otherwise</em> &#8211;</p>
+<dl class="docutils">
+<dt>AP: np.ndarray</dt>
+<dd><p class="first last">vector of magnitude and phase values</p>
+</dd>
+<dt>UAP: np.ndarray</dt>
+<dd><p class="first last">covariance matrix associated with AP</p>
+</dd>
+</dl>
+</li>
 </ul>
 </p>
 </td>

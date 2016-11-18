@@ -421,12 +421,12 @@
 
 	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DFT2AmpPhase"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase">[docs]</a><span class="k">def</span> <span class="nf">DFT2AmpPhase</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Transformation from real and imaginary parts to amplitude and phase</span>
+<div class="viewcode-block" id="DFT2AmpPhase"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase">[docs]</a><span class="k">def</span> <span class="nf">DFT2AmpPhase</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="s2">&quot;separate&quot;</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Transformation from real and imaginary parts to magnitude and phase</span>
 
 <span class="sd">	Calculate the matrix</span>
 <span class="sd">	U_AP = [[U1,U2],[U2^T,U3]]</span>
-<span class="sd">	associated with amplitude and phase of the vector F=[real,imag]</span>
+<span class="sd">	associated with magnitude and phase of the vector F=[real,imag]</span>
 <span class="sd">	with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]</span>
 
 <span class="sd">	Parameters</span>
@@ -439,14 +439,22 @@
 <span class="sd">			if true then UAP will be sparse if UF is one-dimensional</span>
 <span class="sd">		tol: float, optional</span>
 <span class="sd">			lower bound for A/uF below which a warning will be issued concerning unreliable results</span>
+<span class="sd">		return_type: str, optional</span>
+<span class="sd">			If &quot;separate&quot; then magnitude and phase are returned as seperate arrays. Otherwise the array [A, P] is returned</span>
 <span class="sd">	Returns</span>
 <span class="sd">	-------</span>
+<span class="sd">	If `return_type` is `separate`: </span>
 <span class="sd">		A: np.ndarray</span>
-<span class="sd">			vector of amplitude values</span>
+<span class="sd">			vector of magnitude values</span>
 <span class="sd">		P: np.ndarray</span>
-<span class="sd">			vector of phase values</span>
+<span class="sd">			vector of phase values in radians, in the range [-pi, pi]</span>
 <span class="sd">		UAP: np.ndarray</span>
 <span class="sd">			covariance matrix associated with (A,P)</span>
+<span class="sd">	Otherwise:</span>
+<span class="sd">		AP: np.ndarray</span>
+<span class="sd">			vector of magnitude and phase values</span>
+<span class="sd">		UAP: np.ndarray</span>
+<span class="sd">			covariance matrix associated with AP</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="c1"># calculate inverse DFT</span>
 	<span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span>
@@ -457,11 +465,11 @@
 	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
 		<span class="n">uF</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]))</span>
 	<span class="k">else</span><span class="p">:</span>
-		<span class="n">uF</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:]))</span>
+		<span class="n">uF</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span><span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:])))</span>
 	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">):</span>
-		<span class="nb">print</span><span class="p">(</span> <span class="s1">&#39;Some amplitude values are below the defined threshold.&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DFT2AmpPhase Warning</span><span class="se">\n</span><span class="s1"> Some amplitude values are below the defined threshold.&#39;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The GUM formulas may become unreliable and a Monte Carlo approach is recommended instead.&#39;</span><span class="p">)</span>
-		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;minimum value of A/uF is </span><span class="si">%.2e</span><span class="s1"> and the threshold is </span><span class="si">%.2e</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">tol</span><span class="p">))</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The actual minimum value of A/uF is </span><span class="si">%.2e</span><span class="s1"> and the threshold is </span><span class="si">%.2e</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">tol</span><span class="p">))</span>
 	<span class="n">aR</span> <span class="o">=</span> <span class="n">R</span><span class="o">/</span><span class="n">A</span>
 	<span class="n">aI</span> <span class="o">=</span> <span class="n">I</span><span class="o">/</span><span class="n">A</span>
 	<span class="n">pR</span> <span class="o">=</span> <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">A</span><span class="o">**</span><span class="mi">2</span>
@@ -485,18 +493,21 @@
 		<span class="n">U22</span> <span class="o">=</span> <span class="n">prod</span><span class="p">(</span><span class="n">pR</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URR</span><span class="p">,</span><span class="n">pR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">pR</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="p">,</span><span class="n">pI</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">pI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">URI</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">pR</span><span class="p">))</span> <span class="o">+</span> <span class="n">prod</span><span class="p">(</span><span class="n">pI</span><span class="p">,</span><span class="n">prod</span><span class="p">(</span><span class="n">UII</span><span class="p">,</span><span class="n">pI</span><span class="p">))</span>
 		<span class="n">UAP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">U11</span><span class="p">,</span><span class="n">U12</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">U12</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">U22</span><span class="p">))))</span>
 
-	<span class="k">return</span> <span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span></div>
+	<span class="k">if</span> <span class="n">return_type</span> <span class="o">==</span> <span class="s2">&quot;separate&quot;</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">],</span> <span class="n">UAP</span></div>
 
 
 <div class="viewcode-block" id="AmpPhase2DFT"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT">[docs]</a><span class="k">def</span> <span class="nf">AmpPhase2DFT</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot;Transformation from amplitude and phase to real and imaginary parts</span>
+	<span class="sd">&quot;&quot;&quot;Transformation from magnitude and phase to real and imaginary parts</span>
 
 <span class="sd">	Calculate the vector F=[real,imag] and propagate the covariance matrix UAP associated with [A, P]</span>
 
 <span class="sd">	Parameters</span>
 <span class="sd">	----------</span>
 <span class="sd">		A: np.ndarray</span>
-<span class="sd">			vector of amplitude values</span>
+<span class="sd">			vector of magnitude values</span>
 <span class="sd">		P: np.ndarray</span>
 <span class="sd">			vector of phase values (in radians)</span>
 <span class="sd">		UAP: np.ndarray</span>
