@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: PyDynamic
+Version: 1.2.61
+Summary: A software package for the analysis of dynamic measurements
+Home-page: https://github.com/eichstaedtPTB/PyDynamic
+Author: Sascha Eichstädt, Ian Smith
+Author-email: sascha.eichstaedt@ptb.de
+License: LGPLv3
+Description: Python package for the analysis of dynamic measurements
+         The goal of this package is to provide a starting point for users in metrology and related areas who deal with time-dependent, i.e. *dynamic*, measurements.
+        The software is part of a joint research project of the national metrology institutes from Germany and the UK, i.e. [Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html) and the [National Physical Laboratory](http://www.npl.co.uk).
+        
+Keywords: uncertainty dynamic deconvolution metrology
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Topic :: Utilities
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)

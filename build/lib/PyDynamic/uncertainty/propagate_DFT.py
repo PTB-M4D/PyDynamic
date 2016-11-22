@@ -13,7 +13,6 @@ The correspoding scientific publications is
 
 """
 
-# Todo: allow user to select specific frequencies
 import numpy as np
 from scipy import sparse
 
@@ -267,7 +266,6 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 	else:
 		return x,Ux/N**2
 
-
 def GUM_DFTfreq(N, dt=1):
 	"""Return the Discrete Fourier Transform sample frequencies
 
@@ -291,12 +289,12 @@ def GUM_DFTfreq(N, dt=1):
 
 	return np.fft.rfftfreq(N, dt)
 
-def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
-	"""Transformation from real and imaginary parts to amplitude and phase
+def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0, return_type="separate"):
+	"""Transformation from real and imaginary parts to magnitude and phase
 
 	Calculate the matrix
 	U_AP = [[U1,U2],[U2^T,U3]]
-	associated with amplitude and phase of the vector F=[real,imag]
+	associated with magnitude and phase of the vector F=[real,imag]
 	with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]
 
 	Parameters
@@ -309,14 +307,22 @@ def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
 			if true then UAP will be sparse if UF is one-dimensional
 		tol: float, optional
 			lower bound for A/uF below which a warning will be issued concerning unreliable results
+		return_type: str, optional
+			If "separate" then magnitude and phase are returned as seperate arrays. Otherwise the array [A, P] is returned
 	Returns
 	-------
+	If `return_type` is `separate`: 
 		A: np.ndarray
-			vector of amplitude values
+			vector of magnitude values
 		P: np.ndarray
-			vector of phase values
+			vector of phase values in radians, in the range [-pi, pi]
 		UAP: np.ndarray
 			covariance matrix associated with (A,P)
+	Otherwise:
+		AP: np.ndarray
+			vector of magnitude and phase values
+		UAP: np.ndarray
+			covariance matrix associated with AP
 	"""
 	# calculate inverse DFT
 	N = len(F)-2
@@ -327,11 +333,11 @@ def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
 	if len(UF.shape)==1:
 		uF = 0.5*(np.sqrt(UF[:N//2+1])+np.sqrt(UF[N//2+1:]))
 	else:
-		uF = 0.5*(np.sqrt(UF[:N//2+1,:N//2+1])+ np.sqrt(UF[:N//2+1,N//2+1:]))
+		uF = 0.5*(np.sqrt(np.diag(UF[:N//2+1,:N//2+1]))+ np.sqrt(np.diag(UF[N//2+1:,N//2+1:])))
 	if np.any(A/uF < tol):
-		print( 'Some amplitude values are below the defined threshold.')
+		print('DFT2AmpPhase Warning\n Some amplitude values are below the defined threshold.')
 		print('The GUM formulas may become unreliable and a Monte Carlo approach is recommended instead.')
-		print('minimum value of A/uF is %.2e and the threshold is %.2e'%((A/uF).min(), tol))
+		print('The actual minimum value of A/uF is %.2e and the threshold is %.2e'%((A/uF).min(), tol))
 	aR = R/A
 	aI = I/A
 	pR = -I/A**2
@@ -355,18 +361,21 @@ def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0):
 		U22 = prod(pR,prod(URR,pR)) + prod(pR,prod(URI,pI)) + prod(pI,prod(URI.T,pR)) + prod(pI,prod(UII,pI))
 		UAP = np.vstack((np.hstack((U11,U12)),np.hstack((U12.T,U22))))
 
-	return A,P,UAP
+	if return_type == "separate":
+		return A,P,UAP
+	else:
+		return np.r_[A,P], UAP
 
 
 def AmpPhase2DFT(A,P,UAP,keep_sparse=False):
-	"""Transformation from amplitude and phase to real and imaginary parts
+	"""Transformation from magnitude and phase to real and imaginary parts
 
 	Calculate the vector F=[real,imag] and propagate the covariance matrix UAP associated with [A, P]
 
 	Parameters
 	----------
 		A: np.ndarray
-			vector of amplitude values
+			vector of magnitude values
 		P: np.ndarray
 			vector of phase values (in radians)
 		UAP: np.ndarray
@@ -559,7 +568,7 @@ def DFT_transferfunction(X, Y, UX, UY):
 def DFT_deconv(H, Y, UH, UY):
 	"""Deconvolution in the frequency domain
 
-	GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
+	GUM propagation of uncertainties for the deconvolution X = Y/H with Y and H being the Fourier transform of the measured signal
 	and of the system's impulse response, respectively.
 
 	Parameters
@@ -569,9 +578,9 @@ def DFT_deconv(H, Y, UH, UY):
 		Y: np.ndarray
 			real and imaginary parts of DFT values
 		UH: np.ndarray
-			covariance matrix associated with real and imaginary parts of H
+			covariance matrix associated with H
 		UY: np.ndarray
-			covariance matrix associated with real and imaginary parts of X
+			covariance matrix associated with X
 
 	Returns
 	-------
