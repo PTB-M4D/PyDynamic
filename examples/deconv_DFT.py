@@ -70,7 +70,7 @@ plt.fill_between(time * 1e6, xh + 2 * ux, xh - 2 * ux, alpha=0.2, color=colors[0
 plt.xlabel(r"time / $\mu$s", fontsize=22)
 plt.ylabel("signal amplitude / MPa", fontsize=22)
 plt.tick_params(which= "major", labelsize=18)
-plt.legend(loc= "upper left", fontsize=18, fancybox=True)
+plt.legend(loc= "best", fontsize=18, fancybox=True)
 plt.xlim(0, 2)
 
 dB = lambda a: 20*np.log10(np.abs(a))

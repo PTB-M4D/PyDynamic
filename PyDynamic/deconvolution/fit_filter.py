@@ -61,7 +61,7 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
 			weights = np.diag(Wt)
 		else:
 			weights = np.eye(len(f))*Wt
-		X = np.np.vstack([np.real(np.dot(weights,E)), np.imag(np.dot(weights,E))])
+		X = np.vstack([np.real(np.dot(weights,E)), np.imag(np.dot(weights,E))])
 	else:
 		X = np.vstack([np.real(E), np.imag(E)])
 

@@ -15,8 +15,9 @@ The correspoding scientific publications is
 
 import numpy as np
 from scipy import sparse
+import warnings
 
-__all__ = ['GUM_DFT','GUM_iDFT', 'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase', 'AmpPhase2Time', 'Time2AmpPhase']
+__all__ = ['GUM_DFT','GUM_iDFT', 'GUM_DFTfreq', 'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase', 'AmpPhase2Time', 'Time2AmpPhase']
 
 def apply_window(x,Ux,window):
 	"""Apply a time domain window to the signal x of equal length and propagate uncertainties
@@ -139,6 +140,7 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False,mask=Non
 	if isinstance(mask, np.ndarray):
 		F = np.fft.rfft(x)[mask]
 		F = np.r_[np.real(F), np.imag(F)]
+		warnings.warn("In a future release, because of issues with the current version, \nthe handling of masked DFT arrays will be changed to use numpy masked arrays.",DeprecationWarning)
 	else:
 		F = np.fft.rfft(x)
 		F = np.r_[np.real(F),np.imag(F)]
