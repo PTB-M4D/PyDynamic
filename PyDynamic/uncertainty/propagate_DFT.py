@@ -582,7 +582,7 @@ def DFT_deconv(H, Y, UH, UY):
 		UH: np.ndarray
 			covariance matrix associated with H
 		UY: np.ndarray
-			covariance matrix associated with X
+			covariance matrix associated with Y
 
 	Returns
 	-------
