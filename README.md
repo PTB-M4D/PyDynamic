@@ -28,7 +28,7 @@ If you just want to use the software, the easiest way is to run from your system
 ```
   pip install PyDynamic
 ```
-This will download the latest version from the Python package repository and copy it into your local folder of third-party libraries. Usage in any Python environment on your computer is then possible by
+This will download the latest version from the Python package repository and copy it into your local folder of third-party libraries. Note that PyDynamic uses **Python version 3.x**. Usage in any Python environment on your computer is then possible by
 ```python
   import PyDynamic
 ```
