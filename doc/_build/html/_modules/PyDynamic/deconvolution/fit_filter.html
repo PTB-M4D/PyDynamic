@@ -130,7 +130,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for PyDynamic.deconvolution.fit_filter</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">.. module:: LSIIR</span>
 
 <span class="sd">.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)</span>
@@ -193,7 +194,7 @@
 			<span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Wt</span><span class="p">)</span>
 		<span class="k">else</span><span class="p">:</span>
 			<span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">))</span><span class="o">*</span><span class="n">Wt</span>
-		<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span><span class="n">E</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span><span class="n">E</span><span class="p">))])</span>
+		<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span><span class="n">E</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span><span class="n">E</span><span class="p">))])</span>
 	<span class="k">else</span><span class="p">:</span>
 		<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">E</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">E</span><span class="p">)])</span>
 
@@ -321,7 +322,6 @@
 	<span class="k">return</span> <span class="n">bi</span><span class="p">,</span><span class="n">ai</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span></div>
 
 
-<span class="c1">#Todo: Replace Monte Carlo with propagate_DFT.AmpPhase2DFT</span>
 <div class="viewcode-block" id="LSFIR_unc"><a class="viewcode-back" href="../../../PyDynamic.deconvolution.html#PyDynamic.deconvolution.fit_filter.LSFIR_unc">[docs]</a><span class="k">def</span> <span class="nf">LSFIR_unc</span><span class="p">(</span><span class="n">H</span><span class="p">,</span><span class="n">UH</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">tau</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">Fs</span><span class="p">,</span><span class="n">wt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">trunc_svd_tol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Design of FIR filter as fit to reciprocal of frequency response values with uncertainty</span>
 

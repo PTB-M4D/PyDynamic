@@ -14,7 +14,6 @@ This module implements Monte Carlo methods for the propagation of uncertainties 
 # TODO: Implement repeated random number drawing from multivariate normal like in mvnrnd with re-using cholesky
 import numpy as np
 import scipy as sp
-from numpy import matrix
 import sys
 from scipy.signal import lfilter
 import scipy.stats as stats
@@ -28,7 +27,7 @@ class Normal_ZeroCorr():
 	"""
 	Multivariate normal distribution with zero correlation
 	"""
-	def __init__(self, loc=None, scale=None):
+	def __init__(self, mean=None, cov=None):
 		"""
 		Parameters
 		----------
@@ -37,21 +36,30 @@ class Normal_ZeroCorr():
 			scale: np.ndarray, optional
 				standard deviations for the elements in loc, default is zero
 		"""
-		if isinstance(loc, np.ndarray):
-			self.mean = loc
-			if isinstance(scale, np.ndarray):
-				assert (len(scale)==len(loc))
-				self.std = scale
-			elif isinstance(scale, float):
-				self.std = scale * np.ones_like(loc)
+		if isinstance(mean, np.ndarray):
+			self.mean = mean
+			if isinstance(cov, np.ndarray):
+				assert (len(cov)==len(mean))
+				self.std = cov
+			elif isinstance(cov, float):
+				self.std = cov * np.ones_like(mean)
 			else:
-				self.std = np.zeros_like(loc)
-		elif isinstance(scale, np.ndarray):
-			self.std = scale
-			self.mean = np.zeros_like(scale)
+				self.std = np.zeros_like(mean)
+		elif isinstance(cov, np.ndarray):
+			self.std = cov
+			self.mean = np.zeros_like(cov)
 
 	def rvs(self, size=1):
 		return np.tile(self.mean, (size, 1)) + np.random.randn(size, len(self.mean))*np.tile(self.std, (size, 1))
+
+class Normal_FullCov(stats._multivariate.multivariate_normal_frozen):
+	"""
+	Derive from the default multivariate normal class one that allows storing the covariance matrix decomposition once calculated
+	"""
+	def __init__(self, mean=0, cov=1, seed=None, allow_singular=False):
+		super(Normal_FullCov, self).__init__(mean, cov, allow_singular, seed)
+		# initialize covariance matrix decomposition
+
 
 
 
@@ -108,7 +116,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 	theta = np.hstack((a[1:],b))
 	Theta = np.random.multivariate_normal(theta,Uab,runs)
 	if isinstance(Ux, np.ndarray):
-		dist = stats.multivariate_normal(x, Ux)
+		dist = stats.multivariate_normal(x, Ux, allow_singular=True)
 	elif isinstance(Ux, float):
 		dist = Normal_ZeroCorr(loc=x, scale=Ux)
 	else:

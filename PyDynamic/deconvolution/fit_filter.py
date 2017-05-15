@@ -190,7 +190,6 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
 	return bi,ai,int(tau)
 
 
-#Todo: Replace Monte Carlo with propagate_DFT.AmpPhase2DFT
 def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,trunc_svd_tol=None):
 	"""Design of FIR filter as fit to reciprocal of frequency response values with uncertainty
 

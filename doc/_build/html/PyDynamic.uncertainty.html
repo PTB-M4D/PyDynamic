@@ -228,6 +228,30 @@ and real and imaginary part obtained from calling rfft (DFT for real-valued sign
 </dd></dl>
 
 <dl class="function">
+<dt id="PyDynamic.uncertainty.propagate_DFT.GUM_DFTfreq">
+<code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">GUM_DFTfreq</code><span class="sig-paren">(</span><em>N</em>, <em>dt=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#GUM_DFTfreq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.GUM_DFTfreq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the Discrete Fourier Transform sample frequencies</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>N</strong> (<em>int</em>) &#8211; window length</li>
+<li><strong>dt</strong> (<em>float</em>) &#8211; sample spacing (inverse of sampling rate)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>f</strong> &#8211; Array of length <code class="docutils literal"><span class="pre">n//2</span> <span class="pre">+</span> <span class="pre">1</span></code> containing the sample frequencies</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_DFT.DFT_deconv">
 <code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">DFT_deconv</code><span class="sig-paren">(</span><em>H</em>, <em>Y</em>, <em>UH</em>, <em>UY</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#DFT_deconv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.DFT_deconv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deconvolution in the frequency domain</p>
@@ -241,7 +265,7 @@ and of the system&#8217;s impulse response, respectively.</p>
 <li><strong>H</strong> (<em>np.ndarray</em>) &#8211; real and imaginary parts of frequency response values (N an even integer)</li>
 <li><strong>Y</strong> (<em>np.ndarray</em>) &#8211; real and imaginary parts of DFT values</li>
 <li><strong>UH</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with H</li>
-<li><strong>UY</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with X</li>
+<li><strong>UY</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with Y</li>
 </ul>
 </td>
 </tr>

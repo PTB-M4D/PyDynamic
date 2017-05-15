@@ -657,6 +657,9 @@ def DFT_multiply(Y, UY, F, UF=None):
 		UYF: np.ndarray
 			the uncertainty associated with YF
 	"""
+	warnings.warn(
+		"In a future release, in order to achieve consistency with the other functions, \nthe order of the input arrays will change to Y, F, UY, UF.",
+		DeprecationWarning)
 
 	assert(len(Y)==len(F))
 
