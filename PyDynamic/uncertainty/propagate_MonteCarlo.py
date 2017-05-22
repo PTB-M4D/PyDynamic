@@ -11,6 +11,7 @@ This module implements Monte Carlo methods for the propagation of uncertainties 
 """
 
 # TODO: Implement updating Monte Carlo method
+# TODO: Advocate use of second-order-systems for higher-order IIR filters (i.e. throw warning at the user)
 import numpy as np
 import scipy as sp
 from numpy import matrix

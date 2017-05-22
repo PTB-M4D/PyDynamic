@@ -84,7 +84,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Getting started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PyDynamic.uncertainty.html">Evaluation of uncertainties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PyDynamic.deconvolution.html">Design of deconvolution filters</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Miscellaneous</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Miscellaneous</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.misc.SecondOrderSystem">Tools for 2nd order systems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.misc.filterstuff">Tools for digital filters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.misc.testsignals">Test signals</a></li>
@@ -112,7 +112,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -163,8 +163,7 @@ draws from the model parameters</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>H</strong> &#8211;
-complex frequency response values</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>H</strong> &#8211; complex frequency response values</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray shape (N,) or ndarray shape (N,K)</p>
@@ -192,8 +191,7 @@ draws from the model parameters</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211;
-analogue filter coefficients</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211; analogue filter coefficients</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
@@ -224,10 +222,8 @@ part of system&#8217;s transfer function using GUM S2 Monte Carlo.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211;
-best estimate of complex frequency response values</li>
-<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211;
-covariance matrix [ [u(abs,abs), u(abs,phase)], [u(phase,abs), u(phase,phase)] ]</li>
+<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211; best estimate of complex frequency response values</li>
+<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211; covariance matrix [ [u(abs,abs), u(abs,phase)], [u(phase,abs), u(phase,phase)] ]</li>
 </ul>
 </p>
 </td>
@@ -257,10 +253,8 @@ part of system&#8217;s transfer function using GUM S2 Monte Carlo.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211;
-best estimate of complex frequency response values</li>
-<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211;
-covariance matrix [ [u(real,real), u(real,imag)], [u(imag,real), u(imag,imag)] ]</li>
+<li><strong>Hmean</strong> (<em>ndarray, shape (N,)</em>) &#8211; best estimate of complex frequency response values</li>
+<li><strong>Hcov</strong> (<em>ndarray, shape (2N,2N)</em>) &#8211; covariance matrix [ [u(real,real), u(real,imag)], [u(imag,real), u(imag,imag)] ]</li>
 </ul>
 </p>
 </td>
@@ -290,10 +284,8 @@ covariance matrix [ [u(real,real), u(real,imag)], [u(imag,real), u(imag,imag)] ]
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>group_delay</strong> (<em>np.ndarray</em>) &#8211;
-group delay values</li>
-<li><strong>frequencies</strong> (<em>ndarray</em>) &#8211;
-frequencies at which the group delay is calculated</li>
+<li><strong>group_delay</strong> (<em>np.ndarray</em>) &#8211; group delay values</li>
+<li><strong>frequencies</strong> (<em>ndarray</em>) &#8211; frequencies at which the group delay is calculated</li>
 </ul>
 </p>
 </td>
@@ -322,10 +314,8 @@ frequencies at which the group delay is calculated</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>blow</strong> (<em>ndarray</em>) &#8211;
-FIR filter coefficients</li>
-<li><strong>shift</strong> (<em>int</em>) &#8211;
-delay of the filter (in samples)</li>
+<li><strong>blow</strong> (<em>ndarray</em>) &#8211; FIR filter coefficients</li>
+<li><strong>shift</strong> (<em>int</em>) &#8211; delay of the filter (in samples)</li>
 </ul>
 </p>
 </td>
@@ -349,8 +339,7 @@ delay of the filter (in samples)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stable</strong> &#8211;
-whether filter is stable or not</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>stable</strong> &#8211; whether filter is stable or not</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
@@ -381,8 +370,7 @@ approaches, such as moving averages techniques.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ys</strong> &#8211;
-the smoothed signal (or it&#8217;s n-th derivative).</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ys</strong> &#8211; the smoothed signal (or it&#8217;s n-th derivative).</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray, shape (N,)</p>
@@ -423,8 +411,7 @@ the point.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211;
-signal amplitudes at time instants</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211; signal amplitudes at time instants</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
@@ -451,8 +438,7 @@ signal amplitudes at time instants</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211;
-signal amplitudes at time instants</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211; signal amplitudes at time instants</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
@@ -479,8 +465,7 @@ signal amplitudes at time instants</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211;
-signal amplitudes at time instants</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211; signal amplitudes at time instants</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
@@ -506,8 +491,7 @@ signal amplitudes at time instants</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211;
-signal amplitude at time instants</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>x</strong> &#8211; signal amplitude at time instants</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>

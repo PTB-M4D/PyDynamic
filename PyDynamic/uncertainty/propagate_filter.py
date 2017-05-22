@@ -108,6 +108,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
 #TODO: Remove utilization of numpy.matrix
 #TODO: Extend to colored noise
 #TODO: Allow zero uncertainty for filter
+#TODO: use second-order-system structure for higher-order IIR filters (i.e. throw warning to user as a first step)
 def IIRuncFilter(x, noise, b, a, Uab):
     """Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 

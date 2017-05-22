@@ -31,6 +31,7 @@
 
   
     <link rel="top" title="PyDynamic 1.2.1 documentation" href="index.html"/>
+        <link rel="next" title="Miscellaneous" href="PyDynamic.misc.html"/>
         <link rel="prev" title="Evaluation of uncertainties" href="PyDynamic.uncertainty.html"/> 
 
   
@@ -81,8 +82,10 @@
             
             
                 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Getting started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="PyDynamic.uncertainty.html">Evaluation of uncertainties</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Design of deconvolution filters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Design of deconvolution filters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDynamic.misc.html">Miscellaneous</a></li>
 </ul>
 
             
@@ -105,7 +108,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -153,8 +156,7 @@ for the measurement system.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bFIR</strong> &#8211;
-filter coefficients</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bFIR</strong> &#8211; filter coefficients</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
@@ -193,10 +195,8 @@ Uncertainties are propagated using a truncated svd and linear matrix propagation
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>b</strong> (<em>np.ndarray</em>) &#8211;
-filter coefficients of shape</li>
-<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211;
-uncertainties associated with b</li>
+<li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter coefficients of shape</li>
+<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211; uncertainties associated with b</li>
 </ul>
 </p>
 </td>
@@ -211,7 +211,7 @@ uncertainties associated with b</li>
 
 <dl class="function">
 <dt id="PyDynamic.deconvolution.fit_filter.LSIIR">
-<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">LSIIR</code><span class="sig-paren">(</span><em>Hvals</em>, <em>Nb</em>, <em>Na</em>, <em>f</em>, <em>Fs</em>, <em>tau</em>, <em>justFit=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#LSIIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.LSIIR" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.deconvolution.fit_filter.</code><code class="descname">LSIIR</code><span class="sig-paren">(</span><em>Hvals</em>, <em>Nb</em>, <em>Na</em>, <em>f</em>, <em>Fs</em>, <em>tau=1</em>, <em>justFit=False</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/deconvolution/fit_filter.html#LSIIR"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.deconvolution.fit_filter.LSIIR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Design of a stable IIR filter as fit to reciprocal of frequency response values</p>
 <p>Least-squares fit of a digital IIR filter to the reciprocal of a given set
 of frequency response values using the equation-error method and stabilization
@@ -231,8 +231,7 @@ by pole mapping and introduction of a time delay.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211;
-IIR filter coefficients, int tau &#8211; time delay (in samples)</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>b,a</strong> &#8211; IIR filter coefficients, int tau &#8211; time delay (in samples)</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
@@ -269,12 +268,9 @@ carried out using the Monte Carlo method.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>b,a</strong> (<em>np.ndarray</em>) &#8211;
-IIR filter coefficients</li>
-<li><strong>tau</strong> (<em>int</em>) &#8211;
-time delay (in samples)</li>
-<li><strong>Uba</strong> (<em>np.ndarray</em>) &#8211;
-uncertainties associated with [a[1:],b]</li>
+<li><strong>b,a</strong> (<em>np.ndarray</em>) &#8211; IIR filter coefficients</li>
+<li><strong>tau</strong> (<em>int</em>) &#8211; time delay (in samples)</li>
+<li><strong>Uba</strong> (<em>np.ndarray</em>) &#8211; uncertainties associated with [a[1:],b]</li>
 </ul>
 </p>
 </td>
@@ -287,7 +283,7 @@ uncertainties associated with [a[1:],b]</li>
 </ul>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><code class="xref py py-mod docutils literal"><span class="pre">PyDynamic.uncertainty.propagate_filter.IIRuncFilter</span></code>
+<p class="last"><a class="reference internal" href="PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_filter.IIRuncFilter" title="PyDynamic.uncertainty.propagate_filter.IIRuncFilter"><code class="xref py py-mod docutils literal"><span class="pre">PyDynamic.uncertainty.propagate_filter.IIRuncFilter</span></code></a>
 <a class="reference internal" href="#PyDynamic.deconvolution.fit_filter.LSIIR" title="PyDynamic.deconvolution.fit_filter.LSIIR"><code class="xref py py-mod docutils literal"><span class="pre">PyDynamic.deconvolution.fit_filter.LSIIR</span></code></a></p>
 </div>
 </dd></dl>
@@ -318,10 +314,8 @@ associated with the filter coefficients.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>b</strong> (<em>np.ndarray</em>) &#8211;
-filter coefficients of shape</li>
-<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211;
-uncertainties associated with b</li>
+<li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter coefficients of shape</li>
+<li><strong>Ub</strong> (<em>np.ndarray</em>) &#8211; uncertainties associated with b</li>
 </ul>
 </p>
 </td>
@@ -342,6 +336,8 @@ uncertainties associated with b</li>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="PyDynamic.misc.html" class="btn btn-neutral float-right" title="Miscellaneous" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="PyDynamic.uncertainty.html" class="btn btn-neutral" title="Evaluation of uncertainties" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

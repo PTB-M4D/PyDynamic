@@ -83,7 +83,7 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Getting started.html">Getting started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Evaluation of uncertainties</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Evaluation of uncertainties</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.uncertainty.propagate_DFT">Uncertainty evaluation for the DFT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.uncertainty.propagate_filter">Uncertainty evaluation for digital filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-PyDynamic.uncertainty.propagate_MonteCarlo">Monte Carlo methods for digital filtering</a></li>
@@ -113,7 +113,7 @@
         <div class="rst-content">
           
 
-
+ 
 
 
 
@@ -156,7 +156,7 @@ GUM2DFT — a software tool for uncertainty evaluation of transient signals in t
 </dl>
 <dl class="function">
 <dt id="PyDynamic.uncertainty.propagate_DFT.GUM_DFT">
-<code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">GUM_DFT</code><span class="sig-paren">(</span><em>x</em>, <em>Ux</em>, <em>N=None</em>, <em>window=None</em>, <em>CxCos=None</em>, <em>CxSin=None</em>, <em>returnC=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#GUM_DFT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.GUM_DFT" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">GUM_DFT</code><span class="sig-paren">(</span><em>x</em>, <em>Ux</em>, <em>N=None</em>, <em>window=None</em>, <em>CxCos=None</em>, <em>CxSin=None</em>, <em>returnC=False</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#GUM_DFT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.GUM_DFT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculation of the DFT of the time domain signal x and propagation of the squared uncertainty Ux
 associated with the time domain sequence x to the real and imaginary parts of the DFT of x.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -171,14 +171,13 @@ associated with the time domain sequence x to the real and imaginary parts of th
 <li><strong>CxCos</strong> (<em>numpy.ndarray, optional</em>) &#8211; cosine part of sensitivity matrix</li>
 <li><strong>CxSin</strong> (<em>numpy.ndarray, optional</em>) &#8211; sine part of sensitivity matrix</li>
 <li><strong>returnC</strong> (<em>bool, optional</em>) &#8211; if true, return sensitivity matrix blocks for later use</li>
+<li><strong>mask</strong> (<em>ndarray of dtype bool</em>) &#8211; calculate DFT values and uncertainties only at those frequencies where mask is <cite>True</cite></li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>F</strong> (<em>numpy.ndarray</em>) &#8211;
-vector of complex valued DFT values or of its real and imaginary parts</li>
-<li><strong>UF</strong> (<em>numpy.ndarray</em>) &#8211;
-covariance matrix associated with real and imaginary part of F</li>
+<li><strong>F</strong> (<em>numpy.ndarray</em>) &#8211; vector of complex valued DFT values or of its real and imaginary parts</li>
+<li><strong>UF</strong> (<em>numpy.ndarray</em>) &#8211; covariance matrix associated with real and imaginary part of F</li>
 </ul>
 </p>
 </td>
@@ -214,10 +213,8 @@ and real and imaginary part obtained from calling rfft (DFT for real-valued sign
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>x</strong> (<em>np.ndarry</em>) &#8211;
-vector of time domain signal values</li>
-<li><strong>Ux</strong> (<em>np.ndarray</em>) &#8211;
-covariance matrix associated with x</li>
+<li><strong>x</strong> (<em>np.ndarry</em>) &#8211; vector of time domain signal values</li>
+<li><strong>Ux</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with x</li>
 </ul>
 </p>
 </td>
@@ -234,7 +231,7 @@ covariance matrix associated with x</li>
 <dt id="PyDynamic.uncertainty.propagate_DFT.DFT_deconv">
 <code class="descclassname">PyDynamic.uncertainty.propagate_DFT.</code><code class="descname">DFT_deconv</code><span class="sig-paren">(</span><em>H</em>, <em>Y</em>, <em>UH</em>, <em>UY</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyDynamic/uncertainty/propagate_DFT.html#DFT_deconv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDynamic.uncertainty.propagate_DFT.DFT_deconv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deconvolution in the frequency domain</p>
-<p>GUM propagation of uncertainties for the deconvolution Y = X/H with X and H being the Fourier transform of the measured signal
+<p>GUM propagation of uncertainties for the deconvolution X = Y/H with Y and H being the Fourier transform of the measured signal
 and of the system&#8217;s impulse response, respectively.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -243,16 +240,14 @@ and of the system&#8217;s impulse response, respectively.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>H</strong> (<em>np.ndarray</em>) &#8211; real and imaginary parts of frequency response values (N an even integer)</li>
 <li><strong>Y</strong> (<em>np.ndarray</em>) &#8211; real and imaginary parts of DFT values</li>
-<li><strong>UH</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with real and imaginary parts of H</li>
-<li><strong>UY</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with real and imaginary parts of X</li>
+<li><strong>UH</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with H</li>
+<li><strong>UY</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with X</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>X</strong> (<em>np.ndarray</em>) &#8211;
-real and imaginary parts of DFT values of deconv result</li>
-<li><strong>UX</strong> (<em>np.ndarray</em>) &#8211;
-covariance matrix associated with real and imaginary part of X</li>
+<li><strong>X</strong> (<em>np.ndarray</em>) &#8211; real and imaginary parts of DFT values of deconv result</li>
+<li><strong>UX</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with real and imaginary part of X</li>
 </ul>
 </p>
 </td>
@@ -285,10 +280,8 @@ the frequency domain or the application of deconvolution as a multiplication wit
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>YF</strong> (<em>np.ndarray</em>) &#8211;
-the product of Y and F</li>
-<li><strong>UYF</strong> (<em>np.ndarray</em>) &#8211;
-the uncertainty associated with YF</li>
+<li><strong>YF</strong> (<em>np.ndarray</em>) &#8211; the product of Y and F</li>
+<li><strong>UYF</strong> (<em>np.ndarray</em>) &#8211; the uncertainty associated with YF</li>
 </ul>
 </p>
 </td>
@@ -316,10 +309,8 @@ or vector of squared standard uncertainties [u^2(A),u^2(P)]</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>F</strong> (<em>np.ndarray</em>) &#8211;
-vector of real and imaginary parts of DFT result</li>
-<li><strong>UF</strong> (<em>np.ndarray</em>) &#8211;
-covariance matrix associated with F</li>
+<li><strong>F</strong> (<em>np.ndarray</em>) &#8211; vector of real and imaginary parts of DFT result</li>
+<li><strong>UF</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with F</li>
 </ul>
 </p>
 </td>
@@ -349,12 +340,9 @@ with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>A</strong> (<em>np.ndarray</em>) &#8211;
-vector of amplitude values</li>
-<li><strong>P</strong> (<em>np.ndarray</em>) &#8211;
-vector of phase values</li>
-<li><strong>UAP</strong> (<em>np.ndarray</em>) &#8211;
-covariance matrix associated with (A,P)</li>
+<li><strong>A</strong> (<em>np.ndarray</em>) &#8211; vector of amplitude values</li>
+<li><strong>P</strong> (<em>np.ndarray</em>) &#8211; vector of phase values</li>
+<li><strong>UAP</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with (A,P)</li>
 </ul>
 </p>
 </td>
@@ -382,10 +370,8 @@ UAP = [[u(A,A), u(A,P)],[u(P,A),u(P,P)]]</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>x</strong> (<em>np.ndarray</em>) &#8211;
-vector of time domain values</li>
-<li><strong>Ux</strong> (<em>np.ndarray</em>) &#8211;
-covariance matrix associated with x</li>
+<li><strong>x</strong> (<em>np.ndarray</em>) &#8211; vector of time domain values</li>
+<li><strong>Ux</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with x</li>
 </ul>
 </p>
 </td>
@@ -409,12 +395,9 @@ covariance matrix associated with x</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>A</strong> (<em>np.ndarray</em>) &#8211;
-amplitude values</li>
-<li><strong>P</strong> (<em>np.ndarray</em>) &#8211;
-phase values</li>
-<li><strong>UAP</strong> (<em>np.ndarray</em>) &#8211;
-covariance matrix associated with [A,P]</li>
+<li><strong>A</strong> (<em>np.ndarray</em>) &#8211; amplitude values</li>
+<li><strong>P</strong> (<em>np.ndarray</em>) &#8211; phase values</li>
+<li><strong>UAP</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with [A,P]</li>
 </ul>
 </p>
 </td>
@@ -436,19 +419,17 @@ covariance matrix associated with [A,P]</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>np.ndarray</em>) &#8211; filter input signal</li>
-<li><strong>sigma_noise</strong> (<em>np.ndarray</em>) &#8211; standard deviation of white noise in y</li>
+<li><strong>sigma_noise</strong> (<em>float or np.ndarray</em>) &#8211; when float then standard deviation of white noise in y; when ndarray then point-wise standard uncertainties</li>
 <li><strong>theta</strong> (<em>np.ndarray</em>) &#8211; FIR filter coefficients</li>
-<li><strong>Utheta</strong> (<em>np.ndarray</em>) &#8211; squared uncertainty associated with theta</li>
+<li><strong>Utheta</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with theta</li>
 <li><strong>shift</strong> (<em>int</em>) &#8211; time delay of filter output signal (in samples)</li>
 <li><strong>blow</strong> (<em>np.ndarray</em>) &#8211; optional FIR low-pass filter</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>x</strong> (<em>np.ndarray</em>) &#8211;
-FIR filter output signal</li>
-<li><strong>ux</strong> (<em>np.ndarray</em>) &#8211;
-point-wise uncertainties associated with x</li>
+<li><strong>x</strong> (<em>np.ndarray</em>) &#8211; FIR filter output signal</li>
+<li><strong>ux</strong> (<em>np.ndarray</em>) &#8211; point-wise uncertainties associated with x</li>
 </ul>
 </p>
 </td>
@@ -463,14 +444,13 @@ point-wise uncertainties associated with x</li>
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="PyDynamic.deconvolution.html#module-PyDynamic.deconvolution.fit_filter" title="PyDynamic.deconvolution.fit_filter"><code class="xref py py-mod docutils literal"><span class="pre">PyDynamic.deconvolution.fit_filter</span></code></a></p>
 </div>
-<dl class="docutils">
-<dt>Todo:</dt>
-<dd><ul class="first last simple">
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ul class="last simple">
 <li>Implement formula for colored noise</li>
 <li>Implement formula for covariance calculation</li>
 </ul>
-</dd>
-</dl>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -491,10 +471,8 @@ point-wise uncertainties associated with x</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>y</strong> (<em>np.ndarray</em>) &#8211;
-filter output signal</li>
-<li><strong>Uy</strong> (<em>np.ndarray</em>) &#8211;
-uncertainty associated with y</li>
+<li><strong>y</strong> (<em>np.ndarray</em>) &#8211; filter output signal</li>
+<li><strong>Uy</strong> (<em>np.ndarray</em>) &#8211; uncertainty associated with y</li>
 </ul>
 </p>
 </td>
@@ -532,7 +510,7 @@ with uncertainty matrix
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>x</strong> (<em>np.ndarray</em>) &#8211; filter input signal</li>
-<li><strong>Ux</strong> (<em>float or np.ndarray</em>) &#8211; standard deviation of signal noise or covariance matrix associated with x</li>
+<li><strong>Ux</strong> (<em>float or np.ndarray</em>) &#8211; standard deviation of signal noise (float), point-wise standard uncertainties or covariance matrix associated with x</li>
 <li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter numerator coefficients</li>
 <li><strong>a</strong> (<em>np.ndarray</em>) &#8211; filter denominator coefficients</li>
 <li><strong>Uab</strong> (<em>np.ndarray</em>) &#8211; uncertainty matrix <span class="math">\(U_    heta\)</span></li>
@@ -549,10 +527,8 @@ with uncertainty matrix
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li><strong>y</strong> (<em>np.ndarray</em>) &#8211;
-filter output signal</li>
-<li><strong>Uy</strong> (<em>np.ndarray</em>) &#8211;
-uncertainty associated with</li>
+<li><strong>y</strong> (<em>np.ndarray</em>) &#8211; filter output signal</li>
+<li><strong>Uy</strong> (<em>np.ndarray</em>) &#8211; uncertainty associated with</li>
 </ul>
 </td>
 </tr>
@@ -563,8 +539,7 @@ uncertainty associated with</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>Y</strong> &#8211;
-array of Monte Carlo results</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>Y</strong> &#8211; array of Monte Carlo results</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
 </tr>
@@ -613,12 +588,9 @@ with :<span class="math">\(w(n)\sim N(0,noise_std^2)\)</span></li>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
-<li><strong>y</strong> (<em>np.ndarray</em>) &#8211;
-filter output signal (Monte Carlo mean)</li>
-<li><strong>Uy</strong> (<em>np.ndarray</em>) &#8211;
-uncertainties associated with y (Monte Carlo point-wise std)</li>
-<li><strong>Quant</strong> (<em>np.ndarray</em>) &#8211;
-quantiles corresponding to percentiles Perc (if not None) at</li>
+<li><strong>y</strong> (<em>np.ndarray</em>) &#8211; filter output signal (Monte Carlo mean)</li>
+<li><strong>Uy</strong> (<em>np.ndarray</em>) &#8211; uncertainties associated with y (Monte Carlo point-wise std)</li>
+<li><strong>Quant</strong> (<em>np.ndarray</em>) &#8211; quantiles corresponding to percentiles Perc (if not None) at</li>
 </ul>
 </td>
 </tr>
@@ -629,8 +601,7 @@ quantiles corresponding to percentiles Perc (if not None) at</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>Y</strong> &#8211;
-array of all Monte Carlo results</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>Y</strong> &#8211; array of all Monte Carlo results</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">np.ndarray</td>
 </tr>
