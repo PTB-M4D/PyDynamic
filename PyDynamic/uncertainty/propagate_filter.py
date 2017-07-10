@@ -66,7 +66,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
         Lstart = int(np.ceil(Lr/2.0))
         Lend = Lstart + LR -1
         Ryy = toeplitz(ycorr[Lstart:Lend])
-        Ulow= Ryy[:len(theta),:len(theta)]
+        Ulow= Ryy[:len(y),:len(y)]
         xlow = lfilter(blow,1.0,y)
     else:
         if isinstance(sigma_noise, float):
