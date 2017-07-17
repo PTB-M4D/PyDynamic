@@ -57,7 +57,7 @@ def prod(A,B):
 	else:
 		raise ValueError("Wrong dimension of inputs")
 
-def matprod(M,V,W):
+def matprod(M,V,W,return_as_matrix=True):
 	"""Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2) for V=(V1,V2)
 	and W=(W1,W2). M can be sparse, one-dimensional or a full (quadratic) matrix.
 	"""
@@ -79,7 +79,10 @@ def matprod(M,V,W):
 	elif len(M.shape)==1:
 		A = M[:N]
 		D = M[N:]
-		return np.diag(v1*A*w1 + v2*D*w2)
+		if return_as_matrix:
+			return np.diag(v1*A*w1 + v2*D*w2)
+		else:
+			return np.r_[v1*A*w1 + v2*D*w2]
 	else:
 		A = M[:N,:N]
 		B = M[:N,N:]
@@ -596,11 +599,16 @@ def DFT_deconv(H, Y, UH, UY):
 		* Eichstädt and Wilkens [Eichst2016]_
 	"""
 	assert(len(H)==len(Y))
-	assert(UH.shape==(len(H),len(H)))
-	if len(UY.shape)==2:
-		assert(UH.shape==UY.shape)
 
-	N = UH.shape[0]-2
+	if len(UY.shape)==2:
+		assert (UH.shape == (len(H), len(H)))
+		assert(UH.shape==UY.shape)
+		N = UH.shape[0]-2
+	else:
+		assert(len(UH)==len(H))
+		assert(len(UY)==len(Y))
+		N = len(UH)-2
+
 	assert(np.mod(N,2)==0)
 
 # real and imaginary parts of system and signal

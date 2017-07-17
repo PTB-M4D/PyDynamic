@@ -189,7 +189,7 @@
 	<span class="k">else</span><span class="p">:</span>
 		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong dimension of inputs&quot;</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">matprod</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">W</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">matprod</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">return_as_matrix</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2) for V=(V1,V2)</span>
 <span class="sd">	and W=(W1,W2). M can be sparse, one-dimensional or a full (quadratic) matrix.</span>
 <span class="sd">	&quot;&quot;&quot;</span>
@@ -211,7 +211,10 @@
 	<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
 		<span class="n">A</span> <span class="o">=</span> <span class="n">M</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
 		<span class="n">D</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span>
-		<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">v1</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">w1</span> <span class="o">+</span> <span class="n">v2</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="n">w2</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">return_as_matrix</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">v1</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">w1</span> <span class="o">+</span> <span class="n">v2</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="n">w2</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">v1</span><span class="o">*</span><span class="n">A</span><span class="o">*</span><span class="n">w1</span> <span class="o">+</span> <span class="n">v2</span><span class="o">*</span><span class="n">D</span><span class="o">*</span><span class="n">w2</span><span class="p">]</span>
 	<span class="k">else</span><span class="p">:</span>
 		<span class="n">A</span> <span class="o">=</span> <span class="n">M</span><span class="p">[:</span><span class="n">N</span><span class="p">,:</span><span class="n">N</span><span class="p">]</span>
 		<span class="n">B</span> <span class="o">=</span> <span class="n">M</span><span class="p">[:</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">:]</span>
@@ -728,11 +731,16 @@
 <span class="sd">		* Eichstädt and Wilkens [Eichst2016]_</span>
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span>
-	<span class="k">assert</span><span class="p">(</span><span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)))</span>
-	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UY</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
-		<span class="k">assert</span><span class="p">(</span><span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">UY</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-	<span class="n">N</span> <span class="o">=</span> <span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">UY</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="k">assert</span> <span class="p">(</span><span class="n">UH</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">)))</span>
+		<span class="k">assert</span><span class="p">(</span><span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">UY</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+		<span class="n">N</span> <span class="o">=</span> <span class="n">UH</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UH</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">H</span><span class="p">))</span>
+		<span class="k">assert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UY</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span>
+		<span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">UH</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span>
+
 	<span class="k">assert</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1"># real and imaginary parts of system and signal</span>
