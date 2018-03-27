@@ -12,11 +12,15 @@ import scipy.signal as dsp
 from math import factorial
 from scipy.special import binom
 
-polyrev = lambda p_in: p_in[-1::-1]
+polyrev = lambda p_in: p_in[::-1]
 
 def prepad(vec, length, value=0):
-	return np.r_[value*np.ones(length-len(vec)), vec]
-
+    if length > len(vec):
+        return np.r_[value * np.ones(length - len(vec)), vec]
+    elif length < len(vec):
+        return vec[-length:]
+    else:
+        return vec
 
 def h1_z_deriv(n, p, ts):
 	"""
@@ -51,7 +55,7 @@ def h1_z_deriv(n, p, ts):
 	# Build the vector d that holds coefficients for all the derivatives of H1(z)
 	## The results reads d(n)*z^(1)*(d/dz)^(1)*H1(z) + d(n-1)*z^(2)*(d/dz)^(2)*H1(z) +...+ d(1)*z^(n)*(d/dz)^(n)*H1(z)
 
-	d = (-1)**n # Vector with the derivatives of H1(z)
+	d = [(-1)**n] # Vector with the derivatives of H1(z)
 	for i in range(n-1):
 		d  = [d, 0]                     # Shift result right (multiply by -z)
 		d += prepad(np.polyder(d), i + 1, 0) # Add the derivative
@@ -165,7 +169,7 @@ def impinvar(b_in, a_in, fs = 1, tol = 0.0001):
 
 	r_out = np.zeros(n, dtype = complex)  # Residues of H(z)
 	p_out = np.zeros(n, dtype = complex)  # Poles of H(z)
-	k_out = np.zeros(n)  # Constant term of H(z)
+	k_out = np.zeros(1)  # Constant term of H(z)
 
 	i = 0
 	while (i < n):
