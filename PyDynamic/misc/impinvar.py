@@ -193,3 +193,15 @@ def impinvar(b_in, a_in, fs = 1, tol = 0.0001):
 	b_out = b_out[:-1]
 
 	return b_out, a_out
+
+def impinvar_causal(*args, **kwargs):
+	"""causal version of impinvar, h[0] == 0"""
+
+	# polynomial.polysub is ordered from lowest to highest
+	from numpy.polynomial.polynomial import polysub
+
+	bz, az = impinvar(*args, **kwargs)
+
+	h0 = bz[0] / az[0]
+	bz = polysub(bz, h0 * az)
+	return bz, az
