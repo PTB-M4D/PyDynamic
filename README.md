@@ -81,6 +81,14 @@ coverage intervals *Py* corresponding to the specified percentiles.
 3. Add IPython notebooks as a way of documentation.
 4. Provide graphical user interfaces for specific use cases (Any suggestions? Let us know!)
 
+### Citation
+
+If you publish results obtained with the help of PyDynamic, please cite
+
+Sascha Eichstädt, Clemens Elster, Ian M. Smith, and Trevor J. Esward
+*Evaluation of dynamic measurement uncertainty – an open-source software package to bridge theory and practice*
+**J. Sens. Sens. Syst.**, 6, 97-105, 2017, DOI: [10.5194/jsss-6-97-2017](https://doi.org/10.5194/jsss-6-97-2017)
+
 ##### Acknowledgement
 This work is part of the Joint Support for Impact project [14SIP08](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for Innovation and Research (EMPIR). 
 The [EMPIR](http://msu.euramet.org) is jointly funded by the EMPIR participating countries within EURAMET and the European Union.
