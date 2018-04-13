@@ -5,5 +5,6 @@ to a given frequency response.
 """
 
 from .fit_filter import LSFIR, LSIIR
+from .fit_transfer import fit_sos
 
-__all__ = ['LSFIR', 'LSIIR']
+__all__ = ['LSFIR', 'LSIIR', 'fit_sos']

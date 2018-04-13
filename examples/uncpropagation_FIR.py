@@ -8,7 +8,6 @@ Uncertainty propagation for a FIR lowpass filter with uncertain cut-off frequenc
 
 """
 
-# if run as script, add parent path for relative importing
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -39,20 +38,23 @@ Ub = make_semiposdef(np.cov(B,rowvar=0))
 
 # simulate input and output signals
 time = np.arange(0,499*Ts,Ts)
-noise = 1e-3
+noise = 1e-5
 x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
 
-y,Uy = FIRuncFilter(x,noise,b,Ub)
-yMC,UyMC = MC.MC(x,noise,b,[1.0],Ub,runs=10000)
-yMC2,UyMC2 = MC.SMC(x,noise,b,[1.0],Ub,runs=10000)
+y, Uy = FIRuncFilter(x, noise, b, Ub, blow=b)
+yMC,UyMC = MC.MC(x,noise,b,[1.0],Ub,runs=1000,blow=b)
 
 plt.figure(1); plt.cla()
-plt.plot(time,col_hstack([x,y]))
-plt.legend(('input','output'))
+plt.plot(time, x, label="input")
+plt.plot(time, y, label="output")
+plt.xlabel("time / au")
+plt.ylabel("signal amplitude / au")
+plt.legend()
 
-plt.figure(3);plt.cla()
-plt.plot(time,col_hstack([Uy,UyMC,UyMC2]))
-plt.title('Uncertainty of filter output signal')
-plt.legend(('FIR formula','Monte Carlo','Sequential Monte Carlo'))
-
+plt.figure(2);plt.cla()
+plt.plot(time, Uy, label="FIR formula")
+plt.plot(time, np.sqrt(np.diag(UyMC)), label="Monte Carlo")
+plt.xlabel("time / au")
+plt.ylabel("signal uncertainty/ au")
+plt.legend()
 plt.show()
