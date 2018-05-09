@@ -364,6 +364,7 @@ with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]</p>
 </ul>
 </td>
 </tr>
+<<<<<<< Updated upstream
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul>
 <li><p class="first">If <cite>return_type</cite> is <cite>separate</cite> &#8211;</p>
 <dl class="docutils">
@@ -388,6 +389,12 @@ with associated covariance matrix U_F=[[URR,URI],[URI^T,UII]]</p>
 </dd>
 </dl>
 </li>
+=======
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>A</strong> (<em>np.ndarray</em>) &#8211; vector of amplitude values</li>
+<li><strong>P</strong> (<em>np.ndarray</em>) &#8211; vector of phase values</li>
+<li><strong>UAP</strong> (<em>np.ndarray</em>) &#8211; covariance matrix associated with (A,P)</li>
+>>>>>>> Stashed changes
 </ul>
 </p>
 </td>
@@ -555,7 +562,7 @@ with uncertainty matrix
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>x</strong> (<em>np.ndarray</em>) &#8211; filter input signal</li>
-<li><strong>Ux</strong> (<em>float or np.ndarray</em>) &#8211; standard deviation of signal noise or covariance matrix associated with x</li>
+<li><strong>Ux</strong> (<em>float or np.ndarray</em>) &#8211; standard deviation of signal noise (float), point-wise standard uncertainties or covariance matrix associated with x</li>
 <li><strong>b</strong> (<em>np.ndarray</em>) &#8211; filter numerator coefficients</li>
 <li><strong>a</strong> (<em>np.ndarray</em>) &#8211; filter denominator coefficients</li>
 <li><strong>Uab</strong> (<em>np.ndarray</em>) &#8211; uncertainty matrix <span class="math">\(U_    heta\)</span></li>

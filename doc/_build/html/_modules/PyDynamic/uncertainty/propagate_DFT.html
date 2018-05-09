@@ -145,9 +145,15 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
+<<<<<<< Updated upstream
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">sparse</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+=======
+<span class="c1"># Todo: allow user to select specific frequencies</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">sparse</span>
+>>>>>>> Stashed changes
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GUM_DFT&#39;</span><span class="p">,</span><span class="s1">&#39;GUM_iDFT&#39;</span><span class="p">,</span> <span class="s1">&#39;GUM_DFTfreq&#39;</span><span class="p">,</span> <span class="s1">&#39;DFT_deconv&#39;</span><span class="p">,</span> <span class="s1">&#39;DFT_multiply&#39;</span><span class="p">,</span> <span class="s1">&#39;AmpPhase2DFT&#39;</span><span class="p">,</span> <span class="s1">&#39;DFT2AmpPhase&#39;</span><span class="p">,</span> <span class="s1">&#39;AmpPhase2Time&#39;</span><span class="p">,</span> <span class="s1">&#39;Time2AmpPhase&#39;</span><span class="p">]</span>
 
@@ -275,7 +281,10 @@
 	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
 		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">F</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">F</span><span class="p">)]</span>
+<<<<<<< Updated upstream
 		<span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;In a future release, because of issues with the current version, </span><span class="se">\n</span><span class="s2">the handling of masked DFT arrays will be changed to use numpy masked arrays.&quot;</span><span class="p">,</span><span class="ne">DeprecationWarning</span><span class="p">)</span>
+=======
+>>>>>>> Stashed changes
 	<span class="k">else</span><span class="p">:</span>
 		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 		<span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">F</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">F</span><span class="p">)]</span>
@@ -406,6 +415,12 @@
 <div class="viewcode-block" id="GUM_DFTfreq"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFTfreq">[docs]</a><span class="k">def</span> <span class="nf">GUM_DFTfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Return the Discrete Fourier Transform sample frequencies</span>
 
+<<<<<<< Updated upstream
+=======
+<span class="k">def</span> <span class="nf">GUM_DFTfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Return the Discrete Fourier Transform sample frequencies</span>
+
+>>>>>>> Stashed changes
 <span class="sd">	Parameters</span>
 <span class="sd">	----------</span>
 <span class="sd">		N: int</span>
@@ -424,10 +439,17 @@
 
 <span class="sd">	&quot;&quot;&quot;</span>
 
+<<<<<<< Updated upstream
 	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DFT2AmpPhase"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase">[docs]</a><span class="k">def</span> <span class="nf">DFT2AmpPhase</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="s2">&quot;separate&quot;</span><span class="p">):</span>
 	<span class="sd">&quot;&quot;&quot;Transformation from real and imaginary parts to magnitude and phase</span>
+=======
+	<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DFT2AmpPhase"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase">[docs]</a><span class="k">def</span> <span class="nf">DFT2AmpPhase</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">UF</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Transformation from real and imaginary parts to amplitude and phase</span>
+>>>>>>> Stashed changes
 
 <span class="sd">	Calculate the matrix</span>
 <span class="sd">	U_AP = [[U1,U2],[U2^T,U3]]</span>
@@ -472,9 +494,15 @@
 	<span class="k">else</span><span class="p">:</span>
 		<span class="n">uF</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">UF</span><span class="p">[:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">,:</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span><span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">UF</span><span class="p">[</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:,</span><span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:])))</span>
 	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">):</span>
+<<<<<<< Updated upstream
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DFT2AmpPhase Warning</span><span class="se">\n</span><span class="s1"> Some amplitude values are below the defined threshold.&#39;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The GUM formulas may become unreliable and a Monte Carlo approach is recommended instead.&#39;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The actual minimum value of A/uF is </span><span class="si">%.2e</span><span class="s1"> and the threshold is </span><span class="si">%.2e</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">tol</span><span class="p">))</span>
+=======
+		<span class="nb">print</span><span class="p">(</span> <span class="s1">&#39;Some amplitude values are below the defined threshold.&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The GUM formulas may become unreliable and a Monte Carlo approach is recommended instead.&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;minimum value of A/uF is </span><span class="si">%.2e</span><span class="s1"> and the threshold is </span><span class="si">%.2e</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">((</span><span class="n">A</span><span class="o">/</span><span class="n">uF</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">tol</span><span class="p">))</span>
+>>>>>>> Stashed changes
 	<span class="n">aR</span> <span class="o">=</span> <span class="n">R</span><span class="o">/</span><span class="n">A</span>
 	<span class="n">aI</span> <span class="o">=</span> <span class="n">I</span><span class="o">/</span><span class="n">A</span>
 	<span class="n">pR</span> <span class="o">=</span> <span class="o">-</span><span class="n">I</span><span class="o">/</span><span class="n">A</span><span class="o">**</span><span class="mi">2</span>
@@ -505,7 +533,11 @@
 
 
 <div class="viewcode-block" id="AmpPhase2DFT"><a class="viewcode-back" href="../../../PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT">[docs]</a><span class="k">def</span> <span class="nf">AmpPhase2DFT</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">UAP</span><span class="p">,</span><span class="n">keep_sparse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<<<<<<< Updated upstream
 	<span class="sd">&quot;&quot;&quot;Transformation from magnitude and phase to real and imaginary parts</span>
+=======
+	<span class="sd">&quot;&quot;&quot;Transformation from amplitude and phase to real and imaginary parts</span>
+>>>>>>> Stashed changes
 
 <span class="sd">	Calculate the vector F=[real,imag] and propagate the covariance matrix UAP associated with [A, P]</span>
 

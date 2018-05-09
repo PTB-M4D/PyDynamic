@@ -22,7 +22,7 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 			is taken as covariance matrix. When UH is not specified no uncertainties assoc. with the fit are calculated.
 		weighting: str or array
 			Type of weighting (None, 'diag', 'cov') or array of weights (length two times of f)
-		MCruns: int
+		MCruns: int, optional
 			Number of Monte Carlo trials for propagation of uncertainties. When MCruns is 'None', matrix multiplication
 			is used for the propagation of uncertainties. However, in some cases this can cause trouble.
 		scaling: float
@@ -44,10 +44,7 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 			assert(UH.shape[0]==UH.shape[1])
 
 		# propagate to real and imaginary parts of reciprocal using Monte Carlo
-		if isinstance(MCruns, int) or isinstance(MCruns, float):
-			runs = int(MCruns)
-		else:
-			runs = 10000
+		runs = 10000
 		if len(UH.shape)==1:
 			HR = np.tile(Hr, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[:len(f)], (runs, 1))
 			HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))

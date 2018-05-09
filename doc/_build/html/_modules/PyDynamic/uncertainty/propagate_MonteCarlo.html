@@ -143,9 +143,15 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># TODO: Implement updating Monte Carlo method</span>
+<<<<<<< Updated upstream
 <span class="c1"># TODO: Implement repeated random number drawing from multivariate normal like in mvnrnd with re-using cholesky</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+=======
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">matrix</span>
+>>>>>>> Stashed changes
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="k">import</span> <span class="n">lfilter</span>
 <span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
@@ -159,7 +165,11 @@
 	<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Multivariate normal distribution with zero correlation</span>
 <span class="sd">	&quot;&quot;&quot;</span>
+<<<<<<< Updated upstream
 	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+=======
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+>>>>>>> Stashed changes
 		<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">		Parameters</span>
 <span class="sd">		----------</span>
@@ -208,7 +218,7 @@
 <span class="sd">		x: np.ndarray</span>
 <span class="sd">			filter input signal</span>
 <span class="sd">		Ux: float or np.ndarray</span>
-<span class="sd">			standard deviation of signal noise or covariance matrix associated with x</span>
+<span class="sd">			standard deviation of signal noise (float), point-wise standard uncertainties or covariance matrix associated with x</span>
 <span class="sd">		b: np.ndarray</span>
 <span class="sd">			filter numerator coefficients</span>
 <span class="sd">		a: np.ndarray</span>
@@ -248,7 +258,14 @@
 	<span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">b</span><span class="p">))</span>
 	<span class="n">Theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="n">Uab</span><span class="p">,</span><span class="n">runs</span><span class="p">)</span>
 	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<<<<<<< Updated upstream
 		<span class="n">dist</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ux</span><span class="p">,</span> <span class="n">allow_singular</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+=======
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Ux</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">dist</span> <span class="o">=</span> <span class="n">Normal_ZeroCorr</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">Ux</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">dist</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Ux</span><span class="p">)</span>
+>>>>>>> Stashed changes
 	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Ux</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
 		<span class="n">dist</span> <span class="o">=</span> <span class="n">Normal_ZeroCorr</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">Ux</span><span class="p">)</span>
 	<span class="k">else</span><span class="p">:</span>

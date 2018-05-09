@@ -191,3 +191,24 @@ class Signal():
 		else:
 			raise NotImplementedError
 		return Signal(self.time, values, uncertainty, Ts=self.Ts)
+<<<<<<< Updated upstream:build/lib/PyDynamic/signals.py
+=======
+
+
+if __name__=="__main__":
+	from PyDynamic import Signal
+	N = 1024
+	Ts = 0.01
+	time = np.arange(0, N * Ts, Ts)
+	x = rect(time, Ts * N // 4, Ts * N // 4 * 3)
+	ux = 0.02
+	signal = Signal(time, x, Ts = Ts, uncertainty = ux)
+	b = dsp.firls(15, [0, 0.2 * signal.Fs / 2, 0.25 * signal.Fs / 2, signal.Fs / 2], [1, 1, 0, 0], nyq = signal.Fs / 2)
+	Ub = np.diag(b * 1e-1)
+	signal.apply_filter(b, filter_uncertainty = Ub)
+	signal.plot_uncertainty()
+	bl, al = dsp.bessel(4, 0.2)
+	Ul = np.diag(np.r_[al[1:] * 1e-3, bl * 1e-2] ** 2)
+	signal.apply_filter(bl, al, filter_uncertainty = Ul)
+	signal.plot_uncertainty(fignr = 3)
+>>>>>>> Stashed changes:PyDynamic/signals.py
