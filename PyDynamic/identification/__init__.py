@@ -2,6 +2,9 @@
 """
 The :mod:`PyDynamic.identification` module implements the least-squares fit of an IIR or FIR digital filter
 to a given frequency response.
+
+# See http://mathmet.org/projects/14SIP08 and
+# https://www.github.com/eichstaedtPTB/PyDynamic
 """
 
 from .fit_filter import LSFIR, LSIIR

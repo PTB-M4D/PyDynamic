@@ -118,7 +118,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 	if isinstance(Ux, np.ndarray):
 		dist = stats.multivariate_normal(x, Ux, allow_singular=True)
 	elif isinstance(Ux, float):
-		dist = Normal_ZeroCorr(loc=x, scale=Ux)
+		dist = Normal_ZeroCorr(mean=x, cov=Ux)
 	else:
 		raise NotImplementedError("The supplied type of uncertainty is not implemented")
 
@@ -155,7 +155,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 		return Y
 	else:
 		y = np.mean(Y[st_inds,:],axis=0)
-		uy= np.std(Y[st_inds,:],axis=0)
+		uy= np.cov(Y[st_inds,:],rowvar=0)
 		return y, uy
 
 
@@ -316,10 +316,11 @@ def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0
 			Xl = np.hstack( ( X.dot(blow.T) - Xl[:,:len(alow)].dot(alow[1:]), Xl[:,:-1] ) )
 		elif isinstance(blow,np.ndarray):
 			X = np.hstack((x[k] + E, X[:, :-1]))
-			Xl = X.dot(blow.T)
+			Xl = X.dot(blow)
 		else:
 			Xl = x[k] + E
-
+		if len(Xl.shape)==1:
+			Xl = Xl[:,np.newaxis]
 		Y = np.sum(np.multiply(c,States),axis=1) + np.multiply(b0,Xl[:,0]) + (np.random.rand(runs)*2*Delta - Delta)
 		Z = -np.sum(np.multiply(A,States),axis=1) + Xl[:,0]
 		States = np.hstack((Z[:,np.newaxis], States[:,:-1]))

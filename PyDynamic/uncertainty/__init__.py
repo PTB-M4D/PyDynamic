@@ -2,6 +2,9 @@
 """
 The :mod:`PyDynamic.uncertainty` module implements methods for the propagation of uncertainty for the most common use
 caes in the analysis of dynamic measurements.
+
+# See http://mathmet.org/projects/14SIP08 and
+# https://www.github.com/eichstaedtPTB/PyDynamic
 """
 
 from .propagate_DFT import GUM_DFT, GUM_iDFT, DFT_deconv, DFT_multiply, DFT2AmpPhase, AmpPhase2DFT, AmpPhase2Time, Time2AmpPhase

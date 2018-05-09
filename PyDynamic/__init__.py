@@ -3,9 +3,12 @@ import misc
 import identification
 import deconvolution
 import uncertainty
+
+# See http://mathmet.org/projects/14SIP08 and
+# https://www.github.com/eichstaedtPTB/PyDynamic
 """
 
-from .deconvolution.fit_filter import LSFIR, LSFIR_unc, LSIIR, LSIIR_unc, LSFIR_uncMC, FreqResp2RealImag
+from .deconvolution.fit_filter import LSFIR, LSFIR_unc, LSIIR, LSIIR_unc, LSFIR_uncMC
 from .uncertainty import *
 from .misc import *
 from .identification import *

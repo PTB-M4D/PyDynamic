@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-
-
-
 import numpy as np
 from scipy.signal import lfilter,tf2ss
 from scipy.linalg import toeplitz
 from ..misc.tools import zerom
+# Note: The Elster-Link paper assumes that the autocovariance is known and that noise is stationary!
 
 # TODO Implement formula for colored noise
 # TODO Implement formula for covariance calculation
+
+
 def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
 
@@ -17,8 +17,8 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     ----------
         y: np.ndarray
             filter input signal
-        sigma_noise: float or np.ndarray
-            when float then standard deviation of white noise in y; when ndarray then point-wise standard uncertainties
+        sigma_noise: float
+            standard deviation of white noise in y
         theta: np.ndarray
             FIR filter coefficients
         Utheta: np.ndarray
@@ -47,62 +47,45 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
         * Implement formula for covariance calculation
 
     """
-    L = len(theta)
+    if not isinstance(sigma_noise, float):
+        raise NotImplementedError(
+            "FIR formula for covariance propagation not implemented yet. Suggesting Monte Carlo propagation instead.")
+    Ncomp = len(theta) - 1
+
     if not isinstance(Utheta, np.ndarray):
-        Utheta = np.zeros((L, L))
+        Utheta = np.zeros((Ncomp, Ncomp))
 
     if isinstance(blow,np.ndarray):
         LR = 600
-        Bcorr = np.correlate(blow,blow,mode='full')
-        if isinstance(sigma_noise,float):
-            ycorr = np.convolve(sigma_noise**2,Bcorr)
-        else:
-            if len(sigma_noise.shape)==1:
-                assert (len(sigma_noise)==len(y)), "Length of uncertainty and signal are inconsistent"
-                ycorr = np.convolve(sigma_noise, Bcorr)
-            else:
-                raise NotImplementedError("FIR formula for covariance propagation not implemented. Suggesting Monte Carlo propagation instead.")
+        Bcorr = np.correlate(blow, blow, 'full')
+        ycorr = np.convolve(sigma_noise**2,Bcorr)
         Lr = len(ycorr)
-        Lstart = int(np.ceil(Lr/2.0))
+        Lstart = int(np.ceil(Lr//2))
         Lend = Lstart + LR -1
         Ryy = toeplitz(ycorr[Lstart:Lend])
-        Ulow= Ryy[:len(y),:len(y)]
+        Ulow= Ryy[:Ncomp+1,:Ncomp+1]
         xlow = lfilter(blow,1.0,y)
     else:
-        if isinstance(sigma_noise, float):
-            Ulow = np.eye(len(theta))*sigma_noise**2
-        else:
-            if len(sigma_noise.shape)==1:
-                Ulow = np.diag(sigma_noise)
-            else:
-                Ulow = sigma_noise
+        Ulow = np.eye(len(theta))*sigma_noise**2
         xlow = y
 
-
     x = lfilter(theta,1.0,xlow)
-    x = np.roll(x,int(shift))
+    x = np.roll(x,-int(shift))
 
-    if isinstance(sigma_noise, float):
-        UncCov = np.dot(theta[:,np.newaxis].T,np.dot(Ulow,theta)) + np.abs(np.trace(np.dot(Ulow,Utheta)))
-        unc = np.zeros_like(y)
-        unc[:L] = 0.0
-        for m in range(L,len(y)):
-            XL = xlow[m:m-L:-1]
-            unc[m] = np.dot(XL[:,np.newaxis].T,np.dot(Utheta,XL[:,np.newaxis]))
+    L = Utheta.shape[0]
+    if len(theta.shape)==1:
+        theta = theta[:, np.newaxis]
+    UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))
+    unc = np.zeros_like(y)
+    for m in range(L,len(xlow)):
+        XL = xlow[m:m-L:-1, np.newaxis]
+        unc[m] = XL.T.dot(Utheta.dot(XL))
+    ux = np.sqrt(np.abs(UncCov + unc))
+    ux = np.roll(ux,-int(shift))
 
-        ux = np.sqrt(np.abs(UncCov + unc))
-    else:
-        ux = np.zeros_like(y)
-        ux[:L] = 0.0
-        for m in range(L, len(y)):
-            XL = xlow[m:m-L:-1]
-            UL = Ulow[m:m-L:-1, m:m-L:-1]
-            ux[m] = np.dot(theta[:,np.newaxis].T, UL.dot(theta)) + np.abs(np.trace( UL.dot(Utheta))) + \
-                     np.dot(XL[:,np.newaxis].T, Utheta.dot(XL[:,np.newaxis]))
+    return x, ux.flatten()
 
-    ux = np.roll(ux,int(shift))
 
-    return x, ux
 
 
 #TODO: Remove utilization of numpy.matrix

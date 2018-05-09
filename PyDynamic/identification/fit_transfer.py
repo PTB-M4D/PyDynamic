@@ -2,6 +2,7 @@
 """
 Collection of methods for the identification of transfer function models
 """
+
 import numpy as np
 
 def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):

@@ -4,8 +4,8 @@ Created on Thu Sep 10 11:58:46 2015
 
 In this example an actually measured signal is deconvolved and the result compared to a reference measurement signal.
 
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 from PyDynamic.uncertainty.propagate_DFT import GUM_DFT,GUM_iDFT, DFT_deconv, AmpPhase2DFT, DFT_multiply

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
+This module contains several functions to carry out a least-squares fit to a given complex frequency response.
 '''
 
 from ..misc.filterstuff import grpdelay, mapinside

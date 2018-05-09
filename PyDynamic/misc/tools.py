@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
+Collection of miscelleneous helper functions.
+
 """
+
 import numpy as np
 
 def col_hstack(vectors):
@@ -90,3 +92,62 @@ def make_semiposdef(matrix,maxiter=10,tol=1e-12):
         e = np.real(np.linalg.eigvals(matrix)).min()
         count += 1
     return matrix
+
+
+def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
+    """
+    Calculation of real and imaginary parts from amplitude and phase with associated
+    uncertainties.
+
+    Parameters
+    ----------
+
+        Abs: ndarray of shape N - amplitude values
+        Phase: ndarray of shape N - phase values in rad
+        Unc: ndarray of shape 2Nx2N or 2N - uncertainties
+
+    Returns
+    -------
+
+        Re,Im: ndarrays of shape N - real and imaginary parts (best estimate)
+        URI: ndarray of shape 2Nx2N - uncertainties assoc. with Re and Im
+    """
+
+    if len(Abs) != len(Phase) or 2 * len(Abs) != len(Unc):
+        raise ValueError('\nLength of inputs are inconsistent.')
+
+    if len(Unc.shape) == 1:
+        Unc = np.diag(Unc)
+
+    Nf = len(Abs)
+
+    AbsPhas = np.random.multivariate_normal(np.hstack((Abs, Phase)), Unc, int(MCruns))
+
+    H = AbsPhas[:, :Nf] * np.exp(1j * AbsPhas[:, Nf:])
+    RI = np.hstack((np.real(H), np.imag(H)))
+
+    Re = np.mean(RI[:, :Nf])
+    Im = np.mean(RI[:, Nf:])
+    URI = np.cov(RI, rowvar=False)
+
+    return Re, Im, URI
+
+
+def mapinside(a):
+    """
+    Mapping roots of the polynomial with coefficents a into the unit circle by projection.
+
+    Parameters
+    ----------
+        a: ndarray of shape N - coefficients of polynomial 
+
+    Returns
+    -------
+        v: ndarray of shape N - coefficients of polynomial with all roots inside the unit circle
+
+    """
+    from numpy import roots, conj, poly, nonzero
+    v = roots(a)
+    inds = nonzero(abs(v) > 1)
+    v[inds] = 1 / conj(v[inds])
+    return poly(v)

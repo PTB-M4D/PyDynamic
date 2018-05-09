@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: LSIIR
 
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
+This module contains functions to carry out a least-squares fit of a digital filter to the reciprocal of a given 
+complex frequency response. 
 
 """
 
@@ -10,6 +10,7 @@ import numpy as np
 import scipy.signal as dsp
 
 from ..misc.filterstuff import grpdelay
+from ..misc.tools import mapinside
 
 __all__ = ['LSFIR', 'LSFIR_unc', 'LSIIR', 'LSIIR_unc', 'LSFIR_uncMC']
 
@@ -82,112 +83,9 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
 	return bFIR.flatten()
 
 
-def mapinside(a):
-	from numpy import roots,conj,poly,nonzero
-	v = roots(a)
-	inds = nonzero(abs(v)>1)
-	v[inds] = 1/conj(v[inds])
-	return poly(v)
 
 
-def LSIIR(Hvals,Nb,Na,f,Fs,tau,justFit=False,verbose=True):
-	"""Design of a stable IIR filter as fit to reciprocal of frequency response values
 
-	Least-squares fit of a digital IIR filter to the reciprocal of a given set
-	of frequency response values using the equation-error method and stabilization
-	by pole mapping and introduction of a time delay.
-
-	Parameters
-	----------
-		Hvals: np.ndarray
-			frequency response values.
-		Nb: int
-			order of IIR numerator polynomial.
-		Na: int
-			order of IIR denominator polynomial.
-		f: np.ndarray
-			frequencies corresponding to Hvals
-		Fs: float
-			sampling frequency for digital IIR filter.
-		tau: float
-			initial estimate of time delay for filter stabilization.
-		justFit: bool
-			if True then no stabilization is carried out.
-
-	Returns
-	-------
-		b,a : np.ndarray
-			IIR filter coefficients, int tau -- time delay (in samples)
-	
-	References
-	----------
-		* Eichstädt, Elster, Esward, Hessling [Eichst2010]_
-
-	"""
-	from numpy import conj,count_nonzero,roots,ceil,median
-	from numpy.linalg import lstsq
-
-	if verbose:
-		print("\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb,Na))
-		print("reciprocal of a frequency response given by %d values.\n" % len(Hvals))
-  
-	w = 2*np.pi*f/Fs
-	Ns= np.arange(0,max(Nb,Na)+1)[:,np.newaxis]
-	E = np.exp(-1j*np.dot(w[:,np.newaxis],Ns.T))
-
-	def fitIIR(Hvals,tau,E,Na,Nb):
-		Ea= E[:,1:Na+1]
-		Eb= E[:,:Nb+1]
-		Htau = np.exp(-1j*w*tau)*Hvals**(-1)
-		HEa = np.dot(np.diag(Htau),Ea)
-		D   = np.hstack((HEa,-Eb))
-		Tmp1= np.real(np.dot(conj(D.T),D))
-		Tmp2= np.real(np.dot(conj(D.T),-Htau))
-		ab = lstsq(Tmp1,Tmp2)[0]
-		ai = np.hstack((1.0,ab[:Na]))
-		bi = ab[Na:]
-		return bi,ai
-
-	bi,ai = fitIIR(Hvals,tau,E,Na,Nb)
-
-	if justFit:
-		return bi,ai
-
-	if count_nonzero(abs(roots(ai))>1)>0:
-		stable = False
-	else:
-		stable = True
-
-	maxiter = 50
-
-	astab = mapinside(ai)
-	run = 1
-
-	while stable!=True and run < maxiter:
-		g1 = grpdelay(bi,ai,Fs)[0]
-		g2 = grpdelay(bi,astab,Fs)[0]
-		tau = ceil(tau + median(g2-g1))
-
-		bi,ai = fitIIR(Hvals,tau,E,Na,Nb)
-		if count_nonzero(abs(roots(ai))>1)>0:
-			astab = mapinside(ai)
-		else:
-			stable = True
-		run = run + 1
-		
-	if count_nonzero(abs(roots(ai))>1)>0 and verbose:
-		print( "Caution: The algorithm did NOT result in a stable IIR filter!")
-		print("Maybe try again with a higher value of tau0 or a higher filter order?")
-
-	if verbose:
-		print("Least squares fit finished after %d iterations (tau=%d).\n" % (run,tau))
-		Hd = dsp.freqz(bi,ai,2*np.pi*f/Fs)[1]
-		Hd = Hd*np.exp(1j*2*np.pi*f/Fs*tau)
-		res= np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
-		rms= np.sqrt( np.sum( res**2 )/len(f))
-		print("Final rms error = %e \n\n" % rms)
-	
-	return bi,ai,int(tau)
 
 
 def LSFIR_unc(H,UH,N,tau,f,Fs,wt=None,verbose=True,trunc_svd_tol=None):
@@ -366,6 +264,106 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
 	return bFIR, UbFIR
 
 
+def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
+	"""Design of a stable IIR filter as fit to reciprocal of frequency response values
+
+	Least-squares fit of a digital IIR filter to the reciprocal of a given set
+	of frequency response values using the equation-error method and stabilization
+	by pole mapping and introduction of a time delay.
+
+	Parameters
+	----------
+		Hvals: np.ndarray
+			frequency response values.
+		Nb: int
+			order of IIR numerator polynomial.
+		Na: int
+			order of IIR denominator polynomial.
+		f: np.ndarray
+			frequencies corresponding to Hvals
+		Fs: float
+			sampling frequency for digital IIR filter.
+		tau: float
+			initial estimate of time delay for filter stabilization.
+		justFit: bool
+			if True then no stabilization is carried out.
+
+	Returns
+	-------
+		b,a : np.ndarray
+			IIR filter coefficients, int tau -- time delay (in samples)
+
+	References
+	----------
+		* Eichstädt, Elster, Esward, Hessling [Eichst2010]_
+
+	"""
+	from numpy import conj, count_nonzero, roots, ceil, median
+	from numpy.linalg import lstsq
+
+	if verbose:
+		print("\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb, Na))
+		print("reciprocal of a frequency response given by %d values.\n" % len(Hvals))
+
+	w = 2 * np.pi * f / Fs
+	Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
+	E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
+
+	def fitIIR(Hvals, tau, E, Na, Nb):
+		Ea = E[:, 1:Na + 1]
+		Eb = E[:, :Nb + 1]
+		Htau = np.exp(-1j * w * tau) * Hvals ** (-1)
+		HEa = np.dot(np.diag(Htau), Ea)
+		D = np.hstack((HEa, -Eb))
+		Tmp1 = np.real(np.dot(conj(D.T), D))
+		Tmp2 = np.real(np.dot(conj(D.T), -Htau))
+		ab = lstsq(Tmp1, Tmp2)[0]
+		ai = np.hstack((1.0, ab[:Na]))
+		bi = ab[Na:]
+		return bi, ai
+
+	bi, ai = fitIIR(Hvals, tau, E, Na, Nb)
+
+	if justFit:
+		return bi, ai
+
+	if count_nonzero(abs(roots(ai)) > 1) > 0:
+		stable = False
+	else:
+		stable = True
+
+	maxiter = 50
+
+	astab = mapinside(ai)
+	run = 1
+
+	while stable != True and run < maxiter:
+		g1 = grpdelay(bi, ai, Fs)[0]
+		g2 = grpdelay(bi, astab, Fs)[0]
+		tau = ceil(tau + median(g2 - g1))
+
+		bi, ai = fitIIR(Hvals, tau, E, Na, Nb)
+		if count_nonzero(abs(roots(ai)) > 1) > 0:
+			astab = mapinside(ai)
+		else:
+			stable = True
+		run = run + 1
+
+	if count_nonzero(abs(roots(ai)) > 1) > 0 and verbose:
+		print("Caution: The algorithm did NOT result in a stable IIR filter!")
+		print("Maybe try again with a higher value of tau0 or a higher filter order?")
+
+	if verbose:
+		print("Least squares fit finished after %d iterations (tau=%d).\n" % (run, tau))
+		Hd = dsp.freqz(bi, ai, 2 * np.pi * f / Fs)[1]
+		Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
+		res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
+		rms = np.sqrt(np.sum(res ** 2) / len(f))
+		print("Final rms error = %e \n\n" % rms)
+
+	return bi, ai, int(tau)
+
+
 def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
 	"""Design of stabel IIR filter as fit to reciprocal of given frequency response with uncertainty
 
@@ -432,36 +430,4 @@ def LSIIR_unc(H,UH,Nb,Na,f,Fs,tau=0):
 	tau = np.mean(Tau)
 	return bi,ai, tau, Uab
 
-
-def FreqResp2RealImag(Abs,Phase,Unc,MCruns=1e4):
-	"""
-	Calculation of real and imaginary parts from amplitude and phase with associated
-	uncertainties.
-
-	:param Abs: ndarray of shape N - amplitude values
-	:param Phase: ndarray of shape N - phase values in rad
-	:param Unc: ndarray of shape 2Nx2N or 2N - uncertainties
-
-	:returns Re,Im: ndarrays of shape N - real and imaginary parts (best estimate)
-	:returns URI: ndarray of shape 2Nx2N - uncertainties assoc. with Re and Im
-	"""
-
-	if len(Abs) != len(Phase) or 2*len(Abs) != len(Unc):
-		raise ValueError('\nLength of inputs are inconsistent.')
-
-	if len(Unc.shape)==1:
-		Unc = np.diag(Unc)
-
-	Nf = len(Abs)
-
-	AbsPhas = np.random.multivariate_normal(np.hstack((Abs,Phase)),Unc,int(MCruns))
-
-	H = AbsPhas[:,:Nf]*np.exp(1j*AbsPhas[:,Nf:])
-	RI= np.hstack((np.real(H),np.imag(H)))
-
-	Re = np.mean(RI[:,:Nf])
-	Im = np.mean(RI[:,Nf:])
-	URI= np.cov(RI,rowvar=False)
-
-	return Re,Im, URI
 

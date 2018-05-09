@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+Collection of test signals which can be used to simulate dynamic measurements and test methods.
+
+"""
 from numpy import diff, sqrt, sum, array, corrcoef
 import numpy as np
 from scipy.misc import comb

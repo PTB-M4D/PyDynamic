@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 
 A collection of methods which are related to filter design.
 

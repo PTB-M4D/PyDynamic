@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
 
 A collection of modules and methods that are used throughout the whole package.
 Methods specialized for second order dynamic systems, such as the ones used
