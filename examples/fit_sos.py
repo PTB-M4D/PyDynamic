@@ -2,7 +2,7 @@
 
 """
 
-Fit of a second-order transfer function (mass-damper-spring model) to a set of frequency response values
+Example for the fit of a second-order transfer function (mass-damper-spring model) to a set of frequency response values
 
 """
 

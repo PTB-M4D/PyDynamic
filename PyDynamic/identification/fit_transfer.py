@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Collection of methods for the identification of transfer function models
+Collection of methods for the identification of transfer function models. Initially only a second-order LTI model is implemented.
 
 """
 import numpy as np
