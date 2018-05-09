@@ -11,7 +11,7 @@ This module implements Monte Carlo methods for the propagation of uncertainties 
 """
 
 # TODO: Implement updating Monte Carlo method
-# TODO: Implement repeated random number drawing from multivariate normal like in mvnrnd with re-using cholesky
+# TODO: Advocate use of second-order-systems for higher-order IIR filters (i.e. throw warning at the user)
 import numpy as np
 import scipy as sp
 import sys
@@ -76,7 +76,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 		x: np.ndarray
 			filter input signal
 		Ux: float or np.ndarray
-			standard deviation of signal noise or covariance matrix associated with x
+			standard deviation of signal noise (float), point-wise standard uncertainties or covariance matrix associated with x
 		b: np.ndarray
 			filter numerator coefficients
 		a: np.ndarray
@@ -116,7 +116,14 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 	theta = np.hstack((a[1:],b))
 	Theta = np.random.multivariate_normal(theta,Uab,runs)
 	if isinstance(Ux, np.ndarray):
+<<<<<<< HEAD
 		dist = stats.multivariate_normal(x, Ux, allow_singular=True)
+=======
+		if len(Ux.shape)==1:
+			dist = Normal_ZeroCorr(loc=x, scale=Ux)
+		else:
+			dist = stats.multivariate_normal(x, Ux)
+>>>>>>> devel1
 	elif isinstance(Ux, float):
 		dist = Normal_ZeroCorr(mean=x, cov=Ux)
 	else:

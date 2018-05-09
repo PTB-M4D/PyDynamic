@@ -13,6 +13,7 @@ The correspoding scientific publications is
 
 """
 
+# Todo: allow user to select specific frequencies
 import numpy as np
 from scipy import sparse
 import warnings

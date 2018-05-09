@@ -44,7 +44,14 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 			assert(UH.shape[0]==UH.shape[1])
 
 		# propagate to real and imaginary parts of reciprocal using Monte Carlo
+<<<<<<< HEAD
 		runs = 10000
+=======
+		if isinstance(MCruns, int) or isinstance(MCruns, float):
+			runs = int(MCruns)
+		else:
+			runs = 10000
+>>>>>>> devel1
 		if len(UH.shape)==1:
 			HR = np.tile(Hr, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[:len(f)], (runs, 1))
 			HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))

@@ -42,7 +42,7 @@ time = np.arange(0, 4e-3 - Ts, Ts)
 x = shocklikeGaussian(time, t0 = 2e-3, sigma = 1e-5, m0=0.8)
 y = dsp.lfilter(b, a, x)
 noise = 1e-3
-yn = y + np.random.randn(np.size(y)) * noise
+yn = y + rst.randn(np.size(y)) * noise
 
 # Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]
 runs = 10000
