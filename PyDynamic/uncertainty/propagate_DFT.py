@@ -546,7 +546,7 @@ def AmpPhase2Time(A,P,UAP):
 GUMdeconv = lambda H, Y, UH, UY: DFT_deconv(H, Y, UH, UY)
 
 def DFT_transferfunction(X, Y, UX, UY):
-	"""Calculation of the transfer function H = Y/X in the frequency domain with X beign the Fourier transform
+	"""Calculation of the transfer function H = Y/X in the frequency domain with X being the Fourier transform
 	of the system's input signal and Y that of the output signal.
 
 	Parameters
