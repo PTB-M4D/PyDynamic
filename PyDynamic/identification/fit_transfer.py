@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 Collection of methods for the identification of transfer function models
+
+This module contains the following functions:
+* fit_sos: 
+
 """
 
 import numpy as np
+
+__all__ = ['fit_sos']
 
 def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 	"""Fit second-order model (spring-damper model) with parameters S0, delta and f0
@@ -12,11 +18,11 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 	with real and imaginary parts, see `mod`::PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT
 	Parameters
 	----------
-		f: np.ndarray
+		f: np.ndarray of shape (M,)
 			vector of frequencies
-		H: np.ndarray
+		H: np.ndarray of shape (2M,)
 			real and imaginary parts of measured frequency response values at frequencies f
-		UH: np.ndarray
+		UH: np.ndarray of shape (2M,) or (2M,2M)
 			uncertainties associated with real and imaginary parts
 			When UH is one-dimensional, it is assumed to contain standard uncertainties; otherwise it
 			is taken as covariance matrix. When UH is not specified no uncertainties assoc. with the fit are calculated.
@@ -44,14 +50,11 @@ def fit_sos(f, H, UH=None, weighting=None, MCruns = None, scaling = 1e-3):
 			assert(UH.shape[0]==UH.shape[1])
 
 		# propagate to real and imaginary parts of reciprocal using Monte Carlo
-<<<<<<< HEAD
-		runs = 10000
-=======
+
 		if isinstance(MCruns, int) or isinstance(MCruns, float):
 			runs = int(MCruns)
 		else:
 			runs = 10000
->>>>>>> devel1
 		if len(UH.shape)==1:
 			HR = np.tile(Hr, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[:len(f)], (runs, 1))
 			HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile( UH[len(f):], (runs, 1))

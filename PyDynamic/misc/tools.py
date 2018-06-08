@@ -2,11 +2,19 @@
 """
 Collection of miscelleneous helper functions.
 
+This module contains the following functions:
+* print_mat: print matrix (2D array) to the command line
+* print_vec: print vector (1D array) to the command line
+* make_semiposdef: 
+
 """
 
 import numpy as np
 import scipy.sparse as sparse
 
+__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag']
+
+#TODO: Check that it's not used in the package and remove
 def col_hstack(vectors):
     """
     From tuple of 1D ndarrays make a 2D ndarray where the tuple
@@ -24,7 +32,7 @@ def col_hstack(vectors):
     
     return np.hstack(col_vectors)
             
-            
+#TODO: Check that it's not used in the package and remove
 def find(assertions):
     """
     MATLAB-like determination of occurence of assertion in an array using the
@@ -38,7 +46,8 @@ def find(assertions):
         inds = inds[np.nonzero(assertion[inds])[0]]
     
     return inds
-            
+
+#TODO: Check that it's not used in the package and remove
 def zerom(shape):
     """
     Generate a numpy.matrix of zeros of given shape
@@ -46,7 +55,7 @@ def zerom(shape):
     from numpy import zeros, matrix      
     return matrix(zeros(shape))
     
-    
+#TODO: Check that it's not used in the package and remove
 def stack(elements):
     def make_matrix(v):
         if len(v.shape())>1:
@@ -58,6 +67,20 @@ def stack(elements):
     
 
 def print_vec(vector,prec=5,retS=False,vertical=False):
+    """ Print vector (!D array) to the command line
+
+    Parameters
+    ----------
+        vector : 1D nparray of shape (M,)
+        prec : integer specifying the precision of the output
+        vertical : boolean if print out vertical or not 
+        retS : boolean if print or return string
+
+    Returns
+    -------
+        string if retS is True
+
+    """
     if vertical:
         t = "\n"
     else:
@@ -69,6 +92,20 @@ def print_vec(vector,prec=5,retS=False,vertical=False):
         print(s)
         
 def print_mat(matrix,prec=5,vertical=False,retS=False):
+    """ Print matrix (2D array) to the command line
+    
+    Parameters
+    ----------
+        matrix : 2D nparray of shape (M,N)
+        prec : integer specifying the precision of the output
+        vertical : boolean if print out vertical or not 
+        retS : boolean if print or return string
+         
+    Returns
+    -------
+        string if retS is True
+
+    """
     if vertical:
         matrix = matrix.T
         
@@ -81,6 +118,19 @@ def print_mat(matrix,prec=5,vertical=False,retS=False):
 
 
 def make_semiposdef(matrix,maxiter=10,tol=1e-12):
+    """ Make quadratic matrix positive semi-definite by increasing its eigenvalues
+    
+    Parameters
+    ----------
+        matrix : 2D nparray of shape (N,N)
+        maxiter: integer, the maximum number of iterations for increasing the eigenvalues
+        tol: float, tolerance for deciding if pos. semi-def.
+        
+    Returns
+    -------
+        nparray of shape (N,N)
+
+    """
 
     n,m = matrix.shape
     if n!=m:
@@ -93,12 +143,9 @@ def make_semiposdef(matrix,maxiter=10,tol=1e-12):
             matrix += (np.absolute(e)+tol)*sparse.eye(n,format=matrix.format)
             e = np.real(sparse.eigs(matrix,which="SR",return_eigenvectors=False)).min()
             count += 1
-                    
     else:
         matrix = 0.5*(matrix+matrix.T)
         e = np.real(np.linalg.eigvals(matrix)).min()
-<<<<<<< HEAD
-        count += 1
     return matrix
 
 
@@ -139,31 +186,3 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     URI = np.cov(RI, rowvar=False)
 
     return Re, Im, URI
-
-
-def mapinside(a):
-    """
-    Mapping roots of the polynomial with coefficents a into the unit circle by projection.
-
-    Parameters
-    ----------
-        a: ndarray of shape N - coefficients of polynomial 
-
-    Returns
-    -------
-        v: ndarray of shape N - coefficients of polynomial with all roots inside the unit circle
-
-    """
-    from numpy import roots, conj, poly, nonzero
-    v = roots(a)
-    inds = nonzero(abs(v) > 1)
-    v[inds] = 1 / conj(v[inds])
-    return poly(v)
-=======
-        count = 0
-        while e<tol and count<maxiter:
-            matrix += (np.abs(e)+tol)*np.eye(n)
-            e = np.real(np.linalg.eigvals(matrix)).min()
-            count += 1
-    return matrix
->>>>>>> devel1

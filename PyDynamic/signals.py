@@ -2,9 +2,9 @@
 """
 This module implements the signals class and its derivatives
 Signals are dynamic quantities with associated uncertainties. A signal has to be defined together
-with a time axis
+with a time axis.
 
-Note: Abbreviation GUM stands for "Guide to the Expression of Uncertainty in Measurement"
+IMPORTANT NOTE: This module is experimental! 
 """
 
 import numpy as np

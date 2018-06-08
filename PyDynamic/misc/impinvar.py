@@ -15,12 +15,12 @@ from scipy.special import binom
 polyrev = lambda p_in: p_in[::-1]
 
 def prepad(vec, length, value=0):
-    if length > len(vec):
-        return np.r_[value * np.ones(length - len(vec)), vec]
-    elif length < len(vec):
-        return vec[-length:]
-    else:
-        return vec
+	if length > len(vec):
+		return np.r_[value * np.ones(length - len(vec)), vec]
+	elif length < len(vec):
+		return vec[-length:]
+	else:
+		return vec
 
 def h1_z_deriv(n, p, ts):
 	"""

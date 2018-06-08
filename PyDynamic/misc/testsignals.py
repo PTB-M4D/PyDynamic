@@ -2,6 +2,12 @@
 """
 Collection of test signals which can be used to simulate dynamic measurements and test methods.
 
+This module contains the following functions:
+* shocklikeGaussian: signal that resembles a shock excitation as a Gaussian followed by a smaller Gaussian of opposite sign
+* GaussianPulse: Generates a Gaussian pulse at t0 with height m0 and std sigma
+* rect: Rectangular signal of given height and width t1-t0
+* squarepulse: Generates a series of rect functions to represent a square pulse signal
+
 """
 from numpy import diff, sqrt, sum, array, corrcoef
 import numpy as np
@@ -16,7 +22,7 @@ def shocklikeGaussian(time, t0, m0, sigma, noise = 0.0):
 
 	Parameters
 	----------
-	    time : np.ndarray
+	    time : np.ndarray of shape (N,)
 	    	time instants (equidistant)
 	    t0: float
 	    	time instant of signal maximum
@@ -29,7 +35,7 @@ def shocklikeGaussian(time, t0, m0, sigma, noise = 0.0):
 
 	Returns
 	-------
-	    x: np.ndarray
+	    x: np.ndarray of shape (N,)
 	    	signal amplitudes at time instants
 
     """
@@ -45,7 +51,7 @@ def GaussianPulse(time, t0, m0, sigma, noise = 0.0):
 
     Parameters
     ----------
-        time: np.ndarray
+        time: np.ndarray of shape (N,)
          	time instants (equidistant)
         t0 : float
         	time instant of signal maximum
@@ -58,7 +64,7 @@ def GaussianPulse(time, t0, m0, sigma, noise = 0.0):
 
     Returns
     -------
-        x : np.ndarray
+        x : np.ndarray of shape (N,)
          	signal amplitudes at time instants
     """
 
@@ -73,7 +79,7 @@ def rect(time, t0, t1, height=1, noise = 0.0):
 
     Parameters
     ----------
-        time : np.ndarray
+        time : np.ndarray of shape (N,)
         	time instants (equidistant)
         t0 : float
         	time instant of rect lhs
@@ -86,7 +92,7 @@ def rect(time, t0, t1, height=1, noise = 0.0):
 
     Returns
     -------
-        x : np.ndarray
+        x : np.ndarray of shape (N,)
          	signal amplitudes at time instants
     """
 
@@ -104,7 +110,7 @@ def squarepulse(time, height, numpulse = 4, noise = 0.0):
 
     Parameters
     ----------
-        time : np.ndarray
+        time : np.ndarray of shape (N,)
         	time instants
         height : float
          	height of the rectangular pulses
@@ -115,7 +121,7 @@ def squarepulse(time, height, numpulse = 4, noise = 0.0):
 
     Returns
     -------
-        x : np.ndarray
+        x : np.ndarray of shape (N,)
         	signal amplitude at time instants
     """
 	width = (time[-1] - time[0]) / (2 * numpulse + 1)  # width of each individual rect
@@ -128,7 +134,7 @@ def squarepulse(time, height, numpulse = 4, noise = 0.0):
 
 
 class corr_noise(object):
-	"""colored (i.e. correlated) noise process
+	"""Base class for generation of a correlated noise proces.
 	"""
 	def __init__(self, w, sigma, seed = None):
 		self.w = w
