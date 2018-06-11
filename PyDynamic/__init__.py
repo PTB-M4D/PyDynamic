@@ -13,7 +13,7 @@ from .uncertainty import *
 from .misc import *
 from .identification import *
 
-__version__ = "1.2.67"
+__version__ = "1.2.7"
 
 __all__ = ['LSFIR','LSIIR','LSFIR_unc','LSFIR_uncMC','LSIIR_unc','fit_sos','FreqResp2RealImag',
 		   'GUM_DFT', 'GUM_iDFT', 'DFT_deconv', 'DFT_multiply', 'DFT2AmpPhase', 'AmpPhase2DFT', 'AmpPhase2Time',

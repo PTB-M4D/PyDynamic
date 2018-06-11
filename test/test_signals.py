@@ -1,5 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+Test functions for methods to create testsignals
+"""
+
 import numpy as np
 import unittest
+print(__name__)
+
 from PyDynamic.misc.testsignals import *
 
 class Test_testsignals(unittest.TestCase):

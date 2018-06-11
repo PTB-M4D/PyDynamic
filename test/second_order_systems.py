@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
+
 import unittest
-import numpy as np
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp, sos_phys2filter, sos_realimag, sos_absphase
 from scipy.signal import freqs
 
