@@ -223,9 +223,9 @@ def GUM_iDFT(F,UF,Nx=None,Cc=None,Cs=None,returnC=False):
 
 	Parameters
 	----------
-		F : np.ndarray
+		F : np.ndarray of shape (2M,)
 			vector of real and imaginary parts of a DFT result
-		UF: np.ndarray
+		UF: np.ndarray of shape (2M,2M)
 			covariance matrix associated with real and imaginary parts of F
 		Nx: int, optional
 			number of samples of iDFT result
@@ -322,9 +322,9 @@ def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0, return_type="separate"):
 
 	Parameters
 	----------
-		F: np.ndarray
+		F: np.ndarray of shape (2M,)
 			vector of real and imaginary parts of a DFT result
-		UF: np.ndarray
+		UF: np.ndarray of shape (2M,2M)
 			covariance matrix associated with F
 		keep_sparse: bool, optional
 			if true then UAP will be sparse if UF is one-dimensional
@@ -397,11 +397,11 @@ def AmpPhase2DFT(A,P,UAP,keep_sparse=False):
 
 	Parameters
 	----------
-		A: np.ndarray
+		A: np.ndarray of shape (N,)
 			vector of magnitude values
-		P: np.ndarray
+		P: np.ndarray of shape (N,)
 			vector of phase values (in radians)
-		UAP: np.ndarray
+		UAP: np.ndarray of shape (2N,2N)
 			covariance matrix associated with (A,P)
 			or vector of squared standard uncertainties [u^2(A),u^2(P)]
 		keep_sparse: bool, optional
@@ -472,9 +472,9 @@ def Time2AmpPhase(x,Ux):
 
 	Parameters
 	----------
-		 x: np.ndarray
+		 x: np.ndarray of shape (N,)
 		  	time domain signal
-		 Ux: np.ndarray
+		 Ux: np.ndarray of shape (N,N)
 		 	squared uncertainty associated with x
 
 	Returns
@@ -500,11 +500,11 @@ def AmpPhase2Time(A,P,UAP):
 
 	Parameters
 	----------
-		A: np.ndarray
+		A: np.ndarray of shape (N,)
 			vector of amplitude values
-		P: np.ndarray
+		P: np.ndarray of shape (N,)
 			vector of phase values (in rad)
-		UAP: np.ndarray
+		UAP: np.ndarray of shape (2N,2N)
 			covariance matrix associated with [A,P]
 
 	Returns
@@ -591,24 +591,25 @@ def DFT_deconv(H, Y, UH, UY):
 	"""Deconvolution in the frequency domain
 
 	GUM propagation of uncertainties for the deconvolution X = Y/H with Y and H being the Fourier transform of the measured signal
-	and of the system's impulse response, respectively.
+	and of the system's impulse response, respectively. This function returns the covariance matrix as a tuple of blocks if too
+	large for complete storage in memory.
 
 	Parameters
 	----------
-		H: np.ndarray
+		H: np.ndarray of shape (2M,)
 			real and imaginary parts of frequency response values (N an even integer)
-		Y: np.ndarray
+		Y: np.ndarray of shape (2M,)
 			real and imaginary parts of DFT values
-		UH: np.ndarray
+		UH: np.ndarray of shape (2M,2M)
 			covariance matrix associated with H
-		UY: np.ndarray
+		UY: np.ndarray of shape (2M,2M)
 			covariance matrix associated with Y
 
 	Returns
 	-------
-		X: np.ndarray
+		X: np.ndarray of shape (2M,)
 			real and imaginary parts of DFT values of deconv result
-		UX: np.ndarray
+		UX: np.ndarray of shape (2M,2M)
 			covariance matrix associated with real and imaginary part of X
 
 	References
@@ -666,20 +667,20 @@ def DFT_multiply(Y, F, UY, UF=None):
 
 	Parameters
 	----------
-	    Y: np.ndarray
+	    Y: np.ndarray of shape (2M,)
 	    	real and imaginary parts of the first factor
-	    UY: np.ndarray
-	    	covariance matrix or squared uncertainty associated with Y
-	    F: np.ndarray
+	    F: np.ndarray of shape (2M,)
 	    	real and imaginary parts of the second factor
-	    UF: np.ndarray
+	    UY: np.ndarray either shape (2M,) or shape (2M,2M)
+	    	covariance matrix or squared uncertainty associated with Y
+	    UF: np.ndarray of shape (2M,2M)
 	    	covariance matrix associated with F (optional), default is None
 
 	Returns
 	-------
-		YF: np.ndarray
+		YF: np.ndarray of shape (2M,)
 			the product of Y and F
-		UYF: np.ndarray
+		UYF: np.ndarray of shape (2M,2M)
 			the uncertainty associated with YF
 	"""
 

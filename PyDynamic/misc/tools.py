@@ -5,7 +5,9 @@ Collection of miscelleneous helper functions.
 This module contains the following functions:
 * print_mat: print matrix (2D array) to the command line
 * print_vec: print vector (1D array) to the command line
-* make_semiposdef: 
+* make_semiposdef: Make quadratic matrix positive semi-definite by increasing its eigenvalues
+* FreqResp2RealImag: Calculation of real and imaginary parts from amplitude and phase with associated
+    uncertainties
 
 """
 
@@ -67,7 +69,7 @@ def stack(elements):
     
 
 def print_vec(vector,prec=5,retS=False,vertical=False):
-    """ Print vector (!D array) to the command line
+    """ Print vector (!D array) to the command line of return as formatted string
 
     Parameters
     ----------
@@ -92,7 +94,7 @@ def print_vec(vector,prec=5,retS=False,vertical=False):
         print(s)
         
 def print_mat(matrix,prec=5,vertical=False,retS=False):
-    """ Print matrix (2D array) to the command line
+    """ Print matrix (2D array) to the command line or return as formatted string
     
     Parameters
     ----------
@@ -135,15 +137,15 @@ def make_semiposdef(matrix,maxiter=10,tol=1e-12):
     n,m = matrix.shape
     if n!=m:
         raise ValueError("Matrix has to be quadratic")
-    if sparse.issparse(matrix):
-        matrix = 0.5*(matrix+matrix.T)
-        e = np.real(sparse.eigs(matrix,which="SR",return_eigenvectors=False)).min()
+    if sparse.issparse(matrix):         # use specialised functions for sparse matrices
+        matrix = 0.5*(matrix+matrix.T)  # enforce symmetric matrix
+        e = np.real(sparse.eigs(matrix,which="SR",return_eigenvectors=False)).min() # calculate smallest eigenvalue
         count = 0
-        while e<tol and count<maxiter:
+        while e<tol and count<maxiter:  # increase the eigenvalues until matrix is semi-posdef
             matrix += (np.absolute(e)+tol)*sparse.eye(n,format=matrix.format)
             e = np.real(sparse.eigs(matrix,which="SR",return_eigenvectors=False)).min()
             count += 1
-    else:
+    else:       # same procedure for non-sparse matrices
         matrix = 0.5*(matrix+matrix.T)
         e = np.real(np.linalg.eigvals(matrix)).min()
     return matrix
@@ -176,10 +178,10 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
 
     Nf = len(Abs)
 
-    AbsPhas = np.random.multivariate_normal(np.hstack((Abs, Phase)), Unc, int(MCruns))
+    AbsPhas = np.random.multivariate_normal(np.hstack((Abs, Phase)), Unc, int(MCruns))  # draw MC inputs
 
-    H = AbsPhas[:, :Nf] * np.exp(1j * AbsPhas[:, Nf:])
-    RI = np.hstack((np.real(H), np.imag(H)))
+    H = AbsPhas[:, :Nf] * np.exp(1j * AbsPhas[:, Nf:])  # calculate complex frequency response values
+    RI = np.hstack((np.real(H), np.imag(H)))            # transform to real, imag
 
     Re = np.mean(RI[:, :Nf])
     Im = np.mean(RI[:, Nf:])
