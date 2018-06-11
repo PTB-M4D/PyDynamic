@@ -119,7 +119,7 @@ def print_mat(matrix,prec=5,vertical=False,retS=False):
         print(s)
 
 
-def make_semiposdef(matrix,maxiter=10,tol=1e-12):
+def make_semiposdef(matrix,maxiter=10,tol=1e-12, verbose=False):
     """ Make quadratic matrix positive semi-definite by increasing its eigenvalues
     
     Parameters
@@ -145,9 +145,17 @@ def make_semiposdef(matrix,maxiter=10,tol=1e-12):
             matrix += (np.absolute(e)+tol)*sparse.eye(n,format=matrix.format)
             e = np.real(sparse.eigs(matrix,which="SR",return_eigenvectors=False)).min()
             count += 1
+        e = np.real(sparse.eigs(matrix, which="SR", return_eigenvectors=False)).min()
     else:       # same procedure for non-sparse matrices
-        matrix = 0.5*(matrix+matrix.T)
+        matrix = 0.5 * (matrix + matrix.T)
+        count = 0
         e = np.real(np.linalg.eigvals(matrix)).min()
+        while e<tol and count<maxiter:
+            e = np.real(np.linalg.eigvals(matrix)).min()
+            matrix += (np.absolute(e) + tol) * np.eye(n)
+        e = np.real(np.linalg.eigvals(matrix)).min()
+    if verbose:
+        print("Final result of make_semiposded: smallest eigenvalue is %e" % e)
     return matrix
 
 

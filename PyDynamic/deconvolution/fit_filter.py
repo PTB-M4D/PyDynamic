@@ -16,8 +16,7 @@ This module contains the following functions
 import numpy as np
 import scipy.signal as dsp
 
-from ..misc.filterstuff import grpdelay
-from ..misc.tools import mapinside
+from ..misc.filterstuff import grpdelay, mapinside
 
 __all__ = ['LSFIR', 'LSFIR_unc', 'LSIIR', 'LSIIR_unc', 'LSFIR_uncMC']
 

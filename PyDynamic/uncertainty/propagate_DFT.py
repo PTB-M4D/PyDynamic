@@ -684,7 +684,7 @@ def DFT_multiply(Y, F, UY, UF=None):
 			the uncertainty associated with YF
 	"""
 
-	assert(len(Y)==len(F), "DFT_multiply: Dimension of Y and F inconsistent. Maybe wrong order of variables?")
+	assert(len(Y)==len(F))
 
 	def calcU(A, UB):
 		# uncertainty propagation for A*B with B uncertain (helper function)

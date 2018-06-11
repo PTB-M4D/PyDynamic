@@ -15,7 +15,7 @@ from .SecondOrderSystem import sos_FreqResp, sos_phys2filter, sos_absphase, sos_
 
 from .testsignals import shocklikeGaussian, GaussianPulse, squarepulse, rect, corr_noise
 
-from .tools import print_mat, print_vec, make_semiposdef
+from .tools import print_mat, print_vec, make_semiposdef, FreqResp2RealImag
 
 __all__ = ['db', 'grpdelay', 'mapinside', 'isstable', 'kaiser_lowpass', 'savitzky_golay',
 		   'impinvar', 'sos_absphase', 'sos_realimag', 'sos_FreqResp', 'sos_phys2filter',

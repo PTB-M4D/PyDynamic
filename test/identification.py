@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+Test functions for the identification sub-packages
+
+"""
 import unittest
 import numpy as np
 print(__name__)

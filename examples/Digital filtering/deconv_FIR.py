@@ -34,15 +34,15 @@ S0 = 0.124; uS0= 0.001*S0
 delta = 0.0055; udelta = 0.1*delta
 
 # transform continuous system to digital filter
-bc, ac = sos_phys2filter(S0,delta,f0)
-b, a = dsp.bilinear(bc, ac, Fs)
+bc, ac = sos_phys2filter(S0,delta,f0)   # calculate analog filter coefficients
+b, a = dsp.bilinear(bc, ac, Fs)         # transform to digital filter coefficients
 
 # simulate input and output signals
 time = np.arange(0, 4e-3 - Ts, Ts)
-x = shocklikeGaussian(time, t0 = 2e-3, sigma = 1e-5, m0=0.8)
-y = dsp.lfilter(b, a, x)
+x = shocklikeGaussian(time, t0 = 2e-3, sigma = 1e-5, m0=0.8)    # input signal
+y = dsp.lfilter(b, a, x)                                        # output signal
 noise = 1e-3
-yn = y + rst.randn(np.size(y)) * noise
+yn = y + rst.randn(np.size(y)) * noise                          # add white noise
 
 # Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]
 runs = 10000
@@ -59,7 +59,7 @@ for k in range(runs):
 Hc = np.mean(HMC,dtype=complex,axis=0)
 H = np.r_[np.real(Hc), np.imag(Hc)]
 UH= np.cov(np.c_[np.real(HMC),np.imag(HMC)],rowvar=0)
-UH= make_semiposdef(UH)
+UH= make_semiposdef(UH, verbose=True)
 # Calculation of FIR deconvolution filter and its assoc. unc.
 bF, UbF = deconv.LSFIR_unc(H,UH,N,tau,f,Fs)
 
@@ -70,7 +70,7 @@ CbF = UbF/(np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis],(1,N+1))*
 # Deconvolution Step1: lowpass filter for noise attenuation
 fcut = f0+20e3; low_order = 100
 blow, lshift = kaiser_lowpass(low_order, fcut, Fs)
-shift = -tau - lshift
+shift = tau + lshift
 # Deconvolution Step2: Application of deconvolution filter
 xhat,Uxhat = FIRuncFilter(yn,noise,bF,UbF,shift,blow)
 
