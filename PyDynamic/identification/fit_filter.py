@@ -56,7 +56,7 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
         D   = np.hstack((HEa,-Eb))
         Tmp1= np.real(np.dot(np.conj(D.T),D))
         Tmp2= np.real(np.dot(np.conj(D.T),-Htau))
-        ab = np.linalg.lstsq(Tmp1,Tmp2)[0]
+        ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
         a = np.hstack((1.0,ab[:Na]))
         b = ab[Na:]
         return b,a
