@@ -5,7 +5,6 @@ Perform tests on identification sub-packages.
 """
 
 import numpy as np
-from nose.tools import assert_equal, assert_is_instance
 
 from PyDynamic.identification import fit_filter
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
@@ -28,6 +27,6 @@ def test_LSIIR():
 
     b, a, tau = fit_filter.LSIIR(Hvals, Na, Nb, f, Fs)
 
-    assert_equal(len(b), Nb + 1)
-    assert_equal(len(a), Na + 1)
-    assert_is_instance(tau, int)
+    assert len(b) == Nb + 1
+    assert len(a) == Na + 1
+    assert isinstance(tau, int)
