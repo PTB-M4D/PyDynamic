@@ -1,4 +1,5 @@
 # PyDynamic
+[![Documentation Status](https://readthedocs.org/projects/pydynamic/badge/?version=latest)](https://pydynamic.readthedocs.io/?badge=latest)
 Python package for the analysis of dynamic measurements
 
 The goal of this package is to provide a starting point for users in metrology and related areas who deal with time-dependent, i.e. *dynamic*, measurements.
