@@ -44,7 +44,7 @@ jobs:
         name: install PyDynamic
         command: |
           . venv/bin/activate
-          setup.py install
+          python3 setup.py install
 
     - store_test_results:
         path: test-results
