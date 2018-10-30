@@ -52,10 +52,7 @@ jobs:
           . venv/bin/activate
           python3 setup.py install
 
-    # Store results.
-    - store_test_results:
-        path: test-reports
-
+    # Store test results.
     - store_artifacts:
         path: test-reports
         destination: test-reports
