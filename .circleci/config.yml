@@ -37,7 +37,7 @@ jobs:
         name: run tests
         command: |
           . venv/bin/activate
-          py.test -v
+          py.test -v > test-reports/pytest.log
 
     # Install PyDynamic to check procedure!
     - run:
@@ -47,7 +47,7 @@ jobs:
           python3 setup.py install
 
     - store_test_results:
-        path: test-results
+        path: test-reports
 
     - store_artifacts:
         path: test-reports
