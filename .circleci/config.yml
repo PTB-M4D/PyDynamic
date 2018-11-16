@@ -43,7 +43,7 @@ jobs:
         name: run tests
         command: |
           . venv/bin/activate
-          py.test -v > test-reports/pytest.log
+          pytest --cov=PyDynamic -v > test-reports/pytest.log
 
     # Install PyDynamic.
     - run:
