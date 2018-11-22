@@ -10,6 +10,8 @@ jobs:
 
     working_directory: ~/repo
 
+    steps:
+
     # Create test-result folder.
     - run:
         name: Create test result folder
@@ -17,7 +19,7 @@ jobs:
           mkdir test-results
           mkdir test-results/pytest
 
-    steps:
+    # Checkout code
     - checkout
 
     # Download and cache dependencies.
