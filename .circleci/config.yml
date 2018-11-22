@@ -13,12 +13,6 @@ jobs:
     steps:
     - checkout
 
-    # Create folder for test results.
-    - run:
-        name: create test result folder
-        command: |
-          mkdir test-reports
-
     # Download and cache dependencies.
     - restore_cache:
         keys:
@@ -43,7 +37,7 @@ jobs:
         name: run tests
         command: |
           . venv/bin/activate
-          pytest -v --cov=PyDynamic > test-reports/pytest.log
+          pytest -v --cov=PyDynamic --cov-report xml
 
     # Install PyDynamic.
     - run:
@@ -54,5 +48,5 @@ jobs:
 
     # Store test results.
     - store_artifacts:
-        path: test-reports
+        path: .coverage
         destination: test-reports
