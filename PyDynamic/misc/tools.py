@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Collection of miscelleneous helper functions.
+Collection of miscellaneous helper functions.
 
 This module contains the following functions:
 * print_mat: print matrix (2D array) to the command line
 * print_vec: print vector (1D array) to the command line
-* make_semiposdef: Make quadratic matrix positive semi-definite by increasing its eigenvalues
-* FreqResp2RealImag: Calculation of real and imaginary parts from amplitude and phase with associated
-    uncertainties
-
+* make_semiposdef: Make quadratic matrix positive semi-definite by increasing
+its eigenvalues
+* FreqResp2RealImag: Calculation of real and imaginary parts from amplitude
+and phase with associated uncertainties
 """
+
+__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag']
 
 import numpy as np
 import scipy.sparse as sparse
 
-__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag']
 
-#TODO: Check that it's not used in the package and remove
+# TODO: Check that it's not used in the package and remove
 def col_hstack(vectors):
     """
     From tuple of 1D ndarrays make a 2D ndarray where the tuple
@@ -27,49 +28,51 @@ def col_hstack(vectors):
     
     """
 
-    if isinstance(vectors,list):
-        col_vectors = map(lambda x: x[:,np.newaxis], vectors)
+    if isinstance(vectors, list):
+        col_vectors = map(lambda x: x[:, np.newaxis], vectors)
     else:
-        raise ValueError("Input must be of type list\n")    
-    
+        raise ValueError("Input must be of type list\n")
+
     return np.hstack(col_vectors)
-            
-#TODO: Check that it's not used in the package and remove
+
+
+# TODO: Check that it's not used in the package and remove
 def find(assertions):
     """
-    MATLAB-like determination of occurence of assertion in an array using the
+    MATLAB-like determination of occurrence of assertion in an array using the
     numpy nonzero function
     """
-    if not isinstance(assertions,tuple):
+    if not isinstance(assertions, tuple):
         raise ValueError("Input to 'find' needs to be a tuple.")
-        
+
     inds = np.arange(len(assertions[0]))
     for assertion in assertions:
         inds = inds[np.nonzero(assertion[inds])[0]]
-    
+
     return inds
 
-#TODO: Check that it's not used in the package and remove
+
+# TODO: Check that it's not used in the package and remove
 def zerom(shape):
-    """
-    Generate a numpy.matrix of zeros of given shape
-    """      
-    from numpy import zeros, matrix      
+    """ Generate a numpy.matrix of zeros of given shape"""
+    from numpy import zeros, matrix
     return matrix(zeros(shape))
-    
-#TODO: Check that it's not used in the package and remove
+
+
+# TODO: Check that it's not used in the package and remove
 def stack(elements):
     def make_matrix(v):
-        if len(v.shape())>1:
+        if len(v.shape()) > 1:
             return v
         else:
-            return v[:,np.newaxis]
-            
-    return np.hstack(map(lambda x: make_matrix(x), elements))
-    
+            return v[:, np.newaxis]
 
-def print_vec(vector,prec=5,retS=False,vertical=False):
-    """ Print vector (!D array) to the command line of return as formatted string
+    return np.hstack(map(lambda x: make_matrix(x), elements))
+
+
+def print_vec(vector, prec=5, retS=False, vertical=False):
+    """
+    Print vector (!D array) to the command line of return as formatted string
 
     Parameters
     ----------
@@ -87,14 +90,16 @@ def print_vec(vector,prec=5,retS=False,vertical=False):
         t = "\n"
     else:
         t = "\t"
-    s = "".join(["%1.*g %s" % (int(prec),s,t) for s in vector])
+    s = "".join(["%1.*g %s" % (int(prec), s, t) for s in vector])
     if retS:
         return s
     else:
         print(s)
-        
-def print_mat(matrix,prec=5,vertical=False,retS=False):
-    """ Print matrix (2D array) to the command line or return as formatted string
+
+
+def print_mat(matrix, prec=5, vertical=False, retS=False):
+    """
+    Print matrix (2D array) to the command line or return as formatted string
     
     Parameters
     ----------
@@ -110,22 +115,26 @@ def print_mat(matrix,prec=5,vertical=False,retS=False):
     """
     if vertical:
         matrix = matrix.T
-        
-    s = "".join([ print_vec(matrix[k,:],prec=prec,vertical=False,retS=True)+"\n" for k in range(matrix.shape[0])])
-    
+
+    s = "".join(
+        [print_vec(matrix[k, :], prec=prec, vertical=False, retS=True) + "\n"
+         for k in range(matrix.shape[0])])
+
     if retS:
         return s
     else:
         print(s)
 
 
-def make_semiposdef(matrix,maxiter=10,tol=1e-12, verbose=False):
-    """ Make quadratic matrix positive semi-definite by increasing its eigenvalues
+def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
+    """
+    Make quadratic matrix positive semi-definite by increasing its eigenvalues
     
     Parameters
     ----------
         matrix : 2D nparray of shape (N,N)
-        maxiter: integer, the maximum number of iterations for increasing the eigenvalues
+        maxiter: integer, the maximum number of iterations for increasing the
+                 eigenvalues
         tol: float, tolerance for deciding if pos. semi-def.
         
     Returns
@@ -134,35 +143,44 @@ def make_semiposdef(matrix,maxiter=10,tol=1e-12, verbose=False):
 
     """
 
-    n,m = matrix.shape
-    if n!=m:
+    n, m = matrix.shape
+    if n != m:
         raise ValueError("Matrix has to be quadratic")
-    if sparse.issparse(matrix):         # use specialised functions for sparse matrices
-        matrix = 0.5*(matrix+matrix.T)  # enforce symmetric matrix
-        e = np.real(sparse.eigs(matrix,which="SR",return_eigenvectors=False)).min() # calculate smallest eigenvalue
+    # use specialised functions for sparse matrices
+    if sparse.issparse(matrix):
+        # enforce symmetric matrix
+        matrix = 0.5 * (matrix + matrix.T)
+        # calculate smallest eigenvalue
+        e = np.real(sparse.eigs(matrix, which="SR",
+                                return_eigenvectors=False)).min()
         count = 0
-        while e<tol and count<maxiter:  # increase the eigenvalues until matrix is semi-posdef
-            matrix += (np.absolute(e)+tol)*sparse.eye(n,format=matrix.format)
-            e = np.real(sparse.eigs(matrix,which="SR",return_eigenvectors=False)).min()
+        # increase the eigenvalues until matrix is positive semi-definite
+        while e < tol and count < maxiter:
+            matrix += (np.absolute(e) + tol) * sparse.eye(n,
+                                                          format=matrix.format)
+            e = np.real(sparse.eigs(matrix, which="SR",
+                                    return_eigenvectors=False)).min()
             count += 1
-        e = np.real(sparse.eigs(matrix, which="SR", return_eigenvectors=False)).min()
-    else:       # same procedure for non-sparse matrices
+        e = np.real(
+            sparse.eigs(matrix, which="SR", return_eigenvectors=False)).min()
+    # same procedure for non-sparse matrices
+    else:
         matrix = 0.5 * (matrix + matrix.T)
         count = 0
         e = np.real(np.linalg.eigvals(matrix)).min()
-        while e<tol and count<maxiter:
+        while e < tol and count < maxiter:
             e = np.real(np.linalg.eigvals(matrix)).min()
             matrix += (np.absolute(e) + tol) * np.eye(n)
         e = np.real(np.linalg.eigvals(matrix)).min()
     if verbose:
-        print("Final result of make_semiposded: smallest eigenvalue is %e" % e)
+        print("Final result of make_semiposdef: smallest eigenvalue is %e" % e)
     return matrix
 
 
 def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     """
-    Calculation of real and imaginary parts from amplitude and phase with associated
-    uncertainties.
+    Calculation of real and imaginary parts from amplitude and phase with
+    associated uncertainties
 
     Parameters
     ----------
@@ -186,10 +204,12 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
 
     Nf = len(Abs)
 
-    AbsPhas = np.random.multivariate_normal(np.hstack((Abs, Phase)), Unc, int(MCruns))  # draw MC inputs
+    AbsPhas = np.random.multivariate_normal(np.hstack((Abs, Phase)), Unc,
+                                            int(MCruns))  # draw MC inputs
 
-    H = AbsPhas[:, :Nf] * np.exp(1j * AbsPhas[:, Nf:])  # calculate complex frequency response values
-    RI = np.hstack((np.real(H), np.imag(H)))            # transform to real, imag
+    H = AbsPhas[:, :Nf] * np.exp(
+        1j * AbsPhas[:, Nf:])  # calculate complex frequency response values
+    RI = np.hstack((np.real(H), np.imag(H)))  # transform to real, imag
 
     Re = np.mean(RI[:, :Nf])
     Im = np.mean(RI[:, Nf:])
