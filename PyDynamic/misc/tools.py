@@ -216,3 +216,17 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     URI = np.cov(RI, rowvar=False)
 
     return Re, Im, URI
+
+
+def make_equidistant():
+    """
+    Convert non-equidistant time series to equidistant by interpolation (WIP)
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+    """
+    pass
