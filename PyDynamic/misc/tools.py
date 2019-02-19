@@ -11,7 +11,8 @@ its eigenvalues
 and phase with associated uncertainties
 """
 
-__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag']
+__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
+           'make_equidistant']
 
 import numpy as np
 import scipy.sparse as sparse
@@ -218,7 +219,7 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     return Re, Im, URI
 
 
-def make_equidistant():
+def make_equidistant(t, y, uy, dt=50, kind='previous'):
     """
     Convert non-equidistant time series to equidistant by interpolation (WIP)
 
@@ -229,4 +230,5 @@ def make_equidistant():
     -------
 
     """
+
     pass
