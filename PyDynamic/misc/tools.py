@@ -225,10 +225,23 @@ def make_equidistant(t, y, uy, dt=50, kind='previous'):
 
     Parameters
     ----------
+        t: (N,) array_like
+            timestamps
+        y: (N,) array_like
+            measurement values
+        uy: float
+            measurement values' uncertainty
+        dt: float, optional
+            desired interval length
+        kind: str or int, optional
+            Specifies the kind of interpolation as a string
+            ('linear' or 'previous'; 'previous' simply returns the previous
+            value of the point).
+            Default is 'previous'.
 
     Returns
     -------
 
     """
 
-    pass
+    t + y
