@@ -5,6 +5,10 @@ version: 2
 # Build all formats
 formats: all
 
+# Docker image to use for build process
+build:
+  image: latest
+
 # Python environment to build the docs for and install the package in
 python:
   version: 3.5
