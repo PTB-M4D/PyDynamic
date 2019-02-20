@@ -1,0 +1,22 @@
+# .readthedocs.yml
+
+version: 2
+
+# Build all formats
+formats: all
+
+# Python environment to build the docs for and install the package in
+python:
+  version: 3.5
+  install:
+    - requirements: requirements.txt
+    - method: pip
+        path: .
+    - method: setuptools
+        path: .
+
+# Sphinx configuration
+sphinx:
+  builder: html
+  configuration: docs/conf.py
+  fail_on_warning: false
