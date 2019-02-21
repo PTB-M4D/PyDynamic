@@ -1,4 +1,5 @@
 # PyDynamic
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/297aa5ced88d4d879cba8d01696f5897)](https://app.codacy.com/app/PTB_PSt1/PyDynamic?utm_source=github.com&utm_medium=referral&utm_content=eichstaedtPTB/PyDynamic&utm_campaign=Badge_Grade_Settings)
 [![CircleCI Status](https://circleci.com/gh/eichstaedtPTB/PyDynamic/tree/master.svg?style=shield)](https://circleci.com/gh/eichstaedtPTB/PyDynamic/tree/master) [![Documentation Status](https://readthedocs.org/projects/pydynamic/badge/?version=latest)](https://pydynamic.readthedocs.io/?badge=latest)
 
 Python package for the analysis of dynamic measurements
