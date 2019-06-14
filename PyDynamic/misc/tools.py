@@ -16,7 +16,6 @@ import scipy.sparse as sparse
 
 __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag']
 
-#TODO: Check that it's not used in the package and remove
 def col_hstack(vectors):
     """
     From tuple of 1D ndarrays make a 2D ndarray where the tuple
@@ -34,7 +33,6 @@ def col_hstack(vectors):
     
     return np.hstack(col_vectors)
             
-#TODO: Check that it's not used in the package and remove
 def find(assertions):
     """
     MATLAB-like determination of occurence of assertion in an array using the
@@ -49,7 +47,6 @@ def find(assertions):
     
     return inds
 
-#TODO: Check that it's not used in the package and remove
 def zerom(shape):
     """
     Generate a numpy.matrix of zeros of given shape
@@ -57,7 +54,6 @@ def zerom(shape):
     from numpy import zeros, matrix      
     return matrix(zeros(shape))
     
-#TODO: Check that it's not used in the package and remove
 def stack(elements):
     def make_matrix(v):
         if len(v.shape())>1:
