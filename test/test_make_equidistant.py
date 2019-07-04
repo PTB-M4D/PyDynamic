@@ -28,12 +28,3 @@ def test_full_call_make_equidistant():
     make_equidistant(t, y, uy, dt=.5, kind='previous')
     make_equidistant(t, y, uy, dt=.5)
     make_equidistant(t, y, uy, kind='previous')
-
-
-def test_dimensions_make_equidistant():
-    if len(y) == 1:
-        yresize = [y, y]
-    else:
-        yresize = y[1:]
-    with pytest.raises(ValueError):
-        make_equidistant(t, yresize, uy)
