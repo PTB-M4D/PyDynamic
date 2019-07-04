@@ -47,7 +47,7 @@ jobs:
         name: Run tests
         command: |
           . venv/bin/activate
-          pytest -v --cov=./ > test-results/pytest.log
+          pytest -v --cov=PyDynamic/ > test-results/pytest.log
           codecov
 
     # Install PyDynamic.
