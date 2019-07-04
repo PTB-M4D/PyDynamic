@@ -3,15 +3,20 @@ import misc
 import identification
 import deconvolution
 import uncertainty
+
+# See http://mathmet.org/projects/14SIP08 and
+# https://www.github.com/eichstaedtPTB/PyDynamic
 """
 
-from .deconvolution.fit_filter import LSFIR, LSFIR_unc, LSIIR, LSIIR_unc, LSFIR_uncMC, FreqResp2RealImag
-from .uncertainty import *
+from .deconvolution.fit_filter import LSFIR, LSFIR_unc, LSIIR, LSIIR_unc, \
+    LSFIR_uncMC
+from .identification import *
 from .misc import *
+from .uncertainty import *
 
-__version__ = "1.2.61"
+__version__ = "1.2.73"
 
-__all__ = ['LSFIR','LSIIR','LSFIR_unc','LSFIR_uncMC','LSIIR_unc','FreqResp2RealImag',
+__all__ = ['LSFIR','LSIIR','LSFIR_unc','LSFIR_uncMC','LSIIR_unc','fit_sos','FreqResp2RealImag',
 		   'GUM_DFT', 'GUM_iDFT', 'DFT_deconv', 'DFT_multiply', 'DFT2AmpPhase', 'AmpPhase2DFT', 'AmpPhase2Time',
 		   'Time2AmpPhase','FIRuncFilter', 'IIRuncFilter', 'MC', 'SMC',
 		   'db', 'grpdelay', 'mapinside', 'isstable', 'kaiser_lowpass', 'savitzky_golay',

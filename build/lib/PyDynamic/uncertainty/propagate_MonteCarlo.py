@@ -8,19 +8,21 @@ calculation of uncertainties for such cases.
 
 This module implements Monte Carlo methods for the propagation of uncertainties for digital filtering.
 
+This module contains the following functions:
+* MC: Standard Monte Carlo method for application of digital filter
+* SMC: Sequential Monte Carlo method with reduced computer memory requirements
+
 """
 
-# TODO: Implement updating Monte Carlo method
-# TODO: Implement repeated random number drawing from multivariate normal like in mvnrnd with re-using cholesky
+import sys
+
 import numpy as np
 import scipy as sp
-from numpy import matrix
-import sys
-from scipy.signal import lfilter
 import scipy.stats as stats
+from scipy.signal import lfilter
 
-from ..misc.tools import zerom
 from ..misc.filterstuff import isstable
+from ..misc.tools import zerom
 
 __all__ = ["MC", "SMC"]
 
@@ -28,7 +30,7 @@ class Normal_ZeroCorr():
 	"""
 	Multivariate normal distribution with zero correlation
 	"""
-	def __init__(self, loc=None, scale=None):
+	def __init__(self, mean=None, cov=None):
 		"""
 		Parameters
 		----------
@@ -37,22 +39,22 @@ class Normal_ZeroCorr():
 			scale: np.ndarray, optional
 				standard deviations for the elements in loc, default is zero
 		"""
-		if isinstance(loc, np.ndarray):
-			self.mean = loc
-			if isinstance(scale, np.ndarray):
-				assert (len(scale)==len(loc))
-				self.std = scale
-			elif isinstance(scale, float):
-				self.std = scale * np.ones_like(loc)
+		if isinstance(mean, np.ndarray):
+			self.mean = mean
+			if isinstance(cov, np.ndarray):
+				assert (len(cov)==len(mean))
+				self.std = cov
+			elif isinstance(cov, float):
+				self.std = cov * np.ones_like(mean)
 			else:
-				self.std = np.zeros_like(loc)
-		elif isinstance(scale, np.ndarray):
-			self.std = scale
-			self.mean = np.zeros_like(scale)
+				self.std = np.zeros_like(mean)
+		elif isinstance(cov, np.ndarray):
+			self.std = cov
+			self.mean = np.zeros_like(cov)
 
 	def rvs(self, size=1):
+		# This function mimics the behavior of the scipy stats package
 		return np.tile(self.mean, (size, 1)) + np.random.randn(size, len(self.mean))*np.tile(self.std, (size, 1))
-
 
 
 
@@ -68,7 +70,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 		x: np.ndarray
 			filter input signal
 		Ux: float or np.ndarray
-			standard deviation of signal noise or covariance matrix associated with x
+			standard deviation of signal noise (float), point-wise standard uncertainties or covariance matrix associated with x
 		b: np.ndarray
 			filter numerator coefficients
 		a: np.ndarray
@@ -104,33 +106,36 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 	Na = len(a)
 	runs = int(runs)
 
-	Y = np.zeros((runs,len(x)))
-	theta = np.hstack((a[1:],b))
-	Theta = np.random.multivariate_normal(theta,Uab,runs)
+	Y = np.zeros((runs,len(x)))		# set up matrix of MC results
+	theta = np.hstack((a[1:],b))	# create the parameter vector from the filter coefficients
+	Theta = np.random.multivariate_normal(theta,Uab,runs)	# Theta is small and thus we can draw the full matrix now.
 	if isinstance(Ux, np.ndarray):
-		dist = stats.multivariate_normal(x, Ux)
+		if len(Ux.shape)==1:
+			dist = Normal_ZeroCorr(loc=x, scale=Ux) 	# non-iid noise w/o correlation
+		else:
+			dist = stats.multivariate_normal(x, Ux)		# colored noise
 	elif isinstance(Ux, float):
-		dist = Normal_ZeroCorr(loc=x, scale=Ux)
+		dist = Normal_ZeroCorr(mean=x, cov=Ux)			# iid noise
 	else:
 		raise NotImplementedError("The supplied type of uncertainty is not implemented")
 
-	unst_count = 0
+	unst_count = 0			# Count how often in the MC runs the IIR filter is unstable.
 	st_inds  = list()
 	if verbose:
 		sys.stdout.write('MC progress: ')
 	for k in range(runs):
-		xn = dist.rvs()
+		xn = dist.rvs()		# draw filter input signal
 		if not blow is None:
 			if alow is None:
-				alow = 1.0
-			xn = lfilter(blow,alow,xn)
+				alow = 1.0  # FIR low-pass filter
+			xn = lfilter(blow,alow,xn)	# low-pass filtered input signal
 		bb = Theta[k,Na-1:]
 		aa = np.hstack((1.0, Theta[k,:Na-1]))
 		if isstable(bb,aa):
 			Y[k,:] = lfilter(bb,aa,xn)
 			st_inds.append(k)
 		else:
-			unst_count += 1
+			unst_count += 1		# don't apply the IIR filter if it's unstable
 		if np.mod(k, 0.1*runs) == 0 and verbose:
 			sys.stdout.write(' %d%%' % (np.round(100.0*k/runs)))
 	if verbose:
@@ -141,13 +146,13 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 		print("These results will not be considered for calculation of mean and std")
 		print("However, if return_samples is 'True' then ALL samples are returned.")
 
-	Y = np.roll(Y,int(shift),axis=1)
+	Y = np.roll(Y,int(shift),axis=1)		# correct for the (known) sample delay
 
 	if return_samples:
 		return Y
 	else:
 		y = np.mean(Y[st_inds,:],axis=0)
-		uy= np.std(Y[st_inds,:],axis=0)
+		uy= np.cov(Y[st_inds,:],rowvar=0)
 		return y, uy
 
 
@@ -215,36 +220,36 @@ def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0
 
 	runs = int(runs)
 
-	if isinstance(a,np.ndarray):
+	if isinstance(a,np.ndarray):	# filter order denominator
 		Na = len(a)-1
 	else:
 		Na = 0
-	if isinstance(b,np.ndarray):
+	if isinstance(b,np.ndarray):	# filter order numerator
 		Nb = len(b)-1
 	else:
 		Nb = 0
 
-	if isinstance(theta,np.ndarray) or isinstance(theta,float):
+	if isinstance(theta,np.ndarray) or isinstance(theta,float):		# initialise noise matrix corresponding to ARMA noise model
 		if isinstance(theta,float):
 			W = np.zeros((runs,1))
 		else:
 			W = np.zeros((runs,len(theta)))
 	else:
-		MA = False
+		MA = False		# no moving average part in noise process
 
-	if isinstance(phi,np.ndarray) or isinstance(phi,float):
+	if isinstance(phi,np.ndarray) or isinstance(phi,float):			# Initialise for autoregressive part of noise process
 		AR = True
 		if isinstance(phi,float):
 			E = np.zeros((runs,1))
 		else:
 			E = np.zeros((runs,len(phi)))
 	else:
-		AR = False
+		AR = False		# no autoregresssive part in noise process
 
 
 
 	if isinstance(blow,np.ndarray):
-		X = np.zeros((runs,len(blow)))
+		X = np.zeros((runs,len(blow)))		# initialise matrix of low-pass filtered input signal
 	else:
 		X = np.zeros(runs)
 
@@ -255,41 +260,41 @@ def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0
 
 
 
-	if Na==0:
+	if Na==0:		# only FIR filter
 		coefs = b
 	else:
 		coefs = np.hstack((a[1:],b))
 
-	if isinstance(Uab, np.ndarray):
+	if isinstance(Uab, np.ndarray):			# Monte Carlo draw for filter coefficients
 		Coefs = np.random.multivariate_normal(coefs, Uab, runs)
 	else:
 		Coefs = np.tile(coefs, (runs, 1))
 
 	b0 = Coefs[:,Na]
 
-	if Na>0: # filter is IIR
+	if Na>0:		# filter is IIR
 		A = Coefs[:,:Na]
 		if Nb>Na:
 			A = np.hstack((A,zerom((runs,Nb-Na))))
-	else: # filter is FIR -> zero state equations
+	else:			# filter is FIR -> zero state equations
 		A = np.zeros((runs,Nb))
 
-	c = Coefs[:,Na+1:] - np.multiply(np.tile(b0[:, np.newaxis],(1,Nb)),A)
-	States = np.zeros(np.shape(A))
+	c = Coefs[:,Na+1:] - np.multiply(np.tile(b0[:, np.newaxis],(1,Nb)),A)	# Fixed part of state-space model
+	States = np.zeros(np.shape(A))		# initialise matrix of states
 
-	calcP = False
-	if not Perc is None:
+	calcP = False			# by default no percentiles requested
+	if not Perc is None:	# percentiles requested
 		calcP = True
 		P = np.zeros((len(Perc),len(x)))
 
-	y = np.zeros_like(x)
-	Uy= np.zeros_like(x)
+	y = np.zeros_like(x)	# initialise outputs
+	Uy= np.zeros_like(x)	# initialise vector of point-wise uncertainties (no correlation)
 
 
-	print("Sequential Monte Carlo progress", end="")
+	print("Sequential Monte Carlo progress", end="")	# start of the actual MC part
 	for k in range(len(x)):
 
-		w  = np.random.randn(runs)*noise_std
+		w  = np.random.randn(runs)*noise_std		# noise process draw
 		if AR and MA:
 			E  = np.hstack( ( E.dot(phi) + W.dot(theta) + w, E[:-1]) )
 			W  = np.hstack( (w, W[:-1] ) )
@@ -303,23 +308,24 @@ def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0
 			E  = w
 
 
-		if isinstance(alow,np.ndarray):
+		if isinstance(alow,np.ndarray):				# apply low-pass filter
 			X = np.hstack((x[k] + E, X[:, :-1]))
 			Xl = np.hstack( ( X.dot(blow.T) - Xl[:,:len(alow)].dot(alow[1:]), Xl[:,:-1] ) )
 		elif isinstance(blow,np.ndarray):
 			X = np.hstack((x[k] + E, X[:, :-1]))
-			Xl = X.dot(blow.T)
+			Xl = X.dot(blow)
 		else:
 			Xl = x[k] + E
+		if len(Xl.shape)==1:
+			Xl = Xl[:,np.newaxis]		# prepare for easier calculations
+		Y = np.sum(np.multiply(c,States),axis=1) + np.multiply(b0,Xl[:,0]) + (np.random.rand(runs)*2*Delta - Delta) 	# state-space system output
+		Z = -np.sum(np.multiply(A,States),axis=1) + Xl[:,0]			# calculate state updates
+		States = np.hstack((Z[:,np.newaxis], States[:,:-1]))		# store state updates and remove old ones
 
-		Y = np.sum(np.multiply(c,States),axis=1) + np.multiply(b0,Xl[:,0]) + (np.random.rand(runs)*2*Delta - Delta)
-		Z = -np.sum(np.multiply(A,States),axis=1) + Xl[:,0]
-		States = np.hstack((Z[:,np.newaxis], States[:,:-1]))
-
-		y[k] = np.mean(Y)
-		Uy[k]= np.std(Y)
+		y[k] = np.mean(Y)		# point-wise best estimate
+		Uy[k]= np.std(Y)		# point-wise standard uncertainties
 		if calcP:
-			P[:,k] = sp.stats.mstats.mquantiles(np.asarray(Y),prob=Perc)
+			P[:,k] = sp.stats.mstats.mquantiles(np.asarray(Y),prob=Perc)	# percentiles if requested
 
 		if np.mod(k, np.round(0.1*len(x))) == 0:
 			print(' %d%%' % (np.round(100.0*k/len(x))), end="")
@@ -327,7 +333,7 @@ def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0
 	print(" 100%")
 
 
-	y = np.roll(y,int(shift))
+	y = np.roll(y,int(shift))	# correct for (known) delay
 	Uy= np.roll(Uy,int(shift))
 
 

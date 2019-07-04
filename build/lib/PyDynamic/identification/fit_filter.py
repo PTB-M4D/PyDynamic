@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 '''
-.. moduleauthor:: Sascha Eichstaedt (sascha.eichstaedt@ptb.de)
-'''
+This module contains several functions to carry out a least-squares fit to a given complex frequency response.
 
-from ..misc.filterstuff import grpdelay, mapinside
+This module contains the following functions
+* LSIIR: Least-squares IIR filter fit to a given frequency response
+* LSFIR: Least-squares fit of a digital FIR filter to a given frequency response
+
+'''
 
 import numpy as np
 import scipy.signal as dsp
 
+from ..misc.filterstuff import grpdelay, mapinside
 
-#Todo: Include fitting of transfer function (continuous)
+__all__ = ['LSIIR', 'LSFIR']
+
 def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     """Least-squares IIR filter fit to a given frequency response.
     
@@ -17,10 +22,10 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     mapping for filter stabilization
     
     Parameters:
-        Hvals:   numpy array of frequency response values
+        Hvals:   numpy array of frequency response values of shape (M,)
         Nb:      integer numerator polynomial order
         Na:      integer denominator polynomial order
-        f:       numpy array of frequencies at which Hvals is given
+        f:       numpy array of frequencies at which Hvals is given of shape (M,)
         Fs:      sampling frequency
         tau:     integer initial estimate of time delay
         justFit: boolean, when true then no stabilization is carried out
@@ -51,7 +56,7 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
         D   = np.hstack((HEa,-Eb))
         Tmp1= np.real(np.dot(np.conj(D.T),D))
         Tmp2= np.real(np.dot(np.conj(D.T),-Htau))
-        ab = np.linalg.lstsq(Tmp1,Tmp2)[0]
+        ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
         a = np.hstack((1.0,ab[:Na]))
         b = ab[Na:]
         return b,a
@@ -107,21 +112,18 @@ def LSFIR(H,N,tau,f,Fs,Wt=None):
     """
     Least-squares fit of a digital FIR filter to a given frequency response.
 
+    Parameters
+    ----------
+        H : frequency response values of shape (M,)
+        N : FIR filter order
+        tau : delay of filter
+        f : frequencies of shape (M,)
+        Fs : sampling frequency of digital filter
+        Wt : (optional) vector of weights of shape (M,) or shape (M,M)
 
-    :param H: frequency response values
-    :param N: FIR filter order
-    :param tau: delay of filter
-    :param f: frequencies
-    :param Fs: sampling frequency of digital filter
-    :param Wt: (optional) vector of weights
-
-    :type H: ndarray
-    :type N: int
-    :type tau: int
-    :type f: ndarray
-    :type Fs: float
-
-    :returns: filter coefficients bFIR (ndarray) of shape (N,)
+    Returns
+    -------
+        filter coefficients bFIR (ndarray) of shape (N+1,)
 
     """
 

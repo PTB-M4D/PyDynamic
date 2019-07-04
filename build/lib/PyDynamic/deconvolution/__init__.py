@@ -7,11 +7,10 @@ by least-squares fitting to the reciprocal of a given frequency response with as
 # See http://mathmet.org/projects/14SIP08 and
 # https://www.github.com/eichstaedtPTB/PyDynamic
 
-from .fit_filter import LSFIR, LSIIR, LSFIR_unc, LSFIR_uncMC, LSIIR_unc, FreqResp2RealImag
+from .fit_filter import LSFIR, LSIIR, LSFIR_unc, LSFIR_uncMC, LSIIR_unc
 
 __all__ = ['LSFIR',
 		   'LSIIR',
 		   'LSFIR_unc',
 		   'LSFIR_uncMC',
-		   'LSIIR_unc',
-		   'FreqResp2RealImag']
+		   'LSIIR_unc']
