@@ -244,7 +244,12 @@ def make_equidistant(t, y, uy, dt=50, kind='previous'):
 
     Returns
     -------
-
+        t: (N,) array_like
+            timestamps
+        y: (N,) array_like
+            measurement values
+        uy: float
+            measurement values' uncertainty
     """
 
     t + y
