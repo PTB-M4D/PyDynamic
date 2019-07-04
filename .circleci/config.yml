@@ -67,7 +67,7 @@ jobs:
     # Store test results.
     - store_artifacts:
         path: test_results
-          destination: test_results
+        destination: test_results
 
     - store_test_results:
         path: test_results
