@@ -252,4 +252,4 @@ def make_equidistant(t, y, uy, dt=50, kind='previous'):
             measurement values' uncertainty
     """
 
-    t + y
+    return t, y, uy
