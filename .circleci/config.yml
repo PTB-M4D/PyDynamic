@@ -50,15 +50,12 @@ jobs:
 
     # Run tests with coverage report and upload results to Codecov! We use
     # pytest's test-runner (https://pytest.org)
-    # 1. Upload test report to Codecov using `codecov`
-    # 2. Produce normal report to show in CircleCI 'test-reports'
     - run:
         name: Run tests
         command: |
           . venv/bin/activate
           pytest -v --cov=PyDynamic/
           codecov
-          coverage report -m > test_results/pytest/pytest.log
 
     # Install PyDynamic.
     - run:
