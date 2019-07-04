@@ -76,12 +76,19 @@ coverage intervals *Py* corresponding to the specified percentiles.
 
 ![PyDynamic Workflow Deconvolution](http://mathmet.org/projects/14SIP08/Deconvolution.png) 
 
-### Roadmap - next steps
+### Roadmap
 
-1. Extend the existing examples using improved signals and systems.
-2. Extend the code to more advanced noise processes and uncertainty evaluation.
-3. Add IPython notebooks as a way of documentation.
-4. Provide graphical user interfaces for specific use cases (Any suggestions? Let us know!)
+#### Next steps
+
+1. Interpolation of timeseries with associated uncertainties
+2. Extension of the testsignals module
+3. Extension of data transformation functions to data streams applications  
+
+#### Longterm plans
+
+1. Implementation of other measurement (sensor) models
+2. Extension to more complex noise and uncertainty models
+3. Support for derivation of noise models
 
 ### Citation
 
@@ -92,7 +99,9 @@ Sascha Eichstädt, Clemens Elster, Ian M. Smith, and Trevor J. Esward
 **J. Sens. Sens. Syst.**, 6, 97-105, 2017, DOI: [10.5194/jsss-6-97-2017](https://doi.org/10.5194/jsss-6-97-2017)
 
 ##### Acknowledgement
-This work is part of the Joint Support for Impact project [14SIP08](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for Innovation and Research (EMPIR). 
+This work is part of the Joint Research Project [17IND12 Met4FoF](http://met4fof.eu) of the European Metrology Programme for Innovation and Research (EMPIR).
+
+This work was part of the Joint Support for Impact project [14SIP08](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for Innovation and Research (EMPIR). 
 The [EMPIR](http://msu.euramet.org) is jointly funded by the EMPIR participating countries within EURAMET and the European Union.
 
 ##### Disclaimer

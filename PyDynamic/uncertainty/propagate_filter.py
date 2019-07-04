@@ -14,9 +14,6 @@ from scipy.signal import lfilter,tf2ss
 from scipy.linalg import toeplitz
 from ..misc.tools import zerom
 
-# TODO Implement formula for colored noise
-# TODO Implement formula for covariance calculation
-
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
 
 def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
@@ -92,7 +89,6 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
     return x, ux.flatten()                  # flatten in case that we still have 2D array
 
 
-#TODO: Allow zero uncertainty for filter
 def IIRuncFilter(x, noise, b, a, Uab):
     """Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 

@@ -14,7 +14,6 @@ This module contains the following functions:
 
 """
 
-# TODO: Implement Updating Monte Carlo method
 import numpy as np
 import scipy as sp
 import sys
