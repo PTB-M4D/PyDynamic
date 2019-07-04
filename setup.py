@@ -1,28 +1,63 @@
 # -*- coding: utf-8 -*-
 """
-Installation of PyDynamic in Python path
+Install PyDynamic in Python path.
 """
 
 import os
+import sys
+
 from setuptools import setup, find_packages
-from PyDynamic import __version__ as version
+from setuptools.command.install import install
+
+# Get release version from PyDynamic __init__.py
+from PyDynamic import __version__ as VERSION
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
+def readme():
+    """Print long description"""
+    with open('README.md') as f:
+        return f.read()
+
+
+class VerifyVersionCommand(install):
+    """Custom command to verify that the git tag matches our version"""
+    description = 'Verify that the git tag matches our version'
+
+    def run(self):
+        tag = os.getenv('CIRCLE_TAG')
+
+        if tag != VERSION:
+            info = "Git tag: {0} does not match the version of this app: " \
+                   "{1}".format(
+                tag, VERSION
+            )
+            sys.exit(info)
+
+
 setup(
-    name = "PyDynamic",
-    version = version,
-    author = u"Sascha Eichstädt, Ian Smith",
-    author_email = "sascha.eichstaedt@ptb.de",
-    description = ("A software package for the analysis of dynamic measurements"),
-    license = "LGPLv3",
-    keywords = "uncertainty dynamic deconvolution metrology",
-	packages = find_packages(exclude=["test"]),
-    long_description = "Python package for the analysis of dynamic measurements\n The goal of this package is to provide a starting point for users in metrology and related areas who deal with time-dependent, i.e. *dynamic*, measurements.\nThe software is part of a joint research project of the national metrology institutes from Germany and the UK, i.e. [Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html) and the [National Physical Laboratory](http://www.npl.co.uk).\n",
-	classifiers=[
+    name="PyDynamic",
+    version=VERSION,
+    description="A software package for the analysis of dynamic measurements",
+    long_description=readme(),
+    url='https://github.com/eichstaedtPTB/PyDynamic',
+    author=u"Sascha Eichstädt, Ian Smith, Thomas Bruns, Björn Ludwig, "
+           u"Maximilian Gruber",
+    author_email="sascha.eichstaedt@ptb.de",
+    license="LGPLv3",
+    keywords="uncertainty dynamic deconvolution metrology",
+    packages=find_packages(exclude=["test"]),
+    classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Utilities",
-        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)"],
-    url = 'https://github.com/eichstaedtPTB/PyDynamic'
+        "License :: OSI Approved :: GNU Lesser General Public License v3 ("
+        "LGPLv3)",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5"],
+    cmdclass={
+        'verify': VerifyVersionCommand,
+    }
 )
