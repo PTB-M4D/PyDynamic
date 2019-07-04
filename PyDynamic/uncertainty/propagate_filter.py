@@ -94,29 +94,29 @@ def IIRuncFilter(x, noise, b, a, Uab):
 
     Parameters
     ----------
-	    x: np.ndarray
-	        filter input signal
-	    noise: float
-	        signal noise standard deviation
-	    b: np.ndarray
-	        filter numerator coefficients
-	    a: np.ndarray
-	        filter denominator coefficients
-	    Uab: np.ndarray
-	        covariance matrix for (a[1:],b)
+        x: np.ndarray
+            filter input signal
+        noise: float
+            signal noise standard deviation
+        b: np.ndarray
+            filter numerator coefficients
+        a: np.ndarray
+            filter denominator coefficients
+        Uab: np.ndarray
+            covariance matrix for (a[1:],b)
 
     Returns
     -------
-	    y: np.ndarray
-	        filter output signal
-	    Uy: np.ndarray
-	        uncertainty associated with y
+        y: np.ndarray
+            filter output signal
+        Uy: np.ndarray
+            uncertainty associated with y
 
     References
     ----------
         * Link and Elster [Link2009]_
 
-	"""
+    """
 
     if not isinstance(noise, np.ndarray):
         noise = noise * np.ones_like(x)    # translate iid noise to vector
