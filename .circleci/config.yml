@@ -54,7 +54,7 @@ jobs:
         name: Run tests
         command: |
           . venv/bin/activate
-          pytest -v --cov=PyDynamic/ > test-results/pytest/pytest.log
+          pytest -v --cov=./ > test-results/pytest/pytest.log
           codecov
 
     # Install PyDynamic.
@@ -66,8 +66,8 @@ jobs:
 
     # Store test results.
     - store_artifacts:
-        path: test_results
-        destination: test_results
+        path: test-results
+        destination: test-results
 
     - store_test_results:
-        path: test_results
+        path: test-results
