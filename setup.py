@@ -43,6 +43,7 @@ setup(
     version=VERSION,
     description="A software package for the analysis of dynamic measurements",
     long_description=readme(),
+    long_description_content_type="text/markdown",
     url='https://github.com/eichstaedtPTB/PyDynamic',
     author=u"Sascha Eichstädt, Ian Smith, Thomas Bruns, Björn Ludwig, "
            u"Maximilian Gruber",
@@ -50,6 +51,16 @@ setup(
     license="LGPLv3",
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(exclude=["test"]),
+    install_requires=[
+        'ipython==6.2.1',
+        'jupyter==1.0.0',
+        'matplotlib==2.1.2',
+        'numpy==1.14.0',
+        'pandas==0.22.0',
+        'scipy==1.0.0',
+        'sympy==1.1.1'
+    ],
+    python_requires='>=3.5',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Utilities",
