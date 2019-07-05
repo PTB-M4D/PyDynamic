@@ -115,7 +115,7 @@ jobs:
           name: Create package
           command: |
             . venv/bin/activate
-            python setup.py sdist bdist_wheel
+            python setup.py setuptools sdist bdist_wheel
 
       # Upload the created packages to test.pypi.org.
       - run:
