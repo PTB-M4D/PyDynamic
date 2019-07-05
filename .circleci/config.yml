@@ -122,5 +122,4 @@ jobs:
           name: Upload to PyPI
           command: |
             . venv/bin/activate
-            twine upload --config-file ~/.pypirc --repository-url \
-            https://test.pypi.org/legacy/ dist/*
+            twine upload dist/*
