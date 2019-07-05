@@ -96,14 +96,14 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            pip install wheel twine
+            pip install setuptools wheel twine
 
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
           paths:
             - "venv"
 
-      # Verify Git tag to version
+      # Verify Git tag to version to ensure, only wanted versions are uploaded.
       - run:
           name: Verify Git tag vs. version
           command: |
@@ -115,7 +115,7 @@ jobs:
           name: Create package
           command: |
             . venv/bin/activate
-            python setup.py setuptools sdist bdist_wheel
+            python setup.py sdist bdist_wheel
 
       # Upload the created packages to test.pypi.org.
       - run:
