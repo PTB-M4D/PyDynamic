@@ -2,11 +2,11 @@
 #
 # Check https://circleci.com/docs/2.1/language-python/ for more details
 #
-version: 2
+version: 2.1
 workflows:
   build_and_deploy:
     jobs:
-      - build:
+      - build
       - deploy:
         requires:
           - build
