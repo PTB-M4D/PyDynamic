@@ -2,9 +2,8 @@
 #
 # Check https://circleci.com/docs/2.1/language-python/ for more details
 #
-version: 2
+version: 2.1
 workflows:
-  version: 2
   build_and_deploy:
     jobs:
       - build
@@ -17,112 +16,112 @@ workflows:
 jobs:
   build:
     docker:
-    - image: circleci/python:3.5
+      - image: circleci/python:3.5
 
     working_directory: ~/repo
 
     steps:
-    - checkout
+      - checkout
 
-    # Create folder for test results.
-    - run:
-        name: create test result folder
-        command: |
-          mkdir test-reports
+      # Create folder for test results.
+      - run:
+          name: create test result folder
+          command: |
+            mkdir test-reports
 
-    # Download and cache dependencies.
-    - restore_cache:
-        keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}
-        # Fallback to using the latest cache if no exact match is found.
-        - v1-dependencies-
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # Fallback to using the latest cache if no exact match is found.
+            - v1-dependencies-
 
-    # Install dependencies if needed.
-    - run:
-        name: install dependencies
-        command: |
-          python3 -m venv venv
-          . venv/bin/activate
-          pip install -r requirements.txt
-
-    - save_cache:
-        paths:
-        - ./venv
-        key: v1-dependencies-{{ checksum "requirements.txt" }}
-
-    # Run tests! We use pytest's test-runner (https://pytest.org)
-    - run:
-        name: run tests
-        command: |
-          . venv/bin/activate
-          py.test -v > test-reports/pytest.log
-
-    # Install PyDynamic.
-    - run:
-        name: install PyDynamic
-        command: |
-          . venv/bin/activate
-          python3 setup.py install
-
-    # Store test results.
-    - store_artifacts:
-        path: test-reports
-        destination: test-reports
-
-  deploy:
-    docker:
-    - image: circleci/python:3.5
-
-    working_directory: ~/repo
-
-    steps:
-    - checkout
-
-    # Download and cache dependencies.
-    - restore_cache:
-        key:
-        - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
-        # Fallback to using the latest cache if no exact match is found.
-        - v1-dependencies-
-
-    # Install dependencies if needed.
-    - run:
-        name: Install python dependencies
-        command: |
+      # Install dependencies if needed.
+      - run:
+          name: install dependencies
+          command: |
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
 
-    - save_cache:
-        key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
-        paths:
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      # Run tests! We use pytest's test-runner (https://pytest.org)
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            py.test -v > test-reports/pytest.log
+
+      # Install PyDynamic.
+      - run:
+          name: install PyDynamic
+          command: |
+            . venv/bin/activate
+            python3 setup.py install
+
+      # Store test results.
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
+  deploy:
+    docker:
+      - image: circleci/python:3.5
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+            # Fallback to using the latest cache if no exact match is found.
+            - v1-dependencies-
+
+      # Install dependencies if needed.
+      - run:
+          name: Install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+          paths:
             - "venv"
 
-    # Verify Git tag to version
-    - run:
-        name: Verify Git tag vs. version
-        command: |
+      # Verify Git tag to version
+      - run:
+          name: Verify Git tag vs. version
+          command: |
             python3 -m venv venv
             . venv/bin/activate
             python setup.py verify
 
-    # Create a .pypirc file using the PYPI_PASSWORD environment variable.
-    - run:
-        name: Init .pypirc
-        command: |
+      # Create a .pypirc file using the PYPI_PASSWORD environment variable.
+      - run:
+          name: Init .pypirc
+          command: |
             echo -e "[pypi]" >> ~/.pypirc
             echo -e "username = BjoernLudwigPTB" >> ~/.pypirc
             echo -e "password = $TESTPYPI_PASSWORD" >> ~/.pypirc
 
-    # Create a package.
-    - run:
-        name: Create package
-        command: |
+      # Create a package.
+      - run:
+          name: Create package
+          command: |
             python setup.py sdist bdist_wheel
 
-    # Upload the created packages to test.pypi.org.
-    - run:
-        name: Upload to PyPI
-        command: |
+      # Upload the created packages to test.pypi.org.
+      - run:
+          name: Upload to PyPI
+          command: |
             . venv/bin/activate
             twine upload --repository-url https://test.pypi.org/legacy/ dist/*
