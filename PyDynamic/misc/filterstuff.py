@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 
 A collection of methods which are related to filter design.
 
