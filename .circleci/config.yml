@@ -93,7 +93,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            pip install setuptools wheel twine
+            pip install wheel twine
 
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
