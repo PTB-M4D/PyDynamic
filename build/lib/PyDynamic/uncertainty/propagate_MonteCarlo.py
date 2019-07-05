@@ -10,17 +10,18 @@ This module implements Monte Carlo methods for the propagation of uncertainties 
 
 """
 
+import sys
+
 # TODO: Implement updating Monte Carlo method
-# TODO: Implement repeated random number drawing from multivariate normal like in mvnrnd with re-using cholesky
+# TODO: Implement repeated random number drawing from multivariate normal
+#  like in mvnrnd with re-using cholesky
 import numpy as np
 import scipy as sp
-from numpy import matrix
-import sys
-from scipy.signal import lfilter
 import scipy.stats as stats
+from scipy.signal import lfilter
 
-from ..misc.tools import zerom
 from ..misc.filterstuff import isstable
+from ..misc.tools import zerom
 
 __all__ = ["MC", "SMC"]
 
@@ -57,7 +58,7 @@ class Normal_ZeroCorr():
 
 
 def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,verbose=True):
-	"""Standard Monte Carlo method
+	r"""Standard Monte Carlo method
 
 	Monte Carlo based propagation of uncertainties for a digital filter (b,a)
 	with uncertainty matrix
@@ -154,7 +155,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 
 def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0,\
 			return_samples=False,phi=None,theta=None,Delta=0.0):
-	"""Sequential Monte Carlo method
+	r"""Sequential Monte Carlo method
 
 	Sequential Monte Carlo propagation for a digital filter (b,a) with uncertainty
 	matrix :math:`U_{\theta}` for :math:`\theta=(a_1,\ldots,a_{N_a},b_0,\ldots,b_{N_b})^T`
