@@ -108,7 +108,6 @@ jobs:
       - run:
           name: Verify Git tag vs. version
           command: |
-            python3 -m venv venv
             . venv/bin/activate
             python setup.py verify
 
@@ -124,6 +123,7 @@ jobs:
       - run:
           name: Create package
           command: |
+            . venv/bin/activate
             python setup.py sdist bdist_wheel
 
       # Upload the created packages to test.pypi.org.
