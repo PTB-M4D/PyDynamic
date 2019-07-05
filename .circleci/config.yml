@@ -110,14 +110,6 @@ jobs:
             . venv/bin/activate
             python setup.py verify
 
-      # Create a .pypirc file using the PYPI_PASSWORD environment variable.
-      - run:
-          name: Init .pypirc
-          command: |
-            echo -e "[pypi]" >> ~/.pypirc
-            echo -e "username = BjoernLudwigPTB" >> ~/.pypirc
-            echo -e "password = $TESTPYPI_PASSWORD" >> ~/.pypirc
-
       # Create a package.
       - run:
           name: Create package
