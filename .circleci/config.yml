@@ -91,13 +91,14 @@ jobs:
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
-      # Install dependencies if needed.
+      # Install dependencies if needed as well for package creation.
       - run:
           name: Install python dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
+            pip install setuptools wheel twine
 
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
