@@ -52,22 +52,21 @@ setup(
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(exclude=["test"]),
     install_requires=[
-        'ipython==6.2.1',
+        'ipython==7.6.1',
         'jupyter==1.0.0',
-        'matplotlib==2.1.2',
-        'numpy==1.14.0',
-        'pandas==0.22.0',
-        'scipy==1.0.0',
-        'sympy==1.1.1'
+        'matplotlib==3.1.1',
+        'numpy==1.16.4',
+        'pandas==0.24.2',
+        'scipy==1.3.0',
+        'sympy==1.4'
     ],
-    python_requires='>=3.5',
+    python_requires='>=3',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Utilities",
         "License :: OSI Approved :: GNU Lesser General Public License v3 ("
         "LGPLv3)",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5"],
+        "Programming Language :: Python :: 3"],
     cmdclass={
         'verify': VerifyVersionCommand,
     }
