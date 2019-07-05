@@ -23,7 +23,7 @@ def test_colored_noise():
 
         # definitions
         N     = np.random.choice(lengths)
-        sigma = 1.0
+        sigma = 0.5
         w     = np.random.normal(loc = 0, scale = sigma, size=N)
 
         # instantiate correlated noise class
@@ -31,26 +31,24 @@ def test_colored_noise():
 
         # calculate theortic covariance
         Rxx = cn.theoretic_covariance_colored_noise(beta=beta)
-        assert Rxx.shape == (N,N)
+        assert Rxx.shape == (N,)
         
         # transform w into correlated noise
         w_color = cn.colored_noise(beta=beta)
         assert w_color.shape == (N)
         assert np.all(np.isfinite(w_color))
 
-        print(Rxx)
-        plt.imshow(Rxx)
-        plt.show()
-        print(np.std(w))
-        print(np.std(w_color))
-        plt.plot(w)
-        plt.plot(w_color)
-        plt.show()
-
         # visualize the outcome
-        #plt.imshow(Rxx)
-        #plt.plot(w_color)
-        #plt.show()
+        if beta == -2:
+            print(Rxx)
+            plt.imshow(Rxx)
+            plt.show()
+            print(np.std(w))
+            print(np.std(w_color))
+            plt.plot(w)
+            plt.plot(w_color)
+            plt.show()
+
 
     # check error-message for undefined color-name
     try:

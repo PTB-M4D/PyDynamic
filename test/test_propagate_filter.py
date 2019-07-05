@@ -57,15 +57,12 @@ def test_FIR(makePlots=False, corrNoise=False):
 
     # input signal
     x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
-    plt.plot(time, x)
-    plt.show()
-    exit()
 
-
+    # run methods
     y, Uy = FIRuncFilter(x, noise, b, Ub, blow=b)            # apply uncertain FIR filter (GUM formula)
-    yMC,UyMC = MC.MC(x,noise,b,[1.0],Ub,runs=1000,blow=b)    # apply uncertain FIR filter (Monte Carlo)
+    yMC,UyMC = MC.MC(x,sigma_noise,b,[1.0],Ub,runs=1000,blow=b)    # apply uncertain FIR filter (Monte Carlo)
 
-
+    # plot if necessary
     if makePlots:
         plt.figure(1); plt.cla()
         plt.plot(time, x, label="input")

@@ -50,26 +50,61 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
 
 
     """
-    if not isinstance(sigma_noise, float):
-        raise NotImplementedError(
-            "FIR formula for covariance propagation not implemented yet. Suggesting Monte Carlo propagation instead.")
+    #if not isinstance(sigma_noise, float):
+    #    raise NotImplementedError(
+    #        "FIR formula for covariance propagation not implemented yet. Suggesting Monte Carlo propagation instead.")
     Ncomp = len(theta) - 1      # FIR filter order
 
     if not isinstance(Utheta, np.ndarray):      # handle case of zero uncertainty filter
-        Utheta = np.zeros((Ncomp, Ncomp))
+        Utheta = np.zeros((Ncomp+1, Ncomp+1))
+
+    if isinstance(sigma_noise, float):
+        sigma2 = np.zeros((2*(Ncomp+1),))           # transform sigma into [sigma^2, 0, 0, 0, ...] (right-side autocorrelation of white noise), note: s[2*N] === s[-1]
+        sigma2[0]= sigma_noise**2
+    else:
+        sigma2 = sigma_noise
 
     if isinstance(blow,np.ndarray):             # calculate low-pass filtered signal and propagate noise
-        LR = 600
-        Bcorr = np.correlate(blow, blow, 'full')
-        ycorr = np.convolve(sigma_noise**2,Bcorr)
-        Lr = len(ycorr)
-        Lstart = int(np.ceil(Lr//2))
-        Lend = Lstart + LR -1
-        Ryy = toeplitz(ycorr[Lstart:Lend])
-        Ulow= Ryy[:Ncomp+1,:Ncomp+1]
+
+        # TODO Monday 2019-07-08
+        # I (Max) have questions:
+        # - in the old implementation, if Nlow < Ncomp+1, then Ulow has the wrong dimensions to be multiplied with Utheta
+        # - Lend is higher than ycorr has elements (though, numpy is not issuing a warning)
+        # - unclear, when / how Ncomp or Nlow are used (in the paper Ulow abd Utheta (Uc) are assumed to be of same dimension). 
+
+        ## OLD IMPLEMENTATION, only white noise
+        # LR = 600                                # FIXME: is LR the same as Lr ? Also LR = 600 seems very arbitrary
+        #Bcorr = np.correlate(blow, blow, 'full')
+        #ycorr = np.convolve(sigma_noise**2,Bcorr)
+        #Lr = len(ycorr)
+        #Lstart = int(np.ceil(Lr//2))
+        #Lend = Lstart + Lr -1                     # part of FIXME: replaced LR with Lr 
+        #Ryy = toeplitz(ycorr[Lstart:Lend])
+        #Ulow= Ryy[:Ncomp+1,:Ncomp+1]
+
+        ## NEW IMPLEMENTATION, allows for correlated noise
+        # formula 32: Ulow[k] = sum_{k1,k2}^{Nlow} l_{k1} * l_{k2} * w_{k + k2 - k1}
+        # the idea:
+        # - build up Matrix L with all low-pass-filter-coefficients L
+        # - generate every combination of l_i with l_j by elementwise multiplication of L and L^T
+        # - weight by w_k
+
+        Nlow = len(blow)
+        L = np.tile(blow, (len(blow),1))
+        LL = np.multiply(L, L.T)
+        tmp = np.zeros((Nlow,))
+
+        for k in range(Nlow):
+            wk     = np.roll(sigma2, k)                         # shift the autocorrelation of correlated noise accordingly
+            W      = toeplitz(wk[:Nlow], np.flip(wk)[:Nlow])     # build a matrix from that and cut it down to (Nlow x Nlow)
+            tmp[k] = np.sum(np.multiply(LL,W))
+
+        tmp = np.append(tmp, np.flip(tmp[1:]))
+        Ulow = np.vstack([np.roll(tmp,shift)[0:Ncomp+1] for shift in range(Ncomp+1)])   # make time shifted matrix from vector, because u(x[n], x[n+k]) does depend on k, but not on n
+
         xlow = lfilter(blow,1.0,y)
     else:
-        Ulow = np.eye(len(theta))*sigma_noise**2
+        Ulow = np.vstack([np.roll(sigma2,shift)[0:Ncomp+1] for shift in range(Ncomp+1)])
         xlow = y
 
     x = lfilter(theta,1.0,xlow)     # apply FIR filter to calculate best estimate in accordance with GUM

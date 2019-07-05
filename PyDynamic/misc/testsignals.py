@@ -220,10 +220,10 @@ class corr_noise(object):
 
     def theoretic_covariance_colored_noise(self, N = None, color = "white", beta = None):
         """
-        Return the theoretic autocovariance-matrix (Rxx) of different colors of noise. If "beta" is provided, "color"-argument is ignored.
+        Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "beta" is provided, "color"-argument is ignored.
 
-        Colors of noise are defined to have a power spectral density (Sxx) proportional to f^beta. 
-        Sxx and Rxx form a Fourier-pair. Therefore Rxx = ifft(Sxx). 
+        Colors of noise are defined to have a power spectral density (Sww) proportional to f^beta. 
+        Sww and Rww form a Fourier-pair. Therefore Rww = ifft(Sww). 
         """
         # process the arguments
         if N == None: N = len(self.w)
@@ -232,17 +232,18 @@ class corr_noise(object):
         # generate frequencies
         freq = np.fft.fftfreq(2*N)
 
-        # generate and transform the power spectral density Sxx
-        Sxx = np.power(np.abs(freq), beta)
-        Sxx[0] = 1                             #  FIXME: why one?
+        # generate and transform the power spectral density Sww
+        Sww = np.power(np.abs(freq), beta)
+        Sww[0] = 1                             #  FIXME: why one?
 
-        Rxx = np.real(np.fft.ifft(Sxx))
-        Rxx = Rxx / Rxx[0]            # FIXME: this normalization is not thought through
+        Rww = np.real(np.fft.ifft(Sww))
+        Rww = self.sigma**2 * Rww / Rww[0]     # FIXME: this normalization is not thought through
+
+        return Rww                             # attention, Rww has length 2*N, this allows for cyclic repetition --> Rxx[2N] == Rxx[-1]
 
         # build matrix from this result
-        Rxx_matrix = np.vstack([np.roll(Rxx,shift)[0:N] for shift in range(N)])
-
-        return Rxx_matrix
+        #Rww_matrix = np.vstack([np.roll(Rww,shift)[0:N] for shift in range(N)])
+        #return Rww_matrix
 
     def colored_noise(self, beta = None, color = "white"):
         """
