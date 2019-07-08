@@ -277,6 +277,46 @@ def LSFIR_uncMC(H,UH,N,tau,f,Fs,wt=None,verbose=True):
 	return bFIR, UbFIR
 
 
+def fitIIR(Hvals, tau, w, E, Na, Nb):
+    """The helper function for the actual fitting part.
+
+    Parameters
+    ----------
+        Hvals:   np.ndarray of shape (M,) and dtype complex
+            frequency response values.
+        tau: float
+            initial estimate of time delay for filter stabilization.
+        w:       np.ndarray
+            :math:`2 * np.pi * f / Fs`
+        E:       np.ndarray
+            :math:`np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
+        Nb: int
+            order of IIR numerator polynomial.
+        Na: int
+            order of IIR denominator polynomial.
+
+    Returns
+    -------
+        bi, ai : np.ndarray
+            IIR filter coefficients as numpy arrays
+    """
+    from numpy import conj
+    from numpy.linalg import lstsq
+
+    # helper function for actual fitting part
+    Ea = E[:, 1:Na + 1]
+    Eb = E[:, :Nb + 1]
+    Htau = np.exp(-1j * w * tau) * Hvals ** (-1)
+    HEa = np.dot(np.diag(Htau), Ea)
+    D = np.hstack((HEa, -Eb))
+    Tmp1 = np.real(np.dot(conj(D.T), D))
+    Tmp2 = np.real(np.dot(conj(D.T), -Htau))
+    ab = lstsq(Tmp1, Tmp2)[0]
+    ai = np.hstack((1.0, ab[:Na]))
+    bi = ab[Na:]
+    return bi, ai
+
+
 def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 	"""Design of a stable IIR filter as fit to reciprocal of frequency response values
 
@@ -311,8 +351,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 		* Eichstädt, Elster, Esward, Hessling [Eichst2010]_
 
 	"""
-	from numpy import conj, count_nonzero, roots, ceil, median
-	from numpy.linalg import lstsq
+    from numpy import count_nonzero, roots, ceil, median
 
 	if verbose:
 		print("\nLeast-squares fit of an order %d digital IIR filter to the" % max(Nb, Na))
@@ -322,21 +361,9 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 	Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
 	E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
 
-	def fitIIR(Hvals, tau, E, Na, Nb):
-		# helper function for actual fitting part
-		Ea = E[:, 1:Na + 1]
-		Eb = E[:, :Nb + 1]
-		Htau = np.exp(-1j * w * tau) * Hvals ** (-1)
-		HEa = np.dot(np.diag(Htau), Ea)
-		D = np.hstack((HEa, -Eb))
-		Tmp1 = np.real(np.dot(conj(D.T), D))
-		Tmp2 = np.real(np.dot(conj(D.T), -Htau))
-		ab = lstsq(Tmp1, Tmp2)[0]
-		ai = np.hstack((1.0, ab[:Na]))
-		bi = ab[Na:]
-		return bi, ai
+    bi, ai = fitIIR(Hvals, tau, w, E, Na, Nb)
 
-	bi, ai = fitIIR(Hvals, tau, E, Na, Nb)
+    if justFit:  # no uncertainty evaluation
 
 	if justFit:		# no uncertainty evaluation
 		return bi, ai
@@ -356,7 +383,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 		g2 = grpdelay(bi, astab, Fs)[0]
 		tau = ceil(tau + median(g2 - g1))
 
-		bi, ai = fitIIR(Hvals, tau, E, Na, Nb)
+        bi, ai = fitIIR(Hvals, tau, w, E, Na, Nb)
 		if count_nonzero(abs(roots(ai)) > 1) > 0:
 			astab = mapinside(ai)
 		else:
