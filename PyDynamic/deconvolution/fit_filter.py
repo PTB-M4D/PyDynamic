@@ -13,6 +13,8 @@ This module contains the following functions
 
 """
 
+import warnings
+
 import numpy as np
 import scipy.signal as dsp
 
@@ -20,8 +22,17 @@ from ..misc.filterstuff import grpdelay, mapinside
 
 __all__ = ['LSFIR', 'LSFIR_unc', 'LSIIR', 'LSIIR_unc', 'LSFIR_uncMC']
 
-def LSFIR(H,N,tau,f,Fs,Wt=None):
-	"""	Least-squares fit of a digital FIR filter to the reciprocal of a given frequency response.
+warnings.warn(
+    "The module *deconvolution* will be combined with the module "
+    "*identification* and renamed to *model_estimation* in the "
+    "next major release 3.0. From then on you should only use "
+    "the new module *model_estimation* instead.",
+    DeprecationWarning)
+
+
+def LSFIR(H, N, tau, f, Fs, Wt=None):
+    """	Least-squares fit of a digital FIR filter to the reciprocal of a given
+    frequency response.
 
 	Parameters
 	----------
