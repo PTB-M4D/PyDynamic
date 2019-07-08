@@ -53,6 +53,8 @@ def test_corrNoiseBeta():
         #    plt.plot(w_color)
         #    plt.show()
 
+# add test to compare old and new implementations?
+
 def test_corrNoiseInvalidColor():
     # check error-message for undefined color-name
     cn = corr_noise(None, 1.0)

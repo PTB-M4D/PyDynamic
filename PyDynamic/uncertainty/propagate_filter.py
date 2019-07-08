@@ -95,11 +95,11 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
         tmp = np.zeros((Nlow,))
 
         for k in range(Nlow):
-            wk     = np.roll(sigma2, k)                         # shift the autocorrelation of correlated noise accordingly
-            W      = toeplitz(wk[:Nlow], np.flip(wk)[:Nlow])     # build a matrix from that and cut it down to (Nlow x Nlow)
+            wk     = np.roll(sigma2, k)                                  # shift the autocorrelation of correlated noise accordingly
+            W      = toeplitz(wk[:Nlow], np.flip(wk, axis=0)[:Nlow])     # build a matrix from that and cut it down to (Nlow x Nlow)
             tmp[k] = np.sum(np.multiply(LL,W))
 
-        tmp = np.append(tmp, np.flip(tmp[1:]))
+        tmp = np.append(tmp, np.flip(tmp[1:], axis=0))
         Ulow = np.vstack([np.roll(tmp,shift)[0:Ncomp+1] for shift in range(Ncomp+1)])   # make time shifted matrix from vector, because u(x[n], x[n+k]) does depend on k, but not on n
 
         xlow = lfilter(blow,1.0,y)
