@@ -7,6 +7,7 @@ This module contains the following functions
 * LSFIR: Least-squares fit of a digital FIR filter to a given frequency response
 
 '''
+import warnings
 
 from ..misc.filterstuff import grpdelay, mapinside
 
@@ -15,7 +16,37 @@ import scipy.signal as dsp
 
 __all__ = ['LSIIR', 'LSFIR']
 
-def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
+warnings.warn("This module will be renamed.", DeprecationWarning)
+
+def fitIIR(Hvals, tau, w, E, Na, Nb):
+    """The actual fitting routing for the least-squares IIR filter.
+
+    Parameters:
+        Hvals:   numpy array of frequency response values of shape (M,)
+        tau:     integer initial estimate of time delay
+        w:       numpy array :math:`2 * np.pi * f / Fs`
+        E:       numpy array :math:`np.exp(-1j * np.dot(w[:, np.newaxis],
+                 Ns.T))`
+        Nb:      integer numerator polynomial order
+        Na:      integer denominator polynomial order
+
+    Returns:
+        b, a:    IIR filter coefficients as numpy arrays
+    """
+    Ea = E[:, 1:Na + 1]
+    Eb = E[:, :Nb + 1]
+    Htau = np.exp(-1j * w * tau) * Hvals
+    HEa = np.dot(np.diag(Htau), Ea)
+    D = np.hstack((HEa, -Eb))
+    Tmp1 = np.real(np.dot(np.conj(D.T), D))
+    Tmp2 = np.real(np.dot(np.conj(D.T), -Htau))
+    ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
+    a = np.hstack((1.0, ab[:Na]))
+    b = ab[Na:]
+    return b, a
+
+
+def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     """Least-squares IIR filter fit to a given frequency response.
     
     This method uses Gauss-Newton non-linear optimization and pole
@@ -47,21 +78,8 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
     Ns= np.arange(0,max(Nb,Na)+1)[:,np.newaxis]
     E = np.exp(-1j*np.dot(w[:,np.newaxis],Ns.T))
     
-    def fitIIR(Hvals,tau,E,Na,Nb):
-        # The actual fitting routine
-        Ea= E[:,1:Na+1]
-        Eb= E[:,:Nb+1]
-        Htau = np.exp(-1j*w*tau)*Hvals
-        HEa = np.dot(np.diag(Htau),Ea)
-        D   = np.hstack((HEa,-Eb))
-        Tmp1= np.real(np.dot(np.conj(D.T),D))
-        Tmp2= np.real(np.dot(np.conj(D.T),-Htau))
-        ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
-        a = np.hstack((1.0,ab[:Na]))
-        b = ab[Na:]
-        return b,a
-        
-    b,a = fitIIR(Hvals,tau,E,Na,Nb)
+    b, a = fitIIR(Hvals, tau, w, E, Na, Nb)
+
     
     if justFit:        
         print("Calculation done. No stabilization requested.")
@@ -87,7 +105,7 @@ def LSIIR(Hvals,Nb,Na,f,Fs,tau=0,justFit=False):
         g2 = grpdelay(b,astab,Fs)[0]
         tau = np.ceil(tau + np.median(g2-g1))
         
-        b,a = fitIIR(Hvals,tau,E,Na,Nb)
+        b, a = fitIIR(Hvals, tau, w, E, Na, Nb)
         if np.count_nonzero(np.abs(np.roots(a))>1)>0:
             astab = mapinside(a)
         else:
