@@ -23,7 +23,8 @@ warnings.warn("This module will be renamed.", DeprecationWarning)
 def fitIIR(Hvals, tau, w, E, Na, Nb):
     """The actual fitting routing for the least-squares IIR filter.
 
-    Parameters:
+    Parameters
+    ----------
         Hvals:   numpy array of frequency response values of shape (M,)
         tau:     integer initial estimate of time delay
         w:       numpy array :math:`2 * np.pi * f / Fs`
@@ -32,7 +33,8 @@ def fitIIR(Hvals, tau, w, E, Na, Nb):
         Nb:      integer numerator polynomial order
         Na:      integer denominator polynomial order
 
-    Returns:
+    Returns
+    -------
         b, a:    IIR filter coefficients as numpy arrays
     """
     Ea = E[:, 1:Na + 1]
@@ -54,7 +56,8 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     This method uses Gauss-Newton non-linear optimization and pole
     mapping for filter stabilization
     
-    Parameters:
+    Parameters
+    ----------
         Hvals:   numpy array of frequency response values of shape (M,)
         Nb:      integer numerator polynomial order
         Na:      integer denominator polynomial order
@@ -64,11 +67,13 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
         tau:     integer initial estimate of time delay
         justFit: boolean, when true then no stabilization is carried out
     
-    Returns:
+    Returns
+    -------
         b,a:    IIR filter coefficients as numpy arrays
         tau:    filter time delay in samples
     
-    References:
+    References
+    ----------
     * Eichstädt et al. 2010 [Eichst2010]_
     * Vuerinckx et al. 1996 [Vuer1996]_
     
