@@ -151,12 +151,12 @@ class corr_noise(object):
         self.rst = np.random.RandomState(seed)
 
         # define a beta for every color
-        self.colors = {"violet": 2,
-                       "blue":   1, 
-                       "white":  0, 
-                       "pink":  -1, 
-                       "red":   -2, 
-                       "brown": -2 }
+        self.colors = {"violet": -2,
+                       "blue":   -1, 
+                       "white":   0, 
+                       "pink":    1, 
+                       "red":     2, 
+                       "brown":   2 }
 
     def calc_noise(self, N = 100):
         z = self.rst.randn(N + 4)
@@ -210,6 +210,10 @@ class corr_noise(object):
             return periodogram(self.noise, fs = Fs, **kwargs)
 
     def getBeta(self, beta, colorString):
+        # raise warning, if beta and color are non-None
+        if (beta is not None) and colorString is not in [None, "white"]:
+            raise UserWarning("You have specified a colorString and beta. Only beta will be considered, the colorString is ignored!")
+        
         # define beta from color-string, if no beta-argument was handed over
         if beta is None:
             if colorString in self.colors.keys():
@@ -222,7 +226,7 @@ class corr_noise(object):
         """
         Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "beta" is provided, "color"-argument is ignored.
 
-        Colors of noise are defined to have a power spectral density (Sww) proportional to f^beta. 
+        Colors of noise are defined to have a power spectral density (Sww) proportional to `1/f^beta`. 
         Sww and Rww form a Fourier-pair. Therefore Rww = ifft(Sww). 
         """
         # process the arguments
@@ -233,11 +237,11 @@ class corr_noise(object):
         freq = np.fft.fftfreq(2*N)
 
         # generate and transform the power spectral density Sww
-        Sww = np.power(np.abs(freq), beta)
-        Sww[0] = 1                             #  FIXME: why one?
+        Sww = 1.0 / np.power(np.abs(freq), beta)
+        Sww[0] = 1                             #  Sww[0] is NaN for positive betas, FIXME: Setting it to 1 is suitable because ... ?
 
         Rww = np.real(np.fft.ifft(Sww))
-        Rww = self.sigma**2 * Rww / Rww[0]     # FIXME: this normalization is not thought through
+        Rww = self.sigma**2 * Rww / Rww[0]     # This normalization ensures the given standard-deviation
 
         return Rww                             # attention, Rww has length 2*N, this allows for cyclic repetition --> Rxx[2N] == Rxx[-1]
 
@@ -249,7 +253,7 @@ class corr_noise(object):
         """
         Generate colored noise by
         * taking the (assumingly) white noise `self.w`
-        * multiplying its Fourier-transform with f^(beta/2)
+        * dividing its Fourier-transform with f^(beta/2)
         * inverse Fourier-transform to yield the colored/correlated noise
         """
 
@@ -259,7 +263,7 @@ class corr_noise(object):
         freq = np.fft.fftfreq(len(self.w))
 
         # generate the filtered spectrum by multiplication by f^(k/2) (should do the same as applying f^beta to the PSD)
-        sp_filt = sp * np.power(np.abs(freq), beta/2)
+        sp_filt = sp / np.power(np.abs(freq), beta/2)
 
         ## compensate division by zero errors for beta<0, also sets signal to zero-mean
         sp_filt[0] = 0

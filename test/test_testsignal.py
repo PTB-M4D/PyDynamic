@@ -5,6 +5,7 @@ Perform tests on identification sub-packages.
 """
 
 import numpy as np
+import pytest 
 
 # import PyDynamic from local code, not from the (possibly installed) module
 import sys
@@ -13,13 +14,13 @@ from PyDynamic.misc.testsignals import corr_noise
 
 
 
-def test_colored_noise():
+def test_corrNoiseBeta():
     import matplotlib.pyplot as plt
 
     lengths = [99, 100]
 
     # check function output for even/uneven N and different betas
-    for beta in [-2, -0.5, 0, None, 0.78, 1, 2.0]:
+    for beta in [2, 0.5, 0, None, -0.78, -1, -2.0]:
 
         # definitions
         N     = np.random.choice(lengths)
@@ -32,6 +33,9 @@ def test_colored_noise():
         # calculate theortic covariance
         Rxx = cn.theoretic_covariance_colored_noise(beta=beta)
         assert Rxx.shape == (N,)
+        if beta == 0.0:
+            assert Rxx[0] == pytest.approx(1.0)
+            assert np.mean(Rxx[1:]) == pytest.approx(0)
         
         # transform w into correlated noise
         w_color = cn.colored_noise(beta=beta)
@@ -39,25 +43,19 @@ def test_colored_noise():
         assert np.all(np.isfinite(w_color))
 
         # visualize the outcome
-        if beta == -2:
-            print(Rxx)
-            plt.imshow(Rxx)
-            plt.show()
-            print(np.std(w))
-            print(np.std(w_color))
-            plt.plot(w)
-            plt.plot(w_color)
-            plt.show()
+        #if beta == 2:
+        #    print(Rxx)
+        #    plt.imshow(Rxx)
+        #    plt.show()
+        #    print(np.std(w))
+        #    print(np.std(w_color))
+        #    plt.plot(w)
+        #    plt.plot(w_color)
+        #    plt.show()
 
-
+def test_corrNoiseWarnError():
     # check error-message for undefined color-name
-    try:
-        Rxx = cn.theoretic_covariance_colored_noise(N, color = "NOCOLOR")
-    except NotImplementedError as e:
-        print(e)
-        assert True
-    else: 
-        assert False
+    cn = corr_noise(None, 1.0)
+    pytest.raises(NotImplementedError, cn.theoretic_covariance_colored_noise(100, color = "nocolor"))
+    pytest.raises(UserWarning,         cn.theoretic_covariance_colored_noise(100, color = "red", beta = 2))
 
-
-test_colored_noise()
