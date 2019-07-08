@@ -32,9 +32,9 @@ def test_corrNoiseBeta():
 
         # calculate theortic covariance
         Rxx = cn.theoretic_covariance_colored_noise(beta=beta)
-        assert Rxx.shape == (N,)
+        assert Rxx.shape == (2*N,)
         if beta == 0.0:
-            assert Rxx[0] == pytest.approx(1.0)
+            assert Rxx[0] == pytest.approx(sigma**2)
             assert np.mean(Rxx[1:]) == pytest.approx(0)
         
         # transform w into correlated noise
@@ -53,9 +53,13 @@ def test_corrNoiseBeta():
         #    plt.plot(w_color)
         #    plt.show()
 
-def test_corrNoiseWarnError():
+def test_corrNoiseInvalidColor():
     # check error-message for undefined color-name
     cn = corr_noise(None, 1.0)
-    pytest.raises(NotImplementedError, cn.theoretic_covariance_colored_noise(100, color = "nocolor"))
-    pytest.raises(UserWarning,         cn.theoretic_covariance_colored_noise(100, color = "red", beta = 2))
+    with pytest.raises(NotImplementedError) as e:
+        cn.theoretic_covariance_colored_noise(100, color = "nocolor")
 
+def test_corrNoiseUserWarning():
+    cn = corr_noise(None, 1.0)
+    with pytest.raises(UserWarning) as w:
+        cn.theoretic_covariance_colored_noise(100, color = "red", beta = 2)

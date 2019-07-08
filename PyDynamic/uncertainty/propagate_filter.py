@@ -70,7 +70,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
         # I (Max) have questions:
         # - in the old implementation, if Nlow < Ncomp+1, then Ulow has the wrong dimensions to be multiplied with Utheta
         # - Lend is higher than ycorr has elements (though, numpy is not issuing a warning)
-        # - unclear, when / how Ncomp or Nlow are used (in the paper Ulow abd Utheta (Uc) are assumed to be of same dimension). 
+        # - unclear, when / how Ncomp or Nlow are used (in the paper Ulow abd Utheta (Uc) are assumed to be of same dimension).
 
         ## OLD IMPLEMENTATION, only white noise
         # LR = 600                                # FIXME: is LR the same as Lr ? Also LR = 600 seems very arbitrary
@@ -78,7 +78,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
         #ycorr = np.convolve(sigma_noise**2,Bcorr)
         #Lr = len(ycorr)
         #Lstart = int(np.ceil(Lr//2))
-        #Lend = Lstart + Lr -1                     # part of FIXME: replaced LR with Lr 
+        #Lend = Lstart + Lr -1                     # part of FIXME: replaced LR with Lr
         #Ryy = toeplitz(ycorr[Lstart:Lend])
         #Ulow= Ryy[:Ncomp+1,:Ncomp+1]
 

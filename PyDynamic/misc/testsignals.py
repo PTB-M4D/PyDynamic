@@ -211,7 +211,7 @@ class corr_noise(object):
 
     def getBeta(self, beta, colorString):
         # raise warning, if beta and color are non-None
-        if (beta is not None) and colorString is not in [None, "white"]:
+        if (beta is not None) and (colorString not in [None, "white"]):
             raise UserWarning("You have specified a colorString and beta. Only beta will be considered, the colorString is ignored!")
         
         # define beta from color-string, if no beta-argument was handed over
