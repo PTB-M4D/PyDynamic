@@ -17,7 +17,13 @@ from ..misc.filterstuff import grpdelay, mapinside
 
 __all__ = ['LSIIR', 'LSFIR']
 
-warnings.warn("This module will be renamed.", DeprecationWarning)
+warnings.simplefilter('default')
+warnings.warn(
+    "The module *identification* will be combined with the module "
+    "*deconvolution* and renamed to *model_estimation* in the "
+    "next major release 3.0. From then on you should only use "
+    "the new module *model_estimation* instead.",
+    DeprecationWarning)
 
 
 def fitIIR(Hvals, tau, w, E, Na, Nb):
