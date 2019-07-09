@@ -45,14 +45,14 @@ def test_FIR(makePlots=False, corrNoise=False):
     sigma_noise = 1e-2                              # 1e-5
 
     # use white or non-white (correlated) noise
-    if corrNoise: 
+    if corrNoise:
         color = "white"
         w      = np.random.normal(loc = 0, scale = sigma_noise, size=nTime)
         cn     = corr_noise(w, sigma_noise)
         Ux     = cn.theoretic_covariance_colored_noise(N=nTime, color=color)
         noise  = cn.colored_noise(color=color)
 
-    else: 
+    else:
         noise  = sigma_noise
 
     # input signal
@@ -78,6 +78,3 @@ def test_FIR(makePlots=False, corrNoise=False):
         plt.ylabel("signal uncertainty/ au")
         plt.legend()
         plt.show()
-
-# run the test
-test_FIR(makePlots=True, corrNoise=True)

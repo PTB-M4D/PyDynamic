@@ -5,7 +5,7 @@ Perform tests on identification sub-packages.
 """
 
 import numpy as np
-import pytest 
+import pytest
 
 # import PyDynamic from local code, not from the (possibly installed) module
 import sys
@@ -36,7 +36,7 @@ def test_corrNoiseBeta():
         if beta == 0.0:
             assert Rxx[0] == pytest.approx(sigma**2)
             assert np.mean(Rxx[1:]) == pytest.approx(0)
-        
+
         # transform w into correlated noise
         w_color = cn.colored_noise(beta=beta)
         assert w_color.shape == (N)

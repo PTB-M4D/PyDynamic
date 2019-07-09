@@ -101,13 +101,13 @@ def rect(time, t0, t1, height=1, noise = 0.0):
     x[np.nonzero(time > t1)] = 0.0
 
     # add the noise
-    if type(noise) == float:
+    if isinstance(noise, float):
         if noise > 0:
             x = x + np.random.randn(len(time)) * noise
-    elif type(noise) == np.ndarray:
+    elif isinstance(noise, np.ndarray):
         if x.size == noise.size:
             x = x + noise
-        else: 
+        else:
             raise ValueError("Mismatching sizes of x and noise.")
     else:
         raise NotImplementedError("The given noise is neither of type float nor numpy.ndarray. ")
@@ -152,10 +152,10 @@ class corr_noise(object):
 
         # define a beta for every color
         self.colors = {"violet": -2,
-                       "blue":   -1, 
-                       "white":   0, 
-                       "pink":    1, 
-                       "red":     2, 
+                       "blue":   -1,
+                       "white":   0,
+                       "pink":    1,
+                       "red":     2,
                        "brown":   2 }
 
     def calc_noise(self, N = 100):
@@ -213,7 +213,7 @@ class corr_noise(object):
         # raise warning, if beta and color are non-None
         if (beta is not None) and (colorString not in [None, "white"]):
             raise UserWarning("You have specified a colorString and beta. Only beta will be considered, the colorString is ignored!")
-        
+
         # define beta from color-string, if no beta-argument was handed over
         if beta is None:
             if colorString in self.colors.keys():
@@ -226,8 +226,8 @@ class corr_noise(object):
         """
         Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "beta" is provided, "color"-argument is ignored.
 
-        Colors of noise are defined to have a power spectral density (Sww) proportional to `1/f^beta`. 
-        Sww and Rww form a Fourier-pair. Therefore Rww = ifft(Sww). 
+        Colors of noise are defined to have a power spectral density (Sww) proportional to `1/f^beta`.
+        Sww and Rww form a Fourier-pair. Therefore Rww = ifft(Sww).
         """
         # process the arguments
         if N == None: N = len(self.w)
