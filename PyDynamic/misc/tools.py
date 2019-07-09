@@ -58,10 +58,11 @@ def find(assertions):
 
     return inds
 
+
 def zerom(shape):
-    """ Generate a numpy.matrix of zeros of given shape"""
-    from numpy import zeros, matrix
-    return matrix(zeros(shape))
+    """ Generate a numpy.ndarray of zeros of given shape"""
+    from numpy import zeros
+    return zeros(shape)
 
 
 def stack(elements):
