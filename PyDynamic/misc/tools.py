@@ -217,7 +217,7 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     return Re, Im, URI
 
 
-def make_equidistant(t, y, uy, dt=50, kind='previous'):
+def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
     """
     Convert non-equidistant time series to equidistant by interpolation (WIP)
 
@@ -227,10 +227,10 @@ def make_equidistant(t, y, uy, dt=50, kind='previous'):
             timestamps
         y: (N,) array_like
             measurement values
-        uy: float
-            measurement values' uncertainty
+        uy: (N,) array_like
+            measurement values' uncertainties
         dt: float, optional
-            desired interval length
+            desired interval length in seconds
         kind: str or int, optional
             Specifies the kind of interpolation as a string
             ('linear' or 'previous'; 'previous' simply returns the previous
@@ -239,12 +239,21 @@ def make_equidistant(t, y, uy, dt=50, kind='previous'):
 
     Returns
     -------
-        t: (N,) array_like
+        t_new: (N,) array_like
             timestamps
-        y: (N,) array_like
+        y_new: (N,) array_like
             measurement values
-        uy: float
-            measurement values' uncertainty
+        uy_new: float
+            measurement values' uncertainties
     """
+    # Setup new vector of timestamps.
+    t_new = np.arange(t[0], t[-1], dt)
 
-    return t, y, uy
+    # Interpolate measurement values.
+    for timestamp in t_new:
+        pass
+
+    # During development this only fills our output from the input.
+    y_new, uy_new = y, uy
+
+    return t_new, y_new, uy_new

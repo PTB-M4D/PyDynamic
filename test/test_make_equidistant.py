@@ -20,7 +20,8 @@ def test_too_short_call_make_equidistant():
 
 
 def test_minimal_call_make_equidistant():
-    make_equidistant(t, y, uy)
+    t_new, y_new = make_equidistant(t, y, uy)[0:2]
+    assert len(t_new) == len(y_new)
 
 
 def test_full_call_make_equidistant():
@@ -28,3 +29,9 @@ def test_full_call_make_equidistant():
     make_equidistant(t, y, uy, dt=.5, kind='previous')
     make_equidistant(t, y, uy, dt=.5)
     make_equidistant(t, y, uy, kind='previous')
+
+
+def test_t_new_to_dt_make_equidistant():
+    t_new = make_equidistant(t, y, uy, dt)[0]
+    for i in range(len(t_new) - 1):
+        assert t_new[i+1] - t_new[i] == dt
