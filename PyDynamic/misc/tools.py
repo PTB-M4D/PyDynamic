@@ -25,17 +25,22 @@ def col_hstack(vectors):
     """
     From tuple of 1D ndarrays make a 2D ndarray where the tuple
     elements are as column vectors horizontally stacked
-    
-    :param vectors: list of K 1D-ndarrays of dimension N
-    :returns matrix: 2D ndarray of shape (N,K)
+
+    Parameters
+    ----------
+        vectors : list of K 1D-ndarrays of dimension N
+
+    Returns
+    -------
+        matrix : 2D array-like of shape (N,K)
     
     """
 
-    if isinstance(vectors,list):
-        col_vectors = map(lambda x: x[:,np.newaxis], vectors)
+    if isinstance(vectors, list):
+        col_vectors = map(lambda x: x[:, np.newaxis], vectors)
     else:
-        raise ValueError("Input must be of type list\n")    
-    
+        raise ValueError("Input must be of type list\n")
+
     return np.hstack(col_vectors)
 
 
