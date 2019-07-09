@@ -22,13 +22,15 @@ import scipy.sparse as sparse
 
 
 def col_hstack(vectors):
-    """
+    """Stack 1D arrays horizontally
+
     From tuple of 1D ndarrays make a 2D ndarray where the tuple
     elements are as column vectors horizontally stacked
 
     Parameters
     ----------
-        vectors : list of K 1D-ndarrays of dimension N
+        vectors : list
+            K 1D-ndarrays of dimension N
 
     Returns
     -------
@@ -45,9 +47,20 @@ def col_hstack(vectors):
 
 
 def find(assertions):
-    """
+    """ Find assertions in array
+
     MATLAB-like determination of occurrence of assertion in an array using the
     numpy nonzero function
+
+    Parameters
+    ----------
+        assertions : tuple
+            assertions to look for
+
+    Returns
+    -------
+        inds : list
+            indices of assertions
     """
     if not isinstance(assertions, tuple):
         raise ValueError("Input to 'find' needs to be a tuple.")
@@ -60,9 +73,18 @@ def find(assertions):
 
 
 def zerom(shape):
-    """ Generate a numpy.ndarray of zeros of given shape"""
-    from numpy import zeros
-    return zeros(shape)
+    """ Generate a numpy.ndarray of zeros of given shape
+
+    Parameters
+    ----------
+        shape : int or tuple of ints
+            Shape of the new array, e.g., `(2, 3)` or `2`.
+
+    Returns
+    -------
+        inds : ndarray
+    """
+    return np.zeros(shape)
 
 
 def stack(elements):
@@ -77,18 +99,22 @@ def stack(elements):
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
     """
-    Print vector (!D array) to the command line of return as formatted string
+    Print vector (!D array) to the console of return as formatted string
 
     Parameters
     ----------
         vector : 1D nparray of shape (M,)
-        prec : integer specifying the precision of the output
-        vertical : boolean if print out vertical or not 
-        retS : boolean if print or return string
+        prec : int
+            the precision of the output
+        vertical : bool
+            print out vertical or not
+        retS : bool
+            print or return string
 
     Returns
     -------
-        string if retS is True
+        s : str
+            if retS is True
 
     """
     if vertical:
@@ -104,18 +130,22 @@ def print_vec(vector, prec=5, retS=False, vertical=False):
 
 def print_mat(matrix, prec=5, vertical=False, retS=False):
     """
-    Print matrix (2D array) to the command line or return as formatted string
+    Print matrix (2D array) to the console or return as formatted string
     
     Parameters
     ----------
         matrix : 2D nparray of shape (M,N)
-        prec : integer specifying the precision of the output
-        vertical : boolean if print out vertical or not 
-        retS : boolean if print or return string
+        prec : int
+            the precision of the output
+        vertical : bool
+            print out vertical or not
+        retS : bool
+            print or return string
          
     Returns
     -------
-        string if retS is True
+        s : str
+            if retS is True
 
     """
     if vertical:
@@ -138,9 +168,12 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
     Parameters
     ----------
         matrix : 2D nparray of shape (N,N)
-        maxiter: integer, the maximum number of iterations for increasing the
-                 eigenvalues
-        tol: float, tolerance for deciding if pos. semi-def.
+        maxiter: int
+            the maximum number of iterations for increasing the eigenvalues
+        tol: float
+            tolerance for deciding if pos. semi-def.
+        verbose: bool
+            If True print some more detail about input parameters.
         
     Returns
     -------
@@ -183,22 +216,30 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
 
 
 def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
-    """
+    """ Calculate real and imaginary parts from frequency response
+
     Calculation of real and imaginary parts from amplitude and phase with
     associated uncertainties
 
     Parameters
     ----------
 
-        Abs: ndarray of shape N - amplitude values
-        Phase: ndarray of shape N - phase values in rad
-        Unc: ndarray of shape 2Nx2N or 2N - uncertainties
+        Abs: ndarray of shape N
+            amplitude values
+        Phase: ndarray of shape N
+            phase values in rad
+        Unc: ndarray of shape 2Nx2N or 2N
+            uncertainties
+        MCruns: bool
+            Iterations for Monte Carlo simulation
 
     Returns
     -------
 
-        Re,Im: ndarrays of shape N - real and imaginary parts (best estimate)
-        URI: ndarray of shape 2Nx2N - uncertainties assoc. with Re and Im
+        Re,Im: ndarrays of shape N
+            real and imaginary parts (best estimate)
+        URI: ndarray of shape 2Nx2N
+            uncertainties assoc. with Re and Im
     """
 
     if len(Abs) != len(Phase) or 2 * len(Abs) != len(Unc):
