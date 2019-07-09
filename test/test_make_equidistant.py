@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
-"""
-Perform tests on the method *make_equidistant*.
-"""
+""" Perform tests on the method *make_equidistant*."""
 
 import numpy as np
-import pytest
+from pytest import raises, approx
 
 from PyDynamic.misc.tools import make_equidistant
 
 n = 20
-t, y, uy, dt, kind = np.linspace(0, 1, n), np.random.uniform(size=n),\
-                     np.random.uniform(), np.random.uniform(), 'previous'
+t, y, uy, dt, kind = np.linspace(0, 1, n), np.random.uniform(size=n), \
+                     np.random.uniform(), 5e-2, 'previous'
 
 
 def test_too_short_call_make_equidistant():
-    with pytest.raises(TypeError):
+    with raises(TypeError):
         make_equidistant(t)
         make_equidistant(t, y)
 
