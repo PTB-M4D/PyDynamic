@@ -21,7 +21,6 @@ import numpy as np
 import scipy.sparse as sparse
 
 
-# TODO: Check that it's not used in the package and remove
 def col_hstack(vectors):
     """
     From tuple of 1D ndarrays make a 2D ndarray where the tuple
@@ -32,15 +31,14 @@ def col_hstack(vectors):
     
     """
 
-    if isinstance(vectors, list):
-        col_vectors = map(lambda x: x[:, np.newaxis], vectors)
+    if isinstance(vectors,list):
+        col_vectors = map(lambda x: x[:,np.newaxis], vectors)
     else:
-        raise ValueError("Input must be of type list\n")
-
+        raise ValueError("Input must be of type list\n")    
+    
     return np.hstack(col_vectors)
 
 
-# TODO: Check that it's not used in the package and remove
 def find(assertions):
     """
     MATLAB-like determination of occurrence of assertion in an array using the
@@ -55,15 +53,12 @@ def find(assertions):
 
     return inds
 
-
-# TODO: Check that it's not used in the package and remove
 def zerom(shape):
     """ Generate a numpy.matrix of zeros of given shape"""
     from numpy import zeros, matrix
     return matrix(zeros(shape))
 
 
-# TODO: Check that it's not used in the package and remove
 def stack(elements):
     def make_matrix(v):
         if len(v.shape()) > 1:
