@@ -8,7 +8,7 @@ from PyDynamic.misc.tools import make_equidistant
 
 n = 20
 t, y, uy, dt, kind = np.linspace(0, 1, n), np.random.uniform(size=n), \
-                     np.random.uniform(), 5e-2, 'previous'
+                     np.random.uniform(size=n), 5e-2, 'previous'
 
 
 def test_too_short_call_make_equidistant():
@@ -30,6 +30,16 @@ def test_full_call_make_equidistant():
 
 
 def test_t_new_to_dt_make_equidistant():
-    t_new = make_equidistant(t, y, uy, dt)[0]
-    for i in range(len(t_new) - 1):
-        assert t_new[i+1] - t_new[i] == dt
+    t_new = make_equidistant(t, y, uy, dt, kind)[0]
+    assert np.diff(t_new) - dt == approx(0)
+
+
+def test_prev_in_make_equidistant():
+    y_new, uy_new = make_equidistant(t, y, uy, dt, kind)[1:3]
+    assert (np.isin(y_new, y)).all()
+    assert (np.isin(uy_new, uy)).all()
+
+
+def test_raise_not_implemented_yet_make_equidistant():
+    with raises(NotImplementedError):
+        make_equidistant(t, y, uy, dt, 'linear')

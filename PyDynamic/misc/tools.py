@@ -281,8 +281,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
         kind: str or int, optional
             Specifies the kind of interpolation as a string
             ('linear' or 'previous'; 'previous' simply returns the previous
-            value of the point).
-            Default is 'previous'.
+            value of the point). Default is 'previous'.
 
     Returns
     -------
@@ -290,17 +289,22 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
             timestamps
         y_new: (N,) array_like
             measurement values
-        uy_new: float
+        uy_new: (N,) array_like
             measurement values' uncertainties
     """
-    # Setup new vector of timestamps.
+    # Setup new vector of timestamps and measurement values.
     t_new = np.arange(t[0], t[-1], dt)
-
-    # Interpolate measurement values.
-    for timestamp in t_new:
-        pass
-
-    # During development this only fills our output from the input.
-    y_new, uy_new = y, uy
+    y_new = np.zeros_like(t_new)
+    y_new[0] = y[0]
+    uy_new = np.zeros_like(t_new)
+    uy_new[0] = uy[0]
+    if kind == 'previous':
+        # Compute each previous measurement value and uncertainty.
+        for i in range(1, len(t_new)):
+            index = np.where(t <= t_new[i])[0]
+            y_new[i] = y[index[-1]]
+            uy_new[i] = uy[index[-1]]
+    else:
+        raise NotImplementedError
 
     return t_new, y_new, uy_new
