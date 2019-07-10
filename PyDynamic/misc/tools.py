@@ -295,13 +295,11 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
     # Setup new vectors of timestamps, measurement values and uncertainties.
     t_new = np.arange(t[0], t[-1], dt)
     y_new = np.zeros_like(t_new)
-    y_new[0] = y[0]
     uy_new = np.zeros_like(t_new)
-    uy_new[0] = uy[0]
-    
+
     if kind == 'previous':
         # Compute each previous measurement value and uncertainty.
-        for i in range(1, len(t_new)):
+        for i in range(len(t_new)):
             index = np.where(t <= t_new[i])[0]
             y_new[i] = y[index[-1]]
             uy_new[i] = uy[index[-1]]
