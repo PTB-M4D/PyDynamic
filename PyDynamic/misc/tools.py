@@ -303,7 +303,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
         it = np.nditer(t_new, flags=['f_index'])
         while not it.finished:
             # Find measurement value and uncertainty for biggest of all
-            # timestamps smaller than current time.
+            # timestamps smaller or equal than current time.
             last_index = np.where(t <= it[0])[0][-1]
             y_new[it.index] = y[last_index]
             uy_new[it.index] = uy[last_index]
