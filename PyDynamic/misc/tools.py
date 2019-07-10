@@ -18,7 +18,8 @@ __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
            'make_equidistant']
 
 import numpy as np
-import scipy.sparse as sparse
+from scipy import sparse
+from scipy.interpolate import interp1d
 
 
 def col_hstack(vectors):
@@ -180,7 +181,6 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
         nparray of shape (N,N)
 
     """
-
     n, m = matrix.shape
     if n != m:
         raise ValueError("Matrix has to be quadratic")
@@ -309,6 +309,12 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
             uy_new[it.index] = uy[last_index]
             it.iternext()
     else:
-        raise NotImplementedError
+        if kind == 'linear':
+            # Linearly interpolate each new measurement value and uncertainty by
+            # iterating over t_new as ndarray.
+            t_interpolant = interp1d(t, y)
+            y_new = t_interpolant(t_new)
+        else:
+            raise NotImplementedError
 
     return t_new, y_new, uy_new
