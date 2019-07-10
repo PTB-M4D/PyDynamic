@@ -300,9 +300,11 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
     if kind == 'previous':
         # Compute each previous measurement value and uncertainty.
         for i in range(len(t_new)):
-            index = np.where(t <= t_new[i])[0]
-            y_new[i] = y[index[-1]]
-            uy_new[i] = uy[index[-1]]
+            # Find all timestamps smaller than current time and return only
+            # biggest index.
+            index = np.where(t <= t_new[i])[0][-1]
+            y_new[i] = y[index]
+            uy_new[i] = uy[index]
     else:
         raise NotImplementedError
 
