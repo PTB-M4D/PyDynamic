@@ -1,5 +1,4 @@
-class PyDynamic(object):
-    pass# PyDynamic
+# PyDynamic
 [![CircleCI](https://circleci.com/gh/PTB-PSt1/PyDynamic.svg?style=shield)
 ](https://circleci.com/gh/PTB-PSt1/PyDynamic)
 [![Scrutinizer Code Quality
@@ -149,18 +148,18 @@ Research (EMPIR).
 
 This work was part of the Joint Support for Impact project [14SIP08
 ](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for
- Innovation and Research (EMPIR). The [EMPIR](http://msu.euramet.org) is 
- jointly funded by the EMPIR participating countries within EURAMET and the 
- European Union.
+Innovation and Research (EMPIR). The [EMPIR](http://msu.euramet.org) is 
+jointly funded by the EMPIR participating countries within EURAMET and the 
+European Union.
 
 ##### Disclaimer
 This software was developed at Physikalisch-Technische Bundesanstalt (PTB) 
 and National Physical Laboratory (NPL). The software is made available "as 
 is" free of cost. PTB and NPL assume no responsibility whatsoever for its use
- by other parties, and makes no guarantees, expressed or implied, about its 
- quality, reliability, safety, suitability or any other characteristic. In no
-  event will PTB and NPL be liable for any direct, indirect or consequential 
-  damage arising in connection with the use of this software.
+by other parties, and makes no guarantees, expressed or implied, about its 
+quality, reliability, safety, suitability or any other characteristic. In no
+event will PTB and NPL be liable for any direct, indirect or consequential 
+damage arising in connection with the use of this software.
 
 ##### License
 PyDynamic is distributed under the LGPLv3 license with the exception of the 
