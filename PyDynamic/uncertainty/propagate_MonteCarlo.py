@@ -30,7 +30,7 @@ class Normal_ZeroCorr():
 	"""
 	Multivariate normal distribution with zero correlation
 	"""
-	def __init__(self, mean=None, cov=None):
+	def __init__(self, loc=None, scale=None):
 		"""
 		Parameters
 		----------
@@ -115,7 +115,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 		else:
 			dist = stats.multivariate_normal(x, Ux)		# colored noise
 	elif isinstance(Ux, float):
-		dist = Normal_ZeroCorr(mean=x, cov=Ux)			# iid noise
+		dist = Normal_ZeroCorr(loc=x, scale=Ux)			# iid noise
 	else:
 		raise NotImplementedError("The supplied type of uncertainty is not implemented")
 
