@@ -32,8 +32,8 @@ jobs:
       # Create folder for test results.
       - run:
           name: Create test result folder
-            command: |
-              mkdir test-reports
+          command: |
+            mkdir test-reports
 
       # Download and cache dependencies.
       - restore_cache:
@@ -44,7 +44,7 @@ jobs:
 
       # Install dependencies and Codecov reporter if neccessary
       - run:
-        name: Install dependencies
+          name: Install dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
