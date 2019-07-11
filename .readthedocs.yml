@@ -1,4 +1,6 @@
 # .readthedocs.yml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
 version: 2
 
@@ -11,7 +13,7 @@ build:
 
 # Python environment to build the docs for and install the package in
 python:
-  version: 3.5
+  version: 3
   install:
     - requirements: requirements.txt
     - method: pip
