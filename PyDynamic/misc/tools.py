@@ -215,6 +215,10 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
             measurement values
         uy_new: (N,) array_like
             measurement values' uncertainties
+
+    References
+    ----------
+        * White [White2017]_
     """
     # Setup new vectors of timestamps, measurement values and uncertainties.
     t_new = np.arange(t[0], t[-1], dt)
