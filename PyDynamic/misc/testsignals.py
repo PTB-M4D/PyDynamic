@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Collection of test signals which can be used to simulate dynamic measurements and test methods.
+"""Collection of test signals which can be used to simulate dynamic measurements
+and test methods.
 
 This module contains the following functions:
-* shocklikeGaussian: signal that resembles a shock excitation as a Gaussian followed by a smaller Gaussian of opposite sign
+* shocklikeGaussian: signal that resembles a shock excitation as a Gaussian
+followed by a smaller Gaussian of opposite sign
 * GaussianPulse: Generates a Gaussian pulse at t0 with height m0 and std sigma
 * rect: Rectangular signal of given height and width t1-t0
-* squarepulse: Generates a series of rect functions to represent a square pulse signal
-
+* squarepulse: Generates a series of rect functions to represent a square
+pulse signal
 """
-from numpy import diff, sqrt, sum, array, corrcoef
+
 import numpy as np
-from scipy.special import comb
+from numpy import diff, sqrt, sum, array, corrcoef
 from scipy.signal import periodogram
+from scipy.special import comb
 
 __all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse']
 
@@ -74,7 +76,7 @@ def GaussianPulse(time, t0, m0, sigma, noise = 0.0):
     return x
 
 
-def rect(time, t0, t1, height=1, noise = 0.0):
+def rect(time, t0, t1, height = 1, noise = 0.0):
     """Rectangular signal of given height and width t1-t0
 
     Parameters
@@ -143,9 +145,9 @@ def squarepulse(time, height, numpulse = 4, noise = 0.0):
 
 
 class corr_noise(object):
-    """Base class for generation of a correlated noise proces.
-    """
-    def __init__(self, w, sigma, seed = None):
+    """Base class for generation of a correlated noise process."""
+
+    def __init__(self, w, sigma, seed=None):
         self.w = w
         self.sigma = sigma
         self.rst = np.random.RandomState(seed)
@@ -160,9 +162,7 @@ class corr_noise(object):
 
     def calc_noise(self, N = 100):
         z = self.rst.randn(N + 4)
-        noise = diff(diff(diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3) + 6 * z[2:] * self.w ** 2) - 4 * z[
-                                                                                                                 3:] * self.w) + z[
-                                                                                                                                 4:]
+        noise = diff(diff(diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3) + 6 * z[2:] * self.w ** 2) - 4 * z[3:] * self.w) + z[4:]
         self.Cw = sqrt(sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
         self.noise = noise * self.sigma / self.Cw
         return self.noise
