@@ -1,5 +1,18 @@
 # PyDynamic
-[![CircleCI Status](https://circleci.com/gh/eichstaedtPTB/PyDynamic/tree/master.svg?style=shield)](https://circleci.com/gh/eichstaedtPTB/PyDynamic/tree/master) [![Documentation Status](https://readthedocs.org/projects/pydynamic/badge/?version=latest)](https://pydynamic.readthedocs.io/?badge=latest)
+[![CircleCI](https://circleci.com/gh/PTB-PSt1/PyDynamic.svg?style=shield)
+](https://circleci.com/gh/PTB-PSt1/PyDynamic)
+[![Scrutinizer Code Quality
+](https://scrutinizer-ci.com/g/PTB-PSt1/PyDynamic/badges/quality-score.png?b=master)
+](https://scrutinizer-ci.com/g/PTB-PSt1/PyDynamic/?branch=master)
+[![Codacy Badge
+](https://api.codacy.com/project/badge/Grade/397eebc52073457a824e5657c305dc92)
+](https://www.codacy.com/app/PTB-PSt1/PyDynamic?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PTB-PSt1/PyDynamic&amp;utm_campaign=Badge_Grade)
+[![Documentation Status
+](https://readthedocs.org/projects/pydynamic/badge/?version=latest)
+](https://pydynamic.readthedocs.io/?badge=latest)
+[![Codecov Badge
+](https://codecov.io/gh/PTB-PSt1/PyDynamic/branch/master/graph/badge.svg)
+](https://codecov.io/gh/PTB-PSt1/PyDynamic)
 
 Python package for the analysis of dynamic measurements
 
