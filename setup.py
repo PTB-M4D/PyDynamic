@@ -32,9 +32,7 @@ class VerifyVersionCommand(install):
 
         if tag != VERSION:
             info = "Git tag: {0} does not match the version of this app: " \
-                   "{1}".format(
-                tag, VERSION
-            )
+                   "{1}".format(tag, VERSION)
             sys.exit(info)
 
 
@@ -48,11 +46,10 @@ setup(
     author=u"Sascha Eichstädt, Ian Smith, Thomas Bruns, Björn Ludwig, "
            u"Maximilian Gruber",
     author_email="sascha.eichstaedt@ptb.de",
-    license="LGPLv3",
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(exclude=["test"]),
     install_requires=[
-        'ipython==7.6.1',
+        'ipython>=7.6.0',
         'jupyter==1.0.0',
         'matplotlib==3.1.1',
         'numpy==1.16.4',
