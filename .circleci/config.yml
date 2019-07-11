@@ -33,7 +33,7 @@ jobs:
       - run:
         name: Create test result folder
           command: |
-          mkdir test-reports
+            mkdir test-reports
 
       # Download and cache dependencies.
       - restore_cache:
