@@ -220,28 +220,36 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
     ----------
         * White [White2017]_
     """
+
+    def compute_lij(x_j, x_i, x):
+        return (x - x_i) / (x_j - x_i)
+
     # Setup new vectors of timestamps, measurement values and uncertainties.
     t_new = np.arange(t[0], t[-1], dt)
-    y_new = np.zeros_like(t_new)
-    uy_new = np.zeros_like(t_new)
 
-    if kind == 'previous':
-        # Compute each previous measurement value and uncertainty by
-        # iterating over t_new as ndarray.
-        it = np.nditer(t_new, flags=['f_index'])
-        while not it.finished:
-            # Find measurement value and uncertainty for biggest of all
-            # timestamps smaller or equal than current time.
-            last_index = np.where(t <= it[0])[0][-1]
-            y_new[it.index] = y[last_index]
-            uy_new[it.index] = uy[last_index]
-            it.iternext()
+    interp_y = interp1d(t, y, kind=kind)
+    y_new = interp_y(t_new)
+
+    if kind == 'previous' or kind == 'next' or kind == 'nearest':
+        interp_uy = interp1d(t, uy, kind=kind)
+        uy_new = interp_uy(t_new)
     else:
         if kind == 'linear':
-            # Linearly interpolate each new measurement value and uncertainty by
-            # iterating over t_new as ndarray.
-            t_interpolant = interp1d(t, y)
-            y_new = t_interpolant(t_new)
+            # Compute each previous and next measurement values and
+            # uncertainties by iterating over t_new as ndarray.
+            indices = np.empty_like(t_new, dtype=int)
+            it_t_new = np.nditer(t_new, flags=['f_index'])
+            while not it_t_new.finished:
+                # Find indices of biggest of all timestamps smaller or equal
+                # than current time.
+                indices[it_t_new.index] = np.where(t <= it_t_new[0])[0][-1]
+                it_t_new.iternext()
+            t_prev = t[indices]
+            t_next = t[indices + 1]
+            uy_prev_sqr = uy[indices] ** 2
+            uy_next_sqr = uy[indices + 1] ** 2
+            # Dummy calculation for testing purposes.
+            uy_new = np.sqrt(uy_prev_sqr + uy_next_sqr)
         else:
             raise NotImplementedError
 
