@@ -1,4 +1,5 @@
-# PyDynamic
+class PyDynamic(object):
+    pass# PyDynamic
 [![CircleCI](https://circleci.com/gh/PTB-PSt1/PyDynamic.svg?style=shield)
 ](https://circleci.com/gh/PTB-PSt1/PyDynamic)
 [![Scrutinizer Code Quality
@@ -50,7 +51,7 @@ Get in contact via [@PyDynamic](https://twitter.com/PyDynamic)
 ### Installation
 If you just want to use the software, the easiest way is to run from your 
 system's command line
-```python
+```
 pip install PyDynamic
 ```
 This will download the latest version from the Python package repository and 
@@ -66,7 +67,7 @@ methods:
 from PyDynamic.uncertainty import propagate_DFT
 ```
 Updates can then be installed via
-```python
+```
 pip install --upgrade PyDynamic
 ```
 
