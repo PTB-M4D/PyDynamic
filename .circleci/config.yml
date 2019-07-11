@@ -11,13 +11,14 @@ jobs:
     working_directory: ~/repo
 
     steps:
+    # Checkout code
     - checkout
 
-    # Create folder for test results.
+    # Create test-result folder.
     - run:
-        name: create test result folder
+        name: Create test result folder
         command: |
-          mkdir test-reports
+          mkdir test-results
 
     # Download and cache dependencies.
     - restore_cache:
@@ -26,33 +27,40 @@ jobs:
         # Fallback to using the latest cache if no exact match is found.
         - v1-dependencies-
 
+    # Install dependencies and Codecov reporter if neccessary
     - run:
-        name: install dependencies
+        name: Install dependencies
         command: |
           python3 -m venv venv
           . venv/bin/activate
           pip install -r requirements.txt
+          pip install codecov
 
     - save_cache:
         paths:
         - ./venv
         key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-    # Run tests! We use pytest's test-runner (https://pytest.org)
+    # Run tests with coverage report and upload results to Codecov! We use
+    # pytest's test-runner (https://pytest.org)
     - run:
-        name: run tests
+        name: Run tests
         command: |
           . venv/bin/activate
-          py.test -v > test-reports/pytest.log
+          pytest -v --cov=PyDynamic/ > test-results/pytest.log
+          codecov
 
     # Install PyDynamic.
     - run:
-        name: install PyDynamic
+        name: Install PyDynamic
         command: |
           . venv/bin/activate
           python3 setup.py install
 
     # Store test results.
     - store_artifacts:
-        path: test-reports
-        destination: test-reports
+        path: test-results
+        destination: test-results
+
+    - store_test_results:
+        path: test-results
