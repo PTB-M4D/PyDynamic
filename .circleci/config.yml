@@ -1,66 +1,132 @@
-# Python CircleCI 2.0 configuration file
+# Python CircleCI 2.1 configuration file
 #
-# Check https://circleci.com/docs/2.0/language-python/ for more details
+# Check https://circleci.com/docs/2.1/language-python/ for more details
 #
-version: 2
+version: 2.1
+workflows:
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+              tags:
+                only: /.*/
+      - deploy:
+          requires:
+              - build
+          filters:
+              tags:
+                only: /[0-9]+(\.[0-9]+)*/
+              branches:
+                ignore: /.*/
 jobs:
   build:
     docker:
-    - image: circleci/python:3.6.1
+      - image: circleci/python:3
 
     working_directory: ~/repo
 
     steps:
-    # Checkout code
-    - checkout
+      # Checkout code
+      - checkout
 
-    # Create test-result folder.
-    - run:
-        name: Create test result folder
-        command: |
-          mkdir test-results
+      # Create folder for test results.
+      - run:
+          name: Create test result folder
+          command: |
+            mkdir test-reports
 
-    # Download and cache dependencies.
-    - restore_cache:
-        keys:
-        - v1-dependencies-{{ checksum "requirements.txt" }}
-        # Fallback to using the latest cache if no exact match is found.
-        - v1-dependencies-
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # Fallback to using the latest cache if no exact match is found.
+            - v1-dependencies-
 
-    # Install dependencies and Codecov reporter if neccessary
-    - run:
-        name: Install dependencies
-        command: |
-          python3 -m venv venv
-          . venv/bin/activate
-          pip install -r requirements.txt
-          pip install codecov
+      # Install dependencies and Codecov reporter if neccessary
+      - run:
+          name: Install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install coverage pytest-cov codecov
 
-    - save_cache:
-        paths:
-        - ./venv
-        key: v1-dependencies-{{ checksum "requirements.txt" }}
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-    # Run tests with coverage report and upload results to Codecov! We use
-    # pytest's test-runner (https://pytest.org)
-    - run:
-        name: Run tests
-        command: |
-          . venv/bin/activate
-          pytest -v --cov=PyDynamic/ > test-results/pytest.log
-          codecov
+      # Run tests with coverage report and upload results to Codecov! We use
+      # pytest's test-runner (https://pytest.org)
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            pytest -v --cov=PyDynamic/ > test-reports/pytest.log
+            codecov
 
-    # Install PyDynamic.
-    - run:
-        name: Install PyDynamic
-        command: |
-          . venv/bin/activate
-          python3 setup.py install
+      # Install PyDynamic.
+      - run:
+          name: Install PyDynamic
+          command: |
+            . venv/bin/activate
+            python3 setup.py install
 
-    # Store test results.
-    - store_artifacts:
-        path: test-results
-        destination: test-results
+      # Store test results.
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
 
-    - store_test_results:
-        path: test-results
+      - store_test_results:
+          path: test-reports
+
+  deploy:
+    docker:
+      - image: circleci/python:3
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+            # Fallback to using the latest cache if no exact match is found.
+            - v1-dependencies-
+
+      # Install dependencies if needed as well for package creation.
+      - run:
+          name: Install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install setuptools wheel twine
+
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+          paths:
+            - "venv"
+
+      # Verify Git tag to version to ensure, only wanted versions are uploaded.
+      - run:
+          name: Verify Git tag vs. version
+          command: |
+            . venv/bin/activate
+            python setup.py verify
+
+      # Create a package.
+      - run:
+          name: Create package
+          command: |
+            . venv/bin/activate
+            python setup.py sdist bdist_wheel
+
+      # Upload the created packages to test.pypi.org.
+      - run:
+          name: Upload to PyPI
+          command: |
+            . venv/bin/activate
+            twine upload dist/*
