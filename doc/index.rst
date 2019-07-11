@@ -7,7 +7,7 @@ joint European Research Project `EMPIR 14SIP08 Dynamic <http://mathmet.org/proje
 
 For the PyDynamic homepage go to `GitHub <https://github.com/eichstaedtPTB/PyDynamic>`_
 
-*PyDynamic* is written in Python 3.5.
+*PyDynamic* is written in Python 3.
 
 Contents:
 
