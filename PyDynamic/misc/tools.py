@@ -18,8 +18,9 @@ __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
            'make_equidistant']
 
 import numpy as np
-from scipy import sparse
 from scipy.interpolate import interp1d
+from scipy.sparse import issparse, eye
+from scipy.sparse.linalg.eigen.arpack import eigs
 
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
@@ -109,22 +110,21 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
     if n != m:
         raise ValueError("Matrix has to be quadratic")
     # use specialised functions for sparse matrices
-    if sparse.issparse(matrix):
+    if issparse(matrix):
         # enforce symmetric matrix
         matrix = 0.5 * (matrix + matrix.T)
         # calculate smallest eigenvalue
-        e = np.real(sparse.eigs(matrix, which="SR",
-                                return_eigenvectors=False)).min()
+        e = np.real(eigs(matrix, which="SR",
+                         return_eigenvectors=False)).min()
         count = 0
         # increase the eigenvalues until matrix is positive semi-definite
         while e < tol and count < maxiter:
-            matrix += (np.absolute(e) + tol) * sparse.eye(n,
-                                                          format=matrix.format)
-            e = np.real(sparse.eigs(matrix, which="SR",
-                                    return_eigenvectors=False)).min()
+            matrix += (np.absolute(e) + tol) * eye(n, format=matrix.format)
+            e = np.real(eigs(matrix, which="SR",
+                             return_eigenvectors=False)).min()
             count += 1
-        e = np.real(
-            sparse.eigs(matrix, which="SR", return_eigenvectors=False)).min()
+        e = np.real(eigs(matrix, which="SR",
+                         return_eigenvectors=False)).min()
     # same procedure for non-sparse matrices
     else:
         matrix = 0.5 * (matrix + matrix.T)
