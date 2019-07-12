@@ -203,9 +203,9 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
         dt: float, optional
             desired interval length in seconds
         kind: str or int, optional
-            Specifies the kind of interpolation as a string
-            ('linear' or 'previous'; 'previous' simply returns the previous
-            value of the point). Default is 'previous'.
+            Specifies the kind of interpolation for the measurement values
+            as a string ('previous', 'next', 'nearest' or 'linear'). Default is
+            'previous'.
 
     Returns
     -------
