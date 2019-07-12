@@ -44,12 +44,12 @@ def test_full_call_make_equidistant():
 def test_t_new_to_dt_make_equidistant():
     from numpy.testing import assert_almost_equal
 
-    t_new = make_equidistant(t, y, uy, dt, kind)[0]
-    difference = np.diff(t_new)
+    t_new = make_equidistant(t, y, uy, dt)[0]
+    delta_t_new = np.diff(t_new)
     # Check if the new timestamps are ascending.
-    assert np.all(difference > 0)
+    assert np.all(delta_t_new > 0)
     # Check if the timesteps have the desired length.
-    assert_almost_equal(difference - dt, 0)
+    assert_almost_equal(delta_t_new - dt, 0)
 
 
 def test_prev_in_make_equidistant():
