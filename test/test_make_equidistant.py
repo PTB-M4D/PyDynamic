@@ -22,18 +22,23 @@ def test_minimal_call_make_equidistant():
     # Check the minimum working call.
     t_new, y_new, uy_new = make_equidistant(t, y, uy)
     # Check the equal dimensions of the minimum calls output.
-    assert len(t_new) == len(y_new) == len(uy)
+    assert len(t_new) == len(y_new) == len(uy_new)
 
 
 def test_full_call_make_equidistant():
-    # Check all possible working calls.
-    make_equidistant(t, y, uy, dt, kind)
-    make_equidistant(t, y, uy, dt, 'linear')
-    make_equidistant(t, y, uy, dt=.5, kind='previous')
-    make_equidistant(t, y, uy, dt=.5, kind='linear')
-    make_equidistant(t, y, uy, dt=.5)
-    make_equidistant(t, y, uy, kind='previous')
-    make_equidistant(t, y, uy, kind='linear')
+    # Setup array of timesteps.
+    dts = 5 * np.power(10., np.arange(-5, 5))
+    # Check full call for all specified timesteps.
+    for i_dt in dts:
+        make_equidistant(t, y, uy, dt=i_dt)
+    # Setup array of all implemented interpolation methods.
+    kinds = ['previous', 'next', 'nearest', 'linear']
+    # Check all possible full interpolation calls.
+    for i_kind in kinds:
+        make_equidistant(t, y, uy, kind=i_kind)
+        for i_dt in dts:
+            make_equidistant(t, y, uy, i_dt, i_kind)
+            make_equidistant(t, y, uy, dt=i_dt, kind=i_kind)
 
 
 def test_t_new_to_dt_make_equidistant():
@@ -48,7 +53,7 @@ def test_t_new_to_dt_make_equidistant():
 
 
 def test_prev_in_make_equidistant():
-    y_new, uy_new = make_equidistant(t, y, uy, dt, kind)[1:3]
+    y_new, uy_new = make_equidistant(t, y, uy, dt, 'previous')[1:3]
     # Check if all 'interpolated' values are present in the actual values.
     assert np.all(np.isin(y_new, y))
     assert np.all(np.isin(uy_new, uy))
