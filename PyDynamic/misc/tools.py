@@ -29,7 +29,7 @@ def print_vec(vector, prec=5, retS=False, vertical=False):
 
     Parameters
     ----------
-        vector : 1D nparray of shape (M,)
+        vector : 1D ndarray of shape (M,)
         prec : int
             the precision of the output
         vertical : bool
@@ -60,7 +60,7 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
     
     Parameters
     ----------
-        matrix : 2D nparray of shape (M,N)
+        matrix : 2D ndarray of shape (M,N)
         prec : int
             the precision of the output
         vertical : bool
@@ -93,7 +93,7 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
     
     Parameters
     ----------
-        matrix : 2D nparray of shape (N,N)
+        matrix : 2D ndarray of shape (N,N)
         maxiter: int
             the maximum number of iterations for increasing the eigenvalues
         tol: float
@@ -103,7 +103,7 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
         
     Returns
     -------
-        nparray of shape (N,N)
+        ndarray of shape (N,N)
 
     """
     n, m = matrix.shape
@@ -189,17 +189,18 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
 
 
 def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
-    """
-    Convert non-equidistant time series to equidistant by interpolation (WIP)
+    """Convert time series to equidistant by interpolation
+
+    Interpolate measurement values and propagate uncertainties accordingly.
 
     Parameters
     ----------
         t: (N,) array_like
-            timestamps
+            timestamps in ascending order
         y: (N,) array_like
-            measurement values
+            corresponding measurement values
         uy: (N,) array_like
-            measurement values' uncertainties
+            corresponding measurement values' uncertainties
         dt: float, optional
             desired interval length in seconds
         kind: str or int, optional
@@ -220,36 +221,36 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
     ----------
         * White [White2017]_
     """
-
-    def compute_lij(x_j, x_i, x):
-        return (x - x_i) / (x_j - x_i)
-
-    # Setup new vectors of timestamps, measurement values and uncertainties.
+    # Setup new vectors of timestamps.
     t_new = np.arange(t[0], t[-1], dt)
-
+    # Interpolate measurement values in the desired fashion.
     interp_y = interp1d(t, y, kind=kind)
     y_new = interp_y(t_new)
 
     if kind == 'previous' or kind == 'next' or kind == 'nearest':
+        # Look up uncertainties in cases where it is applicable.
         interp_uy = interp1d(t, uy, kind=kind)
         uy_new = interp_uy(t_new)
     else:
         if kind == 'linear':
-            # Compute each previous and next measurement values and
-            # uncertainties by iterating over t_new as ndarray.
+            # Iterate over t_new as ndarray to find relevant timestamp indices.
             indices = np.empty_like(t_new, dtype=int)
             it_t_new = np.nditer(t_new, flags=['f_index'])
             while not it_t_new.finished:
                 # Find indices of biggest of all timestamps smaller or equal
-                # than current time.
+                # than current time, assumes that timestamps are in ascending
+                # order.
                 indices[it_t_new.index] = np.where(t <= it_t_new[0])[0][-1]
                 it_t_new.iternext()
             t_prev = t[indices]
             t_next = t[indices + 1]
+            # Look up corresponding input uncertainties.
             uy_prev_sqr = uy[indices] ** 2
             uy_next_sqr = uy[indices + 1] ** 2
-            # Dummy calculation for testing purposes.
-            uy_new = np.sqrt(uy_prev_sqr + uy_next_sqr)
+            # Compute uncertainties for interpolated measurement values.
+            uy_new = np.sqrt((t_new - t_next) ** 2 * uy_prev_sqr +
+                             (t_new - t_prev) ** 2 * uy_next_sqr) / np.abs(
+                t_next - t_prev)
         else:
             raise NotImplementedError
 
