@@ -4,19 +4,25 @@ r"""
 A collection of methods which are related to filter design.
 
 This module contains the following functions:
-* db: Calculation of decibel values :math:`20\log_{10}(x)` for a vector of values
-* ua: Shortcut for calculation of unwrapped angle of complex values
-* grpdelay: Calculation of the group delay of a digital filter
-* mapinside: Maps the roots of polynomial with coefficients a inside the unit circle
-* kaiser_lowpass: Design of a FIR lowpass filter using the window technique with a Kaiser window.
-* isstable: Determine whether a given IIR filter is stable
-* savitzky_golay: Smooth (and optionally differentiate) data with a Savitzky-Golay filter
+
+* *db*: Calculation of decibel values :math:`20\log_{10}(x)` for a vector of
+  values
+* *ua*: Shortcut for calculation of unwrapped angle of complex values
+* *grpdelay*: Calculation of the group delay of a digital filter
+* *mapinside*: Maps the roots of polynomial with coefficients :math:`a`
+  inside the unit circle
+* *kaiser_lowpass*: Design of a FIR lowpass filter using the window technique
+  with a Kaiser window.
+* *isstable*: Determine whether a given IIR filter is stable
+* *savitzky_golay*: Smooth (and optionally differentiate) data with a
+  Savitzky-Golay filter
 
 """
 
 import numpy as np
 
-__all__ = ['db', 'ua', 'grpdelay', 'mapinside', 'kaiser_lowpass', 'isstable', 'savitzky_golay']
+__all__ = ['db', 'ua', 'grpdelay', 'mapinside', 'kaiser_lowpass', 'isstable',
+           'savitzky_golay']
 
 def db(vals):
     # Calculation of decibel values :math:`20\log_{10}(x)` for a vector of values    

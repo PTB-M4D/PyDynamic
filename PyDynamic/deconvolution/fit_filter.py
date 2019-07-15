@@ -17,6 +17,11 @@ response values
 * LSIIR_unc: Design of a stable IIR filter as fit to reciprocal of frequency
 response values with uncertainty
 
+.. deprecated:: 1.2.71
+          The module *deconvolution* will be combined with the module
+          *identification* and renamed to *model_estimation* in the next
+          major release 3.0. From then on you should only use the new module
+          *model_estimation* instead.
 """
 
 import warnings
