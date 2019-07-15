@@ -11,8 +11,7 @@ This module contains the following functions:
 * *make_semiposdef*: Make quadratic matrix positive semi-definite
 * *FreqResp2RealImag*: Calculate real and imaginary parts from frequency
   response
-* make_equidistant: Convert non-equidistant time series to equidistant by
-  interpolation
+* *make_equidistant*: Interpolate non-equidistant time series to equidistant
 """
 
 __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
@@ -189,7 +188,7 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
 
 
 def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
-    """ Convert time series to equidistant by interpolation
+    """ Interpolate non-equidistant time series to equidistant
 
     Interpolate measurement values and propagate uncertainties accordingly.
 
