@@ -4,14 +4,15 @@ Collection of miscellaneous helper functions.
 
 This module contains the following functions:
 
-* print_mat: print matrix (2D array) to the command line
-* print_vec: print vector (1D array) to the command line
-* make_semiposdef: Make quadratic matrix positive semi-definite by increasing
-its eigenvalues
-* FreqResp2RealImag: Calculation of real and imaginary parts from amplitude
-and phase with associated uncertainties
+* *print_vec*: Print vector (1D array) to the console or return as formatted
+  string
+* *print_mat*: Print matrix (2D array) to the console or return as formatted
+  string
+* *make_semiposdef*: Make quadratic matrix positive semi-definite
+* *FreqResp2RealImag*: Calculate real and imaginary parts from frequency
+  response
 * make_equidistant: Convert non-equidistant time series to equidistant by
-interpolation
+  interpolation
 """
 
 __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',

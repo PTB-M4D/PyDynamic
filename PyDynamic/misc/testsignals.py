@@ -3,12 +3,14 @@
 and test methods.
 
 This module contains the following functions:
-* shocklikeGaussian: signal that resembles a shock excitation as a Gaussian
-followed by a smaller Gaussian of opposite sign
-* GaussianPulse: Generates a Gaussian pulse at t0 with height m0 and std sigma
-* rect: Rectangular signal of given height and width t1-t0
-* squarepulse: Generates a series of rect functions to represent a square
-pulse signal
+
+* *shocklikeGaussian*: signal that resembles a shock excitation as a Gaussian
+  followed by a smaller Gaussian of opposite sign
+* *GaussianPulse*: Generates a Gaussian pulse at :math:`t_0` with height
+  :math:`m_0` and std :math:`sigma`
+* *rect*: Rectangular signal of given height and width :math:`t_1 - t_0`
+* *squarepulse*: Generates a series of rect functions to represent a square
+  pulse signal
 """
 
 import numpy as np

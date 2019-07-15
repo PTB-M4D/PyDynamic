@@ -6,12 +6,14 @@ Methods specialized for second order dynamic systems, such as the ones used
 for high-class accelerometers.
 
 This module contains the following functions:
-* sos_FreqResp: Calculation of the system frequency response
-* sos_phys2filter: Calculation of continuous filter coefficients from physical parameters
-* sos_absphase: Propagation of uncertainty from physical parameters to real and imaginary
-	part of system's transfer function using GUM S2 Monte Carlo
-* sos_realimag: Propagation of uncertainty from physical parameters to real and imaginary
-	part of system's transfer function using GUM S2 Monte Carlo
+
+* *sos_FreqResp*: Calculation of the system frequency response
+* *sos_phys2filter*: Calculation of continuous filter coefficients from
+  physical parameters
+* *sos_absphase*: Propagation of uncertainty from physical parameters to real
+  and imaginary	part of system's transfer function using GUM S2 Monte Carlo
+* *sos_realimag*: Propagation of uncertainty from physical parameters to real
+  and imaginary	part of system's transfer function using GUM S2 Monte Carlo
 
 """
 
