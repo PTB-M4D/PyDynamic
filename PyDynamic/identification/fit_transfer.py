@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Collection of methods for the identification of transfer function models
+""" Collection of methods for the identification of transfer function models
 
 This module contains the following functions:
-* fit_sos: 
+
+* *fit_sos*: Fit second-order model to complex-valued frequency response
 
 """
 
