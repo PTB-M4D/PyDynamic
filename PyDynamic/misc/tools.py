@@ -25,12 +25,11 @@ from scipy.sparse.linalg.eigen.arpack import eigs
 
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
-    """
-    Print vector (!D array) to the console of return as formatted string
+    """ Print vector (1D array) to the console or return as formatted string
 
     Parameters
     ----------
-        vector : 1D ndarray of shape (M,)
+        vector : (M,) array_like
         prec : int
             the precision of the output
         vertical : bool
@@ -56,12 +55,11 @@ def print_vec(vector, prec=5, retS=False, vertical=False):
 
 
 def print_mat(matrix, prec=5, vertical=False, retS=False):
-    """
-    Print matrix (2D array) to the console or return as formatted string
+    """ Print matrix (2D array) to the console or return as formatted string
     
     Parameters
     ----------
-        matrix : 2D ndarray of shape (M,N)
+        matrix : (M,N) array_like
         prec : int
             the precision of the output
         vertical : bool
@@ -94,7 +92,7 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
     
     Parameters
     ----------
-        matrix : 2D ndarray of shape (N,N)
+        matrix : (N,N) array_like
         maxiter: int
             the maximum number of iterations for increasing the eigenvalues
         tol: float
@@ -104,7 +102,8 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
         
     Returns
     -------
-        ndarray of shape (N,N)
+        (N,N) array_like
+            quadratic positive semi-definite matrix
 
     """
     n, m = matrix.shape
@@ -143,17 +142,17 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
 def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     """ Calculate real and imaginary parts from frequency response
 
-    Calculation of real and imaginary parts from amplitude and phase with
-    associated uncertainties
+    Calculate real and imaginary parts from amplitude and phase with
+    associated uncertainties.
 
     Parameters
     ----------
 
-        Abs: ndarray of shape N
+        Abs: (N,) array_like
             amplitude values
-        Phase: ndarray of shape N
+        Phase: (N,) array_like
             phase values in rad
-        Unc: ndarray of shape 2Nx2N or 2N
+        Unc: (2N, 2N) or (2N,) array_like
             uncertainties
         MCruns: bool
             Iterations for Monte Carlo simulation
@@ -161,9 +160,9 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     Returns
     -------
 
-        Re,Im: ndarrays of shape N
+        Re, Im: (N,) array_like
             real and imaginary parts (best estimate)
-        URI: ndarray of shape 2Nx2N
+        URI: (2N, 2N) array_like
             uncertainties assoc. with Re and Im
     """
 
@@ -206,16 +205,15 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
             desired interval length in seconds
         kind: str or int, optional
             Specifies the kind of interpolation for the measurement values
-            as a string ('previous', 'next', 'nearest' or 'linear'). Default is
-            'previous'.
+            as a string ('previous', 'next', 'nearest' or 'linear').
 
     Returns
     -------
-        t_new: (N,) array_like
+        t_new : (N,) array_like
             timestamps
-        y_new: (N,) array_like
+        y_new : (N,) array_like
             measurement values
-        uy_new: (N,) array_like
+        uy_new : (N,) array_like
             measurement values' uncertainties
 
     References
