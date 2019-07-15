@@ -229,7 +229,7 @@ def LSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
     return bFIR, UbFIR
 
 
-def LSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
+def LSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
     """Design of FIR filter as fit to reciprocal of frequency response values
     with uncertainty
 
@@ -256,8 +256,6 @@ def LSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
             frequencies corresponding to H
         Fs: float
             sampling frequency of digital filter
-        wt: np.ndarray of shape (2M,), optional
-             vector of weights
         verbose: bool, optional
             whether to print statements to the command line
 

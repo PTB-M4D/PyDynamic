@@ -18,7 +18,8 @@ from numpy import diff, sqrt, sum, array, corrcoef
 from scipy.signal import periodogram
 from scipy.special import comb
 
-__all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse']
+__all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse',
+           'corr_noise']
 
 
 def shocklikeGaussian(time, t0, m0, sigma, noise=0.0):
