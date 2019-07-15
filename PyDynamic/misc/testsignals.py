@@ -13,6 +13,8 @@ This module contains the following functions:
   pulse signal
 """
 
+import itertools
+
 import numpy as np
 from numpy import diff, sqrt, sum, array, corrcoef
 from scipy.signal import periodogram
@@ -164,7 +166,7 @@ class corr_noise(object):
         NT = self.rst.randn(P) * self.sigma
         STD = np.zeros(21)
         STD[10] = 1.0
-        for counter in range(5):
+        for _ in itertools.repeat(None, 5):
             NTtmp = NT.copy()
             NT[:-1] = NT[:-1] + self.w * NTtmp[1:]
             NT[-1] = NT[-1] + self.w * NTtmp[-1]
