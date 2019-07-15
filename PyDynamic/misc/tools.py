@@ -203,7 +203,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
             corresponding measurement values' uncertainties
         dt: float, optional
             desired interval length in seconds
-        kind: str or int, optional
+        kind: str, optional
             Specifies the kind of interpolation for the measurement values
             as a string ('previous', 'next', 'nearest' or 'linear').
 
@@ -226,7 +226,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
     interp_y = interp1d(t, y, kind=kind)
     y_new = interp_y(t_new)
 
-    if kind == 'previous' or kind == 'next' or kind == 'nearest':
+    if kind in ('previous', 'next', 'nearest'):
         # Look up uncertainties in cases where it is applicable.
         interp_uy = interp1d(t, uy, kind=kind)
         uy_new = interp_uy(t_new)
@@ -248,8 +248,8 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
             uy_next_sqr = uy[indices + 1] ** 2
             # Compute uncertainties for interpolated measurement values.
             uy_new = np.sqrt((t_new - t_next) ** 2 * uy_prev_sqr +
-                             (t_new - t_prev) ** 2 * uy_next_sqr) / np.abs(
-                t_next - t_prev)
+                             (t_new - t_prev) ** 2 * uy_next_sqr) / \
+                (t_next - t_prev)
         else:
             raise NotImplementedError
 
