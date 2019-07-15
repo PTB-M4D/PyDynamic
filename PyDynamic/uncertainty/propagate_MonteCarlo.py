@@ -96,7 +96,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
 	-------
 		Y: np.ndarray
 			array of Monte Carlo results
-	
+
 	References
 	----------
 		* Eichstädt, Link, Harris and Elster [Eichst2012]_

@@ -98,7 +98,7 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
             tolerance for deciding if pos. semi-def.
         verbose: bool
             If True print some more detail about input parameters.
-        
+
     Returns
     -------
         (N,N) array_like

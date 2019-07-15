@@ -90,7 +90,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     ----------
     * Eichstädt et al. 2010 [Eichst2010]_
     * Vuerinckx et al. 1996 [Vuer1996]_
-    
+
     """
 
     print("\nLeast-squares fit of an order %d digital IIR filter" % max(Nb, Na))

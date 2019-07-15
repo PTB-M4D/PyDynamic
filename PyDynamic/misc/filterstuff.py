@@ -192,12 +192,12 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         deriv: int
            the order of the derivative to compute (default = 0 means only
            smoothing)
-    
+
     Returns
     -------
          ys: ndarray, shape (N,)
             the smoothed signal (or it's n-th derivative).
-    
+
     Notes
     -----
     The Savitzky-Golay is a type of low-pass filter, particularly
@@ -205,13 +205,13 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     approach is to make for each point a least-square fit with a
     polynomial of high order over a odd-sized window centered at
     the point.
-    
+
 
     References
     ----------
     * Savitzky et al. [Savitzky]_
     * Numerical Recipes [NumRec]_
-       
+
     """
     from math import factorial
 

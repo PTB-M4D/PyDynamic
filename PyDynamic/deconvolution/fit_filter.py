@@ -3,7 +3,7 @@
 
 This module contains functions to carry out a least-squares fit of a digital
 filter to the reciprocal of a given
-complex frequency response. 
+complex frequency response.
 
 This module contains the following functions:
 
