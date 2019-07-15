@@ -4,12 +4,13 @@ Collection of miscelleneous helper functions.
 
 This module contains the following functions:
 
-* print_vec: Print vector (1D array) to the console or return as formatted
+* *print_vec*: Print vector (1D array) to the console or return as formatted
   string
-* print_mat: Print matrix (2D array) to the console or return as formatted
+* *print_mat*: Print matrix (2D array) to the console or return as formatted
   string
-* make_semiposdef: Make quadratic matrix positive semi-definite
-* FreqResp2RealImag: Calculate real and imaginary parts from frequency response
+* *make_semiposdef*: Make quadratic matrix positive semi-definite
+* *FreqResp2RealImag*: Calculate real and imaginary parts from frequency
+  response
 
 """
 
