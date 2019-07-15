@@ -6,16 +6,37 @@ from pytest import raises
 
 from PyDynamic.misc.tools import make_equidistant
 
-n = 20
+n = 50
 t, y, uy, dt, kind = np.linspace(0, 1, n), np.random.uniform(size=n), \
                      np.random.uniform(size=n), 5e-2, 'previous'
 
 
 def test_too_short_call_make_equidistant():
-    # Check erroneous calls.
+    # Check erroneous calls with too few inputs.
     with raises(TypeError):
         make_equidistant(t)
         make_equidistant(t, y)
+
+
+def test_wrong_input_lengths_call_make_equidistant():
+    # Check erroneous calls with unequally long inputs.
+    with raises(ValueError):
+        y_n_wrong = n * 2
+        uy_n_wrong = n * 3
+        y_wrong, uy_wrong = np.random.uniform(size=y_n_wrong), \
+                         np.random.uniform(size=uy_n_wrong)
+        make_equidistant(t, y_wrong, uy_wrong)
+
+
+def test_wrong_input_order_call_make_equidistant():
+    # Check erroneous calls with not ascending timestamps.
+    with raises(ValueError):
+        # Assure first and last value are correctly ordered and COUNT matches.
+        t_wrong = np.empty_like(t)
+        t_wrong[0] = t[0]
+        t_wrong[-1] = t[-1]
+        t_wrong[1:-1] = -np.sort(-t[1:-1])
+        make_equidistant(t_wrong, y, uy)
 
 
 def test_minimal_call_make_equidistant():
@@ -26,8 +47,8 @@ def test_minimal_call_make_equidistant():
 
 
 def test_full_call_make_equidistant():
-    # Setup array of timesteps.
-    dts = 5 * np.power(10., np.arange(-5, 5))
+    # Setup array of timesteps in relation to original time interval length.
+    dts = np.power(10., np.arange(-5, 0)) * (t[-1] - t[0])
     # Check full call for all specified timesteps.
     for i_dt in dts:
         make_equidistant(t, y, uy, dt=i_dt)
@@ -53,10 +74,12 @@ def test_t_new_to_dt_make_equidistant():
 
 
 def test_prev_in_make_equidistant():
-    y_new, uy_new = make_equidistant(t, y, uy, dt, 'previous')[1:3]
-    # Check if all 'interpolated' values are present in the actual values.
-    assert np.all(np.isin(y_new, y))
-    assert np.all(np.isin(uy_new, uy))
+    kinds = ['previous', 'next', 'nearest']
+    for i_kind in kinds:
+        y_new, uy_new = make_equidistant(t, y, uy, dt, i_kind)[1:3]
+        # Check if all 'interpolated' values are present in the actual values.
+        assert np.all(np.isin(y_new, y))
+        assert np.all(np.isin(uy_new, uy))
 
 
 def test_linear_in_make_equidistant():
@@ -70,7 +93,8 @@ def test_linear_in_make_equidistant():
 
 
 def test_linear_uy_in_make_equidistant():
-    # Check for given input, if interpolated uncertainties equal 2 and sqrt(2).
+    # Check for given input, if interpolated uncertainties equal 1 and
+    # :math:`sqrt(2) / 2`.
     dt_unit = 2
     t_unit = np.arange(0, n, dt_unit)
     y = np.ones_like(t_unit)
@@ -79,6 +103,7 @@ def test_linear_uy_in_make_equidistant():
     uy_new = make_equidistant(t_unit, y, uy_unit, dt_half, 'linear')[2]
     assert np.all(uy_new[0:n:2] == 1) and np.all(uy_new[1:n:2] == np.sqrt(2)
                                                  / 2)
+
 
 def test_raise_not_implemented_yet_make_equidistant():
     # Check that not implemented versions raise exceptions.

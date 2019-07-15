@@ -220,6 +220,9 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
     ----------
         * White [White2017]_
     """
+    # Check for ascending order of timestamps.
+    if not np.all(t[1:] >= t[:-1]):
+        raise ValueError('Array of timestamps needs to be in ascending order.')
     # Setup new vectors of timestamps.
     t_new = np.arange(t[0], t[-1], dt)
     # Interpolate measurement values in the desired fashion.
