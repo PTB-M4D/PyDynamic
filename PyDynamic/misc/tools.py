@@ -188,8 +188,8 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     return Re, Im, URI
 
 
-def make_equidistant(t, y, uy, dt=5e-2, kind='previous'):
-    """Convert time series to equidistant by interpolation
+def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
+    """ Convert time series to equidistant by interpolation
 
     Interpolate measurement values and propagate uncertainties accordingly.
 
