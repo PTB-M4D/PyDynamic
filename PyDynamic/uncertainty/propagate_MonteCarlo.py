@@ -276,7 +276,7 @@ def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0
     if Na>0:        # filter is IIR
         A = Coefs[:,:Na]
         if Nb>Na:
-            A = np.hstack((A,zerom((runs,Nb-Na))))
+            A = np.hstack((A,np.zeros((runs,Nb-Na))))
     else:            # filter is FIR -> zero state equations
         A = np.zeros((runs,Nb))
 
