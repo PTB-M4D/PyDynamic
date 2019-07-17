@@ -1,2 +1,2 @@
-*.pyc
-*.doctree
+.pytest_cache/
+__pycache__/

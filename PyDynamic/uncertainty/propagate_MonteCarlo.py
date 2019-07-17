@@ -22,7 +22,6 @@ import scipy.stats as stats
 from scipy.signal import lfilter
 
 from ..misc.filterstuff import isstable
-from ..misc.tools import zerom
 
 __all__ = ["MC", "SMC"]
 

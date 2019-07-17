@@ -10,9 +10,8 @@ This modules contains the following functions:
 
 """
 import numpy as np
-from scipy.signal import lfilter,tf2ss
 from scipy.linalg import toeplitz
-from ..misc.tools import zerom
+from scipy.signal import lfilter, tf2ss
 
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
 
@@ -131,11 +130,11 @@ def IIRuncFilter(x, noise, b, a, Uab):
     bs = np.matrix(bs)
     c = np.matrix(c)
 
-    phi = zerom((2 * p + 1, 1))
-    dz = zerom((p, p))
-    dz1 = zerom((p, p))
-    z = zerom((p, 1))
-    P = zerom((p, p))
+    phi = np.zeros((2*p+1, 1))
+    dz = np.zeros((p, p))
+    dz1 = np.zeros((p, p))
+    z = np.zeros((p, 1))
+    P = np.zeros((p, p))
 
     y = np.zeros((len(x),))
     Uy = np.zeros((len(x),))
