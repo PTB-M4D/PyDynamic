@@ -13,10 +13,11 @@ import numpy as np
 from scipy.signal import lfilter,tf2ss
 from scipy.linalg import toeplitz
 from ..misc.tools import zerom
+from ..misc.tools import trimOrPad
 
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
 
-def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
+def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
 
     Parameters
@@ -24,7 +25,8 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
         y: np.ndarray
             filter input signal
         sigma_noise: float or np.ndarray
-            when float then standard deviation of white noise in y; when ndarray then point-wise standard uncertainties
+            float:    standard deviation of white noise in y 
+            1D-array: interpretation depends on kind
         theta: np.ndarray
             FIR filter coefficients
         Utheta: np.ndarray
@@ -33,6 +35,10 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
             time delay of filter output signal (in samples)
         blow: np.ndarray
             optional FIR low-pass filter
+        kind: string
+            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
+            "diag": point-wise standard uncertainties of white noise
+            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
 
     Returns
     -------
@@ -50,64 +56,86 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None):
 
 
     """
-    #if not isinstance(sigma_noise, float):
-    #    raise NotImplementedError(
-    #        "FIR formula for covariance propagation not implemented yet. Suggesting Monte Carlo propagation instead.")
-    Ncomp = len(theta) - 1      # FIR filter order
+    Ntheta      = len(theta)      # FIR filter size
+    filterOrder = Ntheta - 1      # FIR filter order
 
     if not isinstance(Utheta, np.ndarray):      # handle case of zero uncertainty filter
-        Utheta = np.zeros((Ncomp+1, Ncomp+1))
+        Utheta = np.zeros((Ntheta, Ntheta))
 
+    # check which case of sigma_noise is necessary
     if isinstance(sigma_noise, float):
-        sigma2 = np.zeros((2*(Ncomp+1),))           # transform sigma into [sigma^2, 0, 0, 0, ...] (right-side autocorrelation of white noise), note: s[2*N] === s[-1]
-        sigma2[0]= sigma_noise**2
-    else:
-        sigma2 = sigma_noise
+        sigma2 = sigma_noise**2
+
+    elif isinstance(sigma_noise, np.ndarray):
+        if kind == "diag":
+            sigma2 = sigma_noise ** 2
+        elif kind == "corr":
+            sigma2 = sigma_noise
+        else: 
+            raise ValueError("unknown kind of sigma_noise")
+
+    else: 
+        raise ValueError("sigma_noise is neither of type float nor numpy.ndarray.")
+
 
     if isinstance(blow,np.ndarray):             # calculate low-pass filtered signal and propagate noise
 
-        # TODO Monday 2019-07-08
-        # I (Max) have questions:
-        # - in the old implementation, if Nlow < Ncomp+1, then Ulow has the wrong dimensions to be multiplied with Utheta
-        # - Lend is higher than ycorr has elements (though, numpy is not issuing a warning)
-        # - unclear, when / how Ncomp or Nlow are used (in the paper Ulow abd Utheta (Uc) are assumed to be of same dimension).
+        if isinstance(sigma2, float):
+            Bcorr = np.correlate(blow, blow, 'full') # len(Bcorr) == 2*Ntheta - 1
+            ycorr = sigma2 * Bcorr[Ntheta-1:]
 
-        ## OLD IMPLEMENTATION, only white noise
-        # LR = 600                                # FIXME: is LR the same as Lr ? Also LR = 600 seems very arbitrary
-        #Bcorr = np.correlate(blow, blow, 'full')
-        #ycorr = np.convolve(sigma_noise**2,Bcorr)
-        #Lr = len(ycorr)
-        #Lstart = int(np.ceil(Lr//2))
-        #Lend = Lstart + Lr -1                     # part of FIXME: replaced LR with Lr
-        #Ryy = toeplitz(ycorr[Lstart:Lend])
-        #Ulow= Ryy[:Ncomp+1,:Ncomp+1]
+            # trim / pad to length Ntheta
+            ycorr = trimOrPad(ycorr, Ntheta)
+            Ulow = toeplitz(ycorr)
+             
+        elif isinstance(sigma2, np.ndarray):
 
-        ## NEW IMPLEMENTATION, allows for correlated noise
-        # formula 32: Ulow[k] = sum_{k1,k2}^{Nlow} l_{k1} * l_{k2} * w_{k + k2 - k1}
-        # the idea:
-        # - build up Matrix L with all low-pass-filter-coefficients L
-        # - generate every combination of l_i with l_j by elementwise multiplication of L and L^T
-        # - weight by w_k
+            if kind == "diag":
+                raise NotImplementedError("Non-stationary noise not covered yet")
 
-        Nlow = len(blow)
-        L = np.tile(blow, (len(blow),1))
-        LL = np.multiply(L, L.T)
-        tmp = np.zeros((Nlow,))
+            elif kind == "corr":
+                
+                # adjust the lengths of blow and sigma2 to fit theta
+                # this either crops informations or appends zero-information
+                # also, this is the reason, why Ulow will have dimension (Ntheta x Ntheta) without further ado
 
-        for k in range(Nlow):
-            wk     = np.roll(sigma2, k)                                  # shift the autocorrelation of correlated noise accordingly
-            W      = toeplitz(wk[:Nlow], np.flip(wk, axis=0)[:Nlow])     # build a matrix from that and cut it down to (Nlow x Nlow)
-            tmp[k] = np.sum(np.multiply(LL,W))
+                # pad or crop length of blow
+                blow = trimOrPad(blow, Ntheta)
 
-        tmp = np.append(tmp, np.flip(tmp[1:], axis=0))
-        Ulow = np.vstack([np.roll(tmp,shift)[0:Ncomp+1] for shift in range(Ncomp+1)])   # make time shifted matrix from vector, because u(x[n], x[n+k]) does depend on k, but not on n
+                # pad or crop length of sigma2, then reflect the lower half to the left 
+                # [0 1 2 3 4 5 6 7] --> [-3 -2 -1 0 1 2 3 4 5 6 7]
+                sigma2 = trimOrPad(sigma2, 2*Ntheta)
+                sigma2_reflect = np.pad(sigma2, (Ntheta-2, 0), mode="reflect")
+
+                Bcorr = np.correlate(blow, blow, 'full')
+                ycorr = np.correlate(sigma2_reflect,Bcorr,mode="valid") # used convolve in a earlier version?
+                Ulow = toeplitz(ycorr)
+
+            #print(Ulow)
+            #print(Ulow.shape)
+            #print(theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta))))
 
         xlow = lfilter(blow,1.0,y)
-    else:
-        Ulow = np.vstack([np.roll(sigma2,shift)[0:Ncomp+1] for shift in range(Ncomp+1)])
+
+    else: # if blow is not provided
+        if isinstance(sigma2, float):
+            Ulow = np.eye(Ntheta) * sigma2
+
+        elif isinstance(sigma2, np.ndarray):
+
+            # pad or crop length of sigma2
+            sigma2 = trimOrPad(sigma2, Ntheta)
+
+            if kind == "diag":
+                Ulow = np.diag(sigma2)
+
+            elif kind == "corr":
+                Ulow = toeplitz(sigma2, np.flip(sigma2, axis=0))
+
         xlow = y
 
-    x = lfilter(theta,1.0,xlow)     # apply FIR filter to calculate best estimate in accordance with GUM
+    # apply FIR filter to calculate best estimate in accordance with GUM
+    x = lfilter(theta,1.0,xlow)
     x = np.roll(x,-int(shift))
 
     L = Utheta.shape[0]

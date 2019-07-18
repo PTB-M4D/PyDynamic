@@ -243,7 +243,7 @@ class corr_noise(object):
         Rww = np.real(np.fft.ifft(Sww))
         Rww = self.sigma**2 * Rww / Rww[0]     # This normalization ensures the given standard-deviation
 
-        return Rww                             # attention, Rww has length 2*N, this allows for cyclic repetition --> Rxx[2N] == Rxx[-1]
+        return Rww[0:N]
 
         # build matrix from this result
         #Rww_matrix = np.vstack([np.roll(Rww,shift)[0:N] for shift in range(N)])

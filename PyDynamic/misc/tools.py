@@ -16,6 +16,14 @@ import scipy.sparse as sparse
 
 __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag']
 
+def trimOrPad(array, length):
+
+    if len(array) < length: # pad zeros to the right if too short
+        return np.pad(array,(0,length - len(array)),mode="constant")
+    else:                   # trim to given length otherwise
+        return array[0:length]
+
+
 def col_hstack(vectors):
     """
     From tuple of 1D ndarrays make a 2D ndarray where the tuple
