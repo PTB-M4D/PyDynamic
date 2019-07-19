@@ -25,7 +25,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
         y: np.ndarray
             filter input signal
         sigma_noise: float or np.ndarray
-            float:    standard deviation of white noise in y 
+            float:    standard deviation of white noise in y
             1D-array: interpretation depends on kind
         theta: np.ndarray
             FIR filter coefficients
@@ -57,7 +57,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
 
     """
     Ntheta      = len(theta)      # FIR filter size
-    filterOrder = Ntheta - 1      # FIR filter order
+    #filterOrder = Ntheta - 1      # FIR filter order
 
     if not isinstance(Utheta, np.ndarray):      # handle case of zero uncertainty filter
         Utheta = np.zeros((Ntheta, Ntheta))
@@ -71,10 +71,10 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
             sigma2 = sigma_noise ** 2
         elif kind == "corr":
             sigma2 = sigma_noise
-        else: 
+        else:
             raise ValueError("unknown kind of sigma_noise")
 
-    else: 
+    else:
         raise ValueError("sigma_noise is neither of type float nor numpy.ndarray.")
 
 
@@ -82,33 +82,37 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
 
         if isinstance(sigma2, float):
             Bcorr = np.correlate(blow, blow, 'full') # len(Bcorr) == 2*Ntheta - 1
-            ycorr = sigma2 * Bcorr[Ntheta-1:]
+            ycorr = sigma2 * Bcorr[len(blow)-1:]     # only the upper half of the correlation is needed
 
             # trim / pad to length Ntheta
             ycorr = trimOrPad(ycorr, Ntheta)
             Ulow = toeplitz(ycorr)
-             
+
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
                 raise NotImplementedError("Non-stationary noise not covered yet")
 
             elif kind == "corr":
-                
-                # adjust the lengths of blow and sigma2 to fit theta
-                # this either crops informations or appends zero-information
-                # also, this is the reason, why Ulow will have dimension (Ntheta x Ntheta) without further ado
 
-                # pad or crop length of blow
-                blow = trimOrPad(blow, Ntheta)
+                # adjust the lengths of Bcorr and sigma2 to fit theta
+                # this either crops (unused) information or appends zero-information
+                # note1: this is the reason, why Ulow will have dimension (Ntheta x Ntheta) without further ado
+                # note2: in order to calculate Bcorr, the full length of blow is used (no information loss here)
 
-                # pad or crop length of sigma2, then reflect the lower half to the left 
+                # calculate Bcorr
+                Bcorr = np.correlate(blow, blow, 'full')
+
+                # pad/crop length of Bcorr to 
+                Bcorr_half = trimOrPad(Bcorr[len(blow)-1:], Ntheta)                  # select the right half of Bcorr, then pad or crop to length Ntheta
+                Bcorr_adjusted = np.pad(Bcorr_half, (Ntheta-2, 0), mode="reflect")   # restore symmetric correlation of length (2*Ntheta-1)
+
+                # pad or crop length of sigma2, then reflect the lower half to the left
                 # [0 1 2 3 4 5 6 7] --> [-3 -2 -1 0 1 2 3 4 5 6 7]
                 sigma2 = trimOrPad(sigma2, 2*Ntheta)
                 sigma2_reflect = np.pad(sigma2, (Ntheta-2, 0), mode="reflect")
 
-                Bcorr = np.correlate(blow, blow, 'full')
-                ycorr = np.correlate(sigma2_reflect,Bcorr,mode="valid") # used convolve in a earlier version?
+                ycorr = np.correlate(sigma2_reflect,Bcorr_adjusted,mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
                 Ulow = toeplitz(ycorr)
 
             #print(Ulow)
@@ -223,5 +227,3 @@ def IIRuncFilter(x, noise, b, a, Uab):
     Uy = np.sqrt(np.abs(Uy))    # calculate point-wise standard uncertainties
 
     return y, Uy
-
-
