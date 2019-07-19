@@ -134,7 +134,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
                 Ulow = np.diag(sigma2)
 
             elif kind == "corr":
-                Ulow = toeplitz(sigma2, np.flip(sigma2, axis=0))
+                Ulow = toeplitz(sigma2)
 
         xlow = y
 

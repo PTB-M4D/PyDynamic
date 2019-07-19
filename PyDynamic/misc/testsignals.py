@@ -238,8 +238,11 @@ class corr_noise(object):
 
         # generate and transform the power spectral density Sww
         Sww = 1.0 / np.power(np.abs(freq), beta)
-        Sww[0] = 1                             #  Sww[0] is NaN for positive betas, FIXME: Setting it to 1 is suitable because ... ?
+        # Sww[0] is NaN for positive betas
+        # Note: setting Sww[]it to 1 is suitable because 
+        Sww[0] = 1                             
 
+        # inverse Fourier-transform to get Autocorrelation from PSD/Sww
         Rww = np.real(np.fft.ifft(Sww))
         Rww = self.sigma**2 * Rww / Rww[0]     # This normalization ensures the given standard-deviation
 
