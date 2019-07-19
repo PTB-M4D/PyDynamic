@@ -4,9 +4,6 @@
 import numpy as np
 from pytest import raises
 
-import sys
-sys.path.append(".")
-
 import PyDynamic.uncertainty.propagate_MonteCarlo as mc
 
 
