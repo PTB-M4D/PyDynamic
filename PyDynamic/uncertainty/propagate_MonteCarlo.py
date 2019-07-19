@@ -29,7 +29,7 @@ class Normal_ZeroCorr():
     """
     Multivariate normal distribution with zero correlation
     """
-    def __init__(self, loc=None, scale=None):
+    def __init__(self, loc=np.zeros(1), scale=np.zeros(1)):
         """
         Parameters
         ----------
@@ -38,24 +38,40 @@ class Normal_ZeroCorr():
             scale: np.ndarray, optional
                 standard deviations for the elements in loc, default is zero
         """
-        if isinstance(loc, np.ndarray):
-            self.mean = loc
-            if isinstance(scale, np.ndarray):
-                assert (len(scale)==len(loc))
-                self.std = scale
-            elif isinstance(scale, float):
-                self.std = scale * np.ones_like(loc)
+
+        if isinstance(loc, np.ndarray) or isinstance(scale, np.ndarray):
+
+            # convert loc to array if necessary
+            if not isinstance(loc, np.ndarray):
+                self.loc = loc * np.ones(1)
             else:
-                self.std = np.zeros_like(loc)
-        elif isinstance(scale, np.ndarray):
-            self.std = scale
-            self.mean = np.zeros_like(scale)
+                self.loc = loc
+
+            # convert scale to arraym if necessary
+            if not isinstance(scale, np.ndarray):
+                self.scale = scale * np.ones(1)
+            else:
+                self.scale = scale
+            
+            # if one of both (loc/scale) has length one, make it bigger to fit size of the other
+            if self.loc.size != self.scale.size:
+                Nmax = max(self.loc.size, self.scale.size)
+
+                if self.loc.size == 1 and self.scale.size != 1:
+                    self.loc = self.loc * np.ones(Nmax)
+
+                elif self.scale.size == 1 and self.loc.size != 1:
+                    self.scale = self.scale * np.ones(Nmax)
+
+                else:
+                    raise ValueError("loc and scale do not have the same dimensions. (And none of them has dim == 1)")
+            
         else:
-            raise TypeError("Neither loc nor scale are of type numpy.ndarray.")
+            raise TypeError("At least of loc or scale must be of type numpy.ndarray.")
 
     def rvs(self, size=1):
         # This function mimics the behavior of the scipy stats package
-        return np.tile(self.mean, (size, 1)) + np.random.randn(size, len(self.mean))*np.tile(self.std, (size, 1))
+        return np.tile(self.loc, (size, 1)) + np.random.randn(size, len(self.loc))*np.tile(self.scale, (size, 1))
 
 
 

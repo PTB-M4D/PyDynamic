@@ -7,41 +7,53 @@ from pytest import raises
 import PyDynamic.uncertainty.propagate_MonteCarlo as mc
 
 
+N = 10
+possibleInputs = [0, 0.0, np.zeros(1), np.zeros(N), np.zeros(N+1), 
+                    1, 1.0, np.ones(1), np.ones(N), np.ones(N+1), 
+                    np.arange(N), np.arange(N+1)]
+
+def shouldRaiseTypeError(a, b):
+    if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
+        return False
+    else:
+        return True
+
+def shouldRaiseValueError(a, b):
+    if isinstance(a, np.ndarray) and isinstance(b, np.ndarray):
+        if a.size != b.size:
+            if len(a) == 1 or len(b) == 1:
+                return False
+            else:
+                return True
+        else:
+            return False
+    else:
+        return False
+
 def test_Normal_ZeroCorr_constructor():
-    N = 10
-    possibleInputs = [None, 
-           0, 0.0, np.zeros(N), np.zeros(N+1), 
-           1, 1.0, np.ones(N), np.ones(N+1), 
-           np.arange(N), np.arange(N+1)]
     
     for loc in possibleInputs:
         for scale in possibleInputs:
-            if isinstance(loc, np.ndarray) or isinstance(scale, np.ndarray):
 
-                if isinstance(loc, np.ndarray) and isinstance(scale, np.ndarray):
-                    if len(loc) != len(scale):
-                        with raises(AssertionError):
-                            zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-                        continue
-                    else:
-                        zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-                else:
-                    zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-
-            else:
+            if shouldRaiseTypeError(loc, scale):
                 with raises(TypeError):
                     zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-                continue
             
-            # run the rvs method
-            Nmax = max(len(zc.mean), len(zc.std))
-            k = np.random.choice(np.arange(Nmax), size=1)[0]
-            rvs = zc.rvs(size=k)
+            elif shouldRaiseValueError(loc, scale):
+                with raises(ValueError):
+                    zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
 
-            # check assertions
-            assert isinstance(rvs, np.ndarray)
-            assert rvs.shape == (k, Nmax)
+            else: # should run through
+                zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
 
+                # run the rvs method
+                Nmax = max(zc.loc.size, zc.scale.size)
+                k = np.random.choice(np.arange(Nmax), size=1)[0]
+                rvs = zc.rvs(size=k)
+
+                # check assertions
+                assert isinstance(rvs, np.ndarray)
+                assert rvs.shape == (k, Nmax)
 
 
 def test_MC():
