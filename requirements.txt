@@ -1,8 +1,8 @@
 ipython>=7.6.0
 jupyter==1.0.0
-matplotlib>=3.1.0
+matplotlib
 pytest==5.0.1
-numpy==1.16.4
-pandas==0.24.2
-scipy>=1.2.1
+numpy
+pandas
+scipy
 sympy==1.4
