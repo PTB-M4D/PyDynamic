@@ -73,7 +73,9 @@ jobs:
       # Upload coverage report.
       - run:
           name: Upload coverage report
-          command: bash <(curl -s https://codecov.io/bash)
+          command: |
+            . venv/bin/activate
+            bash <(curl -s https://codecov.io/bash)
 
       # Install PyDynamic.
       - run:
