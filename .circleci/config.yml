@@ -56,7 +56,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            pip install coverage pytest-cov codecov
+            pip install coverage pytest-cov
 
       - save_cache:
           paths:
@@ -69,7 +69,11 @@ jobs:
           command: |
             . venv/bin/activate
             pytest -v --cov=PyDynamic/ > test-reports/pytest.log
-            codecov
+
+      # Upload coverage report.
+      - run:
+          name: Upload coverage report
+          command: bash <(curl -s https://codecov.io/bash)
 
       # Install PyDynamic.
       - run:
