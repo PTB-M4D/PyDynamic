@@ -1,13 +1,8 @@
 import numpy as np
 
-### TESTING
-import sys
-sys.path.append(".")
-### /TESTING
-
 from PyDynamic.misc.tools import col_hstack, make_semiposdef
 from PyDynamic.misc.filterstuff import kaiser_lowpass
-from PyDynamic.misc.testsignals import corr_noise
+import PyDynamic.misc.noise as pmn
 from PyDynamic.misc.testsignals import rect
 import PyDynamic.uncertainty.propagate_MonteCarlo as MC
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
@@ -50,22 +45,24 @@ def test_sigma_noise():
             # input signal + run methods
             x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)
             y, Uy = FIRuncFilter(x, sigma_noise, b1, Ub, blow=b2, kind=kind)            # apply uncertain FIR filter (GUM formula)
+            
+            assert len(y) == len(x)
+            assert len(Uy) == len(x)
 
         elif kind == "corr":
             color = "white"
-            w      = np.random.normal(loc = 0, scale = sigma_noise, size=nTime)
-            cn     = corr_noise(w, sigma_noise)
-            Ux     = cn.theoretic_covariance_colored_noise(N=nTime, color=color)
-            noise  = cn.colored_noise(color=color)
+            Ux     = pmn.power_law_acf(nTime, color=color, std=sigma_noise)
+            noise  = pmn.power_law_noise(N=nTime, color=color, std=sigma_noise)
 
             # input signal + run methods
             x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
             y, Uy = FIRuncFilter(x, Ux, b1, Ub, blow=b2, kind=kind)            # apply uncertain FIR filter (GUM formula)
 
+            assert len(y) == len(x)
+            assert len(Uy) == len(x)
+
         
         elif kind == "diag":
             pass
-
-
 
 test_sigma_noise()

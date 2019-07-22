@@ -93,6 +93,11 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
             if kind == "diag":
                 raise NotImplementedError("Non-stationary noise not covered yet")
 
+                # not tested!
+                #B = toeplitz(blow, np.zeros(blow.size))
+                #D = np.diag(sigma2)
+                #Ulow = B.dot(D).dot(B.T)
+
             elif kind == "corr":
 
                 # adjust the lengths of Bcorr and sigma2 to fit theta
@@ -105,7 +110,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
 
                 # pad/crop length of Bcorr to 
                 Bcorr_half = trimOrPad(Bcorr[len(blow)-1:], Ntheta)                  # select the right half of Bcorr, then pad or crop to length Ntheta
-                Bcorr_adjusted = np.pad(Bcorr_half, (Ntheta-2, 0), mode="reflect")   # restore symmetric correlation of length (2*Ntheta-1)
+                Bcorr_adjusted = np.pad(Bcorr_half, (Ntheta-1, 0), mode="reflect")   # restore symmetric correlation of length (2*Ntheta-1)
 
                 # pad or crop length of sigma2, then reflect the lower half to the left
                 # [0 1 2 3 4 5 6 7] --> [-3 -2 -1 0 1 2 3 4 5 6 7]

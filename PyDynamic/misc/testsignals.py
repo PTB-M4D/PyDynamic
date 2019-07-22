@@ -152,14 +152,6 @@ class corr_noise(object):
         self.sigma = sigma
         self.rst = np.random.RandomState(seed)
 
-        # define a beta for every color
-        self.colors = {"violet": -2,
-                       "blue":   -1,
-                       "white":   0,
-                       "pink":    1,
-                       "red":     2,
-                       "brown":   2 }
-
     def calc_noise(self, N = 100):
         z = self.rst.randn(N + 4)
         noise = diff(diff(diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3) + 6 * z[2:] * self.w ** 2) - 4 * z[3:] * self.w) + z[4:]
@@ -208,73 +200,3 @@ class corr_noise(object):
             return periodogram(noise, fs = Fs, **kwargs)
         else:
             return periodogram(self.noise, fs = Fs, **kwargs)
-
-    def getBeta(self, beta, colorString):
-        # raise warning, if beta and color are non-None
-        if (beta is not None) and (colorString not in [None, "white"]):
-            raise UserWarning("You have specified a colorString and beta. Only beta will be considered, the colorString is ignored!")
-
-        # define beta from color-string, if no beta-argument was handed over
-        if beta is None:
-            if colorString in self.colors.keys():
-                beta = self.colors[colorString]
-            else: raise NotImplementedError(
-                "Specified color ({COLOR}) of noise is not available. Please choose from {COLORS} or define beta directly.".format(COLOR=colorString, COLORS='/'.join(self.colors.keys())))
-        return beta
-
-    def theoretic_covariance_colored_noise(self, N = None, color = "white", beta = None):
-        """
-        Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "beta" is provided, "color"-argument is ignored.
-
-        Colors of noise are defined to have a power spectral density (Sww) proportional to `1/f^beta`.
-        Sww and Rww form a Fourier-pair. Therefore Rww = ifft(Sww).
-        """
-        # process the arguments
-        if N == None: N = len(self.w)
-        beta = self.getBeta(beta, color)
-
-        # generate frequencies
-        freq = np.fft.fftfreq(2*N)
-
-        # generate and transform the power spectral density Sww
-        Sww = 1.0 / np.power(np.abs(freq), beta)
-        # Sww[0] is NaN for positive betas
-        # Note: setting Sww[]it to 1 is suitable because 
-        Sww[0] = 1                             
-
-        # inverse Fourier-transform to get Autocorrelation from PSD/Sww
-        Rww = np.real(np.fft.ifft(Sww))
-        Rww = self.sigma**2 * Rww / Rww[0]     # This normalization ensures the given standard-deviation
-
-        return Rww[0:N]
-
-        # build matrix from this result
-        #Rww_matrix = np.vstack([np.roll(Rww,shift)[0:N] for shift in range(N)])
-        #return Rww_matrix
-
-    def colored_noise(self, beta = None, color = "white"):
-        """
-        Generate colored noise by
-        * taking the (assumingly) white noise `self.w`
-        * dividing its Fourier-transform with f^(beta/2)
-        * inverse Fourier-transform to yield the colored/correlated noise
-        """
-
-        beta = self.getBeta(beta, color)
-
-        sp   = np.fft.fft(self.w)
-        freq = np.fft.fftfreq(len(self.w))
-
-        # generate the filtered spectrum by multiplication by f^(k/2) (should do the same as applying f^beta to the PSD)
-        sp_filt = sp / np.power(np.abs(freq), beta/2)
-
-        ## compensate division by zero errors for beta<0, also sets signal to zero-mean
-        sp_filt[0] = 0
-
-        # calculate the filtered time-series
-        w_filt = np.real(np.fft.ifft(sp_filt))
-
-        # back to sigma variance
-        w_filt = self.sigma * w_filt / np.std(w_filt)
-
-        return w_filt
