@@ -9,4 +9,4 @@ exclude_lines =
     if __name__ == .__main__.:
 ignore_errors = True
 omit =
-    test/*
+    PyDynamic/test/*
