@@ -187,6 +187,9 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         deriv: int
            the order of the derivative to compute (default = 0 means only
            smoothing)
+        rate: float
+            the influence of the scaling factor :math:`n! \ h^n`, where
+            :math:`n` is represented by `deriv` and :math:`h` by `rate`
 
     Returns
     -------
