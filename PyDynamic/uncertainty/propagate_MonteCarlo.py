@@ -291,7 +291,7 @@ def SMC(x,noise_std,b,a,Uab=None,runs=1000,Perc=None,blow=None,alow=None,shift=0
 
 
 	print("Sequential Monte Carlo progress", end="")	# start of the actual MC part
-	for k in range(len(x)):
+	for _ in np.itertools.repeat(None, len(x)):
 
 		w  = np.random.randn(runs)*noise_std		# noise process draw
 		if AR and MA:

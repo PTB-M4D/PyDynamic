@@ -93,7 +93,7 @@ def mapinside(a):
     Parameters
     ----------
         a: ndarray
-           polynomial coefficients    
+           polynomial coefficients
     Returns
     -------
         a: ndarray
@@ -177,8 +177,8 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     It has the advantage of preserving the original shape and
     features of the signal better than other types of filtering
     approaches, such as moving averages techniques.
-    
-    Source obtained from scipy cookbook (online), downloaded 2013-09-13    
+
+    Source obtained from scipy cookbook (online), downloaded 2013-09-13
 
     Parameters
     ----------

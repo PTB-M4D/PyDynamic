@@ -88,7 +88,7 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
 def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
     """
     Make quadratic matrix positive semi-definite by increasing its eigenvalues
-    
+
     Parameters
     ----------
         matrix : (N,N) array_like

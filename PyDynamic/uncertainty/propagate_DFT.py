@@ -41,7 +41,7 @@ def apply_window(x,Ux,window):
 
 	Args:
 		x: vector of time domain signal values of shape (N,)
-		Ux: covariance matrix of shape (N,N) associated with x or noise variance as float 
+		Ux: covariance matrix of shape (N,N) associated with x or noise variance as float
 		window: vector of time domain window (same length as x)
 	Returns:
 		xw,Uxw

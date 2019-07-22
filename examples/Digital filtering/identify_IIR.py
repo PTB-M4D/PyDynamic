@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     Fit of an IIR filter to a simulated frequency response of a second-order dynamic system.
-    
+
     Try to play with this script by changing the parameters of the 2nd order system or the order of the fitted filter.
 
 .. seealso:: :mod:`..identification.fit_filter`

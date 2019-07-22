@@ -85,7 +85,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     -------
         b,a:    IIR filter coefficients as numpy arrays
         tau:    filter time delay in samples
-    
+
     References
     ----------
     * Eichstädt et al. 2010 [Eichst2010]_
