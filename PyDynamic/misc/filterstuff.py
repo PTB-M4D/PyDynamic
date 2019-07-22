@@ -139,7 +139,10 @@ def kaiser_lowpass(L, fcut, Fs, beta=8.0):
 
 
 def isstable(b, a, ftype='digital'):
-    """Determine whether IIR filter (b,a) is stable
+    """Determine whether `IIR filter (b,a)` is stable
+
+    Determine whether `IIR filter (b,a)` is stable by checking roots of the
+    polynomial ´a´.
     
     Parameters
     ----------
@@ -155,24 +158,16 @@ def isstable(b, a, ftype='digital'):
             whether filter is stable or not
                 
     """
-
+    v = np.roots(a)
     if ftype == 'digital':
-        v = np.roots(a)
-        if np.any(np.abs(v) > 1.0):
-            return False
-        else:
-            return True
+        return not np.any(np.abs(v) > 1.0)
     elif ftype == 'analog':
-        v = np.roots(a)
-        if np.any(np.real(v) < 0):
-            return False
-        else:
-            return True
+        return not np.any(np.real(v) < 0)
 
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
-    
+
     The Savitzky-Golay filter removes high frequency noise from data.
     It has the advantage of preserving the original shape and
     features of the signal better than other types of filtering
