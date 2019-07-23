@@ -7,6 +7,7 @@ from pytest import raises
 from PyDynamic.misc.tools import make_equidistant
 
 n = 50
+np.random.seed(123)
 t, y, uy, dt, kind = np.linspace(0, 1, n), np.random.uniform(size=n), \
                      np.random.uniform(size=n), 5e-2, 'previous'
 
@@ -24,7 +25,7 @@ def test_wrong_input_lengths_call_make_equidistant():
         y_n_wrong = n * 2
         uy_n_wrong = n * 3
         y_wrong, uy_wrong = np.random.uniform(size=y_n_wrong), \
-                         np.random.uniform(size=uy_n_wrong)
+                            np.random.uniform(size=uy_n_wrong)
         make_equidistant(t, y_wrong, uy_wrong)
 
 
