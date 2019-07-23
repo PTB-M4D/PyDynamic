@@ -67,7 +67,7 @@ class Normal_ZeroCorr():
                     raise ValueError("loc and scale do not have the same dimensions. (And none of them has dim == 1)")
             
         else:
-            raise TypeError("At least of loc or scale must be of type numpy.ndarray.")
+            raise TypeError("At least one of loc or scale must be of type numpy.ndarray.")
 
     def rvs(self, size=1):
         # This function mimics the behavior of the scipy stats package
@@ -114,7 +114,7 @@ def MC(x,Ux,b,a,Uab,runs=1000,blow=None,alow=None,return_samples=False,shift=0,v
     -------
         Y: np.ndarray
             array of Monte Carlo results
-    
+
     References
     ----------
         * Eichstädt, Link, Harris and Elster [Eichst2012]_
