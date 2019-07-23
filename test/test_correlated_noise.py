@@ -1,6 +1,13 @@
+"""
+
+Uncertainty propagation for a FIR lowpass filter with uncertain cut-off frequency for a rectangular signal.
+
+"""
+
+import matplotlib.pyplot as plt
 import numpy as np
 
-from PyDynamic.misc.tools import col_hstack, make_semiposdef
+from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 import PyDynamic.misc.noise as pmn
 from PyDynamic.misc.testsignals import rect
@@ -8,7 +15,7 @@ import PyDynamic.uncertainty.propagate_MonteCarlo as MC
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 
 
-def test_sigma_noise():
+def test_sigma_noise(makePlots=False):
 
     # parameters of simulated measurement
     Fs = 100e3        # sampling frequency (in Hz)
@@ -64,5 +71,23 @@ def test_sigma_noise():
         
         elif kind == "diag":
             pass
+
+        # plot if necessary
+        if makePlots:
+            plt.figure(1); plt.cla()
+            plt.plot(time, x, label="input")
+            plt.plot(time, y, label="output")
+            plt.xlabel("time / au")
+            plt.ylabel("signal amplitude / au")
+            plt.legend()
+
+            plt.figure(2);plt.cla()
+            plt.plot(time, Uy, label="FIR formula")
+            plt.plot(time, np.sqrt(np.diag(UyMC)), label="Monte Carlo")
+            plt.xlabel("time / au")
+            plt.ylabel("signal uncertainty/ au")
+            plt.legend()
+            plt.show()
+
 
 test_sigma_noise()
