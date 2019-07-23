@@ -119,7 +119,7 @@ def GUM_DFT(x,Ux,N=None,window=None,CxCos=None,CxSin=None,returnC=False,mask=Non
 	----------
 		x : numpy.ndarray of shape (M,)
 			vector of time domain signal values
-		Ux : numpy.ndarray
+		Ux : numpy.ndarray or float
 			covariance matrix associated with x, shape (M,M) or noise variance as float
 		N : int, optional
 			length of time domain signal for DFT; N>=len(x)
