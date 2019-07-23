@@ -53,7 +53,8 @@ class Normal_ZeroCorr:
             else:
                 self.scale = scale
 
-            # if one of both (loc/scale) has length one, make it bigger to fit size of the other
+            # if one of both (loc/scale) has length one, make it bigger to fit
+            # size of the other
             if self.loc.size != self.scale.size:
                 Nmax = max(self.loc.size, self.scale.size)
 
@@ -64,19 +65,25 @@ class Normal_ZeroCorr:
                     self.scale = self.scale * np.ones(Nmax)
 
                 else:
-                    raise ValueError("loc and scale do not have the same dimensions. (And none of them has dim == 1)")
+                    raise ValueError(
+                        "loc and scale do not have the same dimensions. (And "
+                        "none of them has dim == 1)")
 
         else:
-            raise TypeError("At least one of loc or scale must be of type numpy.ndarray.")
+            raise TypeError("At least one of loc or scale must be of type "
+                            "numpy.ndarray.")
 
     def rvs(self, size=1):
         # This function mimics the behavior of the scipy stats package
-        return np.tile(self.loc, (size, 1)) + np.random.randn(size, len(self.loc))*np.tile(self.scale, (size, 1))
+        return np.tile(self.loc, (size, 1)) + \
+               np.random.randn(size, len(self.loc)) * \
+               np.tile(self.scale, (size, 1))
 
 
 def MC(
         x, Ux, b, a, Uab, runs=1000, blow=None, alow=None,
-        return_samples=False, shift=0, verbose=True):
+        return_samples=False, shift=0, verbose=True
+):
     r"""Standard Monte Carlo method
 
     Monte Carlo based propagation of uncertainties for a digital filter (b,a)
@@ -187,8 +194,9 @@ def MC(
 
 def SMC(
         x, noise_std, b, a, Uab=None, runs=1000, Perc=None, blow=None,
-        alow=None, shift=0,
-        return_samples=False, phi=None, theta=None, Delta=0.0):
+        alow=None, shift=0, return_samples=False, phi=None, theta=None,
+        Delta=0.0
+):
     r"""Sequential Monte Carlo method
 
     Sequential Monte Carlo propagation for a digital filter (b,a) with
