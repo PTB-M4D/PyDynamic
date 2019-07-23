@@ -28,9 +28,8 @@ __all__ = ["MC", "SMC"]
 
 
 class Normal_ZeroCorr:
-    """ Multivariate normal distribution with zero correlation"""
-
-    def __init__(self, mean=None, cov=None):
+    """     Multivariate normal distribution with zero correlation"""
+    def __init__(self, loc=np.zeros(1), scale=np.zeros(1)):
         """
         Parameters
         ----------
@@ -39,23 +38,40 @@ class Normal_ZeroCorr:
             scale: np.ndarray, optional
                 standard deviations for the elements in loc, default is zero
         """
-        if isinstance(mean, np.ndarray):
-            self.mean = mean
-            if isinstance(cov, np.ndarray):
-                assert (len(cov) == len(mean))
-                self.std = cov
-            elif isinstance(cov, float):
-                self.std = cov * np.ones_like(mean)
+
+        if isinstance(loc, np.ndarray) or isinstance(scale, np.ndarray):
+
+            # convert loc to array if necessary
+            if not isinstance(loc, np.ndarray):
+                self.loc = loc * np.ones(1)
             else:
-                self.std = np.zeros_like(mean)
-        elif isinstance(cov, np.ndarray):
-            self.std = cov
-            self.mean = np.zeros_like(cov)
+                self.loc = loc
+
+            # convert scale to arraym if necessary
+            if not isinstance(scale, np.ndarray):
+                self.scale = scale * np.ones(1)
+            else:
+                self.scale = scale
+
+            # if one of both (loc/scale) has length one, make it bigger to fit size of the other
+            if self.loc.size != self.scale.size:
+                Nmax = max(self.loc.size, self.scale.size)
+
+                if self.loc.size == 1 and self.scale.size != 1:
+                    self.loc = self.loc * np.ones(Nmax)
+
+                elif self.scale.size == 1 and self.loc.size != 1:
+                    self.scale = self.scale * np.ones(Nmax)
+
+                else:
+                    raise ValueError("loc and scale do not have the same dimensions. (And none of them has dim == 1)")
+
+        else:
+            raise TypeError("At least one of loc or scale must be of type numpy.ndarray.")
 
     def rvs(self, size=1):
         # This function mimics the behavior of the scipy stats package
-        return np.tile(self.mean, (size, 1)) + np.random.randn(size, len(
-            self.mean)) * np.tile(self.std, (size, 1))
+        return np.tile(self.loc, (size, 1)) + np.random.randn(size, len(self.loc))*np.tile(self.scale, (size, 1))
 
 
 def MC(
@@ -122,7 +138,7 @@ def MC(
         else:
             dist = stats.multivariate_normal(x, Ux)  # colored noise
     elif isinstance(Ux, float):
-        dist = Normal_ZeroCorr(mean=x, cov=Ux)  # iid noise
+        dist = Normal_ZeroCorr(loc=x, scale=Ux)         # iid noise
     else:
         raise NotImplementedError(
             "The supplied type of uncertainty is not implemented")
