@@ -64,9 +64,8 @@ def MC(
     r"""Standard Monte Carlo method
 
     Monte Carlo based propagation of uncertainties for a digital filter (b,a)
-    with uncertainty matrix
-    :math:`U_{\theta}` for :math:`\theta=(a_1,\ldots,a_{N_a},b_0,\ldots,
-    b_{N_b})^T`
+    with uncertainty matrix :math:`U_{\theta}` for
+    :math:`\theta=(a_1,\ldots,a_{N_a},b_0,\ldots,b_{N_b})^T`
 
     Parameters
     ----------
@@ -86,7 +85,7 @@ def MC(
         return_samples: bool, optional
             whether samples or mean and std are returned
 
-    If `return_samples` is false, the method returns:
+    If ``return_samples`` is ``False``, the method returns:
 
     Returns
     -------
@@ -177,9 +176,8 @@ def SMC(
     r"""Sequential Monte Carlo method
 
     Sequential Monte Carlo propagation for a digital filter (b,a) with
-    uncertainty
-    matrix :math:`U_{\theta}` for :math:`\theta=(a_1,\ldots,a_{N_a},b_0,
-    \ldots,b_{N_b})^T`
+    uncertainty matrix :math:`U_{\theta}` for
+    :math:`\theta=(a_1,\ldots,a_{N_a},b_0,\ldots,b_{N_b})^T`
 
     Parameters
     ----------
@@ -208,12 +206,11 @@ def SMC(
         phi, theta: np.ndarray, optional
             parameters for AR(MA) noise model
             :math:`\epsilon(n)  = \sum_k \phi_k\epsilon(n-k) + \sum_k
-            \theta_k w(n-k) + w(n)`
-            with :math:`w(n)\sim N(0,noise_std^2)`
+            \theta_k w(n-k) + w(n)` with :math:`w(n)\sim N(0,noise_std^2)`
         Delta: float,optional
              upper bound on systematic error of the filter
 
-    If `return_samples` is false, the method returns:
+    If ``return_samples`` is ``False``, the method returns:
 
     Returns
     -------
@@ -222,7 +219,7 @@ def SMC(
         Uy: np.ndarray
             uncertainties associated with y (Monte Carlo point-wise std)
         Quant: np.ndarray
-            quantiles corresponding to percentiles `Perc` (if not `None`)
+            quantiles corresponding to percentiles ``Perc`` (if not ``None``)
 
     Otherwise the method returns:
 
