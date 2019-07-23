@@ -91,12 +91,27 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
-                raise NotImplementedError("Non-stationary noise not covered yet")
+                # [Leeuw1994](Covariance matrix of ARMA errors in closed form) can be used, to derive this formula
+                # The given "blow" corresponds to a MA(q)-process. 
+                # Going through the calculations of Leeuw, but assuming
+                # that E(vv^T) is a diagonal matrix with non-identical elements, 
+                # the covariance matrix V becomes (see Leeuw:corollary1)
+                # V = N * SP * N^T + M * S * M^T
+                # N, M are defined as in the paper
+                # and SP is the covariance of input-noise prior to the observed time-interval
+                # (SP needs be available len(blow)-timesteps into the past. In this code special assumptions are made.)
 
-                # not tested!
-                #B = toeplitz(blow, np.zeros(blow.size))
-                #D = np.diag(sigma2)
-                #Ulow = B.dot(D).dot(B.T)
+                N = toeplitz(blow[::-1], np.zeros_like(sigma2)).T
+                M = toeplitz(trimOrPad(blow, len(sigma2)))
+                S = np.diag(sigma2)
+                SP = np.diag(sigma2[0] * np.ones_like(sigma2))
+                print(N, M, S, SP)
+
+                V = N.dot(SP).dot(N.T) + M.dot(S).dot(M.T)
+                print(V)
+
+                Ulow = V[:Ntheta,:Ntheta]
+                print(Ulow)
 
             elif kind == "corr":
 
