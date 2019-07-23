@@ -49,7 +49,7 @@ jobs:
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
-      # Install dependencies and Codecov reporter if necessary.
+      # Install dependencies if necessary.
       - run:
           name: Install dependencies
           command: |
@@ -63,7 +63,7 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      # Run tests with coverage report and upload results to Codecov!
+      # Run tests with coverage report!
       - run:
           name: Run tests
           command: |
@@ -84,11 +84,12 @@ jobs:
             . venv/bin/activate
             python3 setup.py install
 
-      # Store test results.
+      # Store test results as artifacts.
       - store_artifacts:
           path: test-reports
           destination: test-reports
 
+      # Show test results as summary on job page.
       - store_test_results:
           path: test-reports
 
@@ -120,7 +121,7 @@ jobs:
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
           paths:
-            - "venv"
+            - ./venv
 
       # Verify Git tag to version to ensure, only wanted versions are uploaded.
       - run:
