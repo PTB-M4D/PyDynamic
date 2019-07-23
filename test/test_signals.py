@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Perform tests on methods to create testsignals.
-"""
+""" Perform tests on methods to create testsignals."""
 
 import numpy as np
 from pytest import approx
 
-from PyDynamic.misc.testsignals import shocklikeGaussian, GaussianPulse, rect, squarepulse
+from PyDynamic.misc.testsignals import shocklikeGaussian, GaussianPulse, rect, \
+    squarepulse
 
 N = 2048
 Ts = 0.01

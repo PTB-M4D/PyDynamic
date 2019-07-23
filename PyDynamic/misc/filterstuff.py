@@ -166,7 +166,7 @@ def isstable(b, a, ftype='digital'):
 
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
-    """Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
+    """Smooth (and optionally differentiate) data with a Savitzky-Golay filter
 
     The Savitzky-Golay filter removes high frequency noise from data.
     It has the advantage of preserving the original shape and
@@ -188,8 +188,8 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
            the order of the derivative to compute (default = 0 means only
            smoothing)
         rate: float
-            the influence of the scaling factor :math:`n! \ h^n`, where
-            :math:`n` is represented by `deriv` and :math:`h` by `rate`
+            the influence of the scaling factor :math:`n! / h^n`, where
+            :math:`n` is represented by `deriv` and :math:`1/h` by `rate`
 
     Returns
     -------

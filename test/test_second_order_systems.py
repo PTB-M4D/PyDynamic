@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-"""
-Perform tests on methods specialized for second order dynamic systems.
-"""
+""" Perform tests on methods specialized for second order dynamic systems."""
+
+# import numpy as np
 
 from matplotlib.pyplot import np as np
 from pytest import approx
 from scipy.signal import freqs
 
 # import numpy as np
-from PyDynamic.misc.SecondOrderSystem import sos_FreqResp, sos_phys2filter, sos_realimag, sos_absphase
+from PyDynamic.misc.SecondOrderSystem import sos_FreqResp, sos_phys2filter, \
+    sos_realimag, sos_absphase
 
 Fs = 100e3
 delta = 0.0001
