@@ -11,6 +11,7 @@ This module contains the following functions:
 * *rect*: Rectangular signal of given height and width :math:`t_1 - t_0`
 * *squarepulse*: Generates a series of rect functions to represent a square
   pulse signal
+* *sine*: Generate a sine signal
 """
 
 import itertools
@@ -21,7 +22,7 @@ from scipy.signal import periodogram
 from scipy.special import comb
 
 __all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse',
-           'corr_noise']
+           'corr_noise', 'sine']
 
 
 def shocklikeGaussian(time, t0, m0, sigma, noise=0.0):
@@ -138,6 +139,31 @@ def squarepulse(time, height, numpulse=4, noise=0.0):
     x = np.zeros_like(time)
     for k in range(numpulse):
         x += rect(time, (2 * k + 1) * width, (2 * k + 2) * width, height)
+    if noise > 0:
+        x += np.random.randn(len(time)) * noise
+    return x
+
+
+def sine(time=np.array(0), amp=1.0, freq=2 * np.pi, noise=0.0):
+    r""" Generate a sine signal
+
+    Parameters
+    ----------
+        time : np.ndarray of shape (N,)
+            time instants
+        amp : float, optional
+             amplitude of the sine (default = 1.0)
+        freq : float, optional
+             frequency of the sine in seconds (default = :math:`2 * \pi`)
+        noise : float, optional
+            std of simulated signal noise (default = 0.0)
+
+    Returns
+    -------
+        x : np.ndarray of shape (N,)
+            signal amplitude at time instants
+    """
+    x = amp * np.sin(2 * np.pi / freq * time)
     if noise > 0:
         x += np.random.randn(len(time)) * noise
     return x
