@@ -8,10 +8,9 @@ This module contains the following functions:
 """
 
 import numpy as np
+from scipy.linalg import toeplitz
 
 __all__ = ['white_gaussian', 'power_law_noise', 'power_law_acf']
-
-import numpy as np
 
 
 # define an alpha for every color
@@ -82,7 +81,7 @@ def power_law_noise(N = None, w = None, alpha = None, color = "white", mean = 0,
 
     return w_filt
 
-def power_law_acf(N, color = "white", alpha = None, mean = 0, std = 1):
+def power_law_acf(N, color = "white", alpha = None, mean = 0, std = 1, returnMatrix = False):
     """
     Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "alpha" is provided, "color"-argument is ignored.
 
@@ -105,4 +104,7 @@ def power_law_acf(N, color = "white", alpha = None, mean = 0, std = 1):
     Rww = np.fft.irfft(Sww, 2*N)
     Rww = std**2 * Rww / Rww[0]           # This normalization ensures the given standard-deviation
 
-    return Rww[:N]
+    if returnMatrix:
+        return toeplitz(Rww[:N])
+    else:
+        return Rww[:N]
