@@ -165,7 +165,7 @@ def isstable(b, a, ftype='digital'):
         return not np.any(np.real(v) < 0)
 
 
-def savitzky_golay(y, window_size, order, deriv=0, rate=1):
+def savitzky_golay(y, window_size, order, deriv=0, delta=1.0):
     """Smooth (and optionally differentiate) data with a Savitzky-Golay filter
 
     The Savitzky-Golay filter removes high frequency noise from data.
@@ -184,12 +184,15 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         order: int
            the order of the polynomial used in the filtering. Must be less
            then `window_size` - 1.
-        deriv: int
-           the order of the derivative to compute (default = 0 means only
-           smoothing)
-        rate: float
-            the influence of the scaling factor :math:`n! / h^n`, where
-            :math:`n` is represented by `deriv` and :math:`1/h` by `rate`
+        deriv: int, optional
+            The order of the derivative to compute.  This must be a
+            nonnegative integer.  The default is 0, which means to filter
+            the data without differentiating.
+        delta: float, optional
+            The spacing of the samples to which the filter will be applied.
+            This is only used if deriv > 0. This includes a factor
+            :math:`n! / h^n`, where :math:`n` is represented by `deriv` and
+            :math:`1/h` by `delta`.
 
     Returns
     -------
@@ -227,7 +230,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     # precompute coefficients
     b = np.mat([[k ** i for i in order_range] for k in
                 range(-half_window, half_window + 1)])
-    m = np.linalg.pinv(b).A[deriv] * rate ** deriv * factorial(deriv)
+    m = np.linalg.pinv(b).A[deriv] * factorial(deriv) / delta ** deriv
     # pad the signal at the extremes with
     # values taken from the signal itself
     firstvals = y[0] - np.abs(y[1:half_window + 1][::-1] - y[0])
