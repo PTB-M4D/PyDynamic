@@ -90,6 +90,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
+                raise NotImplementedError("Non-i.i.d. white noise is not supported from this function. Please consider using Monte-Carlo methods.")
                 # [Leeuw1994](Covariance matrix of ARMA errors in closed form) can be used, to derive this formula
                 # The given "blow" corresponds to a MA(q)-process. 
                 # Going through the calculations of Leeuw, but assuming
@@ -101,16 +102,14 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
                 # (SP needs be available len(blow)-timesteps into the past. In this code special assumptions are made.)
 
                 N = toeplitz(blow[::-1], np.zeros_like(sigma2)).T
-                M = toeplitz(trimOrPad(blow, len(sigma2)))
+                M = toeplitz(trimOrPad(blow, len(sigma2)), np.zeros_like(sigma2))
                 S = np.diag(sigma2)
-                SP = np.diag(sigma2[0] * np.ones_like(sigma2))
-                print(N, M, S, SP)
+                SP = np.diag(sigma2[0] * np.ones_like(blow))
 
                 V = N.dot(SP).dot(N.T) + M.dot(S).dot(M.T)
-                print(V)
 
-                Ulow = V[:Ntheta,:Ntheta]
-                print(Ulow)
+                # Ulow = V[:Ntheta,:Ntheta] # this is not correct, as Ulow needs to be a rolling slice of V
+                # also V needs to be extended to cover Ntheta timesteps more into the future???
 
             elif kind == "corr":
 
@@ -134,10 +133,6 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
                 ycorr = np.correlate(sigma2_reflect,Bcorr_adjusted,mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
                 Ulow = toeplitz(ycorr)
 
-            #print(Ulow)
-            #print(Ulow.shape)
-            #print(theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta))))
-
         xlow = lfilter(blow,1.0,y)
 
     else: # if blow is not provided
@@ -146,14 +141,12 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
 
         elif isinstance(sigma2, np.ndarray):
 
-            # pad or crop length of sigma2
-            sigma2 = trimOrPad(sigma2, Ntheta)
-
             if kind == "diag":
-                Ulow = np.diag(sigma2)
+                raise NotImplementedError("Non-i.i.d. white noise is not supported from this function. Please consider using Monte-Carlo methods.")
+                V = np.diag(sigma2) #  this is not Ulow, same problem as in the case of a provided blow
 
             elif kind == "corr":
-                Ulow = toeplitz(sigma2)
+                Ulow = toeplitz(trimOrPad(sigma2, Ntheta))
 
         xlow = y
 
@@ -164,6 +157,10 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
     L = Utheta.shape[0]
     if len(theta.shape)==1:
         theta = theta[:, np.newaxis]
+
+    # TODO: handle case where Ulow needs to be sliced from V
+    #       in all kind == "diag" - cases UncCov needs to be calculated inside in its own for-loop
+
     UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
     unc = np.zeros_like(y)
     for m in range(L,len(xlow)):
