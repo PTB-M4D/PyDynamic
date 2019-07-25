@@ -36,8 +36,7 @@ For the validation of the propagation of uncertainties, the Monte-Carlo
 method can be applied using a memory-efficient implementation of Monte-Carlo 
 for digital filtering
 
-The documentation for PyDynamic can be found on [ReadTheDocs](http://pydynamic
-.readthedocs.io)
+The documentation for PyDynamic can be found on [ReadTheDocs](http://pydynamic.readthedocs.io)
 
 Get in contact via [@PyDynamic](https://twitter.com/PyDynamic)
 
