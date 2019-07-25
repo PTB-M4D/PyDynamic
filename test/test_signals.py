@@ -106,7 +106,7 @@ class TestSine:
         x = sine(time, amp=amp)
         # Check for minimal callability and that maximum amplitude at
         # timestamps is below default.
-        assert np.max(x) < amp
+        assert np.max(np.abs(x)) <= amp
 
     def test_medium_call_hi_res_max_sine(self):
         # Initialize fixed amplitude.
@@ -115,7 +115,8 @@ class TestSine:
         x = sine(self.hi_res_time, amp=amp)
         # Check for minimal callability with high resolution time vector and
         # that maximum amplitude at timestamps is almost equal default.
-        assert_almost_equal(np.max(x), amp)
+        assert_almost_equal(np.max(np.abs(x)), amp)
+        assert_almost_equal(np.min(np.abs(x)), -amp)
 
     def test_full_call_sine(self):
         # Check for all possible calls.
