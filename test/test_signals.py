@@ -97,7 +97,7 @@ class TestSine:
         x = sine(fixed_freq_time, freq=freq)
         # Check if signal at multiples of frequency is start value of signal.
         for i_x in x:
-            assert_almost_equal(i_x, x[0])
+            assert_almost_equal(i_x, 0)
 
     def test_medium_call_max_sine(self):
         # Initialize fixed amplitude.
