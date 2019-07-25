@@ -144,7 +144,7 @@ def squarepulse(time, height, numpulse=4, noise=0.0):
     return x
 
 
-def sine(time=np.array(0), amp=1.0, freq=2 * np.pi, noise=0.0):
+def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
     r""" Generate a sine signal
 
     Parameters
