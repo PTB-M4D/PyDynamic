@@ -85,6 +85,7 @@ class TestSine:
         # Check for minimal callability with high resolution time vector and
         # that maximum amplitude at timestamps is almost equal default.
         assert_almost_equal(np.max(x), 1.0)
+        assert_almost_equal(np.min(x), -1.0)
 
     def test_medium_call_freq_multiples_sine(self):
         # Initialize fixed frequency and number of repetitions.
