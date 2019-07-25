@@ -3,20 +3,26 @@
 
 This module contains functions to carry out a least-squares fit of a digital
 filter to the reciprocal of a given
-complex frequency response. 
+complex frequency response.
 
-This module contains the following functions
-* LSFIR: Least-squares fit of a digital FIR filter to the reciprocal of a
-given frequency response.
-* LSFIR_unc: Design of FIR filter as fit to reciprocal of frequency response
-values with uncertainty
-* LSFIR_uncMC: Design of FIR filter as fit to reciprocal of frequency
-response values with uncertainty via Monte Carlo
-* LSIIR: Design of a stable IIR filter as fit to reciprocal of frequency
-response values
-* LSIIR_unc: Design of a stable IIR filter as fit to reciprocal of frequency
-response values with uncertainty
+This module contains the following functions:
 
+* *LSFIR*: Least-squares fit of a digital FIR filter to the reciprocal of a
+  given frequency response.
+* *LSFIR_unc*: Design of FIR filter as fit to reciprocal of frequency response
+  values with uncertainty
+* *LSFIR_uncMC*: Design of FIR filter as fit to reciprocal of frequency
+  response values with uncertainty via Monte Carlo
+* *LSIIR*: Design of a stable IIR filter as fit to reciprocal of frequency
+  response values
+* *LSIIR_unc*: Design of a stable IIR filter as fit to reciprocal of frequency
+  response values with uncertainty
+
+.. deprecated:: 1.2.71
+          The module *deconvolution* will be combined with the module
+          *identification* and renamed to *model_estimation* in the next
+          major release 3.0. From then on you should only use the new module
+          *model_estimation* instead.
 """
 
 import warnings
@@ -223,7 +229,7 @@ def LSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
     return bFIR, UbFIR
 
 
-def LSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
+def LSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
     """Design of FIR filter as fit to reciprocal of frequency response values
     with uncertainty
 
@@ -250,8 +256,6 @@ def LSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
             frequencies corresponding to H
         Fs: float
             sampling frequency of digital filter
-        wt: np.ndarray of shape (2M,), optional
-             vector of weights
         verbose: bool, optional
             whether to print statements to the command line
 

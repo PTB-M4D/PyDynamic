@@ -4,7 +4,7 @@ This module implements the signals class and its derivatives Signals are
 dynamic quantities with associated uncertainties. A signal has to be defined
 together with a time axis.
 
-IMPORTANT NOTE: This module is experimental! 
+IMPORTANT NOTE: This module is experimental!
 """
 
 import numpy as np

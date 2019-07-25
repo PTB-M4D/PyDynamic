@@ -3,20 +3,25 @@
 and test methods.
 
 This module contains the following functions:
-* shocklikeGaussian: signal that resembles a shock excitation as a Gaussian
-followed by a smaller Gaussian of opposite sign
-* GaussianPulse: Generates a Gaussian pulse at t0 with height m0 and std sigma
-* rect: Rectangular signal of given height and width t1-t0
-* squarepulse: Generates a series of rect functions to represent a square
-pulse signal
+
+* *shocklikeGaussian*: signal that resembles a shock excitation as a Gaussian
+  followed by a smaller Gaussian of opposite sign
+* *GaussianPulse*: Generates a Gaussian pulse at :math:`t_0` with height
+  :math:`m_0` and std :math:`sigma`
+* *rect*: Rectangular signal of given height and width :math:`t_1 - t_0`
+* *squarepulse*: Generates a series of rect functions to represent a square
+  pulse signal
 """
+
+import itertools
 
 import numpy as np
 from numpy import diff, sqrt, sum, array, corrcoef
 from scipy.signal import periodogram
 from scipy.special import comb
 
-__all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse']
+__all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse',
+           'corr_noise']
 
 
 def shocklikeGaussian(time, t0, m0, sigma, noise=0.0):
@@ -161,7 +166,7 @@ class corr_noise(object):
         NT = self.rst.randn(P) * self.sigma
         STD = np.zeros(21)
         STD[10] = 1.0
-        for counter in range(5):
+        for _ in itertools.repeat(None, 5):
             NTtmp = NT.copy()
             NT[:-1] = NT[:-1] + self.w * NTtmp[1:]
             NT[-1] = NT[-1] + self.w * NTtmp[-1]

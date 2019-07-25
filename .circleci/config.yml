@@ -1,22 +1,29 @@
 # Python CircleCI 2.1 configuration file
 #
-# Check https://circleci.com/docs/2.1/language-python/ for more details
+# Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2.1
 workflows:
+  # Create workflow for testing and deploying PyDynamic.
   build_and_deploy:
     jobs:
+      # Create 'build' job to test and install PyDynamic for every commit.
       - build:
+          # Include tag filter to trigger as well on tag pushes.
           filters:
               tags:
                 only: /.*/
       - deploy:
+          # Create 'deploy' job to upload PyDynamic to PyPI.org on certain tag
+          #   pushes, which successfully run 'build' job.
           requires:
               - build
           filters:
               tags:
+                # Specify the tags which trigger the job as regular expression.
                 only: /[0-9]+(\.[0-9]+)*/
               branches:
+                # This assures the job only being triggered by tag pushes.
                 ignore: /.*/
 jobs:
   build:
@@ -26,7 +33,7 @@ jobs:
     working_directory: ~/repo
 
     steps:
-      # Checkout code
+      # Checkout code.
       - checkout
 
       # Create folder for test results.
@@ -42,28 +49,33 @@ jobs:
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
-      # Install dependencies and Codecov reporter if neccessary
+      # Install dependencies and Codecov reporter if necessary.
       - run:
           name: Install dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            pip install coverage pytest-cov codecov
+            pip install coverage pytest-cov
 
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      # Run tests with coverage report and upload results to Codecov! We use
-      # pytest's test-runner (https://pytest.org)
+      # Run tests with coverage report and upload results to Codecov!
       - run:
           name: Run tests
           command: |
             . venv/bin/activate
             pytest -v --cov=PyDynamic/ > test-reports/pytest.log
-            codecov
+
+      # Upload coverage report.
+      - run:
+          name: Upload coverage report
+          command: |
+            . venv/bin/activate
+            bash <(curl -s https://codecov.io/bash)
 
       # Install PyDynamic.
       - run:

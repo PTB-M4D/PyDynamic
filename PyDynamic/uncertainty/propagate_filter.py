@@ -10,8 +10,8 @@ This modules contains the following functions:
 
 """
 import numpy as np
-from scipy.signal import lfilter,tf2ss
 from scipy.linalg import toeplitz
+from scipy.signal import lfilter, tf2ss
 
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
 

@@ -3,10 +3,18 @@
 This module contains several functions to carry out a least-squares fit to a
 given complex frequency response.
 
-This module contains the following functions
-* LSIIR: Least-squares IIR filter fit to a given frequency response
-* LSFIR: Least-squares fit of a digital FIR filter to a given frequency response
+This module contains the following functions:
 
+* *LSIIR*: Least-squares IIR filter fit to a given frequency response
+* *LSFIR*: Least-squares fit of a digital FIR filter to a given frequency
+  response
+
+
+.. deprecated:: 1.2.71
+          The module *identification* will be combined with the module
+          *deconvolution* and renamed to *model_estimation* in the next
+          major release 3.0. From then on you should only use the new module
+          *model_estimation* instead.
 """
 import warnings
 
@@ -77,12 +85,12 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     -------
         b,a:    IIR filter coefficients as numpy arrays
         tau:    filter time delay in samples
-    
+
     References
     ----------
     * Eichstädt et al. 2010 [Eichst2010]_
     * Vuerinckx et al. 1996 [Vuer1996]_
-    
+
     """
 
     print("\nLeast-squares fit of an order %d digital IIR filter" % max(Nb, Na))

@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """
     Fit of an IIR filter to a simulated frequency response of a second-order dynamic system.
-    
+
     Try to play with this script by changing the parameters of the 2nd order system or the order of the fitted filter.
-    
+
 .. seealso:: :mod:`..identification.fit_filter`
 """
 import numpy as np
-from scipy.signal import freqz
 from matplotlib.pyplot import figure, cla, show
+from scipy.signal import freqz
 
-from PyDynamic.misc.filterstuff import db
 import PyDynamic.identification.fit_filter as fit_filter
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
+from PyDynamic.misc.filterstuff import db
 
 # sensor/measuring system
 f0 = 36e3           # system resonance frequency in Hz
