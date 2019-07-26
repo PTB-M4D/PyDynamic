@@ -48,7 +48,8 @@ hw = waitbar(0,'UMC initialisation');
 
 for k=1:small
     th = p_ba(1); % HINT: if p_ba = mvnrnd, then run it once and keep Cholesky (see below)
-    bb = th(1:nb); aa = [1,th(nb+1:end)];
+    bb = th(1:nb); 
+    aa = [1,th(nb+1:end)];
     e  = noiseprocess(phi,theta,sigma,numel(x));    
     Y(k,:) = filter(bb,aa, filter(blow,alow,x + e) ) + (rand(1,numel(x))*2*delta - delta);    
     waitbar(k/small,hw);

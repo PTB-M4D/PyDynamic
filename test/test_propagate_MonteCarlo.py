@@ -4,53 +4,14 @@
 import numpy as np
 from pytest import raises
 
-import PyDynamic.uncertainty.propagate_MonteCarlo as mc
+import sys
+sys.path.append(".")
 
-
-N = 10
-possibleInputs = [0, 0.0, np.zeros(1), np.zeros(N), np.zeros(N+1),
-                    1, 1.0, np.ones(1), np.ones(N), np.ones(N+1),
-                    np.arange(N), np.arange(N+1)]
-
-
-def shouldRaiseTypeError(a, b):
-    return not isinstance(a, np.ndarray) and not isinstance(b, np.ndarray)
-
-
-def shouldRaiseValueError(a, b):
-    if isinstance(a, np.ndarray) and isinstance(b, np.ndarray):
-        if a.size != b.size:
-            return (not len(a) == 1) and (not len(b) == 1)
-        else:
-            return False
-    else:
-        return False
-
-
-def test_Normal_ZeroCorr_constructor():
-    
-    for loc in possibleInputs:
-        for scale in possibleInputs:
-
-            if shouldRaiseTypeError(loc, scale):
-                with raises(TypeError):
-                    zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-            
-            elif shouldRaiseValueError(loc, scale):
-                with raises(ValueError):
-                    zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-
-            else: # should run through
-                zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-
-                # run the rvs method
-                Nmax = max(zc.loc.size, zc.scale.size)
-                k = np.random.choice(np.arange(Nmax), size=1)[0]
-                rvs = zc.rvs(size=k)
-
-                # check assertions
-                assert isinstance(rvs, np.ndarray)
-                assert rvs.shape == (k, Nmax)
+from PyDynamic.misc.testsignals import rect
+from PyDynamic.misc.tools import make_semiposdef
+from PyDynamic.misc.filterstuff import kaiser_lowpass
+#from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian, ARMA
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC, SMC, UMC, ARMA
 
 
 def test_MC():
@@ -64,5 +25,82 @@ def test_SMC():
 
 
 def test_UMC():
-    # maybe take this test from some example?
-    pass
+    # parameters of simulated measurement
+    Fs = 100e3        # sampling frequency (in Hz)
+    Ts = 1 / Fs       # sampling interval length (in s)
+
+    # nominal system parameters
+    fcut = 20e3                            # low-pass filter cut-off frequency (6 dB)
+    L = 100                                 # filter order
+    b1 = kaiser_lowpass(L,   fcut,Fs)[0]
+    b2 = kaiser_lowpass(L-20,fcut,Fs)[0]
+
+    # uncertain knowledge: cutoff between 19.5kHz and 20.5kHz
+    runs = 1000
+    FC = fcut + (2*np.random.rand(runs)-1)*0.5e3
+
+    B = np.zeros((runs,L+1))
+    for k in range(runs):        # Monte Carlo for filter coefficients of low-pass filter
+        B[k,:] = kaiser_lowpass(L,FC[k],Fs)[0]
+
+    Ub = make_semiposdef(np.cov(B,rowvar=0))    # covariance matrix of MC result
+
+    # simulate input and output signals
+    nTime = 500
+    time  = np.arange(nTime)*Ts                     # time values
+
+    # different cases
+    sigma_noise = 1e-2                              # 1e-5
+
+    for kind in ["float", "corr", "diag"]:
+
+        print(kind)
+
+        if kind == "float":
+            # input signal + run methods
+            x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)
+
+            # run method
+            #yMC,UyMC    = MC(x,sigma_noise,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
+            yUMC, UyUMC = UMC(x, sigma_noise, b1, [1.0], Ub)
+            
+            assert len(yUMC) == len(x)
+            assert len(UyUMC) == len(x)
+
+        #elif kind == "corr":
+
+        #    # get an instance of noise, the covariance and the covariance-matrix with the specified color
+        #    color = "white"
+        #    noise = power_law_noise(N=nTime, color=color, std=sigma_noise)
+        #    Ux_matrix = power_law_acf(nTime, color=color, std=sigma_noise, returnMatrix=True)
+
+        #    # input signal
+        #    x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
+
+        #    # run method
+        #    yMC,UyMC = MC(x,Ux_matrix,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
+
+        #    assert len(y) == len(x)
+        #    assert len(Uy) == len(x)
+        
+        #elif kind == "diag":
+        #    sigma_diag = sigma_noise * ( 1 + np.heaviside(np.arange(len(time)) - len(time)//2,0) )    # std doubles after half of the time
+        #    noise = sigma_diag * white_gaussian(len(time))
+
+        #    # input signal + run methods
+        #    x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
+
+        #    # run method
+        #    yMC,UyMC = MC(x,sigma_diag,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
+
+def test_noise_ARMA():
+    length = 100
+    phi = [1/3, 1/4, 1/5]
+    theta = [1, -1 ]
+
+    e = ARMA(length, phi = phi, theta = theta)
+
+    assert len(e) == length
+
+
+test_UMC()

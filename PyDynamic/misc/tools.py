@@ -21,6 +21,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from scipy.sparse import issparse, eye
 from scipy.sparse.linalg.eigen.arpack import eigs
+import sys
 
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
@@ -256,3 +257,39 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
             raise NotImplementedError
 
     return t_new, y_new, uy_new
+
+
+def progressBar(count, countMax, width = 30, prefix = "", doneIndicator = "#", todoIndicator = "." , fout=sys.stdout):
+    """
+    A simple and reusable progress-bar. 
+
+    Parameters
+    ----------
+        count: int
+            current status of iterations, assumed to be zero-based
+        countMax: int
+            total number of iterations
+        width: int, optional (default: 30)
+            width of the actual progressbar (acutal printed line will be wider)
+        prefix: str, optional (default: "")
+            some text that will be printed in front of the bar (i.e. "Progress of ABC:")
+        doneIndicator: str, optional (default: "#")
+            what character is used as "already-done"-indicator
+        todoIndicator: str, optional (default: ".")
+            what character is used as "not-done-yet"-indicator
+        fout: file-object, optional (default: sys.stdout)
+            where the progress-bar should be written/printed to
+
+    Returns
+    -------
+        None
+    """
+    x = int(width*(count+1)/countMax)
+    progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
+        PREFIX=prefix, 
+        DONE=x*doneIndicator, 
+        NOTDONE=(width-x)*todoIndicator,
+        COUNT=count+1,
+        COUNTMAX=countMax)
+    
+    fout.write(progressString)

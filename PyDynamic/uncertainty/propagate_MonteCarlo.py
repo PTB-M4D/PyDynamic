@@ -12,10 +12,12 @@ This module contains the following functions:
 
 * *MC*: Standard Monte Carlo method for application of digital filter
 * *SMC*: Sequential Monte Carlo method with reduced computer memory requirements
+* *UMC*: Update Monte Carlo method with reduced computer memory requirements
 
 """
 
 import sys
+import types
 
 import numpy as np
 import scipy as sp
@@ -23,6 +25,7 @@ import scipy.stats as stats
 from scipy.signal import lfilter
 
 from ..misc.filterstuff import isstable
+from ..misc.tools import progressBar
 
 __all__ = ["MC", "SMC", "UMC"]
 
@@ -132,23 +135,20 @@ def MC(
     Na = len(a)
     runs = int(runs)
 
-    Y = np.zeros((runs, len(x)))  # set up matrix of MC results
-    theta = np.hstack(
-        (a[1:], b))  # create the parameter vector from the filter coefficients
-    Theta = np.random.multivariate_normal(theta, Uab,
-                                          runs)  # Theta is small and thus we
+    Y = np.zeros((runs, len(x)))   # set up matrix of MC results
+    theta = np.hstack((a[1:], b))  # create the parameter vector from the filter coefficients
+    Theta = np.random.multivariate_normal(theta, Uab, runs)  # Theta is small and thus we
+
     # can draw the full matrix now.
     if isinstance(Ux, np.ndarray):
         if len(Ux.shape) == 1:
-            dist = Normal_ZeroCorr(loc=x,
-                                   scale=Ux)  # non-iid noise w/o correlation
+            dist = Normal_ZeroCorr(loc=x, scale=Ux)  # non-iid noise w/o correlation
         else:
             dist = stats.multivariate_normal(x, Ux)  # colored noise
     elif isinstance(Ux, float):
-        dist = Normal_ZeroCorr(loc=x, scale=Ux)         # iid noise
+        dist = Normal_ZeroCorr(loc=x, scale=Ux)      # iid noise
     else:
-        raise NotImplementedError(
-            "The supplied type of uncertainty is not implemented")
+        raise NotImplementedError("The supplied type of uncertainty is not implemented")
 
     unst_count = 0  # Count how often in the MC runs the IIR filter is unstable.
     st_inds = list()
@@ -270,6 +270,7 @@ def SMC(
 
     # Initialize noise matrix corresponding to ARMA noise model.
     if isinstance(theta, np.ndarray) or isinstance(theta, float):
+        MA = True
         if isinstance(theta, float):
             W = np.zeros((runs, 1))
         else:
@@ -393,9 +394,141 @@ def SMC(
         return y, Uy
 
 
-def UMC():
+def UMC(x, Ux, b, a, Uab, runs = 1000, runs_seq = 8, blow = [1], alow = [1], 
+        phi = [0], theta = [0], sigma = 1, Delta = 0.0, runs_init = 100, nbins=[1000]):
     """
-    placeholder
+    TODO: this is the old matlab-doc-string and needs update after implementation has finished
+
+    Batch Monte Carlo for filtering using update formulae for mean, variance
+    and (approximated) histogram
+    HERE: allows for call with numel(nbins)>1
+    
+    [y,uy,p025,p975] = BMCP_update(b,a,p_ba,x,phi,theta,sigma,delta,runs,...)
+    Calculates mean, standard uncertainty and 95% credible interval 
+    
+    [y,uy] = BMCP(b,a,p_ba,x,phi,theta,sigma,delta,runs,...)
+    Calculates mean and standard uncertainty 
+    
+    b,a : filter coefficients --> y = filter(b,a,x) is GUM estimate
+    p_ba : function handle to draw samples from PDF associated with [b,a(2:end)]
+    x   : filter input signal (estimate)
+    phi,theta,sigma: ARMA noise model --> eps(n) = sum phi_k*eps(n-k) + sum theta_k*w(n-k) + w(n)
+                                          with w(n) ~ N(0,sigma^2)
+    delta: upper bound of systematic correction due to regularisation (assume uniform distribution)
+    runs: number of MC trials
+    
+    
+    varargin{1,2} = (blow,alow) : filter coefficients of optional low pass filter
+    
+    varargin{3} = nbins: number of bins for histogram (default is 1e3)
+    
+    Version: 2011-10-12 (Sascha Eichstaedt)
+    
+    copyright on updating formulae parts is by Peter Harris (NPL)
+    
     """
 
-    pass
+    # ------------ preparations for update formulae ------------
+    # set low pass filter
+    if alow[0] != 1:
+        blow = blow / alow[0]
+        alow = alow / alow[0]
+
+
+    # init set intervals
+    Y = np.zeros((runs, len(x)))                             # set up matrix of MC results
+    theta = np.hstack((a[1:], b))                            # create the parameter vector from the filter coefficients
+    Theta = np.random.multivariate_normal(theta, Uab, runs)  # Theta is small and thus we can draw the full matrix now.
+
+    # generate function to later draw x-values from
+    if isinstance(Ux, np.ndarray):
+        if len(Ux.shape) == 1:
+            dist = Normal_ZeroCorr(loc=x,
+                                   scale=Ux)  # non-iid noise w/o correlation
+        else:
+            dist = stats.multivariate_normal(x, Ux)  # colored noise
+    elif isinstance(Ux, float):
+        dist = Normal_ZeroCorr(loc=x, scale=Ux)      # iid noise
+    else:
+        raise NotImplementedError("The supplied type of uncertainty is not implemented")
+    
+    # init Y
+    Y = np.zeros((runs_init, x.size))
+
+    # calculate Y of 
+    for k in range(runs_init):
+        bb = Theta[k, :b.size]
+        aa = np.insert(Theta[k, b.size:], 0, 1) # insert coeff 1 at position 0 to restore aa
+        epsilon = ARMA(x.size, phi = phi, theta = theta, std = sigma)
+        delta = np.random.uniform(-Delta, Delta, size = x.size)
+        Y[k,] = lfilter(b, a, lfilter(blow, alow, x + epsilon)) + delta
+
+        progressBar(k, runs_init, prefix="UMC initialisation: ")
+    print("\n") # to excape the carriage-return of progressBar
+    
+
+    # bin edges
+    ymin = np.min(Y, axis=0)
+    ymax = np.max(Y, axis=0)
+
+    happr = {}
+    for nbin in nbins:
+        happr[nbin] = np.linspace(ymin, ymax, num=nbin)
+    
+
+    # ----------------- run MC block-wise -----------------------
+    # TODO: continue here on Mon, 5th July 2019
+    # also fetch/merge master
+
+
+
+
+
+
+
+    return 0, 0
+    #return y,uy,p025,p975,happr
+
+
+# move this function to ..misc.noise.ARMA
+def ARMA(length, phi = [0], theta = [0], std = 1):
+    """
+    Generate time-series of a predefined ARMA-process based on this equation:
+    :math:`\sum_{j=1}^{\min(p,n-1)} \phi_j \epsilon[n-j] + \sum_{j=1}^{\min(q,n-1)} \\nu_j w[n-j]`
+    Equation and algorithm taken from [Eichst2012]_
+
+    Parameters
+    ----------
+    length: int
+        how long the drawn sample will be
+    phi: list or numpy.ndarray
+        AR-coefficients
+    theta: list or numpy.ndarray
+        MA-coefficients
+    std: float
+        std of the gaussian white noise that is feeded into the ARMA-model
+        
+    References
+    ----------
+        * Eichstädt, Link, Harris and Elster [Eichst2012]_
+    """
+
+    # convert to numpy.ndarray
+    if isinstance(phi, list): phi = np.array(phi)
+    if isinstance(theta, list): theta = np.array(theta)
+
+    # initialize e, w
+    w = np.random.normal(loc = 0, scale = std, size = length)
+    e = np.zeros_like(w)
+
+    # define shortcuts
+    p = len(phi)
+    q = len(theta)
+    
+    # iterate series over time
+    for n, wn in enumerate(w):
+        min_pn = min(p, n)
+        min_qn = min(q, n)
+        e[n] = np.sum(phi[:min_pn].dot(e[n-min_pn:n])) + np.sum(theta[:min_qn].dot(w[n-min_qn:n])) + wn
+
+    return e
