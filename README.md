@@ -15,7 +15,7 @@ Python package for the analysis of dynamic measurements
 
 The goal of this package is to provide a starting point for users in 
 metrology and related areas who deal with time-dependent, i.e. *dynamic*, 
-measurements. The software is part of a joint research project of the 
+measurements. The initial version of this software was developed as part of a joint research project of the 
 national metrology institutes from Germany and the UK, i.e. 
 [Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html) and 
 the [National Physical Laboratory](http://www.npl.co.uk).
@@ -115,17 +115,8 @@ y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
 
 ### Roadmap
 
-#### Next steps
-
-1. Interpolation of timeseries with associated uncertainties
-2. Extension of the testsignals module
-3. Extension of data transformation functions to data streams applications  
-
-#### Longterm plans
-
-1. Implementation of other measurement (sensor) models
+1. Implementation of robust measurement (sensor) models
 2. Extension to more complex noise and uncertainty models
-3. Support for derivation of noise models
 
 ### Citation
 
@@ -138,7 +129,7 @@ package to bridge theory and practice*
 ](https://doi.org/10.5194/jsss-6-97-2017)
 
 ##### Acknowledgement
-This work is part of the Joint Research Project [17IND12 Met4FoF
+Part of this work is developed as part of the Joint Research Project [17IND12 Met4FoF
 ](http://met4fof.eu) of the European Metrology Programme for Innovation and 
 Research (EMPIR).
 
@@ -149,13 +140,8 @@ jointly funded by the EMPIR participating countries within EURAMET and the
 European Union.
 
 ##### Disclaimer
-This software was developed at Physikalisch-Technische Bundesanstalt (PTB) 
-and National Physical Laboratory (NPL). The software is made available "as 
-is" free of cost. PTB and NPL assume no responsibility whatsoever for its use
-by other parties, and makes no guarantees, expressed or implied, about its 
-quality, reliability, safety, suitability or any other characteristic. In no
-event will PTB and NPL be liable for any direct, indirect or consequential 
-damage arising in connection with the use of this software.
+This software is developed at Physikalisch-Technische Bundesanstalt (PTB). The software is made available "as 
+is" free of cost. PTB assumes no responsibility whatsoever for its use by other parties, and makes no guarantees, expressed or implied, about its quality, reliability, safety, suitability or any other characteristic. In no event will PTB be liable for any direct, indirect or consequential damage arising in connection with the use of this software.
 
 ##### License
 PyDynamic is distributed under the LGPLv3 license with the exception of the 
