@@ -38,11 +38,6 @@ for digital filtering
 
 The documentation for PyDynamic can be found on [ReadTheDocs](http://pydynamic.readthedocs.io)
 
-Get in contact via [@PyDynamic](https://twitter.com/PyDynamic)
-
-![PyDynamic packages](http://mathmet.org/projects/14SIP08/PyDynamic_scheme.png)
-
-
 ### Installation
 If you just want to use the software, the easiest way is to run from your 
 system's command line
