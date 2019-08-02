@@ -13,12 +13,10 @@
 
 Python package for the analysis of dynamic measurements
 
-The goal of this package is to provide a starting point for users in 
-metrology and related areas who deal with time-dependent, i.e. *dynamic*, 
-measurements. The initial version of this software was developed as part of a joint research project of the 
-national metrology institutes from Germany and the UK, i.e. 
-[Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html) and 
-the [National Physical Laboratory](http://www.npl.co.uk).
+The goal of this package is to provide a starting point for users in metrology and related areas who deal with time-dependent, i.e. *dynamic*, measurements. The initial version of this software was developed as part of a joint research project of the 
+national metrology institutes from Germany and the UK, i.e. [Physikalisch-Technische Bundesanstalt](http://www.ptb.de/cms/en.html) and the [National Physical Laboratory](http://www.npl.co.uk).
+
+Further development and explicit use of PyDynamic is part of the European research project [EMPIR 17IND12 Met4FoF](http://met4fof.eu) and the German research project [FAMOUS](https://famous-project.eu).
 
 PyDynamic offers propagation of *uncertainties* for
 - application of the discrete Fourier transform and its inverse
