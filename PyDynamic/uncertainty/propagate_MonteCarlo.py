@@ -18,11 +18,14 @@ This module contains the following functions:
 
 import sys
 import types
+import math
+import multiprocessing
 
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
 from scipy.signal import lfilter
+from scipy.interpolate import interp1d
 
 from ..misc.filterstuff import isstable
 from ..misc.tools import progressBar
@@ -394,8 +397,8 @@ def SMC(
         return y, Uy
 
 
-def UMC(x, Ux, b, a, Uab, runs = 1000, runs_seq = 8, blow = [1], alow = [1], 
-        phi = [0], theta = [0], sigma = 1, Delta = 0.0, runs_init = 100, nbins=[1000]):
+def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1], 
+        phi = [0], theta = [0], sigma = 1, Delta = 0.0, runs_init = 100, nbins=[1000], verboseReturn = False):
     """
     TODO: this is the old matlab-doc-string and needs update after implementation has finished
 
@@ -428,40 +431,48 @@ def UMC(x, Ux, b, a, Uab, runs = 1000, runs_seq = 8, blow = [1], alow = [1],
     
     """
 
+    def evaluate(th, printProgressBar = False):
+        th = p_ba(1)                    # draw sample
+        bb = th[:b.size]                # restore bb
+        aa = np.append(1, th[b.size:])  # insert coeff 1 at position 0 to restore aa
+
+        e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
+        res = lfilter(bb, aa, lfilter(blow, alow, x + e)) + p_delta(x.size)
+
+        if printProgressBar: 
+            progressBar(k, runs_init, prefix="UMC initialisation: ")
+        
+        return res
+
+
     # ------------ preparations for update formulae ------------
+
     # set low pass filter
     if alow[0] != 1:
         blow = blow / alow[0]
         alow = alow / alow[0]
 
+    theta = np.hstack((a[1:], b))                            # create the parameter vector from the filter coefficients
 
     # init set intervals
     Y = np.zeros((runs, len(x)))                             # set up matrix of MC results
-    theta = np.hstack((a[1:], b))                            # create the parameter vector from the filter coefficients
-    Theta = np.random.multivariate_normal(theta, Uab, runs)  # Theta is small and thus we can draw the full matrix now.
 
-    # generate function to later draw x-values from
-    if isinstance(Ux, np.ndarray):
-        if len(Ux.shape) == 1:
-            dist = Normal_ZeroCorr(loc=x,
-                                   scale=Ux)  # non-iid noise w/o correlation
-        else:
-            dist = stats.multivariate_normal(x, Ux)  # colored noise
-    elif isinstance(Ux, float):
-        dist = Normal_ZeroCorr(loc=x, scale=Ux)      # iid noise
-    else:
-        raise NotImplementedError("The supplied type of uncertainty is not implemented")
+    # define functions to draw samples from (with predefined PDF associated)
+    p_ba    = lambda size: np.random.multivariate_normal(theta, Uab, size)
+    p_delta = lambda size: np.random.uniform(-Delta, Delta, size = size)
     
     # init Y
     Y = np.zeros((runs_init, x.size))
 
     # calculate Y of 
+    print("UMC initialisation")
     for k in range(runs_init):
-        bb = Theta[k, :b.size]
-        aa = np.insert(Theta[k, b.size:], 0, 1) # insert coeff 1 at position 0 to restore aa
-        epsilon = ARMA(x.size, phi = phi, theta = theta, std = sigma)
-        delta = np.random.uniform(-Delta, Delta, size = x.size)
-        Y[k,] = lfilter(b, a, lfilter(blow, alow, x + epsilon)) + delta
+        th = p_ba(1)                    # draw sample
+        bb = th[:b.size]                # restore bb
+        aa = np.append(1, th[b.size:])  # insert coeff 1 at position 0 to restore aa
+
+        e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
+        Y[k,] = lfilter(bb, aa, lfilter(blow, alow, x + e)) + p_delta(x.size)
 
         progressBar(k, runs_init, prefix="UMC initialisation: ")
     print("\n") # to excape the carriage-return of progressBar
@@ -473,21 +484,121 @@ def UMC(x, Ux, b, a, Uab, runs = 1000, runs_seq = 8, blow = [1], alow = [1],
 
     happr = {}
     for nbin in nbins:
-        happr[nbin] = np.linspace(ymin, ymax, num=nbin)
+        happr[nbin] = {}
+        happr[nbin]["ed"] = np.linspace(ymin, ymax, num=nbin) # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
+        happr[nbin]["f"] = np.zeros(nbin, len(x))             # init. bin-counts
+
+    
+    # ----------------- run MC block-wise -----------------------
+    
+    blocks = math.ceil(runs/blocksize)
+
+    # init parallel computation
+    nPool = min(multiprocessing.cpu_count(), blocksize)
+    #pool = multiprocessing.pool.Pool(nPool)
+
+    print("UMC running")
+    for m in range(blocks):
+        curr_block = min(blocksize, runs - m * blocksize)
+        Y = np.zeros(curr_block, len(x))
+        TH = p_ba(blocksize)
+
+
+
+        for k in range(blocksize): # TODO: parfor!
+        #for k, res in pool.imap(evaluate, range(blocksize), TH, chunksize=5):
+        #    Y[k,:] = res
+
+            th = TH[k,:]
+            bb = th[:b.size]                # restore bb
+            aa = np.append(1, th[b.size:])  # insert coeff 1 at position 0 to restore aa
+
+            e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
+            Y[k,:] = lfilter(b, a, lfilter(blow, alow, x + e)) + p_delta(x.size)
+
+        if m == 0: # first block
+            y  = np.mean(Y, axis=0)
+            uy = np.std(Y, axis=0)
+            
+            if verboseReturn:
+
+                for k in range(x.size):
+                    for nbin, h in happr.items():  # NOTE: this loops over a different index than the matlab-script
+                        h["f"][:,k] = np.histogram(Y[:,k], bins = h["ed"][:,k])
+
+                ymin = np.min(Y)
+                ymax = np.max(Y)
+
+        else: # after first block
+            K  = m * blocksize
+            K0 = curr_block
+
+            # diff to current calculated mean
+            d = np.sum(Y - y) / (K + K0)
+
+            # new mean
+            y = y + d
+
+            # new variance
+            s2 = ((K-1)*np.square(uy) + K*np.square(d) + np.sum(np.square(Y-y))) / (K+K0-1)
+            uy = np.sqrt(s2)
+
+            if verboseReturn:
+                # update histogram values
+                for k in range(x.size):
+                    for nbin in range(nbins):
+                        happr[nbin]["f"][:,k] = np.histogram(Y[:,k], bins = happr[nbin].ed[:,k])
+
+                ymin = np.min(np.append(ymin,Y))
+                ymax = np.max(np.append(ymax,Y))
+
+        progressBar(m, blocks)
+    print("\n") # to excape the carriage-return of progressBar
     
 
-    # ----------------- run MC block-wise -----------------------
-    # TODO: continue here on Mon, 5th July 2019
-    # also fetch/merge master
+    # ----------------- post-calculation steps -----------------------
 
+    if verboseReturn:
+        # remove the last frequency, which is always zero
+        for nbin, h in happr.items():
+            h["f"] = h["f"][:-1,:]
+            h["ed"][0,:]  = np.min(np.append(ymin, h["ed"][1,:]))
+            h["ed"][-1,:] = np.max(np.append(ymax, h["ed"][-2,:]))
 
+        print("UMC credible intervals ...")
 
+        # replace edge limits by ymin and ymax, resp. 
+        p025 = np.zeros(len(nbins), len(y))
+        p975 = np.zeros(len(nbins), len(y))
 
+        for k in range(x.size):
+            for nbin, h in happr.items():
+                e = h["ed"][:,k]
+                f = h["f"][:k]
+                G = np.append(0, np.cumsum(f)/np.sum(f))
 
+                # quick fix to ensure strictly increasing G
+                iz = np.where(np.diff(G) == 0)
+                if iz.size != 0:
+                    for l in iz:   # NOTE: is there a wrong index in the matlab-script?
+                        G[l+1]  = G[l] + 10*np.epsilon
 
+                pcov = np.linspace(G[0], G[-1]-0.95, 100)
+                ylow = interp1d(G,e)(pcov)
+                yhgh = interp1d(G,e)(pcov+0.95)
 
-    return 0, 0
-    #return y,uy,p025,p975,happr
+                lcov = yhgh - ylow
+                imin = np.argmin(lcov)
+                p025[nbin,k] = ylow[imin]
+                p975[nbin,k] = yhgh[imin]
+            
+            progressBar(k, x.size)
+        print("\n") # to excape the carriage-return of progressBar
+        
+        return y,uy,p025,p975,happr
+
+    else:
+        return y, uy
 
 
 # move this function to ..misc.noise.ARMA
