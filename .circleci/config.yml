@@ -68,7 +68,8 @@ jobs:
           name: Run tests
           command: |
             . venv/bin/activate
-            pytest -v --cov=PyDynamic/ > test-reports/pytest.log
+            pytest -v --junitxml=test-reports/pytest.xml \
+            --cov=PyDynamic/ > test-reports/pytest.log
 
       # Upload coverage report.
       - run:
