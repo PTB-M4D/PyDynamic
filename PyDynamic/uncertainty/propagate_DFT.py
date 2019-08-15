@@ -522,17 +522,17 @@ def AmpPhase2Time(A,P,UAP):
 
 	# calculate inverse DFT
 	F = A*np.exp(1j*P)
-	x = np.irfft(F)
+	x = np.fft.irfft(F)
 
 	Pf = np.r_[P,-P[-2:0:-1]]		# phase values to take into account symmetric part
-	Cc = np.zeros((N,N/2+1))		# sensitivities wrt cosinus part
+	Cc = np.zeros((N,N//2+1))		# sensitivities wrt cosinus part
 	Cc[:,0] = np.cos(P[0]); Cc[:,-1] = np.cos(P[-1]+np.pi*np.arange(N))
-	for k in range(1,N/2):
+	for k in range(1,N//2):
 		Cc[:,k] = 2*np.cos(Pf[k]+k*beta)
 
-	Cs = np.zeros((N,N/2+1))		# sensitivities wrt sinus part
+	Cs = np.zeros((N,N//2+1))		# sensitivities wrt sinus part
 	Cs[:,0] = -A[0]*np.sin(P[0]); Cs[:,-1] = -A[-1]*np.sin(P[-1]+np.pi*np.arange(N))
-	for k in range(1,N/2):
+	for k in range(1,N//2):
 		Cs[:,k] = -A[k]*2*np.sin(Pf[k]+k*beta)
 
 	# calculate blocks of uncertainty matrix
@@ -543,7 +543,7 @@ def AmpPhase2Time(A,P,UAP):
 	else:
 		if isinstance(UAP,sparse.dia_matrix):
 			nrows = UAP.shape[0]
-			n = nrows/2
+			n = nrows//2
 			offset= UAP.offsets
 			diags = UAP.data
 			AA = diags[0][:n]
@@ -551,9 +551,9 @@ def AmpPhase2Time(A,P,UAP):
 			PP = diags[0][n:]
 			Ux = np.dot(Cc,prod(AA,Cc.T)) + 2*np.dot(Cc,prod(AP,Cs.T)) + np.dot(Cs,prod(PP,Cs.T))
 		else:
-			AA = UAP[:N/2+1,:N/2+1]
-			AP = UAP[:N/2+1, N/2+1:]
-			PP = UAP[N/2+1:,N/2+1:]
+			AA = UAP[:N//2+1,:N//2+1]
+			AP = UAP[:N//2+1, N//2+1:]
+			PP = UAP[N//2+1:,N//2+1:]
 			# propagate uncertainties
 			Ux = np.dot(Cc,np.dot(AA,Cc.T)) + 2*np.dot(Cc,np.dot(AP,Cs.T)) + np.dot(Cs,np.dot(PP,Cs.T))
 

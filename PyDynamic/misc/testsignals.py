@@ -154,7 +154,7 @@ def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
         amp : float, optional
              amplitude of the sine (default = 1.0)
         freq : float, optional
-             frequency of the sine in seconds (default = :math:`2 * \pi`)
+             frequency of the sine in Hz (default = :math:`2 * \pi`)
         noise : float, optional
             std of simulated signal noise (default = 0.0)
 
@@ -166,6 +166,32 @@ def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
     x = amp * np.sin(2 * np.pi / freq * time)
     if noise > 0:
         x += np.random.randn(len(time)) * noise
+    return x
+
+def multi_sine(time, amps, freqs, noise=0.0):
+    r"""Generate a multi-sine signal as summation of single sine signals
+
+    Parameters
+    ----------
+        time: np.ndarray of shape (N,)
+            time instants
+        amps: list or np.ndarray of floating point values
+            amplitudes of the sine signals
+        freqs: list or np.ndarray of floating point values
+            frequencies of the sine signals in Hz
+        noise: float, optional
+            std of simulated signal noise (default = 0.0)
+
+    Returns
+    -------
+        x: np.ndarray of shape (N,)
+            signal amplitude at time instants
+    """
+
+    x = np.zeros_like(time)
+    for amp, freq in zip(amps, freqs):
+        x += amp * np.sin(freq*time)
+    x += np.random.randn(len(x))*noise**2
     return x
 
 
