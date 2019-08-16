@@ -13,6 +13,7 @@ from PyDynamic.misc.filterstuff import kaiser_lowpass
 #from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian, ARMA
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC, SMC, UMC, ARMA
 
+import matplotlib.pyplot as plt
 
 def test_MC():
     # maybe take this test from some example?
@@ -62,7 +63,14 @@ def test_UMC():
 
             # run method
             #yMC,UyMC    = MC(x,sigma_noise,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
-            yUMC, UyUMC = UMC(x, sigma_noise, b1, [1.0], Ub)
+
+            yUMC, UyUMC = UMC(x, b1, [1.0], Ub, sigma=sigma_noise)
+            #yUMC, UyUMC, p025, p975, happr = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=1000, runs_init=150, verboseReturn=True)
+            
+            print(yUMC)
+            plt.plot(time, x)
+            plt.plot(time, yUMC)
+            plt.show()
             
             assert len(yUMC) == len(x)
             assert len(UyUMC) == len(x)

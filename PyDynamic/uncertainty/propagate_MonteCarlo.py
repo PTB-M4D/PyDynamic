@@ -20,6 +20,7 @@ import sys
 import types
 import math
 import multiprocessing
+import functools
 
 import numpy as np
 import scipy as sp
@@ -431,20 +432,6 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
     
     """
 
-    def evaluate(th, printProgressBar = False):
-        th = p_ba(1)                    # draw sample
-        bb = th[:b.size]                # restore bb
-        aa = np.append(1, th[b.size:])  # insert coeff 1 at position 0 to restore aa
-
-        e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
-        res = lfilter(bb, aa, lfilter(blow, alow, x + e)) + p_delta(x.size)
-
-        if printProgressBar: 
-            progressBar(k, runs_init, prefix="UMC initialisation: ")
-        
-        return res
-
-
     # ------------ preparations for update formulae ------------
 
     # set low pass filter
@@ -458,23 +445,17 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
     Y = np.zeros((runs, len(x)))                             # set up matrix of MC results
 
     # define functions to draw samples from (with predefined PDF associated)
-    p_ba    = lambda size: np.random.multivariate_normal(theta, Uab, size)
-    p_delta = lambda size: np.random.uniform(-Delta, Delta, size = size)
+    p_ba = lambda size: np.random.multivariate_normal(theta, Uab, size)
     
     # init Y
     Y = np.zeros((runs_init, x.size))
 
     # calculate Y of 
-    print("UMC initialisation")
     for k in range(runs_init):
-        th = p_ba(1)                    # draw sample
-        bb = th[:b.size]                # restore bb
-        aa = np.append(1, th[b.size:])  # insert coeff 1 at position 0 to restore aa
+        th = np.squeeze(p_ba(1))        # draw sample
+        Y[k,:] = UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
 
-        e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
-        Y[k,] = lfilter(bb, aa, lfilter(blow, alow, x + e)) + p_delta(x.size)
-
-        progressBar(k, runs_init, prefix="UMC initialisation: ")
+        progressBar(k, runs_init, prefix="UMC initialisation:     ")
     print("\n") # to excape the carriage-return of progressBar
     
 
@@ -485,8 +466,8 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
     happr = {}
     for nbin in nbins:
         happr[nbin] = {}
-        happr[nbin]["ed"] = np.linspace(ymin, ymax, num=nbin) # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
-        happr[nbin]["f"] = np.zeros(nbin, len(x))             # init. bin-counts
+        happr[nbin]["ed"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
+        happr[nbin]["f"] = np.zeros((nbin, len(x)))              # init. bin-counts
 
     
     # ----------------- run MC block-wise -----------------------
@@ -495,41 +476,35 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
 
     # init parallel computation
     nPool = min(multiprocessing.cpu_count(), blocksize)
-    #pool = multiprocessing.pool.Pool(nPool)
+    pool = multiprocessing.Pool(nPool)
 
-    print("UMC running")
     for m in range(blocks):
         curr_block = min(blocksize, runs - m * blocksize)
-        Y = np.zeros(curr_block, len(x))
-        TH = p_ba(blocksize)
+        Y = np.zeros((curr_block, len(x)))
+        TH = p_ba(curr_block)  # NOTE: change from blocksize to curr_block
 
-
-
-        for k in range(blocksize): # TODO: parfor!
-        #for k, res in pool.imap(evaluate, range(blocksize), TH, chunksize=5):
-        #    Y[k,:] = res
-
+        # serial loop
+        for k in range(curr_block): # NOTE: changed loop-count from blocksize to curr_block
             th = TH[k,:]
-            bb = th[:b.size]                # restore bb
-            aa = np.append(1, th[b.size:])  # insert coeff 1 at position 0 to restore aa
+            Y[k,:] = UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
 
-            e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
-            Y[k,:] = lfilter(b, a, lfilter(blow, alow, x + e)) + p_delta(x.size)
+        # parallel loop
+        #for k, res in enumerate(pool.imap_unordered(functools.partial(UMCevaluate, bsize=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH, curr_block)):
+        #    Y[k,:] = res
 
         if m == 0: # first block
             y  = np.mean(Y, axis=0)
             uy = np.std(Y, axis=0)
             
             if verboseReturn:
-
                 for k in range(x.size):
-                    for nbin, h in happr.items():  # NOTE: this loops over a different index than the matlab-script
-                        h["f"][:,k] = np.histogram(Y[:,k], bins = h["ed"][:,k])
+                    for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
+                        h["f"][:,k] = np.histogram(Y[:,k], bins = h["ed"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
                 ymin = np.min(Y)
                 ymax = np.max(Y)
 
-        else: # after first block
+        else: # updating y and uy from results of current block
             K  = m * blocksize
             K0 = curr_block
 
@@ -538,6 +513,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
 
             # new mean
             y = y + d
+            print(y)
 
             # new variance
             s2 = ((K-1)*np.square(uy) + K*np.square(d) + np.sum(np.square(Y-y))) / (K+K0-1)
@@ -546,13 +522,13 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
             if verboseReturn:
                 # update histogram values
                 for k in range(x.size):
-                    for nbin in range(nbins):
-                        happr[nbin]["f"][:,k] = np.histogram(Y[:,k], bins = happr[nbin].ed[:,k])
+                    for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
+                        h["f"][:,k] = np.histogram(Y[:,k], bins = h["ed"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
                 ymin = np.min(np.append(ymin,Y))
                 ymax = np.max(np.append(ymax,Y))
 
-        progressBar(m, blocks)
+        progressBar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
     print("\n") # to excape the carriage-return of progressBar
     
 
@@ -565,40 +541,54 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
             h["ed"][0,:]  = np.min(np.append(ymin, h["ed"][1,:]))
             h["ed"][-1,:] = np.max(np.append(ymax, h["ed"][-2,:]))
 
-        print("UMC credible intervals ...")
-
         # replace edge limits by ymin and ymax, resp. 
-        p025 = np.zeros(len(nbins), len(y))
-        p975 = np.zeros(len(nbins), len(y))
+        p025 = np.zeros((len(nbins), len(y)))
+        p975 = np.zeros((len(nbins), len(y)))
 
         for k in range(x.size):
-            for nbin, h in happr.items():
-                e = h["ed"][:,k]
-                f = h["f"][:k]
+            for m, h in enumerate(happr.values()):
+                e = h["ed"][:-1,k]  # last bin-edge is not required
+                f = h["f"][:,k]
                 G = np.append(0, np.cumsum(f)/np.sum(f))
 
                 # quick fix to ensure strictly increasing G
-                iz = np.where(np.diff(G) == 0)
+                iz = np.argwhere(np.diff(G) == 0)
                 if iz.size != 0:
                     for l in iz:   # NOTE: is there a wrong index in the matlab-script?
-                        G[l+1]  = G[l] + 10*np.epsilon
+                        G[l+1]  = G[l] + 10*np.spacing(1.0)   # numpy.spacing gives the machine-epsilon 
 
                 pcov = np.linspace(G[0], G[-1]-0.95, 100)
+
                 ylow = interp1d(G,e)(pcov)
                 yhgh = interp1d(G,e)(pcov+0.95)
 
                 lcov = yhgh - ylow
                 imin = np.argmin(lcov)
-                p025[nbin,k] = ylow[imin]
-                p975[nbin,k] = yhgh[imin]
+
+                p025[m,k] = ylow[imin]
+                p975[m,k] = yhgh[imin]
             
-            progressBar(k, x.size)
+            progressBar(k, x.size,prefix="UMC credible intervals: ")
         print("\n") # to excape the carriage-return of progressBar
         
         return y,uy,p025,p975,happr
 
     else:
         return y, uy
+
+
+def UMCevaluate(th, bsize, x, Delta, theta, phi, sigma, blow, alow):
+
+    bb = th[:bsize]                # restore bb
+    aa = np.append(1, th[bsize:])  # insert coeff 1 at position 0 to restore aa
+
+    e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
+
+    xlow = lfilter(blow, alow, x + e)
+    d = Delta * (2 * np.random.random_sample(size=x.size) - 1 )   # uniform distribution [-Delta, Delta]
+    res = lfilter(bb, aa, xlow) + d
+    
+    return res
 
 
 # move this function to ..misc.noise.ARMA
