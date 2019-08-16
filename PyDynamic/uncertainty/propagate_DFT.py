@@ -33,7 +33,7 @@ import warnings
 import numpy as np
 from scipy import sparse
 
-__all__ = ['GUM_DFT','GUM_iDFT', 'GUM_DFTfreq', 'DFT_transferfunction', 'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase', 'AmpPhase2Time', 'Time2AmpPhase']
+__all__ = ['GUM_DFT','GUM_iDFT', 'GUM_DFTfreq', 'DFT_transferfunction', 'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase', 'AmpPhase2Time', 'Time2AmpPhase', 'Time2AmpPhase_multi']
 
 def apply_window(x,Ux,window):
 	"""Apply a time domain window to the signal x of equal length and propagate uncertainties.
@@ -332,7 +332,7 @@ def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0, return_type="separate"):
 		tol: float, optional
 			lower bound for A/uF below which a warning will be issued concerning unreliable results
 		return_type: str, optional
-			If "separate" then magnitude and phase are returned as seperate arrays. Otherwise the array [A, P] is returned
+			If "separate" then magnitude and phase are returned as separate arrays. Otherwise the array [A, P] is returned
 	Returns
 	-------
 	If `return_type` is `separate`:
@@ -491,6 +491,50 @@ def Time2AmpPhase(x,Ux):
 	A,P,UAP = DFT2AmpPhase(F,UF)	# propagate to amplitude and phase
 	return A,P,UAP
 
+def Time2AmpPhase_multi(x, Ux, selector=None):
+	"""Transformation from time domain to amplitude and phase for a set of M signals of the same type
+
+	Parameters
+	----------
+		x: np.ndarray of shape (M,N)
+			M time domain signals of length N
+		Ux: np.ndarray of shape (M,)
+			squared standard deviations representing noise variances of the signals x
+		selector: np.ndarray of shape (L,), optional
+			indices of amplitude and phase values that should be returned; default is 0:N-1
+	Returns
+	-------
+		A: np.ndarray of shape (M,N)
+			amplitude values
+		P: np.ndarray of shape (M,N)
+			phase values
+		UAP: np.ndarray of shape (M, 3N)
+			diagonals of the covariance matrices: [diag(UPP), diag(UAA), diag(UPA)]
+	"""
+	M, nx = x.shape
+	assert(len(Ux)==M)
+	N = nx//2+1
+	if not isinstance(selector, np.ndarray):
+		selector = np.arange(nx//2+1)
+	ns = len(selector)
+
+	A = np.zeros((M,ns))
+	P = np.zeros_like(A)
+	UAP = np.zeros((M, 3*ns))
+	CxCos = None
+	CxSin = None
+	for m in range(M):
+		F, UF, CX = GUM_DFT(x[m,:], Ux[m], CxCos, CxSin, returnC=True)
+		CxCos = CX["CxCos"]
+		CxSin = CX["CxSin"]
+		A_m, P_m, UAP_m = DFT2AmpPhase(F, UF, keep_sparse=True)
+		A[m,:] = A_m[selector]
+		P[m,:] = P_m[selector]
+		UAP[m,:ns] = UAP_m.data[0][:N][selector]
+		UAP[m,ns:2*ns] = UAP_m.data[1][UAP_m.offsets[1]:2*N+UAP_m.offsets[1]][selector]
+		UAP[m, 2*ns:] = UAP_m.data[0][N:][selector]
+
+	return A, P, UAP
 
 def AmpPhase2Time(A,P,UAP):
 	"""Transformation from amplitude and phase to time domain

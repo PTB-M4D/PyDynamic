@@ -11,7 +11,7 @@ The function AmpPhase2Time applies the formulas as given in the corresponding pu
 
 import numpy as np
 import matplotlib.pyplot as plt
-from PyDynamic.uncertainty.propagate_DFT import AmpPhase2Time, Time2AmpPhase, GUM_DFTfreq
+from PyDynamic.uncertainty.propagate_DFT import AmpPhase2Time, Time2AmpPhase, GUM_DFTfreq, Time2AmpPhase_multi
 from PyDynamic.misc.testsignals import multi_sine
 
 # set amplitude values of multi-sine componentens (last parameter is number of components)
@@ -56,3 +56,20 @@ plt.plot(time, np.ones_like(time)*sigma_noise, label="original uncertainty")
 plt.xlabel("time in s")
 plt.ylabel("uncertainty in a.u.")
 plt.legend()
+
+# # apply the same method to several signals with one call
+M = 10
+testsignals = np.zeros((M, len(time)))
+for m in range(M):
+    testsignals[m,:] = multi_sine(time, sine_amps, sine_freqs, noise = sigma_noise)
+
+# select those frequencies of the 10 % largest magnitude values
+indices = np.argsort(A)[:len(A)//10]
+# propagate from time to frequency domain and only select the specific frequencies
+A_mult, P_mult, UAP_mult = Time2AmpPhase_multi(testsignals, np.ones(M)*sigma_noise**2, selector=indices)
+
+plt.figure(4, figsize=(12,6))
+plt.subplot(211)
+plt.plot(f[indices], A_mult.T, linestyle=":")
+plt.subplot(212)
+plt.plot(f[indices], P_mult.T, linestyle=":")
