@@ -398,38 +398,75 @@ def SMC(
         return y, Uy
 
 
-def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1], 
+def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
         phi = [0], theta = [0], sigma = 1, Delta = 0.0, runs_init = 100, nbins=[1000], verboseReturn = False):
     """
-    TODO: this is the old matlab-doc-string and needs update after implementation has finished
+    Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram
 
-    Batch Monte Carlo for filtering using update formulae for mean, variance
-    and (approximated) histogram
-    HERE: allows for call with numel(nbins)>1
-    
-    [y,uy,p025,p975] = BMCP_update(b,a,p_ba,x,phi,theta,sigma,delta,runs,...)
-    Calculates mean, standard uncertainty and 95% credible interval 
-    
-    [y,uy] = BMCP(b,a,p_ba,x,phi,theta,sigma,delta,runs,...)
-    Calculates mean and standard uncertainty 
-    
-    b,a : filter coefficients --> y = filter(b,a,x) is GUM estimate
-    p_ba : function handle to draw samples from PDF associated with [b,a(2:end)]
-    x   : filter input signal (estimate)
-    phi,theta,sigma: ARMA noise model --> eps(n) = sum phi_k*eps(n-k) + sum theta_k*w(n-k) + w(n)
-                                          with w(n) ~ N(0,sigma^2)
-    delta: upper bound of systematic correction due to regularisation (assume uniform distribution)
-    runs: number of MC trials
-    
-    
-    varargin{1,2} = (blow,alow) : filter coefficients of optional low pass filter
-    
-    varargin{3} = nbins: number of bins for histogram (default is 1e3)
-    
-    Version: 2011-10-12 (Sascha Eichstaedt)
-    
-    copyright on updating formulae parts is by Peter Harris (NPL)
-    
+    Parameters
+    ----------
+        x: np.ndarray
+            filter input signal
+        b: np.ndarray
+            filter numerator coefficients
+        a: np.ndarray
+            filter denominator coefficients
+        Uab: np.ndarray
+            uncertainty matrix :math:`U_\theta`
+        runs: int, optional
+            number of Monte Carlo runs
+        blocksize: int, optional
+            how many samples should be evaluated for at a time
+        blow: list or np.ndarray, optional
+            filter coefficients of optional low pass filter
+        alow: list or np.ndarray, optional
+            filter coefficients of optional low pass filter
+        phi: np.ndarray, optional
+            see ARMA noise model
+        theta: np.ndarray, optional
+            see ARMA noise model
+        sigma: float, optional
+            see ARMA noise model
+        Delta: float, optional
+            upper bound of systematic correction due to regularisation (assume uniform distribution)
+        runs_init: int, optional
+            how many samples to evaluate to form initial guess about limits
+        nbins: list of int, optional
+            number of bins for histogram
+        verboseReturn: bool, optional
+            see return-value of documentation
+
+    ARMA noise model
+    ----------------
+    * eps(n) = sum phi_k*eps(n-k) + sum theta_k*w(n-k) + w(n)
+    * with w(n) ~ N(0,sigma^2)
+
+    Returns (if not verboseReturn, default)
+    -------
+        y: np.ndarray
+            filter output signal
+        Uy: np.ndarray
+            uncertainty associated with
+
+    Returns (if verboseReturn)
+    -------
+        y: np.ndarray
+            filter output signal
+        Uy: np.ndarray
+            uncertainty associated with
+        p025: np.ndarray
+            lower 95% credible interval
+        p975: np.ndarray
+            upper 95% credible interval
+        happr: dict
+            dictionary keys: given nbin
+            dictionary values: bin-edges val["ed"], bin-counts val["f"]
+
+    References
+    ----------
+        * Eichstädt, Link, Harris, Elster [Eichst2012]_
+        * ported to python in 2019-08 from matlab-version of Sascha Eichstaedt (PTB) from 2011-10-12
+        * copyright on updating formulae parts is by Peter Harris (NPL)
     """
 
     # ------------ preparations for update formulae ------------
@@ -450,7 +487,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
     # init Y
     Y = np.zeros((runs_init, x.size))
 
-    # calculate Y of 
+    # calculate Y of
     for k in range(runs_init):
         th = np.squeeze(p_ba(1))        # draw sample
         Y[k,:] = UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
@@ -541,7 +578,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
             h["ed"][0,:]  = np.min(np.append(ymin, h["ed"][1,:]))
             h["ed"][-1,:] = np.max(np.append(ymax, h["ed"][-2,:]))
 
-        # replace edge limits by ymin and ymax, resp. 
+        # replace edge limits by ymin and ymax, resp.
         p025 = np.zeros((len(nbins), len(y)))
         p975 = np.zeros((len(nbins), len(y)))
 
@@ -555,7 +592,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
                 iz = np.argwhere(np.diff(G) == 0)
                 if iz.size != 0:
                     for l in iz:   # NOTE: is there a wrong index in the matlab-script?
-                        G[l+1]  = G[l] + 10*np.spacing(1.0)   # numpy.spacing gives the machine-epsilon 
+                        G[l+1]  = G[l] + 10*np.spacing(1.0)   # numpy.spacing gives the machine-epsilon
 
                 pcov = np.linspace(G[0], G[-1]-0.95, 100)
 
