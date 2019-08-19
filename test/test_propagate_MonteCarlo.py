@@ -25,14 +25,14 @@ def test_SMC():
     pass
 
 
-def test_UMC():
+def test_UMC(visualizeOutput=False):
     # parameters of simulated measurement
     Fs = 100e3        # sampling frequency (in Hz)
     Ts = 1 / Fs       # sampling interval length (in s)
 
     # nominal system parameters
-    fcut = 20e3                            # low-pass filter cut-off frequency (6 dB)
-    L = 100                                 # filter order
+    fcut = 20e3                                 # low-pass filter cut-off frequency (6 dB)
+    L = 100                                     # filter order
     b1 = kaiser_lowpass(L,   fcut,Fs)[0]
     b2 = kaiser_lowpass(L-20,fcut,Fs)[0]
 
@@ -41,17 +41,17 @@ def test_UMC():
     FC = fcut + (2*np.random.rand(runs)-1)*0.5e3
 
     B = np.zeros((runs,L+1))
-    for k in range(runs):        # Monte Carlo for filter coefficients of low-pass filter
+    for k in range(runs):                       # Monte Carlo for filter coefficients of low-pass filter
         B[k,:] = kaiser_lowpass(L,FC[k],Fs)[0]
 
     Ub = make_semiposdef(np.cov(B,rowvar=0))    # covariance matrix of MC result
 
     # simulate input and output signals
     nTime = 500
-    time  = np.arange(nTime)*Ts                     # time values
+    time  = np.arange(nTime)*Ts                 # time values
 
     # different cases
-    sigma_noise = 1e-2                              # 1e-5
+    sigma_noise = 1e-5
 
     for kind in ["float", "corr", "diag"]:
 
@@ -62,18 +62,24 @@ def test_UMC():
             x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)
 
             # run method
-            #yMC,UyMC    = MC(x,sigma_noise,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
+            #yMC,UyMC = MC(x,sigma_noise,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
 
-            yUMC, UyUMC = UMC(x, b1, [1.0], Ub, sigma=sigma_noise)
-            #yUMC, UyUMC, p025, p975, happr = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=1000, runs_init=150, verboseReturn=True)
+            #yUMC, UyUMC = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=200, Delta=0.001)
+            yUMC, UyUMC, p025, p975, happr = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=20, runs_init=15, verboseReturn=True)
             
-            print(yUMC)
-            plt.plot(time, x)
-            plt.plot(time, yUMC)
-            plt.show()
+            if visualizeOutput:
+                plt.plot(time, x)
+                plt.plot(time, yUMC)
+                #plt.fill_between(time, yUMC - UyUMC, yUMC + UyUMC)
+                plt.plot(time, yUMC - UyUMC, linestyle="--", linewidth=1, color="red")
+                plt.plot(time, yUMC + UyUMC, linestyle="--", linewidth=1, color="red")
+                plt.show()
             
             assert len(yUMC) == len(x)
             assert len(UyUMC) == len(x)
+            assert p025.shape[1] == len(x)
+            assert p975.shape[1] == len(x)
+            assert isinstance(happr, dict)
 
         #elif kind == "corr":
 
@@ -109,6 +115,3 @@ def test_noise_ARMA():
     e = ARMA(length, phi = phi, theta = theta)
 
     assert len(e) == length
-
-
-test_UMC()

@@ -469,6 +469,10 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
         * copyright on updating formulae parts is by Peter Harris (NPL)
     """
 
+    # init parallel computation
+    nPool = min(multiprocessing.cpu_count(), blocksize)
+    pool = multiprocessing.Pool(nPool)
+
     # ------------ preparations for update formulae ------------
 
     # set low pass filter
@@ -476,25 +480,22 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
         blow = blow / alow[0]
         alow = alow / alow[0]
 
-    theta = np.hstack((a[1:], b))                            # create the parameter vector from the filter coefficients
+    ab = np.hstack((a[1:], b))    # create the parameter vector from the filter coefficients (should be named theta, but this name is already used)
 
-    # init set intervals
-    Y = np.zeros((runs, len(x)))                             # set up matrix of MC results
-
-    # define functions to draw samples from (with predefined PDF associated)
-    p_ba = lambda size: np.random.multivariate_normal(theta, Uab, size)
-    
     # init Y
-    Y = np.zeros((runs_init, x.size))
-
-    # calculate Y of
-    for k in range(runs_init):
-        th = np.squeeze(p_ba(1))        # draw sample
-        Y[k,:] = UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
-
-        progressBar(k, runs_init, prefix="UMC initialisation:     ")
-    print("\n") # to excape the carriage-return of progressBar
+    Y = np.zeros((runs_init, x.size))  # set up matrix of MC results
+ 
+    # define functions to draw samples from (with predefined PDF associated)
+    p_ab = lambda size: np.random.multivariate_normal(ab, Uab, size)
     
+    # init samples to be evaluated
+    TH = p_ab(runs_init)
+
+    # evaluate the initial samples
+    for k, res in enumerate(pool.imap(functools.partial(UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH)):
+        Y[k,:] = res
+        progressBar(k, runs_init, prefix="UMC initialisation:     ")
+    print("\n") # to escape the carriage-return of progressBar
 
     # bin edges
     ymin = np.min(Y, axis=0)
@@ -506,33 +507,28 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
         happr[nbin]["ed"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
         happr[nbin]["f"] = np.zeros((nbin, len(x)))              # init. bin-counts
 
-    
     # ----------------- run MC block-wise -----------------------
     
     blocks = math.ceil(runs/blocksize)
 
-    # init parallel computation
-    nPool = min(multiprocessing.cpu_count(), blocksize)
-    pool = multiprocessing.Pool(nPool)
-
     for m in range(blocks):
         curr_block = min(blocksize, runs - m * blocksize)
         Y = np.zeros((curr_block, len(x)))
-        TH = p_ba(curr_block)  # NOTE: change from blocksize to curr_block
+        TH = p_ab(curr_block)  # NOTE: change from blocksize to curr_block
 
         # serial loop
-        for k in range(curr_block): # NOTE: changed loop-count from blocksize to curr_block
-            th = TH[k,:]
-            Y[k,:] = UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
+        #for k in range(curr_block): # NOTE: changed loop-count from blocksize to curr_block
+        #    th = TH[k,:]
+        #    Y[k,:] = UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
 
         # parallel loop
-        #for k, res in enumerate(pool.imap_unordered(functools.partial(UMCevaluate, bsize=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH, curr_block)):
-        #    Y[k,:] = res
+        for k, res in enumerate(pool.imap_unordered(functools.partial(UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH, curr_block)):
+            Y[k,:] = res
 
         if m == 0: # first block
             y  = np.mean(Y, axis=0)
             uy = np.std(Y, axis=0)
-            
+
             if verboseReturn:
                 for k in range(x.size):
                     for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
@@ -546,11 +542,10 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
             K0 = curr_block
 
             # diff to current calculated mean
-            d = np.sum(Y - y) / (K + K0)
+            d = np.sum(Y - y, axis=0) / (K + K0)
 
             # new mean
             y = y + d
-            print(y)
 
             # new variance
             s2 = ((K-1)*np.square(uy) + K*np.square(d) + np.sum(np.square(Y-y))) / (K+K0-1)
@@ -566,7 +561,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
                 ymax = np.max(np.append(ymax,Y))
 
         progressBar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
-    print("\n") # to excape the carriage-return of progressBar
+    print("\n") # to escape the carriage-return of progressBar
     
 
     # ----------------- post-calculation steps -----------------------
@@ -606,7 +601,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
                 p975[m,k] = yhgh[imin]
             
             progressBar(k, x.size,prefix="UMC credible intervals: ")
-        print("\n") # to excape the carriage-return of progressBar
+        print("\n") # to escape the carriage-return of progressBar
         
         return y,uy,p025,p975,happr
 
@@ -614,10 +609,11 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
         return y, uy
 
 
-def UMCevaluate(th, bsize, x, Delta, theta, phi, sigma, blow, alow):
+def UMCevaluate(th, nbb, x, Delta, theta, phi, sigma, blow, alow):
 
-    bb = th[:bsize]                # restore bb
-    aa = np.append(1, th[bsize:])  # insert coeff 1 at position 0 to restore aa
+    naa = len(th) - nbb + 1        # theta contains all but the first entry of aa
+    aa = np.append(1, th[:naa-1])  # insert coeff 1 at position 0 to restore aa
+    bb = th[naa-1:]                # restore bb
 
     e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
 
