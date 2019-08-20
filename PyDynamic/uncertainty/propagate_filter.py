@@ -53,10 +53,10 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
 
     .. seealso:: :mod:`PyDynamic.deconvolution.fit_filter`
 
-
     """
-    Ntheta      = len(theta)      # FIR filter size
-    #filterOrder = Ntheta - 1      # FIR filter order
+
+    Ntheta = len(theta)         # FIR filter size
+    #filterOrder = Ntheta - 1   # FIR filter order
 
     if not isinstance(Utheta, np.ndarray):      # handle case of zero uncertainty filter
         Utheta = np.zeros((Ntheta, Ntheta))
@@ -90,7 +90,8 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
-                raise NotImplementedError("Non-i.i.d. white noise is not supported from this function. Please consider using Monte-Carlo methods.")
+                #raise NotImplementedError("Non-i.i.d. lowpass-filtered white noise is not supported from this function. Please consider using Monte-Carlo methods.")
+                
                 # [Leeuw1994](Covariance matrix of ARMA errors in closed form) can be used, to derive this formula
                 # The given "blow" corresponds to a MA(q)-process.
                 # Going through the calculations of Leeuw, but assuming
@@ -101,15 +102,17 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
                 # and SP is the covariance of input-noise prior to the observed time-interval
                 # (SP needs be available len(blow)-timesteps into the past. In this code special assumptions are made.)
 
-                N = toeplitz(blow[::-1], np.zeros_like(sigma2)).T
-                M = toeplitz(trimOrPad(blow, len(sigma2)), np.zeros_like(sigma2))
-                S = np.diag(sigma2)
-                SP = np.diag(sigma2[0] * np.ones_like(blow))
+                # V needs to be extended to cover Ntheta timesteps more into the future
+                sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
+
+                N = toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
+                M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
+                SP  = np.diag(sigma2[0] * np.ones_like(blow))
+                S = np.diag(sigma2_extended)
 
                 V = N.dot(SP).dot(N.T) + M.dot(S).dot(M.T)
 
-                # Ulow = V[:Ntheta,:Ntheta] # this is not correct, as Ulow needs to be a rolling slice of V
-                # also V needs to be extended to cover Ntheta timesteps more into the future???
+                # Ulow is to be sliced from V, see below
 
             elif kind == "corr":
 
@@ -142,8 +145,12 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
-                raise NotImplementedError("Non-i.i.d. white noise is not supported from this function. Please consider using Monte-Carlo methods.")
-                V = np.diag(sigma2) #  this is not Ulow, same problem as in the case of a provided blow
+                #raise NotImplementedError("Non-i.i.d. white noise is not supported from this function. Please consider using Monte-Carlo methods.")
+
+                # V needs to be extended to cover Ntheta timesteps more into the future
+                sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
+
+                V = np.diag(sigma2) #  this is not Ulow, same problem as in the case of a provided blow (see above)
 
             elif kind == "corr":
                 Ulow = toeplitz(trimOrPad(sigma2, Ntheta))
@@ -158,10 +165,18 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
     if len(theta.shape)==1:
         theta = theta[:, np.newaxis]
 
-    # TODO: handle case where Ulow needs to be sliced from V
-    #       in all kind == "diag" - cases UncCov needs to be calculated inside in its own for-loop
+    # handle diag-case, where Ulow needs to be sliced from V
+    if kind == "diag":
+        # UncCov needs to be calculated inside in its own for-loop
+        # Ulow has dimension (len(sigma2) + Ntheta) * (len(sigma2) + Ntheta) --> slice a fitting
+        ls = len(sigma2)
+        for k in range(ls):
+            Ulow = V[k:k+ls,k:k+ls]
+            UncCov = ...
 
-    UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
+    else:
+        UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
+
     unc = np.zeros_like(y)
     for m in range(L,len(xlow)):
         XL = xlow[m:m-L:-1, np.newaxis]     # extract necessary part from input signal
