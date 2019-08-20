@@ -64,13 +64,13 @@ def power_law_noise(N = None, w = None, alpha = None, color = "white", mean = 0,
     sp   = np.fft.rfft(w)
 
     # get index of frequencies
-    # note: 
+    # note:
     # * this gives [1., 2., 3., ..., N+1] (in accordance with Zhivomirov2018)
     # * ==> not ~ f^alpha, but rather ~ (k+1)^alpha (with a zero-based index k)
     # * this could be a point for further discussion
     freq = np.fft.rfftfreq(N, d=1/N) + 1
 
-    # generate the filtered spectrum by multiplication with k^(alpha/2)
+    # generate the filtered spectrum by multiplication with f^(alpha/2)
     sp_filt = sp * np.power(freq, alpha/2)
 
     # calculate the filtered time-series (inverse fourier of modified spectrum)

@@ -92,9 +92,9 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
             if kind == "diag":
                 raise NotImplementedError("Non-i.i.d. white noise is not supported from this function. Please consider using Monte-Carlo methods.")
                 # [Leeuw1994](Covariance matrix of ARMA errors in closed form) can be used, to derive this formula
-                # The given "blow" corresponds to a MA(q)-process. 
+                # The given "blow" corresponds to a MA(q)-process.
                 # Going through the calculations of Leeuw, but assuming
-                # that E(vv^T) is a diagonal matrix with non-identical elements, 
+                # that E(vv^T) is a diagonal matrix with non-identical elements,
                 # the covariance matrix V becomes (see Leeuw:corollary1)
                 # V = N * SP * N^T + M * S * M^T
                 # N, M are defined as in the paper
@@ -121,7 +121,7 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
                 # calculate Bcorr
                 Bcorr = np.correlate(blow, blow, 'full')
 
-                # pad/crop length of Bcorr to 
+                # pad/crop length of Bcorr to
                 Bcorr_half = trimOrPad(Bcorr[len(blow)-1:], Ntheta)                  # select the right half of Bcorr, then pad or crop to length Ntheta
                 Bcorr_adjusted = np.pad(Bcorr_half, (Ntheta-1, 0), mode="reflect")   # restore symmetric correlation of length (2*Ntheta-1)
 
