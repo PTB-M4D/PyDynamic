@@ -83,10 +83,13 @@ def test_FIRuncFilter(makePlots=False):
 
             # input signal + run methods
             x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
-            with raises(NotImplementedError):
-                y, Uy = FIRuncFilter(x, sigma_diag, b1, Ub, blow=b2, kind=kind)            # apply uncertain FIR filter (GUM formula)
+
+            y, Uy = FIRuncFilter(x, sigma_diag, b1, Ub, blow=b2, kind=kind)            # apply uncertain FIR filter (GUM formula)
             #yMC,UyMC = MC(x,sigma_diag,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
 
+            assert len(y) == len(x)
+            assert len(Uy) == len(x)
+        
         # plot if necessary
         if makePlots:
             plt.figure(1); plt.cla()
