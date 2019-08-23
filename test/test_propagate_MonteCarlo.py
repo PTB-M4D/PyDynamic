@@ -4,9 +4,6 @@
 import numpy as np
 from pytest import raises
 
-import sys
-sys.path.append(".")
-
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.misc.filterstuff import kaiser_lowpass

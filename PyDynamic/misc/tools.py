@@ -261,7 +261,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
 
 def progressBar(count, countMax, width = 30, prefix = "", doneIndicator = "#", todoIndicator = "." , fout=sys.stdout):
     """
-    A simple and reusable progress-bar. 
+    A simple and reusable progress-bar.
 
     Parameters
     ----------
@@ -286,8 +286,8 @@ def progressBar(count, countMax, width = 30, prefix = "", doneIndicator = "#", t
     """
     x = int(width*(count+1)/countMax)
     progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
-        PREFIX=prefix, 
-        DONE=x*doneIndicator, 
+        PREFIX=prefix,
+        DONE=x*doneIndicator,
         NOTDONE=(width-x)*todoIndicator,
         COUNT=count+1,
         COUNTMAX=countMax)

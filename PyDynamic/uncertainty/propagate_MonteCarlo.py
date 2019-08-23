@@ -17,7 +17,6 @@ This module contains the following functions:
 """
 
 import sys
-import types
 import math
 import multiprocessing
 import functools
@@ -398,8 +397,8 @@ def SMC(
         return y, Uy
 
 
-def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
-        phi = [0], theta = [0], sigma = 1, Delta = 0.0, runs_init = 100, nbins=[1000], verboseReturn = False):
+def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
+        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=[1000], verboseReturn = False):
     """
     Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram
 
@@ -469,6 +468,10 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = [1], alow = [1],
         * copyright on updating formulae parts is by Peter Harris (NPL)
     """
 
+    # type-conversions
+    if isinstance(alow, float): alow = np.array([alow])
+    if isinstance(blow, float): blow = np.array([blow])
+    
     # init parallel computation
     nPool = min(multiprocessing.cpu_count(), blocksize)
     pool = multiprocessing.Pool(nPool)
@@ -625,7 +628,7 @@ def UMCevaluate(th, nbb, x, Delta, theta, phi, sigma, blow, alow):
 
 
 # move this function to ..misc.noise.ARMA
-def ARMA(length, phi = [0], theta = [0], std = 1):
+def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
     """
     Generate time-series of a predefined ARMA-process based on this equation:
     :math:`\sum_{j=1}^{\min(p,n-1)} \phi_j \epsilon[n-j] + \sum_{j=1}^{\min(q,n-1)} \\nu_j w[n-j]`
@@ -635,9 +638,9 @@ def ARMA(length, phi = [0], theta = [0], std = 1):
     ----------
     length: int
         how long the drawn sample will be
-    phi: list or numpy.ndarray
+    phi: float, list or numpy.ndarray
         AR-coefficients
-    theta: list or numpy.ndarray
+    theta: float, list or numpy.ndarray
         MA-coefficients
     std: float
         std of the gaussian white noise that is feeded into the ARMA-model
@@ -648,8 +651,11 @@ def ARMA(length, phi = [0], theta = [0], std = 1):
     """
 
     # convert to numpy.ndarray
-    if isinstance(phi, list): phi = np.array(phi)
-    if isinstance(theta, list): theta = np.array(theta)
+    if isinstance(phi, float): phi = np.array([phi])
+    elif isinstance(phi, list): phi = np.array(phi)
+    
+    if isinstance(theta, float): theta = np.array([theta])
+    elif isinstance(theta, list): theta = np.array(theta)
 
     # initialize e, w
     w = np.random.normal(loc = 0, scale = std, size = length)
@@ -658,7 +664,7 @@ def ARMA(length, phi = [0], theta = [0], std = 1):
     # define shortcuts
     p = len(phi)
     q = len(theta)
-    
+
     # iterate series over time
     for n, wn in enumerate(w):
         min_pn = min(p, n)
