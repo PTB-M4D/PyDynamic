@@ -398,7 +398,7 @@ def SMC(
 
 
 def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
-        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=[1000], verboseReturn = False):
+        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=1000, verboseReturn = False):
     """
     Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram
 
@@ -430,7 +430,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             upper bound of systematic correction due to regularisation (assume uniform distribution)
         runs_init: int, optional
             how many samples to evaluate to form initial guess about limits
-        nbins: list of int, optional
+        nbins: int, list of int, optional
             number of bins for histogram
         verboseReturn: bool, optional
             see return-value of documentation
@@ -471,6 +471,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     # type-conversions
     if isinstance(alow, float): alow = np.array([alow])
     if isinstance(blow, float): blow = np.array([blow])
+    if isinstance(nbins, int): nbins = [nbins]
     
     # init parallel computation
     nPool = min(multiprocessing.cpu_count(), blocksize)
@@ -653,7 +654,7 @@ def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
     # convert to numpy.ndarray
     if isinstance(phi, float): phi = np.array([phi])
     elif isinstance(phi, list): phi = np.array(phi)
-    
+
     if isinstance(theta, float): theta = np.array([theta])
     elif isinstance(theta, list): theta = np.array(theta)
 
