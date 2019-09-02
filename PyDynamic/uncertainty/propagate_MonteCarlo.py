@@ -398,29 +398,29 @@ def SMC(
 
 
 def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
-        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=1000, verboseReturn = False):
+        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=1000, verbose_return = False):
     """
     Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram
 
     Parameters
     ----------
-        x: np.ndarray
+        x: np.ndarray, shape (nx, )
             filter input signal
-        b: np.ndarray
+        b: np.ndarray, shape (nbb, )
             filter numerator coefficients
-        a: np.ndarray
-            filter denominator coefficients
-        Uab: np.ndarray
+        a: np.ndarray, shape (naa, )
+            filter denominator coefficients, normalization (a[0] == 1.0) is assumed
+        Uab: np.ndarray, shape (naa + nbb - 1, )
             uncertainty matrix :math:`U_\theta`
         runs: int, optional
             number of Monte Carlo runs
         blocksize: int, optional
             how many samples should be evaluated for at a time
-        blow: list or np.ndarray, optional
+        blow: float or np.ndarray, optional
             filter coefficients of optional low pass filter
-        alow: list or np.ndarray, optional
+        alow: float or np.ndarray, optional
             filter coefficients of optional low pass filter
-        phi: np.ndarray, optional
+        phi: np.ndarray, optional, 
             see ARMA noise model
         theta: np.ndarray, optional
             see ARMA noise model
@@ -432,22 +432,19 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             how many samples to evaluate to form initial guess about limits
         nbins: int, list of int, optional
             number of bins for histogram
-        verboseReturn: bool, optional
+        verbose_return: bool, optional
             see return-value of documentation
+    
+    By default, phi, theta, sigma are choosen such, that N(0,1)-noise is added to the input signal.
 
-    ARMA noise model
-    ----------------
-    * eps(n) = sum phi_k*eps(n-k) + sum theta_k*w(n-k) + w(n)
-    * with w(n) ~ N(0,sigma^2)
-
-    Returns (if not verboseReturn, default)
+    Returns (if not verbose_return, default)
     -------
         y: np.ndarray
             filter output signal
         Uy: np.ndarray
             uncertainty associated with
 
-    Returns (if verboseReturn)
+    Returns (if verbose_return)
     -------
         y: np.ndarray
             filter output signal
@@ -459,7 +456,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             upper 95% credible interval
         happr: dict
             dictionary keys: given nbin
-            dictionary values: bin-edges val["ed"], bin-counts val["f"]
+            dictionary values: bin-edges val["bin-edges"], bin-counts val["bin-counts"]
 
     References
     ----------
@@ -469,9 +466,12 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     """
 
     # type-conversions
-    if isinstance(alow, float): alow = np.array([alow])
-    if isinstance(blow, float): blow = np.array([blow])
-    if isinstance(nbins, int): nbins = [nbins]
+    if isinstance(alow, float):
+        alow = np.array([alow])
+    if isinstance(blow, float):
+        blow = np.array([blow])
+    if isinstance(nbins, int):
+        nbins = [nbins]
     
     # init parallel computation
     nPool = min(multiprocessing.cpu_count(), blocksize)
@@ -487,7 +487,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     ab = np.hstack((a[1:], b))    # create the parameter vector from the filter coefficients (should be named theta, but this name is already used)
 
     # init Y
-    Y = np.zeros((runs_init, x.size))  # set up matrix of MC results
+    Y = np.empty((runs_init, x.size))  # set up matrix of MC results
  
     # define functions to draw samples from (with predefined PDF associated)
     p_ab = lambda size: np.random.multivariate_normal(ab, Uab, size)
@@ -496,8 +496,8 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     TH = p_ab(runs_init)
 
     # evaluate the initial samples
-    for k, res in enumerate(pool.imap(functools.partial(UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH)):
-        Y[k,:] = res
+    for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH)):
+        Y[k,:] = result
         progressBar(k, runs_init, prefix="UMC initialisation:     ")
     print("\n") # to escape the carriage-return of progressBar
 
@@ -508,35 +508,39 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     happr = {}
     for nbin in nbins:
         happr[nbin] = {}
-        happr[nbin]["ed"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
-        happr[nbin]["f"] = np.zeros((nbin, len(x)))              # init. bin-counts
+        happr[nbin]["bin-edges"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
+        happr[nbin]["bin-counts"] = np.zeros((nbin, len(x)))              # init. bin-counts
 
     # ----------------- run MC block-wise -----------------------
     
-    blocks = math.ceil(runs/blocksize)
+    nblocks = math.ceil(runs/blocksize)
 
-    for m in range(blocks):
-        curr_block = min(blocksize, runs - m * blocksize)
-        Y = np.zeros((curr_block, len(x)))
-        TH = p_ab(curr_block)  # NOTE: change from blocksize to curr_block
-
-        # serial loop
-        #for k in range(curr_block): # NOTE: changed loop-count from blocksize to curr_block
-        #    th = TH[k,:]
-        #    Y[k,:] = UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
+    for m in range(nblocks):
+        if m == nblocks:
+            curr_block = runs % blocksize
+        else: 
+            curr_block = blocksize
+        
+        Y = np.empty((curr_block, x.size))
+        TH = p_ab(curr_block)
 
         # parallel loop
-        for k, res in enumerate(pool.imap_unordered(functools.partial(UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH, curr_block)):
-            Y[k,:] = res
+        for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH)):
+            Y[k,:] = result
+
+        # the serial loop is much easier to understand
+        # for k in range(curr_block):
+        #     th = TH[k,:]
+        #     Y[k,:] = _UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
 
         if m == 0: # first block
             y  = np.mean(Y, axis=0)
             uy = np.std(Y, axis=0)
 
-            if verboseReturn:
+            if verbose_return:
                 for k in range(x.size):
                     for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
-                        h["f"][:,k] = np.histogram(Y[:,k], bins = h["ed"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
+                        h["bin-counts"][:,k] = np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
                 ymin = np.min(Y)
                 ymax = np.max(Y)
@@ -545,21 +549,21 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             K  = m * blocksize
             K0 = curr_block
 
-            # diff to current calculated mean
+            # diff to current calculated mean (formula 7 in [Eichst2012])
             d = np.sum(Y - y, axis=0) / (K + K0)
 
             # new mean
             y = y + d
 
-            # new variance
+            # new variance (formula 8 in [Eichst2012])
             s2 = ((K-1)*np.square(uy) + K*np.square(d) + np.sum(np.square(Y-y))) / (K+K0-1)
             uy = np.sqrt(s2)
 
-            if verboseReturn:
+            if verbose_return:
                 # update histogram values
                 for k in range(x.size):
                     for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
-                        h["f"][:,k] = np.histogram(Y[:,k], bins = h["ed"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
+                        h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
                 ymin = np.min(np.append(ymin,Y))
                 ymax = np.max(np.append(ymax,Y))
@@ -570,12 +574,12 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
 
     # ----------------- post-calculation steps -----------------------
 
-    if verboseReturn:
+    if verbose_return:
         # remove the last frequency, which is always zero
         for nbin, h in happr.items():
-            h["f"] = h["f"][:-1,:]
-            h["ed"][0,:]  = np.min(np.append(ymin, h["ed"][1,:]))
-            h["ed"][-1,:] = np.max(np.append(ymax, h["ed"][-2,:]))
+            h["bin-counts"] = h["bin-counts"][:-1,:]
+            h["bin-edges"][0,:]  = np.min(np.append(ymin, h["bin-edges"][1,:]))
+            h["bin-edges"][-1,:] = np.max(np.append(ymax, h["bin-edges"][-2,:]))
 
         # replace edge limits by ymin and ymax, resp.
         p025 = np.zeros((len(nbins), len(y)))
@@ -583,8 +587,8 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
 
         for k in range(x.size):
             for m, h in enumerate(happr.values()):
-                e = h["ed"][:-1,k]  # last bin-edge is not required
-                f = h["f"][:,k]
+                e = h["bin-edges"][:-1,k]  # last bin-edge is not required
+                f = h["bin-counts"][:,k]
                 G = np.append(0, np.cumsum(f)/np.sum(f))
 
                 # quick fix to ensure strictly increasing G
@@ -613,7 +617,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         return y, uy
 
 
-def UMCevaluate(th, nbb, x, Delta, theta, phi, sigma, blow, alow):
+def _UMCevaluate(th, nbb, x, Delta, theta, phi, sigma, blow, alow):
 
     naa = len(th) - nbb + 1        # theta contains all but the first entry of aa
     aa = np.append(1, th[:naa-1])  # insert coeff 1 at position 0 to restore aa
@@ -623,40 +627,43 @@ def UMCevaluate(th, nbb, x, Delta, theta, phi, sigma, blow, alow):
 
     xlow = lfilter(blow, alow, x + e)
     d = Delta * (2 * np.random.random_sample(size=x.size) - 1 )   # uniform distribution [-Delta, Delta]
-    res = lfilter(bb, aa, xlow) + d
-    
-    return res
+
+    return lfilter(bb, aa, xlow) + d
 
 
 # move this function to ..misc.noise.ARMA
 def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
     """
     Generate time-series of a predefined ARMA-process based on this equation:
-    :math:`\sum_{j=1}^{\min(p,n-1)} \phi_j \epsilon[n-j] + \sum_{j=1}^{\min(q,n-1)} \\nu_j w[n-j]`
-    Equation and algorithm taken from [Eichst2012]_
+    :math:`\sum_{j=1}^{\min(p,n-1)} \phi_j \epsilon[n-j] + \sum_{j=1}^{\min(q,n-1)} \\theta_j w[n-j]`
+    where w is white gaussian noise. Equation and algorithm taken from [Eichst2012]_ .
 
     Parameters
     ----------
     length: int
         how long the drawn sample will be
-    phi: float, list or numpy.ndarray
+    phi: float, list or numpy.ndarray, shape (p, )
         AR-coefficients
-    theta: float, list or numpy.ndarray
+    theta: float, list or numpy.ndarray,
         MA-coefficients
     std: float
         std of the gaussian white noise that is feeded into the ARMA-model
-        
+
     References
     ----------
         * Eichstädt, Link, Harris and Elster [Eichst2012]_
     """
 
     # convert to numpy.ndarray
-    if isinstance(phi, float): phi = np.array([phi])
-    elif isinstance(phi, list): phi = np.array(phi)
+    if isinstance(phi, float):
+        phi = np.array([phi])
+    elif isinstance(phi, list):
+        phi = np.array(phi)
 
-    if isinstance(theta, float): theta = np.array([theta])
-    elif isinstance(theta, list): theta = np.array(theta)
+    if isinstance(theta, float):
+        theta = np.array([theta])
+    elif isinstance(theta, list):
+        theta = np.array(theta)
 
     # initialize e, w
     w = np.random.normal(loc = 0, scale = std, size = length)

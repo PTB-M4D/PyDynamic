@@ -62,14 +62,21 @@ def test_UMC(visualizeOutput=False):
             #yMC,UyMC = MC(x,sigma_noise,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
 
             #yUMC, UyUMC = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=200, Delta=0.001)
-            yUMC, UyUMC, p025, p975, happr = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=20, runs_init=15, verboseReturn=True)
+            yUMC, UyUMC, p025, p975, happr = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=20, runs_init=10, nbins=10, verbose_return=True)
             
             if visualizeOutput:
+                # visualize mean+uncertainty of system responses
                 plt.plot(time, x)
                 plt.plot(time, yUMC)
                 #plt.fill_between(time, yUMC - UyUMC, yUMC + UyUMC)
                 plt.plot(time, yUMC - UyUMC, linestyle="--", linewidth=1, color="red")
                 plt.plot(time, yUMC + UyUMC, linestyle="--", linewidth=1, color="red")
+
+                # visualize the bin-counts
+                key = list(happr.keys())[0]
+                for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
+                    plt.scatter(ts*np.ones_like(bc), be[1:-1], bc)
+                    
                 plt.show()
             
             assert len(yUMC) == len(x)
@@ -112,3 +119,5 @@ def test_noise_ARMA():
     e = ARMA(length, phi = phi, theta = theta)
 
     assert len(e) == length
+
+test_UMC(visualizeOutput=True)
