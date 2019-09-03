@@ -16,16 +16,16 @@ This module contains the following functions:
 
 """
 
-import sys
+import functools
 import math
 import multiprocessing
-import functools
+import sys
 
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
-from scipy.signal import lfilter
 from scipy.interpolate import interp1d
+from scipy.signal import lfilter
 
 from ..misc.filterstuff import isstable
 from ..misc.tools import progressBar
@@ -420,7 +420,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             filter coefficients of optional low pass filter
         alow: float or np.ndarray, optional
             filter coefficients of optional low pass filter
-        phi: np.ndarray, optional, 
+        phi: np.ndarray, optional,
             see ARMA noise model
         theta: np.ndarray, optional
             see ARMA noise model
@@ -518,7 +518,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     for m in range(nblocks):
         if m == nblocks:
             curr_block = runs % blocksize
-        else: 
+        else:
             curr_block = blocksize
         
         Y = np.empty((curr_block, x.size))
@@ -604,7 +604,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
                 ylow = interp1d(G,e)(pcov)
                 yhgh = interp1d(G,e)(pcov+0.95)
 
-                # find 
+                # find
                 lcov = yhgh - ylow
                 imin = np.argmin(lcov)
 
@@ -612,9 +612,9 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
                 p975[m,k] = yhgh[imin]
             
             progressBar(k, x.size,prefix="UMC credible intervals: ")
-        print("\n") # to escape the carriage-return of progressBar
-        
-        return y,uy,p025,p975,happr
+        print("\n")  # to escape the carriage-return of progressBar
+
+        return y, uy, p025, p975, happr
 
     else:
         return y, uy
