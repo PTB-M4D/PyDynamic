@@ -542,8 +542,8 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
                     for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
                         h["bin-counts"][:,k] = np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
-                ymin = np.min(Y)
-                ymax = np.max(Y)
+                ymin = np.min(Y, axis=0)
+                ymax = np.max(Y, axis=0)
 
         else: # updating y and uy from results of current block
             K  = m * blocksize
@@ -565,8 +565,8 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
                     for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
                         h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
-                ymin = np.min(np.append(ymin,Y))
-                ymax = np.max(np.append(ymax,Y))
+                ymin = np.min(np.vstack((ymin,Y)), axis=0)
+                ymax = np.max(np.vstack((ymax,Y)), axis=0)
 
         progressBar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
     print("\n") # to escape the carriage-return of progressBar
@@ -575,21 +575,21 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     # ----------------- post-calculation steps -----------------------
 
     if verbose_return:
-        # remove the last frequency, which is always zero
-        for nbin, h in happr.items():
-            h["bin-counts"] = h["bin-counts"][:-1,:]
-            h["bin-edges"][0,:]  = np.min(np.append(ymin, h["bin-edges"][1,:]))
-            h["bin-edges"][-1,:] = np.max(np.append(ymax, h["bin-edges"][-2,:]))
 
         # replace edge limits by ymin and ymax, resp.
+        for h in happr.values():
+            h["bin-edges"][0,:]  = np.min(np.vstack((ymin, h["bin-edges"][0,:])), axis=0)
+            h["bin-edges"][-1,:] = np.min(np.vstack((ymax, h["bin-edges"][-1,:])), axis=0)
+
         p025 = np.zeros((len(nbins), len(y)))
         p975 = np.zeros((len(nbins), len(y)))
 
+        # approximate 2.5% and 97.5% percentiles
         for k in range(x.size):
             for m, h in enumerate(happr.values()):
-                e = h["bin-edges"][:-1,k]  # last bin-edge is not required
-                f = h["bin-counts"][:,k]
-                G = np.append(0, np.cumsum(f)/np.sum(f))
+                e = h["bin-edges"][:,k]                 # take all bin-edges
+                f = np.append(0, h["bin-counts"][:,k])  # bin count for before first bin is 0
+                G = np.cumsum(f)/np.sum(f)
 
                 # quick fix to ensure strictly increasing G
                 iz = np.argwhere(np.diff(G) == 0)
@@ -597,11 +597,14 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
                     for l in iz:   # NOTE: is there a wrong index in the matlab-script?
                         G[l+1]  = G[l] + 10*np.spacing(1.0)   # numpy.spacing gives the machine-epsilon
 
+                # interval [0, 0.05] with fine resolution
                 pcov = np.linspace(G[0], G[-1]-0.95, 100)
 
+                # interpolate the cumulated relative bin-count G(e) on this fine resolution
                 ylow = interp1d(G,e)(pcov)
                 yhgh = interp1d(G,e)(pcov+0.95)
 
+                # find 
                 lcov = yhgh - ylow
                 imin = np.argmin(lcov)
 

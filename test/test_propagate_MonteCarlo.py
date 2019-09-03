@@ -64,27 +64,32 @@ def test_UMC(visualizeOutput=False):
             #yUMC, UyUMC = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=200, Delta=0.001)
             yUMC, UyUMC, p025, p975, happr = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=20, runs_init=10, nbins=10, verbose_return=True)
             
-            if visualizeOutput:
-                # visualize mean+uncertainty of system responses
-                plt.plot(time, x)
-                plt.plot(time, yUMC)
-                #plt.fill_between(time, yUMC - UyUMC, yUMC + UyUMC)
-                plt.plot(time, yUMC - UyUMC, linestyle="--", linewidth=1, color="red")
-                plt.plot(time, yUMC + UyUMC, linestyle="--", linewidth=1, color="red")
-
-                # visualize the bin-counts
-                key = list(happr.keys())[0]
-                for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
-                    plt.scatter(ts*np.ones_like(bc), be[1:-1], bc)
-                    
-                plt.show()
-            
             assert len(yUMC) == len(x)
             assert len(UyUMC) == len(x)
             assert p025.shape[1] == len(x)
             assert p975.shape[1] == len(x)
             assert isinstance(happr, dict)
 
+            if visualizeOutput:
+                # visualize input and mean of system response
+                plt.plot(time, x)
+                plt.plot(time, yUMC)
+
+                # visualize uncertainty of output
+                plt.plot(time, yUMC - UyUMC, linestyle="--", linewidth=1, color="red")
+                plt.plot(time, yUMC + UyUMC, linestyle="--", linewidth=1, color="red")
+
+                # visualize central 95%-quantile
+                plt.plot(time, p025.T, linestyle=":", linewidth=1, color="gray")
+                plt.plot(time, p975.T, linestyle=":", linewidth=1, color="gray")
+
+                # visualize the bin-counts
+                key = list(happr.keys())[0]
+                for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
+                    plt.scatter(ts*np.ones_like(bc), be[1:], bc)
+                    
+                plt.show()
+            
         #elif kind == "corr":
 
         #    # get an instance of noise, the covariance and the covariance-matrix with the specified color
