@@ -434,7 +434,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             number of bins for histogram
         verbose_return: bool, optional
             see return-value of documentation
-    
+
     By default, phi, theta, sigma are choosen such, that N(0,1)-noise is added to the input signal.
 
     Returns (if not verbose_return, default)
@@ -472,7 +472,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         blow = np.array([blow])
     if isinstance(nbins, int):
         nbins = [nbins]
-    
+
     # init parallel computation
     nPool = min(multiprocessing.cpu_count(), blocksize)
     pool = multiprocessing.Pool(nPool)
@@ -488,10 +488,10 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
 
     # init Y
     Y = np.empty((runs_init, x.size))  # set up matrix of MC results
- 
+
     # define functions to draw samples from (with predefined PDF associated)
     p_ab = lambda size: np.random.multivariate_normal(ab, Uab, size)
-    
+
     # init samples to be evaluated
     TH = p_ab(runs_init)
 
@@ -512,7 +512,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         happr[nbin]["bin-counts"] = np.zeros((nbin, len(x)))              # init. bin-counts
 
     # ----------------- run MC block-wise -----------------------
-    
+
     nblocks = math.ceil(runs/blocksize)
 
     for m in range(nblocks):
