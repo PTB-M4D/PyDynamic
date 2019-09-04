@@ -570,7 +570,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
 
         progressBar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
     print("\n") # to escape the carriage-return of progressBar
-    
+
 
     # ----------------- post-calculation steps -----------------------
 
