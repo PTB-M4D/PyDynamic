@@ -520,7 +520,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             curr_block = runs % blocksize
         else:
             curr_block = blocksize
-        
+
         Y = np.empty((curr_block, x.size))
         TH = p_ab(curr_block)
 
