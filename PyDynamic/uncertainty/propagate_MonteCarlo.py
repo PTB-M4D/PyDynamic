@@ -421,11 +421,11 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         alow: float or np.ndarray, optional
             filter coefficients of optional low pass filter
         phi: np.ndarray, optional,
-            see ARMA noise model
+            see misc.noise.ARMA noise model
         theta: np.ndarray, optional
-            see ARMA noise model
+            see misc.noise.ARMA noise model
         sigma: float, optional
-            see ARMA noise model
+            see misc.noise.ARMA noise model
         Delta: float, optional
             upper bound of systematic correction due to regularisation (assume uniform distribution)
         runs_init: int, optional
@@ -496,7 +496,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     TH = p_ab(runs_init)
 
     # evaluate the initial samples
-    for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH)):
+    for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow), TH)):
         Y[k,:] = result
         progressBar(k, runs_init, prefix="UMC initialisation:     ")
     print("\n") # to escape the carriage-return of progressBar
@@ -525,7 +525,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         TH = p_ab(curr_block)
 
         # parallel loop
-        for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, theta=theta, phi=phi, sigma=sigma, blow=blow, alow=alow), TH)):
+        for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow), TH)):
             Y[k,:] = result
 
         # the serial loop is much easier to understand
@@ -620,7 +620,36 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         return y, uy
 
 
-def _UMCevaluate(th, nbb, x, Delta, theta, phi, sigma, blow, alow):
+def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
+    """
+    Calculate system-response of an IIR-filter to some input signal x.
+
+    Parameters
+    ----------
+    th: numpy.ndarray, shape (naa + nbb -1, )
+        coefficients of an IIR filter, :math:`\\theta = [aa[1:], b]`
+    nbb: int
+        size of bb within th
+    x: numpy.ndarray, shape (nx, )
+        input signal
+    Delta: float
+        add noise to output drawn from uniform-distribution U([-Delta, Delta])
+    phi: np.ndarray
+        see misc.noise.ARMA noise model
+    theta: np.ndarray
+        see misc.noise.ARMA noise model
+    sigma: float
+        see misc.noise.ARMA noise model
+    blow: float or np.ndarray
+        filter coefficients of low pass filter applied to sum of input-signal and ARMA-noise
+    alow: float or np.ndarray
+        filter coefficients of low pass filter applied to sum of input-signal and ARMA-noise
+
+
+    x -----------------+--->[LOWPASS]--->[IIR-FILTER]----+---> y
+                       |                                 |
+    ARMA(phi,theta) ---'            U([-Delta,Delta]) ---'
+    """
 
     naa = len(th) - nbb + 1        # theta contains all but the first entry of aa
     aa = np.append(1, th[:naa-1])  # insert coeff 1 at position 0 to restore aa
