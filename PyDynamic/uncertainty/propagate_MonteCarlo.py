@@ -531,11 +531,11 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         # the serial loop is much easier to understand
         # for k in range(curr_block):
         #     th = TH[k,:]
-        #     Y[k,:] = _UMCevaluate(th, b.size, x, Delta, theta, phi, sigma, blow, alow)
+        #     Y[k,:] = _UMCevaluate(th, b.size, x, Delta, phi, theta, sigma, blow, alow)
 
         if m == 0: # first block
             y  = np.mean(Y, axis=0)
-            uy = np.std(Y, axis=0)
+            Uy = np.matmul((Y-y).T, (Y-y))
 
             if verbose_return:
                 for k in range(x.size):
@@ -549,20 +549,17 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             K  = m * blocksize
             K0 = curr_block
 
-            # diff to current calculated mean (formula 7 in [Eichst2012])
-            d = np.sum(Y - y, axis=0) / (K + K0)
+            # update mean (formula 7 in [Eichst2012])
+            y0 = y
+            y = y + np.sum(Y - y, axis=0) / (K + K0)
 
-            # new mean
-            y = y + d
-
-            # new variance (formula 8 in [Eichst2012])
-            s2 = ((K-1)*np.square(uy) + K*np.square(d) + np.sum(np.square(Y-y))) / (K+K0-1)
-            uy = np.sqrt(s2)
+            # update covariance (formula 8 in [Eichst2012])
+            Uy = ( (K-1)*Uy + K*np.outer(y-y0, y-y0) + np.matmul((Y-y).T, (Y-y)) ) / (K+K0-1)
 
             if verbose_return:
                 # update histogram values
                 for k in range(x.size):
-                    for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
+                    for h in happr.values():
                         h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
                 ymin = np.min(np.vstack((ymin,Y)), axis=0)
@@ -591,33 +588,18 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
                 f = np.append(0, h["bin-counts"][:,k])  # bin count for before first bin is 0
                 G = np.cumsum(f)/np.sum(f)
 
-                # quick fix to ensure strictly increasing G
-                iz = np.argwhere(np.diff(G) == 0)
-                if iz.size != 0:
-                    for l in iz:   # NOTE: is there a wrong index in the matlab-script?
-                        G[l+1]  = G[l] + 10*np.spacing(1.0)   # numpy.spacing gives the machine-epsilon
+                ## interpolate the cumulated relative bin-count G(e) for the requested credibility interval
+                cred = 0.95
+                interp_e = interp1d(G,e)
 
-                # interval [0, 0.05] with fine resolution
-                pcov = np.linspace(G[0], G[-1]-0.95, 100)
+                # save credibility intervals
+                p025[m,k] = interp_e((1+cred)/2)
+                p975[m,k] = interp_e((1-cred)/2)
 
-                # interpolate the cumulated relative bin-count G(e) on this fine resolution
-                ylow = interp1d(G,e)(pcov)
-                yhgh = interp1d(G,e)(pcov+0.95)
-
-                # find
-                lcov = yhgh - ylow
-                imin = np.argmin(lcov)
-
-                p025[m,k] = ylow[imin]
-                p975[m,k] = yhgh[imin]
-
-            progressBar(k, x.size,prefix="UMC credible intervals: ")
-        print("\n")  # to escape the carriage-return of progressBar
-
-        return y, uy, p025, p975, happr
+        return y, Uy, p025, p975, happr
 
     else:
-        return y, uy
+        return y, Uy
 
 
 def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):

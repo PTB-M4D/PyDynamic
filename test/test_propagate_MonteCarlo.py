@@ -63,9 +63,9 @@ def test_UMC(visualizeOutput=False):
 
             #yUMC, UyUMC = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=200, Delta=0.001)
             yUMC, UyUMC, p025, p975, happr = UMC(x, b1, [1.0], Ub, sigma=sigma_noise, runs=20, runs_init=10, nbins=10, verbose_return=True)
-            
+
             assert len(yUMC) == len(x)
-            assert len(UyUMC) == len(x)
+            assert UyUMC.shape == (x.size, x.size)
             assert p025.shape[1] == len(x)
             assert p975.shape[1] == len(x)
             assert isinstance(happr, dict)
@@ -76,8 +76,8 @@ def test_UMC(visualizeOutput=False):
                 plt.plot(time, yUMC)
 
                 # visualize uncertainty of output
-                plt.plot(time, yUMC - UyUMC, linestyle="--", linewidth=1, color="red")
-                plt.plot(time, yUMC + UyUMC, linestyle="--", linewidth=1, color="red")
+                plt.plot(time, yUMC - np.sqrt(np.diag(UyUMC)), linestyle="--", linewidth=1, color="red")
+                plt.plot(time, yUMC + np.sqrt(np.diag(UyUMC)), linestyle="--", linewidth=1, color="red")
 
                 # visualize central 95%-quantile
                 plt.plot(time, p025.T, linestyle=":", linewidth=1, color="gray")
@@ -87,9 +87,9 @@ def test_UMC(visualizeOutput=False):
                 key = list(happr.keys())[0]
                 for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
                     plt.scatter(ts*np.ones_like(bc), be[1:], bc)
-                    
+
                 plt.show()
-            
+
         #elif kind == "corr":
 
         #    # get an instance of noise, the covariance and the covariance-matrix with the specified color
@@ -105,7 +105,7 @@ def test_UMC(visualizeOutput=False):
 
         #    assert len(y) == len(x)
         #    assert len(Uy) == len(x)
-        
+
         #elif kind == "diag":
         #    sigma_diag = sigma_noise * ( 1 + np.heaviside(np.arange(len(time)) - len(time)//2,0) )    # std doubles after half of the time
         #    noise = sigma_diag * white_gaussian(len(time))
