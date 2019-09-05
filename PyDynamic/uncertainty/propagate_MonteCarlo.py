@@ -411,7 +411,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         a: np.ndarray, shape (naa, )
             filter denominator coefficients, normalization (a[0] == 1.0) is assumed
         Uab: np.ndarray, shape (naa + nbb - 1, )
-            uncertainty matrix :math:`U_\theta`
+            uncertainty matrix :math:`U_\\theta`
         runs: int, optional
             number of Monte Carlo runs
         blocksize: int, optional
