@@ -3,12 +3,14 @@
 
 import numpy as np
 from pytest import raises
+import functools
+import scipy
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 #from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian, ARMA
-from PyDynamic.uncertainty.propagate_MonteCarlo import MC, SMC, UMC, ARMA
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC, SMC, UMC, ARMA, UMC_generic, _UMCevaluate
 
 import matplotlib.pyplot as plt
 
@@ -110,6 +112,42 @@ def test_UMC(visualizeOutput=False):
         plt.show()
 
 
+def test_UMC_generic(visualizeOutput=False):
+
+    Ux = 1e-2 * np.diag(np.abs(np.sin(time * Fs / 10)))
+
+    drawSamples = lambda size: np.random.multivariate_normal(x, Ux, size)
+    #params = {"b": b2, "a":[1]}  # does not work
+    evaluate = functools.partial(scipy.signal.lfilter, b2, [1])
+
+    # run UMC
+    y, Uy, happr = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10)
+
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+    assert isinstance(happr, dict)
+
+    # run again, but only return all simulations
+    sims = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10, return_simulations=True)
+    assert isinstance(sims, dict)
+
+    if visualizeOutput:
+        # visualize input and mean of system response
+        plt.plot(time, x)
+        plt.plot(time, y)
+
+        # visualize uncertainty of output
+        plt.plot(time, y - np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+        plt.plot(time, y + np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+
+        # visualize the bin-counts
+        key = list(happr.keys())[0]
+        for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
+            plt.scatter(ts*np.ones_like(bc), be[1:], bc)
+
+        plt.show()
+
+
 def test_compare_MC_UMC():
 
     y_MC, Uy_MC = MC(x,sigma_noise,b1,[1.0],Ub,runs=2*runs,blow=b2)
@@ -128,3 +166,6 @@ def test_noise_ARMA():
     e = ARMA(length, phi = phi, theta = theta)
 
     assert len(e) == length
+
+#test_UMC_generic(visualizeOutput=True)
+#test_UMC(visualizeOutput=True)

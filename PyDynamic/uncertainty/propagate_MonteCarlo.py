@@ -30,7 +30,7 @@ from scipy.signal import lfilter
 from ..misc.filterstuff import isstable
 from ..misc.tools import progressBar
 
-__all__ = ["MC", "SMC", "UMC"]
+__all__ = ["MC", "SMC", "UMC", "UMC_generic"]
 
 
 class Normal_ZeroCorr:
@@ -400,7 +400,8 @@ def SMC(
 def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=1000, verbose_return = False):
     """
-    Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram
+    Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram.
+    This is a wrapper for the UMC_generic function, specialised on filters
 
     Parameters
     ----------
@@ -465,7 +466,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
         * copyright on updating formulae parts is by Peter Harris (NPL)
     """
 
-    # type-conversions
+    # input adjustments and type conversions
     if isinstance(alow, float):
         alow = np.array([alow])
     if isinstance(blow, float):
@@ -473,110 +474,33 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     if isinstance(nbins, int):
         nbins = [nbins]
 
-    # init parallel computation
-    nPool = min(multiprocessing.cpu_count(), blocksize)
-    pool = multiprocessing.Pool(nPool)
-
-    # ------------ preparations for update formulae ------------
-
-    # set low pass filter
     if alow[0] != 1:
         blow = blow / alow[0]
         alow = alow / alow[0]
 
+
+    # define generic functions to hand over to UMC_generic
+
+    # variate the coefficients of filter as main simulation influence
     ab = np.hstack((a[1:], b))    # create the parameter vector from the filter coefficients (should be named theta, but this name is already used)
+    drawSamples = lambda size: np.random.multivariate_normal(ab, Uab, size)
 
-    # init Y
-    Y = np.empty((runs_init, x.size))  # set up matrix of MC results
+    # how to evaluate functions
+    params = {"nbb": b.size,
+              "x": x,
+              "sigma": sigma,
+              "blow": blow,
+              "alow": alow,
+              "Delta": Delta,
+              "phi": phi,
+              "theta": theta}
+    evaluate = functools.partial(_UMCevaluate, **params)
 
-    # define functions to draw samples from (with predefined PDF associated)
-    p_ab = lambda size: np.random.multivariate_normal(ab, Uab, size)
+    # run UMC
+    y, Uy, happr = UMC_generic(drawSamples, evaluate, runs=runs, blocksize=blocksize, runs_init=runs_init)
 
-    # init samples to be evaluated
-    TH = p_ab(runs_init)
-
-    # evaluate the initial samples
-    for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow), TH)):
-        Y[k,:] = result
-        progressBar(k, runs_init, prefix="UMC initialisation:     ")
-    print("\n") # to escape the carriage-return of progressBar
-
-    # bin edges
-    ymin = np.min(Y, axis=0)
-    ymax = np.max(Y, axis=0)
-
-    happr = {}
-    for nbin in nbins:
-        happr[nbin] = {}
-        happr[nbin]["bin-edges"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
-        happr[nbin]["bin-counts"] = np.zeros((nbin, len(x)))              # init. bin-counts
-
-    # ----------------- run MC block-wise -----------------------
-
-    nblocks = math.ceil(runs/blocksize)
-
-    for m in range(nblocks):
-        if m == nblocks:
-            curr_block = runs % blocksize
-        else:
-            curr_block = blocksize
-
-        Y = np.empty((curr_block, x.size))
-        TH = p_ab(curr_block)
-
-        # parallel loop
-        for k, result in enumerate(pool.imap_unordered(functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow), TH)):
-            Y[k,:] = result
-
-        # the serial loop is much easier to understand
-        # for k in range(curr_block):
-        #     th = TH[k,:]
-        #     Y[k,:] = _UMCevaluate(th, b.size, x, Delta, phi, theta, sigma, blow, alow)
-
-        if m == 0: # first block
-            y  = np.mean(Y, axis=0)
-            Uy = np.matmul((Y-y).T, (Y-y))
-
-            if verbose_return:
-                for k in range(x.size):
-                    for h in happr.values():  # NOTE: this loops over a different index than the matlab-script
-                        h["bin-counts"][:,k] = np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
-
-                ymin = np.min(Y, axis=0)
-                ymax = np.max(Y, axis=0)
-
-        else: # updating y and uy from results of current block
-            K  = m * blocksize
-            K0 = curr_block
-
-            # update mean (formula 7 in [Eichst2012])
-            y0 = y
-            y = y + np.sum(Y - y, axis=0) / (K + K0)
-
-            # update covariance (formula 8 in [Eichst2012])
-            Uy = ( (K-1)*Uy + K*np.outer(y-y0, y-y0) + np.matmul((Y-y).T, (Y-y)) ) / (K+K0-1)
-
-            if verbose_return:
-                # update histogram values
-                for k in range(x.size):
-                    for h in happr.values():
-                        h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
-
-                ymin = np.min(np.vstack((ymin,Y)), axis=0)
-                ymax = np.max(np.vstack((ymax,Y)), axis=0)
-
-        progressBar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
-    print("\n") # to escape the carriage-return of progressBar
-
-
-    # ----------------- post-calculation steps -----------------------
-
+    # further post-calculation steps
     if verbose_return:
-
-        # replace edge limits by ymin and ymax, resp.
-        for h in happr.values():
-            h["bin-edges"][0,:]  = np.min(np.vstack((ymin, h["bin-edges"][0,:])), axis=0)
-            h["bin-edges"][-1,:] = np.min(np.vstack((ymax, h["bin-edges"][-1,:])), axis=0)
 
         p025 = np.zeros((len(nbins), len(y)))
         p975 = np.zeros((len(nbins), len(y)))
@@ -694,3 +618,167 @@ def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
         e[n] = np.sum(phi[:min_pn].dot(e[n-min_pn:n])) + np.sum(theta[:min_qn].dot(w[n-min_qn:n])) + wn
 
     return e
+
+
+def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100, return_simulations = False, n_cpu = multiprocessing.cpu_count()):
+    """
+    Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
+    Assumes that the output of evaluate is a numeric vector.
+
+    Parameters
+    ----------
+        drawSamples: function(int nDraws)
+            function that draws nDraws from a given distribution / population
+        evaluate: function(sample)
+            function that evaluates a sample and returns the result
+        runs: int, optional
+            number of Monte Carlo runs
+        blocksize: int, optional
+            how many samples should be evaluated for at a time
+        runs_init: int, optional
+            how many samples to evaluate to form initial guess about limits
+        return_simulations: bool, optional
+            see return-value of documentation
+        n_cpu: int
+            number of CPUs to use for multiprocessing, defaults to all available CPUs
+
+    Cookbook
+    --------
+        draw samples from multivariate normal distribution:
+            drawSamples = lambda size: np.random.multivariate_normal(x, Ux, size)
+
+        build a function, that only accepts one argument by masking addtional kwargs:
+            evaluate = functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow)
+            evaluate = functools.partial(bigFunction, **dict_of_kwargs)
+
+    Returns (if not return_simulations)
+    -------
+        y: np.ndarray
+            filter output signal
+        Uy: np.ndarray
+            uncertainty associated with
+        happr: dict
+            dictionary of bin-edges and bin-counts
+
+    Returns (if return_simulations)
+    -------
+        Y: list
+            individual results of every individual
+
+    References
+    ----------
+        * Eichstädt, Link, Harris, Elster [Eichst2012]_
+    """
+
+    # type-conversions
+    if isinstance(nbins, int):
+        nbins = [nbins]
+
+    # init parallel computation
+    nPool = min(n_cpu, blocksize)
+    pool = multiprocessing.Pool(nPool)
+
+    # ------------ preparations for update formulae ------------
+
+    # set up list of MC results
+    Y = [None]*runs_init
+
+    # init samples to be evaluated
+    samples = drawSamples(runs_init)
+
+    # evaluate the initial samples
+    for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
+        Y[k] = result
+        progressBar(k, runs_init, prefix="UMC initialisation:     ")
+    print("\n") # to escape the carriage-return of progressBar
+
+    # convert to array
+    Y = np.asarray(Y)
+
+    # get size of in- and output (was so far not explicitly known)
+    inputSize = samples.shape[1]
+    outputSize = Y.shape[1]
+
+    # prepare histograms
+    # bin edges
+    ymin = np.min(Y, axis=0)
+    ymax = np.max(Y, axis=0)
+
+    happr = {}
+    for nbin in nbins:
+        happr[nbin] = {}
+        happr[nbin]["bin-edges"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
+        happr[nbin]["bin-counts"] = np.zeros((nbin, outputSize))        # init. bin-counts
+
+    # ----------------- run MC block-wise -----------------------
+
+    nblocks = math.ceil(runs/blocksize)
+
+    # remember all evaluated simulations, if wanted
+    if return_simulations:
+        sims = {"params": np.empty((runs, inputSize)), "results": np.empty((runs, outputSize))}
+
+    for m in range(nblocks):
+        if m == nblocks:
+            curr_block = runs % blocksize
+        else:
+            curr_block = blocksize
+
+        Y = np.empty((curr_block, outputSize))
+        samples = drawSamples(curr_block)
+
+        # parallel loop
+        for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
+            Y[k,:] = result
+
+        if m == 0: # first block
+            y  = np.mean(Y, axis=0)
+            Uy = np.matmul((Y-y).T, (Y-y))
+
+            # update histogram values
+            for k in range(outputSize):
+                for h in happr.values():
+                    h["bin-counts"][:,k] = np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
+
+            ymin = np.min(Y, axis=0)
+            ymax = np.max(Y, axis=0)
+
+        else: # updating y and Uy from results of current block
+            K  = m * blocksize
+            K0 = curr_block
+
+            # update mean (formula 7 in [Eichst2012])
+            y0 = y
+            y = y + np.sum(Y - y, axis=0) / (K + K0)
+
+            # update covariance (formula 8 in [Eichst2012])
+            Uy = ( (K-1)*Uy + K*np.outer(y-y0, y-y0) + np.matmul((Y-y).T, (Y-y)) ) / (K+K0-1)
+
+            # update histogram values
+            for k in range(outputSize):
+                for h in happr.values():
+                    h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
+
+            ymin = np.min(np.vstack((ymin,Y)), axis=0)
+            ymax = np.max(np.vstack((ymax,Y)), axis=0)
+
+        # save results if wanted
+        if return_simulations:
+            sims["params"][m*blocksize:m*blocksize+curr_block, :] = samples
+            sims["results"][m*blocksize:m*blocksize+curr_block, :] = Y
+
+        progressBar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
+    print("\n") # to escape the carriage-return of progressBar
+
+
+    # ----------------- post-calculation steps -----------------------
+
+    # replace edge limits by ymin and ymax, resp.
+    for h in happr.values():
+        h["bin-edges"][0,:]  = np.min(np.vstack((ymin, h["bin-edges"][0,:])), axis=0)
+        h["bin-edges"][-1,:] = np.min(np.vstack((ymax, h["bin-edges"][-1,:])), axis=0)
+
+    if return_simulations:
+        return sims
+    else:
+        return y, Uy, happr
