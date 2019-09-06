@@ -15,10 +15,15 @@ def ARMA(length, phi=0.0, theta=0.0, std=1.0):
         how long the drawn sample will be
     phi: float, list or numpy.ndarray, shape (p, )
         AR-coefficients
-    theta: float, list or numpy.ndarray,
+    theta: float, list or numpy.ndarray
         MA-coefficients
     std: float
         std of the gaussian white noise that is feeded into the ARMA-model
+
+    Returns
+    -------
+    e: numpy.ndarray, shape (length, )
+       time-series of the predefined ARMA-process
 
     References
     ----------
