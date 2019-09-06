@@ -8,6 +8,8 @@ from scipy.signal import freqs
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp, sos_phys2filter, \
     sos_realimag, sos_absphase
 
+np.random.seed(12345)
+
 Fs = 100e3
 delta = 0.0001
 f0 = float(Fs / 4 + np.abs(np.random.randn(1)) * Fs / 8)
