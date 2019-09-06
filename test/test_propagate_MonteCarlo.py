@@ -128,7 +128,7 @@ def test_UMC_generic(visualizeOutput=False):
     assert isinstance(happr, dict)
 
     # run again, but only return all simulations
-    sims = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10, return_simulations=True)
+    sims = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
     assert isinstance(sims, dict)
 
     if visualizeOutput:

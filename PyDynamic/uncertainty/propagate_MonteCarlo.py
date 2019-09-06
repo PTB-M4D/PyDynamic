@@ -559,7 +559,7 @@ def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
     return lfilter(bb, aa, xlow) + d
 
 
-def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100, return_simulations = False, n_cpu = multiprocessing.cpu_count()):
+def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100, return_samples = False, n_cpu = multiprocessing.cpu_count()):
     """
     Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
     Assumes that the input and output of evaluate are numeric vectors (but not necessarily of same dimension).
@@ -578,7 +578,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             how many samples to evaluate to form initial guess about limits
         nbins: int, list of int, optional
             number of bins for histogram
-        return_simulations: bool, optional
+        return_samples: bool, optional
             see return-value of documentation
         n_cpu: int, optional
             number of CPUs to use for multiprocessing, defaults to all available CPUs
@@ -592,8 +592,10 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             evaluate = functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow)
             evaluate = functools.partial(bigFunction, **dict_of_kwargs)
 
-    Returns (if not return_simulations)
-    -----------------------------------
+    If ``return_samples`` is ``False``, the method returns:
+
+    Returns
+    -------
         y: np.ndarray
             filter output signal
         Uy: np.ndarray
@@ -601,8 +603,10 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         happr: dict
             dictionary of bin-edges and bin-counts
 
-    Returns (if return_simulations)
-    -------------------------------
+    Otherwise the method returns:
+
+    Returns
+    -------
         sims: dict
             dict of samples and corresponding results of every evaluated simulation
 
@@ -655,7 +659,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     nblocks = math.ceil(runs/blocksize)
 
     # remember all evaluated simulations, if wanted
-    if return_simulations:
+    if return_samples:
         sims = {"samples": np.empty((runs, input_size)), "results": np.empty((runs, output_size))}
 
     for m in range(nblocks):
@@ -695,7 +699,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         ymax = np.max(np.vstack((ymax,Y)), axis=0)
 
         # save results if wanted
-        if return_simulations:
+        if return_samples:
             block_start = m*blocksize
             block_end = block_start + curr_block
             sims["samples"][block_start:block_end, :] = samples
@@ -712,7 +716,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         h["bin-edges"][0,:]  = np.min(np.vstack((ymin, h["bin-edges"][0,:])), axis=0)
         h["bin-edges"][-1,:] = np.min(np.vstack((ymax, h["bin-edges"][-1,:])), axis=0)
 
-    if return_simulations:
+    if return_samples:
         return sims
     else:
         return y, Uy, happr
