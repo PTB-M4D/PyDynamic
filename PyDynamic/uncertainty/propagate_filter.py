@@ -11,7 +11,7 @@ This modules contains the following functions:
   IIR filter (b,a)
 
 # Note: The Elster-Link paper for FIR filters assumes that the autocovariance
-  is known and that noise is stationary!
+is known and that noise is stationary!
 
 """
 import numpy as np
