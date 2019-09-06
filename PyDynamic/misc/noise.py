@@ -6,7 +6,7 @@ __all__ = ["ARMA"]
 def ARMA(length, phi=0.0, theta=0.0, std=1.0):
     r"""
     Generate time-series of a predefined ARMA-process based on this equation:
-    :math:`\sum_{j=1}^{\min(p,n-1)} \phi_j \epsilon[n-j] + \sum_{j=1}^{\min(q,n-1)} \\theta_j w[n-j]`
+    :math:`\sum_{j=1}^{\min(p,n-1)} \phi_j \epsilon[n-j] + \sum_{j=1}^{\min(q,n-1)} \theta_j w[n-j]`
     where w is white gaussian noise. Equation and algorithm taken from [Eichst2012]_ .
 
     Parameters
