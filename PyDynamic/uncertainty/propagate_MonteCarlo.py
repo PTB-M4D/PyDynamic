@@ -12,7 +12,10 @@ This module contains the following functions:
 
 * *MC*: Standard Monte Carlo method for application of digital filter
 * *SMC*: Sequential Monte Carlo method with reduced computer memory requirements
-* *UMC*: Update Monte Carlo method with reduced computer memory requirements
+* *UMC*: Update Monte Carlo method for application of digital filters with
+  reduced computer memory requirements
+* *UMC_generic*: Update Monte Carlo method with reduced computer memory
+  requirements
 
 """
 
