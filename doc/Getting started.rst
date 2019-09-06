@@ -70,7 +70,7 @@ imaginary parts of the DFT applied to *x* and the associated uncertainty *UX*.
 Sequential application of the Monte Carlo method for uncertainty propagation
 for the case of filtering a time domain signal *x* with an IIR filter *b,a*
 with uncertainty associated with the filter coefficients *Uab* and signal
-noise standard deviation *sigma*. The filter output is the signal *y and the
+noise standard deviation *sigma*. The filter output is the signal *y* and the
 Monte Carlo method calculates point-wise uncertainties *uy* and coverage
 intervals *Py* corresponding to the specified percentiles.
 
