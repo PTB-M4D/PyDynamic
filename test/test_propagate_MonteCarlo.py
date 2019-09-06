@@ -83,7 +83,7 @@ def test_MC(visualizeOutput=False):
 
 def test_UMC(visualizeOutput=False):
     # run method
-    y, Uy, p025, p975, happr = UMC(x, b1, [1.0], Ub, blow=b2, sigma=sigma_noise, runs=runs, runs_init=10, nbins=10, verbose_return=True)
+    y, Uy, p025, p975, happr = UMC(x, b1, [1.0], Ub, blow=b2, sigma=sigma_noise, runs=runs, runs_init=10, nbins=10)
 
     assert len(y) == len(x)
     assert Uy.shape == (x.size, x.size)
