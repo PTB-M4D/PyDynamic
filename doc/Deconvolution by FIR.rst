@@ -304,11 +304,15 @@ Fit an FIR filter to the reciprocal of the measured frequency response
     from PyDynamic.deconvolution.fit_filter import LSFIR_unc
     bF, UbF = LSFIR_unc(H,UH,N,tau,f,Fs, verbose=False)
 
-with - ``H`` the measured frequency response values - ``UH`` the
-covariance (i.e. uncertainty) associated with real and imaginary parts
-of H - ``N`` the filter order - ``tau`` the filter delay in samples -
-``f`` the vector of frequencies at which H is given - ``Fs`` the
-sampling frequency for the digital FIR filter
+with
+
+* ``H`` the measured frequency response values
+* ``UH`` the covariance (i.e. uncertainty) associated with real and imaginary
+  parts of ``H``
+* ``N`` the filter order
+* ``tau`` the filter delay in samples
+* ``f`` the vector of frequencies at which H is given
+* ``Fs`` the sampling frequency for the digital FIR filter
 
 Propagate the uncertainty associated with the measurement noise and the
 FIR filter through the deconvolution process
