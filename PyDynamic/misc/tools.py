@@ -270,7 +270,7 @@ def progress_bar(count, countMax, width = 30, prefix = "", doneIndicator = "#", 
         countMax: int
             total number of iterations
         width: int, optional
-            width of the actual progressbar (acutal printed line will be wider)
+            width of the actual progressbar (actual printed line will be wider)
         prefix: str, optional
             some text that will be printed in front of the bar (i.e. "Progress of ABC:")
         doneIndicator: str, optional
