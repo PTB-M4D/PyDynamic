@@ -8,7 +8,7 @@ European Research Project
 `EMPIR 14SIP08 Dynamic <http://mathmet.org/projects/14SIP08>`_.
 
 For the PyDynamic homepage go to
-`GitHub <https://github.com/eichstaedtPTB/PyDynamic>`_.
+`GitHub <https://github.com/PTB-PSt1/PyDynamic>`_.
 
 *PyDynamic* is written in Python 3.
 
