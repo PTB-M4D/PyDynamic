@@ -321,6 +321,9 @@ FIR filter through the deconvolution process
 
     xhat,Uxhat = FIRuncFilter(yn,noise,bF,UbF,shift,blow)
 
-with - ``yn`` the noisy measurement - ``noise`` the std of the noise -
-``shift`` the total delay of the FIR filter and the low-pass filter -
-``blow`` the coefficients of the FIR low-pass filter
+with
+
+* ``yn`` the noisy measurement
+* ``noise`` the std of the noise
+* ``shift`` the total delay of the FIR filter and the low-pass filter
+* ``blow`` the coefficients of the FIR low-pass filter
