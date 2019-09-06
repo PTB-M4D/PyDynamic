@@ -539,10 +539,11 @@ def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
     alow: float or np.ndarray
         filter coefficients of low pass filter applied to sum of input-signal and ARMA-noise
 
-
+    ```
     x -----------------+--->[LOWPASS]--->[IIR-FILTER]----+---> y
                        |                                 |
     ARMA(phi,theta) ---'            U([-Delta,Delta]) ---'
+    ```
     """
 
     naa = len(th) - nbb + 1        # theta contains all but the first entry of aa
@@ -632,8 +633,8 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         n_cpu: int, optional
             number of CPUs to use for multiprocessing, defaults to all available CPUs
 
-    Cookbook
-    --------
+    Example
+    -------
         draw samples from multivariate normal distribution:
         draw_samples = lambda size: np.random.multivariate_normal(x, Ux, size)
 
@@ -642,7 +643,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             evaluate = functools.partial(bigFunction, **dict_of_kwargs)
 
     Returns (if not return_simulations)
-    -------
+    -----------------------------------
         y: np.ndarray
             filter output signal
         Uy: np.ndarray
@@ -651,7 +652,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             dictionary of bin-edges and bin-counts
 
     Returns (if return_simulations)
-    -------
+    -------------------------------
         sims: dict
             dict of samples and corresponding results of every evaluated simulation
 

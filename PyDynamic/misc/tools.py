@@ -56,7 +56,7 @@ def print_vec(vector, prec=5, retS=False, vertical=False):
 
 def print_mat(matrix, prec=5, vertical=False, retS=False):
     """ Print matrix (2D array) to the console or return as formatted string
-    
+
     Parameters
     ----------
         matrix : (M,N) array_like
@@ -66,7 +66,7 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
             print out vertical or not
         retS : bool
             print or return string
-         
+
     Returns
     -------
         s : str
@@ -269,20 +269,16 @@ def progress_bar(count, countMax, width = 30, prefix = "", doneIndicator = "#", 
             current status of iterations, assumed to be zero-based
         countMax: int
             total number of iterations
-        width: int, optional (default: 30)
+        width: int, optional
             width of the actual progressbar (acutal printed line will be wider)
-        prefix: str, optional (default: "")
+        prefix: str, optional
             some text that will be printed in front of the bar (i.e. "Progress of ABC:")
-        doneIndicator: str, optional (default: "#")
+        doneIndicator: str, optional
             what character is used as "already-done"-indicator
-        todoIndicator: str, optional (default: ".")
+        todoIndicator: str, optional
             what character is used as "not-done-yet"-indicator
-        fout: file-object, optional (default: sys.stdout)
+        fout: file-object, optional
             where the progress-bar should be written/printed to
-
-    Returns
-    -------
-        None
     """
     x = int(width*(count+1)/countMax)
     progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
@@ -291,5 +287,5 @@ def progress_bar(count, countMax, width = 30, prefix = "", doneIndicator = "#", 
         NOTDONE=(width-x)*todoIndicator,
         COUNT=count+1,
         COUNTMAX=countMax)
-    
+
     fout.write(progressString)
