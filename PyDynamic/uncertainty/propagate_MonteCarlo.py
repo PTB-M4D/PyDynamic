@@ -401,8 +401,11 @@ def SMC(
         return y, Uy
 
 
-def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
-        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=1000, credible_interval=0.95, verbose_return = False):
+def UMC(
+        x, b, a, Uab, runs=1000, blocksize=8, blow=1.0, alow=1.0, phi=0.0,
+        theta=0.0, sigma=1, Delta=0.0, runs_init=100, nbins=1000,
+        credible_interval=0.95
+):
     """
     Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram.
     This is a wrapper for the UMC_generic function, specialised on filters
