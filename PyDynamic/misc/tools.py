@@ -259,7 +259,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
     return t_new, y_new, uy_new
 
 
-def progress_bar(count, countMax, width = 30, prefix = "", doneIndicator = "#", todoIndicator = "." , fout=sys.stdout):
+def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo_indicator =".", fout=sys.stdout):
     """
     A simple and reusable progress-bar.
 
@@ -267,25 +267,26 @@ def progress_bar(count, countMax, width = 30, prefix = "", doneIndicator = "#", 
     ----------
         count: int
             current status of iterations, assumed to be zero-based
-        countMax: int
+        count_max: int
             total number of iterations
         width: int, optional
             width of the actual progressbar (actual printed line will be wider)
         prefix: str, optional
-            some text that will be printed in front of the bar (i.e. "Progress of ABC:")
-        doneIndicator: str, optional
+            some text that will be printed in front of the bar (i.e.
+            "Progress of ABC:")
+        done_indicator: str, optional
             what character is used as "already-done"-indicator
-        todoIndicator: str, optional
+        todo_indicator: str, optional
             what character is used as "not-done-yet"-indicator
         fout: file-object, optional
             where the progress-bar should be written/printed to
     """
-    x = int(width*(count+1)/countMax)
+    x = int(width * (count+1) / count_max)
     progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
         PREFIX=prefix,
-        DONE=x*doneIndicator,
-        NOTDONE=(width-x)*todoIndicator,
+        DONE=x * done_indicator,
+        NOTDONE=(width-x) * todo_indicator,
         COUNT=count+1,
-        COUNTMAX=countMax)
+        COUNTMAX=count_max)
 
     fout.write(progressString)
