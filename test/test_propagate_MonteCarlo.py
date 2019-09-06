@@ -3,66 +3,168 @@
 
 import numpy as np
 from pytest import raises
+import functools
+import scipy
 
-import PyDynamic.uncertainty.propagate_MonteCarlo as mc
+from PyDynamic.misc.testsignals import rect
+from PyDynamic.misc.tools import make_semiposdef
+from PyDynamic.misc.filterstuff import kaiser_lowpass
+#from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian, ARMA
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC, SMC, UMC, ARMA, UMC_generic, _UMCevaluate
 
-
-N = 10
-possibleInputs = [0, 0.0, np.zeros(1), np.zeros(N), np.zeros(N+1),
-                    1, 1.0, np.ones(1), np.ones(N), np.ones(N+1),
-                    np.arange(N), np.arange(N+1)]
-
-
-def shouldRaiseTypeError(a, b):
-    return not isinstance(a, np.ndarray) and not isinstance(b, np.ndarray)
+import matplotlib.pyplot as plt
 
 
-def shouldRaiseValueError(a, b):
-    if isinstance(a, np.ndarray) and isinstance(b, np.ndarray):
-        if a.size != b.size:
-            return (not len(a) == 1) and (not len(b) == 1)
-        else:
-            return False
-    else:
-        return False
 
 
-def test_Normal_ZeroCorr_constructor():
-    
-    for loc in possibleInputs:
-        for scale in possibleInputs:
+##### some definitions for all tests
 
-            if shouldRaiseTypeError(loc, scale):
-                with raises(TypeError):
-                    zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
-            
-            elif shouldRaiseValueError(loc, scale):
-                with raises(ValueError):
-                    zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
+# parameters of simulated measurement
+Fs = 100e3        # sampling frequency (in Hz)
+Ts = 1 / Fs       # sampling interval length (in s)
 
-            else: # should run through
-                zc = mc.Normal_ZeroCorr(loc=loc, scale=scale)
+# nominal system parameters
+fcut = 20e3                                 # low-pass filter cut-off frequency (6 dB)
+L = 100                                     # filter order
+b1 = kaiser_lowpass(L,   fcut,Fs)[0]
+b2 = kaiser_lowpass(L-20,fcut,Fs)[0]
 
-                # run the rvs method
-                Nmax = max(zc.loc.size, zc.scale.size)
-                k = np.random.choice(np.arange(Nmax), size=1)[0]
-                rvs = zc.rvs(size=k)
+# uncertain knowledge: cutoff between 19.5kHz and 20.5kHz
+runs = 20
+FC = fcut + (2*np.random.rand(runs)-1)*0.5e3
 
-                # check assertions
-                assert isinstance(rvs, np.ndarray)
-                assert rvs.shape == (k, Nmax)
+B = np.zeros((runs,L+1))
+for k in range(runs):                       # Monte Carlo for filter coefficients of low-pass filter
+    B[k,:] = kaiser_lowpass(L,FC[k],Fs)[0]
 
+Ub = make_semiposdef(np.cov(B,rowvar=0))    # covariance matrix of MC result
 
-def test_MC():
-    # maybe take this test from some example?
-    pass
+# simulate input and output signals
+nTime = 500
+time  = np.arange(nTime)*Ts                 # time values
 
+# different cases
+sigma_noise = 1e-5
 
-def test_SMC():
-    # maybe take this test from some example?
-    pass
+# input signal + run methods
+x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)
 
 
-def test_UMC():
-    # maybe take this test from some example?
-    pass
+
+##### actual tests
+
+def test_MC(visualizeOutput=False):
+    # run method
+    y,Uy = MC(x,sigma_noise,b1,[1.0],Ub,runs=runs,blow=b2)
+
+    assert len(y) == len(x)
+    assert Uy.shape == (x.size, x.size)
+
+    if visualizeOutput:
+        # visualize input and mean of system response
+        plt.plot(time, x)
+        plt.plot(time, y)
+
+        # visualize uncertainty of output
+        plt.plot(time, y - np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+        plt.plot(time, y + np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+
+        plt.show()
+
+
+# this does not run through yet
+#def test_SMC():
+#    # run method
+#    y,Uy = SMC(x, sigma_noise, b1, [1.0], Ub, runs=runs)
+#
+#    assert len(y) == len(x)
+#    assert Uy.shape == (x.size, x.size)
+
+
+def test_UMC(visualizeOutput=False):
+    # run method
+    y, Uy, p025, p975, happr = UMC(x, b1, [1.0], Ub, blow=b2, sigma=sigma_noise, runs=runs, runs_init=10, nbins=10)
+
+    assert len(y) == len(x)
+    assert Uy.shape == (x.size, x.size)
+    assert p025.shape[1] == len(x)
+    assert p975.shape[1] == len(x)
+    assert isinstance(happr, dict)
+
+    if visualizeOutput:
+        # visualize input and mean of system response
+        plt.plot(time, x)
+        plt.plot(time, y)
+
+        # visualize uncertainty of output
+        plt.plot(time, y - np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+        plt.plot(time, y + np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+
+        # visualize central 95%-quantile
+        plt.plot(time, p025.T, linestyle=":", linewidth=1, color="gray")
+        plt.plot(time, p975.T, linestyle=":", linewidth=1, color="gray")
+
+        # visualize the bin-counts
+        key = list(happr.keys())[0]
+        for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
+            plt.scatter(ts*np.ones_like(bc), be[1:], bc)
+
+        plt.show()
+
+
+def test_UMC_generic(visualizeOutput=False):
+
+    Ux = 1e-2 * np.diag(np.abs(np.sin(time * Fs / 10)))
+
+    drawSamples = lambda size: np.random.multivariate_normal(x, Ux, size)
+    #params = {"b": b2, "a":[1]}  # does not work
+    evaluate = functools.partial(scipy.signal.lfilter, b2, [1])
+
+    # run UMC
+    y, Uy, happr = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10)
+
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+    assert isinstance(happr, dict)
+
+    # run again, but only return all simulations
+    sims = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
+    assert isinstance(sims, dict)
+
+    if visualizeOutput:
+        # visualize input and mean of system response
+        plt.plot(time, x)
+        plt.plot(time, y)
+
+        # visualize uncertainty of output
+        plt.plot(time, y - np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+        plt.plot(time, y + np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
+
+        # visualize the bin-counts
+        key = list(happr.keys())[0]
+        for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
+            plt.scatter(ts*np.ones_like(bc), be[1:], bc)
+
+        plt.show()
+
+
+def test_compare_MC_UMC():
+
+    np.random.seed(12345)
+
+    y_MC, Uy_MC = MC(x,sigma_noise,b1,[1.0],Ub,runs=2*runs,blow=b2)
+    y_UMC, Uy_UMC, _, _, _ = UMC(x, b1, [1.0], Ub, blow=b2, sigma=sigma_noise, runs=2*runs, runs_init=10)
+
+    # both methods should yield roughly the same results
+    assert np.allclose(y_MC, y_UMC, atol=5e-4)
+    assert np.allclose(Uy_MC, Uy_UMC, atol=5e-4)
+
+
+def test_noise_ARMA():
+    length = 100
+    phi = [1/3, 1/4, 1/5]
+    theta = [1, -1 ]
+
+    e = ARMA(length, phi = phi, theta = theta)
+
+    assert len(e) == length
