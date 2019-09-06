@@ -441,7 +441,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             must be in [0,1]
             central credible interval size
 
-    By default, phi, theta, sigma are choosen such, that N(0,1)-noise is added to the input signal.
+    By default, phi, theta, sigma are chosen such, that N(0,1)-noise is added to the input signal.
 
     Returns
     -------
