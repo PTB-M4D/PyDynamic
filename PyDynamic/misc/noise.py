@@ -3,7 +3,7 @@ import numpy as np
 __all__ = ["ARMA"]
 
 
-def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
+def ARMA(length, phi=0.0, theta=0.0, std=1.0):
     """
     Generate time-series of a predefined ARMA-process based on this equation:
     :math:`\sum_{j=1}^{\min(p,n-1)} \phi_j \epsilon[n-j] + \sum_{j=1}^{\min(q,n-1)} \\theta_j w[n-j]`
@@ -37,7 +37,7 @@ def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
         theta = np.array(theta)
 
     # initialize e, w
-    w = np.random.normal(loc = 0, scale = std, size = length)
+    w = np.random.normal(loc=0, scale=std, size=length)
     e = np.zeros_like(w)
 
     # define shortcuts
