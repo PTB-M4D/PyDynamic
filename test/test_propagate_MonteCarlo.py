@@ -155,7 +155,7 @@ def test_compare_MC_UMC():
 
     # both methods should yield roughly the same results
     assert np.allclose(y_MC, y_UMC, atol=1e-3)
-    assert np.allclose(Uy_MC, Uy_UMC, atol=1e-4)
+    assert np.allclose(Uy_MC, Uy_UMC, atol=1e-3)
 
 
 def test_noise_ARMA():
@@ -166,6 +166,3 @@ def test_noise_ARMA():
     e = ARMA(length, phi = phi, theta = theta)
 
     assert len(e) == length
-
-#test_UMC_generic(visualizeOutput=True)
-#test_UMC(visualizeOutput=True)
