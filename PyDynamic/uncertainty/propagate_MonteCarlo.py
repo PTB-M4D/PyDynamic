@@ -398,7 +398,7 @@ def SMC(
 
 
 def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
-        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=1000, verbose_return = False):
+        phi = 0.0, theta = 0.0, sigma = 1, Delta = 0.0, runs_init = 100, nbins=1000, credible_interval=0.95, verbose_return = False):
     """
     Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram.
     This is a wrapper for the UMC_generic function, specialised on filters
@@ -433,28 +433,22 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
             how many samples to evaluate to form initial guess about limits
         nbins: int, list of int, optional
             number of bins for histogram
-        verbose_return: bool, optional
-            see return-value of documentation
+        credible_interval: float, optional
+            must be in [0,1]
+            central credible interval size
 
     By default, phi, theta, sigma are choosen such, that N(0,1)-noise is added to the input signal.
 
-    Returns (if not verbose_return, default)
+    Returns
     -------
         y: np.ndarray
             filter output signal
         Uy: np.ndarray
             uncertainty associated with
-
-    Returns (if verbose_return)
-    -------
-        y: np.ndarray
-            filter output signal
-        Uy: np.ndarray
-            uncertainty associated with
-        p025: np.ndarray
-            lower 95% credible interval
-        p975: np.ndarray
-            upper 95% credible interval
+        y_cred_low: np.ndarray
+            lower boundary of credible interval
+        y_cred_high: np.ndarray
+            upper boundary of credible interval
         happr: dict
             dictionary keys: given nbin
             dictionary values: bin-edges val["bin-edges"], bin-counts val["bin-counts"]
@@ -483,7 +477,7 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
 
     # variate the coefficients of filter as main simulation influence
     ab = np.hstack((a[1:], b))    # create the parameter vector from the filter coefficients (should be named theta, but this name is already used)
-    drawSamples = lambda size: np.random.multivariate_normal(ab, Uab, size)
+    draw_samples = lambda size: np.random.multivariate_normal(ab, Uab, size)
 
     # how to evaluate functions
     params = {"nbb": b.size,
@@ -497,33 +491,27 @@ def UMC(x, b, a, Uab, runs = 1000, blocksize = 8, blow = 1.0, alow = 1.0,
     evaluate = functools.partial(_UMCevaluate, **params)
 
     # run UMC
-    y, Uy, happr = UMC_generic(drawSamples, evaluate, runs=runs, blocksize=blocksize, runs_init=runs_init)
+    y, Uy, happr = UMC_generic(draw_samples, evaluate, runs=runs, blocksize=blocksize, runs_init=runs_init)
 
     # further post-calculation steps
-    if verbose_return:
+    y_cred_low = np.zeros((len(nbins), len(y)))
+    y_cred_high = np.zeros((len(nbins), len(y)))
 
-        p025 = np.zeros((len(nbins), len(y)))
-        p975 = np.zeros((len(nbins), len(y)))
+    # approximate lower and upper credible quantiles
+    for k in range(x.size):
+        for m, h in enumerate(happr.values()):
+            e = h["bin-edges"][:,k]                 # take all bin-edges
+            f = np.append(0, h["bin-counts"][:,k])  # bin count for before first bin is 0
+            G = np.cumsum(f)/np.sum(f)
 
-        # approximate 2.5% and 97.5% percentiles
-        for k in range(x.size):
-            for m, h in enumerate(happr.values()):
-                e = h["bin-edges"][:,k]                 # take all bin-edges
-                f = np.append(0, h["bin-counts"][:,k])  # bin count for before first bin is 0
-                G = np.cumsum(f)/np.sum(f)
+            ## interpolate the cumulated relative bin-count G(e) for the requested credibility interval
+            interp_e = interp1d(G, e)
 
-                ## interpolate the cumulated relative bin-count G(e) for the requested credibility interval
-                cred = 0.95
-                interp_e = interp1d(G,e)
+            # save credibility intervals
+            y_cred_low[m,k] = interp_e((1-credible_interval)/2)
+            y_cred_high[m,k] = interp_e((1+credible_interval)/2)
 
-                # save credibility intervals
-                p025[m,k] = interp_e((1+cred)/2)
-                p975[m,k] = interp_e((1-cred)/2)
-
-        return y, Uy, p025, p975, happr
-
-    else:
-        return y, Uy
+    return y, Uy, y_cred_low, y_cred_high, happr
 
 
 def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
@@ -620,14 +608,14 @@ def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
     return e
 
 
-def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100, return_simulations = False, n_cpu = multiprocessing.cpu_count()):
+def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100, return_simulations = False, n_cpu = multiprocessing.cpu_count()):
     """
     Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
-    Assumes that the output of evaluate is a numeric vector.
+    Assumes that the input and output of evaluate are numeric vectors (but not necessarily of same dimension).
 
     Parameters
     ----------
-        drawSamples: function(int nDraws)
+        draw_samples: function(int nDraws)
             function that draws nDraws from a given distribution / population
         evaluate: function(sample)
             function that evaluates a sample and returns the result
@@ -637,15 +625,17 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
             how many samples should be evaluated for at a time
         runs_init: int, optional
             how many samples to evaluate to form initial guess about limits
+        nbins: int, list of int, optional
+            number of bins for histogram
         return_simulations: bool, optional
             see return-value of documentation
-        n_cpu: int
+        n_cpu: int, optional
             number of CPUs to use for multiprocessing, defaults to all available CPUs
 
     Cookbook
     --------
         draw samples from multivariate normal distribution:
-            drawSamples = lambda size: np.random.multivariate_normal(x, Ux, size)
+        draw_samples = lambda size: np.random.multivariate_normal(x, Ux, size)
 
         build a function, that only accepts one argument by masking addtional kwargs:
             evaluate = functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow)
@@ -662,8 +652,8 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
 
     Returns (if return_simulations)
     -------
-        Y: list
-            individual results of every individual
+        sims: dict
+            dict of samples and corresponding results of every evaluated simulation
 
     References
     ----------
@@ -681,33 +671,33 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
     # ------------ preparations for update formulae ------------
 
     # set up list of MC results
-    Y = [None]*runs_init
+    Y_init = [None]*runs_init
 
     # init samples to be evaluated
-    samples = drawSamples(runs_init)
+    samples = draw_samples(runs_init)
 
     # evaluate the initial samples
     for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
+        Y_init[k] = result
         progress_bar(k, runs_init, prefix="UMC initialisation:     ")
     print("\n") # to escape the carriage-return of progress_bar
 
     # convert to array
-    Y = np.asarray(Y)
+    Y_init = np.asarray(Y_init)
 
     # get size of in- and output (was so far not explicitly known)
-    inputSize = samples.shape[1]
-    outputSize = Y.shape[1]
+    input_size = samples.shape[1]
+    output_size = Y_init.shape[1]
 
     # prepare histograms
-    # bin edges
-    ymin = np.min(Y, axis=0)
-    ymax = np.max(Y, axis=0)
+    ymin = np.min(Y_init, axis=0)
+    ymax = np.max(Y_init, axis=0)
 
     happr = {}
     for nbin in nbins:
         happr[nbin] = {}
         happr[nbin]["bin-edges"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
-        happr[nbin]["bin-counts"] = np.zeros((nbin, outputSize))        # init. bin-counts
+        happr[nbin]["bin-counts"] = np.zeros((nbin, output_size))        # init. bin-counts
 
     # ----------------- run MC block-wise -----------------------
 
@@ -715,7 +705,7 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
 
     # remember all evaluated simulations, if wanted
     if return_simulations:
-        sims = {"params": np.empty((runs, inputSize)), "results": np.empty((runs, outputSize))}
+        sims = {"samples": np.empty((runs, input_size)), "results": np.empty((runs, output_size))}
 
     for m in range(nblocks):
         if m == nblocks:
@@ -723,10 +713,10 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
         else:
             curr_block = blocksize
 
-        Y = np.empty((curr_block, outputSize))
-        samples = drawSamples(curr_block)
+        Y = np.empty((curr_block, output_size))
+        samples = draw_samples(curr_block)
 
-        # parallel loop
+        # evaluate samples in parallel loop
         for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
             Y[k,:] = result
 
@@ -734,37 +724,31 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
             y  = np.mean(Y, axis=0)
             Uy = np.matmul((Y-y).T, (Y-y))
 
-            # update histogram values
-            for k in range(outputSize):
-                for h in happr.values():
-                    h["bin-counts"][:,k] = np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
-
-            ymin = np.min(Y, axis=0)
-            ymax = np.max(Y, axis=0)
-
         else: # updating y and Uy from results of current block
-            K  = m * blocksize
-            K0 = curr_block
+            K0  = m * blocksize
+            K_seq = curr_block
 
             # update mean (formula 7 in [Eichst2012])
             y0 = y
-            y = y + np.sum(Y - y, axis=0) / (K + K0)
+            y = y0 + np.sum(Y - y0, axis=0) / (K0 + K_seq)
 
             # update covariance (formula 8 in [Eichst2012])
-            Uy = ( (K-1)*Uy + K*np.outer(y-y0, y-y0) + np.matmul((Y-y).T, (Y-y)) ) / (K+K0-1)
+            Uy = ( (K0-1)*Uy + K0*np.outer(y-y0, y-y0) + np.matmul((Y-y).T, (Y-y)) ) / (K0 + K_seq - 1)
 
-            # update histogram values
-            for k in range(outputSize):
-                for h in happr.values():
-                    h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
+        # update histogram values
+        for k in range(output_size):
+            for h in happr.values():
+                h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
-            ymin = np.min(np.vstack((ymin,Y)), axis=0)
-            ymax = np.max(np.vstack((ymax,Y)), axis=0)
+        ymin = np.min(np.vstack((ymin,Y)), axis=0)
+        ymax = np.max(np.vstack((ymax,Y)), axis=0)
 
         # save results if wanted
         if return_simulations:
-            sims["params"][m*blocksize:m*blocksize+curr_block, :] = samples
-            sims["results"][m*blocksize:m*blocksize+curr_block, :] = Y
+            block_start = m*blocksize
+            block_end = block_start + curr_block
+            sims["samples"][block_start:block_end, :] = samples
+            sims["results"][block_start:block_end, :] = Y
 
         progress_bar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
     print("\n") # to escape the carriage-return of progress_bar
