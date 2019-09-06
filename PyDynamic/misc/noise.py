@@ -2,7 +2,7 @@ import numpy as np
 
 __all__ = ["ARMA"]
 
-# move this function to ..misc.noise.ARMA
+
 def ARMA(length, phi = 0.0, theta = 0.0, std = 1.0):
     """
     Generate time-series of a predefined ARMA-process based on this equation:
