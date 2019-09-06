@@ -596,7 +596,8 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         draw_samples = lambda size: np.random.multivariate_normal(x, Ux, size)
         ``
 
-        build a function, that only accepts one argument by masking addtional kwargs:
+        build a function, that only accepts one argument by masking
+        additional kwargs:
         ``
         evaluate = functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow)
         evaluate = functools.partial(bigFunction, **dict_of_kwargs)
