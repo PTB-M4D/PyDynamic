@@ -15,7 +15,7 @@ This module contains the following functions:
 """
 
 __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
-           'make_equidistant']
+           'make_equidistant', 'progress_bar']
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -259,7 +259,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
     return t_new, y_new, uy_new
 
 
-def progressBar(count, countMax, width = 30, prefix = "", doneIndicator = "#", todoIndicator = "." , fout=sys.stdout):
+def progress_bar(count, countMax, width = 30, prefix = "", doneIndicator = "#", todoIndicator = "." , fout=sys.stdout):
     """
     A simple and reusable progress-bar.
 

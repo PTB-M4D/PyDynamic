@@ -28,7 +28,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import lfilter
 
 from ..misc.filterstuff import isstable
-from ..misc.tools import progressBar
+from ..misc.tools import progress_bar
 
 __all__ = ["MC", "SMC", "UMC", "UMC_generic"]
 
@@ -688,9 +688,8 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
 
     # evaluate the initial samples
     for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
-        Y[k] = result
-        progressBar(k, runs_init, prefix="UMC initialisation:     ")
-    print("\n") # to escape the carriage-return of progressBar
+        progress_bar(k, runs_init, prefix="UMC initialisation:     ")
+    print("\n") # to escape the carriage-return of progress_bar
 
     # convert to array
     Y = np.asarray(Y)
@@ -767,8 +766,8 @@ def UMC_generic(drawSamples, evaluate, runs = 100, blocksize = 8, runs_init = 10
             sims["params"][m*blocksize:m*blocksize+curr_block, :] = samples
             sims["results"][m*blocksize:m*blocksize+curr_block, :] = Y
 
-        progressBar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
-    print("\n") # to escape the carriage-return of progressBar
+        progress_bar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
+    print("\n") # to escape the carriage-return of progress_bar
 
 
     # ----------------- post-calculation steps -----------------------
