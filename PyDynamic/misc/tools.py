@@ -12,6 +12,7 @@ This module contains the following functions:
 * *FreqResp2RealImag*: Calculate real and imaginary parts from frequency
   response
 * *make_equidistant*: Interpolate non-equidistant time series to equidistant
+* *progress_bar*: A simple and reusable progress-bar
 """
 
 __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
@@ -261,7 +262,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
 
 def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo_indicator =".", fout=sys.stdout):
     """
-    A simple and reusable progress-bar.
+    A simple and reusable progress-bar
 
     Parameters
     ----------
