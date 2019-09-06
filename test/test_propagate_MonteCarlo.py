@@ -150,12 +150,14 @@ def test_UMC_generic(visualizeOutput=False):
 
 def test_compare_MC_UMC():
 
+    np.random.seed(12345)
+
     y_MC, Uy_MC = MC(x,sigma_noise,b1,[1.0],Ub,runs=2*runs,blow=b2)
     y_UMC, Uy_UMC, _, _, _ = UMC(x, b1, [1.0], Ub, blow=b2, sigma=sigma_noise, runs=2*runs, runs_init=10)
 
     # both methods should yield roughly the same results
-    assert np.allclose(y_MC, y_UMC, atol=1e-3)
-    assert np.allclose(Uy_MC, Uy_UMC, atol=1e-3)
+    assert np.allclose(y_MC, y_UMC, atol=5e-4)
+    assert np.allclose(Uy_MC, Uy_UMC, atol=5e-4)
 
 
 def test_noise_ARMA():
