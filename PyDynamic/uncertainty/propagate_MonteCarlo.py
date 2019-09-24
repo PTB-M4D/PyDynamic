@@ -641,8 +641,12 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         nbins = [nbins]
 
     # init parallel computation
-    nPool = min(n_cpu, blocksize)
-    pool = multiprocessing.Pool(nPool)
+    if n_cpu == 1:
+        map_func = map
+    else:
+        nPool = min(n_cpu, blocksize)
+        pool = multiprocessing.Pool(nPool)
+        map_func = pool.imap_unordered
 
     # ------------ preparations for update formulae ------------
 
@@ -653,7 +657,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     samples = draw_samples(runs_init)
 
     # evaluate the initial samples
-    for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
+    for k, result in enumerate(map_func(evaluate, samples)):
         Y_init[k] = result
         progress_bar(k, runs_init, prefix="UMC initialisation:     ")
     print("\n") # to escape the carriage-return of progress_bar
@@ -693,7 +697,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         samples = draw_samples(curr_block)
 
         # evaluate samples in parallel loop
-        for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
+        for k, result in enumerate(map_func(evaluate, samples)):
             Y[k] = result.ravel()
 
         if m == 0: # first block
