@@ -498,7 +498,7 @@ def UMC(
     evaluate = functools.partial(_UMCevaluate, **params)
 
     # run UMC
-    y, Uy, happr = UMC_generic(draw_samples, evaluate, runs=runs, blocksize=blocksize, runs_init=runs_init)
+    y, Uy, happr, _ = UMC_generic(draw_samples, evaluate, runs=runs, blocksize=blocksize, runs_init=runs_init)
 
     # further post-calculation steps
     y_cred_low = np.zeros((len(nbins), len(y)))
@@ -565,7 +565,8 @@ def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
     return lfilter(bb, aa, xlow) + d
 
 
-def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100, return_samples = False, n_cpu = multiprocessing.cpu_count()):
+def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100,
+                return_samples = False, return_original_shape = False, n_cpu = multiprocessing.cpu_count()):
     """
     Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
     Assumes that the input and output of evaluate are numeric vectors (but not necessarily of same dimension).
@@ -598,18 +599,32 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             evaluate = functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow)
             evaluate = functools.partial(bigFunction, **dict_of_kwargs)
 
-    If ``return_samples`` is ``False``, the method returns:
+    If ``return_samples`` is ``False`` and ``return_original_shape`` is ``False``, the method returns:
 
     Returns
     -------
         y: np.ndarray
-            filter output signal
+            mean of raveled simulation output
         Uy: np.ndarray
-            uncertainty associated with
+            covariance associated with y
         happr: dict
             dictionary of bin-edges and bin-counts
+        output_shape: tuple
+            shape of the unraveled simulation output
+            can be used to reshape y and np.diag(Uy) into original shape
 
-    Otherwise the method returns:
+    If ``return_samples`` is ``False`` and ``return_original_shape`` is ``True``, the method returns:
+
+    Returns
+    -------
+        y: np.ndarray
+            mean of simulation output
+        Uy_diag: np.ndarray
+            Uncertainty associated with y
+            same shape as y
+            Uy_diag = np.sqrt(np.diag(Uy).reshape(output_shape)
+    
+    If ``return_samples`` is ``True``:
 
     Returns
     -------
@@ -643,22 +658,22 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         progress_bar(k, runs_init, prefix="UMC initialisation:     ")
     print("\n") # to escape the carriage-return of progress_bar
 
+    # get size of in- and output (was so far not explicitly known)
+    input_shape = samples[0].shape
+    output_shape = Y_init[0].shape
+
     # convert to array
     Y_init = np.asarray(Y_init)
 
-    # get size of in- and output (was so far not explicitly known)
-    input_size = samples.shape[1]
-    output_size = Y_init.shape[1]
-
     # prepare histograms
-    ymin = np.min(Y_init, axis=0)
-    ymax = np.max(Y_init, axis=0)
+    ymin = np.min(Y_init, axis=0).ravel()
+    ymax = np.max(Y_init, axis=0).ravel()
 
     happr = {}
     for nbin in nbins:
         happr[nbin] = {}
-        happr[nbin]["bin-edges"] = np.linspace(ymin, ymax, num=nbin+1)  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
-        happr[nbin]["bin-counts"] = np.zeros((nbin, output_size))        # init. bin-counts
+        happr[nbin]["bin-edges"] = np.linspace(ymin, ymax, num=nbin+1)           # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
+        happr[nbin]["bin-counts"] = np.zeros((nbin, np.prod(output_shape)))   # init. bin-counts
 
     # ----------------- run MC block-wise -----------------------
 
@@ -666,7 +681,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
 
     # remember all evaluated simulations, if wanted
     if return_samples:
-        sims = {"samples": np.empty((runs, input_size)), "results": np.empty((runs, output_size))}
+        sims = {"samples": np.empty((runs, *input_shape)), "results": np.empty((runs, *output_shape))}
 
     for m in range(nblocks):
         if m == nblocks:
@@ -674,19 +689,19 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         else:
             curr_block = blocksize
 
-        Y = np.empty((curr_block, output_size))
+        Y = np.empty((curr_block, np.prod(output_shape)))
         samples = draw_samples(curr_block)
 
         # evaluate samples in parallel loop
         for k, result in enumerate(pool.imap_unordered(evaluate, samples)):
-            Y[k,:] = result
+            Y[k] = result.ravel()
 
         if m == 0: # first block
             y  = np.mean(Y, axis=0)
             Uy = np.matmul((Y-y).T, (Y-y))
 
         else: # updating y and Uy from results of current block
-            K0  = m * blocksize
+            K0 = m * blocksize
             K_seq = curr_block
 
             # update mean (formula 7 in [Eichst2012])
@@ -697,7 +712,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             Uy = ( (K0-1)*Uy + K0*np.outer(y-y0, y-y0) + np.matmul((Y-y).T, (Y-y)) ) / (K0 + K_seq - 1)
 
         # update histogram values
-        for k in range(output_size):
+        for k in range(np.prod(output_shape)):
             for h in happr.values():
                 h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
@@ -708,8 +723,8 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         if return_samples:
             block_start = m*blocksize
             block_end = block_start + curr_block
-            sims["samples"][block_start:block_end, :] = samples
-            sims["results"][block_start:block_end, :] = Y
+            sims["samples"][block_start:block_end] = samples
+            sims["results"][block_start:block_end] = np.asarray([YY.reshape(output_shape) for YY in Y])
 
         progress_bar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
     print("\n") # to escape the carriage-return of progress_bar
@@ -725,4 +740,8 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     if return_samples:
         return sims
     else:
-        return y, Uy, happr
+        if return_original_shape:
+            Uy_diag = np.sqrt(np.diag(Uy).reshape(output_shape))
+            return y.reshape(output_shape), Uy_diag
+        else:
+            return y, Uy, happr, output_shape

@@ -114,38 +114,31 @@ def test_UMC(visualizeOutput=False):
 
 def test_UMC_generic(visualizeOutput=False):
 
-    Ux = 1e-2 * np.diag(np.abs(np.sin(time * Fs / 10)))
-
-    drawSamples = lambda size: np.random.multivariate_normal(x, Ux, size)
-    #params = {"b": b2, "a":[1]}  # does not work
-    evaluate = functools.partial(scipy.signal.lfilter, b2, [1])
+    x_shape = (5,6,7)
+    draw_samples = lambda size: np.random.rand(size, *x_shape)
+    evaluate = lambda sample: np.mean(sample, axis=1)
+    evaluate = functools.partial(np.mean, axis=1)
 
     # run UMC
-    y, Uy, happr = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10)
+    y, Uy, happr, output_shape = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10)
 
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
     assert isinstance(happr, dict)
+    assert isinstance(output_shape, tuple)
+
+
+    # run UMC with output reshaped to shape of output of "evaluate"
+    y, Uy = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, return_original_shape=True)
+
+    assert y.shape == (5,7)
+    assert y.shape == Uy.shape
+
 
     # run again, but only return all simulations
-    sims = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
+    sims = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
+
     assert isinstance(sims, dict)
-
-    if visualizeOutput:
-        # visualize input and mean of system response
-        plt.plot(time, x)
-        plt.plot(time, y)
-
-        # visualize uncertainty of output
-        plt.plot(time, y - np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
-        plt.plot(time, y + np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
-
-        # visualize the bin-counts
-        key = list(happr.keys())[0]
-        for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
-            plt.scatter(ts*np.ones_like(bc), be[1:], bc)
-
-        plt.show()
 
 
 def test_compare_MC_UMC():
