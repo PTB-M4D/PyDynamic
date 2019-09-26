@@ -116,30 +116,31 @@ def test_UMC_generic(visualizeOutput=False):
 
     x_shape = (5,6,7)
     draw_samples = lambda size: np.random.rand(size, *x_shape)
-    evaluate = lambda sample: np.mean(sample, axis=1)
     evaluate = functools.partial(np.mean, axis=1)
 
     # run UMC
     y, Uy, happr, output_shape = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10)
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
-    assert output_shape == (5,7)
     assert isinstance(happr, dict)
-    assert isinstance(output_shape, tuple)
-
-    # run UMC with output reshaped to shape of output of "evaluate"
-    y, Uy = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, return_original_shape=True)
-    assert y.shape == (5,7)
-    assert y.shape == Uy.shape
-
-    # run again, but only return all simulations
-    sims = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
-    assert isinstance(sims, dict)
+    assert output_shape == (5,7)
 
     # run without parallel computation
-    y, Uy = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, return_original_shape=True, n_cpu=1)
-    assert y.shape == (5,7)
-    assert y.shape == Uy.shape
+    y, Uy, happr, output_shape = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, n_cpu=1)
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+    assert isinstance(happr, dict)
+    assert output_shape == (5,7)
+
+    # run again, but only return all simulations
+    y, Uy, happr, output_shape, sims = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+    assert isinstance(happr, dict)
+    assert output_shape == (5,7)
+    assert isinstance(sims, dict)
+    assert sims["samples"][0].shape == x_shape
+    assert sims["results"][0].shape == output_shape
 
 
 def test_compare_MC_UMC():

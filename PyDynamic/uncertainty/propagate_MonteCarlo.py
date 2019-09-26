@@ -566,10 +566,11 @@ def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
 
 
 def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100,
-                return_samples = False, return_original_shape = False, n_cpu = multiprocessing.cpu_count()):
+                return_samples = False, n_cpu = multiprocessing.cpu_count()):
     """
     Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
     Assumes that the input and output of evaluate are numeric vectors (but not necessarily of same dimension).
+    If the output of evaluate is multi-dimensional, it will be flattened into 1D. 
 
     Parameters
     ----------
@@ -593,18 +594,19 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     Example
     -------
         draw samples from multivariate normal distribution:
-        draw_samples = lambda size: np.random.multivariate_normal(x, Ux, size)
+            draw_samples = lambda size: np.random.multivariate_normal(x, Ux, size)
 
         build a function, that only accepts one argument by masking addtional kwargs:
             evaluate = functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow)
             evaluate = functools.partial(bigFunction, **dict_of_kwargs)
 
-    If ``return_samples`` is ``False`` and ``return_original_shape`` is ``False``, the method returns:
+    By default the method 
 
     Returns
     -------
         y: np.ndarray
-            mean of raveled simulation output
+            mean of flattened/raveled simulation output
+            i.e.: y = np.ravel(evaluate(sample))
         Uy: np.ndarray
             covariance associated with y
         happr: dict
@@ -613,23 +615,14 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             shape of the unraveled simulation output
             can be used to reshape y and np.diag(Uy) into original shape
 
-    If ``return_samples`` is ``False`` and ``return_original_shape`` is ``True``, the method returns:
-
-    Returns
-    -------
-        y: np.ndarray
-            mean of simulation output
-        Uy_diag: np.ndarray
-            Uncertainty associated with y
-            same shape as y
-            Uy_diag = np.sqrt(np.diag(Uy).reshape(output_shape)
-    
-    If ``return_samples`` is ``True``:
+    If ``return_samples`` is ``True``, the method additionally returns all evaluated samples. 
+    This should only be done for testing and debugging reasons, as this removes all memory-improvements of the UMC-method. 
 
     Returns
     -------
         sims: dict
             dict of samples and corresponding results of every evaluated simulation
+            samples and results are saved in their original shape
 
     References
     ----------
@@ -640,7 +633,9 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     if isinstance(nbins, int):
         nbins = [nbins]
 
-    # init parallel computation
+    # check if parallel computation is required
+    # this allows to circumvent a multiprocessing-problem on windows-machines
+    # see: https://github.com/PTB-PSt1/PyDynamic/issues/84
     if n_cpu == 1:
         map_func = map
     else:
@@ -728,7 +723,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             block_start = m*blocksize
             block_end = block_start + curr_block
             sims["samples"][block_start:block_end] = samples
-            sims["results"][block_start:block_end] = np.asarray([YY.reshape(output_shape) for YY in Y])
+            sims["results"][block_start:block_end] = np.asarray([element.reshape(output_shape) for element in Y])
 
         progress_bar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
     print("\n") # to escape the carriage-return of progress_bar
@@ -742,10 +737,6 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         h["bin-edges"][-1,:] = np.min(np.vstack((ymax, h["bin-edges"][-1,:])), axis=0)
 
     if return_samples:
-        return sims
+        return y, Uy, happr, output_shape, sims
     else:
-        if return_original_shape:
-            Uy_diag = np.sqrt(np.diag(Uy).reshape(output_shape))
-            return y.reshape(output_shape), Uy_diag
-        else:
-            return y, Uy, happr, output_shape
+        return y, Uy, happr, output_shape
