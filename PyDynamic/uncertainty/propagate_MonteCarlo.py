@@ -576,8 +576,10 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     ----------
         draw_samples: function(int nDraws)
             function that draws nDraws from a given distribution / population
+            needs to return a list of (multi dimensional) numpy.ndarrays
         evaluate: function(sample)
             function that evaluates a sample and returns the result
+            needs to return a (multi dimensional) numpy.ndarray
         runs: int, optional
             number of Monte Carlo runs
         blocksize: int, optional
