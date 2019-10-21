@@ -16,10 +16,6 @@ workflows:
               tags:
                 only: /.*/
       - build_versions:
-          version: "3.4"
-          requires:
-              - build
-      - build_versions:
           version: "3.5"
           requires:
               - build
@@ -151,6 +147,7 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
+            pip install coverage pytest-cov
 
       - save_cache:
           paths:
@@ -163,7 +160,7 @@ jobs:
           command: |
             . venv/bin/activate
             pytest -v --junitxml=test-reports/pytest.xml \
-            PyDynamic/ > test-reports/pytest.log
+            --cov=PyDynamic/ > test-reports/pytest.log
 
       # Install PyDynamic.
       - run:
