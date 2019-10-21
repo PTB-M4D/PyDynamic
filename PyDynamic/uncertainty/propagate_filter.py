@@ -60,15 +60,16 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None):
         raise NotImplementedError(
             "FIR formula for covariance propagation not implemented yet. "
             "Suggesting Monte Carlo propagation instead.")
-    Ncomp = len(theta) - 1  # FIR filter order
 
-    if not isinstance(Utheta,
-                      np.ndarray):  # handle case of zero uncertainty filter
+    # Set the FIR filter order.
+    Ncomp = len(theta) - 1
+
+    # Handle case of zero uncertainty filter.
+    if not isinstance(Utheta, np.ndarray):
         Utheta = np.zeros((Ncomp, Ncomp))
 
-    if isinstance(blow,
-                  np.ndarray):  # calculate low-pass filtered signal and
-        # propagate noise
+    # Calculate low-pass filtered signal and propagate noise.
+    if isinstance(blow, np.ndarray):
         LR = 600
         Bcorr = np.correlate(blow, blow, 'full')
         ycorr = np.convolve(sigma_noise ** 2, Bcorr)
@@ -82,16 +83,15 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None):
         Ulow = np.eye(len(theta)) * sigma_noise ** 2
         xlow = y
 
-    x = lfilter(theta, 1.0,
-                xlow)  # apply FIR filter to calculate best estimate in
-    # accordance with GUM
+    # Apply FIR filter to calculate best estimate in accordance with GUM.
+    x = lfilter(theta, 1.0, xlow)
     x = np.roll(x, -int(shift))
 
     L = Utheta.shape[0]
     if len(theta.shape) == 1:
         theta = theta[:, np.newaxis]
-    UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(
-        np.trace(Ulow.dot(Utheta)))  # static part of uncertainty
+    # Static part of uncertainty.
+    UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))
     unc = np.zeros_like(y)
     for m in range(L, len(xlow)):
         # extract necessary part from input signal and apply formula from paper
@@ -137,13 +137,13 @@ def IIRuncFilter(x, noise, b, a, Uab):
         noise = noise * np.ones_like(x)  # translate iid noise to vector
 
     p = len(a) - 1
-    if not len(b) == len(a):
-        b = np.hstack(
-            (b, np.zeros((len(a) - len(b),))))  # adjust dimension for later use
 
-    [A, bs, c, b0] = tf2ss(b,
-                           a)  # from discrete-time transfer function to
-    # state space representation
+    # Adjust dimension for later use.
+    if not len(b) == len(a):
+        b = np.hstack((b, np.zeros((len(a) - len(b),))))
+
+    # From discrete-time transfer function to state space representation.
+    [A, bs, c, b0] = tf2ss(b, a)
 
     A = np.matrix(A)
     bs = np.matrix(bs)
@@ -162,8 +162,8 @@ def IIRuncFilter(x, noise, b, a, Uab):
     for k in range(p):
         Aabl[0, k, k] = -1
 
-    for n in range(len(
-            y)):  # implementation of the state-space formulas from the paper
+    # implementation of the state-space formulas from the paper
+    for n in range(len(y)):
         for k in range(p):  # derivative w.r.t. a_1,...,a_p
             dz1[:, k] = A * dz[:, k] + np.squeeze(Aabl[:, :, k]) * z
             phi[k] = c * dz[:, k] - b0 * z[k]

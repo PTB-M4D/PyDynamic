@@ -311,7 +311,7 @@ with
   parts of ``H``
 * ``N`` the filter order
 * ``tau`` the filter delay in samples
-* ``f`` the vector of frequencies at which H is given
+* ``f`` the vector of frequencies at which ``H`` is given
 * ``Fs`` the sampling frequency for the digital FIR filter
 
 Propagate the uncertainty associated with the measurement noise and the

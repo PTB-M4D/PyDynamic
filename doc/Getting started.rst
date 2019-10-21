@@ -47,7 +47,7 @@ On the project website you can find various examples illustrating the
 application of the software in the examples folder. Here is just a short list
 to get you started.
 
-Uncertainty propagation for the application of a FIR filter with coefficients
+Uncertainty propagation for the application of an FIR filter with coefficients
 *b* with which an uncertainty *ub* is associated. The filter input signal is
 *x* with known noise standard deviation *sigma*. The filter output signal
 is *y* with associated uncertainty *uy*.
