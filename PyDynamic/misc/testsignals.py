@@ -11,6 +11,7 @@ This module contains the following functions:
 * *rect*: Rectangular signal of given height and width :math:`t_1 - t_0`
 * *squarepulse*: Generates a series of rect functions to represent a square
   pulse signal
+* *sine*: Generate a sine signal
 """
 
 import itertools
@@ -21,7 +22,7 @@ from scipy.signal import periodogram
 from scipy.special import comb
 
 __all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse',
-           'corr_noise']
+           'corr_noise', 'sine']
 
 
 def shocklikeGaussian(time, t0, m0, sigma, noise=0.0):
@@ -140,6 +141,57 @@ def squarepulse(time, height, numpulse=4, noise=0.0):
         x += rect(time, (2 * k + 1) * width, (2 * k + 2) * width, height)
     if noise > 0:
         x += np.random.randn(len(time)) * noise
+    return x
+
+
+def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
+    r""" Generate a sine signal
+
+    Parameters
+    ----------
+        time : np.ndarray of shape (N,)
+            time instants
+        amp : float, optional
+             amplitude of the sine (default = 1.0)
+        freq : float, optional
+             frequency of the sine in Hz (default = :math:`2 * \pi`)
+        noise : float, optional
+            std of simulated signal noise (default = 0.0)
+
+    Returns
+    -------
+        x : np.ndarray of shape (N,)
+            signal amplitude at time instants
+    """
+    x = amp * np.sin(2 * np.pi / freq * time)
+    if noise > 0:
+        x += np.random.randn(len(time)) * noise
+    return x
+
+def multi_sine(time, amps, freqs, noise=0.0):
+    r"""Generate a multi-sine signal as summation of single sine signals
+
+    Parameters
+    ----------
+        time: np.ndarray of shape (N,)
+            time instants
+        amps: list or np.ndarray of floating point values
+            amplitudes of the sine signals
+        freqs: list or np.ndarray of floating point values
+            frequencies of the sine signals in Hz
+        noise: float, optional
+            std of simulated signal noise (default = 0.0)
+
+    Returns
+    -------
+        x: np.ndarray of shape (N,)
+            signal amplitude at time instants
+    """
+
+    x = np.zeros_like(time)
+    for amp, freq in zip(amps, freqs):
+        x += amp * np.sin(freq*time)
+    x += np.random.randn(len(x))*noise**2
     return x
 
 

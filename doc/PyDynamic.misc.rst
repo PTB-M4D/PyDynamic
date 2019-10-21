@@ -3,7 +3,7 @@ Miscellaneous
 
 
 Tools for 2nd order systems
----------------------------------------
+---------------------------
 
 .. automodule:: PyDynamic.misc.SecondOrderSystem
     :members:
@@ -18,6 +18,12 @@ Test signals
 ------------
 
 .. automodule:: PyDynamic.misc.testsignals
+    :members:
+
+Noise related functions
+-----------------------
+
+.. automodule:: PyDynamic.misc.noise
     :members:
 
 Miscellaneous useful helper functions

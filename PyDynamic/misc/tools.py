@@ -15,12 +15,13 @@ This module contains the following functions:
 """
 
 __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
-           'make_equidistant']
+           'make_equidistant', 'progress_bar']
 
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.sparse import issparse, eye
 from scipy.sparse.linalg.eigen.arpack import eigs
+import sys
 
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
@@ -55,7 +56,7 @@ def print_vec(vector, prec=5, retS=False, vertical=False):
 
 def print_mat(matrix, prec=5, vertical=False, retS=False):
     """ Print matrix (2D array) to the console or return as formatted string
-    
+
     Parameters
     ----------
         matrix : (M,N) array_like
@@ -65,7 +66,7 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
             print out vertical or not
         retS : bool
             print or return string
-         
+
     Returns
     -------
         s : str
@@ -256,3 +257,36 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
             raise NotImplementedError
 
     return t_new, y_new, uy_new
+
+
+def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo_indicator =".", fout=sys.stdout):
+    """
+    A simple and reusable progress-bar.
+
+    Parameters
+    ----------
+        count: int
+            current status of iterations, assumed to be zero-based
+        count_max: int
+            total number of iterations
+        width: int, optional
+            width of the actual progressbar (actual printed line will be wider)
+        prefix: str, optional
+            some text that will be printed in front of the bar (i.e.
+            "Progress of ABC:")
+        done_indicator: str, optional
+            what character is used as "already-done"-indicator
+        todo_indicator: str, optional
+            what character is used as "not-done-yet"-indicator
+        fout: file-object, optional
+            where the progress-bar should be written/printed to
+    """
+    x = int(width * (count+1) / count_max)
+    progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
+        PREFIX=prefix,
+        DONE=x * done_indicator,
+        NOTDONE=(width-x) * todo_indicator,
+        COUNT=count+1,
+        COUNTMAX=count_max)
+
+    fout.write(progressString)

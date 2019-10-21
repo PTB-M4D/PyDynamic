@@ -33,7 +33,7 @@ import warnings
 import numpy as np
 from scipy import sparse
 
-__all__ = ['GUM_DFT','GUM_iDFT', 'GUM_DFTfreq', 'DFT_transferfunction', 'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase', 'AmpPhase2Time', 'Time2AmpPhase']
+__all__ = ['GUM_DFT','GUM_iDFT', 'GUM_DFTfreq', 'DFT_transferfunction', 'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase', 'AmpPhase2Time', 'Time2AmpPhase', 'Time2AmpPhase_multi']
 
 def apply_window(x,Ux,window):
 	"""Apply a time domain window to the signal x of equal length and propagate uncertainties.
@@ -332,7 +332,7 @@ def DFT2AmpPhase(F,UF,keep_sparse=False, tol=1.0, return_type="separate"):
 		tol: float, optional
 			lower bound for A/uF below which a warning will be issued concerning unreliable results
 		return_type: str, optional
-			If "separate" then magnitude and phase are returned as seperate arrays. Otherwise the array [A, P] is returned
+			If "separate" then magnitude and phase are returned as separate arrays. Otherwise the array [A, P] is returned
 	Returns
 	-------
 	If `return_type` is `separate`:
@@ -491,6 +491,50 @@ def Time2AmpPhase(x,Ux):
 	A,P,UAP = DFT2AmpPhase(F,UF)	# propagate to amplitude and phase
 	return A,P,UAP
 
+def Time2AmpPhase_multi(x, Ux, selector=None):
+	"""Transformation from time domain to amplitude and phase for a set of M signals of the same type
+
+	Parameters
+	----------
+		x: np.ndarray of shape (M,N)
+			M time domain signals of length N
+		Ux: np.ndarray of shape (M,)
+			squared standard deviations representing noise variances of the signals x
+		selector: np.ndarray of shape (L,), optional
+			indices of amplitude and phase values that should be returned; default is 0:N-1
+	Returns
+	-------
+		A: np.ndarray of shape (M,N)
+			amplitude values
+		P: np.ndarray of shape (M,N)
+			phase values
+		UAP: np.ndarray of shape (M, 3N)
+			diagonals of the covariance matrices: [diag(UPP), diag(UAA), diag(UPA)]
+	"""
+	M, nx = x.shape
+	assert(len(Ux)==M)
+	N = nx//2+1
+	if not isinstance(selector, np.ndarray):
+		selector = np.arange(nx//2+1)
+	ns = len(selector)
+
+	A = np.zeros((M,ns))
+	P = np.zeros_like(A)
+	UAP = np.zeros((M, 3*ns))
+	CxCos = None
+	CxSin = None
+	for m in range(M):
+		F, UF, CX = GUM_DFT(x[m,:], Ux[m], CxCos, CxSin, returnC=True)
+		CxCos = CX["CxCos"]
+		CxSin = CX["CxSin"]
+		A_m, P_m, UAP_m = DFT2AmpPhase(F, UF, keep_sparse=True)
+		A[m,:] = A_m[selector]
+		P[m,:] = P_m[selector]
+		UAP[m,:ns] = UAP_m.data[0][:N][selector]
+		UAP[m,ns:2*ns] = UAP_m.data[1][UAP_m.offsets[1]:2*N+UAP_m.offsets[1]][selector]
+		UAP[m, 2*ns:] = UAP_m.data[0][N:][selector]
+
+	return A, P, UAP
 
 def AmpPhase2Time(A,P,UAP):
 	"""Transformation from amplitude and phase to time domain
@@ -522,17 +566,17 @@ def AmpPhase2Time(A,P,UAP):
 
 	# calculate inverse DFT
 	F = A*np.exp(1j*P)
-	x = np.irfft(F)
+	x = np.fft.irfft(F)
 
 	Pf = np.r_[P,-P[-2:0:-1]]		# phase values to take into account symmetric part
-	Cc = np.zeros((N,N/2+1))		# sensitivities wrt cosinus part
+	Cc = np.zeros((N,N//2+1))		# sensitivities wrt cosinus part
 	Cc[:,0] = np.cos(P[0]); Cc[:,-1] = np.cos(P[-1]+np.pi*np.arange(N))
-	for k in range(1,N/2):
+	for k in range(1,N//2):
 		Cc[:,k] = 2*np.cos(Pf[k]+k*beta)
 
-	Cs = np.zeros((N,N/2+1))		# sensitivities wrt sinus part
+	Cs = np.zeros((N,N//2+1))		# sensitivities wrt sinus part
 	Cs[:,0] = -A[0]*np.sin(P[0]); Cs[:,-1] = -A[-1]*np.sin(P[-1]+np.pi*np.arange(N))
-	for k in range(1,N/2):
+	for k in range(1,N//2):
 		Cs[:,k] = -A[k]*2*np.sin(Pf[k]+k*beta)
 
 	# calculate blocks of uncertainty matrix
@@ -543,7 +587,7 @@ def AmpPhase2Time(A,P,UAP):
 	else:
 		if isinstance(UAP,sparse.dia_matrix):
 			nrows = UAP.shape[0]
-			n = nrows/2
+			n = nrows//2
 			offset= UAP.offsets
 			diags = UAP.data
 			AA = diags[0][:n]
@@ -551,9 +595,9 @@ def AmpPhase2Time(A,P,UAP):
 			PP = diags[0][n:]
 			Ux = np.dot(Cc,prod(AA,Cc.T)) + 2*np.dot(Cc,prod(AP,Cs.T)) + np.dot(Cs,prod(PP,Cs.T))
 		else:
-			AA = UAP[:N/2+1,:N/2+1]
-			AP = UAP[:N/2+1, N/2+1:]
-			PP = UAP[N/2+1:,N/2+1:]
+			AA = UAP[:N//2+1,:N//2+1]
+			AP = UAP[:N//2+1, N//2+1:]
+			PP = UAP[N//2+1:,N//2+1:]
 			# propagate uncertainties
 			Ux = np.dot(Cc,np.dot(AA,Cc.T)) + 2*np.dot(Cc,np.dot(AP,Cs.T)) + np.dot(Cs,np.dot(PP,Cs.T))
 
