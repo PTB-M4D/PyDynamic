@@ -74,8 +74,7 @@ def _apply_window(x, Ux, window):
 
 
 def _prod(A, B):
-    """
-    Calculate the matrix-vector product, or vector-matrix product
+    """Calculate the matrix-vector product, or vector-matrix product
 
     Calculate the product that corresponds to diag(A)*B or A*diag(B),
     respectively; depending	on which of A,B is the matrix and which the vector.
@@ -99,8 +98,7 @@ def _prod(A, B):
 
 
 def _matprod(M, V, W, return_as_matrix=True):
-    """
-    Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2)
+    """Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2)
 
     Calculate the product for V=(V1,V2) and W=(W1,W2). M can be sparse,
     one-dimensional or a full (quadratic) matrix.
@@ -141,8 +139,7 @@ def _matprod(M, V, W, return_as_matrix=True):
 
 def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
             mask=None):
-    """
-    Calculation of the DFT with propagation of uncertainty
+    """Calculation of the DFT with propagation of uncertainty
 
     Calculation of the DFT of the time domain signal x and propagation of
     the squared uncertainty Ux associated with the time domain sequence x to
@@ -182,11 +179,9 @@ def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
         * Eichstädt and Wilkens [Eichst2016]_
     """
     L = 0
+    # Apply the chosen window for the application of the FFT.
     if isinstance(window, np.ndarray):
-        x, Ux = _apply_window(x, Ux,
-                              window)  # apply the chose window for the
-        # application of the FFT
-
+        x, Ux = _apply_window(x, Ux, window)
     if isinstance(N, int):
         L = N - len(x)
         assert (L >= 0)
@@ -199,22 +194,21 @@ def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
 
     if isinstance(mask, np.ndarray):
         F = np.fft.rfft(x)[mask]  # calculation of best estimate
-        F = np.r_[np.real(F), np.imag(
-            F)]  # in real,imag format in accordance with GUM S2
+        # In real, imag format in accordance with GUM S2
+        F = np.r_[np.real(F), np.imag(F)]
         warnings.warn(
             "In a future release, because of issues with the current version, "
             "\nthe handling of masked DFT arrays will be changed to use numpy "
-            "masked arrays.",
-            DeprecationWarning)
+            "masked arrays.", DeprecationWarning)
     else:
         F = np.fft.rfft(x)  # calculation of best estimate
-        F = np.r_[np.real(F), np.imag(
-            F)]  # in real,imag format in accordance with GUM S2
+        # In real, imag format in accordance with GUM S2
+        F = np.r_[np.real(F), np.imag(F)]
         mask = np.ones(len(F) // 2, dtype=bool)
     Nm = 2 * np.sum(mask)
 
-    beta = 2 * np.pi * np.arange(
-        N - L) / N  # for simplified calculation of sensitivities
+    # For simplified calculation of sensitivities
+    beta = 2 * np.pi * np.arange(N - L) / N
 
     # sensitivity matrix wrt cosine part
     Cxkc = lambda k: np.cos(k * beta)[np.newaxis, :]
@@ -258,13 +252,12 @@ def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
             print(
                 "Returning the three blocks (A,B,C) such that U = [[A,B],"
                 "[B.T,C]] instead.")
-            UF = (
-                UFCC, UFCS,
-                UFSS)  # return blocks only because of lack of memory
+            # Return blocks only because of lack of memory.
+            UF = (UFCC, UFCS, UFSS)
 
     if returnC:
-        return F, UF, {"CxCos": CxCos,
-                       "CxSin": CxSin}  # return sensitivities if requested
+        # Return sensitivities if requested.
+        return F, UF, {"CxCos": CxCos, "CxSin": CxSin}
     else:
         return F, UF
 
@@ -439,8 +432,7 @@ def DFT2AmpPhase(F, UF, keep_sparse=False, tol=1.0, return_type="separate"):
             'approach is recommended instead.')
         print(
             'The actual minimum value of A/uF is %.2e and the threshold is '
-            '%.2e' % (
-                (A / uF).min(), tol))
+            '%.2e' % ((A / uF).min(), tol))
     aR = R / A  # sensitivities
     aI = I / A
     pR = -I / A ** 2
@@ -566,9 +558,9 @@ def Time2AmpPhase(x, Ux):
 
     Parameters
     ----------
-         x: np.ndarray of shape (N,)
+        x: np.ndarray of shape (N,)
             time domain signal
-         Ux: np.ndarray of shape (N,N)
+        Ux: np.ndarray of shape (N,N)
             squared uncertainty associated with x
 
     Returns
@@ -895,14 +887,14 @@ def DFT_multiply(Y, F, UY, UF=None):
     YF = np.r_[RY * RF - IY * IF, RY * IF + IY * RF]  # apply product rule
     if not isinstance(UF, np.ndarray):  # second factor is known exactly
         UYRR, UYRI, UYII = calcU(F, UY)
-        UYF = np.vstack((np.hstack((UYRR, UYRI)), np.hstack(
-            (UYRI.T, UYII))))  # stack together covariance matrix
+        # Stack together covariance matrix
+        UYF = np.vstack((np.hstack((UYRR, UYRI)), np.hstack((UYRI.T, UYII))))
     else:  # both factors are uncertain
         URR_Y, URI_Y, UII_Y = calcU(F, UY)
         URR_F, URI_F, UII_F = calcU(Y, UF)
         URR = URR_Y + URR_F
         URI = URI_Y + URI_F
         UII = UII_Y + UII_F
-        UYF = np.vstack((np.hstack((URR, URI)), np.hstack(
-            (URI.T, UII))))  # stack together covariance matrix
+        # Stack together covariance matrix
+        UYF = np.vstack((np.hstack((URR, URI)), np.hstack((URI.T, UII))))
     return YF, UYF
