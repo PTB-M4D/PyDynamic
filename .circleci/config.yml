@@ -42,6 +42,11 @@ workflows:
                 ignore: /.*/
 jobs:
   build:
+    parameters:
+      version:
+        type: string
+        default: latest
+
     docker:
       - image: circleci/python:<< parameters.version >>
 
@@ -111,6 +116,11 @@ jobs:
           path: test-reports
 
   build_versions:
+    parameters:
+      version:
+        type: string
+        default: latest
+
     docker:
       - image: circleci/python:<< parameters.version >>
 
@@ -180,6 +190,10 @@ jobs:
           path: test-reports
 
   deploy:
+    parameters:
+      version:
+        type: string
+        default: latest
     docker:
       - image: circleci/python:<< parameters.version >>
 
