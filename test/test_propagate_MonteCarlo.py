@@ -114,38 +114,33 @@ def test_UMC(visualizeOutput=False):
 
 def test_UMC_generic(visualizeOutput=False):
 
-    Ux = 1e-2 * np.diag(np.abs(np.sin(time * Fs / 10)))
-
-    drawSamples = lambda size: np.random.multivariate_normal(x, Ux, size)
-    #params = {"b": b2, "a":[1]}  # does not work
-    evaluate = functools.partial(scipy.signal.lfilter, b2, [1])
+    x_shape = (5,6,7)
+    draw_samples = lambda size: np.random.rand(size, *x_shape)
+    evaluate = functools.partial(np.mean, axis=1)
 
     # run UMC
-    y, Uy, happr = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10)
-
+    y, Uy, happr, output_shape = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10)
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
     assert isinstance(happr, dict)
+    assert output_shape == (5,7)
+
+    # run without parallel computation
+    y, Uy, happr, output_shape = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, n_cpu=1)
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+    assert isinstance(happr, dict)
+    assert output_shape == (5,7)
 
     # run again, but only return all simulations
-    sims = UMC_generic(drawSamples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
+    y, Uy, happr, output_shape, sims = UMC_generic(draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, return_samples=True)
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+    assert isinstance(happr, dict)
+    assert output_shape == (5,7)
     assert isinstance(sims, dict)
-
-    if visualizeOutput:
-        # visualize input and mean of system response
-        plt.plot(time, x)
-        plt.plot(time, y)
-
-        # visualize uncertainty of output
-        plt.plot(time, y - np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
-        plt.plot(time, y + np.sqrt(np.diag(Uy)), linestyle="--", linewidth=1, color="red")
-
-        # visualize the bin-counts
-        key = list(happr.keys())[0]
-        for ts, be, bc in zip(time, happr[key]["bin-edges"].T, happr[key]["bin-counts"].T):
-            plt.scatter(ts*np.ones_like(bc), be[1:], bc)
-
-        plt.show()
+    assert sims["samples"][0].shape == x_shape
+    assert sims["results"][0].shape == output_shape
 
 
 def test_compare_MC_UMC():
