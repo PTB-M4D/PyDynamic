@@ -16,6 +16,7 @@ workflows:
       - build:
           version: "3.6"
       - build:
+          name: "sample"
           version: "3.7"
           # Include tag filter to trigger as well on tag pushes.
           filters:
@@ -26,7 +27,7 @@ workflows:
           # Create 'deploy' job to upload PyDynamic to PyPI.org on certain tag
           #   pushes, which successfully run 'build' job.
           requires:
-              - build
+              - sample
           filters:
               tags:
                 # Specify the tags which trigger the job as regular expression.
