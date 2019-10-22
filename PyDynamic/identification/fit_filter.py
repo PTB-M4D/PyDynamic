@@ -29,7 +29,7 @@ warnings.simplefilter('default')
 warnings.warn(
     "The module *identification* will be combined with the module "
     "*deconvolution* and renamed to *model_estimation* in the "
-    "next major release 3.0. From then on you should only use "
+    "next major release 1.3.0. From then on you should only use "
     "the new module *model_estimation* instead.",
     DeprecationWarning)
 
