@@ -7,13 +7,24 @@ workflows:
   # Create workflow for testing and deploying PyDynamic.
   build_and_deploy:
     jobs:
-      # Create 'build' job to test and install PyDynamic for every commit.
+      # Create 'build' job to test and install PyDynamic for every commit and
+      # all compatible Python versions.
       - build:
+          version: "3.7"
           # Include tag filter to trigger as well on tag pushes.
           filters:
               tags:
                 only: /.*/
+      - build_versions:
+          version: "3.5"
+          requires:
+              - build
+      - build_versions:
+          version: "3.6"
+          requires:
+            - build
       - deploy:
+          version: "3.7"
           # Create 'deploy' job to upload PyDynamic to PyPI.org on certain tag
           #   pushes, which successfully run 'build' job.
           requires:
@@ -27,8 +38,13 @@ workflows:
                 ignore: /.*/
 jobs:
   build:
+    parameters:
+      version:
+        type: string
+        default: latest
+
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:<< parameters.version >>
 
     working_directory: ~/repo
 
@@ -49,7 +65,7 @@ jobs:
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
-      # Install dependencies and Codecov reporter if necessary.
+      # Install dependencies if necessary.
       - run:
           name: Install dependencies
           command: |
@@ -60,7 +76,7 @@ jobs:
             - /home/circleci/.cache/pypoetry/virtualenvs
           key: v1-dependencies-{{ checksum "poetry.lock" }}
 
-      # Run tests with coverage report and upload results to Codecov!
+      # Run tests with coverage report!
       - run:
           name: Run tests
           command: |
@@ -79,17 +95,89 @@ jobs:
           command: |
             poetry run python3 setup.py install
 
-      # Store test results.
+      # Store test results as artifacts.
       - store_artifacts:
           path: test-reports
           destination: test-reports
 
+      # Show test results as summary on job page.
+      - store_test_results:
+          path: test-reports
+
+  build_versions:
+    parameters:
+      version:
+        type: string
+        default: latest
+
+    docker:
+      - image: circleci/python:<< parameters.version >>
+
+    working_directory: ~/repo
+
+    steps:
+      # Checkout code.
+      - checkout
+
+      # Create folder for test results.
+      - run:
+          name: Create test result folder
+          command: |
+            mkdir test-reports
+
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # Fallback to using the latest cache if no exact match is found.
+            - v1-dependencies-
+
+      # Install dependencies if necessary.
+      - run:
+          name: Install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install coverage pytest-cov
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      # Run tests with coverage report!
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            pytest -v --junitxml=test-reports/pytest.xml \
+            --cov=PyDynamic/ > test-reports/pytest.log
+
+      # Install PyDynamic.
+      - run:
+          name: Install PyDynamic
+          command: |
+            . venv/bin/activate
+            python3 setup.py install
+
+      # Store test results as artifacts.
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
+      # Show test results as summary on job page.
       - store_test_results:
           path: test-reports
 
   deploy:
+    parameters:
+      version:
+        type: string
+        default: latest
     docker:
-      - image: circleci/python:3
+      - image: circleci/python:<< parameters.version >>
 
     working_directory: ~/repo
 
@@ -115,7 +203,7 @@ jobs:
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
           paths:
-            - "venv"
+            - ./venv
 
       # Verify Git tag to version to ensure, only wanted versions are uploaded.
       - run:

@@ -96,6 +96,24 @@ def _prod(A, B):
     else:
         raise ValueError("Wrong dimension of inputs")
 
+	Parameters
+	----------
+		x : numpy.ndarray of shape (M,)
+			vector of time domain signal values
+		Ux : numpy.ndarray or float
+			covariance matrix associated with x, shape (M,M) or noise variance as float
+		N : int, optional
+			length of time domain signal for DFT; N>=len(x)
+		window : numpy.ndarray, optional of shape (M,)
+			vector of the time domain window values
+		CxCos : numpy.ndarray, optional
+			cosine part of sensitivity matrix
+		CxSin : numpy.ndarray, optional
+			sine part of sensitivity matrix
+		returnC : bool, optional
+			if true, return sensitivity matrix blocks for later use
+		mask: ndarray of dtype bool
+			calculate DFT values and uncertainties only at those frequencies where mask is `True`
 
 def _matprod(M, V, W, return_as_matrix=True):
     """Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2)
