@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "PyDynamic"
-version = "1.2.79"
+version = "1.2.93"
 license = "LGPL-3.0"
 description = "A software package for the analysis of dynamic measurements"
 authors = ["Sascha Eichstädt, Ian Smith, Thomas Bruns, Björn Ludwig, Maximilian Gruber <sascha.eichstaedt@ptb.de>"]
@@ -12,9 +12,8 @@ homepage = "https://github.com/PTB-PSt1/PyDynamic"
 documentation = "https://pydynamic.readthedocs.io/"
 keywords=['uncertainty', 'dynamic', 'deconvolution', 'metrology']
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Topic :: Utilities",
-    "Programming Language :: Python :: 3"]
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
 
