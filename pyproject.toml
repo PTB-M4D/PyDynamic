@@ -14,7 +14,7 @@ keywords=['uncertainty', 'dynamic', 'deconvolution', 'metrology']
 classifiers = [
     "Development Status :: 4 - Beta",
     "Topic :: Utilities",
-    "Programming Language :: Python :: 3"]
+    "Programming Language :: Python :: 3"
 ]
 
 
