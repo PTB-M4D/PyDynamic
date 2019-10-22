@@ -42,10 +42,11 @@ system's command line
 ```
 pip install PyDynamic
 ```
-This will download the latest version from the Python package repository and 
-copy it into your local folder of third-party libraries. Note that PyDynamic 
-uses **Python version 3.x**. Usage in any Python environment on your computer
- is then possible by
+This will download the latest version from the Python package repository
+and copy it into your local folder of third-party libraries. Note that
+PyDynamic runs with **Python version 3.4 to 3.7**. Usage in any Python
+ environment on
+your computer is then possible by
 ```python
 import PyDynamic
 ```
