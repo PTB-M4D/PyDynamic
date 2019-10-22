@@ -190,5 +190,4 @@ jobs:
       - run:
           name: Upload to PyPI
           command: |
-            poetry publish --username "${TWINE_USERNAME}" --password
-            "${TWINE_PASSWORD}" --no-interaction
+            poetry publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" --no-interaction
