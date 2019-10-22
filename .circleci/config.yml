@@ -16,10 +16,6 @@ workflows:
               tags:
                 only: /.*/
       - build_versions:
-          version: "3.5"
-          requires:
-              - build
-      - build_versions:
           version: "3.6"
           requires:
             - build
