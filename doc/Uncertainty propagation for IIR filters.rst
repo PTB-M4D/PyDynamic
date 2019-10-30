@@ -93,9 +93,12 @@ Implementation in PyDynamic
 
 ``y,Uy = IIRuncFilter(x,noise,b,a,Uab)``
 
-with - x the filter input signal sequency - noise the standard deviation
-of the measurement noise in x - b,a the IIR filter coefficient - Uab,
-the covariance matrix associated with :math:`(a_1,\ldots,b_{N_b})`
+with
+
+* ``x`` the filter input signal sequency
+* ``noise`` the standard deviation of the measurement noise in x
+* ``b,a`` the IIR filter coefficient
+* ``Uab`` the covariance matrix associated with :math:`(a_1,\ldots,b_{N_b})`
 
 Remark
 

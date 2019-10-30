@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-This module contains functions for the propagation of uncertainties through the application of a digital filter using the GUM approach.
+This module contains functions for the propagation of uncertainties through
+the application of a digital filter using the GUM approach.
 
 This modules contains the following functions:
-* FIRuncFilter: Uncertainty propagation for signal y and uncertain FIR filter theta
-* IIRuncFilter: Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
-# Note: The Elster-Link paper for FIR filters assumes that the autocovariance is known and that noise is stationary!
+* *FIRuncFilter*: Uncertainty propagation for signal y and uncertain FIR
+  filter theta
+* *IIRuncFilter*: Uncertainty propagation for the signal x and the uncertain
+  IIR filter (b,a)
+
+# Note: The Elster-Link paper for FIR filters assumes that the autocovariance
+is known and that noise is stationary!
 
 """
 import numpy as np
@@ -16,7 +21,7 @@ from ..misc.tools import trimOrPad
 
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
 
-def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
+def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
 
     Parameters
@@ -184,27 +189,28 @@ def FIRuncFilter(y,sigma_noise,theta,Utheta=None,shift=0,blow=None,kind="corr"):
 
 
 def IIRuncFilter(x, noise, b, a, Uab):
-    """Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
+    """
+    Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
     Parameters
     ----------
-        x: np.ndarray
-            filter input signal
-        noise: float
-            signal noise standard deviation
-        b: np.ndarray
-            filter numerator coefficients
-        a: np.ndarray
-            filter denominator coefficients
-        Uab: np.ndarray
-            covariance matrix for (a[1:],b)
+    x: np.ndarray
+        filter input signal
+    noise: float
+        signal noise standard deviation
+    b: np.ndarray
+        filter numerator coefficients
+    a: np.ndarray
+        filter denominator coefficients
+    Uab: np.ndarray
+        covariance matrix for (a[1:],b)
 
     Returns
     -------
-        y: np.ndarray
-            filter output signal
-        Uy: np.ndarray
-            uncertainty associated with y
+    y: np.ndarray
+        filter output signal
+    Uy: np.ndarray
+        uncertainty associated with y
 
     References
     ----------
@@ -213,19 +219,22 @@ def IIRuncFilter(x, noise, b, a, Uab):
     """
 
     if not isinstance(noise, np.ndarray):
-        noise = noise * np.ones_like(x)    # translate iid noise to vector
+        noise = noise * np.ones_like(x)  # translate iid noise to vector
 
     p = len(a) - 1
-    if not len(b) == len(a):
-        b = np.hstack((b, np.zeros((len(a) - len(b),))))    # adjust dimension for later use
 
-    [A, bs, c, b0] = tf2ss(b, a) # from discrete-time transfer function to state space representation
+    # Adjust dimension for later use.
+    if not len(b) == len(a):
+        b = np.hstack((b, np.zeros((len(a) - len(b),))))
+
+    # From discrete-time transfer function to state space representation.
+    [A, bs, c, b0] = tf2ss(b, a)
 
     A = np.matrix(A)
     bs = np.matrix(bs)
     c = np.matrix(c)
 
-    phi = np.zeros((2*p+1, 1))
+    phi = np.zeros((2 * p + 1, 1))
     dz = np.zeros((p, p))
     dz1 = np.zeros((p, p))
     z = np.zeros((p, 1))
@@ -238,19 +247,20 @@ def IIRuncFilter(x, noise, b, a, Uab):
     for k in range(p):
         Aabl[0, k, k] = -1
 
-    for n in range(len(y)):     # implementation of the state-space formulas from the paper
-        for k in range(p):      # derivative w.r.t. a_1,...,a_p
+    # implementation of the state-space formulas from the paper
+    for n in range(len(y)):
+        for k in range(p):  # derivative w.r.t. a_1,...,a_p
             dz1[:, k] = A * dz[:, k] + np.squeeze(Aabl[:, :, k]) * z
             phi[k] = c * dz[:, k] - b0 * z[k]
-        phi[p + 1] = -np.matrix(a[1:]) * z + x[n]       # derivative w.r.t. b_0
-        for k in range(p + 2, 2 * p + 1):               # derivative w.r.t. b_1,...,b_p
+        phi[p + 1] = -np.matrix(a[1:]) * z + x[n]  # derivative w.r.t. b_0
+        for k in range(p + 2, 2 * p + 1):  # derivative w.r.t. b_1,...,b_p
             phi[k] = z[k - (p + 1)]
         P = A * P * A.T + noise[n] ** 2 * (bs * bs.T)
         y[n] = c * z + b0 * x[n]
         Uy[n] = phi.T * Uab * phi + c * P * c.T + b[0] ** 2 * noise[n] ** 2
-        z = A * z + bs * x[n]   # update of the state equations
+        z = A * z + bs * x[n]  # update of the state equations
         dz = dz1
 
-    Uy = np.sqrt(np.abs(Uy))    # calculate point-wise standard uncertainties
+    Uy = np.sqrt(np.abs(Uy))  # calculate point-wise standard uncertainties
 
     return y, Uy

@@ -1,8 +1,7 @@
-ipython>=7.6.0
-jupyter==1.0.0
+ipykernel
 matplotlib
-pytest==5.0.1
+pytest
 numpy
 pandas
 scipy
-sympy==1.4
+sympy

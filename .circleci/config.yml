@@ -28,7 +28,7 @@ workflows:
 jobs:
   build:
     docker:
-      - image: circleci/python:3
+      - image: circleci/python:3.7
 
     working_directory: ~/repo
 
@@ -55,6 +55,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
+            pip install --upgrade pip
             pip install -r requirements.txt
             pip install coverage pytest-cov
 
@@ -68,7 +69,8 @@ jobs:
           name: Run tests
           command: |
             . venv/bin/activate
-            pytest -v --cov=PyDynamic/ > test-reports/pytest.log
+            pytest -v --junitxml=test-reports/pytest.xml \
+            --cov=PyDynamic/ > test-reports/pytest.log
 
       # Upload coverage report.
       - run:
@@ -94,7 +96,7 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:3
+      - image: circleci/python:3.7
 
     working_directory: ~/repo
 

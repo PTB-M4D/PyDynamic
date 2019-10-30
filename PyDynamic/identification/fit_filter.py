@@ -13,7 +13,7 @@ This module contains the following functions:
 .. deprecated:: 1.2.71
           The module *identification* will be combined with the module
           *deconvolution* and renamed to *model_estimation* in the next
-          major release 3.0. From then on you should only use the new module
+          major release 1.3.0. From then on you should only use the new module
           *model_estimation* instead.
 """
 import warnings
@@ -29,7 +29,7 @@ warnings.simplefilter('default')
 warnings.warn(
     "The module *identification* will be combined with the module "
     "*deconvolution* and renamed to *model_estimation* in the "
-    "next major release 3.0. From then on you should only use "
+    "next major release 1.3.0. From then on you should only use "
     "the new module *model_estimation* instead.",
     DeprecationWarning)
 
@@ -85,7 +85,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     -------
         b,a:    IIR filter coefficients as numpy arrays
         tau:    filter time delay in samples
-    
+
     References
     ----------
     * Eichstädt et al. 2010 [Eichst2010]_

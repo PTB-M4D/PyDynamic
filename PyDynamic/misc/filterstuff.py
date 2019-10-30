@@ -93,7 +93,7 @@ def mapinside(a):
     Parameters
     ----------
         a: ndarray
-           polynomial coefficients    
+           polynomial coefficients
     Returns
     -------
         a: ndarray
@@ -139,7 +139,10 @@ def kaiser_lowpass(L, fcut, Fs, beta=8.0):
 
 
 def isstable(b, a, ftype='digital'):
-    """Determine whether IIR filter (b,a) is stable
+    """Determine whether `IIR filter (b,a)` is stable
+
+    Determine whether `IIR filter (b,a)` is stable by checking roots of the
+    polynomial ´a´.
     
     Parameters
     ----------
@@ -155,30 +158,22 @@ def isstable(b, a, ftype='digital'):
             whether filter is stable or not
                 
     """
-
+    v = np.roots(a)
     if ftype == 'digital':
-        v = np.roots(a)
-        if np.any(np.abs(v) > 1.0):
-            return False
-        else:
-            return True
+        return not np.any(np.abs(v) > 1.0)
     elif ftype == 'analog':
-        v = np.roots(a)
-        if np.any(np.real(v) < 0):
-            return False
-        else:
-            return True
+        return not np.any(np.real(v) < 0)
 
 
-def savitzky_golay(y, window_size, order, deriv=0, rate=1):
-    """Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
-    
+def savitzky_golay(y, window_size, order, deriv=0, delta=1.0):
+    """Smooth (and optionally differentiate) data with a Savitzky-Golay filter
+
     The Savitzky-Golay filter removes high frequency noise from data.
     It has the advantage of preserving the original shape and
     features of the signal better than other types of filtering
     approaches, such as moving averages techniques.
-    
-    Source obtained from scipy cookbook (online), downloaded 2013-09-13    
+
+    Source obtained from scipy cookbook (online), downloaded 2013-09-13
 
     Parameters
     ----------
@@ -189,9 +184,15 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         order: int
            the order of the polynomial used in the filtering. Must be less
            then `window_size` - 1.
-        deriv: int
-           the order of the derivative to compute (default = 0 means only
-           smoothing)
+        deriv: int, optional
+            The order of the derivative to compute.  This must be a
+            nonnegative integer.  The default is 0, which means to filter
+            the data without differentiating.
+        delta: float, optional
+            The spacing of the samples to which the filter will be applied.
+            This is only used if deriv > 0. This includes a factor
+            :math:`n! / h^n`, where :math:`n` is represented by `deriv` and
+            :math:`1/h` by `delta`.
 
     Returns
     -------
@@ -229,7 +230,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     # precompute coefficients
     b = np.mat([[k ** i for i in order_range] for k in
                 range(-half_window, half_window + 1)])
-    m = np.linalg.pinv(b).A[deriv] * rate ** deriv * factorial(deriv)
+    m = np.linalg.pinv(b).A[deriv] * factorial(deriv) / delta ** deriv
     # pad the signal at the extremes with
     # values taken from the signal itself
     firstvals = y[0] - np.abs(y[1:half_window + 1][::-1] - y[0])
