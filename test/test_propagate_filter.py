@@ -1,12 +1,9 @@
 """
-
-Uncertainty propagation for a FIR lowpass filter with uncertain cut-off frequency for a rectangular signal.
-
+Perform test for uncertainty.propagate_filter
 """
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pytest import raises
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
@@ -106,3 +103,6 @@ def test_FIRuncFilter(makePlots=False):
             plt.ylabel("signal uncertainty/ au")
             plt.legend()
             plt.show()
+
+def test_IIRuncFilter():
+    pass

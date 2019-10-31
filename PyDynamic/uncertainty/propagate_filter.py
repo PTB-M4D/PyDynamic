@@ -14,6 +14,7 @@ This modules contains the following functions:
 is known and that noise is stationary!
 
 """
+
 import numpy as np
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, tf2ss

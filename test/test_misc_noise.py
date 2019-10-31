@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-
 Perform tests on noise methods.
-
 """
 
 import numpy as np
