@@ -23,23 +23,45 @@ colors = {"violet": 2,
           "brown": -2}
 
 
-def getAlpha(alpha, colorString):
-    # raise warning, if alpha and color are non-None
-    if (alpha is not None) and (colorString not in [None, "white"]):
-        raise UserWarning("You have specified a colorString and alpha. Only alpha will be considered, the colorString is ignored!")
+def get_alpha(color_value = 0):
+    """
+    Translate a color (given as string) into an exponent alpha or directly
+    hand through a given numeric value of alpha.
 
-    # define alpha from color-string, if no alpha-argument was handed over
-    if alpha is None:
-        if colorString in colors.keys():
-            alpha = colors[colorString]
-        else: raise NotImplementedError(
-            "Specified color ({COLOR}) of noise is not available. Please choose from {COLORS} or define alpha directly.".format(COLOR=colorString, COLORS='/'.join(colors.keys())))
-    return alpha
+    Parameters:
+    -----------
+        color_value: str, int or float
+            if string -> check against known colornames -> return alpha
+            if numeric -> directly return value
+
+    Returns:
+    --------
+        alpha: float
+    """
+
+    if isinstance(color_value, str):
+        if color_value in colors.keys():
+            alpha = colors[color_value]
+        else: 
+            raise NotImplementedError(
+            "Specified color ({COLOR}) of noise is not available. " \
+            "Please choose from {COLORS} or define alpha directly." \
+            .format(COLOR=color_value, COLORS='/'.join(colors.keys())))
+
+    elif isinstance(color_value, (float, int)):
+        alpha = color_value
+
+    else:
+        raise IOError("No valid string or numeric value for alpha given")
+
+    return float(alpha)
+
 
 def white_gaussian(N, mean = 0, std = 1):
     return np.random.normal(loc=mean, scale = std, size = N)
 
-def power_law_noise(N = None, w = None, alpha = None, color = "white", mean = 0, std = 1):
+
+def power_law_noise(N = None, w = None, color_value = "white", mean = 0, std = 1):
     """
     Generate colored noise by
     * generate white gaussian noise
@@ -59,7 +81,7 @@ def power_law_noise(N = None, w = None, alpha = None, color = "white", mean = 0,
         w = white_gaussian(N)
 
     # get alpha either directly or from color-string
-    alpha = getAlpha(alpha, color)
+    alpha = get_alpha(color_value)
 
     # (real) fourier transform to get spectrum
     sp   = np.fft.rfft(w)
@@ -82,7 +104,8 @@ def power_law_noise(N = None, w = None, alpha = None, color = "white", mean = 0,
 
     return w_filt
 
-def power_law_acf(N, color = "white", alpha = None, std = 1, returnMatrix = False):
+
+def power_law_acf(N, color_value = "white", std = 1, returnMatrix = False):
     """
     Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "alpha" is provided, "color"-argument is ignored.
 
@@ -90,7 +113,7 @@ def power_law_acf(N, color = "white", alpha = None, std = 1, returnMatrix = Fals
     Sww and Rww form a Fourier-pair. Therefore Rww = ifft(Sww).
     """
     # process the arguments
-    alpha = getAlpha(alpha, color)
+    alpha = get_alpha(color_value)
 
     # get index of frequencies (see notes of same line at power_law_noise() )
     freq = np.fft.rfftfreq(2*N, d=1/(2*N)) + 1
@@ -139,12 +162,12 @@ def ARMA(length, phi=0.0, theta=0.0, std=1.0):
     """
 
     # convert to numpy.ndarray
-    if isinstance(phi, float):
+    if isinstance(phi, (float, int)):
         phi = np.array([phi])
     elif isinstance(phi, list):
         phi = np.array(phi)
 
-    if isinstance(theta, float):
+    if isinstance(theta, (float, int)):
         theta = np.array([theta])
     elif isinstance(theta, list):
         theta = np.array(theta)
