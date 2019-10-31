@@ -82,7 +82,7 @@ def power_law_noise(N = None, w = None, alpha = None, color = "white", mean = 0,
 
     return w_filt
 
-def power_law_acf(N, color = "white", alpha = None, mean = 0, std = 1, returnMatrix = False):
+def power_law_acf(N, color = "white", alpha = None, std = 1, returnMatrix = False):
     """
     Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "alpha" is provided, "color"-argument is ignored.
 
