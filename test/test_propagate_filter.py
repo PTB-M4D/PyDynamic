@@ -60,9 +60,9 @@ def test_FIRuncFilter(makePlots=False):
 
             # get an instance of noise, the covariance and the covariance-matrix with the specified color
             color = "white"
-            noise = power_law_noise(N=nTime, color=color, std=sigma_noise)
-            Ux = power_law_acf(nTime, color=color, std=sigma_noise)
-            Ux_matrix = power_law_acf(nTime, color=color, std=sigma_noise, returnMatrix=True)
+            noise = power_law_noise(N=nTime, color_value=color, std=sigma_noise)
+            Ux = power_law_acf(nTime, color_value=color, std=sigma_noise)
+            Ux_matrix = power_law_acf(nTime, color_value=color, std=sigma_noise, returnMatrix=True)
 
             # input signal
             x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
