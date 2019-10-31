@@ -103,19 +103,19 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # V = N * SP * N^T + M * S * M^T
                 # N, M are defined as in the paper
                 # and SP is the covariance of input-noise prior to the observed time-interval
-                # (SP needs be available len(blow)-timesteps into the past. In this code special assumptions are made.)
+                # (SP needs be available len(blow)-timesteps into the past. Here it is 
+                # assumed, that SP is constant with the first value of sigma2)
 
                 # V needs to be extended to cover Ntheta timesteps more into the future
                 sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
 
                 N = toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
                 M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
-                SP  = np.diag(sigma2[0] * np.ones_like(blow))
+                SP = np.diag(sigma2[0] * np.ones_like(blow))
                 S = np.diag(sigma2_extended)
 
-                V = N.dot(SP).dot(N.T) + M.dot(S).dot(M.T)
-
                 # Ulow is to be sliced from V, see below
+                V = N.dot(SP).dot(N.T) + M.dot(S).dot(M.T)
 
             elif kind == "corr":
 
@@ -127,16 +127,16 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # calculate Bcorr
                 Bcorr = np.correlate(blow, blow, 'full')
 
-                # pad/crop length of Bcorr to
+                # pad/crop length of Bcorr on both sides
                 Bcorr_half = trimOrPad(Bcorr[len(blow)-1:], Ntheta)                  # select the right half of Bcorr, then pad or crop to length Ntheta
                 Bcorr_adjusted = np.pad(Bcorr_half, (Ntheta-1, 0), mode="reflect")   # restore symmetric correlation of length (2*Ntheta-1)
 
                 # pad or crop length of sigma2, then reflect the lower half to the left
-                # [0 1 2 3 4 5 6 7] --> [-3 -2 -1 0 1 2 3 4 5 6 7]
+                # [0 1 2 3 4 5 6 7] --> [3 2 1 0 1 2 3 4 5 6 7]
                 sigma2 = trimOrPad(sigma2, 2*Ntheta)
                 sigma2_reflect = np.pad(sigma2, (Ntheta-2, 0), mode="reflect")
 
-                ycorr = np.correlate(sigma2_reflect,Bcorr_adjusted,mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
+                ycorr = np.correlate(sigma2_reflect, Bcorr_adjusted, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
                 Ulow = toeplitz(ycorr)
 
         xlow = lfilter(blow,1.0,y)
@@ -151,7 +151,8 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # V needs to be extended to cover Ntheta timesteps more into the future
                 sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
 
-                V = np.diag(sigma2_extended) #  this is not Ulow, same problem as in the case of a provided blow (see above)
+                # Ulow is to be sliced from V, see below
+                V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
 
             elif kind == "corr":
                 Ulow = toeplitz(trimOrPad(sigma2, Ntheta))
@@ -162,6 +163,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     x = lfilter(theta,1.0,xlow)
     x = np.roll(x,-int(shift))
 
+    # add dimension to theta, otherwise transpose won't work
     if len(theta.shape)==1:
         theta = theta[:, np.newaxis]
 
