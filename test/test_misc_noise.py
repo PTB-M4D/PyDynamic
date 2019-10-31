@@ -100,7 +100,7 @@ def test_ARMA():
 
     for theta, phi in zip(theta_list, phi_list):
 
-        # definitions        
+        # definitions
         N = np.random.choice(possible_lengths)
         std = 0.5
 

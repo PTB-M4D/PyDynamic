@@ -103,7 +103,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # V = N * SP * N^T + M * S * M^T
                 # N, M are defined as in the paper
                 # and SP is the covariance of input-noise prior to the observed time-interval
-                # (SP needs be available len(blow)-timesteps into the past. Here it is 
+                # (SP needs be available len(blow)-timesteps into the past. Here it is
                 # assumed, that SP is constant with the first value of sigma2)
 
                 # V needs to be extended to cover Ntheta timesteps more into the future
