@@ -91,6 +91,9 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0, std = 1
         w_filt: filtered noise signal
     """
 
+    if (N is not None) and (w is not None):
+        raise UserWarning("You specified N and w. Ignoring N.")
+
     # draw white gaussian noise, or take the provided w
     if isinstance(w, np.ndarray):
         N = len(w)
