@@ -110,8 +110,8 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
     # note:
     # * this gives [1., 2., 3., ..., N+1] (in accordance with [Zhivomirov2018])
     # * ==> not W_filt ~ f^alpha, but rather W_filt ~ k^alpha
-    N_2 = N//2 + 1
-    k = np.linspace(0,N_2,N_2) + 1
+    steps = N//2 + 1
+    k = np.linspace(0, steps, steps) + 1
 
     # generate the filtered spectrum by multiplication with f^(alpha/2)
     W_filt = W * np.power(k, alpha/2)
@@ -126,9 +126,9 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
     return w_filt
 
 
-def power_law_acf(N, color_value = "white", std = 1, returnMatrix = False):
+def power_law_acf(N, color_value = "white", std = 1.0):
     """
-    Return the theoretic autocovariance-matrix (Rww) of different colors of noise. If "alpha" is provided, "color"-argument is ignored.
+    Return the theoretic right-sided autocorrelation (Rww) of different colors of noise. 
 
     Colors of noise are defined to have a power spectral density (Sww) proportional to `f^\alpha`.
     Sww and Rww form a Fourier-pair. Therefore Rww = ifft(Sww).
@@ -137,22 +137,20 @@ def power_law_acf(N, color_value = "white", std = 1, returnMatrix = False):
     alpha = get_alpha(color_value)
 
     # get index of frequencies (see notes of same line at power_law_noise() )
-    freq = np.fft.rfftfreq(2*N, d=1/(2*N)) + 1
+    steps = (2*N)//2 + 1
+    k = np.linspace(0, steps, steps) + 1
 
     # generate and transform the power spectral density Sww
-    Sww = np.power(freq, alpha)
+    Sww = np.power(k, alpha)
 
     # normalize Sww to have the same overall power as the white-noise-PSD it is transformed from
-    Sww = Sww / np.sum(Sww) * len(freq)   # probably unnecessary because of later normalization of Rww
+    #Sww = Sww / np.sum(Sww) * len(k)   # probably unnecessary because of later normalization of Rww
 
     # inverse Fourier-transform to get Autocorrelation from PSD/Sww
     Rww = np.fft.irfft(Sww, 2*N)
     Rww = std**2 * Rww / Rww[0]           # This normalization ensures the given standard-deviation
 
-    if returnMatrix:
-        return toeplitz(Rww[:N])
-    else:
-        return Rww[:N]
+    return Rww[:N]
 
 
 def ARMA(length, phi=0.0, theta=0.0, std=1.0):
