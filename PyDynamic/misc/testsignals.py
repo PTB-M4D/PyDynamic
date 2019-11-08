@@ -97,8 +97,9 @@ def rect(time, t0, t1, height=1, noise=0.0):
             time instant of rect rhs
         height : float
             signal maximum
-        noise :float, optional
-            std of simulated signal noise
+        noise :float or numpy.ndarray of shape (N,), optional
+            float: standard deviation of additive white gaussian noise
+            ndarray: user-defined additive noise
 
     Returns
     -------
