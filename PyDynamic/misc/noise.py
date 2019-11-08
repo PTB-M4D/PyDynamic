@@ -119,7 +119,8 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
     w_filt = np.fft.irfft(W_filt, N)
 
     # adjust to given mean + std
-    w_filt = mean + std * (w_filt - np.mean(w_filt)) / np.std(w_filt)
+    w_filt = (w_filt - np.mean(w_filt)) / np.std(w_filt)
+    w_filt = mean + std * w_filt
 
     return w_filt
 
