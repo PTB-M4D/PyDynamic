@@ -11,7 +11,7 @@ This module contains the following functions:
 import numpy as np
 from scipy.linalg import toeplitz
 
-__all__ = ['white_gaussian', 'power_law_noise', 'power_law_acf', 'ARMA']
+__all__ = ['get_alpha', 'white_gaussian', 'power_law_noise', 'power_law_acf', 'ARMA']
 
 
 # define an alpha for every color
