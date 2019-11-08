@@ -61,7 +61,7 @@ def white_gaussian(N, mean = 0, std = 1):
     return np.random.normal(loc=mean, scale = std, size = N)
 
 
-def power_law_noise(N = None, w = None, color_value = "white", mean = 0, std = 1):
+def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std = 1.0):
     """
     Generate colored noise by
     * generate white gaussian noise
@@ -97,8 +97,6 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0, std = 1
     # draw white gaussian noise, or take the provided w
     if isinstance(w, np.ndarray):
         N = len(w)
-        mean = np.mean(w)
-        std  = np.std(w)
     else:
         w = white_gaussian(N)
 
