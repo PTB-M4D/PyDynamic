@@ -137,7 +137,7 @@ def power_law_acf(N, color_value = "white", std = 1.0):
     alpha = get_alpha(color_value)
 
     # get index of frequencies (see notes of same line at power_law_noise() )
-    steps = (2*N)//2 + 1
+    steps = (N)//2 + 1
     k = np.linspace(0, steps, steps) + 1
 
     # generate and transform the power spectral density Sww
@@ -147,10 +147,10 @@ def power_law_acf(N, color_value = "white", std = 1.0):
     #Sww = Sww / np.sum(Sww) * len(k)   # probably unnecessary because of later normalization of Rww
 
     # inverse Fourier-transform to get Autocorrelation from PSD/Sww
-    Rww = np.fft.irfft(Sww, 2*N)
+    Rww = np.fft.irfft(Sww, N)
     Rww = std**2 * Rww / Rww[0]           # This normalization ensures the given standard-deviation
 
-    return Rww[:N]
+    return Rww
 
 
 def ARMA(length, phi=0.0, theta=0.0, std=1.0):
