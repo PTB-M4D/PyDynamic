@@ -70,6 +70,25 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0, std = 1
     * further adjustments to fit to specified mean/std
 
     based on [Zhivomirov2018](A Method for Colored Noise Generation)
+
+    Parameters:
+    -----------
+        N: int
+            length of noise to be generated
+        w: numpy.ndarray
+            user-defined white noise
+            if provided, `N` is ignored!
+        color_value: str, int or float
+            if string -> check against known colornames
+            if numeric -> used as alpha to shape PSD
+        mean: float
+            mean of the output signal
+        std: float
+            standard deviation of the output signal
+
+    Returns:
+    --------
+        w_filt: filtered noise signal
     """
 
     # draw white gaussian noise, or take the provided w
