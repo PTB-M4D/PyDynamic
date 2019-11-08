@@ -110,7 +110,8 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
     # note:
     # * this gives [1., 2., 3., ..., N+1] (in accordance with [Zhivomirov2018])
     # * ==> not W_filt ~ f^alpha, but rather W_filt ~ k^alpha
-    k = np.linspace(1,N,N)
+    N_2 = N//2 + 1
+    k = np.linspace(0,N_2,N_2) + 1
 
     # generate the filtered spectrum by multiplication with f^(alpha/2)
     W_filt = W * np.power(k, alpha/2)
