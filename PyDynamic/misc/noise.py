@@ -106,7 +106,7 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0, std = 1
     alpha = get_alpha(color_value)
 
     # (real) fourier transform to get spectrum
-    sp   = np.fft.rfft(w)
+    W = np.fft.rfft(w)
 
     # get index of frequencies
     # note:
@@ -116,10 +116,10 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0, std = 1
     freq = np.fft.rfftfreq(N, d=1/N) + 1
 
     # generate the filtered spectrum by multiplication with f^(alpha/2)
-    sp_filt = sp * np.power(freq, alpha/2)
+    W_filt = W * np.power(freq, alpha/2)
 
     # calculate the filtered time-series (inverse fourier of modified spectrum)
-    w_filt = np.fft.irfft(sp_filt, N)
+    w_filt = np.fft.irfft(W_filt, N)
 
     # adjust to given mean + std
     w_filt = mean + std * (w_filt - np.mean(w_filt)) / np.std(w_filt)
