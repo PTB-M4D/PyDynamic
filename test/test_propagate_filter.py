@@ -4,6 +4,7 @@ Perform test for uncertainty.propagate_filter
 
 import matplotlib.pyplot as plt
 import numpy as np
+import time as time_measure
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
@@ -46,62 +47,68 @@ def test_FIRuncFilter(makePlots=False):
 
         print(kind)
 
-        if kind == "float":
-            # input signal + run methods
-            x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)
+        for Utheta in [None, Ub]:
 
-            y, Uy = FIRuncFilter(x, sigma_noise, b1, Ub, blow=b2, kind=kind)       # apply uncertain FIR filter (GUM formula)
-            #yMC,UyMC = MC(x,sigma_noise,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
+            start = time_measure.time()
+
+            if kind == "float":
+                # input signal + run methods
+                x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)
+
+                y, Uy = FIRuncFilter(x, sigma_noise, b1, Utheta=Utheta, blow=b2, kind=kind) # apply uncertain FIR filter (GUM formula)
+                
+                assert len(y) == len(x)
+                assert len(Uy) == len(x)
+
+            elif kind == "corr":
+
+                # get an instance of noise, the covariance and the covariance-matrix with the specified color
+                color = "white"
+                noise = power_law_noise(N=nTime, color_value=color, std=sigma_noise)
+                Ux = power_law_acf(nTime, color_value=color, std=sigma_noise)
+
+                # input signal
+                x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
+
+                # run methods
+                y, Uy = FIRuncFilter(x, Ux, b1, Utheta=Utheta, blow=b2, kind=kind)  # apply uncertain FIR filter (GUM formula)
+
+                assert len(y) == len(x)
+                assert len(Uy) == len(x)
             
-            assert len(y) == len(x)
-            assert len(Uy) == len(x)
+            elif kind == "diag":
+                sigma_diag = sigma_noise * ( 1 + np.heaviside(np.arange(len(time)) - len(time)//2,0) )    # std doubles after half of the time
+                noise = sigma_diag * white_gaussian(len(time))
 
-        elif kind == "corr":
+                # input signal + run methods
+                x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
 
-            # get an instance of noise, the covariance and the covariance-matrix with the specified color
-            color = "white"
-            noise = power_law_noise(N=nTime, color_value=color, std=sigma_noise)
-            Ux = power_law_acf(nTime, color_value=color, std=sigma_noise)
+                y, Uy = FIRuncFilter(x, sigma_diag, b1, Utheta=Utheta, blow=b2, kind=kind)  # apply uncertain FIR filter (GUM formula)
 
-            # input signal
-            x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
+                assert len(y) == len(x)
+                assert len(Uy) == len(x)
+            
+            # 
+            end = time_measure.time()
+            print("Execution for Utheta of type {TYPE:30s} took {DT:0.6f} seconds".format(TYPE=str(type(Utheta)), DT=end-start))
 
-            # run methods
-            y, Uy = FIRuncFilter(x, Ux, b1, Ub, blow=b2, kind=kind)              # apply uncertain FIR filter (GUM formula)
-            #yMC,UyMC = MC(x,Ux_matrix,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
+            # plot if necessary
+            if makePlots:
+                plt.figure(1); plt.cla()
+                plt.plot(time, x, label="input")
+                plt.plot(time, y, label="output")
+                plt.xlabel("time / au")
+                plt.ylabel("signal amplitude / au")
+                plt.legend()
 
-            assert len(y) == len(x)
-            assert len(Uy) == len(x)
-        
-        elif kind == "diag":
-            sigma_diag = sigma_noise * ( 1 + np.heaviside(np.arange(len(time)) - len(time)//2,0) )    # std doubles after half of the time
-            noise = sigma_diag * white_gaussian(len(time))
+                plt.figure(2);plt.cla()
+                plt.plot(time, Uy, label="FIR formula")
+                plt.plot(time, np.sqrt(np.diag(UyMC)), label="Monte Carlo")
+                plt.xlabel("time / au")
+                plt.ylabel("signal uncertainty/ au")
+                plt.legend()
+                plt.show()
 
-            # input signal + run methods
-            x = rect(time,100*Ts,250*Ts,1.0,noise=noise)
-
-            y, Uy = FIRuncFilter(x, sigma_diag, b1, Ub, blow=b2, kind=kind)            # apply uncertain FIR filter (GUM formula)
-            #yMC,UyMC = MC(x,sigma_diag,b1,[1.0],Ub,runs=runs,blow=b2)             # apply uncertain FIR filter (Monte Carlo)
-
-            assert len(y) == len(x)
-            assert len(Uy) == len(x)
-        
-        # plot if necessary
-        if makePlots:
-            plt.figure(1); plt.cla()
-            plt.plot(time, x, label="input")
-            plt.plot(time, y, label="output")
-            plt.xlabel("time / au")
-            plt.ylabel("signal amplitude / au")
-            plt.legend()
-
-            plt.figure(2);plt.cla()
-            plt.plot(time, Uy, label="FIR formula")
-            plt.plot(time, np.sqrt(np.diag(UyMC)), label="Monte Carlo")
-            plt.xlabel("time / au")
-            plt.ylabel("signal uncertainty/ au")
-            plt.legend()
-            plt.show()
 
 def test_IIRuncFilter():
     # define filter
