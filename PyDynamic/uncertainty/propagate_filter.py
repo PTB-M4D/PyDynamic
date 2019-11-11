@@ -185,14 +185,13 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         else:  # handle case of zero uncertainty filter
             UncCov = theta.T.dot(Ulow.dot(theta))       # static part of uncertainty
 
+    unc = np.zeros_like(y)
     if isinstance(Utheta, np.ndarray):
-        unc = np.zeros_like(y)
         for m in range(Ntheta,len(xlow)):
             XL = xlow[m:m-Ntheta:-1, np.newaxis]  # extract necessary part from input signal
             unc[m] = XL.T.dot(Utheta.dot(XL))     # apply formula from paper
-        ux = np.sqrt(np.abs(UncCov + unc))
-    else:  # handle case of zero uncertainty filter
-        ux = np.sqrt(np.abs(UncCov))
+    
+    ux = np.sqrt(np.abs(UncCov + unc))
 
     # correct for delay
     ux = np.roll(ux,-int(shift))
