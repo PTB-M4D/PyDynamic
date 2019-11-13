@@ -7,13 +7,14 @@ transform (DWT).
 """
 
 import numpy as np
-from propagate_filter import FIRuncFilter
+import scipy.signal as scs
+from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 
 
 __all__ = ["wavelet_block", "DWT", "DWT_filter_design"]
 
 
-def wavelet_block(x, Ux, g, h, kind='corr'):
+def wavelet_block(x, Ux, g, h, kind):
     """
     Apply low-pass `g` and high-pass `h` to time-series data `x` and propagate
     uncertainty `Ux`. Return the subsampled results.
@@ -63,16 +64,95 @@ def wavelet_block(x, Ux, g, h, kind='corr'):
     return y_detail, U_detail, y_approx, U_approx
 
 
-def DWT(x, Ux, g, h, depth=-1):
+def DWT(x, Ux, g, h, max_depth=-1, kind="corr"):
+    """
+    Calculate the discrete wavelet transformation of time-series x with uncertainty Ux.
+    The uncertainty is propgated through the transformation by using PyDynamic.uncertainty.FIRuncFilter.
+
+    Parameters:
+    -----------
+        x: np.ndarray
+            ...
+        Ux: float or np.ndarray
+            ...
+        g: np.ndarray
+            lowpass for wavelet_block
+        h: np.ndarray
+            high-pass for wavelet_block
+        max_depth: int
+            maximum consecutive repetitions of wavelet_block
+            user is warned, if it is not possible to reach the specified maximum depth
+            ignored if set to -1 (default)
+        kind: string
+            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
+            "diag": point-wise standard uncertainties of non-stationary white noise
+            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+
+    Returns:
+    --------
+        tbd, currently just a list of tuples with results of each level.
+    """
+
+    y_detail = x
+    U_detail = Ux
     
     results = []
+    counter = 0
 
-    level = 0
-    x_level = x
-    U_level = Ux
+    while True:
+        
+        # execute wavelet bloc
+        y_detail, U_detail, y_approx, U_approx = wavelet_block(y_detail, U_detail, g, h, kind)
 
-    while x_level.size > 1 or level < depth
+        results.append((y_approx, U_approx))
 
 
-def DWT_filter_design(length, kind="Haar"):
-    pass
+        # if max_depth was specified, check if it is reached
+        if (max_depth != -1) and (counter >= max_depth):
+            print("reached max depth")
+            break
+    
+        # check if another iteration is possible
+        if y_detail.size <= 1:
+
+            # warn user if specified depth is deeper than achieved depth
+            if counter < max_depth:
+                raise UserWarning("Reached only depth of {COUNTER}, but you specified {MAX_DEPTH}".format(COUNTER=counter, MAX_DEPTH=max_depth))
+            break
+
+        counter += 1
+    
+    return results
+
+
+def DWT_filter_design(kind, kwargs):
+    """
+    Provide low- and highpass filters suitable for discrete wavelet transformation.
+    
+    Parameters:
+    -----------
+        kind: string
+            filter name
+        kwargs: dict
+            dictionary of keyword arguments for the underlying function scipy.signal.<filtername>
+    
+    Returns:
+    --------
+        g: np.ndarray
+            low-pass filter
+        h: np.ndarray
+            high-pass filter
+    """
+
+    if kind == "daub":
+        g = scs.daub(**kwargs)
+        h = scs.qmf(g)
+
+    elif kind == "ricker":
+        g = scs.ricker(**kwargs)
+        h = scs.qmf(g)
+
+    else:
+        raise NotImplementedError("The specified wavelet-kind \"{KIND}\" is not implemented.".format(KIND=kind))
+
+    return g, h
