@@ -10,11 +10,11 @@ from PyDynamic.uncertainty.propagate_DWT import DWT, wavelet_block, DWT_filter_d
 
 def test_DWT_filter_design():
 
-    g, h = DWT_filter_design("daub", {"p": 3})
-    print(g, h)
+    ld, hd, lr, hr = DWT_filter_design("db3")
+    print(ld, hd, lr, hr)
 
-    g, h = DWT_filter_design("ricker", {"points": 10, "a": 4.0})
-    print(g, h)
+    ld, hd, lr, hr = DWT_filter_design("rbio3.3")
+    print(ld, hd, lr, hr)
 
 
 def test_wavelet_block():

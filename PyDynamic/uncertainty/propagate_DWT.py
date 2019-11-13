@@ -126,34 +126,33 @@ def DWT(x, Ux, g, h, max_depth=-1, kind="corr"):
     return results
 
 
-def DWT_filter_design(kind, kwargs):
+def DWT_filter_design(kind):
     """
     Provide low- and highpass filters suitable for discrete wavelet transformation.
     
     Parameters:
     -----------
         kind: string
-            filter name
-        kwargs: dict
-            dictionary of keyword arguments for the underlying function scipy.signal.<filtername>
-    
+            filter name, i.e. db4, coif6, gaus9, rbio3.3, ...
+            supported families: pywt.families(short=False)
+            supported wavelets: pywt.wavelist()
+
     Returns:
     --------
-        g: np.ndarray
-            low-pass filter
-        h: np.ndarray
-            high-pass filter
+        ld: np.ndarray
+            low-pass filter for decomposition
+        hd: np.ndarray
+            high-pass filter for decomposition
+        lr: np.ndarray
+            low-pass filter for reconstruction
+        hr: np.ndarray
+            high-pass filter for reconstruction
     """
 
-    if kind == "daub":
-        g = scs.daub(**kwargs)
-        h = scs.qmf(g)
-
-    elif kind == "ricker":
-        g = scs.ricker(**kwargs)
-        h = scs.qmf(g)
+    if kind in pywt.wavelist():
+        w = pywt.Wavelet(kind)
+        return w.dec_lo, w.dec_hi, w.rec_lo, w.rec_hi
 
     else:
         raise NotImplementedError("The specified wavelet-kind \"{KIND}\" is not implemented.".format(KIND=kind))
-
-    return g, h
+        
