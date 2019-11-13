@@ -6,6 +6,7 @@ the propagation of uncertainties in the application of the discrete wavelet
 transform (DWT).
 """
 
+import pywt
 import numpy as np
 import scipy.signal as scs
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
