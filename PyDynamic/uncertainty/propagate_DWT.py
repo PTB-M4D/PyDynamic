@@ -70,6 +70,97 @@ def dwt(x, Ux, l, h, kind):
     return y_approx, U_approx, y_detail, U_detail
 
 
+def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
+    """
+    Single step of inverse discrete wavelet transform
+
+    Parameters
+    ----------
+        y_approx: np.ndarray
+            low-pass output signal
+        U_approx: np.ndarray
+            low-pass output uncertainty
+        y_detail: np.ndarray
+            high-pass output signal
+        U_detail: np.ndarray
+            high-pass output uncertainty
+        l: np.ndarray
+            FIR filter coefficients
+            representing a low-pass for reconstruction
+        h: np.ndarray
+            FIR filter coefficients
+            representing a high-pass for reconstruction
+        kind: string
+            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
+            "diag": point-wise standard uncertainties of non-stationary white noise
+            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+    
+    Returns
+    -------
+        x: np.ndarray
+            upsampled reconstructed signal
+        Ux: np.ndarray
+            upsampled uncertainty of reconstructed signal
+    """
+
+    # upsample to double the length
+    indices = np.linspace(1,y_detail.size,y_detail.size)
+    y_approx = np.insert(y_approx, indices, 0)
+    U_approx = np.insert(U_approx, indices, 0)
+    y_detail = np.insert(y_detail, indices, 0)
+    U_detail = np.insert(U_detail, indices, 0)
+
+    # propagate uncertainty through FIR-filter
+    x_approx, Ux_approx = FIRuncFilter(y_approx, U_approx, l, Utheta=None, kind=kind)
+    x_detail, Ux_detail = FIRuncFilter(y_detail, U_detail, h, Utheta=None, kind=kind)
+
+    # add both parts
+    x = x_detail + x_approx
+    Ux = Ux_detail + Ux_approx
+
+    # remove "FIR start"
+    x = x[l.size-1:]
+    Ux = Ux[l.size-1:]
+
+    return x, Ux
+
+
+def filter_design(kind):
+    """
+    Provide low- and highpass filters suitable for discrete wavelet transformation.
+    
+    Parameters:
+    -----------
+        kind: string
+            filter name, i.e. db4, coif6, gaus9, rbio3.3, ...
+            supported families: pywt.families(short=False)
+            supported wavelets: pywt.wavelist()
+
+    Returns:
+    --------
+        ld: np.ndarray
+            low-pass filter for decomposition
+        hd: np.ndarray
+            high-pass filter for decomposition
+        lr: np.ndarray
+            low-pass filter for reconstruction
+        hr: np.ndarray
+            high-pass filter for reconstruction
+    """
+
+    if kind in pywt.wavelist():
+        w = pywt.Wavelet(kind)
+        ld = np.array(w.dec_lo)
+        hd = np.array(w.dec_hi)
+        lr = np.array(w.rec_lo)
+        hr = np.array(w.rec_hi)
+
+        return ld, hd, lr, hr
+
+    else:
+        raise NotImplementedError("The specified wavelet-kind \"{KIND}\" is not implemented.".format(KIND=kind))
+        
+
 def wave_dec(x, Ux, l, h, max_depth=-1, kind="corr"):
     """
     Multilevel discrete wavelet transformation of time-series x with uncertainty Ux.
@@ -129,97 +220,5 @@ def wave_dec(x, Ux, l, h, max_depth=-1, kind="corr"):
     return results
 
 
-def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
-    """
-    Single step of inverse discrete wavelet transform
-
-    Parameters
-    ----------
-        y_approx: np.ndarray
-            low-pass output signal
-        U_approx: np.ndarray
-            low-pass output uncertainty
-        y_detail: np.ndarray
-            high-pass output signal
-        U_detail: np.ndarray
-            high-pass output uncertainty
-        l: np.ndarray
-            FIR filter coefficients
-            representing a low-pass for reconstruction
-        h: np.ndarray
-            FIR filter coefficients
-            representing a high-pass for reconstruction
-        kind: string
-            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
-            "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
-    
-    Returns
-    -------
-        x: np.ndarray
-            upsampled reconstructed signal
-        Ux: np.ndarray
-            upsampled uncertainty of reconstructed signal
-    """
-
-    # upsample to double the length
-    indices = np.linspace(1,y_detail.size,y_detail.size)
-    y_approx = np.insert(y_approx, indices, 0)
-    U_approx = np.insert(U_approx, indices, 0)
-    y_detail = np.insert(y_detail, indices, 0)
-    U_detail = np.insert(U_detail, indices, 0)
-
-    # propagate uncertainty through FIR-filter
-    x_approx, Ux_approx = FIRuncFilter(y_approx, U_approx, l, Utheta=None, kind=kind)
-    x_detail, Ux_detail = FIRuncFilter(y_detail, U_detail, h, Utheta=None, kind=kind)
-
-    # add both parts
-    x = x_detail + x_approx
-    Ux = Ux_detail + Ux_approx
-
-    # remove "FIR start"
-    x = x[l.size-1:]
-    Ux = Ux[l.size-1:]
-
-    return x, Ux
-
-
 def wave_rec():
     pass
-
-
-def filter_design(kind):
-    """
-    Provide low- and highpass filters suitable for discrete wavelet transformation.
-    
-    Parameters:
-    -----------
-        kind: string
-            filter name, i.e. db4, coif6, gaus9, rbio3.3, ...
-            supported families: pywt.families(short=False)
-            supported wavelets: pywt.wavelist()
-
-    Returns:
-    --------
-        ld: np.ndarray
-            low-pass filter for decomposition
-        hd: np.ndarray
-            high-pass filter for decomposition
-        lr: np.ndarray
-            low-pass filter for reconstruction
-        hr: np.ndarray
-            high-pass filter for reconstruction
-    """
-
-    if kind in pywt.wavelist():
-        w = pywt.Wavelet(kind)
-        ld = np.array(w.dec_lo)
-        hd = np.array(w.dec_hi)
-        lr = np.array(w.rec_lo)
-        hr = np.array(w.rec_hi)
-
-        return ld, hd, lr, hr
-
-    else:
-        raise NotImplementedError("The specified wavelet-kind \"{KIND}\" is not implemented.".format(KIND=kind))
-        
