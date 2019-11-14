@@ -11,10 +11,8 @@ from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, idwt, wave_rec, f
 def test_filter_design():
 
     ld, hd, lr, hr = filter_design("db3")
-    print(ld, hd, lr, hr)
 
     ld, hd, lr, hr = filter_design("rbio3.3")
-    print(ld, hd, lr, hr)
 
 
 def test_dwt():
@@ -35,7 +33,7 @@ def test_dwt():
     assert Uy1.size == Uy2.size
 
     # output is half the length of input
-    assert (x.size + 1) // 2 == y1.size
+    assert (x.size + l.size + 1) // 2 == y1.size
 
 
 def test_decomposition():
@@ -62,7 +60,7 @@ def test_reconstruction():
 
 def test_identity():
 
-    nx = np.random.choice([200,201])
+    nx = np.random.choice([20,21])
     x = np.random.randn(nx)
     Ux = 0.1 * (1 + np.random.random(nx))
 
@@ -77,5 +75,5 @@ def test_identity():
     plt.plot(x)
     plt.plot(xr)
     plt.show()
-    print(x)
-    print(xr)
+    print(x, x.size)
+    print(xr, xr.size)
