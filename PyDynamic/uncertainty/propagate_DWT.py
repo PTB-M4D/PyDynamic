@@ -12,15 +12,16 @@ import scipy.signal as scs
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 
 
-__all__ = ["wavelet_block", "DWT", "DWT_filter_design"]
+__all__ = ["dwt", "wave_dec", "idwt", "wave_rec", "filter_design"]
 
 
-def wavelet_block(x, Ux, g, h, kind):
+def dwt(x, Ux, l, h, kind):
     """
-    Apply low-pass `g` and high-pass `h` to time-series data `x` and propagate
-    uncertainty `Ux`. Return the subsampled results.
+    Apply low-pass `l` and high-pass `h` to time-series data `x`.
+    The uncertainty is propgated through the transformation by using 
+    PyDynamic.uncertainty.FIRuncFilter. and propagate
 
-    To be used as core operation of a wavelet transformation.
+    Return the subsampled results.
 
     Parameters
     ----------
@@ -29,46 +30,45 @@ def wavelet_block(x, Ux, g, h, kind):
         Ux: float or np.ndarray
             float:    standard deviation of white noise in x
             1D-array: interpretation depends on kind
-        g: np.ndarray
+        l: np.ndarray
             FIR filter coefficients
-            representing a low-pass
+            representing a low-pass for decomposition
         h: np.ndarray
             FIR filter coefficients
-            representing a high-pass
+            representing a high-pass for decomposition
         kind: string
-            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
+            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
             "diag": point-wise standard uncertainties of non-stationary white noise
             "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
     
     Returns
     -------
-        y_detail: np.ndarray
-            subsampled high-pass output signal
-        U_detail: np.ndarray
-            subsampled high-pass output uncertainty
         y_approx: np.ndarray
             subsampled low-pass output signal
         U_approx: np.ndarray
             subsampled low-pass output uncertainty
+        y_detail: np.ndarray
+            subsampled high-pass output signal
+        U_detail: np.ndarray
+            subsampled high-pass output uncertainty
     """
 
     # propagate uncertainty through FIR-filter
+    y_approx, U_approx = FIRuncFilter(x, Ux, l, Utheta=None, kind=kind)
     y_detail, U_detail = FIRuncFilter(x, Ux, h, Utheta=None, kind=kind)
-    y_approx, U_approx = FIRuncFilter(x, Ux, g, Utheta=None, kind=kind)
 
     # subsample to half the length
-    y_detail = y_detail[::2] 
-    U_detail = U_detail[::2] 
     y_approx = y_approx[::2] 
     U_approx = U_approx[::2] 
+    y_detail = y_detail[::2] 
+    U_detail = U_detail[::2] 
 
-    return y_detail, U_detail, y_approx, U_approx
+    return y_approx, U_approx, y_detail, U_detail
 
 
-def DWT(x, Ux, g, h, max_depth=-1, kind="corr"):
+def wave_dec(x, Ux, l, h, max_depth=-1, kind="corr"):
     """
-    Calculate the discrete wavelet transformation of time-series x with uncertainty Ux.
-    The uncertainty is propgated through the transformation by using PyDynamic.uncertainty.FIRuncFilter.
+    Multilevel discrete wavelet transformation of time-series x with uncertainty Ux.
 
     Parameters:
     -----------
@@ -76,7 +76,7 @@ def DWT(x, Ux, g, h, max_depth=-1, kind="corr"):
             ...
         Ux: float or np.ndarray
             ...
-        g: np.ndarray
+        l: np.ndarray
             lowpass for wavelet_block
         h: np.ndarray
             high-pass for wavelet_block
@@ -103,10 +103,9 @@ def DWT(x, Ux, g, h, max_depth=-1, kind="corr"):
     while True:
         
         # execute wavelet bloc
-        y_detail, U_detail, y_approx, U_approx = wavelet_block(y_detail, U_detail, g, h, kind)
+        y_approx, U_approx, y_detail, U_detail = dwt(y_detail, U_detail, l, h, kind)
 
-        results.append((y_approx, U_approx))
-
+        results.append(((y_approx, U_approx),(y_detail, U_detail)))
 
         # if max_depth was specified, check if it is reached
         if (max_depth != -1) and (counter >= max_depth):
@@ -126,7 +125,62 @@ def DWT(x, Ux, g, h, max_depth=-1, kind="corr"):
     return results
 
 
-def DWT_filter_design(kind):
+def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
+    """
+    Single step of inverse discrete wavelet transform
+
+    Parameters
+    ----------
+        y_approx: np.ndarray
+            low-pass output signal
+        U_approx: np.ndarray
+            low-pass output uncertainty
+        y_detail: np.ndarray
+            high-pass output signal
+        U_detail: np.ndarray
+            high-pass output uncertainty
+        l: np.ndarray
+            FIR filter coefficients
+            representing a low-pass for reconstruction
+        h: np.ndarray
+            FIR filter coefficients
+            representing a high-pass for reconstruction
+        kind: string
+            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
+            "diag": point-wise standard uncertainties of non-stationary white noise
+            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+    
+    Returns
+    -------
+        x: np.ndarray
+            upsampled reconstructed signal
+        Ux: np.ndarray
+            upsampled uncertainty of reconstructed signal
+    """
+
+    # upsample to half the length
+    indices = np.linspace(1,y_detail.size,y_detail.size)
+    y_approx = np.insert(y_approx, indices, 0) 
+    U_approx = np.insert(U_approx, indices, 0) 
+    y_detail = np.insert(y_detail, indices, 0) 
+    U_detail = np.insert(U_detail, indices, 0) 
+
+    # propagate uncertainty through FIR-filter
+    x_approx, Ux_approx = FIRuncFilter(y_approx, U_approx, l, Utheta=None, kind=kind)
+    x_detail, Ux_detail = FIRuncFilter(y_detail, U_detail, h, Utheta=None, kind=kind)
+
+    # add both parts
+    x = x_detail + x_approx
+    Ux = Ux_detail + Ux_approx
+
+    return x, Ux
+
+
+def wave_rec():
+    pass
+
+
+def filter_design(kind):
     """
     Provide low- and highpass filters suitable for discrete wavelet transformation.
     
@@ -151,7 +205,12 @@ def DWT_filter_design(kind):
 
     if kind in pywt.wavelist():
         w = pywt.Wavelet(kind)
-        return w.dec_lo, w.dec_hi, w.rec_lo, w.rec_hi
+        ld = np.array(w.dec_lo)
+        hd = np.array(w.dec_hi)
+        lr = np.array(w.rec_lo)
+        hr = np.array(w.rec_hi)
+
+        return ld, hd, lr, hr
 
     else:
         raise NotImplementedError("The specified wavelet-kind \"{KIND}\" is not implemented.".format(KIND=kind))
