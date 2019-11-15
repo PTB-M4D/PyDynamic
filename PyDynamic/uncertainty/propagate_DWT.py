@@ -55,10 +55,6 @@ def dwt(x, Ux, l, h, kind):
 
     # append signals to compensate for "FIR start"
     pad_len = l.size-1
-    #if x.size % 2 == 0:
-    #    pad_len = l.size
-    #else:
-    #    pad_len = l.size - 1
     x = np.pad(x, (0, pad_len), mode="constant")
     Ux = np.pad(Ux, (0, pad_len), mode="constant")
 
