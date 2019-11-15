@@ -53,19 +53,24 @@ def dwt(x, Ux, l, h, kind):
             subsampled high-pass output uncertainty
     """
 
-    # pad with zeros to compensate FIR "start"
-    x = np.pad(x, (0,l.size-1), mode="constant")
-    Ux = np.pad(Ux, (0,l.size-1), mode="constant")
+    # append signals to compensate for "FIR start"
+    pad_len = l.size-1
+    #if x.size % 2 == 0:
+    #    pad_len = l.size
+    #else:
+    #    pad_len = l.size - 1
+    x = np.pad(x, (0, pad_len), mode="constant")
+    Ux = np.pad(Ux, (0, pad_len), mode="constant")
 
     # propagate uncertainty through FIR-filter
     y_approx, U_approx = FIRuncFilter(x, Ux, l, Utheta=None, kind=kind)
     y_detail, U_detail = FIRuncFilter(x, Ux, h, Utheta=None, kind=kind)
 
     # subsample to half the length
-    y_approx = y_approx[::2]
-    U_approx = U_approx[::2]
-    y_detail = y_detail[::2]
-    U_detail = U_detail[::2]
+    y_approx = y_approx[1::2]
+    U_approx = U_approx[1::2]
+    y_detail = y_detail[1::2]
+    U_detail = U_detail[1::2]
 
     return y_approx, U_approx, y_detail, U_detail
 
@@ -104,7 +109,7 @@ def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
     """
 
     # upsample to double the length
-    indices = np.linspace(1,y_detail.size,y_detail.size)
+    indices = np.arange(1, y_detail.size+1)
     y_approx = np.insert(y_approx, indices, 0)
     U_approx = np.insert(U_approx, indices, 0)
     y_detail = np.insert(y_detail, indices, 0)
@@ -119,8 +124,9 @@ def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
     Ux = Ux_detail + Ux_approx
 
     # remove "FIR start"
-    x = x[l.size-1:]
-    Ux = Ux[l.size-1:]
+    a = l.size-2
+    x = x[a:]
+    Ux = Ux[a:]
 
     return x, Ux
 
