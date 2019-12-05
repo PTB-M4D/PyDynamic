@@ -45,7 +45,7 @@ jobs:
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "requirements/requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
@@ -56,13 +56,13 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install coverage pytest-cov
+            pip install -r requirements/requirements.txt
+            pip install -r requirements/dev-requirements.txt
 
       - save_cache:
           paths:
             - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
+          key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
 
       # Run tests with coverage report and upload results to Codecov!
       - run:
@@ -106,7 +106,7 @@ jobs:
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+            - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements/requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
@@ -116,11 +116,11 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements.txt
+            pip install -r requirements/requirements.txt
             pip install setuptools wheel twine
 
       - save_cache:
-          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements/requirements.txt" }}
           paths:
             - "venv"
 
