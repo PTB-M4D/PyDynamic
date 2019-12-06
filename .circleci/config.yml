@@ -5,19 +5,19 @@
 version: 2.1
 workflows:
   # Create workflow for testing and deploying PyDynamic.
-  build_and_deploy:
+  test_and_deploy:
     jobs:
-      # Create 'build' job to test and install PyDynamic for every commit.
-      - build:
+      # Create 'test' job to test and install PyDynamic for every commit.
+      - test:
           # Include tag filter to trigger as well on tag pushes.
           filters:
               tags:
                 only: /.*/
       - deploy:
           # Create 'deploy' job to upload PyDynamic to PyPI.org on certain tag
-          #   pushes, which successfully run 'build' job.
+          #   pushes, which successfully run 'test' job.
           requires:
-              - build
+              - test
           filters:
               tags:
                 # Specify the tags which trigger the job as regular expression.
@@ -26,7 +26,7 @@ workflows:
                 # This assures the job only being triggered by tag pushes.
                 ignore: /.*/
 jobs:
-  build:
+  test:
     docker:
       - image: circleci/python:3.7
 
@@ -53,22 +53,22 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
+            python3 -m venv test_env
+            source test_env/bin/activate
             pip install --upgrade pip
             pip install -r requirements/requirements.txt
             pip install -r requirements/dev-requirements.txt
 
       - save_cache:
-          paths:
-            - ./venv
           key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
+          paths:
+            - ./test_env
 
       # Run tests with coverage report and upload results to Codecov!
       - run:
           name: Run tests
           command: |
-            . venv/bin/activate
+            source test_env/bin/activate
             pytest -v --junitxml=test-reports/pytest.xml \
             --cov=PyDynamic/ > test-reports/pytest.log
 
@@ -76,14 +76,14 @@ jobs:
       - run:
           name: Upload coverage report
           command: |
-            . venv/bin/activate
+            source test_env/bin/activate
             bash <(curl -s https://codecov.io/bash)
 
       # Install PyDynamic.
       - run:
           name: Install PyDynamic
           command: |
-            . venv/bin/activate
+            source test_env/bin/activate
             python3 setup.py install
 
       # Store test results.
@@ -114,33 +114,33 @@ jobs:
       - run:
           name: Install python dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
+            python3 -m venv build_env
+            source build_env/bin/activate
             pip install -r requirements/requirements.txt
             pip install setuptools wheel twine
 
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements/requirements.txt" }}
-          paths:
-            - "venv"
+            paths:
+              - ./build_env
 
       # Verify Git tag to version to ensure, only wanted versions are uploaded.
       - run:
           name: Verify Git tag vs. version
           command: |
-            . venv/bin/activate
+            source build_env/bin/activate
             python setup.py verify
 
       # Create a package.
       - run:
           name: Create package
           command: |
-            . venv/bin/activate
+            source build_env/bin/activate
             python setup.py sdist bdist_wheel
 
       # Upload the created packages to test.pypi.org.
       - run:
           name: Upload to PyPI
           command: |
-            . venv/bin/activate
+            source build_env/bin/activate
             twine upload dist/*
