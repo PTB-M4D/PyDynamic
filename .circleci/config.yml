@@ -121,8 +121,8 @@ jobs:
 
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements/requirements.txt" }}
-            paths:
-              - ./build_env
+          paths:
+            - ./build_env
 
       # Verify Git tag to version to ensure, only wanted versions are uploaded.
       - run:
