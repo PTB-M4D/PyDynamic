@@ -156,9 +156,14 @@ def filter_design(kind):
 
     else:
         raise NotImplementedError("The specified wavelet-kind \"{KIND}\" is not implemented.".format(KIND=kind))
-        
 
-def wave_dec(x, Ux, l, h, max_depth=-1, kind="corr"):
+
+def dwt_max_level(data_length, filter_length):
+    n_max = np.floor(np.log2(data_length / (filter_length - 1)))
+    return int(n_max)
+
+
+def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
     """
     Multilevel discrete wavelet transformation of time-series x with uncertainty Ux.
 
@@ -168,13 +173,13 @@ def wave_dec(x, Ux, l, h, max_depth=-1, kind="corr"):
             ...
         Ux: float or np.ndarray
             ...
-        l: np.ndarray
-            lowpass for wavelet_block
-        h: np.ndarray
+        lowpass: np.ndarray
+            low-pass for wavelet_block
+        highpass: np.ndarray
             high-pass for wavelet_block
-        max_depth: int
-            maximum consecutive repetitions of wavelet_block
-            user is warned, if it is not possible to reach the specified maximum depth
+        n: int
+            consecutive repetitions of wavelet_block
+            user is warned, if it is not possible to reach the specified depth
             ignored if set to -1 (default)
         kind: string
             only meaningfull in combination with isinstance(Ux, numpy.ndarray)
@@ -183,38 +188,34 @@ def wave_dec(x, Ux, l, h, max_depth=-1, kind="corr"):
 
     Returns:
     --------
-        tbd, currently just a list of tuples with results of each level.
+        result: dict
+            result["original_length"] = len(x)
+            result["coeffs"] = [cAn, cDn, cDn-1, ..., cD2, cD1]
     """
 
-    y_detail = x
-    U_detail = Ux
-    
-    results = []
-    counter = 0
+    # check if depth is reachable
+    max_depth = dwt_max_level(x.size, lowpass.size)
+    if n > max_depth:
+        raise UserWarning("Will run into trouble, max_depth = {MAX_DEPTH}, but you specified {DEPTH}".format(DEPTH=n, MAX_DEPTH=max_depth))
+    elif n == -1:
+        n = max_depth
 
-    while True:
+    c_approx = x
+    Uc_approx = Ux
+    
+    result = {"original_length": len(x), "coeffs": []}
+
+    for level in range(n):
         
-        # execute wavelet bloc
-        y_approx, U_approx, y_detail, U_detail = dwt(y_detail, U_detail, l, h, kind)
+        # execute wavelet block
+        c_approx, Uc_approx, c_detail, Uc_detail = dwt(c_approx, Uc_approx, lowpass, highpass, kind)
 
-        results.append(((y_approx, U_approx),(y_detail, U_detail)))
-
-        # if max_depth was specified, check if it is reached
-        if (max_depth != -1) and (counter >= max_depth):
-            print("reached max depth")
-            break
+        # save result
+        result["coeffs"].insert(0, (c_detail, Uc_detail))
+        if level + 1 == n:  # save the details when in last level
+            result["coeffs"].insert(0, (c_approx, Uc_approx))
     
-        # check if another iteration is possible
-        if y_detail.size <= l.size + 1:
-
-            # warn user if specified depth is deeper than achieved depth
-            if counter < max_depth:
-                raise UserWarning("Reached only depth of {COUNTER}, but you specified {MAX_DEPTH}".format(COUNTER=counter, MAX_DEPTH=max_depth))
-            break
-
-        counter += 1
-    
-    return results
+    return result
 
 
 def wave_rec():

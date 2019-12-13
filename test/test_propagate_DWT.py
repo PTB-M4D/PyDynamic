@@ -5,7 +5,7 @@ Perform test for uncertainty.propagate_DWT
 import matplotlib.pyplot as plt
 import numpy as np
 
-from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, idwt, wave_rec, filter_design
+from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, idwt, wave_rec, filter_design, dwt_max_level
 
 import pywt
 
@@ -115,9 +115,39 @@ def test_identity(make_plots=False):
                 plt.show()
 
 
-def test_decomposition():
-    pass
+def test_max_level():
+    assert dwt_max_level(12, 5) == 1
+    assert dwt_max_level(1000, 11) == 6
 
+
+def test_decomposition():
+    for filter_name in ["db2", "db3"]:
+
+        for nx in [20,21]:
+
+            x = np.random.randn(nx)
+            Ux = 0.1 * (1 + np.random.random(nx))
+
+            ld, hd, lr, hr = filter_design(filter_name)
+
+            result = wave_dec(x, Ux, ld, hd)
+
+            #for c, Uc in result["coeffs"]:
+            #    print(c)
+            #    print("-"*60)
+            #print("="*60)
+
+            # compare to the output of PyWavelet
+            result_pywt = pywt.wavedec(x, filter_name, mode='constant')
+            result_pydy = [c for c, Uc in result["coeffs"]]
+
+            # compare output depth
+            assert len(result_pywt) == len(result_pydy)
+            
+            # compare output in detail
+            for a, b in zip(result_pywt, result_pydy):
+                assert len(a) == len(b)
+                assert np.allclose(a, b)
 
 def test_reconstruction():
     pass
