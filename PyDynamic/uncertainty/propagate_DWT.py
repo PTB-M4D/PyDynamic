@@ -55,18 +55,18 @@ def dwt(x, Ux, l, h, kind):
 
     # append signals to compensate for "FIR start"
     pad_len = l.size-1
-    x = np.pad(x, (0, pad_len), mode="constant")
-    Ux = np.pad(Ux, (0, pad_len), mode="constant")
+    x = np.pad(x, (pad_len, pad_len), mode="edge")
+    Ux = np.pad(Ux, (pad_len, pad_len), mode="edge")
 
     # propagate uncertainty through FIR-filter
     y_approx, U_approx = FIRuncFilter(x, Ux, l, Utheta=None, kind=kind)
     y_detail, U_detail = FIRuncFilter(x, Ux, h, Utheta=None, kind=kind)
 
-    # subsample to half the length
-    y_approx = y_approx[1::2]
-    U_approx = U_approx[1::2]
-    y_detail = y_detail[1::2]
-    U_detail = U_detail[1::2]
+    # remove "FIR start"-compensation, subsample to half the length
+    y_approx = y_approx[pad_len+1::2]
+    U_approx = U_approx[pad_len+1::2]
+    y_detail = y_detail[pad_len+1::2]
+    U_detail = U_detail[pad_len+1::2]
 
     return y_approx, U_approx, y_detail, U_detail
 
@@ -115,15 +115,10 @@ def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
     x_approx, Ux_approx = FIRuncFilter(y_approx, U_approx, l, Utheta=None, kind=kind)
     x_detail, Ux_detail = FIRuncFilter(y_detail, U_detail, h, Utheta=None, kind=kind)
 
-    # add both parts
-    x = x_detail + x_approx
-    Ux = Ux_detail + Ux_approx
-
-    # remove "FIR start"
-    a = l.size-2
-    x = x[a:]
-    Ux = Ux[a:]
-
+    # add both parts and remove "FIR start" compensation at the beginning
+    ls = l.size - 2
+    x = x_detail[ls:] + x_approx[ls:]
+    Ux = Ux_detail[ls:] + Ux_approx[ls:]
     return x, Ux
 
 
