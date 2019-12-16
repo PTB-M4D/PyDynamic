@@ -130,22 +130,21 @@ def test_decomposition():
 
             ld, hd, lr, hr = filter_design(filter_name)
 
-            result = wave_dec(x, Ux, ld, hd)
+            coeffs, Ucoeffs, ol = wave_dec(x, Ux, ld, hd)
 
-            #for c, Uc in result["coeffs"]:
+            #for c, Uc in zip(coeffs, Ucoeffs):
             #    print(c)
             #    print("-"*60)
             #print("="*60)
 
             # compare to the output of PyWavelet
             result_pywt = pywt.wavedec(x, filter_name, mode='constant')
-            result_pydy = [c for c, Uc in result["coeffs"]]
 
             # compare output depth
-            assert len(result_pywt) == len(result_pydy)
+            assert len(result_pywt) == len(coeffs)
             
             # compare output in detail
-            for a, b in zip(result_pywt, result_pydy):
+            for a, b in zip(result_pywt, coeffs):
                 assert len(a) == len(b)
                 assert np.allclose(a, b)
 

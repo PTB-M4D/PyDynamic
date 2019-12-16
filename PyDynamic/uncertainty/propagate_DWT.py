@@ -174,9 +174,9 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
         Ux: float or np.ndarray
             ...
         lowpass: np.ndarray
-            low-pass for wavelet_block
+            decomposition low-pass for wavelet_block
         highpass: np.ndarray
-            high-pass for wavelet_block
+            decomposition high-pass for wavelet_block
         n: int
             consecutive repetitions of wavelet_block
             user is warned, if it is not possible to reach the specified depth
@@ -188,9 +188,14 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
 
     Returns:
     --------
-        result: dict
-            result["original_length"] = len(x)
-            result["coeffs"] = [cAn, cDn, cDn-1, ..., cD2, cD1]
+        coeffs: list of arrays
+            order of arrays within list is:
+            [cAn, cDn, cDn-1, ..., cD2, cD1]
+        Ucoeffs: list of arrays
+            uncertainty of coeffs, same order as coeffs
+        original_length: int
+            equals to len(x)
+            necessary to restore correct length 
     """
 
     # check if depth is reachable
@@ -203,7 +208,9 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
     c_approx = x
     Uc_approx = Ux
     
-    result = {"original_length": len(x), "coeffs": []}
+    original_length = len(x)
+    coeffs = []
+    Ucoeffs = []
 
     for level in range(n):
         
@@ -211,9 +218,14 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
         c_approx, Uc_approx, c_detail, Uc_detail = dwt(c_approx, Uc_approx, lowpass, highpass, kind)
 
         # save result
-        result["coeffs"].insert(0, (c_detail, Uc_detail))
+        coeffs.insert(0, c_detail)
+        Ucoeffs.insert(0, Uc_detail)
         if level + 1 == n:  # save the details when in last level
-            result["coeffs"].insert(0, (c_approx, Uc_approx))
+            coeffs.insert(0, c_approx)
+            Ucoeffs.insert(0, Uc_approx)
+    
+    return coeffs, Ucoeffs, original_length
+
     
     return result
 
