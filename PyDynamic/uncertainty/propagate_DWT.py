@@ -43,11 +43,11 @@ def dwt(x, Ux, l, h, kind):
     
     Returns
     -------
-        y_approx: np.ndarray
+        c_approx: np.ndarray
             subsampled low-pass output signal
         U_approx: np.ndarray
             subsampled low-pass output uncertainty
-        y_detail: np.ndarray
+        c_detail: np.ndarray
             subsampled high-pass output signal
         U_detail: np.ndarray
             subsampled high-pass output uncertainty
@@ -59,29 +59,29 @@ def dwt(x, Ux, l, h, kind):
     Ux = np.pad(Ux, (pad_len, pad_len), mode="edge")
 
     # propagate uncertainty through FIR-filter
-    y_approx, U_approx = FIRuncFilter(x, Ux, l, Utheta=None, kind=kind)
-    y_detail, U_detail = FIRuncFilter(x, Ux, h, Utheta=None, kind=kind)
+    c_approx, U_approx = FIRuncFilter(x, Ux, l, Utheta=None, kind=kind)
+    c_detail, U_detail = FIRuncFilter(x, Ux, h, Utheta=None, kind=kind)
 
     # remove "FIR start"-compensation, subsample to half the length
-    y_approx = y_approx[pad_len+1::2]
+    c_approx = c_approx[pad_len+1::2]
     U_approx = U_approx[pad_len+1::2]
-    y_detail = y_detail[pad_len+1::2]
+    c_detail = c_detail[pad_len+1::2]
     U_detail = U_detail[pad_len+1::2]
 
-    return y_approx, U_approx, y_detail, U_detail
+    return c_approx, U_approx, c_detail, U_detail
 
 
-def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
+def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind):
     """
     Single step of inverse discrete wavelet transform
 
     Parameters
     ----------
-        y_approx: np.ndarray
+        c_approx: np.ndarray
             low-pass output signal
         U_approx: np.ndarray
             low-pass output uncertainty
-        y_detail: np.ndarray
+        c_detail: np.ndarray
             high-pass output signal
         U_detail: np.ndarray
             high-pass output uncertainty
@@ -105,15 +105,15 @@ def idwt(y_approx, U_approx, y_detail, U_detail, l, h, kind):
     """
 
     # upsample to double the length
-    indices = np.arange(1, y_detail.size+1)
-    y_approx = np.insert(y_approx, indices, 0)
+    indices = np.arange(1, c_detail.size+1)
+    c_approx = np.insert(c_approx, indices, 0)
     U_approx = np.insert(U_approx, indices, 0)
-    y_detail = np.insert(y_detail, indices, 0)
+    c_detail = np.insert(c_detail, indices, 0)
     U_detail = np.insert(U_detail, indices, 0)
 
     # propagate uncertainty through FIR-filter
-    x_approx, Ux_approx = FIRuncFilter(y_approx, U_approx, l, Utheta=None, kind=kind)
-    x_detail, Ux_detail = FIRuncFilter(y_detail, U_detail, h, Utheta=None, kind=kind)
+    x_approx, Ux_approx = FIRuncFilter(c_approx, U_approx, l, Utheta=None, kind=kind)
+    x_detail, Ux_detail = FIRuncFilter(c_detail, U_detail, h, Utheta=None, kind=kind)
 
     # add both parts and remove "FIR start" compensation at the beginning
     ls = l.size - 2
