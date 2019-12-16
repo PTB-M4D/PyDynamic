@@ -56,7 +56,7 @@ def test_idwt():
 
     for filter_name in ["db3", "db4"]:
 
-        for nc in [10,11,12,13]:
+        for nc in [20,21,22,23]:
 
             c_approx = np.random.randn(nc)
             Uc_approx = 0.1 * (1 + np.random.random(nc))
@@ -79,7 +79,7 @@ def test_idwt():
             assert np.allclose(x, r)
 
 
-def test_identity(make_plots=False):
+def test_identity_single(make_plots=False):
 
     for filter_name in ["db3", "db4"]:
 
@@ -148,5 +148,38 @@ def test_decomposition():
                 assert len(a) == len(b)
                 assert np.allclose(a, b)
 
+
 def test_reconstruction():
     pass
+
+
+def test_identity_multi():
+
+    for filter_name in ["db3", "db4"]:
+
+        for nx in [20, 21, 22, 23, 203]:
+            print(nx)
+
+            x = np.linspace(1,nx,nx)  # np.random.randn(nx)
+            #Ux = 0.1 * (1 + np.random.random(nx))
+            Ux = np.ones((nx))
+            Ux[nx//2:] = 2
+            Ux = 0.1 * Ux
+
+            ld, hd, lr, hr = filter_design(filter_name)
+
+            # full decomposition
+            coeffs, Ucoeffs, ol = wave_dec(x, Ux, ld, hd, kind="diag")
+
+            # full reconstruction
+            xr, Uxr = wave_rec(coeffs, Ucoeffs, lr, hr, original_length=ol, kind="diag")
+
+            assert x.size == xr.size
+            assert np.allclose(x, xr)
+            assert Ux.size == Uxr.size
+            #assert np.allclose(Ux, Uxr)
+
+            #if nx == 203 and filter_name == "db3":
+            #    plt.plot(Ux)
+            #    plt.plot(Uxr)
+            #    plt.show()

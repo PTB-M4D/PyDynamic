@@ -226,9 +226,52 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
     
     return coeffs, Ucoeffs, original_length
 
+
+def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None, kind="corr"):
+    """
+    Multilevel discrete wavelet reconstruction of coefficients from levels back into time-series.
+
+    Parameters:
+    -----------
+        coeffs: list of arrays
+            order of arrays within list is:
+            [cAn, cDn, cDn-1, ..., cD2, cD1]
+            where:
+            - cAi: approximation coefficients array from i-th level
+            - cDi: detail coefficients array from i-th level
+        Ucoeffs: list of arrays
+            uncertainty of coeffs, same order as coeffs
+        lowpass: np.ndarray
+            reconstruction low-pass for wavelet_block
+        highpass: np.ndarray
+            reconstruction high-pass for wavelet_block
+        original_length: optional, int
+            necessary to restore correct length of original time-series
     
-    return result
+    Returns
+    -------
+        x: np.ndarray
+            reconstructed signal
+        Ux: np.ndarray
+            uncertainty of reconstructed signal
+    """
+    
+    # init the approximation coefficients
+    c_approx = coeffs[0]
+    U_approx = Ucoeffs[0]
 
+    # reconstruction loop
+    for c_detail, U_detail in zip(coeffs[1:], Ucoeffs[1:]):
+        # crop approximation coefficients if necessary
+        lc = len(c_detail)
+        c_approx = c_approx[:lc]
+        U_approx = U_approx[:lc]
 
-def wave_rec():
-    pass
+        # execute idwt
+        c_approx, U_approx = idwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass, kind=kind)
+    
+    # bring to original length (does nothing if original_length == None)
+    x = c_approx[:original_length]
+    Ux = U_approx[:original_length]
+
+    return x, Ux
