@@ -105,8 +105,8 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # (SP needs be available len(blow)-timesteps into the past. Here it is
                 # assumed, that SP is constant with the first value of sigma2)
 
-                # V needs to be extended to cover Ntheta timesteps more into the future
-                sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
+                # V needs to be extended to cover Ntheta-1 timesteps more into the past
+                sigma2_extended = np.pad(sigma2, (Ntheta - 1, 0), mode="edge")  # ???
 
                 N = toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
                 M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
@@ -147,8 +147,8 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
-                # V needs to be extended to cover Ntheta timesteps more into the future
-                sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
+                # V needs to be extended to cover Ntheta-1 timesteps more into the past
+                sigma2_extended = np.pad(sigma2, (Ntheta - 1, 0), mode="edge")
 
                 # Ulow is to be sliced from V, see below
                 V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
@@ -169,21 +169,21 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     # handle diag-case, where Ulow needs to be sliced from V
     if kind == "diag":
         # UncCov needs to be calculated inside in its own for-loop
-        # V has dimension (len(sigma2) + Ntheta) * (len(sigma2) + Ntheta) --> slice a fitting Ulow of dimension (Ntheta x Ntheta)
+        # V has dimension (len(sigma2) + Ntheta - 1) * (len(sigma2) + Ntheta - 1) --> slice a fitting Ulow of dimension (Ntheta x Ntheta)
         UncCov = np.zeros((len(sigma2)))
 
         for k in range(len(sigma2)):
             Ulow = V[k:k+Ntheta,k:k+Ntheta]
             if isinstance(Utheta, np.ndarray):
-                UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta))))  # static part of uncertainty
+                UncCov[k] = np.squeeze(theta[::-1].T.dot(Ulow.dot(theta[::-1])) + np.abs(np.trace(Ulow.dot(Utheta[::-1]))))  # static part of uncertainty
             else:  # handle case of zero uncertainty filter
-                UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)) )  # static part of uncertainty
+                UncCov[k] = np.squeeze(theta[::-1].T.dot(Ulow.dot(theta[::-1])) )  # static part of uncertainty
 
     else:
         if isinstance(Utheta, np.ndarray):
-            UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
+            UncCov = theta[::-1].T.dot(Ulow.dot(theta[::-1])) + np.abs(np.trace(Ulow.dot(Utheta[::-1])))      # static part of uncertainty
         else:  # handle case of zero uncertainty filter
-            UncCov = theta.T.dot(Ulow.dot(theta))       # static part of uncertainty
+            UncCov = theta[::-1].T.dot(Ulow.dot(theta[::-1]))       # static part of uncertainty
 
     unc = np.zeros_like(y)
     if isinstance(Utheta, np.ndarray):
