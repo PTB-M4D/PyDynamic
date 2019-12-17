@@ -157,8 +157,7 @@ def test_identity_multi():
 
     for filter_name in ["db3", "db4"]:
 
-        for nx in [20, 21, 22, 23, 203]:
-            print(nx)
+        for nx in [20, 21, 203]:
 
             x = np.linspace(1,nx,nx)  # np.random.randn(nx)
             #Ux = 0.1 * (1 + np.random.random(nx))
@@ -177,9 +176,8 @@ def test_identity_multi():
             assert x.size == xr.size
             assert np.allclose(x, xr)
             assert Ux.size == Uxr.size
-            #assert np.allclose(Ux, Uxr)
 
-            #if nx == 203 and filter_name == "db3":
+            #if nx == 203 and filter_name == "db4":
             #    plt.plot(Ux)
             #    plt.plot(Uxr)
             #    plt.show()
