@@ -16,7 +16,7 @@ for filter_name in ["db9"]:
     for nx in [101]:
         
         # define input signal and uncertainty of input signal
-        x = np.linspace(1,nx,nx)
+        x = np.clip(np.linspace(1,nx,nx), -10, 30)
         Ux = np.ones((nx))
         Ux[nx//2:] = 2
         Ux = 1.0 * Ux
