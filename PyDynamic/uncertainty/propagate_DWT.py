@@ -163,7 +163,7 @@ def dwt_max_level(data_length, filter_length):
     return int(n_max)
 
 
-def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
+def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
     """
     Multilevel discrete wavelet transformation of time-series x with uncertainty Ux.
 
@@ -227,7 +227,7 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="corr"):
     return coeffs, Ucoeffs, original_length
 
 
-def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None, kind="corr"):
+def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None, kind="diag"):
     """
     Multilevel discrete wavelet reconstruction of coefficients from levels back into time-series.
 
