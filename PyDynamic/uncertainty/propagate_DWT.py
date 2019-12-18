@@ -107,9 +107,9 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind):
     # upsample to double the length
     indices = np.arange(1, c_detail.size+1)
     c_approx = np.insert(c_approx, indices, 0)
-    U_approx = np.insert(U_approx, indices, 0)
+    U_approx = np.insert(U_approx, indices, 0) / np.sqrt(2)  # why is this correction necessary?
     c_detail = np.insert(c_detail, indices, 0)
-    U_detail = np.insert(U_detail, indices, 0)
+    U_detail = np.insert(U_detail, indices, 0) / np.sqrt(2)  # why is this correction necessary?
 
     # propagate uncertainty through FIR-filter
     x_approx, Ux_approx = FIRuncFilter(c_approx, U_approx, l, Utheta=None, kind=kind)
