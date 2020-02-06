@@ -68,7 +68,7 @@ any changes to PyDynamic can be applied very easily.
 
 If you have downloaded this software, we would be very thankful for letting 
 us know. You may, for instance, drop an email to one of the [authors
-](https://github.com/PTB-PSt1/PyDynamic/people) (e.g. 
+](https://github.com/PTB-PSt1/PyDynamic/graphs/contributors) (e.g. 
 [Sascha Eichstädt](mailto:sascha.eichstaedt@ptb.de), [Björn Ludwig
 ](mailto:bjoern.ludwig@ptb.de) or [Maximilian Gruber
 ](mailto:maximilian.gruber@ptb.de))

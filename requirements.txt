@@ -1,5 +1,4 @@
-ipython
-jupyter
+ipykernel
 matplotlib
 pytest
 numpy

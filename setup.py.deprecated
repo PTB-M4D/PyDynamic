@@ -49,8 +49,7 @@ setup(
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(exclude=["test"]),
     install_requires=[
-        'ipython',
-        'jupyter',
+        'ipykernel',
         'matplotlib',
         'numpy',
         'pandas',
