@@ -73,12 +73,12 @@ def test_MC(visualizeOutput=False):
 
 
 # this does not run through yet
-#def test_SMC():
-#    # run method
-#    y,Uy = SMC(x, sigma_noise, b1, [1.0], Ub, runs=runs)
-#
-#    assert len(y) == len(x)
-#    assert Uy.shape == (x.size, x.size)
+def test_SMC():
+    # run method
+    y, Uy = SMC(x, sigma_noise, b1, [1.0], Ub, runs=runs)
+
+    assert len(y) == len(x)
+    assert Uy.shape == y.shape
 
 
 def test_UMC(visualizeOutput=False):
