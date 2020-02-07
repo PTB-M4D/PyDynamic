@@ -191,22 +191,31 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     return x, ux.flatten()                    # flatten in case that we still have 2D array
 
 
-def IIRuncFilter(x, noise, b, a, Uab):
+def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=False, kind="diag"):
     """
     Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
     Parameters
     ----------
-    x: np.ndarray
-        filter input signal
-    noise: float
-        signal noise standard deviation
-    b: np.ndarray
-        filter numerator coefficients
-    a: np.ndarray
-        filter denominator coefficients
-    Uab: np.ndarray
-        covariance matrix for (a[1:],b)
+        x: np.ndarray
+            filter input signal
+        noise: float
+            signal noise standard deviation
+        b: np.ndarray
+            filter numerator coefficients
+        a: np.ndarray
+            filter denominator coefficients
+        Uab: np.ndarray
+            covariance matrix for (a[1:],b)
+        kind: string
+            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
+            "diag": point-wise standard uncertainties of non-stationary white noise (default)
+            "corr": single sided autocovariance of stationary (colored/corrlated) noise
+        init_internal_state: dict
+            An internal state (z, dz, P) to start from - e.g. from a previous run of IIRuncFilter.
+            If not given, internal state is assumed to be zero. 
+        return_state:
+            Return the last internal state - e.g. for reuse in a subsequent call of IIRuncFilter.
 
     Returns
     -------
@@ -214,6 +223,9 @@ def IIRuncFilter(x, noise, b, a, Uab):
         filter output signal
     Uy: np.ndarray
         uncertainty associated with y
+    internal_state: dict
+        dictionary of internal state
+        only returned, if return_state == True
 
     References
     ----------
@@ -221,49 +233,75 @@ def IIRuncFilter(x, noise, b, a, Uab):
 
     """
 
+    # process inputs
+    p = len(a) - 1
+
+    if kind == "corr":
+        raise NotImplementedError
+
     if not isinstance(noise, np.ndarray):
         noise = noise * np.ones_like(x)  # translate iid noise to vector
 
-    p = len(a) - 1
-
-    # Adjust dimension for later use.
+    if not isinstance(Uab, np.ndarray):
+        Uab = np.zeros((2*p+1, 2*p+1))
+    
+    # adjust dimension for later use.
     if not len(b) == len(a):
         b = np.hstack((b, np.zeros((len(a) - len(b),))))
+    # TODO: check Uab for consistency
 
-    # From discrete-time transfer function to state space representation.
-    [A, bs, c, b0] = tf2ss(b, a)
+    # from discrete-time transfer function to state space representation.
+    [A, bs, cT, b0] = tf2ss(b, a)
 
-    A = np.matrix(A)
-    bs = np.matrix(bs)
-    c = np.matrix(c)
+    # init
+    # internal variables
+    if init_internal_state:
+        z = init_internal_state["z"]
+        dz = init_internal_state["dz"]
+        P = init_internal_state["P"]
+    else:
+        z = np.zeros((p, 1))
+        dz = np.zeros((p, p))
+        P = np.zeros((p, p))
 
-    phi = np.zeros((2 * p + 1, 1))
-    dz = np.zeros((p, p))
-    dz1 = np.zeros((p, p))
-    z = np.zeros((p, 1))
-    P = np.zeros((p, p))
+    # phi: dy/dtheta
+    phi = np.empty((2 * p + 1, 1))
 
-    y = np.zeros((len(x),))
-    Uy = np.zeros((len(x),))
-
-    Aabl = np.zeros((p, p, p))
+    # dA: dA/dtheta
+    dA = np.zeros((p, p, p))
     for k in range(p):
-        Aabl[0, k, k] = -1
+        dA[0, k, k] = -1        # any ideas, why this validates correctly against Monte Carlo runs?
+        #dA[k, 0, -(k+1)] = -1  # this seems more appropriate, but doesn't validate against Monte Carlo run
+
+    # output y, output uncertainty Uy
+    y = np.zeros_like(x)
+    Uy = np.zeros_like(x)
 
     # implementation of the state-space formulas from the paper
     for n in range(len(y)):
-        for k in range(p):  # derivative w.r.t. a_1,...,a_p
-            dz1[:, k] = A * dz[:, k] + np.squeeze(Aabl[:, :, k]) * z
-            phi[k] = c * dz[:, k] - b0 * z[k]
-        phi[p + 1] = -np.matrix(a[1:]) * z + x[n]  # derivative w.r.t. b_0
-        for k in range(p + 2, 2 * p + 1):  # derivative w.r.t. b_1,...,b_p
-            phi[k] = z[k - (p + 1)]
-        P = A * P * A.T + noise[n] ** 2 * (bs * bs.T)
-        y[n] = c * z + b0 * x[n]
-        Uy[n] = phi.T * Uab * phi + c * P * c.T + b[0] ** 2 * noise[n] ** 2
-        z = A * z + bs * x[n]  # update of the state equations
-        dz = dz1
 
+        # calculate phi according to formulas (13) and (15) from paper
+        phi[:p] = np.transpose(cT @ dz - np.transpose(b0 * z[::-1]))   # derivative w.r.t. a_1,...,a_p
+        phi[p] = np.dot(-a[1:][::-1], z) + x[n]                        # derivative w.r.t. b_0
+        phi[p+1:] = z[::-1]                                            # derivative w.r.t. b_1,...,b_p
+        
+        # calculate output and output uncertainty according to formulas (6), (12) or (19)
+        y[n] = np.dot(cT, z) + b0 * x[n]
+        if kind == "diag":
+            Uy[n] = phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * noise[n])
+        elif kind == "corr":
+            some_term = 0
+            Uy[n] = phi.T @ Uab @ phi + some_term
+
+       # update for timestep
+        P = A @ P @ A.T + np.square(noise[n]) * np.outer(bs, bs)  # state uncertainty, formula (18)
+        dz = A @ dz + np.squeeze(dA @ z)                          # state derivative, formula (17)
+        z = A @ z + bs * x[n]                                     # state, formula (6)
+        
     Uy = np.sqrt(np.abs(Uy))  # calculate point-wise standard uncertainties
 
-    return y, Uy
+    if return_state:
+        internal_state = {"z": z, "dz": dz, "P": P}
+        return y, Uy, internal_state
+    else:
+        return y, Uy
