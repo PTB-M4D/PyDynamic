@@ -212,7 +212,7 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
             "diag": point-wise standard uncertainties of non-stationary white noise (default)
             "corr": single sided autocovariance of stationary (colored/corrlated) noise
         init_internal_state: dict
-            An internal state (z, dz, P) to start from - e.g. from a previous run of IIRuncFilter.
+            An internal state (z, dz, P, system) to start from - e.g. from a previous run of IIRuncFilter.
             If not given, internal state is assumed to be zero. 
         return_state:
             Return the last internal state - e.g. for reuse in a subsequent call of IIRuncFilter.
@@ -250,19 +250,18 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
         b = np.hstack((b, np.zeros((len(a) - len(b),))))
     # TODO: check Uab for consistency
 
-    # from discrete-time transfer function to state space representation.
-    [A, bs, cT, b0] = tf2ss(b, a)
-
     # init
     # internal variables
     if init_internal_state:
         z = init_internal_state["z"]
         dz = init_internal_state["dz"]
         P = init_internal_state["P"]
+        A, bs, cT, b0 = init_internal_state["system"]
     else:
         z = np.zeros((p, 1))
         dz = np.zeros((p, p))
         P = np.zeros((p, p))
+        [A, bs, cT, b0] = tf2ss(b, a)   # from discrete-time transfer function to state space representation.
 
     # phi: dy/dtheta
     phi = np.empty((2 * p + 1, 1))
@@ -301,7 +300,7 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
     Uy = np.sqrt(np.abs(Uy))  # calculate point-wise standard uncertainties
 
     if return_state:
-        internal_state = {"z": z, "dz": dz, "P": P}
+        internal_state = {"z": z, "dz": dz, "P": P, "system": (A, bs, cT, b0)}
         return y, Uy, internal_state
     else:
         return y, Uy
