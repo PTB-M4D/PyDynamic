@@ -10,7 +10,7 @@ from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from PyDynamic.uncertainty.propagate_filter import FIRuncFilter, IIRuncFilter
 
 
 def test_FIRuncFilter(makePlots=False):
@@ -104,4 +104,43 @@ def test_FIRuncFilter(makePlots=False):
             plt.show()
 
 def test_IIRuncFilter():
-    pass
+    # define filter
+    b = np.array([ 0.01967691, -0.01714282,  0.03329653, -0.01714282,  0.01967691])
+    a = np.array([ 1.        , -3.03302405,  3.81183153, -2.29112937,  0.5553678 ])
+
+    # simulate input and output signals
+    Fs = 100e3        # sampling frequency (in Hz)
+    Ts = 1 / Fs       # sampling interval length (in s)
+    nx = 500
+    time  = np.arange(nx)*Ts    # time values
+
+    # input signal + run methods
+    sigma_noise = 1e-2                                    # std for input signal
+    x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)    # generate input signal
+    Ux = sigma_noise * np.ones_like(x)                    # uncertainty of input signal
+    Uab = np.diag(np.zeros((len(a) + len(b) -1)))         # uncertainty of IIR-parameters
+    Uab[2,2] = 0.000001                                   # only a2 is uncertain
+
+    # run x all at once
+    y, Uy = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
+    end = time_measure.time()
+    assert len(y) == len(x)
+    assert len(Uy) == len(x)
+
+    # slice x into smaller chunks and process them in batches
+    # this tests the internal state options
+    y_list = []
+    Uy_list = []
+    internal_state = {}
+    for x_batch, Ux_batch in zip(np.array_split(x, 200), np.array_split(Ux, 200)):
+        yi, Uyi, internal_state = IIRuncFilter(x_batch, Ux_batch, b, a, Uab=Uab, kind="diag", init_internal_state=internal_state, return_state=True)
+        y_list.append(yi)
+        Uy_list.append(Uyi)
+    yb = np.concatenate(y_list, axis=0)
+    Uyb = np.concatenate(Uy_list, axis=0)
+    assert len(yb) == len(x)
+    assert len(Uyb) == len(x)
+
+    # check if both ways of calling IIRuncFilter yield the same result
+    assert np.allclose(yb, y)
+    assert np.allclose(Uyb, Uy)
