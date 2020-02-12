@@ -294,7 +294,7 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
 
        # update for timestep
         P = A @ P @ A.T + np.square(noise[n]) * np.outer(bs, bs)  # state uncertainty, formula (18)
-        dz = A @ dz + np.squeeze(dA @ z)                          # state derivative, formula (17)
+        dz = A @ dz + np.hstack(dA @ z)                           # state derivative, formula (17)
         z = A @ z + bs * x[n]                                     # state, formula (6)
         
     Uy = np.sqrt(np.abs(Uy))  # calculate point-wise standard uncertainties
