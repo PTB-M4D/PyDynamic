@@ -324,3 +324,50 @@ def _get_derivative_A(size_A):
 
     return dA
 
+
+def get_initial_internal_state(b, a, x0 = 1.0, U0 = 1.0):
+    """
+    Calculate the internal state for the IIRuncFilter-function corresponding to stationary
+    non-zero input signal.
+
+    Parameters
+    ----------
+        b: np.ndarray
+            filter numerator coefficients
+        a: np.ndarray
+            filter denominator coefficients
+        x0: float
+            stationary input value
+        U0: float
+            stationary input uncertainty
+
+    Returns
+    -------
+    internal_state: dict
+        dictionary of internal state
+ 
+    """
+
+    # convert into state space representation
+    [A, B, C, D] = _tf2ss(b, a)
+
+    # necessary intermediate variables
+    p = len(A)
+    IminusA = np.eye(p) - A
+    dA = _get_derivative_A(p)
+
+    # stationary internal state
+    # (eye()-A) * zs = B*x0
+    zs = scipy.linalg.solve(IminusA, B) * x0
+
+    # stationary derivative of internal state
+    # (eye() - A) dzs = dA * zs
+    dzs = scipy.linalg.solve(IminusA, np.hstack(dA@zs))
+
+    # stationary uncertainty of internal state
+    Ps = scipy.linalg.solve_discrete_lyapunov(A, U0**2 * np.outer(B,B))
+
+    # bring results into the format that is used within IIRuncFilter
+    internal_state = {"z": zs, "dz": dzs, "P": Ps, "system": (A, B, C, D)}
+
+    return internal_state
