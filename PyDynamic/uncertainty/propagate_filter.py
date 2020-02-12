@@ -267,10 +267,7 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
     phi = np.empty((2 * p + 1, 1))
 
     # dA: dA/dtheta
-    dA = np.zeros((p, p, p))
-    for k in range(p):
-        dA[0, k, k] = -1        # any ideas, why this validates correctly against Monte Carlo runs?
-        #dA[k, 0, -(k+1)] = -1  # this seems more appropriate, but doesn't validate against Monte Carlo run
+    dA = _get_derivative_A(p)
 
     # output y, output uncertainty Uy
     y = np.zeros_like(x)
@@ -304,3 +301,11 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
         return y, Uy, internal_state
     else:
         return y, Uy
+
+def _get_derivative_A(size_A):
+    dA = np.zeros((size_A, size_A, size_A))
+    for k in range(size_A):
+        dA[k, -1, -(k+1)] = -1
+
+    return dA
+
