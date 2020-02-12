@@ -16,8 +16,8 @@ is known and that noise is stationary!
 """
 
 import numpy as np
-from scipy.linalg import toeplitz
-from scipy.signal import lfilter, tf2ss
+import scipy.linalg
+import scipy.signal
 from ..misc.tools import trimOrPad
 
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
@@ -91,7 +91,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
             # trim / pad to length Ntheta
             ycorr = trimOrPad(ycorr, Ntheta)
-            Ulow = toeplitz(ycorr)
+            Ulow = scipy.linalg.toeplitz(ycorr)
 
         elif isinstance(sigma2, np.ndarray):
 
@@ -110,8 +110,8 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # V needs to be extended to cover Ntheta timesteps more into the future
                 sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
 
-                N = toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
-                M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
+                N = scipy.linalg.toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
+                M = scipy.linalg.toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
                 SP = np.diag(sigma2[0] * np.ones_like(blow))
                 S = np.diag(sigma2_extended)
 
@@ -138,9 +138,9 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 sigma2_reflect = np.pad(sigma2, (Ntheta-2, 0), mode="reflect")
 
                 ycorr = np.correlate(sigma2_reflect, Bcorr_adjusted, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
-                Ulow = toeplitz(ycorr)
+                Ulow = scipy.linalg.toeplitz(ycorr)
 
-        xlow = lfilter(blow,1.0,y)
+        xlow = scipy.signal.lfilter(blow,1.0,y)
 
     else: # if blow is not provided
         if isinstance(sigma2, float):
@@ -156,12 +156,12 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
 
             elif kind == "corr":
-                Ulow = toeplitz(trimOrPad(sigma2, Ntheta))
+                Ulow = scipy.linalg.toeplitz(trimOrPad(sigma2, Ntheta))
 
         xlow = y
 
     # apply FIR filter to calculate best estimate in accordance with GUM
-    x = lfilter(theta,1.0,xlow)
+    x = scipy.signal.lfilter(theta,1.0,xlow)
     x = np.roll(x,-int(shift))
 
     # add dimension to theta, otherwise transpose won't work
