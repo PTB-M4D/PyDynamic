@@ -261,7 +261,7 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
         z = np.zeros((p, 1))
         dz = np.zeros((p, p))
         P = np.zeros((p, p))
-        [A, bs, cT, b0] = tf2ss(b, a)   # from discrete-time transfer function to state space representation.
+        [A, bs, cT, b0] = _tf2ss(b, a)   # from discrete-time transfer function to state space representation.
 
     # phi: dy/dtheta
     phi = np.empty((2 * p + 1, 1))
@@ -301,6 +301,21 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
         return y, Uy, internal_state
     else:
         return y, Uy
+
+
+def _tf2ss(b, a):
+    """
+    Variant of scipy.signal.tf2ss that fits the definitions of [Link2009]_ 
+    """
+
+    p = len(a) - 1
+    A = np.vstack([np.eye(p-1, p, k=1), -a[1:][::-1]])
+    B = np.zeros((p, 1))
+    B[-1] = 1
+    C = np.expand_dims((b[1:] - b[0] * a[1:])[::-1], axis=0)
+    D = np.ones((1,1))*b[0]
+
+    return A, B, C, D
 
 def _get_derivative_A(size_A):
     dA = np.zeros((size_A, size_A, size_A))
