@@ -191,7 +191,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     return x, ux.flatten()                    # flatten in case that we still have 2D array
 
 
-def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=False, kind="diag"):
+def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False, kind="diag"):
     """
     Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
@@ -199,8 +199,9 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
     ----------
         x: np.ndarray
             filter input signal
-        noise: float
-            signal noise standard deviation
+        Ux: float
+            float:    standard deviation of white noise in y
+            1D-array: interpretation depends on kind
         b: np.ndarray
             filter numerator coefficients
         a: np.ndarray
@@ -208,7 +209,7 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
         Uab: np.ndarray
             covariance matrix for (a[1:],b)
         kind: string
-            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
+            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
             "diag": point-wise standard uncertainties of non-stationary white noise (default)
             "corr": single sided autocovariance of stationary (colored/corrlated) noise
         init_internal_state: dict
@@ -236,11 +237,8 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
     # process inputs
     p = len(a) - 1
 
-    if kind == "corr":
-        raise NotImplementedError
-
-    if not isinstance(noise, np.ndarray):
-        noise = noise * np.ones_like(x)  # translate iid noise to vector
+    if not isinstance(Ux, np.ndarray):
+        Ux = Ux * np.ones_like(x)  # translate iid noise to vector
 
     if not isinstance(Uab, np.ndarray):
         Uab = np.zeros((2*p+1, 2*p+1))
@@ -250,24 +248,34 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
         b = np.hstack((b, np.zeros((len(a) - len(b),))))
     # TODO: check Uab for consistency
 
-    # init
     # internal variables
+    # system and corr_unc are cached as well to reduce computational load
     if init_internal_state:
         z = init_internal_state["z"]
         dz = init_internal_state["dz"]
         P = init_internal_state["P"]
         A, bs, cT, b0 = init_internal_state["system"]
+        corr_unc = init_internal_state["corr_unc"]
+
     else:
-        z = np.zeros((p, 1))
-        dz = np.zeros((p, p))
-        P = np.zeros((p, p))
-        [A, bs, cT, b0] = _tf2ss(b, a)   # from discrete-time transfer function to state space representation.
+        # calculate initial state
+        if kind == "diag":
+            state = get_initial_internal_state(b, a, x0=0.0, U0=0.0)
+        else:  # "corr"
+            state = get_initial_internal_state(b, a, x0=0.0, U0=0.0, Ux=Ux)
+        
+        # populate internal variables from result
+        z = state["z"]
+        dz = state["dz"]
+        P = state["P"]
+        [A, bs, cT, b0] = state["system"]
+        corr_unc = state["corr_unc"]
 
     # phi: dy/dtheta
     phi = np.empty((2 * p + 1, 1))
 
     # dA: dA/dtheta
-    dA = _get_derivative_A(p)
+    #dA = _get_derivative_A(p)  # not needed, because derivative is not directly used (see comments below)
 
     # output y, output uncertainty Uy
     y = np.zeros_like(x)
@@ -281,23 +289,27 @@ def IIRuncFilter(x, noise, b, a, Uab, init_internal_state = {}, return_state=Fal
         phi[p] = np.dot(-a[1:][::-1], z) + x[n]                        # derivative w.r.t. b_0
         phi[p+1:] = z[::-1]                                            # derivative w.r.t. b_1,...,b_p
         
-        # calculate output and output uncertainty according to formulas (6), (12) or (19)
-        y[n] = np.dot(cT, z) + b0 * x[n]
+        # calculate output and output uncertainty according to formulas (6), (12), (19) and (20)
+        y[n] = np.dot(cT, z) + b0 * x[n]                                           # (6)
         if kind == "diag":
-            Uy[n] = phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * noise[n])
-        elif kind == "corr":
-            some_term = 0
-            Uy[n] = phi.T @ Uab @ phi + some_term
+            Uy[n] = phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * Ux[n])      # (12)
+        else:  # "corr"
+            Uy[n] = phi.T @ Uab @ phi + corr_unc                                   # (19)
 
-       # update for timestep
-        P = A @ P @ A.T + np.square(noise[n]) * np.outer(bs, bs)  # state uncertainty, formula (18)
-        dz = A @ dz + np.hstack(dA @ z)                           # state derivative, formula (17)
-        z = A @ z + bs * x[n]                                     # state, formula (6)
+        # timestep update
+        if kind == "diag":
+            P = A @ P @ A.T + np.square(Ux[n]) * np.outer(bs, bs)   # state uncertainty, formula (18)
+        else:  # "corr"
+            P = A @ P @ A.T + Ux[0] * np.outer(bs, bs)              # state uncertainty, adopted from formula (18)
+        #dA_z = np.hstack(dA @ z)                                   # not efficient, because dA is sparse
+        dA_z = np.vstack((np.zeros((p-1, p)), -z[::-1].T))          # efficient, no tensor-multiplication involved
+        dz = A @ dz + dA_z                                          # state derivative, formula (17)
+        z = A @ z + bs * x[n]                                       # state, formula (6)
         
     Uy = np.sqrt(np.abs(Uy))  # calculate point-wise standard uncertainties
 
     if return_state:
-        internal_state = {"z": z, "dz": dz, "P": P, "system": (A, bs, cT, b0)}
+        internal_state = {"z": z, "dz": dz, "P": P, "system": (A, bs, cT, b0), "corr_unc": corr_unc}
         return y, Uy, internal_state
     else:
         return y, Uy
@@ -317,6 +329,7 @@ def _tf2ss(b, a):
 
     return A, B, C, D
 
+
 def _get_derivative_A(size_A):
     dA = np.zeros((size_A, size_A, size_A))
     for k in range(size_A):
@@ -325,7 +338,23 @@ def _get_derivative_A(size_A):
     return dA
 
 
-def get_initial_internal_state(b, a, x0 = 1.0, U0 = 1.0):
+def _get_corr_unc(b, a, Ux):
+    """
+    Calculate the cumulated correlated noise based on equations (20) of [Link2009]_ .
+    """
+
+    # get impulse response of IIR defined by (b,a)
+    h_theta = scipy.signal.dimpulse((b, a, 1), x0 = 0.0, t=np.arange(0, len(Ux), step=1))[1][0]
+    
+    # equation (20), note:
+    # - for values r<0 or s<0 the contribution to the sum is zero (because h_theta is zero)
+    # - Ux is the one-sided autocorrelation and assumed to be zero outside its range
+    corr_unc = np.sum(scipy.linalg.toeplitz(Ux) + scipy.linalg.toeplitz(h_theta))
+
+    return corr_unc
+
+
+def get_initial_internal_state(b, a, x0 = 1.0, U0 = 1.0, Ux = None):
     """
     Calculate the internal state for the IIRuncFilter-function corresponding to stationary
     non-zero input signal.
@@ -367,7 +396,12 @@ def get_initial_internal_state(b, a, x0 = 1.0, U0 = 1.0):
     # stationary uncertainty of internal state
     Ps = scipy.linalg.solve_discrete_lyapunov(A, U0**2 * np.outer(B,B))
 
+    if isinstance(Ux, np.ndarray):
+        corr_unc = _get_corr_unc(b, a, Ux)
+    else:
+        corr_unc = 0
+
     # bring results into the format that is used within IIRuncFilter
-    internal_state = {"z": zs, "dz": dzs, "P": Ps, "system": (A, B, C, D)}
+    internal_state = {"z": zs, "dz": dzs, "P": Ps, "system": (A, B, C, D), "corr_unc": corr_unc}
 
     return internal_state
