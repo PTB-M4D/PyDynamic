@@ -235,19 +235,31 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False,
     """
 
     # process inputs
-    p = len(a) - 1
+    p = max(len(a), len(b)) - 1
+    d = len(a) - len(b)
 
     if not isinstance(Ux, np.ndarray):
         Ux = Ux * np.ones_like(x)  # translate iid noise to vector
 
-    if not isinstance(Uab, np.ndarray):
+    # adjust filter coefficient uncertainties
+    if isinstance(Uab, np.ndarray):
+        if Uab.shape == (len(a)+len(b)-1, len(a)+len(b)-1):
+            if d < 0:
+                Uab = np.insert(np.insert(Uab, [len(a)-1]*(-d), 0, axis=0), [len(a)-1]*(-d), 0, axis=1)
+            elif d > 0:
+                Uab = np.hstack((Uab, np.zeros((Uab.shape[0], d))))
+                Uab = np.vstack((Uab, np.zeros((d, Uab.shape[1]))))
+        else:
+            raise ValueError("Uab is not of correct shape.")
+    else:
         Uab = np.zeros((2*p+1, 2*p+1))
     
-    # adjust dimension for later use.
-    if not len(b) == len(a):
-        b = np.hstack((b, np.zeros((len(a) - len(b),))))
-    # TODO: check Uab for consistency
-
+    # adjust filter coefficients for later use
+    if d < 0:
+        a = np.hstack((a, np.zeros(-d)))
+    elif d > 0:
+        b = np.hstack((b, np.zeros(d)))
+    
     # internal variables
     # system and corr_unc are cached as well to reduce computational load
     if init_internal_state:
