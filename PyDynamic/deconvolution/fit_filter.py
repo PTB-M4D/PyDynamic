@@ -21,7 +21,7 @@ This module contains the following functions:
 .. deprecated:: 1.2.71
           The module *deconvolution* will be combined with the module
           *identification* and renamed to *model_estimation* in the next
-          major release 1.3.0. From then on you should only use the new module
+          major release 2.0.0. From then on you should only use the new module
           *model_estimation* instead.
 """
 
@@ -37,7 +37,7 @@ __all__ = ['LSFIR', 'LSFIR_unc', 'LSIIR', 'LSIIR_unc', 'LSFIR_uncMC']
 warnings.warn(
     "The module *deconvolution* will be combined with the module "
     "*identification* and renamed to *model_estimation* in the "
-    "next major release 1.3.0. From then on you should only use "
+    "next major release 2.0.0. From then on you should only use "
     "the new module *model_estimation* instead.",
     DeprecationWarning)
 
