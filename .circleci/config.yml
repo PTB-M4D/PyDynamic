@@ -57,7 +57,7 @@ jobs:
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "poetry.lock" }}
+            - v1-dependencies-{{ checksum "requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
@@ -65,25 +65,37 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            poetry install
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install coverage pytest-cov
 
       - save_cache:
           paths:
-            - /home/circleci/.cache/pypoetry/virtualenvs
-          key: v1-dependencies-{{ checksum "poetry.lock" }}
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       # Run tests with coverage report!
       - run:
           name: Run tests
           command: |
-            poetry run pytest -v --junitxml=test-reports/pytest.xml \
+            . venv/bin/activate
+            pytest -v --junitxml=test-reports/pytest.xml \
             --cov=PyDynamic/ > test-reports/pytest.log
 
       # Upload coverage report.
       - run:
           name: Upload coverage report
           command: |
+            . venv/bin/activate
             bash <(curl -s https://codecov.io/bash)
+
+      # Install PyDynamic.
+      - run:
+          name: Install PyDynamic
+          command: |
+            . venv/bin/activate
+            python3 setup.py install
 
       # Store test results as artifacts.
       - store_artifacts:
@@ -118,7 +130,7 @@ jobs:
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "poetry.lock" }}
+            - v1-dependencies-{{ checksum "requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
@@ -126,19 +138,31 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            poetry install
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install coverage pytest-cov
 
       - save_cache:
           paths:
-            - /home/circleci/.cache/pypoetry/virtualenvs
-          key: v1-dependencies-{{ checksum "poetry.lock" }}
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
 
       # Run tests with coverage report!
       - run:
           name: Run tests
           command: |
-            poetry run pytest -v --junitxml=test-reports/pytest.xml \
+            . venv/bin/activate
+            pytest -v --junitxml=test-reports/pytest.xml \
             --cov=PyDynamic/ > test-reports/pytest.log
+
+      # Install PyDynamic.
+      - run:
+          name: Install PyDynamic
+          command: |
+            . venv/bin/activate
+            python3 setup.py install
 
       # Store test results as artifacts.
       - store_artifacts:
@@ -165,7 +189,7 @@ jobs:
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependency-cache-{{ checksum "pyproject.toml" }}-{{ checksum "poetry.lock" }}
+            - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
@@ -173,22 +197,33 @@ jobs:
       - run:
           name: Install python dependencies
           command: |
-            poetry install
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install setuptools wheel twine
 
       - save_cache:
-          key: v1-dependency-cache-{{ checksum "pyproject.toml" }}-{{ checksum "poetry.lock" }}
+          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
           paths:
-            - /home/circleci/.cache/pypoetry/virtualenvs
+            - ./venv
+
+      # Verify Git tag to version to ensure, only wanted versions are uploaded.
+      - run:
+          name: Verify Git tag vs. version
+          command: |
+            . venv/bin/activate
+            python setup.py verify
 
       # Create a package.
       - run:
           name: Create package
           command: |
-            poetry build
+            . venv/bin/activate
+            python setup.py sdist bdist_wheel
 
       # Upload the created packages to test.pypi.org.
       - run:
           name: Upload to PyPI
           command: |
-            poetry publish --username "${TWINE_USERNAME}" --password
-            "${TWINE_PASSWORD}" --no-interaction
+            . venv/bin/activate
+            twine upload dist/*
