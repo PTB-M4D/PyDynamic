@@ -117,30 +117,40 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            pip install setuptools wheel twine
+#            pip install setuptools wheel twine
+            pip install python-semantic-release
 
       - save_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
           paths:
             - "venv"
 
-      # Verify Git tag to version to ensure, only wanted versions are uploaded.
-      - run:
-          name: Verify Git tag vs. version
-          command: |
-            . venv/bin/activate
-            python setup.py verify
+#      # Verify Git tag to version to ensure, only wanted versions are uploaded.
+#      - run:
+#          name: Verify Git tag vs. version
+#          command: |
+#            . venv/bin/activate
+#            python setup.py verify
 
-      # Create a package.
-      - run:
-          name: Create package
-          command: |
-            . venv/bin/activate
-            python setup.py sdist bdist_wheel
+#      # Create a package.
+#      - run:
+#          name: Create package
+#          command: |
+#            . venv/bin/activate
+#            python setup.py sdist bdist_wheel
 
-      # Upload the created packages to test.pypi.org.
+#      # Upload the created packages to pypi.org.
+#      - run:
+#          name: Upload to PyPI
+#          command: |
+#            . venv/bin/activate
+#            twine upload dist/*
+
+      # Create and upload the created packages to pypi.org.
       - run:
           name: Upload to PyPI
           command: |
             . venv/bin/activate
-            twine upload dist/*
+            git config --global user.name "Bjoern Ludwig"
+            git config --global user.email "bjoern.ludwig@ptb.de"
+            semantic-release publish
