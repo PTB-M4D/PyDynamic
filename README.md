@@ -10,6 +10,7 @@
 [![Codecov Badge
 ](https://codecov.io/gh/PTB-PSt1/PyDynamic/branch/master/graph/badge.svg)
 ](https://codecov.io/gh/PTB-PSt1/PyDynamic)
+[![DOI](https://zenodo.org/badge/34848642.svg)](https://zenodo.org/badge/latestdoi/34848642)
 
 Python package for the analysis of dynamic measurements
 
