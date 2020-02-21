@@ -243,16 +243,15 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False,
 
     # adjust filter coefficient uncertainties
     if isinstance(Uab, np.ndarray):
-        if Uab.shape == (len(a)+len(b)-1, len(a)+len(b)-1):
-            if d < 0:
-                Uab = np.insert(np.insert(Uab, [len(a)-1]*(-d), 0, axis=0), [len(a)-1]*(-d), 0, axis=1)
-            elif d > 0:
-                Uab = np.hstack((Uab, np.zeros((Uab.shape[0], d))))
-                Uab = np.vstack((Uab, np.zeros((d, Uab.shape[1]))))
-        else:
-            raise ValueError("Uab is not of correct shape.")
-    else:
-        Uab = np.zeros((2*p+1, 2*p+1))
+        if d != 0:
+            if Uab.shape == (len(a)+len(b)-1, len(a)+len(b)-1):
+                if d < 0:
+                    Uab = np.insert(np.insert(Uab, [len(a)-1]*(-d), 0, axis=0), [len(a)-1]*(-d), 0, axis=1)
+                elif d > 0:
+                    Uab = np.hstack((Uab, np.zeros((Uab.shape[0], d))))
+                    Uab = np.vstack((Uab, np.zeros((d, Uab.shape[1]))))
+            else:
+                raise ValueError("Uab is not of correct shape.")
     
     # adjust filter coefficients for later use
     if d < 0:
@@ -303,10 +302,16 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False,
         
         # calculate output and output uncertainty according to formulas (6), (12), (19) and (20)
         y[n] = np.dot(cT, z) + b0 * x[n]                                           # (6)
-        if kind == "diag":
-            Uy[n] = phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * Ux[n])      # (12)
-        else:  # "corr"
-            Uy[n] = phi.T @ Uab @ phi + corr_unc                                   # (19)
+        if isinstance(Uab, np.ndarray):
+            if kind == "diag":
+                Uy[n] = phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * Ux[n])      # (12)
+            else:  # "corr"
+                Uy[n] = phi.T @ Uab @ phi + corr_unc                                   # (19)
+        else:  # Uab is None
+            if kind == "diag":
+                Uy[n] = cT @ P @ cT.T + np.square(b0 * Ux[n])                          # (12)
+            else:  # "corr"
+                Uy[n] = corr_unc                                                       # (19)
 
         # timestep update
         if kind == "diag":
