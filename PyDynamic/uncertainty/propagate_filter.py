@@ -41,7 +41,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         blow: np.ndarray
             optional FIR low-pass filter
         kind: string
-            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
+            defines the interpretation of sigma_noise, if sigma_noise is a 1D-array
             "diag": point-wise standard uncertainties of non-stationary white noise
             "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
 
@@ -199,7 +199,7 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
     ----------
         x: np.ndarray
             filter input signal
-        Ux: float
+        Ux: float or np.ndarray
             float:    standard deviation of white noise in y
             1D-array: interpretation depends on kind
         b: np.ndarray
@@ -209,7 +209,7 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
         Uab: np.ndarray
             covariance matrix for (a[1:],b)
         kind: string
-            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
+            defines the interpretation of Ux, if Ux is a 1D-array
             "diag": point-wise standard uncertainties of non-stationary white noise (default)
             "corr": single sided autocovariance of stationary (colored/corrlated) noise
         init_internal_state: dict
