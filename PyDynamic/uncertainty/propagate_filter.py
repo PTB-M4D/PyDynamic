@@ -191,7 +191,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     return x, ux.flatten()                    # flatten in case that we still have 2D array
 
 
-def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
+def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
     """
     Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
@@ -212,7 +212,7 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
             defines the interpretation of Ux, if Ux is a 1D-array
             "diag": point-wise standard uncertainties of non-stationary white noise (default)
             "corr": single sided autocovariance of stationary (colored/corrlated) noise
-        init_internal_state: dict
+        state: dict
             An internal state (z, dz, P, system) to start from - e.g. from a previous run of IIRuncFilter.
             If not given, internal state is assumed to be zero. 
 
@@ -222,8 +222,8 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
         filter output signal
     Uy: np.ndarray
         uncertainty associated with y
-    internal_state: dict
-        dictionary of internal state
+    state: dict
+        dictionary of updated internal state
 
     References
     ----------
@@ -258,26 +258,18 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
     
     # internal variables
     # system and corr_unc are cached as well to reduce computational load
-    if init_internal_state:
-        z = init_internal_state["z"]
-        dz = init_internal_state["dz"]
-        P = init_internal_state["P"]
-        A, bs, cT, b0 = init_internal_state["system"]
-        corr_unc = init_internal_state["corr_unc"]
-
-    else:
+    if not state:
         # calculate initial state
         if kind == "diag":
             state = get_initial_internal_state(b, a, x0=0.0, U0=0.0)
         else:  # "corr"
             state = get_initial_internal_state(b, a, x0=0.0, U0=0.0, Ux=Ux)
-        
-        # populate internal variables from result
-        z = state["z"]
-        dz = state["dz"]
-        P = state["P"]
-        [A, bs, cT, b0] = state["system"]
-        corr_unc = state["corr_unc"]
+
+    z = state["z"]
+    dz = state["dz"]
+    P = state["P"]
+    A, bs, cT, b0 = state["system"]
+    corr_unc = state["corr_unc"]
 
     # phi: dy/dtheta
     phi = np.empty((2 * p + 1, 1))
@@ -323,8 +315,8 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
     Uy = np.sqrt(np.abs(Uy))  # calculate point-wise standard uncertainties
 
     # return result and internal state
-    internal_state = {"z": z, "dz": dz, "P": P, "system": (A, bs, cT, b0), "corr_unc": corr_unc}
-    return y, Uy, internal_state
+    state.update({"z": z, "dz": dz, "P": P})
+    return y, Uy, state
 
 
 def _tf2ss(b, a):
