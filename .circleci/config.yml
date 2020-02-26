@@ -3,32 +3,35 @@
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
 version: 2.1
+
+executors:
+  tester:
+    docker:
+      - image: circleci/python:3.7
+  publisher:
+    docker:
+      - image: circleci/python:3.8
+
 workflows:
   # Create workflow for testing and deploying PyDynamic.
   build_and_deploy:
     jobs:
       # Create 'build' job to test and install PyDynamic for every commit.
-      - build:
-          # Include tag filter to trigger as well on tag pushes.
-          filters:
-              tags:
-                only: /.*/
+      - test
+      - install
       - deploy:
-          # Create 'deploy' job to upload PyDynamic to PyPI.org on certain tag
-          #   pushes, which successfully run 'build' job.
+          # Create 'deploy' job to create a release and publish it on GitHub,
+          # Zenodo and PyPI.org.
           requires:
-              - build
+              - test
+              - install
           filters:
-              tags:
-                # Specify the tags which trigger the job as regular expression.
-                only: /[0-9]+(\.[0-9]+)*/
               branches:
-                # This assures the job only being triggered by tag pushes.
-                ignore: /.*/
+                # This assures the job only being triggered on branch master.
+                only: /master/
 jobs:
-  build:
-    docker:
-      - image: circleci/python:3.7
+  test:
+    executor: tester
 
     working_directory: ~/repo
 
@@ -54,7 +57,7 @@ jobs:
           name: Install dependencies
           command: |
             python3 -m venv venv
-            . venv/bin/activate
+            source venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
             pip install coverage pytest-cov
@@ -68,7 +71,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            . venv/bin/activate
+            source venv/bin/activate
             pytest -v --junitxml=test-reports/pytest.xml \
             --cov=PyDynamic/ > test-reports/pytest.log
 
@@ -76,15 +79,8 @@ jobs:
       - run:
           name: Upload coverage report
           command: |
-            . venv/bin/activate
+            source venv/bin/activate
             bash <(curl -s https://codecov.io/bash)
-
-      # Install PyDynamic.
-      - run:
-          name: Install PyDynamic
-          command: |
-            . venv/bin/activate
-            python3 setup.py install
 
       # Store test results.
       - store_artifacts:
@@ -94,63 +90,77 @@ jobs:
       - store_test_results:
           path: test-reports
 
-  deploy:
-    docker:
-      - image: circleci/python:3.7
+  install:
+    executor: tester
 
     working_directory: ~/repo
 
     steps:
+      # Checkout code.
       - checkout
 
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
-      # Install dependencies if needed as well for package creation.
+      # Install dependencies and Codecov reporter if necessary.
+      - run:
+          name: Install dependencies
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+      # Install PyDynamic.
+      - run:
+          name: Install PyDynamic
+          command: |
+            source venv/bin/activate
+            python3 setup.py install
+
+  deploy:
+    executor: publisher
+
+    working_directory: ~/repo
+
+    steps:
+      # Checkout code.
+      - checkout
+
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            # Specify the unique identifier for the cache.
+            - publisher-dependencies
+
+      # Install dependencies.
       - run:
           name: Install python dependencies
           command: |
             python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-#            pip install setuptools wheel twine
+            source venv/bin/activate
+            pip install --upgrade pip
             pip install python-semantic-release
 
       - save_cache:
-          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "requirements.txt" }}
+          key: publisher-dependencies
           paths:
-            - "venv"
+            - ./venv
 
-#      # Verify Git tag to version to ensure, only wanted versions are uploaded.
-#      - run:
-#          name: Verify Git tag vs. version
-#          command: |
-#            . venv/bin/activate
-#            python setup.py verify
-
-#      # Create a package.
-#      - run:
-#          name: Create package
-#          command: |
-#            . venv/bin/activate
-#            python setup.py sdist bdist_wheel
-
-#      # Upload the created packages to pypi.org.
-#      - run:
-#          name: Upload to PyPI
-#          command: |
-#            . venv/bin/activate
-#            twine upload dist/*
-
-      # Create and upload the created packages to pypi.org.
+      # Publish it!
       - run:
-          name: Upload to PyPI
+          name: Run semantic-release publish
           command: |
-            . venv/bin/activate
-            git config --global user.name "Bjoern Ludwig"
+            source venv/bin/activate
+            git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
