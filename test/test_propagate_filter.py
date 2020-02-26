@@ -129,7 +129,7 @@ def test_IIRuncFilter():
     Uab[2,2] = 0.000001                                   # only a2 is uncertain
 
     # run x all at once
-    y, Uy = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
+    y, Uy, _ = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
     end = time_measure.time()
     assert len(y) == len(x)
     assert len(Uy) == len(x)
@@ -138,9 +138,9 @@ def test_IIRuncFilter():
     # this tests the internal state options
     y_list = []
     Uy_list = []
-    internal_state = {}
+    state = None
     for x_batch, Ux_batch in zip(np.array_split(x, 200), np.array_split(Ux, 200)):
-        yi, Uyi, internal_state = IIRuncFilter(x_batch, Ux_batch, b, a, Uab=Uab, kind="diag", init_internal_state=internal_state, return_state=True)
+        yi, Uyi, state = IIRuncFilter(x_batch, Ux_batch, b, a, Uab=Uab, kind="diag", state=state)
         y_list.append(yi)
         Uy_list.append(Uyi)
     yb = np.concatenate(y_list, axis=0)
