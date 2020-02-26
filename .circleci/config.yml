@@ -14,9 +14,9 @@ executors:
 
 workflows:
   # Create workflow for testing and deploying PyDynamic.
-  build_and_deploy:
+  test_and_deploy:
     jobs:
-      # Create 'build' job to test and install PyDynamic for every commit.
+      # Create 'test' job to test and install PyDynamic for every commit.
       - test
       - install
       - deploy:
@@ -48,7 +48,7 @@ jobs:
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "requirements/requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
@@ -59,13 +59,13 @@ jobs:
             python3 -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install coverage pytest-cov
+            pip install -r requirements/requirements.txt
+            pip install -r requirements/dev-requirements.txt
 
       - save_cache:
+          key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
           paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
+            - ./test_env
 
       # Run tests with coverage report and upload results to Codecov!
       - run:
@@ -102,7 +102,7 @@ jobs:
       # Download and cache dependencies.
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "requirements/requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
             - v1-dependencies-
 
@@ -113,12 +113,12 @@ jobs:
             python3 -m venv venv
             source venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt
+            pip install -r requirements/requirements.txt
 
       - save_cache:
           paths:
             - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
+          key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
 
       # Install PyDynamic.
       - run:
