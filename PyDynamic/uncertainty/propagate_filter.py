@@ -16,8 +16,8 @@ is known and that noise is stationary!
 """
 
 import numpy as np
-import scipy.linalg
-import scipy.signal
+from scipy.linalg import toeplitz, solve, solve_discrete_lyapunov
+from scipy.signal import lfilter, dimpulse
 from ..misc.tools import trimOrPad
 
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
@@ -91,7 +91,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
             # trim / pad to length Ntheta
             ycorr = trimOrPad(ycorr, Ntheta)
-            Ulow = scipy.linalg.toeplitz(ycorr)
+            Ulow = toeplitz(ycorr)
 
         elif isinstance(sigma2, np.ndarray):
 
@@ -110,8 +110,8 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # V needs to be extended to cover Ntheta timesteps more into the future
                 sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
 
-                N = scipy.linalg.toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
-                M = scipy.linalg.toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
+                N = toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
+                M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
                 SP = np.diag(sigma2[0] * np.ones_like(blow))
                 S = np.diag(sigma2_extended)
 
@@ -138,9 +138,9 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 sigma2_reflect = np.pad(sigma2, (Ntheta-2, 0), mode="reflect")
 
                 ycorr = np.correlate(sigma2_reflect, Bcorr_adjusted, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
-                Ulow = scipy.linalg.toeplitz(ycorr)
+                Ulow = toeplitz(ycorr)
 
-        xlow = scipy.signal.lfilter(blow,1.0,y)
+        xlow = lfilter(blow,1.0,y)
 
     else: # if blow is not provided
         if isinstance(sigma2, float):
@@ -156,12 +156,12 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
 
             elif kind == "corr":
-                Ulow = scipy.linalg.toeplitz(trimOrPad(sigma2, Ntheta))
+                Ulow = toeplitz(trimOrPad(sigma2, Ntheta))
 
         xlow = y
 
     # apply FIR filter to calculate best estimate in accordance with GUM
-    x = scipy.signal.lfilter(theta,1.0,xlow)
+    x = lfilter(theta,1.0,xlow)
     x = np.roll(x,-int(shift))
 
     # add dimension to theta, otherwise transpose won't work
@@ -361,12 +361,12 @@ def _get_corr_unc(b, a, Ux):
     """
 
     # get impulse response of IIR defined by (b,a)
-    h_theta = scipy.signal.dimpulse((b, a, 1), x0 = 0.0, t=np.arange(0, len(Ux), step=1))[1][0]
+    h_theta = dimpulse((b, a, 1), x0 = 0.0, t=np.arange(0, len(Ux), step=1))[1][0]
     
     # equation (20), note:
     # - for values r<0 or s<0 the contribution to the sum is zero (because h_theta is zero)
     # - Ux is the one-sided autocorrelation and assumed to be zero outside its range
-    corr_unc = np.sum(scipy.linalg.toeplitz(Ux) + scipy.linalg.toeplitz(h_theta))
+    corr_unc = np.sum(toeplitz(Ux) + toeplitz(h_theta))
 
     return corr_unc
 
@@ -404,14 +404,14 @@ def get_initial_internal_state(b, a, x0 = 1.0, U0 = 1.0, Ux = None):
 
     # stationary internal state
     # (eye()-A) * zs = B*x0
-    zs = scipy.linalg.solve(IminusA, B) * x0
+    zs = solve(IminusA, B) * x0
 
     # stationary derivative of internal state
     # (eye() - A) dzs = dA * zs
-    dzs = scipy.linalg.solve(IminusA, np.hstack(dA@zs))
+    dzs = solve(IminusA, np.hstack(dA@zs))
 
     # stationary uncertainty of internal state
-    Ps = scipy.linalg.solve_discrete_lyapunov(A, U0**2 * np.outer(B,B))
+    Ps = solve_discrete_lyapunov(A, U0**2 * np.outer(B,B))
 
     if isinstance(Ux, np.ndarray):
         corr_unc = _get_corr_unc(b, a, Ux)
