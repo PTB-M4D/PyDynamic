@@ -269,8 +269,8 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
         phi[p] = np.dot(-a[1:][::-1], z) + x[n]                        # derivative w.r.t. b_0
         phi[p+1:] = z[::-1]                                            # derivative w.r.t. b_1,...,b_p
         
-        # calculate output and output uncertainty according to formulas (6), (12), (19) and (20)
-        y[n] = np.dot(cT, z) + b0 * x[n]                                           # (6)
+        # calculate output and output uncertainty according to formulas (7), (12) and (19)
+        y[n] = np.dot(cT, z) + b0 * x[n]                                               # (7)
         if isinstance(Uab, np.ndarray):
             if kind == "diag":
                 Uy[n] = phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * Ux[n])      # (12)
