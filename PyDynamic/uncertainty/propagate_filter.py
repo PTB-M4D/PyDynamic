@@ -191,7 +191,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     return x, ux.flatten()                    # flatten in case that we still have 2D array
 
 
-def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False, kind="diag"):
+def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, kind="diag"):
     """
     Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
@@ -215,8 +215,6 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False,
         init_internal_state: dict
             An internal state (z, dz, P, system) to start from - e.g. from a previous run of IIRuncFilter.
             If not given, internal state is assumed to be zero. 
-        return_state:
-            Return the last internal state - e.g. for reuse in a subsequent call of IIRuncFilter.
 
     Returns
     -------
@@ -226,7 +224,6 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False,
         uncertainty associated with y
     internal_state: dict
         dictionary of internal state
-        only returned, if return_state == True
 
     References
     ----------
@@ -325,11 +322,9 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False,
         
     Uy = np.sqrt(np.abs(Uy))  # calculate point-wise standard uncertainties
 
-    if return_state:
-        internal_state = {"z": z, "dz": dz, "P": P, "system": (A, bs, cT, b0), "corr_unc": corr_unc}
-        return y, Uy, internal_state
-    else:
-        return y, Uy
+    # return result and internal state
+    internal_state = {"z": z, "dz": dz, "P": P, "system": (A, bs, cT, b0), "corr_unc": corr_unc}
+    return y, Uy, internal_state
 
 
 def _tf2ss(b, a):
