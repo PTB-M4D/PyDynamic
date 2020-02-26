@@ -334,7 +334,7 @@ def IIRuncFilter(x, Ux, b, a, Uab, init_internal_state = {}, return_state=False,
 
 def _tf2ss(b, a):
     """
-    Variant of scipy.signal.tf2ss that fits the definitions of [Link2009]_ 
+    Variant of :py:func:`scipy.signal.tf2ss` that fits the definitions of [Link2009]_ 
     """
 
     p = len(a) - 1
