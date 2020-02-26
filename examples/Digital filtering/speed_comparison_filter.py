@@ -54,7 +54,7 @@ for nx in [5000]:
 
     # test all-at-once performance
     t1 = tm.time()
-    y1, Uy1 = pf.IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="corr")
+    y1, Uy1, _ = pf.IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="corr")
     t2 = tm.time()
     y2, Uy2 = pf.FIRuncFilter(x, Ux, b, Utheta=Uab, kind="corr")
     t3 = tm.time()

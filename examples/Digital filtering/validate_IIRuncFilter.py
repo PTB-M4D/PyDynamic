@@ -30,11 +30,11 @@ Ux = sigma_noise * np.ones_like(x)
 Uab = np.diag(np.zeros((len(a) + len(b) -1)))
 Uab[2,2] = 0.000001
 
-y, Uy = pf.IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
-#y, Uy = pf.IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag", init_internal_state=pf.get_initial_internal_state(b, a))
+y, Uy, _ = pf.IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
+#y, Uy = pf.IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag", state=pf.get_initial_internal_state(b, a))
 
 # actual monte carlo
-n_mc = 100000
+n_mc = 1000
 tmp_y = []
 for i in range(n_mc):
     x_mc = x + np.random.randn(nx) * Ux
