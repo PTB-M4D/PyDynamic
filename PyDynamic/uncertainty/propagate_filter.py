@@ -257,9 +257,6 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
     # phi: dy/dtheta
     phi = np.empty((2 * p + 1, 1))
 
-    # dA: dA/dtheta
-    #dA = _get_derivative_A(p)  # not needed, because derivative is not directly used (see comments below)
-
     # output y, output uncertainty Uy
     y = np.zeros_like(x)
     Uy = np.zeros_like(x)
@@ -290,7 +287,8 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
             P = A @ P @ A.T + np.square(Ux[n]) * np.outer(bs, bs)   # state uncertainty, formula (18)
         else:  # "corr"
             P = A @ P @ A.T + Ux[0] * np.outer(bs, bs)              # state uncertainty, adopted from formula (18)
-        #dA_z = np.hstack(dA @ z)                                   # not efficient, because dA is sparse
+        
+        #dA_z = np.hstack(dA @ z)                                   # not efficient (dA is sparse), dA = _get_derivative_A(p)
         dA_z = np.vstack((np.zeros((p-1, p)), -z[::-1].T))          # efficient, no tensor-multiplication involved
         dz = A @ dz + dA_z                                          # state derivative, formula (17)
         z = A @ z + bs * x[n]                                       # state, formula (6)
@@ -318,6 +316,7 @@ def _tf2ss(b, a):
 
 
 def _get_derivative_A(size_A):
+    "build tensor representing dA/dtheta"
     dA = np.zeros((size_A, size_A, size_A))
     for k in range(size_A):
         dA[k, -1, -(k+1)] = -1
