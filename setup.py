@@ -48,6 +48,7 @@ setup(
     author_email="sascha.eichstaedt@ptb.de",
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(exclude=["test"]),
+    documentation="pydynamic.readthedocs.io",
     install_requires=[
         'ipykernel',
         'matplotlib',
@@ -60,6 +61,7 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Utilities",
+        "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: GNU Lesser General Public License v3 ("
         "LGPLv3)",
         "Programming Language :: Python :: 3"],
