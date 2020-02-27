@@ -9,13 +9,13 @@ transform (DWT).
 import pywt
 import numpy as np
 import scipy.signal as scs
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from PyDynamic.uncertainty.propagate_filter import IIRuncFilter, get_initial_state, FIRuncFilter
 
 
 __all__ = ["dwt", "wave_dec", "idwt", "wave_rec", "filter_design"]
 
 
-def dwt(x, Ux, l, h, kind):
+def dwt(x, Ux, l, h, kind, states=None, realtime=False):
     """
     Apply low-pass `l` and high-pass `h` to time-series data `x`.
     The uncertainty is propgated through the transformation by using 
@@ -53,25 +53,33 @@ def dwt(x, Ux, l, h, kind):
             subsampled high-pass output uncertainty
     """
 
-    # append signals to compensate for "FIR start"
-    pad_len = l.size-1
-    x = np.pad(x, (pad_len, pad_len), mode="edge")
-    Ux = np.pad(Ux, (pad_len, pad_len), mode="edge")
+    # prolongate signals if no realtime is needed
+    pad_len = 0
+    if not realtime:
+        pad_len = l.size-1
+        x = np.pad(x, (0, pad_len), mode="edge")
+        Ux = np.pad(Ux, (0, pad_len), mode="edge")
+
+    # init states if not given
+    if not states:
+        states = {}
+        states["low"] = get_initial_state(l, [1.0], Uab=None, x0=x[0], U0=Ux[0])
+        states["high"] = get_initial_state(h, [1.0], Uab=None, x0=x[0], U0=Ux[0])
 
     # propagate uncertainty through FIR-filter
-    c_approx, U_approx = FIRuncFilter(x, Ux, l, Utheta=None, kind=kind)
-    c_detail, U_detail = FIRuncFilter(x, Ux, h, Utheta=None, kind=kind)
+    c_approx, U_approx, states["low"] = IIRuncFilter(x, Ux, l, [1.0], Uab=None, kind=kind, state=states["low"])
+    c_detail, U_detail, states["high"] = IIRuncFilter(x, Ux, h, [1.0], Uab=None, kind=kind, state=states["high"])
 
-    # remove "FIR start"-compensation, subsample to half the length
-    c_approx = c_approx[pad_len+1::2]
-    U_approx = U_approx[pad_len+1::2]
-    c_detail = c_detail[pad_len+1::2]
-    U_detail = U_detail[pad_len+1::2]
+    # subsample to half the length
+    c_approx = c_approx[1::2]
+    U_approx = U_approx[1::2]
+    c_detail = c_detail[1::2]
+    U_detail = U_detail[1::2]
 
     return c_approx, U_approx, c_detail, U_detail
 
 
-def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind):
+def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realtime=False):
     """
     Single step of inverse discrete wavelet transform
 
@@ -107,18 +115,30 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind):
     # upsample to double the length
     indices = np.arange(1, c_detail.size+1)
     c_approx = np.insert(c_approx, indices, 0)
-    U_approx = np.insert(U_approx, indices, 0) / np.sqrt(2)  # why is this correction necessary?
+    U_approx = np.insert(U_approx / np.sqrt(2), indices, 0)  # why is this correction necessary?
     c_detail = np.insert(c_detail, indices, 0)
-    U_detail = np.insert(U_detail, indices, 0) / np.sqrt(2)  # why is this correction necessary?
+    U_detail = np.insert(U_detail / np.sqrt(2), indices, 0)  # why is this correction necessary?
+
+    # init states if not given
+    if not states:
+        states = {}
+        states["low"] = get_initial_state(l, [1.0], Uab=None, x0=c_approx[0], U0=U_approx[0])
+        states["high"] = get_initial_state(h, [1.0], Uab=None, x0=c_detail[0], U0=U_detail[0])
 
     # propagate uncertainty through FIR-filter
-    x_approx, Ux_approx = FIRuncFilter(c_approx, U_approx, l, Utheta=None, kind=kind)
-    x_detail, Ux_detail = FIRuncFilter(c_detail, U_detail, h, Utheta=None, kind=kind)
+    x_approx, Ux_approx, states["low"] = IIRuncFilter(c_approx, U_approx, l, [1.0], Uab=None, kind=kind, state=states["low"])
+    x_detail, Ux_detail, states["high"] = IIRuncFilter(c_detail, U_detail, h, [1.0], Uab=None, kind=kind, state=states["high"])
 
-    # add both parts and remove "FIR start" compensation at the beginning
-    ls = l.size - 2
-    x = x_detail[ls:] + x_approx[ls:]
-    Ux = Ux_detail[ls:] + Ux_approx[ls:]
+    # add both parts
+    if True: #realtime:
+        x = x_detail + x_approx
+        Ux = Ux_detail + Ux_approx
+    else:
+        # remove prolongation if not realtime
+        ls = l.size - 2
+        x = x_detail[ls:] + x_approx[ls:]
+        Ux = Ux_detail[ls:] + Ux_approx[ls:]
+
     return x, Ux
 
 
