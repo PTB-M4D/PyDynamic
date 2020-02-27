@@ -124,7 +124,7 @@ y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
 
 ### Citation
 
-If you publish results obtained with the help of PyDynamic, please cite
+If you publish results obtained with the help of PyDynamic, please use the above linked [Zenodo DOI](https://zenodo.org/badge/latestdoi/34848642) for the code itself or cite 
 
 Sascha Eichstädt, Clemens Elster, Ian M. Smith, and Trevor J. Esward
 *Evaluation of dynamic measurement uncertainty – an open-source software 
