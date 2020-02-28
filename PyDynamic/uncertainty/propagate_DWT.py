@@ -76,7 +76,7 @@ def dwt(x, Ux, l, h, kind, states=None, realtime=False):
     c_detail = c_detail[1::2]
     U_detail = U_detail[1::2]
 
-    return c_approx, U_approx, c_detail, U_detail
+    return c_approx, U_approx, c_detail, U_detail, states
 
 
 def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realtime=False):
@@ -139,7 +139,7 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
         x = x_detail[ls:] + x_approx[ls:]
         Ux = Ux_detail[ls:] + Ux_approx[ls:]
 
-    return x, Ux
+    return x, Ux, states
 
 
 def filter_design(kind):
@@ -235,7 +235,7 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
     for level in range(n):
         
         # execute wavelet block
-        c_approx, Uc_approx, c_detail, Uc_detail = dwt(c_approx, Uc_approx, lowpass, highpass, kind)
+        c_approx, Uc_approx, c_detail, Uc_detail, states = dwt(c_approx, Uc_approx, lowpass, highpass, kind)
 
         # save result
         coeffs.insert(0, c_detail)
@@ -288,7 +288,7 @@ def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None, kind="dia
         U_approx = U_approx[:lc]
 
         # execute idwt
-        c_approx, U_approx = idwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass, kind=kind)
+        c_approx, U_approx, states = idwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass, kind=kind)
     
     # bring to original length (does nothing if original_length == None)
     x = c_approx[:original_length]
