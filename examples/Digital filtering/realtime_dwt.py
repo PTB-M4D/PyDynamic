@@ -69,9 +69,9 @@ def main():
     su, = ax[0].plot(0, 0, ":k")  # upper unc
     sl, = ax[0].plot(0, 0, ":k")  # lower unc
 
-    cm, = ax[0].plot(0, 0, "-r")  # approx coeffs
-    cu, = ax[0].plot(0, 0, ":r")  # approx coeffs
-    cl, = ax[0].plot(0, 0, ":r")  # approx coeffs
+    cm, = ax[1].plot(0, 0, "-r")  # (detail) coeffs
+    cu, = ax[1].plot(0, 0, ":r")  # upper unc
+    cl, = ax[1].plot(0, 0, ":r")  # lower unc
 
     # simulate infinite stream of data
     while True:
@@ -95,7 +95,7 @@ def main():
             c_approx, U_approx, c_detail, U_detail, states = wavelet.dwt(v, u, ld, hd, kind="diag", states=states, realtime=True)
 
             # save result to data structure
-            output.append_multi(t[1::2], c_approx, U_approx)
+            output.append_multi(t[1::2], c_detail, U_detail)
 
             dwt_counter = 0
 
