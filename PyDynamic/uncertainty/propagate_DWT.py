@@ -130,7 +130,7 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
     x_detail, Ux_detail, states["high"] = IIRuncFilter(c_detail, U_detail, h, [1.0], Uab=None, kind=kind, state=states["high"])
 
     # add both parts
-    if True: #realtime:
+    if realtime:
         x = x_detail + x_approx
         Ux = Ux_detail + Ux_approx
     else:
