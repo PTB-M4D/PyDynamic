@@ -122,8 +122,8 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
     # init states if not given
     if not states:
         states = {}
-        states["low"] = get_initial_state(l, [1.0], Uab=None, x0=c_approx[0], U0=U_approx[0])
-        states["high"] = get_initial_state(h, [1.0], Uab=None, x0=c_detail[0], U0=U_detail[0])
+        states["low"] = get_initial_state(l, [1.0], Uab=None, x0=0, U0=0)   # the value before the first entry is a zero,
+        states["high"] = get_initial_state(h, [1.0], Uab=None, x0=0, U0=0)  # if the upsampling would continue into the past
 
     # propagate uncertainty through FIR-filter
     x_approx, Ux_approx, states["low"] = IIRuncFilter(c_approx, U_approx, l, [1.0], Uab=None, kind=kind, state=states["low"])
