@@ -45,7 +45,7 @@ def test_dwt():
             assert (x.size + ld.size - 1) // 2 == y1.size
 
             # compare to pywt
-            ca, cd, _ = pywt.dwt(x, filter_name, mode="constant")
+            ca, cd = pywt.dwt(x, filter_name, mode="constant")
             assert ca.size == y1.size
             assert cd.size == y2.size
             assert np.allclose(ca, y1)
