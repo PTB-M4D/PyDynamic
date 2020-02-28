@@ -34,7 +34,7 @@ def test_dwt():
             ld, hd, lr, hr = filter_design(filter_name)
 
             # execute single level DWT
-            y1, Uy1, y2, Uy2 = dwt(x, Ux, ld, hd, kind="diag")
+            y1, Uy1, y2, Uy2, _ = dwt(x, Ux, ld, hd, kind="diag")
 
             # all output has same length
             assert y1.size == y2.size
@@ -45,7 +45,7 @@ def test_dwt():
             assert (x.size + ld.size - 1) // 2 == y1.size
 
             # compare to pywt
-            ca, cd = pywt.dwt(x, filter_name, mode="constant")
+            ca, cd, _ = pywt.dwt(x, filter_name, mode="constant")
             assert ca.size == y1.size
             assert cd.size == y2.size
             assert np.allclose(ca, y1)
@@ -66,7 +66,7 @@ def test_idwt():
             ld, hd, lr, hr = filter_design(filter_name)
 
             # execute single level DWT
-            x, Ux = idwt(c_approx, Uc_approx, c_detail, Uc_detail, lr, hr, kind="diag")
+            x, Ux, _ = idwt(c_approx, Uc_approx, c_detail, Uc_detail, lr, hr, kind="diag")
 
             # all output has same length
             assert x.size == Ux.size
@@ -91,10 +91,10 @@ def test_identity_single(make_plots=False):
             ld, hd, lr, hr = filter_design(filter_name)
 
             # single decomposition
-            y_approx, U_approx, y_detail, U_detail = dwt(x, Ux, ld, hd, kind="diag")
+            y_approx, U_approx, y_detail, U_detail, _ = dwt(x, Ux, ld, hd, kind="diag")
 
             # single reconstruction
-            xr, Uxr = idwt(y_approx, U_approx, y_detail, U_detail, lr, hr, kind="diag")
+            xr, Uxr, _ = idwt(y_approx, U_approx, y_detail, U_detail, lr, hr, kind="diag")
 
             if x.size % 2 == 0:
                 assert x.size == xr.size
