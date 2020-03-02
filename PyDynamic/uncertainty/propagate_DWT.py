@@ -15,7 +15,7 @@ from PyDynamic.uncertainty.propagate_filter import IIRuncFilter, get_initial_sta
 __all__ = ["dwt", "wave_dec", "idwt", "wave_rec", "filter_design"]
 
 
-def dwt(x, Ux, l, h, kind, states=None, realtime=False):
+def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
     """
     Apply low-pass `l` and high-pass `h` to time-series data `x`.
     The uncertainty is propgated through the transformation by using 
@@ -71,10 +71,10 @@ def dwt(x, Ux, l, h, kind, states=None, realtime=False):
     c_detail, U_detail, states["high"] = IIRuncFilter(x, Ux, h, [1.0], Uab=None, kind=kind, state=states["high"])
 
     # subsample to half the length
-    c_approx = c_approx[1::2]
-    U_approx = U_approx[1::2]
-    c_detail = c_detail[1::2]
-    U_detail = U_detail[1::2]
+    c_approx = c_approx[subsample_start::2]
+    U_approx = U_approx[subsample_start::2]
+    c_detail = c_detail[subsample_start::2]
+    U_detail = U_detail[subsample_start::2]
 
     return c_approx, U_approx, c_detail, U_detail, states
 
@@ -245,6 +245,48 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
             Ucoeffs.insert(0, Uc_approx)
     
     return coeffs, Ucoeffs, original_length
+
+
+def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, kind="diag", level_states=None):
+
+    if level_states == None:
+        level_states = {level: None for level in range(n)}
+        level_states["counter"] = 0
+
+    c_approx = x
+    Uc_approx = Ux
+    
+    original_length = len(x)
+    coeffs = []
+    Ucoeffs = []
+    i0 = level_states["counter"]
+
+    for level in range(n):
+        # check, where subsampling needs to start
+        # (to remain consistency over multiple calls of wave_dec with argument-lengths not equal to 2^n)
+        i_n = i0 // 2**level
+        subsample_start = (i_n+1)%2
+
+        # execute wavelet block
+        if len(c_approx) > 0:
+            c_approx, Uc_approx, c_detail, Uc_detail, level_states[level] = dwt(c_approx, Uc_approx, lowpass, highpass, kind, realtime=True, states=level_states[level], subsample_start=subsample_start)
+        else:
+            c_approx = np.empty()
+            Uc_approx = np.empty()
+            c_detail = np.empty()
+            Uc_detail = np.empty()
+
+        # save result
+        coeffs.insert(0, c_detail)
+        Ucoeffs.insert(0, Uc_detail)
+        if level + 1 == n:  # save the details when in last level
+            coeffs.insert(0, c_approx)
+            Ucoeffs.insert(0, Uc_approx)
+    
+    # update total counter modulo 2^n
+    level_states["counter"] = (level_states["counter"] + len(x)) % 2**n
+
+    return coeffs, Ucoeffs, original_length, level_states
 
 
 def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None, kind="diag"):
