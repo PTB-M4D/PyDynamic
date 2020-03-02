@@ -5,7 +5,7 @@ Perform test for uncertainty.propagate_DWT
 import matplotlib.pyplot as plt
 import numpy as np
 
-from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, idwt, wave_rec, filter_design, dwt_max_level
+from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, idwt, wave_rec, filter_design, dwt_max_level, wave_dec_realtime
 
 import pywt
 
@@ -145,6 +145,41 @@ def test_decomposition():
             
             # compare output in detail
             for a, b in zip(result_pywt, coeffs):
+                assert len(a) == len(b)
+                assert np.allclose(a, b)
+
+
+def test_decomposition_realtime():
+    for filter_name in ["db2", "db3"]:
+
+        for nx in [20,21]:
+
+            x = np.random.randn(nx)
+            Ux = 0.1 * (1 + np.random.random(nx))
+
+            ld, hd, lr, hr = filter_design(filter_name)
+
+            # run x all at once
+            coeffs_a, Ucoeffs_a, ol_a, z_a = wave_dec_realtime(x, Ux, ld, hd, n=2)
+
+            # slice x into smaller chunks and process them in batches
+            # this tests the internal state options
+            coeffs_list = []
+            Ucoeffs_list = []
+            z_b = None
+            n_splits = 3
+            for x_batch, Ux_batch in zip(np.array_split(x, n_splits), np.array_split(Ux, n_splits)):
+                coeffs_b, Ucoeffs_b, ol_b, z_b = wave_dec_realtime(x_batch, Ux_batch, ld, hd, n=2, level_states=z_b)
+                coeffs_list.append(coeffs_b)
+                Ucoeffs_list.append(Ucoeffs_b)
+            coeffs_b = np.concatenate(coeffs_list, axis=0)
+            Ucoeffs_b = np.concatenate(Ucoeffs_list, axis=0)
+
+            # compare output depth
+            assert len(coeffs_a) == len(coeffs_b)
+            
+            # compare output in detail
+            for a, b in zip(coeffs_a, coeffs_b):
                 assert len(a) == len(b)
                 assert np.allclose(a, b)
 
