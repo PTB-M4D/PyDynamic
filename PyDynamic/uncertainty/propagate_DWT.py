@@ -271,10 +271,10 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, kind="diag", level_states=N
         if len(c_approx) > 0:
             c_approx, Uc_approx, c_detail, Uc_detail, level_states[level] = dwt(c_approx, Uc_approx, lowpass, highpass, kind, realtime=True, states=level_states[level], subsample_start=subsample_start)
         else:
-            c_approx = np.empty()
-            Uc_approx = np.empty()
-            c_detail = np.empty()
-            Uc_detail = np.empty()
+            c_approx = np.empty(0)
+            Uc_approx = np.empty(0)
+            c_detail = np.empty(0)
+            Uc_detail = np.empty(0)
 
         # save result
         coeffs.insert(0, c_detail)
