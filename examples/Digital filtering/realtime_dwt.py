@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal as scs
 import time as tm
+import random
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.buffer import Buffer
@@ -40,6 +41,7 @@ def main():
     ax = fig.subplots(nrows=1+len(output_multi), ncols=1, sharex=True)
 
     # init signal plot
+    ax[0].set_ylabel("signal with uncertainty")
     ax[0].set_ylim([-2, 2])
     sm, = ax[0].plot(0, 0, "-k")  # signal
     su, = ax[0].plot(0, 0, ":k")  # upper unc
@@ -47,11 +49,12 @@ def main():
 
     # init coefficient plots
     c_lines = []
-    for i, _ax in enumerate(ax[1:]):
+    for level, _ax in zip(output_multi_level[::-1], ax[1:]):
+        _ax.set_ylabel("level {0}".format(level))
         _ax.set_ylim(auto=True)
         cm, = _ax.plot(0, 0, linewidth=0, marker="o", markerfacecolor="r", markeredgecolor="r")  # (detail) coeffs
-        cu, = _ax.plot(0, 0, linewidth=0, marker="^", markerfacecolor="r", markeredgecolor="r")  # upper unc
-        cl, = _ax.plot(0, 0, linewidth=0, marker="v", markerfacecolor="r", markeredgecolor="r")  # lower unc
+        cu, = _ax.plot(0, 0, ":r", linewidth=0.5)  # upper unc
+        cl, = _ax.plot(0, 0, ":r", linewidth=0.5)  # lower unc
         c_lines.append([cm, cu, cl])
         _ax.set_ylim([-3,3])
 
@@ -72,13 +75,8 @@ def main():
         dwt_counter += 1
         if dwt_counter % dwt_length == 0:
             t, v, u = signal.view_last(dwt_length)
-
-            ## single decomposition with uncertainty
-            #c_approx, U_approx, c_detail, U_detail, states = wavelet.dwt(v, u, ld, hd, kind="diag", states=states, realtime=True)
-            ## save result to data structure
-            #output.append_multi(t[1::2], c_detail, U_detail)
             
-            # multi level dwt pre-alpha
+            # multi level dwt with uncertainty
             coeffs, Ucoeffs, ol, level_states = wavelet.wave_dec_realtime(v, u, ld, hd, n=n_levels, kind="diag", level_states=level_states)
             
             # assign correct timestamps to the coefficients
@@ -91,6 +89,10 @@ def main():
                 buffer.append_multi(t[time_indices_level], c, u)
 
             dwt_counter = 0
+
+            # change dwt length until next cycle, TESTING!!!
+            dwt_length = random.choice([1, 2, 10, 21])
+            print(dwt_length)
 
         # update plot every 5 iterations
         plot_counter += 1
@@ -112,7 +114,7 @@ def main():
             ax[0].set_xlim([min(signal.timestamps), max(signal.timestamps)])
 
             # update dwt lines
-            for buffer, _ax, c_line in zip(output_multi[::-1], ax[1:], c_lines[::-1]):
+            for buffer, _ax, c_line in zip(output_multi[::-1], ax[1:], c_lines):
                 t_coeff = np.array(buffer.timestamps)
                 v_coeff = np.array(buffer.values)
                 u_coeff = np.array(buffer.uncertainties)
@@ -121,8 +123,14 @@ def main():
                 c_line[1].set_xdata(t_coeff)
                 c_line[2].set_xdata(t_coeff)
                 c_line[0].set_ydata(v_coeff)
-                c_line[1].set_ydata(v_coeff+u_coeff)
-                c_line[2].set_ydata(v_coeff-u_coeff)
+                upper_unc = v_coeff+u_coeff
+                lower_unc = v_coeff-u_coeff
+                c_line[1].set_ydata(upper_unc)
+                c_line[2].set_ydata(lower_unc)
+
+                if v_coeff.size != 0:
+                    lim = [np.min(lower_unc), np.max(upper_unc)]
+                    _ax.set_ylim(lim)
 
             fig.canvas.draw()
             fig.canvas.flush_events()
