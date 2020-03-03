@@ -172,8 +172,9 @@ def test_decomposition_realtime():
                 coeffs_b, Ucoeffs_b, ol_b, z_b = wave_dec_realtime(x_batch, Ux_batch, ld, hd, n=2, level_states=z_b)
                 coeffs_list.append(coeffs_b)
                 Ucoeffs_list.append(Ucoeffs_b)
-            coeffs_b = np.concatenate(coeffs_list, axis=0)
-            Ucoeffs_b = np.concatenate(Ucoeffs_list, axis=0)
+
+            coeffs_b = [np.concatenate([coeffs[level] for coeffs in coeffs_list], axis=0) for level in range(len(coeffs_list[0]))]
+            Ucoeffs_b = [np.concatenate([Ucoeffs[level] for Ucoeffs in Ucoeffs_list], axis=0) for level in range(len(Ucoeffs_list[0]))]
 
             # compare output depth
             assert len(coeffs_a) == len(coeffs_b)
