@@ -2,6 +2,8 @@ import sys
 sys.path.append(".")
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+import itertools
 import numpy as np
 import scipy.signal as scs
 import time as tm
@@ -29,7 +31,7 @@ def main():
     dwt_length = 21
 
     # init multi level wavelet stuff 
-    n_levels = 3
+    n_levels = 4
     output_multi_level = [n_levels] + [level for level in list(range(1,n_levels+1))[::-1]]    # highest level twice because we store detail + approx
     output_multi_buffer_maxlen = [buffer_length // 2**level for level in output_multi_level]
     output_multi = [Buffer(maxlen=maxlen) for maxlen in output_multi_buffer_maxlen]   # list of buffer (different lengths to approximately cover the same timespan)
@@ -57,6 +59,9 @@ def main():
         cl, = _ax.plot(0, 0, ":r", linewidth=0.5)  # lower unc
         c_lines.append([cm, cu, cl])
         _ax.set_ylim([-3,3])
+
+    # prepare collection of highlights
+    highlights = []
 
     # simulate infinite stream of data
     while True:
@@ -131,7 +136,26 @@ def main():
                 if v_coeff.size != 0:
                     lim = [np.min(lower_unc), np.max(upper_unc)]
                     _ax.set_ylim(lim)
+            
+            # highlight the largest coefficients
+            coeffs_all = [np.array(buffer.values) for i_buffer, buffer in enumerate(output_multi)]
+            coeffs_all_indices = [[(i_buffer, i_coeff) for i_coeff, coeff in enumerate(buffer.values)] for i_buffer, buffer in enumerate(output_multi)]
+            coeffs_joined = list(itertools.chain(*coeffs_all))                      # make 1D list of all coeff-values
+            coeffs_joined_indices = list(itertools.chain(*coeffs_all_indices))      # make 1D list of (i_buffer, i_coeff)
+            coeff_highest = np.argpartition(-np.abs(coeffs_joined), kth=range(10))[:10]  # get 10 biggest (absolut) values
+            coeff_highest_indicies = [coeffs_joined_indices[i] for i in coeff_highest]
+            for circle in highlights:
+                circle.remove()
+            highlights = []
+            for coeff_index in coeff_highest_indicies:
+                _ax = ax[1::][::-1][coeff_index[0]]
+                buffer = output_multi[coeff_index[0]]
+                ti = buffer.timestamps[coeff_index[1]]
+                vi = buffer.values[coeff_index[1]]
+                circle = _ax.add_patch(Circle((ti, vi), radius=0.2, edgecolor="k", facecolor="k", fill=True))
+                highlights.append(circle)
 
+            # finally update the plot itself
             fig.canvas.draw()
             fig.canvas.flush_events()
 
@@ -145,7 +169,7 @@ def main():
         #    tm.sleep(sleep_duration)
         #else:
         #    print("Warning, cycle took longer than given length. (real: {0:.3f}s, target: {1:.3f})".format(real_duration, cycle_duration))
-        tm.sleep(cycle_duration)
+        tm.sleep(cycle_duration/2)
 
 
 
