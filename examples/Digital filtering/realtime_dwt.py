@@ -71,7 +71,7 @@ def main():
 
         #ti = tm.time()
         ti = cycle_counter * cycle_duration
-        ui = 0.05 * (np.sin(2*ti) + 2)
+        ui = 0.15 * (np.sin(2*ti) + 2)
         xi = np.sin(ti) + np.random.randn() * ui
 
         signal.append(ti, xi, ui)
@@ -160,7 +160,7 @@ def main():
                 c_line[0].set_facecolor(tmp_colors)
 
             # finally update the plot itself
-
+            fig.tight_layout()
             fig.align_ylabels(ax)
             fig.canvas.draw()
             fig.canvas.flush_events()
