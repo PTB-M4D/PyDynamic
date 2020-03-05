@@ -17,7 +17,7 @@ import PyDynamic.uncertainty.propagate_DWT as wavelet
 def main():
 
     # basics
-    buffer_length = 200
+    buffer_length = 120
     signal = Buffer(buffer_length)
     cycle_duration = 0.1  # seconds
     plot_counter = 0
@@ -27,7 +27,7 @@ def main():
     # init wavelet stuff
     #output = Buffer(buffer_length // 2)
     #states = None
-    ld, hd, lr, hr = wavelet.filter_design("db5")
+    ld, hd, lr, hr = wavelet.filter_design("db2")
     dwt_length = 21
 
     # init multi level wavelet stuff 
@@ -43,7 +43,7 @@ def main():
     ax = fig.subplots(nrows=1+len(output_multi), ncols=1, sharex=True)
 
     # init signal plot
-    ax[0].set_ylabel("signal with uncertainty")
+    ax[0].set_ylabel("x")
     ax[0].set_ylim([-2, 2])
     sm, = ax[0].plot(0, 0, "-k")  # signal
     su, = ax[0].plot(0, 0, ":k")  # upper unc
@@ -51,17 +51,17 @@ def main():
 
     # init coefficient plots
     c_lines = []
-    for level, _ax in zip(output_multi_level[::-1], ax[1:]):
-        _ax.set_ylabel("level {0}".format(level))
+    for i, (level, _ax) in enumerate(zip(output_multi_level[::-1], ax[1:])):
+        if i == len(ax[1:]) - 1:
+            _ax.set_ylabel("A^({0})".format(level))
+        else:
+            _ax.set_ylabel("D^({0})".format(level))
         _ax.set_ylim(auto=True)
-        cm, = _ax.plot(0, 0, linewidth=0, marker="o", markerfacecolor="r", markeredgecolor="r")  # (detail) coeffs
+        cm = _ax.scatter([0], [0], c='r')  # (detail) coeffs
         cu, = _ax.plot(0, 0, ":r", linewidth=0.5)  # upper unc
         cl, = _ax.plot(0, 0, ":r", linewidth=0.5)  # lower unc
         c_lines.append([cm, cu, cl])
         _ax.set_ylim([-3,3])
-
-    # prepare collection of highlights
-    highlights = []
 
     # simulate infinite stream of data
     while True:
@@ -124,13 +124,19 @@ def main():
                 v_coeff = np.array(buffer.values)
                 u_coeff = np.array(buffer.uncertainties)
 
-                c_line[0].set_xdata(t_coeff)
-                c_line[1].set_xdata(t_coeff)
-                c_line[2].set_xdata(t_coeff)
-                c_line[0].set_ydata(v_coeff)
+                # change the scatter
+                data = np.c_[t_coeff, v_coeff]
+                c_line[0].set_offsets(data)
+                c_line[0].set_facecolor(["r"]*len(t_coeff))
+
+                # change upper unc line
                 upper_unc = v_coeff+u_coeff
-                lower_unc = v_coeff-u_coeff
+                c_line[1].set_xdata(t_coeff)
                 c_line[1].set_ydata(upper_unc)
+                
+                # change lower unc line
+                lower_unc = v_coeff-u_coeff
+                c_line[2].set_xdata(t_coeff)
                 c_line[2].set_ydata(lower_unc)
 
                 if v_coeff.size != 0:
@@ -144,18 +150,18 @@ def main():
             coeffs_joined_indices = list(itertools.chain(*coeffs_all_indices))      # make 1D list of (i_buffer, i_coeff)
             coeff_highest = np.argpartition(-np.abs(coeffs_joined), kth=range(10))[:10]  # get 10 biggest (absolut) values
             coeff_highest_indicies = [coeffs_joined_indices[i] for i in coeff_highest]
-            for circle in highlights:
-                circle.remove()
-            highlights = []
+            
             for coeff_index in coeff_highest_indicies:
                 _ax = ax[1::][::-1][coeff_index[0]]
-                buffer = output_multi[coeff_index[0]]
-                ti = buffer.timestamps[coeff_index[1]]
-                vi = buffer.values[coeff_index[1]]
-                circle = _ax.add_patch(Circle((ti, vi), radius=0.2, edgecolor="k", facecolor="k", fill=True))
-                highlights.append(circle)
+                c_line = c_lines[::-1][coeff_index[0]]
+                
+                tmp_colors = c_line[0].get_facecolor()
+                tmp_colors = ["k" if i == coeff_index[1] else c for i, c in enumerate(tmp_colors)]
+                c_line[0].set_facecolor(tmp_colors)
 
             # finally update the plot itself
+
+            fig.align_ylabels(ax)
             fig.canvas.draw()
             fig.canvas.flush_events()
 
