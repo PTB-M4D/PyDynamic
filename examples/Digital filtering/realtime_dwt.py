@@ -61,10 +61,9 @@ def main():
         else:
             _ax.set_ylabel("$D^{{({0})}}$".format(level))
         _ax.set_ylim(auto=True)
+        ce = _ax.errorbar(0, 0, yerr=0, linewidth=0, elinewidth=2, color="gray", capsize=5)
         cm = _ax.scatter([0], [0], c='r')  # (detail) coeffs
-        cu, = _ax.plot(0, 0, ":r", linewidth=0.5)  # upper unc
-        cl, = _ax.plot(0, 0, ":r", linewidth=0.5)  # lower unc
-        c_lines.append([cm, cu, cl])
+        c_lines.append([cm, ce])
         _ax.set_ylim([-3,3])
 
     # simulate infinite stream of data
@@ -100,12 +99,14 @@ def main():
             dwt_counter = 0
 
             # change dwt length until next cycle, TESTING!!!
-            dwt_length = random.choice([1, 2, 10, 21])
+            #dwt_length = random.choice([1, 2, 10, 21])
+            dwt_length = 20
             print(dwt_length)
 
         # update plot every 5 iterations
         plot_counter += 1
-        if plot_counter % 5 == 0:
+        #if plot_counter % 5 == 0:
+        if plot_counter % 5 == 0 and cycle_counter > buffer_length:
             # update plot
 
             ## get data to plot
@@ -133,15 +134,19 @@ def main():
                 c_line[0].set_offsets(data)
                 c_line[0].set_facecolor(["r"]*len(t_coeff))
 
-                # change upper unc line
+                # change the error bars
+                c_line[1].remove()
+                c_line[1] = _ax.errorbar(t_coeff, v_coeff, yerr=u_coeff, linewidth=0, elinewidth=1.5, color="gray", capsize=3, zorder=0)
                 upper_unc = v_coeff+u_coeff
-                c_line[1].set_xdata(t_coeff)
-                c_line[1].set_ydata(upper_unc)
-                
-                # change lower unc line
                 lower_unc = v_coeff-u_coeff
-                c_line[2].set_xdata(t_coeff)
-                c_line[2].set_ydata(lower_unc)
+                #data_line, caplines, barlinecols = c_line[1].lines
+                #data_line.set_xdata(t_coeff)
+                #data_line.set_ydata(v_coeff)
+                #caplines[0].set_xdata(t_coeff)
+                #caplines[0].set_ydata(upper_unc)
+                #caplines[1].set_xdata(t_coeff)
+                #caplines[1].set_ydata(lower_unc)
+                
 
                 if v_coeff.size != 0:
                     lim = [np.min(lower_unc), np.max(upper_unc)]
@@ -172,14 +177,13 @@ def main():
             # reset plot counter
             plot_counter = 0
 
-        # wait the rest until
-        #real_duration = tm.time() - cycle_start
-        #sleep_duration = cycle_duration - real_duration
-        #if sleep_duration >= 0.0:
-        #    tm.sleep(sleep_duration)
-        #else:
-        #    print("Warning, cycle took longer than given length. (real: {0:.3f}s, target: {1:.3f})".format(real_duration, cycle_duration))
-        tm.sleep(cycle_duration/2)
+        # stop for plotting
+        #if cycle_counter % 7 == 0 and cycle_counter > buffer_length:
+        #    ex = input("Exit (y/n): ")
+        #    if ex == "y":
+        #        exit()
+
+        #tm.sleep(cycle_duration/2)
 
 
 
