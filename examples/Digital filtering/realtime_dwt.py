@@ -3,6 +3,10 @@ sys.path.append(".")
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+
 import itertools
 import numpy as np
 import scipy.signal as scs
@@ -43,7 +47,7 @@ def main():
     ax = fig.subplots(nrows=1+len(output_multi), ncols=1, sharex=True)
 
     # init signal plot
-    ax[0].set_ylabel("x")
+    ax[0].set_ylabel("$X^{(0)}$")
     ax[0].set_ylim([-2, 2])
     sm, = ax[0].plot(0, 0, "-k")  # signal
     su, = ax[0].plot(0, 0, ":k")  # upper unc
@@ -53,9 +57,9 @@ def main():
     c_lines = []
     for i, (level, _ax) in enumerate(zip(output_multi_level[::-1], ax[1:])):
         if i == len(ax[1:]) - 1:
-            _ax.set_ylabel("A^({0})".format(level))
+            _ax.set_ylabel("$X^{{({0})}}$".format(level))
         else:
-            _ax.set_ylabel("D^({0})".format(level))
+            _ax.set_ylabel("$D^{{({0})}}$".format(level))
         _ax.set_ylim(auto=True)
         cm = _ax.scatter([0], [0], c='r')  # (detail) coeffs
         cu, = _ax.plot(0, 0, ":r", linewidth=0.5)  # upper unc
