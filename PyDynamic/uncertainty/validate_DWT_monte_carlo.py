@@ -24,10 +24,10 @@ for filter_name in ["db9"]:
         ld, hd, lr, hr = filter_design(filter_name)
 
         # single decomposition with uncertainty
-        c_approx, U_approx, c_detail, U_detail = dwt(x, Ux, ld, hd, kind="diag")
+        c_approx, U_approx, c_detail, U_detail, _ = dwt(x, Ux, ld, hd, kind="diag")
 
         # single reconstruction with uncertainty
-        xr, Uxr = idwt(c_approx, U_approx, c_detail, U_detail, lr, hr, kind="diag")
+        xr, Uxr, _ = idwt(c_approx, U_approx, c_detail, U_detail, lr, hr, kind="diag")
 
         # actual monte carlo
 
