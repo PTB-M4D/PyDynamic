@@ -12,7 +12,7 @@ import scipy.signal as scs
 from PyDynamic.uncertainty.propagate_filter import IIRuncFilter, get_initial_state, FIRuncFilter
 
 
-__all__ = ["dwt", "wave_dec", "idwt", "wave_rec", "filter_design"]
+__all__ = ["dwt", "wave_dec", "wave_dec_realtime",  "idwt", "wave_rec", "filter_design"]
 
 
 def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
@@ -40,6 +40,10 @@ def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
             only meaningfull in combination with isinstance(Ux, numpy.ndarray)
             "diag": point-wise standard uncertainties of non-stationary white noise
             "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+        states: dictionary of internal high/lowpass-filter states
+            allows to continue at the last used internal state from previous call
+        realtime: Boolean
+            for realtime applications, no signal padding has to be done before decomposition
     
     Returns
     -------
@@ -51,6 +55,8 @@ def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
             subsampled high-pass output signal
         U_detail: np.ndarray
             subsampled high-pass output uncertainty
+        states: dictionary of internal high/lowpass-filter states
+            allows to continue at the last used internal state in next call
     """
 
     # prolongate signals if no realtime is needed
@@ -103,6 +109,10 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
             only meaningfull in combination with isinstance(Ux, numpy.ndarray)
             "diag": point-wise standard uncertainties of non-stationary white noise
             "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+        states: dictionary of internal high/lowpass-filter states
+            allows to continue at the last used internal state from previous call
+        realtime: Boolean
+            for realtime applications, no signal padding has to be undone after reconstruction
     
     Returns
     -------
@@ -110,6 +120,8 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
             upsampled reconstructed signal
         Ux: np.ndarray
             upsampled uncertainty of reconstructed signal
+        states: dictionary of internal high/lowpass-filter states
+            allows to continue at the last used internal state in next call
     """
 
     # upsample to double the length
