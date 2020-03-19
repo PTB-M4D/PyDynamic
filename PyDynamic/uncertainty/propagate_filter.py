@@ -120,24 +120,19 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
             elif kind == "corr":
 
-                # adjust the lengths of Bcorr and sigma2 to fit theta
+                # adjust the lengths sigma2 to fit blow and theta
                 # this either crops (unused) information or appends zero-information
                 # note1: this is the reason, why Ulow will have dimension (Ntheta x Ntheta) without further ado
-                # note2: in order to calculate Bcorr, the full length of blow is used (no information loss here)
 
                 # calculate Bcorr
                 Bcorr = np.correlate(blow, blow, 'full')
 
-                # pad/crop length of Bcorr on both sides
-                Bcorr_half = trimOrPad(Bcorr[len(blow)-1:], Ntheta)                  # select the right half of Bcorr, then pad or crop to length Ntheta
-                Bcorr_adjusted = np.pad(Bcorr_half, (Ntheta-1, 0), mode="reflect")   # restore symmetric correlation of length (2*Ntheta-1)
+                # pad or crop length of sigma2, then reflect some part to the left and invert the order
+                # [0 1 2 3 4 5 6 7] --> [0 0 0 7 6 5 4 3 2 1 0 1 2 3]
+                sigma2 = trimOrPad(sigma2, len(blow) + Ntheta - 1)
+                sigma2_reflect = np.pad(sigma2, (len(blow) - 1, 0), mode="reflect")
 
-                # pad or crop length of sigma2, then reflect the lower half to the left
-                # [0 1 2 3 4 5 6 7] --> [3 2 1 0 1 2 3 4 5 6 7]
-                sigma2 = trimOrPad(sigma2, 2*Ntheta)
-                sigma2_reflect = np.pad(sigma2, (Ntheta-2, 0), mode="reflect")
-
-                ycorr = np.correlate(sigma2_reflect, Bcorr_adjusted, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
+                ycorr = np.correlate(sigma2_reflect, Bcorr, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
                 Ulow = toeplitz(ycorr)
 
         xlow = lfilter(blow,1.0,y)
