@@ -107,12 +107,12 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # (SP needs be available len(blow)-timesteps into the past. Here it is
                 # assumed, that SP is constant with the first value of sigma2)
 
-                # V needs to be extended to cover Ntheta timesteps more into the future
-                sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
+                # V needs to be extended to cover Ntheta-1 timesteps more into the past
+                sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta-1)), sigma2)
 
-                N = toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
+                N = toeplitz(blow[1:][::-1], np.zeros_like(sigma2_extended)).T
                 M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
-                SP = np.diag(sigma2[0] * np.ones_like(blow))
+                SP = np.diag(sigma2[0] * np.ones_like(blow[1:]))
                 S = np.diag(sigma2_extended)
 
                 # Ulow is to be sliced from V, see below
