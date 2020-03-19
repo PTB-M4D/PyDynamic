@@ -17,7 +17,7 @@ is known and that noise is stationary!
 
 import numpy as np
 from scipy.linalg import toeplitz
-from scipy.signal import lfilter, tf2ss
+from scipy.signal import lfilter, lfilter_zi, dimpulse
 from ..misc.tools import trimOrPad
 
 __all__ = ['FIRuncFilter', 'IIRuncFilter']
@@ -135,7 +135,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 ycorr = np.correlate(sigma2_reflect, Bcorr, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
                 Ulow = toeplitz(ycorr)
 
-        xlow = lfilter(blow,1.0,y)
+        xlow, _ = lfilter(blow, 1.0, y, zi = y[0] * lfilter_zi(blow, 1.0))
 
     else: # if blow is not provided
         if isinstance(sigma2, float):
@@ -156,7 +156,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         xlow = y
 
     # apply FIR filter to calculate best estimate in accordance with GUM
-    x = lfilter(theta,1.0,xlow)
+    x, _ = lfilter(theta, 1.0, xlow, zi=xlow[0] * lfilter_zi(theta, 1.0))
     x = np.roll(x,-int(shift))
 
     # add dimension to theta, otherwise transpose won't work
