@@ -11,7 +11,7 @@ from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter, IIRuncFilter
+from PyDynamic.uncertainty.propagate_filter import FIRuncFilter, IIRuncFilter, get_initial_state
 
 
 def test_FIRuncFilter(makePlots=False):
@@ -151,3 +151,38 @@ def test_IIRuncFilter():
     # check if both ways of calling IIRuncFilter yield the same result
     assert np.allclose(yb, y)
     assert np.allclose(Uyb, Uy)
+
+def test_FIR_IIR_identity():
+
+    # define filter
+    b = np.array([ 0.01967691, -0.01714282,  0.03329653, -0.01714282,  0.01967691])
+    a = np.array([ 1.])
+
+    # simulate input and output signals
+    Fs = 100e3        # sampling frequency (in Hz)
+    Ts = 1 / Fs       # sampling interval length (in s)
+    nx = 500
+    time  = np.arange(nx)*Ts    # time values
+
+    # input signal + run methods
+    sigma_noise = 1e-2                                    # std for input signal
+    x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)    # generate input signal
+    Ux = sigma_noise * np.ones_like(x)                    # uncertainty of input signal
+    Uab = np.diag(np.zeros((len(a) + len(b) -1)))         # uncertainty of IIR-parameters
+    Uab[3,3] = 0.0001                                     # only a2 is uncertain
+
+    # run signal through both implementations
+    y_iir, Uy_iir, _ = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
+    y_fir, Uy_fir = FIRuncFilter(x, Ux, theta=b, Utheta=Uab, kind="diag")
+
+    import matplotlib.pyplot as plt 
+    import scipy.signal
+    #plt.plot(time, Uy_iir, label='iir')
+    #plt.plot(time, Uy_fir, label="fir")
+    #plt.legend()
+    plt.plot(time, np.abs(Uy_iir - Uy_fir))
+
+    plt.show()
+
+    assert np.allclose(y_fir, y_iir)
+    assert np.allclose(Uy_fir, Uy_iir)
