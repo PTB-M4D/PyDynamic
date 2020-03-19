@@ -144,8 +144,8 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
-                # V needs to be extended to cover Ntheta timesteps more into the future
-                sigma2_extended = np.append(sigma2, sigma2[-1] * np.ones((Ntheta)))
+                # V needs to be extended to cover Ntheta timesteps more into the past
+                sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta-1)), sigma2)
 
                 # Ulow is to be sliced from V, see below
                 V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
