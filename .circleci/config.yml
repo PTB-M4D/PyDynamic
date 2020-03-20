@@ -207,7 +207,7 @@ jobs:
           paths:
             - ./venv
 
-      # Publish it!
+      # Pretend to publish, just to make sure everything works after merging those PR.
       - run:
           name: Run semantic-release publish
           command: |
