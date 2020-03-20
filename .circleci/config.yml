@@ -214,4 +214,5 @@ jobs:
             source venv/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
+            export CIRCLE_BRANCH=master
             semantic-release --noop publish
