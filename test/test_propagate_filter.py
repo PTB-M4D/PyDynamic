@@ -186,5 +186,5 @@ def test_FIR_IIR_identity():
     ax2.set_yscale("log")
     plt.show()
 
-    assert np.allclose(y_fir, y_iir, atol=1e-5)
-    assert np.allclose(Uy_fir[len(b):], Uy_iir[len(b):], atol=1e-5)
+    assert np.allclose(y_fir, y_iir, rtol=1e-5)
+    assert np.allclose(Uy_fir[len(b):], Uy_iir[len(b):], rtol=1e-5)
