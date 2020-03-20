@@ -97,8 +97,9 @@ def rect(time, t0, t1, height=1, noise=0.0):
             time instant of rect rhs
         height : float
             signal maximum
-        noise :float, optional
-            std of simulated signal noise
+        noise :float or numpy.ndarray of shape (N,), optional
+            float: standard deviation of additive white gaussian noise
+            ndarray: user-defined additive noise
 
     Returns
     -------
@@ -110,8 +111,18 @@ def rect(time, t0, t1, height=1, noise=0.0):
     x[np.nonzero(time > t0)] = height
     x[np.nonzero(time > t1)] = 0.0
 
-    if noise > 0:
-        x = x + np.random.randn(len(time)) * noise
+    # add the noise
+    if isinstance(noise, float):
+        if noise > 0:
+            x = x + np.random.randn(len(time)) * noise
+    elif isinstance(noise, np.ndarray):
+        if x.size == noise.size:
+            x = x + noise
+        else:
+            raise ValueError("Mismatching sizes of x and noise.")
+    else:
+        raise NotImplementedError("The given noise is neither of type float nor numpy.ndarray. ")
+
     return x
 
 

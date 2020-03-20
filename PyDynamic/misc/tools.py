@@ -12,17 +12,26 @@ This module contains the following functions:
 * *FreqResp2RealImag*: Calculate real and imaginary parts from frequency
   response
 * *make_equidistant*: Interpolate non-equidistant time series to equidistant
+* *trimOrPad*: trim or pad (with zeros) a vector to desired length
 * *progress_bar*: A simple and reusable progress-bar
 """
-
-__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
-           'make_equidistant', 'progress_bar']
 
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.sparse import issparse, eye
 from scipy.sparse.linalg.eigen.arpack import eigs
 import sys
+
+__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
+           'make_equidistant', 'trimOrPad', 'progress_bar']
+
+
+def trimOrPad(array, length, mode="constant"):
+
+    if len(array) < length: # pad zeros to the right if too short
+        return np.pad(array, (0,length - len(array)), mode=mode)
+    else:                   # trim to given length otherwise
+        return array[0:length]
 
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
