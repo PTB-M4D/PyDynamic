@@ -29,6 +29,18 @@ workflows:
               branches:
                 # This assures the job only being triggered on branch master.
                 only: /master/
+      - test_deploy:
+          # Test the 'deploy' job to avoid trouble when Pull Requets get merged.
+          requires:
+              - test
+              - install
+          filters:
+              branches:
+                # This assures the job is not triggered on branch master, where the
+                # `deploy` job itself will be triggered. `test_deploy` is basically
+                # `deploy` with the `noop` parameter for `semantic-release` to
+                # trigger a dry-run.
+                ignore: /master/
 jobs:
   test:
     executor: tester
@@ -164,3 +176,41 @@ jobs:
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
+  test_deploy:
+    executor: publisher
+
+    working_directory: ~/repo
+
+    steps:
+      # Checkout code.
+      - checkout
+
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            # Specify the unique identifier for the cache.
+            - publisher-dependencies-{{ checksum "requirements/requirements.txt" }}
+
+      # Install dependencies.
+      - run:
+          name: Install python dependencies
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements/requirements.txt
+            pip install python-semantic-release
+
+      - save_cache:
+          key: publisher-dependencies-{{ checksum "requirements/requirements.txt" }}
+          paths:
+            - ./venv
+
+      # Publish it!
+      - run:
+          name: Run semantic-release publish
+          command: |
+            source venv/bin/activate
+            git config --global user.name "semantic-release (via CircleCI)"
+            git config --global user.email "bjoern.ludwig@ptb.de"
+            semantic-release --noop publish
