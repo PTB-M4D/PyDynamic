@@ -132,7 +132,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 sigma2 = trimOrPad(sigma2, len(blow) + Ntheta - 1)
                 sigma2_reflect = np.pad(sigma2, (len(blow) - 1, 0), mode="reflect")
 
-                ycorr = np.correlate(sigma2_reflect, Bcorr, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
+                ycorr = np.correlate(sigma2_reflect, Bcorr, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr is symmetric
                 Ulow = toeplitz(ycorr)
 
         xlow, _ = lfilter(blow, 1.0, y, zi = y[0] * lfilter_zi(blow, 1.0))
