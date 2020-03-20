@@ -176,6 +176,7 @@ jobs:
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
+
   test_deploy:
     executor: publisher
 
