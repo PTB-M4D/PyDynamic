@@ -1,3 +1,7 @@
 .pytest_cache/
 __pycache__/
+/PyDynamic.egg-info/
+.coverage
+.coverage.*
+pytest.xml
 prep_test_DFT.py
