@@ -150,8 +150,9 @@ def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
         x : numpy.ndarray of shape (M,)
             vector of time domain signal values
         Ux : numpy.ndarray
-            covariance matrix associated with x, shape (M,M) or noise variance
-            as float
+            covariance matrix associated with x, shape (M,M) or 
+            vector of squared standard uncertainties, shape (M,) or
+            noise variance as float
         N : int, optional
             length of time domain signal for DFT; N>=len(x)
         window : numpy.ndarray, optional of shape (M,)
@@ -281,10 +282,10 @@ def GUM_iDFT(F, UF, Nx=None, Cc=None, Cs=None, returnC=False):
         Nx: int, optional
             number of samples of iDFT result
         Cc: np.ndarray, optional
-            cosine part of sensitivities
+            cosine part of sensitivities (without scaling factor 1/N)
         Cs: np.ndarray, optional
-            sine part of sensitivities
-        returnC: if true, return sensitivity matrix blocks
+            sine part of sensitivities (without scaling factor 1/N)
+        returnC: if true, return sensitivity matrix blocks (without scaling factor 1/N)
 
     Returns
     -------
@@ -307,7 +308,7 @@ def GUM_iDFT(F, UF, Nx=None, Cc=None, Cs=None, returnC=False):
 
     beta = 2 * np.pi * np.arange(Nx) / N
 
-    # calculate inverse DFT
+    # calculate inverse DFT; Note: scaling factor 1/N is accounted for at the end
     x = np.fft.irfft(F[:N // 2 + 1] + 1j * F[N // 2 + 1:])[:Nx]
     if not isinstance(Cc, np.ndarray):  # calculate sensitivities
         Cc = np.zeros((Nx, N // 2 + 1))
@@ -454,7 +455,7 @@ def DFT2AmpPhase(F, UF, keep_sparse=False, tol=1.0, return_type="separate"):
         UII = UF[N // 2 + 1:, N // 2 + 1:]
         U11 = _prod(aR, _prod(URR, aR)) + _prod(aR, _prod(URI, aI)) +\
             _prod(aI, _prod(URI.T, aR)) + _prod(aI, _prod(UII, aI))
-        U12 = _prod(aR, _prod(URR, pR)) + _prod(aI, _prod(URI, pI)) +\
+        U12 = _prod(aR, _prod(URR, pR)) + _prod(aR, _prod(URI, pI)) +\
             _prod(aI, _prod(URI.T, pR)) + _prod(aI, _prod(UII, pI))
         U22 = _prod(pR, _prod(URR, pR)) + _prod(pR, _prod(URI, pI)) +\
             _prod(pI, _prod(URI.T, pR)) + _prod(pI, _prod(UII, pI))
@@ -543,7 +544,7 @@ def AmpPhase2DFT(A, P, UAP, keep_sparse=False):
             U11 = _prod(CRA, _prod(Uaa, CRA)) + _prod(CRP, _prod(Uap.T, CRA)) +\
                 _prod(CRA, _prod(Uap, CRP)) + _prod(CRP, _prod(Upp, CRP))
             U12 = _prod(CRA, _prod(Uaa, CIA)) + _prod(CRP, _prod(Uap.T, CIA)) +\
-                _prod(CRA, _prod(Uap, CIA)) + _prod(CRP, _prod(Upp, CIP))
+                _prod(CRA, _prod(Uap, CIP)) + _prod(CRP, _prod(Upp, CIP))
             U22 = _prod(CIA, _prod(Uaa, CIA)) + _prod(CIP, _prod(Uap.T, CIA)) +\
                 _prod(CIA, _prod(Uap, CIP)) + _prod(CIP, _prod(Upp, CIP))
 
