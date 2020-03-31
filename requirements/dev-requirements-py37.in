@@ -1,0 +1,6 @@
+-c requirements-py37.txt
+
+pytest
+pytest-cov
+python-semantic-release
+tox <= 3.14.3

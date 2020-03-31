@@ -1,4 +1,0 @@
--c requirements.txt
-
-pytest
-pytest-cov
