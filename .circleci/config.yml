@@ -74,7 +74,7 @@ commands:
         name: Install dependencies
         command: |
           source << parameters.pyenv >>/bin/activate
-          pip install -r requirements-<< parameters.pyenv >>.txt
+          pip install -r requirements/requirements-<< parameters.pyenv >>.txt
 
   # Reusable command to install development dependencies.
   install__development_deps:
@@ -90,7 +90,7 @@ commands:
         name: Install dependencies
         command: |
           source << parameters.pyenv >>/bin/activate
-          pip install -r dev-requirements-<< parameters.pyenv >>.txt
+          pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
 
   # Reusable command to conduct actual testing.
   tox:
