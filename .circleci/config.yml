@@ -149,7 +149,7 @@ commands:
           - .tox/<< parameters.pyenv >>
         key: >-
           << parameters.pyenv >>-dependencies-
-            {{checksum "requirements/dev-requirements.in" }}
+            {{ checksum "requirements/dev-requirements.in" }}
             {{ checksum "requirements/requirements.in" }}
 
 workflows:
@@ -338,6 +338,8 @@ jobs:
   deploy:
     executor:
       name: publisher
+      tag: "3.8"
+      pyenv: "py38"
 
     steps:
       - create_folders_and_venv:
@@ -359,6 +361,8 @@ jobs:
   test_deploy:
     executor:
       name: publisher
+      tag: "3.8"
+      pyenv: "py38"
 
     steps:
       - create_folders_and_venv:
