@@ -20,7 +20,7 @@ executors:
       - image: circleci/python:<< parameters.tag >>
     environment:
       PYENV: << parameters.pyenv >>
-  # Define the executor for the python semantic release.
+  # Define the executor for the Python semantic release.
   publisher:
     working_directory: ~/repo
     parameters:
@@ -116,21 +116,6 @@ commands:
           source << parameters.pyenv >>/bin/activate
           tox -e << parameters.pyenv >> >> test-results/pytest.log
 
-  # Reusable command to conduct actual testing.
-  install_pydynamic:
-    description: "Install PyDynamic."
-    parameters:
-      pyenv:
-        type: string
-    steps:
-
-      # Install PyDynamic.
-      - run:
-          name: Install PyDynamic
-          command: |
-            source << parameters.pyenv >>/bin/activate
-            python3 setup.py install
-
   # Reusable command to store the previously generated test results.
   store_results:
     description: "Store test results and artifacts."
@@ -163,10 +148,6 @@ workflows:
       - test36
       - test37
       - test38
-      - install35
-      - install36
-      - install37
-      - install38
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
@@ -175,10 +156,6 @@ workflows:
               - test36
               - test37
               - test38
-              - install35
-              - install36
-              - install37
-              - install38
           filters:
               branches:
                 # This assures the job only being triggered on branch master.
@@ -190,10 +167,6 @@ workflows:
               - test36
               - test37
               - test38
-              - install35
-              - install36
-              - install37
-              - install38
           filters:
               branches:
                 # This assures the job is not triggered on branch master, where the
@@ -279,62 +252,6 @@ jobs:
       - tox:
           pyenv: ${PYENV}
       - store_results:
-          pyenv: ${PYENV}
-
-  install35:
-    executor:
-      name: tester
-      tag: "3.5"
-      pyenv: "py35"
-
-    steps:
-      - create_folders_and_venv:
-          pyenv: ${PYENV}
-      - install__production_deps:
-          pyenv: ${PYENV}
-      - install_pydynamic:
-          pyenv: ${PYENV}
-
-  install36:
-    executor:
-      name: tester
-      tag: "3.6"
-      pyenv: "py36"
-
-    steps:
-      - create_folders_and_venv:
-          pyenv: ${PYENV}
-      - install__production_deps:
-          pyenv: ${PYENV}
-      - install_pydynamic:
-          pyenv: ${PYENV}
-
-  install37:
-    executor:
-      name: tester
-      tag: "3.7"
-      pyenv: "py37"
-
-    steps:
-      - create_folders_and_venv:
-          pyenv: ${PYENV}
-      - install__production_deps:
-          pyenv: ${PYENV}
-      - install_pydynamic:
-          pyenv: ${PYENV}
-
-  install38:
-    executor:
-      name: tester
-      tag: "3.8"
-      pyenv: "py38"
-
-    steps:
-      - create_folders_and_venv:
-          pyenv: ${PYENV}
-      - install__production_deps:
-          pyenv: ${PYENV}
-      - install_pydynamic:
           pyenv: ${PYENV}
 
   deploy:
