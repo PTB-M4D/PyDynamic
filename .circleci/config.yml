@@ -251,7 +251,7 @@ jobs:
       - run:
           name: Upload coverage report
           command: |
-            source << parameters.pyenv >>/bin/activate
+            source ${PYENV}/bin/activate
             bash <(curl -s https://codecov.io/bash)
 
   test38:
