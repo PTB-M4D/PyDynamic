@@ -32,6 +32,8 @@ executors:
         default: "py38"
     docker:
       - image: circleci/python:<< parameters.tag >>
+    environment:
+      PYENV: << parameters.pyenv >>
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -338,8 +340,6 @@ jobs:
   deploy:
     executor:
       name: publisher
-      tag: "3.8"
-      pyenv: "py38"
 
     steps:
       - create_folders_and_venv:
@@ -361,8 +361,6 @@ jobs:
   test_deploy:
     executor:
       name: publisher
-      tag: "3.8"
-      pyenv: "py38"
 
     steps:
       - create_folders_and_venv:
