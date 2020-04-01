@@ -58,7 +58,7 @@ commands:
         command: |
           python3 -m venv << parameters.pyenv >>
           source << parameters.pyenv >>/bin/activate
-          pip install --upgrade pip
+          pip install --upgrade pip setuptools
 
   # Reusable command to install production dependencies.
   install__production_deps:
