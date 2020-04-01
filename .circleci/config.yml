@@ -23,8 +23,15 @@ executors:
   # Define the executor for the python semantic release.
   publisher:
     working_directory: ~/repo
+    parameters:
+      tag:
+        type: string
+        default: "3.8"
+      pyenv:
+        type: string
+        default: "py38"
     docker:
-      - image: circleci/python:3.8
+      - image: circleci/python:<< parameters.tag >>
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -344,7 +351,7 @@ jobs:
       - run:
           name: Run semantic-release publish
           command: |
-            source venv/bin/activate
+            source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
@@ -365,7 +372,7 @@ jobs:
       - run:
           name: Run semantic-release --noop publish
           command: |
-            source venv/bin/activate
+            source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             export CIRCLE_BRANCH=master
