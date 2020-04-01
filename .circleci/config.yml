@@ -71,7 +71,7 @@ commands:
 
     # Install dependencies.
     - run:
-        name: Install dependencies
+        name: Install production dependencies
         command: |
           source << parameters.pyenv >>/bin/activate
           pip install -r requirements/requirements-<< parameters.pyenv >>.txt
@@ -87,7 +87,7 @@ commands:
 
     # Install dependencies.
     - run:
-        name: Install dependencies
+        name: Install development dependencies
         command: |
           source << parameters.pyenv >>/bin/activate
           pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
@@ -105,7 +105,7 @@ commands:
         name: Perform tox testing
         command: |
           source << parameters.pyenv >>/bin/activate
-          tox -e << parameters.pyenv >> >> test_results/pytest.log
+          tox -e << parameters.pyenv >> >> test-results/pytest.log
 
   # Reusable command to conduct actual testing.
   install_pydynamic:
