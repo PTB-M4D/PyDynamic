@@ -1,6 +1,8 @@
 .pytest_cache/
 __pycache__/
-/PyDynamic.egg-info/
+build/
+dist/
+PyDynamic.egg-info/
 .coverage
 .coverage.*
 pytest.xml
