@@ -45,11 +45,11 @@ commands:
         default: "py38"
     steps:
     # Show ${PYENV}.
-      - run:
-          name: Show ${PYENV}
-          command: |
-            echo "${PYENV}: "${PYENV}
-            echo "<< parameters.pyenv >>:"<< parameters.pyenv >>
+    - run:
+        name: Show ${PYENV}
+        command: |
+          echo "${PYENV}: "${PYENV}
+          echo "<< parameters.pyenv >>:"<< parameters.pyenv >>
 
     # Checkout code.
     - checkout
