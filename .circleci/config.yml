@@ -52,15 +52,6 @@ commands:
         command: |
           mkdir test-results
 
-    # Download and cache dependencies.
-    - restore_cache:
-        keys:
-          - << parameters.pyenv >> -dependencies-
-              {{ checksum "requirements/dev-requirements.in" }}
-              {{ checksum "requirements/requirements.in" }}
-          # Fallback to using the latest cache if no exact match is found.
-          - << parameters.pyenv >> -dependencies-
-
     # Create PyDynamic virtual environment.
     - run:
         name: Create virtual environment
@@ -130,13 +121,6 @@ commands:
 
     - store_test_results:
         path: test-results
-
-    - save_cache:
-        paths:
-          - .tox/<< parameters.pyenv >>
-        key: << parameters.pyenv >> -dependencies-
-          {{ checksum "requirements/dev-requirements.in" }}
-          {{ checksum "requirements/requirements.in" }}
 
 workflows:
   # Create workflow for testing and deploying PyDynamic.
