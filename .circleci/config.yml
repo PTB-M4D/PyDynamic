@@ -5,26 +5,172 @@
 version: 2.1
 
 executors:
+  # Define a parameterized executor which accepts two parameters to choose the python
+  # version which will be used for the docker image and the tox actions.
   tester:
+    working_directory: ~/repo
+    parameters:
+      tag:
+        type: string
+        default: "3.8"
+      pyenv:
+        type: string
+        default: "py38"
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:<< parameters.tag >>
+    environment:
+      PYENV: << parameters.pyenv >>
+  # Define the executor for the python semantic release.
   publisher:
+    working_directory: ~/repo
     docker:
       - image: circleci/python:3.8
+
+commands:
+  # Reusable command to prepare the environment for testing.
+  create_folders_and_venv:
+    description: "Prepare everything."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
+    # Checkout code.
+    - checkout
+    # Create test-result folder.
+    - run:
+        name: Create test result folder
+        command: |
+          mkdir test-results
+
+    # Download and cache dependencies.
+    - restore_cache:
+        # TODO Check if parameter for checksum gets interpreted.
+        keys:
+          - << parameters.pyenv >>-dependencies-
+              {{ checksum "requirements/dev-requirements-<< parameters.pyenv >>.txt" }}
+              {{ checksum "requirements/requirements-<< parameters.pyenv >>.txt" }}
+          # Fallback to using the latest cache if no exact match is found.
+          - << parameters.pyenv >>-dependencies-
+
+    # Create PyDynamic virtual environment.
+    - run:
+        name: Create virtual environment
+        command: |
+          python3 -m venv << parameters.pyenv >>
+          source << parameters.pyenv >>/bin/activate
+          pip install --upgrade pip
+
+  # Reusable command to install production dependencies.
+  install__production_deps:
+    description: "Install production dependencies."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
+
+    # Install dependencies.
+    - run:
+        name: Install dependencies
+        command: |
+          source << parameters.pyenv >>/bin/activate
+          pip install -r requirements-<< parameters.pyenv >>.txt
+
+  # Reusable command to install development dependencies.
+  install__development_deps:
+    description: "Install development dependencies."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
+
+    # Install dependencies.
+    - run:
+        name: Install dependencies
+        command: |
+          source << parameters.pyenv >>/bin/activate
+          pip install -r dev-requirements-<< parameters.pyenv >>.txt
+
+  # Reusable command to conduct actual testing.
+  tox:
+    description: "Perform tox testing."
+    parameters:
+      pyenv:
+        type: string
+    steps:
+
+    # Perform tox testing.
+    - run:
+        name: Perform tox testing
+        command: |
+          source << parameters.pyenv >>/bin/activate
+          tox -e << parameters.pyenv >>
+
+  # Reusable command to conduct actual testing.
+  install_pydynamic:
+    description: "Install PyDynamic."
+    parameters:
+      pyenv:
+        type: string
+    steps:
+
+      # Install PyDynamic.
+      - run:
+          name: Install PyDynamic
+          command: |
+            source << parameters.pyenv >>/bin/activate
+            python3 setup.py install
+
+  # Reusable command to store the previously generated test results.
+  store_results:
+    description: "Store test results and artifacts."
+    parameters:
+      pyenv:
+        type: string
+    steps:
+    # Store test results.
+    - store_artifacts:
+        path: test_results
+        destination: test_results
+
+    - store_test_results:
+        path: test_results
+
+    - save_cache:
+        paths:
+          - .tox/<< parameters.pyenv >>
+        key: >-
+          << parameters.pyenv >>-dependencies-
+            {{checksum "requirements/dev-requirements-<< parameters.pyenv >>.txt" }}
+            {{ checksum "requirements/requirements-<< parameters.pyenv >>.txt" }}
 
 workflows:
   # Create workflow for testing and deploying PyDynamic.
   test_and_deploy:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
-      - test
-      - install
+      - test35
+      - test36
+      - test37
+      - test38
+      - install35
+      - install36
+      - install37
+      - install38
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
           requires:
-              - test
-              - install
+              - test35
+              - test36
+              - test37
+              - test38
+              - install35
+              - install36
+              - install37
+              - install38
           filters:
               branches:
                 # This assures the job only being triggered on branch master.
@@ -32,8 +178,14 @@ workflows:
       - test_deploy:
           # Test the 'deploy' job to avoid trouble when Pull Requets get merged.
           requires:
-              - test
-              - install
+              - test35
+              - test36
+              - test37
+              - test38
+              - install35
+              - install36
+              - install37
+              - install38
           filters:
               branches:
                 # This assures the job is not triggered on branch master, where the
@@ -42,50 +194,59 @@ workflows:
                 # trigger a dry-run.
                 ignore: /master/
 jobs:
-  test:
-    executor: tester
-
-    working_directory: ~/repo
+  test35:
+    executor:
+      name: tester
+      tag: "3.5"
+      pyenv: "py35"
 
     steps:
-      # Checkout code.
-      - checkout
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install__development_deps:
+          pyenv: ${PYENV}
+      - tox:
+          pyenv: ${PYENV}
+      - store_results:
+          pyenv: ${PYENV}
 
-      # Create folder for test results.
-      - run:
-          name: Create test result folder
-          command: |
-            mkdir test-reports
+  test36:
+    executor:
+      name: tester
+      tag: "3.6"
+      pyenv: "py36"
 
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements/requirements.txt" }}
-            # Fallback to using the latest cache if no exact match is found.
-            - v1-dependencies-
+    steps:
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install__development_deps:
+          pyenv: ${PYENV}
+      - tox:
+          pyenv: ${PYENV}
+      - store_results:
+          pyenv: ${PYENV}
 
-      # Install dependencies and Codecov reporter if necessary.
-      - run:
-          name: Install dependencies
-          command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
-            pip install -r requirements/dev-requirements.txt
+  test37:
+    executor:
+      name: tester
+      tag: "3.7"
+      pyenv: "py37"
 
-      - save_cache:
-          key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
-          paths:
-            - ./test_env
-
-      # Run tests with coverage report and upload results to Codecov!
-      - run:
-          name: Run tests
-          command: |
-            source venv/bin/activate
-            pytest -v --junitxml=test-reports/pytest.xml \
-            --cov=PyDynamic/ > test-reports/pytest.log
+    steps:
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+      pyenv: ${PYENV}
+      - install__development_deps:
+         pyenv: ${PYENV}
+      - tox:
+          pyenv: ${PYENV}
+      - store_results:
+          pyenv: ${PYENV}
 
       # Upload coverage report.
       - run:
@@ -94,79 +255,91 @@ jobs:
             source venv/bin/activate
             bash <(curl -s https://codecov.io/bash)
 
-      # Store test results.
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
-
-      - store_test_results:
-          path: test-reports
-
-  install:
-    executor: tester
-
-    working_directory: ~/repo
+  test38:
+    executor:
+      name: tester
+      tag: "3.8"
+      pyenv: "py38"
 
     steps:
-      # Checkout code.
-      - checkout
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install__development_deps:
+          pyenv: ${PYENV}
+      - tox:
+          pyenv: ${PYENV}
+      - store_results:
+          pyenv: ${PYENV}
 
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements/requirements.txt" }}
-            # Fallback to using the latest cache if no exact match is found.
-            - v1-dependencies-
+  install35:
+    executor:
+      name: tester
+      tag: "3.5"
+      pyenv: "py35"
 
-      # Install dependencies and Codecov reporter if necessary.
-      - run:
-          name: Install dependencies
-          command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
+    steps:
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install_pydynamic:
+          pyenv: ${PYENV}
 
-      - save_cache:
-          paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
+  install36:
+    executor:
+      name: tester
+      tag: "3.6"
+      pyenv: "py36"
 
-      # Install PyDynamic.
-      - run:
-          name: Install PyDynamic
-          command: |
-            source venv/bin/activate
-            python3 setup.py install
+    steps:
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install_pydynamic:
+          pyenv: ${PYENV}
+
+  install37:
+    executor:
+      name: tester
+      tag: "3.7"
+      pyenv: "py37"
+
+    steps:
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install_pydynamic:
+          pyenv: ${PYENV}
+
+  install38:
+    executor:
+      name: tester
+      tag: "3.8"
+      pyenv: "py38"
+
+    steps:
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install_pydynamic:
+          pyenv: ${PYENV}
 
   deploy:
-    executor: publisher
-
-    working_directory: ~/repo
+    executor:
+      name: publisher
 
     steps:
-      # Checkout code.
-      - checkout
-
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            # Specify the unique identifier for the cache.
-            - publisher-dependencies
-
-      # Install dependencies.
-      - run:
-          name: Install python dependencies
-          command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install python-semantic-release
-
-      - save_cache:
-          key: publisher-dependencies
-          paths:
-            - ./venv
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install__development_deps:
+          pyenv: ${PYENV}
 
       # Publish it!
       - run:
@@ -178,38 +351,20 @@ jobs:
             semantic-release publish
 
   test_deploy:
-    executor: publisher
-
-    working_directory: ~/repo
+    executor:
+      name: publisher
 
     steps:
-      # Checkout code.
-      - checkout
-
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            # Specify the unique identifier for the cache.
-            - publisher-dependencies-{{ checksum "requirements/requirements.txt" }}
-
-      # Install dependencies.
-      - run:
-          name: Install python dependencies
-          command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
-            pip install python-semantic-release
-
-      - save_cache:
-          key: publisher-dependencies-{{ checksum "requirements/requirements.txt" }}
-          paths:
-            - ./venv
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install__development_deps:
+          pyenv: ${PYENV}
 
       # Pretend to publish, just to make sure everything works after merging those PR.
       - run:
-          name: Run semantic-release publish
+          name: Run semantic-release --noop publish
           command: |
             source venv/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
