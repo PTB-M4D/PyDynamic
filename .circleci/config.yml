@@ -105,7 +105,7 @@ commands:
         name: Perform tox testing
         command: |
           source << parameters.pyenv >>/bin/activate
-          tox -e << parameters.pyenv >>
+          tox -e << parameters.pyenv >> >> test_results/pytest.log
 
   # Reusable command to conduct actual testing.
   install_pydynamic:
