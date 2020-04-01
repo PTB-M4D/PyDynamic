@@ -45,11 +45,10 @@ commands:
 
     # Download and cache dependencies.
     - restore_cache:
-        # TODO Check if parameter for checksum gets interpreted.
         keys:
           - << parameters.pyenv >>-dependencies-
-              {{ checksum "requirements/dev-requirements-<< parameters.pyenv >>.txt" }}
-              {{ checksum "requirements/requirements-<< parameters.pyenv >>.txt" }}
+              {{ checksum "requirements/dev-requirements.in" }}
+              {{ checksum "requirements/requirements.in" }}
           # Fallback to using the latest cache if no exact match is found.
           - << parameters.pyenv >>-dependencies-
 
@@ -143,8 +142,8 @@ commands:
           - .tox/<< parameters.pyenv >>
         key: >-
           << parameters.pyenv >>-dependencies-
-            {{checksum "requirements/dev-requirements-<< parameters.pyenv >>.txt" }}
-            {{ checksum "requirements/requirements-<< parameters.pyenv >>.txt" }}
+            {{checksum "requirements/dev-requirements.in" }}
+            {{ checksum "requirements/requirements.in" }}
 
 workflows:
   # Create workflow for testing and deploying PyDynamic.
