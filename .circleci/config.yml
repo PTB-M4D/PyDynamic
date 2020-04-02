@@ -128,19 +128,30 @@ workflows:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
       - test:
+          name: "test_python3.5"
+          tag: "3.5"
+          pyenv: "py35"
+      - test:
           name: "test_python3.6"
           tag: "3.6"
           pyenv: "py36"
       - test:
-          name: "test_python3.5"
-          tag: "3.5"
-          pyenv: "py35"
+          name: "test_python3.7"
+          tag: "3.7"
+          pyenv: "py37"
+          send_cov: true
+      - test:
+          name: "test_python3.8"
+          tag: "3.8"
+          pyenv: "py38"
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
           requires:
               - test_python3.5
               - test_python3.6
+              - test_python3.7
+              - test_python3.8
           filters:
               branches:
                 # This assures the job only being triggered on branch master.
@@ -150,6 +161,8 @@ workflows:
           requires:
               - test_python3.5
               - test_python3.6
+              - test_python3.7
+              - test_python3.8
           filters:
               branches:
                 # This assures the job is not triggered on branch master, where the
@@ -184,30 +197,15 @@ jobs:
       - store_results:
           pyenv: << parameters.pyenv >>
 
-  test37:
-    executor:
-      name: tester
-      tag: "3.7"
-      pyenv: "py37"
-
-    steps:
-      - create_folders_and_venv:
-          pyenv: ${PYENV}
-      - install__production_deps:
-          pyenv: ${PYENV}
-      - install__development_deps:
-          pyenv: ${PYENV}
-      - tox:
-          pyenv: ${PYENV}
-      - store_results:
-          pyenv: ${PYENV}
-
       # Upload coverage report.
-      - run:
-          name: Upload coverage report
-          command: |
-            source ${PYENV}/bin/activate
-            bash <(curl -s https://codecov.io/bash)
+      - when:
+          condition: << parameters.send_cov >>
+          steps:
+            - run:
+                name: Upload coverage report
+                command: |
+                  source ${PYENV}/bin/activate
+                  bash <(curl -s https://codecov.io/bash)
 
   deploy:
     executor:
