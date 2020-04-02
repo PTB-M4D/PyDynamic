@@ -130,6 +130,9 @@ workflows:
       - test:
           tag: "3.6"
           pyenv: "py36"
+      - test:
+          tag: "3.5"
+          pyenv: "py35"
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
@@ -151,32 +154,15 @@ workflows:
                 # trigger a dry-run.
                 ignore: /master/
 jobs:
-  test35:
-    executor:
-      name: tester
-      tag: "3.5"
-      pyenv: "py35"
-
-    steps:
-      - create_folders_and_venv:
-          pyenv: ${PYENV}
-      - install__production_deps:
-          pyenv: ${PYENV}
-      - install__development_deps:
-          pyenv: ${PYENV}
-      - tox:
-          pyenv: ${PYENV}
-      - store_results:
-          pyenv: ${PYENV}
 
   test:
     parameters:
       tag:
         type: string
-        default: "3.6"
+        default: "3.8"
       pyenv:
         type: string
-        default: "py36"
+        default: "py38"
     executor:
       name: tester
       tag: << parameters.tag >>
@@ -218,24 +204,6 @@ jobs:
           command: |
             source ${PYENV}/bin/activate
             bash <(curl -s https://codecov.io/bash)
-
-  test38:
-    executor:
-      name: tester
-      tag: "3.8"
-      pyenv: "py38"
-
-    steps:
-      - create_folders_and_venv:
-          pyenv: ${PYENV}
-      - install__production_deps:
-          pyenv: ${PYENV}
-      - install__development_deps:
-          pyenv: ${PYENV}
-      - tox:
-          pyenv: ${PYENV}
-      - store_results:
-          pyenv: ${PYENV}
 
   deploy:
     executor:
