@@ -13,13 +13,8 @@ executors:
       tag:
         type: string
         default: "3.8"
-      pyenv:
-        type: string
-        default: "py38"
     docker:
       - image: circleci/python:<< parameters.tag >>
-    environment:
-      PYENV: << parameters.pyenv >>
   # Define the executor for the Python semantic release.
   publisher:
     working_directory: ~/repo
@@ -27,13 +22,8 @@ executors:
       tag:
         type: string
         default: "3.8"
-      pyenv:
-        type: string
-        default: "py38"
     docker:
       - image: circleci/python:<< parameters.tag >>
-    environment:
-      PYENV: << parameters.pyenv >>
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -172,7 +162,21 @@ workflows:
                 ignore: /master/
 jobs:
 
+  # Define one 'test' job with parameters to deal with all desired cases. The
+  # reason for this is the desire to ensure the following for all supported Python
+  # versions referring to the docs:
+  #
+  # - all tests are guaranteed to pass
+  # - PyDynamic with respect to its `setup.py` successfully installs
+  #
+  # Additionally we want to create one coverage report during all these tests (which are
+  # of course the same for all versions).
   test:
+    # Define all parameters, where 'tag' is used for the docker image and 'pyenv' is
+    # the string which is used in tox to identify the current Python version. We reuse
+    # this variable basically everywhere we deal with the virtual environment.
+    # 'send_cov' is the conditional for either sending the produced coverage report
+    # to codecov or not.
     parameters:
       tag:
         type: string
@@ -183,16 +187,19 @@ jobs:
       send_cov:
         type: boolean
         default: false
+
+    # Specify the executor and hand over the docker image tag parameter.
     executor:
       name: tester
       tag: << parameters.tag >>
-      pyenv: << parameters.pyenv >>
 
+    # Specify the steps to execute during this test jobs.
     steps:
       - create_folders_and_venv:
           pyenv: << parameters.pyenv >>
-      - install__production_deps:
-          pyenv: << parameters.pyenv >>
+      # Since we use tox to create environments and process the `setup.py` we
+      # actually only need to install `tox``which is included in our development
+      # dependencies.
       - install__development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
@@ -200,14 +207,14 @@ jobs:
       - store_results:
           pyenv: << parameters.pyenv >>
 
-      # Upload coverage report.
+      # Upload coverage report conditionally if the according parameter set to `true`.
       - when:
           condition: << parameters.send_cov >>
           steps:
             - run:
                 name: Upload coverage report
                 command: |
-                  source ${PYENV}/bin/activate
+                  source << parameters.pyenv >>/bin/activate
                   bash <(curl -s https://codecov.io/bash)
 
   deploy:
