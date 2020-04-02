@@ -198,7 +198,7 @@ jobs:
       - create_folders_and_venv:
           pyenv: << parameters.pyenv >>
       - install__production_deps:
-          pyenv: ${PYENV}
+          pyenv: << parameters.pyenv >>
       - install__development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
