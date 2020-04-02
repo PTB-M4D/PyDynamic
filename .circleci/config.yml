@@ -148,7 +148,8 @@ workflows:
       - test_deploy:
           # Test the 'deploy' job to avoid trouble when Pull Requets get merged.
           requires:
-              - test
+              - test_python3.5
+              - test_python3.6
           filters:
               branches:
                 # This assures the job is not triggered on branch master, where the
