@@ -128,13 +128,8 @@ workflows:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
       - test:
-          parameters:
-            tag:
-              type: string
-              default: "3.6"
-            pyenv:
-              type: string
-              default: "py36"
+          tag: "3.6"
+          pyenv: "py36"
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
@@ -175,6 +170,13 @@ jobs:
           pyenv: ${PYENV}
 
   test:
+    parameters:
+      tag:
+        type: string
+        default: "3.6"
+      pyenv:
+        type: string
+        default: "py36"
     executor:
       name: tester
       tag: << parameters.tag >>
