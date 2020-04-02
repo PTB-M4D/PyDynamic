@@ -22,10 +22,13 @@ executors:
       tag:
         type: string
         default: "3.8"
+      pyenv:
+        type: string
+        default: "py38"
     docker:
       - image: circleci/python:<< parameters.tag >>
     environment:
-      PYENV: "py38"
+      PYENV: << parameters.pyenv >>
 
 commands:
   # Reusable command to prepare the environment for testing.
