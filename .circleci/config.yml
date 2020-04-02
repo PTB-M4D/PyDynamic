@@ -131,10 +131,12 @@ workflows:
           name: "test_python3.5"
           tag: "3.5"
           pyenv: "py35"
+          send_cov: false
       - test:
           name: "test_python3.6"
           tag: "3.6"
           pyenv: "py36"
+          send_cov: false
       - test:
           name: "test_python3.7"
           tag: "3.7"
@@ -144,6 +146,7 @@ workflows:
           name: "test_python3.8"
           tag: "3.8"
           pyenv: "py38"
+          send_cov: false
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
