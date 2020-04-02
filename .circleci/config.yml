@@ -197,9 +197,8 @@ jobs:
     steps:
       - create_folders_and_venv:
           pyenv: << parameters.pyenv >>
-      # Since we use tox to create environments and process the `setup.py` we
-      # actually only need to install `tox``which is included in our development
-      # dependencies.
+      - install__production_deps:
+          pyenv: ${PYENV}
       - install__development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
