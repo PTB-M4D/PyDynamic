@@ -128,16 +128,19 @@ workflows:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
       - test:
+          name: "test_python3.6"
           tag: "3.6"
           pyenv: "py36"
       - test:
+          name: "test_python3.5"
           tag: "3.5"
           pyenv: "py35"
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
           requires:
-              - test
+              - test_python3.5
+              - test_python3.6
           filters:
               branches:
                 # This assures the job only being triggered on branch master.
