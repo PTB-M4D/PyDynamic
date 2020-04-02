@@ -128,15 +128,22 @@ workflows:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
       - test35
-      - test36
       - test37
       - test38
+      - test:
+          parameters:
+            tag:
+              type: string
+              default: "3.6"
+            pyenv:
+              type: string
+              default: "py36"
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
           requires:
               - test35
-              - test36
+              - test
               - test37
               - test38
           filters:
@@ -147,7 +154,7 @@ workflows:
           # Test the 'deploy' job to avoid trouble when Pull Requets get merged.
           requires:
               - test35
-              - test36
+              - test
               - test37
               - test38
           filters:
@@ -176,23 +183,23 @@ jobs:
       - store_results:
           pyenv: ${PYENV}
 
-  test36:
+  test:
     executor:
       name: tester
-      tag: "3.6"
-      pyenv: "py36"
+      tag: << parameters.tag >>
+      pyenv: << parameters.pyenv >>
 
     steps:
       - create_folders_and_venv:
-          pyenv: ${PYENV}
+          pyenv: << parameters.pyenv >>
       - install__production_deps:
-          pyenv: ${PYENV}
+          pyenv: << parameters.pyenv >>
       - install__development_deps:
-          pyenv: ${PYENV}
+          pyenv: << parameters.pyenv >>
       - tox:
-          pyenv: ${PYENV}
+          pyenv: << parameters.pyenv >>
       - store_results:
-          pyenv: ${PYENV}
+          pyenv: << parameters.pyenv >>
 
   test37:
     executor:
