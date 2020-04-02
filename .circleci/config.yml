@@ -270,12 +270,22 @@ jobs:
       - install__development_deps:
           pyenv: ${PYENV}
 
-      # Pretend to publish, just to make sure everything works after merging those PR.
+      # Pretend to be no Pull Request and on master to fake a release for testing.
+      # This is needed due to
+      # [environment checks](https://python-semantic-release.readthedocs.io/en/latest/automatic-releases/index.html#circleci)
+      - run:
+          name: Prepare fake master environment
+          command: |
+            unset CIRCLE_PULL_REQUEST CIRCLE_PULL_REQUESTS CI_PULL_REQUEST \
+              CI_PULL_REQUESTS
+            export CIRCLE_BRANCH=master
+
+
+      # Fake publish, just to make sure everything works after merging this PR.
       - run:
           name: Run semantic-release --noop publish
           command: |
             source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            export CIRCLE_BRANCH=master
             semantic-release --noop publish
