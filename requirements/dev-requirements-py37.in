@@ -1,4 +1,4 @@
--c requirements.txt
+-c requirements-py37.txt
 
 pytest
 pytest-cov

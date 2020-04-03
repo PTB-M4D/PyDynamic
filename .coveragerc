@@ -9,3 +9,8 @@ exclude_lines =
 ignore_errors = True
 omit =
     PyDynamic/test/*
+    # omit anything in a virtual environment
+    .tox/*
+    py??/*
+    # omit test suite
+    test/*

@@ -10,7 +10,7 @@ European Research Project
 For the PyDynamic homepage go to
 `GitHub <https://github.com/PTB-PSt1/PyDynamic>`_.
 
-*PyDynamic* is written in Python 3.
+*PyDynamic* is written in Python 3 and currently is tested to work in Python 3.5 to 3.8.
 
 Contents:
 

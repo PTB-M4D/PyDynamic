@@ -1,6 +1,6 @@
--c requirements.txt
+-c requirements-py36.txt
 
 pytest
 pytest-cov
 python-semantic-release
-tox <= 3.14.3
+tox <= 3.14.3exit
