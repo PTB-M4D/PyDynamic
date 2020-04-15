@@ -237,7 +237,6 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
 
     return interp1d_unc(t_new, t, y, uy, kind)
 
-    return t_new, y_new, uy_new
 
 
 def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo_indicator =".", fout=sys.stdout):
