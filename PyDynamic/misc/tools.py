@@ -198,7 +198,7 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     return Re, Im, URI
 
 
-def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
+def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     """ Interpolate non-equidistant time series to equidistant
 
     Interpolate measurement values and propagate uncertainties accordingly.
@@ -230,41 +230,12 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
     ----------
         * White [White2017]_
     """
-    # Check for ascending order of timestamps.
-    if not np.all(t[1:] >= t[:-1]):
-        raise ValueError('Array of timestamps needs to be in ascending order.')
-    # Setup new vectors of timestamps.
-    t_new = np.arange(t[0], t[-1], dt)
-    # Interpolate measurement values in the desired fashion.
-    interp_y = interp1d(t, y, kind=kind)
-    y_new = interp_y(t_new)
+    from ..uncertainty.interpolation import interp1d_unc
 
-    if kind in ('previous', 'next', 'nearest'):
-        # Look up uncertainties in cases where it is applicable.
-        interp_uy = interp1d(t, uy, kind=kind)
-        uy_new = interp_uy(t_new)
-    else:
-        if kind == 'linear':
-            # Iterate over t_new as ndarray to find relevant timestamp indices.
-            indices = np.empty_like(t_new, dtype=int)
-            it_t_new = np.nditer(t_new, flags=['f_index'])
-            while not it_t_new.finished:
-                # Find indices of biggest of all timestamps smaller or equal
-                # than current time, assumes that timestamps are in ascending
-                # order.
-                indices[it_t_new.index] = np.where(t <= it_t_new[0])[0][-1]
-                it_t_new.iternext()
-            t_prev = t[indices]
-            t_next = t[indices + 1]
-            # Look up corresponding input uncertainties.
-            uy_prev_sqr = uy[indices] ** 2
-            uy_next_sqr = uy[indices + 1] ** 2
-            # Compute uncertainties for interpolated measurement values.
-            uy_new = np.sqrt((t_new - t_next) ** 2 * uy_prev_sqr +
-                             (t_new - t_prev) ** 2 * uy_next_sqr) / \
-                (t_next - t_prev)
-        else:
-            raise NotImplementedError
+    # Setup new vector of timestamps.
+    t_new = np.arange(t[0], t[-1], dt)
+
+    return interp1d_unc(t_new, t, y, uy, kind)
 
     return t_new, y_new, uy_new
 
