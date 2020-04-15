@@ -24,13 +24,17 @@ setup(
     description="A software package for the analysis of dynamic measurements",
     long_description=get_readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/PTB-PSt1/PyDynamic",
-    author=u"Sascha Eichstädt, Ian Smith, Thomas Bruns, Björn Ludwig, "
-    u"Maximilian Gruber",
+    url="https://ptb-pst1.github.io/PyDynamic/",
+    author=u"Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
+    u"Ian Smith",
     author_email="sascha.eichstaedt@ptb.de",
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(exclude=["test"]),
-    documentation="pydynamic.readthedocs.io",
+    project_urls={
+        "Documentation": "https://pydynamic.readthedocs.io/",
+        "Source": "https://github.com/PTB-PSt1/PyDynamic/",
+        "Tracker": "https://github.com/PTB-PSt1/PyDynamic/issues",
+    },
     install_requires=["ipykernel", "matplotlib", "numpy", "pandas", "scipy", "sympy"],
     python_requires=">=3.5",
     classifiers=[
