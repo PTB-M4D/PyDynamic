@@ -5,8 +5,10 @@ from typing import Dict, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given
-from hypothesis.strategies import composite, nothing
+from hypothesis import assume, example, given
+from hypothesis.strategies import composite
+from numpy import array
+from numpy.testing import assert_almost_equal
 from pytest import raises
 
 from PyDynamic.misc.tools import make_equidistant
@@ -27,6 +29,7 @@ def timestamps_values_uncertainties_kind(
     min_count: int = 2,
     max_count: int = None,
     kind_tuple: Tuple[str] = ("linear", "previous", "next", "nearest"),
+    sorted_timestamps: bool = True,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
@@ -46,6 +49,8 @@ def timestamps_values_uncertainties_kind(
             "spline", "lagrange", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
             "previous", "next", "nearest".
+        sorted_timestamps: bool
+            if the timestamps should be in ascending order or not
 
     Returns
     -------
@@ -68,7 +73,8 @@ def timestamps_values_uncertainties_kind(
     # Draw "original" timestamps.
     t = draw(hnp.arrays(**strategy_params))
     # Sort timestamps in ascending order.
-    t.sort()
+    if sorted_timestamps:
+        t.sort()
     # Reuse "original" timestamps shape for measurements values and associated
     # uncertainties and draw both.
     strategy_params["shape"] = np.shape(t)
@@ -97,52 +103,49 @@ def test_too_short_call_make_equidistant(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind())
 def test_full_call_make_equidistant(interp_inputs):
+    # Ensure at least two different timestamps in the series.
     assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
     t_new, y_new, uy_new = make_equidistant(**interp_inputs)
     # Check the equal dimensions of the minimum calls output.
     assert len(t_new) == len(y_new) == len(uy_new)
 
 
-# @given(timestamps_values_uncertainties_kind())
-# def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
-#     # Check erroneous calls with unequally long inputs.
-#     with raises(ValueError):
-#         y_wrong = np.tile(interp_inputs["y"], 2)
-#         uy_wrong = np.tile(interp_inputs["uy"], 3)
-#         make_equidistant(interp_inputs["t"], y_wrong, uy_wrong)
-#
-#
-# def test_wrong_input_order_call_make_equidistant():
-#     # Check erroneous calls with not ascending timestamps.
-#     with raises(ValueError):
-#         # Assure first and last value are correctly ordered and COUNT matches.
-#         t_wrong = np.empty_like(t)
-#         t_wrong[0] = t[0]
-#         t_wrong[-1] = t[-1]
-#         t_wrong[1:-1] = -np.sort(-t[1:-1])
-#         make_equidistant(t_wrong, y, uy)
-#
-#
-# def test_minimal_call_make_equidistant():
-#     # Check the minimum working call.
-#     t_new, y_new, uy_new = make_equidistant(t, y, uy)
-#     # Check the equal dimensions of the minimum calls output.
-#     assert len(t_new) == len(y_new) == len(uy_new)
+@given(timestamps_values_uncertainties_kind())
+def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
+    # Ensure at least two different timestamps in the series.
+    assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
+    # Check erroneous calls with unequally long inputs.
+    with raises(ValueError):
+        y_wrong = np.tile(interp_inputs["y"], 2)
+        uy_wrong = np.tile(interp_inputs["uy"], 3)
+        make_equidistant(interp_inputs["t"], y_wrong, uy_wrong)
 
 
-def test_t_new_to_dt_make_equidistant():
-    from numpy.testing import assert_almost_equal
+@given(timestamps_values_uncertainties_kind(sorted_timestamps=False))
+def test_wrong_input_order_call_make_equidistant(interp_inputs):
+    # Ensure at least two different timestamps in the series.
+    assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
+    # Ensure the timestamps are not in ascending order.
+    assume(not np.all(interp_inputs["t"][1:] >= interp_inputs["t"][:-1]))
+    # Check erroneous calls with descending timestamps.
+    with raises(ValueError):
+        # Reverse order of t and call make_equidistant().
+        make_equidistant(**interp_inputs)
 
-    t_new = make_equidistant(t, y, uy, dt)[0]
+
+@given(timestamps_values_uncertainties_kind())
+def test_t_new_to_dt_make_equidistant(interp_inputs):
+    # Ensure at least two different timestamps in the series.
+    assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
+    t_new = make_equidistant(**interp_inputs)[0]
     delta_t_new = np.diff(t_new)
     # Check if the new timestamps are ascending.
-    assert np.all(delta_t_new > 0)
-    # Check if the timesteps have the desired length.
-    assert_almost_equal(delta_t_new - dt, 0)
+    assert not np.any(delta_t_new < 0)
 
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
 def test_prev_in_make_equidistant(interp_inputs):
+    # Ensure at least two different timestamps in the series.
     assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
@@ -152,6 +155,7 @@ def test_prev_in_make_equidistant(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
 def test_linear_in_make_equidistant(interp_inputs):
+    # Ensure at least two different timestamps in the series.
     assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
@@ -177,6 +181,7 @@ def test_linear_uy_in_make_equidistant():
     )
 )
 def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
+    # Ensure at least two different timestamps in the series.
     assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
