@@ -59,4 +59,5 @@ __all__ = [
     "print_vec",
     "print_mat",
     "make_semiposdef",
+    "make_equidistant",
 ]
