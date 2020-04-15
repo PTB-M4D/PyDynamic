@@ -3,24 +3,37 @@ import hypothesis.strategies as st
 import numpy as np
 from hypothesis import given
 from hypothesis.strategies import composite
+from pytest import raises
 
 from PyDynamic.uncertainty.interpolation import interp1d_unc
 
 
 @composite
-def timestamps_values_uncertainties(draw, min_count):
-
+def timestamps_values_uncertainties(draw, min_count=2, max_count=None):
+    """Set custom strategy for _hypothesis_ to draw desired input from"""
+    # Set all common parameters for timestamps, measurements values and associated
+    # uncertainties.
+    shape_for_timestamps = hnp.array_shapes(
+        max_dims=1, min_side=min_count, max_side=max_count
+    )
     strategy_params = {
         "dtype": np.float,
-        "shape": hnp.array_shapes(max_dims=1, min_side=min_count),
+        "shape": shape_for_timestamps,
         "elements": st.floats(min_value=0, allow_nan=False, allow_infinity=False),
         "unique": True,
     }
+    # Draw "original" timestamps.
     t = draw(hnp.arrays(**strategy_params))
+    # Sort timestamps in ascending order.
     t.sort()
+    # Reuse "original" timestamps shape for measurements values and associated
+    # uncertainties and draw both.
     strategy_params["shape"] = np.shape(t)
     y = draw(hnp.arrays(**strategy_params))
     uy = draw(hnp.arrays(**strategy_params))
+    # Reset shape for interpolation timestamps and use range of "original" timestamps
+    # as boundaries.
+    strategy_params["shape"] = shape_for_timestamps
     strategy_params["elements"] = st.floats(
         min_value=np.min(t), max_value=np.max(t), allow_nan=False, allow_infinity=False
     )
@@ -29,8 +42,22 @@ def timestamps_values_uncertainties(draw, min_count):
     return {"t_new": t_new, "t": t, "y": y, "uy": uy}
 
 
-@given(timestamps_values_uncertainties(min_count=2))
-def test_minimal_call(interp_inputs):
+@given(timestamps_values_uncertainties())
+def test_usual_call(interp_inputs):
+    assert interp1d_unc(**interp_inputs) is not None
 
-    interpolation = interp1d_unc(**interp_inputs)
-    assert interpolation is not None
+
+@given(timestamps_values_uncertainties(min_count=1, max_count=1))
+def test_too_few_timestamps_call(interp_inputs):
+    # Check that too few timestamps raise exceptions.
+    with raises(ValueError):
+        interp1d_unc(**interp_inputs)
+
+
+@given(timestamps_values_uncertainties())
+def test_raise_not_implemented_yet_interp1d(interp_inputs):
+    # Check that not implemented versions raise exceptions.
+    with raises(NotImplementedError):
+        interp1d_unc(**interp_inputs, kind="spline")
+        interp1d_unc(**interp_inputs, kind="lagrange")
+        interp1d_unc(**interp_inputs, kind="least-squares")
