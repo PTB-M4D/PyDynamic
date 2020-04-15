@@ -94,16 +94,10 @@ def test_too_short_call_make_equidistant(interp_inputs):
         make_equidistant(interp_inputs["t"])
         make_equidistant(interp_inputs["t"], interp_inputs["y"])
 
-def test_wrong_input_order_call_make_equidistant():
-    # Check erroneous calls with not ascending timestamps.
-    with raises(ValueError):
-        # Assure first and last value are correctly ordered and COUNT matches.
-        t_wrong = np.empty_like(t)
-        t_wrong[0] = t[0]
-        t_wrong[-1] = t[-1]
-        t_wrong[1:-1] = -np.sort(-t[1:-1])
-        make_equidistant(t_wrong, y, uy)
 
+@given(timestamps_values_uncertainties_kind())
+def test_too_short_call_make_equidistant(interp_inputs):
+    make_equidistant(**interp_inputs)
 
 def test_minimal_call_make_equidistant():
     # Check the minimum working call.
@@ -139,23 +133,21 @@ def test_t_new_to_dt_make_equidistant():
     assert_almost_equal(delta_t_new - dt, 0)
 
 
-def test_prev_in_make_equidistant():
-    kinds = ['previous', 'next', 'nearest']
-    for i_kind in kinds:
-        y_new, uy_new = make_equidistant(t, y, uy, dt, i_kind)[1:3]
-        # Check if all 'interpolated' values are present in the actual values.
-        assert np.all(np.isin(y_new, y))
-        assert np.all(np.isin(uy_new, uy))
+@given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
+def test_prev_in_make_equidistant(interp_inputs):
+    y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
+    # Check if all 'interpolated' values are present in the actual values.
+    assert np.all(np.isin(y_new, interp_inputs["y"]))
+    assert np.all(np.isin(uy_new, interp_inputs["uy"]))
 
 
-def test_linear_in_make_equidistant():
-    y_new, uy_new = make_equidistant(t, y, uy, dt, 'linear')[1:3]
+@given(timestamps_values_uncertainties_kind())
+def test_linear_in_make_equidistant(interp_inputs):
+    interp_inputs["kind"] = "linear"
+    y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the actual values.
-    assert np.all(np.amin(y) <= y_new)
-    assert np.all(np.amax(y) >= y_new)
-    # Check if for any non-zero input uncertainty the output contains non-zeros.
-    if np.any(uy):
-        assert np.any(uy_new)
+    assert np.all(np.amin(interp_inputs["y"]) <= y_new)
+    assert np.all(np.amax(interp_inputs["y"]) >= y_new)
 
 
 def test_linear_uy_in_make_equidistant():
@@ -166,14 +158,13 @@ def test_linear_uy_in_make_equidistant():
     y = np.ones_like(t_unit)
     uy_unit = np.ones_like(t_unit)
     dt_half = 1
-    uy_new = make_equidistant(t_unit, y, uy_unit, dt_half, 'linear')[2]
-    assert np.all(uy_new[0:n:2] == 1) and np.all(uy_new[1:n:2] == np.sqrt(2)
-                                                 / 2)
+    uy_new = make_equidistant(t_unit, y, uy_unit, dt_half, "linear")[2]
+    assert np.all(uy_new[0:n:2] == 1) and np.all(uy_new[1:n:2] == np.sqrt(2) / 2)
 
 
 def test_raise_not_implemented_yet_make_equidistant():
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
-        make_equidistant(t, y, uy, dt, 'spline')
-        make_equidistant(t, y, uy, dt, 'lagrange')
-        make_equidistant(t, y, uy, dt, 'least-squares')
+        make_equidistant(t, y, uy, dt, "spline")
+        make_equidistant(t, y, uy, dt, "lagrange")
+        make_equidistant(t, y, uy, dt, "least-squares")
