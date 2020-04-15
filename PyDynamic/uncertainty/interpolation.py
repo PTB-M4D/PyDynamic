@@ -1,23 +1,33 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 from scipy.interpolate import interp1d
 
 
-def interp1d_unc(t_new, t, y, uy, kind: Optional[str] = "linear"):
+def interp1d_unc(
+    t_new: np.ndarray,
+    t: np.ndarray,
+    y: np.ndarray,
+    uy: np.ndarray,
+    kind: Optional[str] = "linear",
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Interpolate arbitrary time series considering the associated uncertainties
+
+    The interpolation time stamps must lie within the range of the original time
+    stamps, and the number of original time stamps has to match the number of
+    measured values and the number of associated uncertainties.
 
     Parameters
     ----------
-        t_new: np.ndarray
-            (N,) The timestamps at which to evaluate the interpolated values.
-        t: np.ndarray
-            (N,) timestamps in ascending order
-        y: np.ndarray
-            (N,) corresponding measurement values
-        uy: np.ndarray
-            (N,) corresponding measurement values' uncertainties
-        kind: str
+        t_new: (N,) array_like
+            The timestamps at which to evaluate the interpolated values.
+        t: (N,) array_like
+            timestamps in ascending order
+        y: (N,) array_like
+            corresponding measurement values
+        uy: (N,) array_like
+            corresponding measurement values' uncertainties
+        kind: str, optional
             Specifies the kind of interpolation for the measurement values
             as a string ('previous', 'next', 'nearest' or 'linear').
 
@@ -28,7 +38,7 @@ def interp1d_unc(t_new, t, y, uy, kind: Optional[str] = "linear"):
         y_new : (N,) array_like
             measurement values
         uy_new : (N,) array_like
-            measurement values' uncertainties
+            associated measurement values' uncertainties
 
     References
     ----------
