@@ -5,8 +5,8 @@ from typing import Dict, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given
-from hypothesis.strategies import composite
+from hypothesis import assume, given
+from hypothesis.strategies import composite, nothing
 from pytest import raises
 
 from PyDynamic.misc.tools import make_equidistant
@@ -96,30 +96,38 @@ def test_too_short_call_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind())
-def test_too_short_call_make_equidistant(interp_inputs):
-    make_equidistant(**interp_inputs)
-
-def test_minimal_call_make_equidistant():
-    # Check the minimum working call.
-    t_new, y_new, uy_new = make_equidistant(t, y, uy)
+def test_full_call_make_equidistant(interp_inputs):
+    assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
+    t_new, y_new, uy_new = make_equidistant(**interp_inputs)
     # Check the equal dimensions of the minimum calls output.
     assert len(t_new) == len(y_new) == len(uy_new)
 
 
-def test_full_call_make_equidistant():
-    # Setup array of timesteps in relation to original time interval length.
-    dts = np.power(10., np.arange(-5, 0)) * (t[-1] - t[0])
-    # Check full call for all specified timesteps.
-    for i_dt in dts:
-        make_equidistant(t, y, uy, dt=i_dt)
-    # Setup array of all implemented interpolation methods.
-    kinds = ['previous', 'next', 'nearest', 'linear']
-    # Check all possible full interpolation calls.
-    for i_kind in kinds:
-        make_equidistant(t, y, uy, kind=i_kind)
-        for i_dt in dts:
-            make_equidistant(t, y, uy, i_dt, i_kind)
-            make_equidistant(t, y, uy, dt=i_dt, kind=i_kind)
+# @given(timestamps_values_uncertainties_kind())
+# def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
+#     # Check erroneous calls with unequally long inputs.
+#     with raises(ValueError):
+#         y_wrong = np.tile(interp_inputs["y"], 2)
+#         uy_wrong = np.tile(interp_inputs["uy"], 3)
+#         make_equidistant(interp_inputs["t"], y_wrong, uy_wrong)
+#
+#
+# def test_wrong_input_order_call_make_equidistant():
+#     # Check erroneous calls with not ascending timestamps.
+#     with raises(ValueError):
+#         # Assure first and last value are correctly ordered and COUNT matches.
+#         t_wrong = np.empty_like(t)
+#         t_wrong[0] = t[0]
+#         t_wrong[-1] = t[-1]
+#         t_wrong[1:-1] = -np.sort(-t[1:-1])
+#         make_equidistant(t_wrong, y, uy)
+#
+#
+# def test_minimal_call_make_equidistant():
+#     # Check the minimum working call.
+#     t_new, y_new, uy_new = make_equidistant(t, y, uy)
+#     # Check the equal dimensions of the minimum calls output.
+#     assert len(t_new) == len(y_new) == len(uy_new)
 
 
 def test_t_new_to_dt_make_equidistant():
@@ -135,17 +143,18 @@ def test_t_new_to_dt_make_equidistant():
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
 def test_prev_in_make_equidistant(interp_inputs):
+    assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
     assert np.all(np.isin(y_new, interp_inputs["y"]))
     assert np.all(np.isin(uy_new, interp_inputs["uy"]))
 
 
-@given(timestamps_values_uncertainties_kind())
+@given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
 def test_linear_in_make_equidistant(interp_inputs):
-    interp_inputs["kind"] = "linear"
+    assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
-    # Check if all interpolated values lie in the range of the actual values.
+    # Check if all interpolated values lie in the range of the original values.
     assert np.all(np.amin(interp_inputs["y"]) <= y_new)
     assert np.all(np.amax(interp_inputs["y"]) >= y_new)
 
@@ -162,9 +171,13 @@ def test_linear_uy_in_make_equidistant():
     assert np.all(uy_new[0:n:2] == 1) and np.all(uy_new[1:n:2] == np.sqrt(2) / 2)
 
 
-def test_raise_not_implemented_yet_make_equidistant():
+@given(
+    timestamps_values_uncertainties_kind(
+        kind_tuple=("spline", "lagrange", "least-squares")
+    )
+)
+def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
+    assume(interp_inputs["t"][0] < interp_inputs["t"][-1])
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
-        make_equidistant(t, y, uy, dt, "spline")
-        make_equidistant(t, y, uy, dt, "lagrange")
-        make_equidistant(t, y, uy, dt, "least-squares")
+        make_equidistant(**interp_inputs)
