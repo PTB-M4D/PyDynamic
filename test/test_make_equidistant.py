@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Perform tests on the method *make_equidistant*."""
-from typing import Dict, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
@@ -15,10 +15,10 @@ from PyDynamic.misc.tools import make_equidistant
 @composite
 def timestamps_values_uncertainties_kind(
     draw,
-    min_count: int = 2,
-    max_count: int = None,
-    kind_tuple: Tuple[str] = ("linear", "previous", "next", "nearest"),
-    sorted_timestamps: bool = True,
+    min_count: Optional[int] = 2,
+    max_count: Optional[int] = None,
+    kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest"),
+    sorted_timestamps: Optional[bool] = True,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
