@@ -22,15 +22,22 @@ from scipy.sparse import issparse, eye
 from scipy.sparse.linalg.eigen.arpack import eigs
 import sys
 
-__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
-           'make_equidistant', 'trimOrPad', 'progress_bar']
+__all__ = [
+    "print_mat",
+    "print_vec",
+    "make_semiposdef",
+    "FreqResp2RealImag",
+    "make_equidistant",
+    "trimOrPad",
+    "progress_bar",
+]
 
 
 def trimOrPad(array, length, mode="constant"):
 
-    if len(array) < length: # pad zeros to the right if too short
-        return np.pad(array, (0,length - len(array)), mode=mode)
-    else:                   # trim to given length otherwise
+    if len(array) < length:  # pad zeros to the right if too short
+        return np.pad(array, (0, length - len(array)), mode=mode)
+    else:  # trim to given length otherwise
         return array[0:length]
 
 
@@ -87,8 +94,11 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
         matrix = matrix.T
 
     s = "".join(
-        [print_vec(matrix[k, :], prec=prec, vertical=False, retS=True) + "\n"
-         for k in range(matrix.shape[0])])
+        [
+            print_vec(matrix[k, :], prec=prec, vertical=False, retS=True) + "\n"
+            for k in range(matrix.shape[0])
+        ]
+    )
 
     if retS:
         return s
@@ -124,17 +134,14 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
         # enforce symmetric matrix
         matrix = 0.5 * (matrix + matrix.T)
         # calculate smallest eigenvalue
-        e = np.real(eigs(matrix, which="SR",
-                         return_eigenvectors=False)).min()
+        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
         count = 0
         # increase the eigenvalues until matrix is positive semi-definite
         while e < tol and count < maxiter:
             matrix += (np.absolute(e) + tol) * eye(n, format=matrix.format)
-            e = np.real(eigs(matrix, which="SR",
-                             return_eigenvectors=False)).min()
+            e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
             count += 1
-        e = np.real(eigs(matrix, which="SR",
-                         return_eigenvectors=False)).min()
+        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
     # same procedure for non-sparse matrices
     else:
         matrix = 0.5 * (matrix + matrix.T)
@@ -177,18 +184,20 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     """
 
     if len(Abs) != len(Phase) or 2 * len(Abs) != len(Unc):
-        raise ValueError('\nLength of inputs are inconsistent.')
+        raise ValueError("\nLength of inputs are inconsistent.")
 
     if len(Unc.shape) == 1:
         Unc = np.diag(Unc)
 
     Nf = len(Abs)
 
-    AbsPhas = np.random.multivariate_normal(np.hstack((Abs, Phase)), Unc,
-                                            int(MCruns))  # draw MC inputs
+    AbsPhas = np.random.multivariate_normal(
+        np.hstack((Abs, Phase)), Unc, int(MCruns)
+    )  # draw MC inputs
 
     H = AbsPhas[:, :Nf] * np.exp(
-        1j * AbsPhas[:, Nf:])  # calculate complex frequency response values
+        1j * AbsPhas[:, Nf:]
+    )  # calculate complex frequency response values
     RI = np.hstack((np.real(H), np.imag(H)))  # transform to real, imag
 
     Re = np.mean(RI[:, :Nf])
@@ -220,11 +229,11 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     Returns
     -------
         t_new : (N,) array_like
-            timestamps
+            interpolation timestamps
         y_new : (N,) array_like
-            measurement values
+            interpolated measurement values
         uy_new : (N,) array_like
-            measurement values' uncertainties
+            interpolated measurement values' uncertainties
 
     References
     ----------
@@ -238,8 +247,15 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     return interp1d_unc(t_new, t, y, uy, kind)
 
 
-
-def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo_indicator =".", fout=sys.stdout):
+def progress_bar(
+    count,
+    count_max,
+    width=30,
+    prefix="",
+    done_indicator="#",
+    todo_indicator=".",
+    fout=sys.stdout,
+):
     """
     A simple and reusable progress-bar
 
@@ -261,12 +277,13 @@ def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo
         fout: file-object, optional
             where the progress-bar should be written/printed to
     """
-    x = int(width * (count+1) / count_max)
+    x = int(width * (count + 1) / count_max)
     progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
         PREFIX=prefix,
         DONE=x * done_indicator,
-        NOTDONE=(width-x) * todo_indicator,
-        COUNT=count+1,
-        COUNTMAX=count_max)
+        NOTDONE=(width - x) * todo_indicator,
+        COUNT=count + 1,
+        COUNTMAX=count_max,
+    )
 
     fout.write(progressString)
