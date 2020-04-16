@@ -127,7 +127,7 @@ def test_linear_in_make_equidistant(interp_inputs):
     assert np.all(np.amax(interp_inputs["y"]) >= y_new)
 
 
-@given(st.integers(min_value=3, max_value=1e3))
+@given(st.integers(min_value=3, max_value=1000))
 def test_linear_uy_in_interp1d_unc(n,):
     # Check for given input, if interpolated uncertainties equal 1 and
     # :math:`sqrt(2) / 2`.
