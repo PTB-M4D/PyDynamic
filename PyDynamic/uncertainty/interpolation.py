@@ -34,11 +34,11 @@ def interp1d_unc(
     Returns
     -------
         t_new : (N,) array_like
-            timestamps
+            interpolation timestamps
         y_new : (N,) array_like
-            measurement values
+            interpolated measurement values
         uy_new : (N,) array_like
-            associated measurement values' uncertainties
+            interpolated measurement values' uncertainties
 
     References
     ----------
