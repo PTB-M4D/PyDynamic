@@ -1,3 +1,5 @@
+from typing import Dict, Optional, Tuple, Union
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
@@ -9,8 +11,39 @@ from PyDynamic.uncertainty.interpolation import interp1d_unc
 
 
 @composite
-def timestamps_values_uncertainties(draw, min_count=2, max_count=None):
-    """Set custom strategy for _hypothesis_ to draw desired input from"""
+def timestamps_values_uncertainties(
+    draw,
+    min_count: Optional[int] = 2,
+    max_count: Optional[int] = None,
+    kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest"),
+    sorted_timestamps: Optional[bool] = True,
+) -> Dict[str, Union[np.ndarray, str]]:
+    """Set custom strategy for _hypothesis_ to draw desired input from
+
+    Parameters
+    ----------
+        draw: callable
+            this is a hypothesis internal callable to actually draw from provided
+            strategies
+        min_count: int
+            the minimum number of elements expected inside the arrays of timestamps,
+            measurement values and associated uncertainties
+        max_count: int
+            the maximum number of elements expected inside the arrays of timestamps,
+            measurement values and associated uncertainties
+        kind_tuple: tuple(str), optional
+            the tuple of strings out of "linear", "previous", "next", "nearest",
+            "spline", "lagrange", "least-squares" from which the strategy for the
+            kind randomly chooses. Defaults to the valid options "linear",
+            "previous", "next", "nearest".
+        sorted_timestamps: bool
+            if the timestamps should be in ascending order or not
+
+    Returns
+    -------
+        A dict containing the randomly generated expected input parameters t, y, uy,
+        dt, kind for make_equidistant()
+    """
     # Set all common parameters for timestamps, measurements values and associated
     # uncertainties.
     shape_for_timestamps = hnp.array_shapes(
