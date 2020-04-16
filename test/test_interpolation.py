@@ -80,7 +80,9 @@ def timestamps_values_uncertainties_kind(
 
 @given(timestamps_values_uncertainties_kind())
 def test_usual_call(interp_inputs):
-    assert interp1d_unc(**interp_inputs) is not None
+    t_new, y_new, uy_new = interp1d_unc(**interp_inputs)
+    # Check the equal dimensions of the minimum calls output.
+    assert len(t_new) == len(y_new) == len(uy_new)
 
 
 @given(timestamps_values_uncertainties_kind(min_count=1, max_count=1))
