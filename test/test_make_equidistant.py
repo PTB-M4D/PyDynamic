@@ -152,17 +152,18 @@ def test_linear_in_make_equidistant(interp_inputs):
     assert np.all(np.amax(interp_inputs["y"]) >= y_new)
 
 
-def test_linear_uy_in_make_equidistant():
+@given(st.integers(min_value=3, max_value=1e3))
+def test_linear_uy_in_make_equidistant(n):
     # Check for given input, if interpolated uncertainties equal 1 and
     # :math:`sqrt(2) / 2`.
     dt_unit = 2
-    n = 50
     t_unit = np.arange(0, n, dt_unit)
-    y = np.ones_like(t_unit)
-    uy_unit = np.ones_like(t_unit)
-    dt_half = 1
+    y = uy_unit = np.ones_like(t_unit)
+    dt_half = dt_unit / 2
     uy_new = make_equidistant(t_unit, y, uy_unit, dt_half, "linear")[2]
-    assert np.all(uy_new[0:n:2] == 1) and np.all(uy_new[1:n:2] == np.sqrt(2) / 2)
+    assert np.all(uy_new[0:n:dt_unit] == 1) and np.all(
+        uy_new[1:n:dt_unit] == np.sqrt(2) / 2
+    )
 
 
 @given(
