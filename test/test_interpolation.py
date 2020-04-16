@@ -90,7 +90,26 @@ def test_too_few_timestamps_call(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
-@given(timestamps_values_uncertainties())
+@given(st.integers(min_value=3, max_value=1e3))
+def test_linear_uy_in_interp1d_unc(n,):
+    # Check for given input, if interpolated uncertainties equal 1 and
+    # :math:`sqrt(2) / 2`.
+    dt_unit = 2
+    dt_half = dt_unit / 2
+    t_new = np.arange(0, n, dt_half)
+    t_unit = np.arange(0, n + dt_half, dt_unit)
+    y = uy_unit = np.ones_like(t_unit)
+    uy_new = interp1d_unc(t_new, t_unit, y, uy_unit, "linear")[2]
+    assert np.all(uy_new[0:n:dt_unit] == 1) and np.all(
+        uy_new[1:n:dt_unit] == np.sqrt(2) / 2
+    )
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        kind_tuple=("spline", "lagrange", "least-squares")
+    )
+)
 def test_raise_not_implemented_yet_interp1d(interp_inputs):
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
