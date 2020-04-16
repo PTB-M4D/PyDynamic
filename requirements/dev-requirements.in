@@ -4,3 +4,4 @@ pytest
 pytest-cov
 python-semantic-release
 tox <= 3.14.3
+hypothesis

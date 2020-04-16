@@ -37,6 +37,7 @@ __all__ = [
     "SMC",
     "UMC",
     "UMC_generic",
+    "interp1d_unc",
     "db",
     "grpdelay",
     "mapinside",

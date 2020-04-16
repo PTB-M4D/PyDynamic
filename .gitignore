@@ -7,3 +7,4 @@ PyDynamic.egg-info/
 .coverage.*
 pytest.xml
 prep_test_DFT.py
+.hypothesis
