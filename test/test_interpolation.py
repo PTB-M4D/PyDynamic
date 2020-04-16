@@ -11,7 +11,7 @@ from PyDynamic.uncertainty.interpolation import interp1d_unc
 
 
 @composite
-def timestamps_values_uncertainties(
+def timestamps_values_uncertainties_kind(
     draw,
     min_count: Optional[int] = 2,
     max_count: Optional[int] = None,
@@ -52,13 +52,16 @@ def timestamps_values_uncertainties(
     strategy_params = {
         "dtype": np.float,
         "shape": shape_for_timestamps,
-        "elements": st.floats(min_value=0, allow_nan=False, allow_infinity=False),
+        "elements": st.floats(
+            min_value=0, max_value=1e300, allow_nan=False, allow_infinity=False
+        ),
         "unique": True,
     }
     # Draw "original" timestamps.
     t = draw(hnp.arrays(**strategy_params))
     # Sort timestamps in ascending order.
-    t.sort()
+    if sorted_timestamps:
+        t.sort()
     # Reuse "original" timestamps shape for measurements values and associated
     # uncertainties and draw both.
     strategy_params["shape"] = np.shape(t)
@@ -71,16 +74,16 @@ def timestamps_values_uncertainties(
         min_value=np.min(t), max_value=np.max(t), allow_nan=False, allow_infinity=False
     )
     t_new = draw(hnp.arrays(**strategy_params))
-    t_new.sort()
-    return {"t_new": t_new, "t": t, "y": y, "uy": uy}
+    kind = draw(st.sampled_from(kind_tuple))
+    return {"t_new": t_new, "t": t, "y": y, "uy": uy, "kind": kind}
 
 
-@given(timestamps_values_uncertainties())
+@given(timestamps_values_uncertainties_kind())
 def test_usual_call(interp_inputs):
     assert interp1d_unc(**interp_inputs) is not None
 
 
-@given(timestamps_values_uncertainties(min_count=1, max_count=1))
+@given(timestamps_values_uncertainties_kind(min_count=1, max_count=1))
 def test_too_few_timestamps_call(interp_inputs):
     # Check that too few timestamps raise exceptions.
     with raises(ValueError):
@@ -91,6 +94,4 @@ def test_too_few_timestamps_call(interp_inputs):
 def test_raise_not_implemented_yet_interp1d(interp_inputs):
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
-        interp1d_unc(**interp_inputs, kind="spline")
-        interp1d_unc(**interp_inputs, kind="lagrange")
-        interp1d_unc(**interp_inputs, kind="least-squares")
+        interp1d_unc(**interp_inputs)
