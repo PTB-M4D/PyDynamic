@@ -220,11 +220,11 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     Returns
     -------
         t_new : (N,) array_like
-            timestamps
+            interpolation timestamps
         y_new : (N,) array_like
-            measurement values
+            interpolated measurement values
         uy_new : (N,) array_like
-            measurement values' uncertainties
+            interpolated measurement values' uncertainties
 
     References
     ----------
