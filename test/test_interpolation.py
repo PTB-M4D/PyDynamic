@@ -90,6 +90,16 @@ def test_too_few_timestamps_call(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
+@given(timestamps_values_uncertainties_kind(sorted_timestamps=False))
+def test_wrong_input_order_call_make_equidistant(interp_inputs):
+    # Ensure the timestamps are not in ascending order.
+    assume(not np.all(interp_inputs["t"][1:] >= interp_inputs["t"][:-1]))
+    # Check erroneous calls with descending timestamps.
+    with raises(ValueError):
+        # Reverse order of t and call make_equidistant().
+        interp1d_unc(**interp_inputs)
+
+
 @given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
 def test_trivial_in_make_equidistant(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
