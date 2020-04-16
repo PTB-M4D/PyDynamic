@@ -90,6 +90,14 @@ def test_too_few_timestamps_call(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
+@given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
+def test_trivial_in_make_equidistant(interp_inputs):
+    y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
+    # Check if all 'interpolated' values are present in the actual values.
+    assert np.all(np.isin(y_new, interp_inputs["y"]))
+    assert np.all(np.isin(uy_new, interp_inputs["uy"]))
+
+
 @given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
 def test_linear_in_make_equidistant(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
