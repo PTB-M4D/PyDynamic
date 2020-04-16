@@ -90,6 +90,15 @@ def test_too_few_timestamps_call(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
+@given(timestamps_values_uncertainties_kind())
+def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
+    # Check erroneous calls with unequally long inputs.
+    with raises(ValueError):
+        y_wrong = np.tile(interp_inputs["y"], 2)
+        uy_wrong = np.tile(interp_inputs["uy"], 3)
+        interp1d_unc(interp_inputs["t"], interp_inputs["t"], y_wrong, uy_wrong)
+
+
 @given(timestamps_values_uncertainties_kind(sorted_timestamps=False))
 def test_wrong_input_order_call_make_equidistant(interp_inputs):
     # Ensure the timestamps are not in ascending order.
