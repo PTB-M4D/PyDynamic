@@ -13,7 +13,7 @@ from .identification import *
 from .misc import *
 from .uncertainty import *
 
-__version__ = "1.2.84"
+__version__ = "1.3.0"
 
 __all__ = [
     "LSFIR",
