@@ -3,7 +3,7 @@ from typing import Dict, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis.strategies import composite
 from pytest import raises
 
@@ -88,6 +88,14 @@ def test_too_few_timestamps_call(interp_inputs):
     # Check that too few timestamps raise exceptions.
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
+
+
+@given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
+def test_linear_in_make_equidistant(interp_inputs):
+    y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
+    # Check if all interpolated values lie in the range of the original values.
+    assert np.all(np.amin(interp_inputs["y"]) <= y_new)
+    assert np.all(np.amax(interp_inputs["y"]) >= y_new)
 
 
 @given(st.integers(min_value=3, max_value=1e3))
