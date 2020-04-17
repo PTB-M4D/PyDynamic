@@ -41,7 +41,7 @@ extensions = [
 ]
 
 # This should make SciPy documentation available inside our docs.
-intersphinx_mapping = {"python": ("http://scipy.github.io/devdocs/", None)}
+intersphinx_mapping = {"python": ('http://docs.scipy.org/doc/scipy/reference', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
