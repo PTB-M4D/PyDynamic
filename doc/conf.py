@@ -233,15 +233,15 @@ htmlhelp_basename = "PyDynamicdoc"
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-# latex_documents = [
-#     (
-#         master_doc,
-#         "PyDynamic.tex",
-#         "PyDynamic Documentation",
-#         "S Eichstädt, I Smith",
-#         "manual",
-#     ),
-# ]
+latex_documents = [
+    (
+        master_doc,
+        "PyDynamic.tex",
+        "PyDynamic Documentation",
+        "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith",
+        "manual",
+    ),
+]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -252,26 +252,26 @@ htmlhelp_basename = "PyDynamicdoc"
 # latex_use_parts = False
 
 # If true, show page references after internal links.
-# latex_show_pagerefs = False
+latex_show_pagerefs = False
 
 # If true, show URL addresses after external links.
-# latex_show_urls = False
+latex_show_urls = False
 
 # Documents to append as an appendix to all manuals.
-# latex_appendices = []
+latex_appendices = []
 
 # If false, no module index is generated.
-# latex_domain_indices = True
+latex_domain_indices = True
 
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-# man_pages = [(master_doc, "pydynamic", "PyDynamic Documentation", [author], 1)]
+man_pages = [(master_doc, "pydynamic", "PyDynamic Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
-# man_show_urls = False
+man_show_urls = False
 
 
 # -- Options for Texinfo output -------------------------------------------
