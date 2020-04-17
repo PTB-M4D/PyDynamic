@@ -80,8 +80,10 @@ def timestamps_values_uncertainties_kind(
 
 @given(timestamps_values_uncertainties_kind())
 def test_usual_call(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     t_new, y_new, uy_new = interp1d_unc(**interp_inputs)
     # Check the equal dimensions of the minimum calls output.
     assert len(t_new) == len(y_new) == len(uy_new)
@@ -96,8 +98,10 @@ def test_too_few_timestamps_call(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind())
 def test_wrong_input_length_y_call_interp1d_unc(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     # Check erroneous calls with unequally long inputs.
     interp_inputs["y"] = np.tile(interp_inputs["y"], 2)
     with raises(ValueError):
@@ -106,8 +110,10 @@ def test_wrong_input_length_y_call_interp1d_unc(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind())
 def test_t_new_below_range_interp1d_unc(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     # Check erroneous calls with t_new's minimum below t's minimum.
     interp_inputs["t_new"] -= (
         np.abs(np.amin(interp_inputs["t"]) - np.amin(interp_inputs["t_new"])) + 1
@@ -118,8 +124,10 @@ def test_t_new_below_range_interp1d_unc(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind())
 def test_t_new_above_range_interp1d_unc(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     # Check erroneous calls with t_new's minimum below t's minimum.
     interp_inputs["t_new"] += (
         np.abs(np.amax(interp_inputs["t"]) - np.amax(interp_inputs["t_new"])) + 1
@@ -130,8 +138,10 @@ def test_t_new_above_range_interp1d_unc(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind())
 def test_wrong_input_length_uy_call_interp1d_unc(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     # Check erroneous calls with unequally long inputs.
     interp_inputs["uy"] = np.tile(interp_inputs["uy"], 2)
     with raises(ValueError):
@@ -140,8 +150,10 @@ def test_wrong_input_length_uy_call_interp1d_unc(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind(sorted_timestamps=False))
 def test_wrong_input_order_call_interp1d_unc(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     # Ensure the timestamps are not in ascending order.
     assume(not np.all(interp_inputs["t"][1:] >= interp_inputs["t"][:-1]))
     # Check erroneous calls with descending timestamps.
@@ -152,8 +164,10 @@ def test_wrong_input_order_call_interp1d_unc(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
 def test_trivial_in_interp1d_unc(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
     assert np.all(np.isin(y_new, interp_inputs["y"]))
@@ -162,8 +176,10 @@ def test_trivial_in_interp1d_unc(interp_inputs):
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
 def test_linear_in_interp1d_unc(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
     assert np.all(np.amin(interp_inputs["y"]) <= y_new)
@@ -191,8 +207,10 @@ def test_linear_uy_in_interp1d_unc(n,):
     )
 )
 def test_raise_not_implemented_yet_interp1d(interp_inputs):
-    # Ensure at least two different timestamps in the series.
-    assume(interp_inputs["t"][0] != interp_inputs["t"][-1])
+    # Ensure at least two different timestamps in each series.
+    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
+
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
         interp1d_unc(**interp_inputs)
