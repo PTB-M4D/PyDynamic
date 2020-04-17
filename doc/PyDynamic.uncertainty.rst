@@ -11,10 +11,12 @@ uncertainties.
 
 The package consists of the following modules:
 
-* :mod:`propagate_DFT`: Uncertainty evaluation for the DFT
-* :mod:`propagate_filter`: Uncertainty evaluation for digital filtering
-* :mod:`propagate_MonteCarlo`: Monte Carlo methods for digital filtering
-* :mod:`interpolation`: Uncertainty evaluation for interpolation
+* :mod:`PyDynamic.uncertainty.propagate_DFT`: Uncertainty evaluation for the DFT
+* :mod:`PyDynamic.uncertainty.propagate_filter`: Uncertainty evaluation for digital
+  filtering
+* :mod:`PyDynamic.uncertainty.propagate_MonteCarlo`: Monte Carlo methods for digital
+  filtering
+* :mod:`PyDynamic.uncertainty.interpolation`: Uncertainty evaluation for interpolation
 
 Uncertainty evaluation for the DFT
 ----------------------------------
