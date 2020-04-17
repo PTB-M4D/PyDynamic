@@ -15,23 +15,23 @@ The corresponding scientific publications is
 
 This module contains the following functions:
 
-* *GUM_DFT*: Calculation of the DFT of the time domain signal x and
+* :func:`GUM_DFT`: Calculation of the DFT of the time domain signal x and
   propagation of the squared uncertainty Ux associated with the time domain
   sequence x to the real and imaginary parts of the DFT of x
-* *GUM_iDFT*: GUM propagation of the squared uncertainty UF associated with
+* :func:`GUM_iDFT`: GUM propagation of the squared uncertainty UF associated with
   the DFT values F through the inverse DFT
-* *GUM_DFTfreq*: Return the Discrete Fourier Transform sample frequencies
-* *DFT_transferfunction*: Calculation of the transfer function H = Y/X in the
+* :func:`GUM_DFTfreq`: Return the Discrete Fourier Transform sample frequencies
+* :func:`DFT_transferfunction`: Calculation of the transfer function H = Y/X in the
   frequency domain with X being the Fourier transform
   of the system's input signal and Y that of the output signal
-* *DFT_deconv*: Deconvolution in the frequency domain
-* *DFT_multiply*: Multiplication in the frequency domain
-* *AmpPhase2DFT*: Transformation from magnitude and phase to real and
+* :func:`DFT_deconv`: Deconvolution in the frequency domain
+* :func:`DFT_multiply`: Multiplication in the frequency domain
+* :func:`AmpPhase2DFT`: Transformation from magnitude and phase to real and
   imaginary parts
-* *DFT2AmpPhase*: Transformation from real and imaginary parts to magnitude
+* :func:`DFT2AmpPhase`: Transformation from real and imaginary parts to magnitude
   and phase
-* *AmpPhase2Time*: Transformation from amplitude and phase to time domain
-* *Time2AmpPhase*: Transformation from time domain to amplitude and phase
+* :func:`AmpPhase2Time`: Transformation from amplitude and phase to time domain
+* :func:`Time2AmpPhase`: Transformation from time domain to amplitude and phase
 """
 
 import warnings
@@ -39,9 +39,19 @@ import warnings
 import numpy as np
 from scipy import sparse
 
-__all__ = ['GUM_DFT', 'GUM_iDFT', 'GUM_DFTfreq', 'DFT_transferfunction',
-           'DFT_deconv', 'DFT_multiply', 'AmpPhase2DFT', 'DFT2AmpPhase',
-           'AmpPhase2Time', 'Time2AmpPhase', 'Time2AmpPhase_multi']
+__all__ = [
+    "GUM_DFT",
+    "GUM_iDFT",
+    "GUM_DFTfreq",
+    "DFT_transferfunction",
+    "DFT_deconv",
+    "DFT_multiply",
+    "AmpPhase2DFT",
+    "DFT2AmpPhase",
+    "AmpPhase2Time",
+    "Time2AmpPhase",
+    "Time2AmpPhase_multi",
+]
 
 
 def _apply_window(x, Ux, window):
@@ -62,9 +72,9 @@ def _apply_window(x, Ux, window):
     -------
         xw, Uxw
     """
-    assert (len(x) == len(window))
+    assert len(x) == len(window)
     if not isinstance(Ux, float):
-        assert (Ux.shape[0] == Ux.shape[1] and Ux.shape[0] == len(x))
+        assert Ux.shape[0] == Ux.shape[1] and Ux.shape[0] == len(x)
     xw = x.copy() * window
     if isinstance(Ux, float):
         Uxw = Ux * window ** 2
@@ -81,14 +91,12 @@ def _prod(A, B):
 
     This is an internal helper function.
     """
-    if len(A.shape) == 1 and len(
-            B.shape) == 2:  # A is the vector and B the matrix
+    if len(A.shape) == 1 and len(B.shape) == 2:  # A is the vector and B the matrix
         C = np.zeros_like(B)
         for k in range(C.shape[0]):
             C[k, :] = A[k] * B[k, :]
         return C
-    elif len(A.shape) == 2 and len(
-            B.shape) == 1:  # A is the matrix and B the vector
+    elif len(A.shape) == 2 and len(B.shape) == 1:  # A is the matrix and B the vector
         C = np.zeros_like(A)
         for k in range(C.shape[1]):
             C[:, k] = A[:, k] * B[k]
@@ -106,9 +114,9 @@ def _matprod(M, V, W, return_as_matrix=True):
     This is an internal helper function.
     """
     if len(M.shape) == 2:
-        assert (M.shape[0] == M.shape[1])
-    assert (M.shape[0] == V.shape[0])
-    assert (V.shape == W.shape)
+        assert M.shape[0] == M.shape[1]
+    assert M.shape[0] == V.shape[0]
+    assert V.shape == W.shape
     N = V.shape[0] // 2
     v1 = V[:N]
     v2 = V[N:]
@@ -119,7 +127,7 @@ def _matprod(M, V, W, return_as_matrix=True):
         offset = M.offsets
         diags = M.data
         A = diags[0][:N]
-        B = diags[1][offset[1]:nrows + offset[1]]
+        B = diags[1][offset[1] : nrows + offset[1]]
         D = diags[0][N:]
         return np.diag(v1 * A * w1 + v2 * B * w1 + v1 * B * w2 + v2 * D * w2)
     elif len(M.shape) == 1:
@@ -133,12 +141,17 @@ def _matprod(M, V, W, return_as_matrix=True):
         A = M[:N, :N]
         B = M[:N, N:]
         D = M[N:, N:]
-        return _prod(v1, _prod(A, w1)) + _prod(v2, _prod(B.T, w1)) + \
-            _prod(v1, _prod(B, w2)) + _prod(v2, _prod(D, w2))
+        return (
+            _prod(v1, _prod(A, w1))
+            + _prod(v2, _prod(B.T, w1))
+            + _prod(v1, _prod(B, w2))
+            + _prod(v2, _prod(D, w2))
+        )
 
 
-def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
-            mask=None):
+def GUM_DFT(
+    x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False, mask=None
+):
     """Calculation of the DFT with propagation of uncertainty
 
     Calculation of the DFT of the time domain signal x and propagation of
@@ -185,8 +198,8 @@ def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
         x, Ux = _apply_window(x, Ux, window)
     if isinstance(N, int):
         L = N - len(x)
-        assert (L >= 0)
-        x = np.r_[x.copy(), np.zeros(L, )]  # zero-padding
+        assert L >= 0
+        x = np.r_[x.copy(), np.zeros(L,)]  # zero-padding
     N = len(x)
     if np.mod(N, 2) == 0:  # N is even
         M = N + 2
@@ -200,7 +213,9 @@ def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
         warnings.warn(
             "In a future release, because of issues with the current version, "
             "\nthe handling of masked DFT arrays will be changed to use numpy "
-            "masked arrays.", DeprecationWarning)
+            "masked arrays.",
+            DeprecationWarning,
+        )
     else:
         F = np.fft.rfft(x)  # calculation of best estimate
         # In real, imag format in accordance with GUM S2
@@ -244,15 +259,17 @@ def GUM_DFT(x, Ux, N=None, window=None, CxCos=None, CxSin=None, returnC=False,
         UFCS = np.dot(CxCos, np.dot(Ux, CxSin.T))
         UFSS = np.dot(CxSin, np.dot(Ux, CxSin.T))
         try:
-            UF = np.vstack((np.hstack((UFCC, UFCS)), np.hstack(
-                (UFCS.T, UFSS))))  # stack together full cov matrix
+            UF = np.vstack(
+                (np.hstack((UFCC, UFCS)), np.hstack((UFCS.T, UFSS)))
+            )  # stack together full cov matrix
         except MemoryError:
             print(
-                "Could not put covariance matrix together due to memory "
-                "constraints.")
+                "Could not put covariance matrix together due to memory " "constraints."
+            )
             print(
                 "Returning the three blocks (A,B,C) such that U = [[A,B],"
-                "[B.T,C]] instead.")
+                "[B.T,C]] instead."
+            )
             # Return blocks only because of lack of memory.
             UF = (UFCC, UFCS, UFSS)
 
@@ -304,12 +321,12 @@ def GUM_iDFT(F, UF, Nx=None, Cc=None, Cs=None, returnC=False):
     if Nx is None:
         Nx = N
     else:
-        assert (Nx <= UF.shape[0] - 2)
+        assert Nx <= UF.shape[0] - 2
 
     beta = 2 * np.pi * np.arange(Nx) / N
 
     # calculate inverse DFT; Note: scaling factor 1/N is accounted for at the end
-    x = np.fft.irfft(F[:N // 2 + 1] + 1j * F[N // 2 + 1:])[:Nx]
+    x = np.fft.irfft(F[: N // 2 + 1] + 1j * F[N // 2 + 1 :])[:Nx]
     if not isinstance(Cc, np.ndarray):  # calculate sensitivities
         Cc = np.zeros((Nx, N // 2 + 1))
         Cc[:, 0] = 1.0
@@ -326,16 +343,16 @@ def GUM_iDFT(F, UF, Nx=None, Cc=None, Cs=None, returnC=False):
 
     # calculate blocks of uncertainty matrix
     if len(UF.shape) == 2:
-        RR = UF[:N // 2 + 1, :N // 2 + 1]
-        RI = UF[:N // 2 + 1, N // 2 + 1:]
-        II = UF[N // 2 + 1:, N // 2 + 1:]
+        RR = UF[: N // 2 + 1, : N // 2 + 1]
+        RI = UF[: N // 2 + 1, N // 2 + 1 :]
+        II = UF[N // 2 + 1 :, N // 2 + 1 :]
         # propagate uncertainties
         Ux = np.dot(Cc, np.dot(RR, Cc.T))
         Ux = Ux + 2 * np.dot(Cc, np.dot(RI, Cs.T))
         Ux = Ux + np.dot(Cs, np.dot(II, Cs.T))
     else:
-        RR = UF[:N // 2 + 1]
-        II = UF[N // 2 + 1:]
+        RR = UF[: N // 2 + 1]
+        II = UF[N // 2 + 1 :]
         Ux = np.dot(Cc, _prod(RR, Cc.T)) + np.dot(Cs, _prod(II, Cs.T))
 
     if returnC:
@@ -413,52 +430,69 @@ def DFT2AmpPhase(F, UF, keep_sparse=False, tol=1.0, return_type="separate"):
     """
     # calculate inverse DFT
     N = len(F) - 2
-    R = F[:N // 2 + 1]
-    I = F[N // 2 + 1:]
+    R = F[: N // 2 + 1]
+    I = F[N // 2 + 1 :]
 
     A = np.sqrt(R ** 2 + I ** 2)  # absolute value
     P = np.arctan2(I, R)  # phase value
     if len(UF.shape) == 1:
-        uF = 0.5 * (np.sqrt(UF[:N // 2 + 1]) + np.sqrt(
-            UF[N // 2 + 1:]))  # uncertainty of real,imag
+        uF = 0.5 * (
+            np.sqrt(UF[: N // 2 + 1]) + np.sqrt(UF[N // 2 + 1 :])
+        )  # uncertainty of real,imag
     else:
-        uF = 0.5 * (np.sqrt(np.diag(UF[:N // 2 + 1, :N // 2 + 1])) + np.sqrt(
-            np.diag(UF[N // 2 + 1:, N // 2 + 1:])))
+        uF = 0.5 * (
+            np.sqrt(np.diag(UF[: N // 2 + 1, : N // 2 + 1]))
+            + np.sqrt(np.diag(UF[N // 2 + 1 :, N // 2 + 1 :]))
+        )
     if np.any(A / uF < tol):
         print(
-            'DFT2AmpPhase Warning\n Some amplitude values are below the '
-            'defined threshold.')
+            "DFT2AmpPhase Warning\n Some amplitude values are below the "
+            "defined threshold."
+        )
         print(
-            'The GUM formulas may become unreliable and a Monte Carlo '
-            'approach is recommended instead.')
+            "The GUM formulas may become unreliable and a Monte Carlo "
+            "approach is recommended instead."
+        )
         print(
-            'The actual minimum value of A/uF is %.2e and the threshold is '
-            '%.2e' % ((A / uF).min(), tol))
+            "The actual minimum value of A/uF is %.2e and the threshold is "
+            "%.2e" % ((A / uF).min(), tol)
+        )
     aR = R / A  # sensitivities
     aI = I / A
     pR = -I / A ** 2
     pI = R / A ** 2
 
     if len(UF.shape) == 1:  # uncertainty calculation of zero correlation
-        URR = UF[:N // 2 + 1]
-        UII = UF[N // 2 + 1:]
+        URR = UF[: N // 2 + 1]
+        UII = UF[N // 2 + 1 :]
         U11 = URR * aR ** 2 + UII * aI ** 2
         U12 = aR * URR * pR + aI * UII * pI
         U22 = URR * pR ** 2 + UII * pI ** 2
-        UAP = sparse.diags([np.r_[U11, U22], U12, U12],
-                           [0, N // 2 + 1, -(N // 2 + 1)])
+        UAP = sparse.diags([np.r_[U11, U22], U12, U12], [0, N // 2 + 1, -(N // 2 + 1)])
         if not keep_sparse:
             UAP = UAP.toarray()
     else:  # uncertainty calculation for full covariance
-        URR = UF[:N // 2 + 1, :N // 2 + 1]
-        URI = UF[:N // 2 + 1, N // 2 + 1:]
-        UII = UF[N // 2 + 1:, N // 2 + 1:]
-        U11 = _prod(aR, _prod(URR, aR)) + _prod(aR, _prod(URI, aI)) +\
-            _prod(aI, _prod(URI.T, aR)) + _prod(aI, _prod(UII, aI))
-        U12 = _prod(aR, _prod(URR, pR)) + _prod(aR, _prod(URI, pI)) +\
-            _prod(aI, _prod(URI.T, pR)) + _prod(aI, _prod(UII, pI))
-        U22 = _prod(pR, _prod(URR, pR)) + _prod(pR, _prod(URI, pI)) +\
-            _prod(pI, _prod(URI.T, pR)) + _prod(pI, _prod(UII, pI))
+        URR = UF[: N // 2 + 1, : N // 2 + 1]
+        URI = UF[: N // 2 + 1, N // 2 + 1 :]
+        UII = UF[N // 2 + 1 :, N // 2 + 1 :]
+        U11 = (
+            _prod(aR, _prod(URR, aR))
+            + _prod(aR, _prod(URI, aI))
+            + _prod(aI, _prod(URI.T, aR))
+            + _prod(aI, _prod(UII, aI))
+        )
+        U12 = (
+            _prod(aR, _prod(URR, pR))
+            + _prod(aR, _prod(URI, pI))
+            + _prod(aI, _prod(URI.T, pR))
+            + _prod(aI, _prod(UII, pI))
+        )
+        U22 = (
+            _prod(pR, _prod(URR, pR))
+            + _prod(pR, _prod(URI, pI))
+            + _prod(pI, _prod(URI.T, pR))
+            + _prod(pI, _prod(UII, pI))
+        )
         UAP = np.vstack((np.hstack((U11, U12)), np.hstack((U12.T, U22))))
 
     if return_type == "separate":
@@ -494,9 +528,9 @@ def AmpPhase2DFT(A, P, UAP, keep_sparse=False):
 
     """
 
-    assert (len(A.shape) == 1)
-    assert (A.shape == P.shape)
-    assert (UAP.shape == (2 * len(A), 2 * len(A)) or UAP.shape == (2 * len(A),))
+    assert len(A.shape) == 1
+    assert A.shape == P.shape
+    assert UAP.shape == (2 * len(A), 2 * len(A)) or UAP.shape == (2 * len(A),)
     F = np.r_[A * np.cos(P), A * np.sin(P)]  # calculation of best estimate
 
     # calculation of sensitivities
@@ -522,18 +556,16 @@ def AmpPhase2DFT(A, P, UAP, keep_sparse=False):
             offset = UAP.offsets
             diags = UAP.data
             Uaa = diags[0][:N]
-            Uap = diags[1][offset[1]:nrows + offset[1]]
+            Uap = diags[1][offset[1] : nrows + offset[1]]
             Upp = diags[0][N:]
 
-            U11 = Uaa * CRA ** 2 + CRP * Uap * CRA + CRA * Uap * CRP + Upp * \
-                CRP ** 2
-            U12 = CRA * Uaa * CIA + CRP * Uap * CIA + CRA * Uap * CIA + CRP * \
-                Upp * CIP
-            U22 = Uaa * CIA ** 2 + CIP * Uap * CIA + CIA * Uap * CIP + Upp * \
-                CIP ** 2
+            U11 = Uaa * CRA ** 2 + CRP * Uap * CRA + CRA * Uap * CRP + Upp * CRP ** 2
+            U12 = CRA * Uaa * CIA + CRP * Uap * CIA + CRA * Uap * CIA + CRP * Upp * CIP
+            U22 = Uaa * CIA ** 2 + CIP * Uap * CIA + CIA * Uap * CIP + Upp * CIP ** 2
 
-            UF = sparse.diags([np.r_[U11, U22], U12, U12],
-                              [0, N, -N])  # default is sparse
+            UF = sparse.diags(
+                [np.r_[U11, U22], U12, U12], [0, N, -N]
+            )  # default is sparse
             if not keep_sparse:
                 UF = UF.toarray()  # fall back to non-sparse
         else:
@@ -541,12 +573,24 @@ def AmpPhase2DFT(A, P, UAP, keep_sparse=False):
             Uap = UAP[:N, N:]
             Upp = UAP[N:, N:]
 
-            U11 = _prod(CRA, _prod(Uaa, CRA)) + _prod(CRP, _prod(Uap.T, CRA)) +\
-                _prod(CRA, _prod(Uap, CRP)) + _prod(CRP, _prod(Upp, CRP))
-            U12 = _prod(CRA, _prod(Uaa, CIA)) + _prod(CRP, _prod(Uap.T, CIA)) +\
-                _prod(CRA, _prod(Uap, CIP)) + _prod(CRP, _prod(Upp, CIP))
-            U22 = _prod(CIA, _prod(Uaa, CIA)) + _prod(CIP, _prod(Uap.T, CIA)) +\
-                _prod(CIA, _prod(Uap, CIP)) + _prod(CIP, _prod(Upp, CIP))
+            U11 = (
+                _prod(CRA, _prod(Uaa, CRA))
+                + _prod(CRP, _prod(Uap.T, CRA))
+                + _prod(CRA, _prod(Uap, CRP))
+                + _prod(CRP, _prod(Upp, CRP))
+            )
+            U12 = (
+                _prod(CRA, _prod(Uaa, CIA))
+                + _prod(CRP, _prod(Uap.T, CIA))
+                + _prod(CRA, _prod(Uap, CIP))
+                + _prod(CRP, _prod(Upp, CIP))
+            )
+            U22 = (
+                _prod(CIA, _prod(Uaa, CIA))
+                + _prod(CIP, _prod(Uap.T, CIA))
+                + _prod(CIA, _prod(Uap, CIP))
+                + _prod(CIP, _prod(Upp, CIP))
+            )
 
             # stack together the full covariance matrix
             UF = np.vstack((np.hstack((U11, U12)), np.hstack((U12.T, U22))))
@@ -604,7 +648,7 @@ def Time2AmpPhase_multi(x, Ux, selector=None):
             diag(UPA)]
     """
     M, nx = x.shape
-    assert (len(Ux) == M)
+    assert len(Ux) == M
     N = nx // 2 + 1
     if not isinstance(selector, np.ndarray):
         selector = np.arange(nx // 2 + 1)
@@ -623,9 +667,10 @@ def Time2AmpPhase_multi(x, Ux, selector=None):
         A[m, :] = A_m[selector]
         P[m, :] = P_m[selector]
         UAP[m, :ns] = UAP_m.data[0][:N][selector]
-        UAP[m, ns:2 * ns] = \
-            UAP_m.data[1][UAP_m.offsets[1]:2 * N + UAP_m.offsets[1]][selector]
-        UAP[m, 2 * ns:] = UAP_m.data[0][N:][selector]
+        UAP[m, ns : 2 * ns] = UAP_m.data[1][
+            UAP_m.offsets[1] : 2 * N + UAP_m.offsets[1]
+        ][selector]
+        UAP[m, 2 * ns :] = UAP_m.data[0][N:][selector]
 
     return A, P, UAP
 
@@ -657,15 +702,14 @@ def AmpPhase2Time(A, P, UAP):
     """
 
     N = UAP.shape[0] - 2
-    assert (np.mod(N, 2) == 0)
+    assert np.mod(N, 2) == 0
     beta = 2 * np.pi * np.arange(N) / N
 
     # calculate inverse DFT
     F = A * np.exp(1j * P)
     x = np.fft.irfft(F)
 
-    Pf = np.r_[
-        P, -P[-2:0:-1]]  # phase values to take into account symmetric part
+    Pf = np.r_[P, -P[-2:0:-1]]  # phase values to take into account symmetric part
     Cc = np.zeros((N, N // 2 + 1))  # sensitivities wrt cosine part
     Cc[:, 0] = np.cos(P[0])
     Cc[:, -1] = np.cos(P[-1] + np.pi * np.arange(N))
@@ -680,8 +724,8 @@ def AmpPhase2Time(A, P, UAP):
 
     # calculate blocks of uncertainty matrix
     if len(UAP.shape) == 1:
-        AA = UAP[:N // 2 + 1]
-        PP = UAP[N // 2 + 1:]
+        AA = UAP[: N // 2 + 1]
+        PP = UAP[N // 2 + 1 :]
         Ux = np.dot(Cc, _prod(AA, Cc.T)) + np.dot(Cs, _prod(PP, Cs.T))
     else:
         if isinstance(UAP, sparse.dia_matrix):
@@ -690,17 +734,23 @@ def AmpPhase2Time(A, P, UAP):
             offset = UAP.offsets
             diags = UAP.data
             AA = diags[0][:n]
-            AP = diags[1][offset[1]:nrows + offset[1]]
+            AP = diags[1][offset[1] : nrows + offset[1]]
             PP = diags[0][n:]
-            Ux = np.dot(Cc, _prod(AA, Cc.T)) +\
-                2 * np.dot(Cc, _prod(AP, Cs.T)) + np.dot(Cs, _prod(PP, Cs.T))
+            Ux = (
+                np.dot(Cc, _prod(AA, Cc.T))
+                + 2 * np.dot(Cc, _prod(AP, Cs.T))
+                + np.dot(Cs, _prod(PP, Cs.T))
+            )
         else:
-            AA = UAP[:N // 2 + 1, :N // 2 + 1]
-            AP = UAP[:N // 2 + 1, N // 2 + 1:]
-            PP = UAP[N // 2 + 1:, N // 2 + 1:]
+            AA = UAP[: N // 2 + 1, : N // 2 + 1]
+            AP = UAP[: N // 2 + 1, N // 2 + 1 :]
+            PP = UAP[N // 2 + 1 :, N // 2 + 1 :]
             # propagate uncertainties
-            Ux = np.dot(Cc, np.dot(AA, Cc.T)) +\
-                2 * np.dot(Cc, np.dot(AP, Cs.T)) + np.dot(Cs, np.dot(PP, Cs.T))
+            Ux = (
+                np.dot(Cc, np.dot(AA, Cc.T))
+                + 2 * np.dot(Cc, np.dot(AP, Cs.T))
+                + np.dot(Cs, np.dot(PP, Cs.T))
+            )
 
     return x, Ux / N ** 2
 
@@ -770,35 +820,39 @@ def DFT_deconv(H, Y, UH, UY):
     ----------
         * Eichstädt and Wilkens [Eichst2016]_
     """
-    assert (len(H) == len(Y))
+    assert len(H) == len(Y)
 
     if len(UY.shape) == 2:
-        assert (UH.shape == (len(H), len(H)))
-        assert (UH.shape == UY.shape)
+        assert UH.shape == (len(H), len(H))
+        assert UH.shape == UY.shape
         N = UH.shape[0] - 2
     else:
-        assert (len(UH) == len(H))
-        assert (len(UY) == len(Y))
+        assert len(UH) == len(H)
+        assert len(UY) == len(Y)
         N = len(UH) - 2
 
-    assert (np.mod(N, 2) == 0)
+    assert np.mod(N, 2) == 0
 
     # real and imaginary parts of system and signal
-    rH, iH = H[:N // 2 + 1], H[N // 2 + 1:]
-    rY, iY = Y[:N // 2 + 1], Y[N // 2 + 1:]
+    rH, iH = H[: N // 2 + 1], H[N // 2 + 1 :]
+    rY, iY = Y[: N // 2 + 1], Y[N // 2 + 1 :]
 
-    Yc = Y[:N // 2 + 1] + 1j * Y[N // 2 + 1:]
-    Hc = H[:N // 2 + 1] + 1j * H[N // 2 + 1:]
+    Yc = Y[: N // 2 + 1] + 1j * Y[N // 2 + 1 :]
+    Hc = H[: N // 2 + 1] + 1j * H[N // 2 + 1 :]
     X = np.r_[np.real(Yc / Hc), np.imag(Yc / Hc)]
 
     # sensitivities
     norm = rH ** 2 + iH ** 2
     RY = np.r_[rH / norm, iH / norm]
     IY = np.r_[-iH / norm, rH / norm]
-    RH = np.r_[(-rY * rH ** 2 + rY * iH ** 2 - 2 * iY * iH * rH) / norm ** 2, (
-            iY * rH ** 2 - iH * iH ** 2 - 2 * rY * rH * iH) / norm ** 2]
-    IH = np.r_[(-iY * rH ** 2 + iY * iH ** 2 + 2 * rY * iH * rH) / norm ** 2, (
-            -rY * rH ** 2 + rY * iH ** 2 - 2 * iY * rH * iH) / norm ** 2]
+    RH = np.r_[
+        (-rY * rH ** 2 + rY * iH ** 2 - 2 * iY * iH * rH) / norm ** 2,
+        (iY * rH ** 2 - iH * iH ** 2 - 2 * rY * rH * iH) / norm ** 2,
+    ]
+    IH = np.r_[
+        (-iY * rH ** 2 + iY * iH ** 2 + 2 * rY * iH * rH) / norm ** 2,
+        (-rY * rH ** 2 + rY * iH ** 2 - 2 * iY * rH * iH) / norm ** 2,
+    ]
     # calculate blocks of uncertainty matrix
     URRX = _matprod(UY, RY, RY) + _matprod(UH, RH, RH)
     URIX = _matprod(UY, RY, IY) + _matprod(UH, RH, IH)
@@ -807,12 +861,11 @@ def DFT_deconv(H, Y, UH, UY):
     try:
         UX = np.vstack((np.hstack((URRX, URIX)), np.hstack((URIX.T, UIIX))))
     except MemoryError:
-        print(
-            "Could not put covariance matrix together due to memory "
-            "constraints.")
+        print("Could not put covariance matrix together due to memory " "constraints.")
         print(
             "Returning the three blocks (A,B,C) such that U = [[A,B],[B.T,"
-            "C]] instead.")
+            "C]] instead."
+        )
         UX = (URRX, URIX, UIIX)
 
     return X, UX
@@ -847,44 +900,52 @@ def DFT_multiply(Y, F, UY, UF=None):
             the uncertainty associated with YF
     """
 
-    assert (len(Y) == len(F))
+    assert len(Y) == len(F)
 
     def calcU(A, UB):
         # uncertainty propagation for A*B with B uncertain (helper function)
         n = len(A)
-        RA = A[:n // 2]
-        IA = A[n // 2:]
-        if isinstance(UB,
-                      float):  # simpler calculation if only single uncertainty
+        RA = A[: n // 2]
+        IA = A[n // 2 :]
+        if isinstance(UB, float):  # simpler calculation if only single uncertainty
             uRR = RA * UB * RA + IA * UB * IA
             uRI = RA * UB * IA - IA * UB * RA
             uII = IA * UB * IA + RA * UB * RA
         elif len(UB.shape) == 1:  # simpler calculation if no correlation
-            UBRR = UB[:n // 2]
-            UBII = UB[n // 2:]
+            UBRR = UB[: n // 2]
+            UBII = UB[n // 2 :]
             uRR = RA * UBRR * RA + IA * UBII * IA
             uRI = RA * UBRR * IA - IA * UBII * RA
             uII = IA * UBRR * IA + RA * UBII * RA
         else:  # full calculation because of full input covariance
-            UBRR = UB[:n // 2, :n // 2]
-            UBRI = UB[:n // 2, n // 2:]
-            UBII = UB[n // 2:, n // 2:]
-            uRR = _prod(RA, _prod(UBRR, RA)) - _prod(IA,
-                                                     _prod(UBRI.T, RA)) - _prod(
-                RA, _prod(UBRI, IA)) + _prod(IA, _prod(UBII, IA))
-            uRI = _prod(RA, _prod(UBRR, IA)) - _prod(IA,
-                                                     _prod(UBRI.T, IA)) + _prod(
-                RA, _prod(UBRI, RA)) - _prod(IA, _prod(UBII, RA))
-            uII = _prod(IA, _prod(UBRR, IA)) + _prod(RA,
-                                                     _prod(UBRI.T, IA)) + _prod(
-                IA, _prod(UBRI, RA)) + _prod(RA, _prod(UBII, RA))
+            UBRR = UB[: n // 2, : n // 2]
+            UBRI = UB[: n // 2, n // 2 :]
+            UBII = UB[n // 2 :, n // 2 :]
+            uRR = (
+                _prod(RA, _prod(UBRR, RA))
+                - _prod(IA, _prod(UBRI.T, RA))
+                - _prod(RA, _prod(UBRI, IA))
+                + _prod(IA, _prod(UBII, IA))
+            )
+            uRI = (
+                _prod(RA, _prod(UBRR, IA))
+                - _prod(IA, _prod(UBRI.T, IA))
+                + _prod(RA, _prod(UBRI, RA))
+                - _prod(IA, _prod(UBII, RA))
+            )
+            uII = (
+                _prod(IA, _prod(UBRR, IA))
+                + _prod(RA, _prod(UBRI.T, IA))
+                + _prod(IA, _prod(UBRI, RA))
+                + _prod(RA, _prod(UBII, RA))
+            )
         return uRR, uRI, uII
 
     N = len(Y)
-    RY = Y[:N // 2]
-    IY = Y[N // 2:]  # decompose into block matrix
-    RF = F[:N // 2]
-    IF = F[N // 2:]  # decompose into block matrix
+    RY = Y[: N // 2]
+    IY = Y[N // 2 :]  # decompose into block matrix
+    RF = F[: N // 2]
+    IF = F[N // 2 :]  # decompose into block matrix
     YF = np.r_[RY * RF - IY * IF, RY * IF + IY * RF]  # apply product rule
     if not isinstance(UF, np.ndarray):  # second factor is known exactly
         UYRR, UYRI, UYII = calcU(F, UY)

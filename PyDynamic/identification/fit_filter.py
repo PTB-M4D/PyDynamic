@@ -5,8 +5,8 @@ given complex frequency response.
 
 This module contains the following functions:
 
-* *LSIIR*: Least-squares IIR filter fit to a given frequency response
-* *LSFIR*: Least-squares fit of a digital FIR filter to a given frequency
+* :func:`LSIIR`: Least-squares IIR filter fit to a given frequency response
+* :func:`LSFIR`: Least-squares fit of a digital FIR filter to a given frequency
   response
 
 

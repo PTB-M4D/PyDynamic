@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Collection of miscellaneous helper functions.
+The :mod:`PyDynamic.misc.tools` module is a collection of miscellaneous helper
+functions.
 
 This module contains the following functions:
 
-* *print_vec*: Print vector (1D array) to the console or return as formatted
+* :func:`print_vec`: Print vector (1D array) to the console or return as formatted
   string
-* *print_mat*: Print matrix (2D array) to the console or return as formatted
+* :func:`print_mat`: Print matrix (2D array) to the console or return as formatted
   string
-* *make_semiposdef*: Make quadratic matrix positive semi-definite
-* *FreqResp2RealImag*: Calculate real and imaginary parts from frequency
+* :func:`make_semiposdef`: Make quadratic matrix positive semi-definite
+* :func:`FreqResp2RealImag`: Calculate real and imaginary parts from frequency
   response
-* *make_equidistant*: Interpolate non-equidistant time series to equidistant
-* *trimOrPad*: trim or pad (with zeros) a vector to desired length
-* *progress_bar*: A simple and reusable progress-bar
+* :func:`make_equidistant`: Interpolate non-equidistant time series to equidistant
+* :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
+* :func:`progress_bar`: A simple and reusable progress-bar
 """
 
 import numpy as np
@@ -27,10 +28,10 @@ __all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
 
 
 def trimOrPad(array, length, mode="constant"):
-
-    if len(array) < length: # pad zeros to the right if too short
-        return np.pad(array, (0,length - len(array)), mode=mode)
-    else:                   # trim to given length otherwise
+    """Trim or pad (with zeros) a vector to desired length"""
+    if len(array) < length:  # pad zeros to the right if too short
+        return np.pad(array, (0, length - len(array)), mode=mode)
+    else:  # trim to given length otherwise
         return array[0:length]
 
 
@@ -219,11 +220,11 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
 
     Returns
     -------
-        t_new : (N,) array_like
+        t_new : (M,) array_like
             interpolation timestamps
-        y_new : (N,) array_like
+        y_new : (M,) array_like
             interpolated measurement values
-        uy_new : (N,) array_like
+        uy_new : (M,) array_like
             interpolated measurement values' uncertainties
 
     References
