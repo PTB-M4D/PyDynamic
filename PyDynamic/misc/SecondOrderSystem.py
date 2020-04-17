@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-
-A collection of modules and methods that are used throughout the whole package.
-Methods specialized for second order dynamic systems, such as the ones used
-for high-class accelerometers.
+The :mod:`PyDynamic.misc.SecondOrderSystem` module is a collection of methods that
+are used throughout the whole package, specialized for second
+order dynamic systems, such as the ones used for high-class accelerometers.
 
 This module contains the following functions:
 
-* *sos_FreqResp*: Calculation of the system frequency response
-* *sos_phys2filter*: Calculation of continuous filter coefficients from
+* :func:`sos_FreqResp`: Calculation of the system frequency response
+* :func:`sos_phys2filter`: Calculation of continuous filter coefficients from
   physical parameters
-* *sos_absphase*: Propagation of uncertainty from physical parameters to real
+* :func:`sos_absphase`: Propagation of uncertainty from physical parameters to real
   and imaginary	part of system's transfer function using GUM S2 Monte Carlo
-* *sos_realimag*: Propagation of uncertainty from physical parameters to real
+* :func:`sos_realimag`: Propagation of uncertainty from physical parameters to real
   and imaginary	part of system's transfer function using GUM S2 Monte Carlo
 
 """
