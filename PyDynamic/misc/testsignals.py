@@ -21,8 +21,14 @@ from numpy import diff, sqrt, sum, array, corrcoef
 from scipy.signal import periodogram
 from scipy.special import comb
 
-__all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse',
-           'corr_noise', 'sine']
+__all__ = [
+    "shocklikeGaussian",
+    "GaussianPulse",
+    "rect",
+    "squarepulse",
+    "corr_noise",
+    "sine",
+]
 
 
 def shocklikeGaussian(time, t0, m0, sigma, noise=0.0):
@@ -78,7 +84,7 @@ def GaussianPulse(time, t0, m0, sigma, noise=0.0):
             signal amplitudes at time instants
     """
 
-    x = m0 * np.exp(-(time - t0) ** 2 / (2 * sigma ** 2))
+    x = m0 * np.exp(-((time - t0) ** 2) / (2 * sigma ** 2))
     if noise > 0:
         x = x + np.random.randn(len(time)) * noise
     return x
@@ -121,7 +127,9 @@ def rect(time, t0, t1, height=1, noise=0.0):
         else:
             raise ValueError("Mismatching sizes of x and noise.")
     else:
-        raise NotImplementedError("The given noise is neither of type float nor numpy.ndarray. ")
+        raise NotImplementedError(
+            "The given noise is neither of type float nor numpy.ndarray. "
+        )
 
     return x
 
@@ -145,8 +153,7 @@ def squarepulse(time, height, numpulse=4, noise=0.0):
         x : np.ndarray of shape (N,)
             signal amplitude at time instants
     """
-    width = (time[-1] - time[0]) / (
-            2 * numpulse + 1)  # width of each individual rect
+    width = (time[-1] - time[0]) / (2 * numpulse + 1)  # width of each individual rect
     x = np.zeros_like(time)
     for k in range(numpulse):
         x += rect(time, (2 * k + 1) * width, (2 * k + 2) * width, height)
@@ -179,6 +186,7 @@ def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
         x += np.random.randn(len(time)) * noise
     return x
 
+
 def multi_sine(time, amps, freqs, noise=0.0):
     r"""Generate a multi-sine signal as summation of single sine signals
 
@@ -201,8 +209,8 @@ def multi_sine(time, amps, freqs, noise=0.0):
 
     x = np.zeros_like(time)
     for amp, freq in zip(amps, freqs):
-        x += amp * np.sin(freq*time)
-    x += np.random.randn(len(x))*noise**2
+        x += amp * np.sin(freq * time)
+    x += np.random.randn(len(x)) * noise ** 2
     return x
 
 
@@ -216,11 +224,17 @@ class corr_noise(object):
 
     def calc_noise(self, N=100):
         z = self.rst.randn(N + 4)
-        noise = diff(diff(
-            diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3) + 6 * z[2:] *
-            self.w ** 2) - 4 * z[3:] * self.w) + z[4:]
-        self.Cw = sqrt(
-            sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
+        noise = (
+            diff(
+                diff(
+                    diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3)
+                    + 6 * z[2:] * self.w ** 2
+                )
+                - 4 * z[3:] * self.w
+            )
+            + z[4:]
+        )
+        self.Cw = sqrt(sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
         self.noise = noise * self.sigma / self.Cw
         return self.noise
 
@@ -240,14 +254,14 @@ class corr_noise(object):
             STD[:-1] = STD[:-1] + self.w * STDtmp[1:]
         NT = NT / np.linalg.norm(STD)
         self.noise = NT[:N]
-        self.Cw = sqrt(
-            sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
+        self.Cw = sqrt(sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
         return self.noise
 
     def calc_autocorr(self, lag=10):
         return array(
-            [1] + [corrcoef(self.noise[:-i], self.noise[i:])[0, 1] for i in
-                   range(1, lag)])
+            [1]
+            + [corrcoef(self.noise[:-i], self.noise[i:])[0, 1] for i in range(1, lag)]
+        )
 
     def calc_cov(self):
         def cw(k):
