@@ -1,3 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+The :mod:`PyDynamic.uncertainty.interpolation` module implements methods for
+the propagation of uncertainties in the application of standard interpolation methods
+as provided by :class:`scipy.interpolate.interp1d`.
+
+This module contains the following function:
+
+* :func:`interp1d_unc`: Interpolate arbitrary time series considering the associated
+  uncertainties
+"""
+
 from typing import Optional, Tuple
 
 import numpy as np
