@@ -9,6 +9,13 @@ methods are readily available, for instance, as part of :mod:`scipy.signal`. Thi
 module of PyDynamic provides the corresponding methods for the evaluation of
 uncertainties.
 
+The package consists of the following modules:
+
+* :mod:`propagate_DFT`: Uncertainty evaluation for the DFT
+* :mod:`propagate_filter`: Uncertainty evaluation for digital filtering
+* :mod:`propagate_MonteCarlo`: Monte Carlo methods for digital filtering
+* :mod:`interpolation`: Uncertainty evaluation for interpolation
+
 Uncertainty evaluation for the DFT
 ----------------------------------
 
