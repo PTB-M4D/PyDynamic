@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-r"""
-
-A collection of methods which are related to filter design.
+r""""
+The :mod:`PyDynamic.misc.filterstuff` module is a collection of methods which are
+related to filter design.
 
 This module contains the following functions:
 
-* *db*: Calculation of decibel values :math:`20\log_{10}(x)` for a vector of
+* :func:`db`: Calculation of decibel values :math:`20\log_{10}(x)` for a vector of
   values
-* *ua*: Shortcut for calculation of unwrapped angle of complex values
-* *grpdelay*: Calculation of the group delay of a digital filter
-* *mapinside*: Maps the roots of polynomial with coefficients :math:`a`
+* :func:`ua`: Shortcut for calculation of unwrapped angle of complex values
+* :func:`grpdelay`: Calculation of the group delay of a digital filter
+* :func:`mapinside`: Maps the roots of polynomial with coefficients :math:`a`
   to the unit circle
-* *kaiser_lowpass*: Design of a FIR lowpass filter using the window technique
+* :func:`kaiser_lowpass`: Design of a FIR lowpass filter using the window technique
   with a Kaiser window.
-* *isstable*: Determine whether a given IIR filter is stable
-* *savitzky_golay*: Smooth (and optionally differentiate) data with a
+* :func:`isstable`: Determine whether a given IIR filter is stable
+* :func:`savitzky_golay`: Smooth (and optionally differentiate) data with a
   Savitzky-Golay filter
 
 """
