@@ -3,7 +3,7 @@
 
 This module contains the following functions:
 
-* :func:`white_gaussian`: normal distributed signal amplitudes with equal power
+* :func:`get_alpha`: normal distributed signal amplitudes with equal power
   spectral density
 * :func:`power_law_noise`: normal distributed signal amplitudes with power spectrum
   `:math:f^\alpha`
