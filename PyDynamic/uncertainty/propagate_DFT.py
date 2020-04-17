@@ -15,23 +15,23 @@ The corresponding scientific publications is
 
 This module contains the following functions:
 
-* *:func:`GUM_DFT`*: Calculation of the DFT of the time domain signal x and
+* :func:`GUM_DFT`: Calculation of the DFT of the time domain signal x and
   propagation of the squared uncertainty Ux associated with the time domain
   sequence x to the real and imaginary parts of the DFT of x
-* *GUM_iDFT*: GUM propagation of the squared uncertainty UF associated with
+* :func:`GUM_iDFT`: GUM propagation of the squared uncertainty UF associated with
   the DFT values F through the inverse DFT
-* *GUM_DFTfreq*: Return the Discrete Fourier Transform sample frequencies
-* *DFT_transferfunction*: Calculation of the transfer function H = Y/X in the
+* :func:`GUM_DFTfreq`: Return the Discrete Fourier Transform sample frequencies
+* :func:`DFT_transferfunction`: Calculation of the transfer function H = Y/X in the
   frequency domain with X being the Fourier transform
   of the system's input signal and Y that of the output signal
-* *DFT_deconv*: Deconvolution in the frequency domain
-* *DFT_multiply*: Multiplication in the frequency domain
-* *AmpPhase2DFT*: Transformation from magnitude and phase to real and
+* :func:`DFT_deconv`: Deconvolution in the frequency domain
+* :func:`DFT_multiply`: Multiplication in the frequency domain
+* :func:`AmpPhase2DFT`: Transformation from magnitude and phase to real and
   imaginary parts
-* *DFT2AmpPhase*: Transformation from real and imaginary parts to magnitude
+* :func:`DFT2AmpPhase`: Transformation from real and imaginary parts to magnitude
   and phase
-* *AmpPhase2Time*: Transformation from amplitude and phase to time domain
-* *Time2AmpPhase*: Transformation from time domain to amplitude and phase
+* :func:`AmpPhase2Time`: Transformation from amplitude and phase to time domain
+* :func:`Time2AmpPhase`: Transformation from time domain to amplitude and phase
 """
 
 import warnings
