@@ -5,13 +5,13 @@ the application of a digital filter using the GUM approach.
 
 This modules contains the following functions:
 
-* *FIRuncFilter*: Uncertainty propagation for signal y and uncertain FIR
+* :func:`FIRuncFilter`: Uncertainty propagation for signal y and uncertain FIR
   filter theta
-* *IIRuncFilter*: Uncertainty propagation for the signal x and the uncertain
+* :func:IIRuncFilter`: Uncertainty propagation for the signal x and the uncertain
   IIR filter (b,a)
 
-# Note: The Elster-Link paper for FIR filters assumes that the autocovariance
-is known and that noise is stationary!
+.. note:: The Elster-Link paper for FIR filters assumes that the autocovariance
+          is known and that noise is stationary!
 
 """
 
