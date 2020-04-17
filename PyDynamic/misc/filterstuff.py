@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r""""
+r"""
 The :mod:`PyDynamic.misc.filterstuff` module is a collection of methods which are
 related to filter design.
 
@@ -33,13 +33,12 @@ __all__ = [
 
 
 def db(vals):
-    # Calculation of decibel values :math:`20\log_{10}(x)` for a vector of
-    # values
+    """Calculation of decibel values :math:`20\log_{10}(x)` for a vector of values"""
     return 20 * np.log10(np.abs(vals))
 
 
 def ua(vals):
-    # Shortcut for calculation of unwrapped angle of complex values
+    """Shortcut for calculation of unwrapped angle of complex values"""
     return np.unwrap(np.angle(vals))
 
 
