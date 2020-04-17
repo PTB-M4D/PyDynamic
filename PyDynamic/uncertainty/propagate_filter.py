@@ -7,7 +7,7 @@ This modules contains the following functions:
 
 * :func:`FIRuncFilter`: Uncertainty propagation for signal y and uncertain FIR
   filter theta
-* :func:IIRuncFilter`: Uncertainty propagation for the signal x and the uncertain
+* :func:`IIRuncFilter`: Uncertainty propagation for the signal x and the uncertain
   IIR filter (b,a)
 
 .. note:: The Elster-Link paper for FIR filters assumes that the autocovariance
