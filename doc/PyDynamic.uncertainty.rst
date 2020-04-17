@@ -5,7 +5,7 @@ The evaluation of uncertainties is a fundamental part of the measurement
 analysis in metrology. The analysis of dynamic measurements typically
 involves methods from signal processing, such as digital filtering, the discrete
 Fourier transform (DFT), or simple tasks like interpolation. For most of these tasks,
-methods are readily available, for instance, as part of :mod:`scipy.signals`. This
+methods are readily available, for instance, as part of :mod:`scipy.signal`. This
 module of PyDynamic provides the corresponding methods for the evaluation of
 uncertainties.
 
