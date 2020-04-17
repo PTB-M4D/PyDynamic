@@ -28,21 +28,21 @@ def get_alpha(color_value = 0):
     Translate a color (given as string) into an exponent alpha or directly
     hand through a given numeric value of alpha.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
         color_value: str, int or float
             if string -> check against known colornames -> return alpha
             if numeric -> directly return value
 
-    Returns:
-    --------
+    Returns
+    -------
         alpha: float
     """
 
     if isinstance(color_value, str):
         if color_value in colors.keys():
             alpha = colors[color_value]
-        else: 
+        else:
             raise NotImplementedError(
             "Specified color ({COLOR}) of noise is not available. " \
             "Please choose from {COLORS} or define alpha directly." \
@@ -71,8 +71,8 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
 
     based on [Zhivomirov2018](A Method for Colored Noise Generation)
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
         N: int
             length of noise to be generated
         w: numpy.ndarray
@@ -86,8 +86,8 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
         std: float
             standard deviation of the output signal
 
-    Returns:
-    --------
+    Returns
+    -------
         w_filt: filtered noise signal
     """
 
