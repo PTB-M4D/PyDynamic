@@ -2,10 +2,13 @@
 """Collection of noise-signals
 
 This module contains the following functions:
-* white_gaussian: normal distributed signal amplitudes with equal power spectral density
-* power_law_noise: normal distributed signal amplitudes with power spectrum `~ f^\alpha`
-* power_law_acf: (theoretical) autocorrelation function of power law noise
-* ARMA: autoregressive moving average noise process
+
+* :func:`white_gaussian`: normal distributed signal amplitudes with equal power
+  spectral density
+* :func:`power_law_noise`: normal distributed signal amplitudes with power spectrum
+  `:math:f^\alpha`
+* :func:`power_law_acf`: (theoretical) autocorrelation function of power law noise
+* :func:`ARMA`: autoregressive moving average noise process
 """
 
 import numpy as np
@@ -23,7 +26,7 @@ colors = {"violet": 2,
           "brown": -2}
 
 
-def get_alpha(color_value = 0):
+def get_alpha(color_value=0):
     """
     Translate a color (given as string) into an exponent alpha or directly
     hand through a given numeric value of alpha.
