@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Collection of test signals which can be used to simulate dynamic measurements
-and test methods.
+"""
+The :mod:`PyDynamic.misc.testsignals` module is a collection of test signals
+which can be used to simulate dynamic measurements and test methods.
 
 This module contains the following functions:
 
-* *shocklikeGaussian*: signal that resembles a shock excitation as a Gaussian
+* :func:`shocklikeGaussian`: signal that resembles a shock excitation as a Gaussian
   followed by a smaller Gaussian of opposite sign
-* *GaussianPulse*: Generates a Gaussian pulse at :math:`t_0` with height
+* :func:`GaussianPulse`: Generates a Gaussian pulse at :math:`t_0` with height
   :math:`m_0` and std :math:`sigma`
-* *rect*: Rectangular signal of given height and width :math:`t_1 - t_0`
-* *squarepulse*: Generates a series of rect functions to represent a square
+* :func:`rect`: Rectangular signal of given height and width :math:`t_1 - t_0`
+* :func:`squarepulse`: Generates a series of rect functions to represent a square
   pulse signal
-* *sine*: Generate a sine signal
+* :func:`sine`: Generate a sine signal
 """
 
 import itertools
