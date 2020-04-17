@@ -116,7 +116,8 @@ def test_t_new_below_range_interp1d_unc(interp_inputs):
 
     # Check erroneous calls with t_new's minimum below t's minimum.
     interp_inputs["t_new"] -= (
-        np.abs(np.amin(interp_inputs["t"]) - np.amin(interp_inputs["t_new"])) + 1
+        np.abs(np.amin(interp_inputs["t"]) - np.amin(interp_inputs["t_new"]))
+        + np.abs(np.amin(interp_inputs["t"]))
     ) * 1.1
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
@@ -130,7 +131,8 @@ def test_t_new_above_range_interp1d_unc(interp_inputs):
 
     # Check erroneous calls with t_new's minimum below t's minimum.
     interp_inputs["t_new"] += (
-        np.abs(np.amax(interp_inputs["t"]) - np.amax(interp_inputs["t_new"])) + 1
+        np.abs(np.amax(interp_inputs["t"]) - np.amax(interp_inputs["t_new"]))
+        + np.abs(np.amax(interp_inputs["t"]))
     ) * 1.1
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
