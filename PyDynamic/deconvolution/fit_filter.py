@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-
-This module contains functions to carry out a least-squares fit of a digital
-filter to the reciprocal of a given
-complex frequency response.
+The :mod:`PyDynamic.deconvolution.fit_filter` module implements methods for the
+design of digital deconvolution filters by least-squares fitting to the reciprocal of
+a given frequency response with associated uncertainties.
 
 This module contains the following functions:
 
-* *LSFIR*: Least-squares fit of a digital FIR filter to the reciprocal of a
+* :func:`LSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
   given frequency response.
-* *LSFIR_unc*: Design of FIR filter as fit to reciprocal of frequency response
+* :func:`LSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
   values with uncertainty
-* *LSFIR_uncMC*: Design of FIR filter as fit to reciprocal of frequency
+* :func:`LSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
   response values with uncertainty via Monte Carlo
-* *LSIIR*: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`LSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values
-* *LSIIR_unc*: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`LSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values with uncertainty
 
 .. deprecated:: 1.2.71
