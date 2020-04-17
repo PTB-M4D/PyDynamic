@@ -1,9 +1,9 @@
 from typing import Dict, Optional, Tuple, Union
-
+from numpy import array
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given
+from hypothesis import assume, example, given
 from hypothesis.strategies import composite
 from pytest import raises
 
@@ -108,16 +108,28 @@ def test_wrong_input_length_y_call_interp1d_unc(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
+@example(
+    {
+        "kind": "linear",
+        "t": array([0.00000000e000, 2.22044605e284]),
+        "t_new": array([0.00000000e000, 4.93038066e268]),
+        "uy": array([0.00000000e000, 2.22044605e284]),
+        "y": array([0.00000000e000, 2.22044605e284]),
+    }
+)
 @given(timestamps_values_uncertainties_kind())
 def test_t_new_below_range_interp1d_unc(interp_inputs):
     # Ensure at least two different timestamps in each series.
     assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
     assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
 
-    # Check erroneous calls with t_new's minimum below t's minimum.
+    # Check erroneous calls with t_new's minimum below t's minimum. The complicated
+    # translation follows from covering all cases with very large values in and
+    # very large differences between t_new and t.
     interp_inputs["t_new"] -= (
         np.abs(np.amin(interp_inputs["t"]) - np.amin(interp_inputs["t_new"]))
         + np.abs(np.amin(interp_inputs["t"]))
+        + 1
     ) * 1.1
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
@@ -129,10 +141,13 @@ def test_t_new_above_range_interp1d_unc(interp_inputs):
     assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
     assume(not (interp_inputs["t_new"][0] == interp_inputs["t_new"][-1]))
 
-    # Check erroneous calls with t_new's minimum below t's minimum.
+    # Check erroneous calls with t_new's maximum above t's maximum. The complicated
+    # translation follows from covering all cases with very large values in and very
+    # large differences between t_new and t.
     interp_inputs["t_new"] += (
         np.abs(np.amax(interp_inputs["t"]) - np.amax(interp_inputs["t_new"]))
         + np.abs(np.amax(interp_inputs["t"]))
+        + 1
     ) * 1.1
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
