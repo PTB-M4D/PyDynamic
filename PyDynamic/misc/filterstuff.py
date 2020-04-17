@@ -21,8 +21,15 @@ This module contains the following functions:
 
 import numpy as np
 
-__all__ = ['db', 'ua', 'grpdelay', 'mapinside', 'kaiser_lowpass', 'isstable',
-           'savitzky_golay']
+__all__ = [
+    "db",
+    "ua",
+    "grpdelay",
+    "mapinside",
+    "kaiser_lowpass",
+    "isstable",
+    "savitzky_golay",
+]
 
 
 def db(vals):
@@ -80,8 +87,8 @@ def grpdelay(b, a, Fs, nfft=512):
     gd = np.real(num / den) - Na
 
     f = np.arange(0.0, 2 * nfft - 1) / (2 * nfft) * Fs
-    f = f[:nfft + 1]
-    gd = gd[:len(f)]
+    f = f[: nfft + 1]
+    gd = gd[: len(f)]
     return gd, f
 
 
@@ -131,14 +138,15 @@ def kaiser_lowpass(L, fcut, Fs, beta=8.0):
     
     """
     from scipy.signal import firwin
+
     if np.mod(L, 2) == 0:
         L = L + 1
-    blow = firwin(L, 2 * fcut / Fs, window=('kaiser', beta))
+    blow = firwin(L, 2 * fcut / Fs, window=("kaiser", beta))
     shift = L / 2
     return blow, shift
 
 
-def isstable(b, a, ftype='digital'):
+def isstable(b, a, ftype="digital"):
     """Determine whether `IIR filter (b,a)` is stable
 
     Determine whether `IIR filter (b,a)` is stable by checking roots of the
@@ -159,9 +167,9 @@ def isstable(b, a, ftype='digital'):
                 
     """
     v = np.roots(a)
-    if ftype == 'digital':
+    if ftype == "digital":
         return not np.any(np.abs(v) > 1.0)
-    elif ftype == 'analog':
+    elif ftype == "analog":
         return not np.any(np.real(v) < 0)
 
 
@@ -228,12 +236,13 @@ def savitzky_golay(y, window_size, order, deriv=0, delta=1.0):
     order_range = range(order + 1)
     half_window = (window_size - 1) // 2
     # precompute coefficients
-    b = np.mat([[k ** i for i in order_range] for k in
-                range(-half_window, half_window + 1)])
+    b = np.mat(
+        [[k ** i for i in order_range] for k in range(-half_window, half_window + 1)]
+    )
     m = np.linalg.pinv(b).A[deriv] * factorial(deriv) / delta ** deriv
     # pad the signal at the extremes with
     # values taken from the signal itself
-    firstvals = y[0] - np.abs(y[1:half_window + 1][::-1] - y[0])
-    lastvals = y[-1] + np.abs(y[-half_window - 1:-1][::-1] - y[-1])
+    firstvals = y[0] - np.abs(y[1 : half_window + 1][::-1] - y[0])
+    lastvals = y[-1] + np.abs(y[-half_window - 1 : -1][::-1] - y[-1])
     y = np.concatenate((firstvals, y, lastvals))
-    return np.convolve(m[::-1], y, mode='valid')
+    return np.convolve(m[::-1], y, mode="valid")
