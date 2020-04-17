@@ -19,6 +19,7 @@ Contents:
 
    Getting started.rst
    PyDynamic.uncertainty.rst
+   PyDynamic.identification.rst
    PyDynamic.deconvolution.rst
    PyDynamic.misc.rst
 
