@@ -13,13 +13,14 @@ def interp1d_unc(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Interpolate arbitrary time series considering the associated uncertainties
 
-    The interpolation time stamps must lie within the range of the original time
-    stamps, and the number of original time stamps has to match the number of
-    measured values and the number of associated uncertainties.
+    The interpolation time stamps must lie within the range of the original
+    timestamps. In addition, at least two of each of the original timestamps,
+    measured values and associated measurement uncertainties are required and an
+    equal number of each of these three.
 
     Parameters
     ----------
-        t_new: (N,) array_like
+        t_new: (M,) array_like
             The timestamps at which to evaluate the interpolated values.
         t: (N,) array_like
             timestamps in ascending order
@@ -33,11 +34,11 @@ def interp1d_unc(
 
     Returns
     -------
-        t_new : (N,) array_like
+        t_new : (M,) array_like
             interpolation timestamps
-        y_new : (N,) array_like
+        y_new : (M,) array_like
             interpolated measurement values
-        uy_new : (N,) array_like
+        uy_new : (M,) array_like
             interpolated measurement values' uncertainties
 
     References
