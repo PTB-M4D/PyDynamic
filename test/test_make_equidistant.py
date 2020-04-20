@@ -46,6 +46,8 @@ def timestamps_values_uncertainties_kind(
         A dict containing the randomly generated expected input parameters t, y, uy,
         dt, kind for make_equidistant()
     """
+    # Set the maximum absolute value for floats to be really unique in calculations.
+    float_abs_max = 1e300
     # Set all common parameters for timestamps, measurements values and associated
     # uncertainties including allowed ranges and number of elements.
     shape_for_timestamps = hnp.array_shapes(
@@ -55,7 +57,10 @@ def timestamps_values_uncertainties_kind(
         "dtype": np.float,
         "shape": shape_for_timestamps,
         "elements": st.floats(
-            min_value=0, max_value=1e300, allow_nan=False, allow_infinity=False
+            min_value=-float_abs_max,
+            max_value=float_abs_max,
+            allow_nan=False,
+            allow_infinity=False,
         ),
         "unique": True,
     }
@@ -94,7 +99,7 @@ def test_too_short_call_make_equidistant(interp_inputs):
 @given(timestamps_values_uncertainties_kind())
 def test_full_call_make_equidistant(interp_inputs):
     # Ensure at least two different timestamps in the series.
-    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    # assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
 
     t_new, y_new, uy_new = make_equidistant(**interp_inputs)
     # Check the equal dimensions of the minimum calls output.
@@ -104,7 +109,7 @@ def test_full_call_make_equidistant(interp_inputs):
 @given(timestamps_values_uncertainties_kind())
 def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
     # Ensure at least two different timestamps in the series.
-    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    # assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
 
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
@@ -116,7 +121,7 @@ def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
 @given(timestamps_values_uncertainties_kind(sorted_timestamps=False))
 def test_wrong_input_order_call_make_equidistant(interp_inputs):
     # Ensure at least two different timestamps in the series.
-    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    # assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
 
     # Ensure the timestamps are not in ascending order.
     assume(not np.all(interp_inputs["t"][1:] >= interp_inputs["t"][:-1]))
@@ -129,7 +134,7 @@ def test_wrong_input_order_call_make_equidistant(interp_inputs):
 @given(timestamps_values_uncertainties_kind())
 def test_t_new_to_dt_make_equidistant(interp_inputs):
     # Ensure at least two different timestamps in the series.
-    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    # assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
 
     t_new = make_equidistant(**interp_inputs)[0]
     delta_t_new = np.diff(t_new)
@@ -140,7 +145,7 @@ def test_t_new_to_dt_make_equidistant(interp_inputs):
 @given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
 def test_prev_in_make_equidistant(interp_inputs):
     # Ensure at least two different timestamps in the series.
-    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    # assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
 
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
@@ -151,7 +156,7 @@ def test_prev_in_make_equidistant(interp_inputs):
 @given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
 def test_linear_in_make_equidistant(interp_inputs):
     # Ensure at least two different timestamps in the series.
-    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    # assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
 
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
@@ -180,7 +185,7 @@ def test_linear_uy_in_make_equidistant(n):
 )
 def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
     # Ensure at least two different timestamps in the series.
-    assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
+    # assume(not (interp_inputs["t"][0] == interp_inputs["t"][-1]))
     # Check that not implemented versions raise exceptions or alternatively if values
     # don't allow for proper execution ValueErrors.
     with raises(NotImplementedError):
