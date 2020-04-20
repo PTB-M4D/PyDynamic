@@ -63,7 +63,7 @@ def interp1d_unc(
     if not np.all(t[1:] >= t[:-1]):
         raise ValueError("Array of timestamps needs to be in ascending order.")
     # Check for proper dimensions of inputs.
-    if ((min(t) > t_new) | (max(t) < t_new)).any():
+    if ((t.min() > t_new) | (t.max() < t_new)).any():
         raise ValueError(
             "Array of interpolation timestamps must be in the range of original "
             "timestamps."
