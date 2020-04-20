@@ -1,9 +1,9 @@
 from typing import Dict, Optional, Tuple, Union
-from numpy import array
+
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, example, given
+from hypothesis import assume, given
 from hypothesis.strategies import composite
 from pytest import raises
 
