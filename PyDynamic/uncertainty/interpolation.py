@@ -100,10 +100,9 @@ def interp1d_unc(
             # order.
             indices[it_t_new.index] = np.where(t <= it_t_new[0])[0][-1]
             it_t_new.iternext()
-        # Correct the last interval in case it degenerated. This happens when the
-        # last timestamps of t and t_new are equal.
-        if indices[-1] == len(t) - 1:
-            indices[-1] -= 1
+        # Correct all degenerated intervals. This happens when the last timestamps of
+        # t and t_new are equal.
+        indices[np.where(indices == len(t) - 1)] -= 1
         t_prev = t[indices]
         t_next = t[indices + 1]
         # Look up corresponding input uncertainties.
