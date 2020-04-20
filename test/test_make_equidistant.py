@@ -47,7 +47,7 @@ def timestamps_values_uncertainties_kind(
         dt, kind for make_equidistant()
     """
     # Set the maximum absolute value for floats to be really unique in calculations.
-    float_abs_max = 1e300
+    float_abs_max = 1e256
     # Set all common parameters for timestamps, measurements values and associated
     # uncertainties including allowed ranges and number of elements.
     shape_for_timestamps = hnp.array_shapes(
