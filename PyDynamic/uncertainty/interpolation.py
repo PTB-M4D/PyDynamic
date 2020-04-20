@@ -27,7 +27,7 @@ def interp1d_unc(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Interpolate arbitrary time series considering the associated uncertainties
 
-    The interpolation time stamps must lie within the range of the original
+    The interpolation timestamps must lie within the range of the original
     timestamps. In addition, at least two of each of the original timestamps,
     measured values and associated measurement uncertainties are required and an
     equal number of each of these three.
@@ -86,18 +86,22 @@ def interp1d_unc(
         interp_uy = interp1d(t, uy, kind=kind)
         uy_new = interp_uy(t_new)
     elif kind == "linear":
-        # Determine the relevant interpolation intervals for all new timestamps.
-        # We determine the intervals for each timestamp in t_new by finding the
-        # biggest of all timestamps in t smaller or equal than the one in t_new.
-        # If the maximums are equal we manually choose the last two
-        # timestamps in t as interval bounds, since our algorithm results in two
-        # times the last timestamp in t.
+        # Determine the relevant interpolation intervals for all interpolation
+        # timestamps. We determine the intervals for each timestamp in t_new by
+        # finding the biggest of all timestamps in t smaller or equal than the one in
+        # t_new. From the array of indices of our left interval bounds we get the
+        # right bounds by just incrementing the indices, which of course
+        # results in index errors at the end of our array, in case the biggest
+        # timestamps in t_new are (quasi) equal to the biggest (i.e. last) timestamp
+        # in t. This gets corrected just after the iteration by simply manually
+        # choosing one interval "further left", which will just at the node result
+        # in the same interpolation (being the actual value of y).
         indices = np.empty_like(t_new, dtype=int)
         it_t_new = np.nditer(t_new, flags=["f_index"])
         while not it_t_new.finished:
             # Find indices of biggest of all timestamps smaller or equal
-            # than current time, assumes that timestamps are in ascending
-            # order.
+            # than current interpolation timestamp. Assume that timestamps are in
+            # ascending order.
             indices[it_t_new.index] = np.where(t <= it_t_new[0])[0][-1]
             it_t_new.iternext()
         # Correct all degenerated intervals. This happens when the last timestamps of
