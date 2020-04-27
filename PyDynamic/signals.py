@@ -4,16 +4,14 @@ This module implements the signals class and its derivatives. Signals are
 dynamic quantities with associated uncertainties. A signal has to be defined
 together with a time axis.
 
-IMPORTANT NOTE: This module is experimental!
+.. note:: This module is experimental!
 """
 
 import numpy as np
-import scipy.signal as dsp
-from matplotlib.pyplot import figure, plot, fill_between, xlabel, ylabel, legend
+from matplotlib.pyplot import figure, fill_between, legend, plot, xlabel, ylabel
 
-from PyDynamic.misc.testsignals import rect
-from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 
 __all__ = ["Signal"]
 
@@ -159,25 +157,3 @@ class Signal:
                     filter_uncertainty,
                     runs=MonteCarloRuns,
                 )
-
-
-if __name__ == "__main__":
-    N = 1024
-    delta_t = 0.01
-    t = np.arange(0, N * delta_t, delta_t)
-    x = rect(t, delta_t * N // 4, delta_t * N // 4 * 3)
-    ux = 0.02
-    signal = Signal(t, x, Ts=delta_t, uncertainty=ux)
-    b = dsp.firls(
-        15,
-        [0, 0.2 * signal.Fs / 2, 0.25 * signal.Fs / 2, signal.Fs / 2],
-        [1, 1, 0, 0],
-        nyq=signal.Fs / 2,
-    )
-    Ub = np.diag(b * 1e-1)
-    signal.apply_filter(b, filter_uncertainty=Ub)
-    signal.plot_uncertainty()
-    bl, al = dsp.bessel(4, 0.2)
-    Ul = np.diag(np.r_[al[1:] * 1e-3, bl * 1e-2] ** 2)
-    signal.apply_filter(bl, al, filter_uncertainty=Ul)
-    signal.plot_uncertainty(fignr=3)
