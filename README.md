@@ -30,7 +30,7 @@ PyDynamic offers propagation of *uncertainties* for
 - multiplication in the frequency domain
 - transformation from amplitude and phase to a representation by real and 
   imaginary parts
-- 1-dimensional interpolation in accordance with Scipy
+- 1-dimensional interpolation
 
 For the validation of the propagation of uncertainties, the Monte-Carlo 
 method can be applied using a memory-efficient implementation of Monte-Carlo 
