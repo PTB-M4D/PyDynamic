@@ -30,6 +30,7 @@ PyDynamic offers propagation of *uncertainties* for
 - multiplication in the frequency domain
 - transformation from amplitude and phase to a representation by real and 
   imaginary parts
+- 1-dimensional interpolation in accordance with Scipy
 
 For the validation of the propagation of uncertainties, the Monte-Carlo 
 method can be applied using a memory-efficient implementation of Monte-Carlo 
@@ -37,6 +38,22 @@ for digital filtering.
 
 The documentation for PyDynamic can be found on
 [ReadTheDocs](http://pydynamic.readthedocs.io)
+
+## Package diagram
+
+The fundamental structure of PyDynamic is shown in the following figure.
+
+![PyDynamic package diagram](https://raw.githubusercontent.com/PTB-PSt1/PyDynamic/reintroduce_graphic_in_README/doc/PyDynamic_package_diagram.png)
+
+However, imports should generally be possible without explicitly naming all packages
+and modules in the path, so that for example the following import statements are all
+equivalent.
+
+```python
+from PyDynamic.misc.tools import make_equidistant
+from PyDynamic.misc import make_equidistant
+from PyDynamic import make_equidistant
+```
 
 ## Installation
 
