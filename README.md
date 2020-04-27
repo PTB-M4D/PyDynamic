@@ -43,7 +43,7 @@ The documentation for PyDynamic can be found on
 
 The fundamental structure of PyDynamic is shown in the following figure.
 
-![PyDynamic package diagram](https://raw.githubusercontent.com/PTB-PSt1/PyDynamic/reintroduce_graphic_in_README/doc/PyDynamic_package_diagram.png)
+![PyDynamic package diagram](https://raw.githubusercontent.com/PTB-PSt1/PyDynamic/master/doc/PyDynamic_package_diagram.png)
 
 However, imports should generally be possible without explicitly naming all packages
 and modules in the path, so that for example the following import statements are all
