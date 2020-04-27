@@ -108,12 +108,12 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
 
 
 def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
-    """
-    Make quadratic matrix positive semi-definite by increasing its eigenvalues
+    """Make quadratic matrix positive semi-definite by increasing its eigenvalues
 
     Parameters
     ----------
         matrix : (N,N) array_like
+            the matrix to process
         maxiter : int
             the maximum number of iterations for increasing the eigenvalues
         tol : float
@@ -125,7 +125,6 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
     -------
         (N,N) array_like
             quadratic positive semi-definite matrix
-
     """
     n, m = matrix.shape
     if n != m:
