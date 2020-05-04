@@ -87,16 +87,7 @@ def interp1d_unc(
     # Check for ascending order of timestamps.
     if not np.all(t[1:] >= t[:-1]):
         raise ValueError("Array of timestamps needs to be in ascending order.")
-    # Check for proper dimensions of inputs.
-    if ((t.min() > t_new) | (t.max() < t_new)).any():
-        raise ValueError(
-            "Array of interpolation timestamps must be in the range of original "
-            "timestamps."
-        )
-    if not len(t) == len(y):
-        raise ValueError(
-            "Array of measurement values must be same length as array of timestamps."
-        )
+    # Check for proper dimensions of inputs which are not checked as desired by SciPy.
     if not len(y) == len(uy):
         raise ValueError(
             "Array of associated measurement values' uncertainties must be same length "
