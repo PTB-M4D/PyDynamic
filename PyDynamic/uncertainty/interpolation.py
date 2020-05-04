@@ -24,27 +24,52 @@ def interp1d_unc(
     y: np.ndarray,
     uy: np.ndarray,
     kind: Optional[str] = "linear",
+    bounds_error: Optional[bool] = None,
+    fill_value: Optional[bool] = np.nan,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Interpolate arbitrary time series considering the associated uncertainties
+    r"""Interpolate a 1-D function considering the associated uncertainties
 
-    The interpolation timestamps must lie within the range of the original
-    timestamps. In addition, at least two of each of the original timestamps,
-    measured values and associated measurement uncertainties are required and an
-    equal number of each of these three.
+    t and y are arrays of values used to approximate some function :math:`f \colon y
+    = f(x)`.
+
+    Note that calling :func:`interp1d_unc` with NaNs present in input values
+    results in undefined behaviour.
+
+    At least two of each of the original timestamps (or frequencies), values and
+    associated uncertainties are required and an equal number of each of these three.
 
     Parameters
     ----------
-        t_new: (M,) array_like
-            The timestamps at which to evaluate the interpolated values.
-        t: (N,) array_like
-            timestamps in ascending order
-        y: (N,) array_like
-            corresponding measurement values
-        uy: (N,) array_like
-            corresponding measurement values' uncertainties
-        kind: str, optional
-            Specifies the kind of interpolation for the measurement values
-            as a string ('previous', 'next', 'nearest' or 'linear').
+        t_new : (M,) array_like
+            A 1-D array of real values representing the timestamps (or frequencies) at
+            which to evaluate the interpolated values.
+        t : (N,) array_like
+            A 1-D array of real values representing timestamps (or frequencies) in
+            ascending order.
+        y : (N,) array_like
+            A 1-D array of real values. The length of y must be equal to the length
+            of t_new
+        uy : (N,) array_like
+            A 1-D array of real values representing the uncertainties associated with y.
+        kind : str, optional
+            Specifies the kind of interpolation for y as a string ('previous',
+            'next', 'nearest' or 'linear'). Default is ‘linear’.
+        bounds_error : bool, optional
+            If True, a ValueError is raised any time interpolation is attempted on a
+            value outside of the range of x (where extrapolation is necessary). If
+            False, out of bounds values are assigned fill_value. By default, an error
+            is raised unless `fill_value="extrapolate"`.
+        fill_value : array-like or (array-like, array_like) or “extrapolate”, optional
+
+            - if a ndarray (or float), this value will be used to fill in for
+              requested points outside of the data range. If not provided, then the
+              default is NaN.
+            - If a two-element tuple, then the first element is used as a fill value
+              for `t_new < t[0]` and the second element is used for `t_new > t[-1]`.
+              Anything that is not a 2-element tuple (e.g., list or ndarray, regardless
+              of shape) is taken to be a single array-like argument meant to be used
+              for both bounds as `below, above = fill_value, fill_value`.
+            - If “extrapolate”, then points outside the data range will be extrapolated.
 
     Returns
     -------
@@ -78,7 +103,9 @@ def interp1d_unc(
             "as array of measurement values."
         )
     # Interpolate measurement values in the desired fashion.
-    interp_y = interp1d(t, y, kind=kind)
+    interp_y = interp1d(
+        t, y, kind=kind, bounds_error=bounds_error, fill_value=fill_value
+    )
     y_new = interp_y(t_new)
 
     if kind in ("previous", "next", "nearest"):
