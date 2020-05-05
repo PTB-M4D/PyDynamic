@@ -28,6 +28,7 @@ def interp1d_unc(
     bounds_error: Optional[bool] = None,
     fill_value: Optional[bool] = np.nan,
     assume_sorted: Optional[bool] = True,
+    return_c: Optional[bool] = False,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     r"""Interpolate a 1-D function considering the associated uncertainties
 
@@ -79,15 +80,19 @@ def interp1d_unc(
         assume_sorted : bool, optional
             If False, values of t can be in any order and they are sorted first. If
             True, t has to be an array of monotonically increasing values.
+        return_c : bool, optional
+            If True, return sensitivity coefficients for later use. If False
+            sensitivity coefficients are not returned and internal computation is
+            a little more efficient. Default is False.
 
     Returns
     -------
         t_new : (M,) array_like
-            interpolation timestamps
+            interpolation timestamps (or frequencies)
         y_new : (M,) array_like
-            interpolated measurement values
+            interpolated values
         uy_new : (M,) array_like
-            interpolated measurement values' uncertainties
+            interpolated associated uncertainties
 
     References
     ----------
@@ -104,10 +109,13 @@ def interp1d_unc(
         t = t[ind]
         y = np.take(y, ind)
     # ----------------------------------------------------------------------------------
-    # Check for ascending order of timestamps, because SciPy does not do that.
+    # Check for ascending order of timestamps (or frequencies), because SciPy does not
+    # do that.
     else:
         if not np.all(t[1:] >= t[:-1]):
-            raise ValueError("Array of timestamps needs to be in ascending order.")
+            raise ValueError(
+                "Array of timestamps (or frequencies) needs to be in ascending order."
+            )
     # Check for proper dimensions of inputs which are not checked as desired by SciPy.
     if not len(y) == len(uy):
         raise ValueError(
@@ -164,12 +172,18 @@ def interp1d_unc(
         uy_prev_sqr = uy[t_new_indices - 1] ** 2
         uy_next_sqr = uy[t_new_indices] ** 2
 
+        if return_c:
+            # We return sensitivities as a matrix. We get it by writing out our
+            # equation to calculate the sensitivities as matrix equation. The
+            # sensitivities in the first place are:
+            c_1 = (t_new - t_hi) / (t_hi - t_lo)
+            c_2 = (t_new - t_lo) / (t_hi - t_lo)
         uy_new = np.sqrt(
             (t_new - t_hi) ** 2 * uy_prev_sqr + (t_new - t_lo) ** 2 * uy_next_sqr
         ) / (t_hi - t_lo)
     else:
         raise NotImplementedError(
-            "%s is unsupported yet. Let us know, that you need it" % kind
+            "%s is unsupported yet. Let us know, that you need it." % kind
         )
 
     return t_new, y_new, uy_new
