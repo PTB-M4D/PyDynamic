@@ -37,8 +37,8 @@ def interp1d_unc(
     Note that calling :func:`interp1d_unc` with NaNs present in input values
     results in undefined behaviour.
 
-    At least two of each of the original timestamps (or frequencies), values and
-    associated uncertainties are required and an equal number of each of these three.
+    An equal number of each of the original timestamps (or frequencies), values and
+    associated uncertainties is required.
 
     Parameters
     ----------
@@ -104,7 +104,7 @@ def interp1d_unc(
         t = t[ind]
         y = np.take(y, ind)
     # ----------------------------------------------------------------------------------
-    # Check for ascending order of timestamps, because scipy does not do that.
+    # Check for ascending order of timestamps, because SciPy does not do that.
     else:
         if not np.all(t[1:] >= t[:-1]):
             raise ValueError("Array of timestamps needs to be in ascending order.")
