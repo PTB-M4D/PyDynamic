@@ -93,48 +93,58 @@ def interp1d_unc(
             "Array of associated measurement values' uncertainties must be same length "
             "as array of measurement values."
         )
-    # Interpolate measurement values in the desired fashion.
-    interp_y = interp1d(
-        t, y, kind=kind, bounds_error=bounds_error, fill_value=fill_value
-    )
-    y_new = interp_y(t_new)
 
     if kind in ("previous", "next", "nearest"):
-        # Look up uncertainties in cases where it is applicable.
-        interp_uy = interp1d(t, uy, kind=kind)
+        # Look up values.
+        interp_y = interp1d(
+            t, y, kind=kind, bounds_error=bounds_error, fill_value=fill_value
+        )
+        y_new = interp_y(t_new)
+        # Look up uncertainties.
+        interp_uy = interp1d(
+            t, uy, kind=kind, bounds_error=bounds_error, fill_value=fill_value
+        )
         uy_new = interp_uy(t_new)
     elif kind == "linear":
-        # Determine the relevant interpolation intervals for all interpolation
-        # timestamps. We determine the intervals for each timestamp in t_new by
-        # finding the biggest of all timestamps in t smaller or equal than the one in
-        # t_new. From the array of indices of our left interval bounds we get the
-        # right bounds by just incrementing the indices, which of course
-        # results in index errors at the end of our array, in case the biggest
-        # timestamps in t_new are (quasi) equal to the biggest (i.e. last) timestamp
-        # in t. This gets corrected just after the iteration by simply manually
-        # choosing one interval "further left", which will just at the node result
-        # in the same interpolation (being the actual value of y).
-        indices = np.empty_like(t_new, dtype=int)
-        it_t_new = np.nditer(t_new, flags=["f_index"])
-        while not it_t_new.finished:
-            # Find indices of biggest of all timestamps smaller or equal
-            # than current interpolation timestamp. Assume that timestamps are in
-            # ascending order.
-            indices[it_t_new.index] = np.where(t <= it_t_new[0])[0][-1]
-            it_t_new.iternext()
-        # Correct all degenerated intervals. This happens when the last timestamps of
-        # t and t_new are equal.
-        indices[np.where(indices == len(t) - 1)] -= 1
-        t_prev = t[indices]
-        t_next = t[indices + 1]
-        # Look up corresponding input uncertainties.
-        uy_prev_sqr = uy[indices] ** 2
-        uy_next_sqr = uy[indices + 1] ** 2
-        # Compute uncertainties for interpolated measurement values.
+        # This following section is taken from scipy.interpolate.interp1d.
+
+        # 2. Find where in the original data, the values to interpolate
+        #    would be inserted.
+        #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
+        t_new_indices = np.searchsorted(t, t_new)
+
+        # 3. Clip x_new_indices so that they are within the range of
+        #    self.x indices and at least 1.  Removes mis-interpolation
+        #    of x_new[n] = x[0]
+        t_new_indices = t_new_indices.clip(1, len(t) - 1).astype(int)
+
+        # 4. Calculate the slope of regions that each x_new value falls in.
+        lo = t_new_indices - 1
+        hi = t_new_indices
+
+        t_lo = t[lo]
+        t_hi = t[hi]
+        y_lo = y[lo]
+        y_hi = y[hi]
+
+        # Note that the following two expressions rely on the specifics of the
+        # broadcasting semantics.
+        slope = (y_hi - y_lo) / (t_hi - t_lo)[:, None]
+
+        # 5. Calculate the actual value for each entry in x_new.
+        y_new = slope * (t_new - t_lo)[:, None] + y_lo
+
+        # 6. Now we extend the interpolation from scipy.interpolate.interp1d by
+        # computing the associated interpolated uncertainties following White, 2017.
+        uy_prev_sqr = uy[t_new_indices - 1] ** 2
+        uy_next_sqr = uy[t_new_indices] ** 2
+
         uy_new = np.sqrt(
-            (t_new - t_next) ** 2 * uy_prev_sqr + (t_new - t_prev) ** 2 * uy_next_sqr
-        ) / (t_next - t_prev)
+            (t_new - t_hi) ** 2 * uy_prev_sqr + (t_new - t_lo) ** 2 * uy_next_sqr
+        ) / (t_hi - t_lo)
     else:
-        raise NotImplementedError
+        raise NotImplementedError(
+            "%s is unsupported yet. Let us know, that you need it" % kind
+        )
 
     return t_new, y_new, uy_new
