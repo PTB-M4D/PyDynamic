@@ -45,7 +45,7 @@ def timestamps_values_uncertainties_kind(
         dt, kind for interp1d_unc()
     """
     # Set the maximum absolute value for floats to be really unique in calculations.
-    float_abs_max = 1e128
+    float_abs_max = 1e300
     # Set all common parameters for timestamps, measurements values and associated
     # uncertainties.
     shape_for_timestamps = hnp.array_shapes(
