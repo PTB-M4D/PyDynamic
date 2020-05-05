@@ -24,8 +24,10 @@ def interp1d_unc(
     y: np.ndarray,
     uy: np.ndarray,
     kind: Optional[str] = "linear",
+    copy=True,
     bounds_error: Optional[bool] = None,
     fill_value: Optional[bool] = np.nan,
+    assume_sorted: Optional[bool] = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     r"""Interpolate a 1-D function considering the associated uncertainties
 
@@ -54,6 +56,9 @@ def interp1d_unc(
         kind : str, optional
             Specifies the kind of interpolation for y as a string ('previous',
             'next', 'nearest' or 'linear'). Default is ‘linear’.
+        copy : bool, optional
+            If True, the method makes internal copies of t and y. If False,
+            references to t and y are used. The default is to copy.
         bounds_error : bool, optional
             If True, a ValueError is raised any time interpolation is attempted on a
             value outside of the range of x (where extrapolation is necessary). If
@@ -71,6 +76,10 @@ def interp1d_unc(
               for both bounds as `below, above = fill_value, fill_value`.
             - If “extrapolate”, then points outside the data range will be extrapolated.
 
+        assume_sorted : bool, optional
+            If False, values of t can be in any order and they are sorted first. If
+            True, t has to be an array of monotonically increasing values.
+
     Returns
     -------
         t_new : (M,) array_like
@@ -84,9 +93,21 @@ def interp1d_unc(
     ----------
         * White [White2017]_
     """
-    # Check for ascending order of timestamps.
-    if not np.all(t[1:] >= t[:-1]):
-        raise ValueError("Array of timestamps needs to be in ascending order.")
+    # This is taken from the class scipy.interpolate.interp1d to copy and sort the
+    # arrays in case that is requested.
+    # ----------------------------------------------------------------------------------
+    t = np.array(t, copy=copy)
+    y = np.array(y, copy=copy)
+
+    if not assume_sorted:
+        ind = np.argsort(t)
+        t = t[ind]
+        y = np.take(y, ind)
+    # ----------------------------------------------------------------------------------
+    # Check for ascending order of timestamps, because scipy does not do that.
+    else:
+        if not np.all(t[1:] >= t[:-1]):
+            raise ValueError("Array of timestamps needs to be in ascending order.")
     # Check for proper dimensions of inputs which are not checked as desired by SciPy.
     if not len(y) == len(uy):
         raise ValueError(
@@ -95,19 +116,23 @@ def interp1d_unc(
         )
 
     if kind in ("previous", "next", "nearest"):
+        # Set up parameter dicts for calls of interp1d.
+        interp1d_params = {
+            "kind": kind,
+            "copy": False,
+            "bounds_error": bounds_error,
+            "fill_value": fill_value,
+            "assume_sorted": True,
+        }
         # Look up values.
-        interp_y = interp1d(
-            t, y, kind=kind, bounds_error=bounds_error, fill_value=fill_value
-        )
+        interp_y = interp1d(t, y, **interp1d_params)
         y_new = interp_y(t_new)
         # Look up uncertainties.
-        interp_uy = interp1d(
-            t, uy, kind=kind, bounds_error=bounds_error, fill_value=fill_value
-        )
+        interp_uy = interp1d(t, uy, **interp1d_params)
         uy_new = interp_uy(t_new)
     elif kind == "linear":
         # This following section is taken from scipy.interpolate.interp1d.
-
+        # ------------------------------------------------------------------------------
         # 2. Find where in the original data, the values to interpolate
         #    would be inserted.
         #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
@@ -133,7 +158,7 @@ def interp1d_unc(
 
         # 5. Calculate the actual value for each entry in x_new.
         y_new = slope * (t_new - t_lo)[:, None] + y_lo
-
+        # ------------------------------------------------------------------------------
         # 6. Now we extend the interpolation from scipy.interpolate.interp1d by
         # computing the associated interpolated uncertainties following White, 2017.
         uy_prev_sqr = uy[t_new_indices - 1] ** 2

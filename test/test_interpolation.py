@@ -66,7 +66,8 @@ def timestamps_values_uncertainties_kind(
     t = draw(hnp.arrays(**strategy_params))
     # Sort timestamps in ascending order.
     if sorted_timestamps:
-        t.sort()
+        ind = np.argsort(t)
+        t = t[ind]
     # Reuse "original" timestamps shape for measurements values and associated
     # uncertainties and draw both.
     strategy_params["shape"] = np.shape(t)
@@ -80,7 +81,15 @@ def timestamps_values_uncertainties_kind(
     )
     t_new = draw(hnp.arrays(**strategy_params))
     kind = draw(st.sampled_from(kind_tuple))
-    return {"t_new": t_new, "t": t, "y": y, "uy": uy, "kind": kind}
+    assume_sorted = sorted_timestamps
+    return {
+        "t_new": t_new,
+        "t": t,
+        "y": y,
+        "uy": uy,
+        "kind": kind,
+        "assume_sorted": assume_sorted,
+    }
 
 
 @given(timestamps_values_uncertainties_kind())
@@ -111,6 +120,7 @@ def test_wrong_input_order_call_interp1d_unc(interp_inputs):
     # Ensure the timestamps are not in ascending order.
     assume(not np.all(interp_inputs["t"][1:] >= interp_inputs["t"][:-1]))
     # Check erroneous calls with descending timestamps.
+    interp_inputs["assume_sorted"] = True
     with raises(ValueError):
         # Reverse order of t and call interp1d_unc().
         interp1d_unc(**interp_inputs)
