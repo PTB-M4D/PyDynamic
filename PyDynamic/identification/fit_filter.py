@@ -39,7 +39,7 @@ def fitIIR(Hvals, tau, w, E, Na, Nb):
 
     Parameters
     ----------
-        Hvals:   numpy array of frequency response values of shape (M,)
+        Hvals:   numpy array of (complex) frequency response values of shape (M,)
         tau:     integer initial estimate of time delay
         w:       numpy array :math:`2 * np.pi * f / Fs`
         E:       numpy array :math:`np.exp(-1j * np.dot(w[:, np.newaxis],
@@ -72,7 +72,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     
     Parameters
     ----------
-        Hvals:   numpy array of frequency response values of shape (M,)
+        Hvals:   numpy array of (complex) frequency response values of shape (M,)
         Nb:      integer numerator polynomial order
         Na:      integer denominator polynomial order
         f:       numpy array of frequencies at which Hvals is given of shape
@@ -158,7 +158,7 @@ def LSFIR(H, N, tau, f, Fs, Wt=None):
 
     Parameters
     ----------
-        H : frequency response values of shape (M,)
+        H : (complex) frequency response values of shape (M,)
         N : FIR filter order
         tau : delay of filter
         f : frequencies of shape (M,)
