@@ -99,15 +99,17 @@ def interp1d_unc(
         * White [White2017]_
     """
     # This is taken from the class scipy.interpolate.interp1d to copy and sort the
-    # arrays in case that is requested.
+    # arrays in case that is requested and of course extended by the uncertainties.
     # ----------------------------------------------------------------------------------
     t = np.array(t, copy=copy)
     y = np.array(y, copy=copy)
+    uy = np.array(y, copy=copy)
 
     if not assume_sorted:
         ind = np.argsort(t)
         t = t[ind]
         y = np.take(y, ind)
+        uy = np.take(uy, ind)
     # ----------------------------------------------------------------------------------
     # Check for ascending order of timestamps (or frequencies), because SciPy does not
     # do that.
@@ -142,11 +144,11 @@ def interp1d_unc(
         interp_uy = interp1d(t, uy, **interp1d_params)
         uy_new = interp_uy(t_new)
     elif kind == "linear":
-        if bounds_error:
-            # If we expect to raise an exception for trying to interpolate
-            # outside original bounds, we let SciPy raise the error.
-            interp_y._check_bounds(t_new)
-        # This following section is taken from scipy.interpolate.interp1d.
+        # Inter- or extrapolate values.
+        y_new = interp_y(t_new)
+
+        # This following section is taken from scipy.interpolate.interp1d to
+        # determine the indices of the relevant timestamps or frequencies.
         # ------------------------------------------------------------------------------
         # 2. Find where in the original data, the values to interpolate
         #    would be inserted.
@@ -164,27 +166,23 @@ def interp1d_unc(
 
         t_lo = t[lo]
         t_hi = t[hi]
-        y_lo = y[lo]
-        y_hi = y[hi]
-
-        # Note that the following two expressions rely on the specifics of the
-        # broadcasting semantics.
-        slope = (y_hi - y_lo) / (t_hi - t_lo)[:, None]
-
-        # 5. Calculate the actual value for each entry in x_new.
-        y_new = slope * (t_new - t_lo)[:, None] + y_lo
         # ------------------------------------------------------------------------------
-        # 6. Now we extend the interpolation from scipy.interpolate.interp1d by
+        # Now we extend the interpolation from scipy.interpolate.interp1d by
         # computing the associated interpolated uncertainties following White, 2017.
         uy_prev_sqr = uy[t_new_indices - 1] ** 2
         uy_next_sqr = uy[t_new_indices] ** 2
 
         if return_c:
+            raise NotImplementedError(
+                "Unfortunately we did not yet implement this feature. It will be "
+                "present in the near future."
+            )
             # We return sensitivities as a matrix. We get it by writing out our
             # equation to calculate the sensitivities as matrix equation. The
             # sensitivities in the first place are:
-            c_1 = (t_new - t_hi) / (t_hi - t_lo)
-            c_2 = (t_new - t_lo) / (t_hi - t_lo)
+            # c_1 = (t_new - t_hi) / (t_hi - t_lo)
+            # c_2 = (t_new - t_lo) / (t_hi - t_lo)
+
         uy_new = np.sqrt(
             (t_new - t_hi) ** 2 * uy_prev_sqr + (t_new - t_lo) ** 2 * uy_next_sqr
         ) / (t_hi - t_lo)

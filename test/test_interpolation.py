@@ -185,8 +185,8 @@ def test_trivial_in_interp1d_unc(interp_inputs):
 def test_linear_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
-    assert np.all(np.amin(interp_inputs["y"]) <= y_new)
-    assert np.all(np.amax(interp_inputs["y"]) >= y_new)
+    assert np.all(np.min(interp_inputs["y"]) <= y_new)
+    assert np.all(np.max(interp_inputs["y"]) >= y_new)
 
 
 @given(timestamps_values_uncertainties_kind(extrapolate=True))
