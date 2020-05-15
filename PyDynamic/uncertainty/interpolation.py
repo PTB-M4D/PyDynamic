@@ -123,22 +123,29 @@ def interp1d_unc(
             "as array of measurement values."
         )
 
+    # Set up parameter dicts for calls of interp1d. We use it for actual
+    # "interpolation" (i.e. look-ups) in trivial cases and in the linear case to check
+    # for bound errors.
+    interp1d_params = {
+        "kind": kind,
+        "copy": False,
+        "bounds_error": bounds_error,
+        "fill_value": fill_value,
+        "assume_sorted": True,
+    }
+    interp_y = interp1d(t, y, **interp1d_params)
+
     if kind in ("previous", "next", "nearest"):
-        # Set up parameter dicts for calls of interp1d.
-        interp1d_params = {
-            "kind": kind,
-            "copy": False,
-            "bounds_error": bounds_error,
-            "fill_value": fill_value,
-            "assume_sorted": True,
-        }
         # Look up values.
-        interp_y = interp1d(t, y, **interp1d_params)
         y_new = interp_y(t_new)
         # Look up uncertainties.
         interp_uy = interp1d(t, uy, **interp1d_params)
         uy_new = interp_uy(t_new)
     elif kind == "linear":
+        if bounds_error:
+            # If we expect to raise an exception for trying to interpolate
+            # outside original bounds, we let SciPy raise the error.
+            interp_y._check_bounds(t_new)
         # This following section is taken from scipy.interpolate.interp1d.
         # ------------------------------------------------------------------------------
         # 2. Find where in the original data, the values to interpolate
