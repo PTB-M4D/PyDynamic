@@ -103,7 +103,7 @@ def interp1d_unc(
     # ----------------------------------------------------------------------------------
     t = np.array(t, copy=copy)
     y = np.array(y, copy=copy)
-    uy = np.array(y, copy=copy)
+    uy = np.array(uy, copy=copy)
 
     if not assume_sorted:
         ind = np.argsort(t)

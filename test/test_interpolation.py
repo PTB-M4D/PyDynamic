@@ -210,6 +210,15 @@ def test_linear_uy_in_interp1d_unc(n,):
     )
 
 
+@given(timestamps_values_uncertainties_kind())
+def test_wrong_input_lengths_call_interp1d(interp_inputs):
+    # Check erroneous calls with unequally long inputs.
+    with raises(ValueError):
+        y_wrong = np.tile(interp_inputs["y"], 2)
+        uy_wrong = np.tile(interp_inputs["uy"], 3)
+        interp1d_unc(interp_inputs["t"], y_wrong, uy_wrong)
+
+
 @given(
     timestamps_values_uncertainties_kind(
         kind_tuple=("spline", "lagrange", "least-squares")
