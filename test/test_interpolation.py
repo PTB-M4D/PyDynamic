@@ -1,3 +1,4 @@
+import itertools
 from typing import Dict, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
@@ -17,6 +18,7 @@ def timestamps_values_uncertainties_kind(
     max_count: Optional[int] = None,
     kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest"),
     sorted_timestamps: Optional[bool] = True,
+    extrapolate: Optional[bool] = False,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
@@ -26,18 +28,25 @@ def timestamps_values_uncertainties_kind(
             this is a hypothesis internal callable to actually draw from provided
             strategies
         min_count: int
-            the minimum number of elements expected inside the arrays of timestamps,
-            measurement values and associated uncertainties
+            the minimum number of elements expected inside the arrays of timestamps
+             (or frequencies), measurement values and associated uncertainties
         max_count: int
-            the maximum number of elements expected inside the arrays of timestamps,
-            measurement values and associated uncertainties
+            the maximum number of elements expected inside the arrays of timestamps
+            (or frequencies), measurement values and associated uncertainties
         kind_tuple: tuple(str), optional
             the tuple of strings out of "linear", "previous", "next", "nearest",
             "spline", "lagrange", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
-            "previous", "next", "nearest".
+            "previous", "next", "nearest"
         sorted_timestamps: bool
-            if the timestamps should be in ascending order or not
+            if True the timestamps (or frequencies) are guaranteed to be in ascending
+            order, if False they still might be by coincidence or not
+        extrapolate: bool
+            if True the interpolation timestamps (or frequencies) are generated such
+            that extrapolation is necessary by guarantying at least one of the
+            interpolation timestamps (or frequencies) outside the original bounds
+            and accordingly setting appropriate values for `fill_value` and
+            `bounds_error = False`
 
     Returns
     -------
@@ -46,8 +55,13 @@ def timestamps_values_uncertainties_kind(
     """
     # Set the maximum absolute value for floats to be really unique in calculations.
     float_abs_max = 1e300
-    # Set all common parameters for timestamps, measurements values and associated
-    # uncertainties.
+    # Set generic float parameters.
+    float_generic_params = {
+        "allow_nan": False,
+        "allow_infinity": False,
+    }
+    # Set all common parameters for timestamps (or frequencies), measurements values
+    # and associated uncertainties.
     shape_for_timestamps = hnp.array_shapes(
         max_dims=1, min_side=min_count, max_side=max_count
     )
@@ -55,31 +69,62 @@ def timestamps_values_uncertainties_kind(
         "dtype": np.float,
         "shape": shape_for_timestamps,
         "elements": st.floats(
-            min_value=-float_abs_max,
-            max_value=float_abs_max,
-            allow_nan=False,
-            allow_infinity=False,
+            min_value=-float_abs_max, max_value=float_abs_max, **float_generic_params
         ),
         "unique": True,
     }
-    # Draw "original" timestamps.
+    # Draw "original" timestamps (or frequencies).
     t = draw(hnp.arrays(**strategy_params))
-    # Sort timestamps in ascending order.
+    # Sort timestamps (or frequencies) in ascending order.
     if sorted_timestamps:
         ind = np.argsort(t)
         t = t[ind]
-    # Reuse "original" timestamps shape for measurements values and associated
-    # uncertainties and draw both.
+
+    # Reuse "original" timestamps (or frequencies) shape for measurements values and
+    # associated uncertainties and draw both.
     strategy_params["shape"] = np.shape(t)
     y = draw(hnp.arrays(**strategy_params))
     uy = draw(hnp.arrays(**strategy_params))
-    # Reset shape for interpolation timestamps and use range of "original" timestamps
-    # as boundaries.
+
+    # Reset shape for interpolation timestamps (or frequencies).
     strategy_params["shape"] = shape_for_timestamps
-    strategy_params["elements"] = st.floats(
-        min_value=np.min(t), max_value=np.max(t), allow_nan=False, allow_infinity=False
-    )
+    # Look up minimum and maximum of original timestamps (or frequencies) just once.
+    t_min = np.min(t)
+    t_max = np.max(t)
+
+    if not extrapolate:
+        # In case we do not want to extrapolate, use range of "original" timestamps (or
+        # frequencies) as boundaries.
+        strategy_params["elements"] = st.floats(
+            min_value=t_min, max_value=t_max, **float_generic_params
+        )
+        fill_value = None
+        bounds_error = True
+    else:
+        # In case we want to extrapolate, draw some fill values for the
+        # out-of-bounds range. Those will be either single floats or a 2-tuple of
+        # floats or the special value "extrapolate".
+        float_strategy = st.floats(**float_generic_params)
+        fill_value = draw(
+            st.one_of(
+                float_strategy,
+                st.tuples(
+                    *tuple(itertools.repeat(st.floats(**float_generic_params), 2))
+                ),
+                st.just("extrapolate"),
+            )
+        )
+        bounds_error = False
+
+    # Draw interpolation timestamps (or frequencies).
     t_new = draw(hnp.arrays(**strategy_params))
+
+    if extrapolate:
+        # In case we want to extrapolate, make sure we actually do after having drawn
+        # the timestamps (or frequencies) not to randomly have drawn values inside
+        # original bounds.
+        assume(np.min(t_new) < np.min(t) or np.max(t_new) > np.max(t))
+
     kind = draw(st.sampled_from(kind_tuple))
     assume_sorted = sorted_timestamps
     return {
@@ -88,6 +133,8 @@ def timestamps_values_uncertainties_kind(
         "y": y,
         "uy": uy,
         "kind": kind,
+        "fill_value": fill_value,
+        "bounds_error": bounds_error,
         "assume_sorted": assume_sorted,
     }
 
@@ -142,6 +189,12 @@ def test_linear_in_interp1d_unc(interp_inputs):
     assert np.all(np.amax(interp_inputs["y"]) >= y_new)
 
 
+@given(timestamps_values_uncertainties_kind(extrapolate=True))
+def test_extrapolate_interp1d_unc(interp_inputs):
+    # Check that extrapolation works.
+    assert interp1d_unc(**interp_inputs)
+
+
 @given(st.integers(min_value=3, max_value=1000))
 def test_linear_uy_in_interp1d_unc(n,):
     # Check for given input, if interpolated uncertainties equal 1 and
@@ -165,4 +218,13 @@ def test_linear_uy_in_interp1d_unc(n,):
 def test_raise_not_implemented_yet_interp1d(interp_inputs):
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
+        interp1d_unc(**interp_inputs)
+
+
+@given(timestamps_values_uncertainties_kind(extrapolate=True))
+def test_raise_value_error_interp1d_unc(interp_inputs):
+    # Check that interpolation with points outside the original domain raises
+    # exception.
+    interp_inputs["bounds_error"] = True
+    with raises(ValueError):
         interp1d_unc(**interp_inputs)
