@@ -214,9 +214,9 @@ def test_linear_uy_in_interp1d_unc(n,):
 def test_wrong_input_lengths_call_interp1d(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
-        y_wrong = np.tile(interp_inputs["y"], 2)
-        uy_wrong = np.tile(interp_inputs["uy"], 3)
-        interp1d_unc(interp_inputs["t"], y_wrong, uy_wrong)
+        interp_inputs["y"] = np.tile(interp_inputs["y"], 2)
+        interp_inputs["uy"] = np.tile(interp_inputs["uy"], 3)
+        interp1d_unc(**interp_inputs)
 
 
 @given(
