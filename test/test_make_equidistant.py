@@ -112,16 +112,6 @@ def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
         make_equidistant(interp_inputs["t"], y_wrong, uy_wrong)
 
 
-@given(timestamps_values_uncertainties_kind(sorted_timestamps=False))
-def test_wrong_input_order_call_make_equidistant(interp_inputs):
-    # Ensure the timestamps are not in ascending order.
-    assume(not np.all(interp_inputs["t"][1:] >= interp_inputs["t"][:-1]))
-    # Check erroneous calls with descending timestamps.
-    with raises(ValueError):
-        # Reverse order of t and call make_equidistant().
-        make_equidistant(**interp_inputs)
-
-
 @given(timestamps_values_uncertainties_kind())
 def test_t_new_to_dt_make_equidistant(interp_inputs):
     t_new = make_equidistant(**interp_inputs)[0]
