@@ -52,7 +52,7 @@ def interp1d_unc(
             ascending order.
         y : (N,) array_like
             A 1-D array of real values. The length of y must be equal to the length
-            of t_new
+            of t
         uy : (N,) array_like
             A 1-D array of real values representing the uncertainties associated with y.
         kind : str, optional
