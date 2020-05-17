@@ -33,7 +33,7 @@ def interp1d_unc(
     r"""Interpolate a 1-D function considering the associated uncertainties
 
     t and y are arrays of values used to approximate some function :math:`f \colon y
-    = f(x)`.
+    = f(t)`.
 
     Note that calling :func:`interp1d_unc` with NaNs present in input values
     results in undefined behaviour.
