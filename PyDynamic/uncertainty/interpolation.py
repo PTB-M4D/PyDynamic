@@ -27,6 +27,7 @@ def interp1d_unc(
     copy=True,
     bounds_error: Optional[bool] = None,
     fill_value: Optional[bool] = np.nan,
+    fill_unc: Optional[bool] = np.nan,
     assume_sorted: Optional[bool] = True,
     return_c: Optional[bool] = False,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -75,7 +76,11 @@ def interp1d_unc(
               Anything that is not a 2-element tuple (e.g., list or ndarray, regardless
               of shape) is taken to be a single array-like argument meant to be used
               for both bounds as `below, above = fill_value, fill_value`.
-            - If “extrapolate”, then points outside the data range will be extrapolated.
+            - If “extrapolate”, then points outside the data range will be set
+              to the first or last element of the values.
+
+        fill_unc : array-like or (array-like, array_like) or “extrapolate”, optional
+            Usage and behaviour as described in `fill_value` but for the uncertainties
 
         assume_sorted : bool, optional
             If False, values of t can be in any order and they are sorted first. If
@@ -129,23 +134,26 @@ def interp1d_unc(
         )
 
     # Set up parameter dicts for calls of interp1d. We use it for actual
-    # "interpolation" (i.e. look-ups) in trivial cases and in the linear case to check
-    # for bound errors.
+    # "interpolation" (i.e. look-ups) in trivial cases and in the linear case to
+    # extrapolate.
     interp1d_params = {
         "kind": kind,
         "copy": False,
         "bounds_error": bounds_error,
-        "fill_value": fill_value,
         "assume_sorted": True,
     }
 
-    # Inter- or extrapolate values in the desired fashion.
-    interp_y = interp1d(t, y, **interp1d_params)
+    # Inter- or extrapolate values in the desired fashion and especially ensure
+    # constant behaviour outside the original bounds. For this to rely on SciPy's
+    # handling of fill values we set those explicitly to boundary values of y.
+    if fill_value == "extrapolate":
+        fill_value = y[0], y[-1]
+    interp_y = interp1d(t, y, fill_value=fill_value, **interp1d_params)
     y_new = interp_y(t_new)
 
     if kind in ("previous", "next", "nearest"):
         # Look up uncertainties.
-        interp_uy = interp1d(t, uy, **interp1d_params)
+        interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
         uy_new = interp_uy(t_new)
     elif kind == "linear":
         # This following section is taken from scipy.interpolate.interp1d to
@@ -168,10 +176,10 @@ def interp1d_unc(
         t_lo = t[lo]
         t_hi = t[hi]
         # ------------------------------------------------------------------------------
-        # Now we extend the interpolation from scipy.interpolate.interp1d by
-        # computing the associated interpolated uncertainties following White, 2017.
-        uy_prev_sqr = uy[t_new_indices - 1] ** 2
-        uy_next_sqr = uy[t_new_indices] ** 2
+        # Now we extend the interpolation from scipy.interpolate.interp1d by first
+        # extrapolating the according values if required and then computing the
+        # associated interpolated uncertainties following White, 2017.
+        uy_new = np.empty_like(y_new)
 
         if return_c:
             raise NotImplementedError(
@@ -179,9 +187,31 @@ def interp1d_unc(
                 "present in the near future."
             )
 
-        uy_new = np.sqrt(
-            (t_new - t_hi) ** 2 * uy_prev_sqr + (t_new - t_lo) ** 2 * uy_next_sqr
-        ) / (t_hi - t_lo)
+        # Calculate boolean arrays of indices from t_new which are outside t's bounds...
+        extrapolation_range = (t_new < np.min(t)) | (t_new > np.max(t))
+        # .. and inside t's bounds.
+        interpolation_range = ~extrapolation_range
+
+        # If extrapolation is needed, rely on SciPy's handling of fill values,
+        # which we prepared in advance.
+        if np.any(extrapolation_range):
+            # Set boundary values of uy for fill values to ensure constant behaviour
+            # outside original bounds.
+            if fill_unc == "extrapolate":
+                fill_unc = uy[0], uy[-1]
+            interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
+            uy_new[extrapolation_range] = interp_uy(t_new[extrapolation_range])
+
+        # If interpolation is needed, compute uncertainties following White, 2017.
+        if np.any(interpolation_range):
+            uy_prev_sqr = uy[lo] ** 2
+            uy_next_sqr = uy[hi] ** 2
+            uy_new[interpolation_range] = np.sqrt(
+                (t_new[interpolation_range] - t_hi[interpolation_range]) ** 2
+                * uy_prev_sqr[interpolation_range]
+                + (t_new[interpolation_range] - t_lo[interpolation_range]) ** 2
+                * uy_next_sqr[interpolation_range]
+            ) / (t_hi[interpolation_range] - t_lo[interpolation_range])
     else:
         raise NotImplementedError(
             "%s is unsupported yet. Let us know, that you need it." % kind

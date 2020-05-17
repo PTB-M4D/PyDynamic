@@ -54,7 +54,7 @@ def timestamps_values_uncertainties_kind(
         dt, kind for interp1d_unc()
     """
     # Set the maximum absolute value for floats to be really unique in calculations.
-    float_abs_max = 1e300
+    float_abs_max = 1e150
     # Set generic float parameters.
     float_generic_params = {
         "allow_nan": False,
