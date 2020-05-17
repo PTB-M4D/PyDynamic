@@ -172,18 +172,13 @@ def interp1d_unc(
         # Now we extend the interpolation from scipy.interpolate.interp1d by first
         # extrapolating the according values if required and then computing the
         # associated interpolated uncertainties following White, 2017.
-        uy_new = np.empty_like(y_new)
-
-        if return_c:
-            raise NotImplementedError(
-                "Unfortunately we did not yet implement this feature. It will be "
-                "present in the near future."
-            )
 
         # Calculate boolean arrays of indices from t_new which are outside t's bounds...
         extrapolation_range = (t_new < np.min(t)) | (t_new > np.max(t))
         # .. and inside t's bounds.
         interpolation_range = ~extrapolation_range
+        # Initialize the uncertainties.
+        uy_new = np.empty_like(y_new)
 
         # If extrapolation is needed, rely on SciPy's handling of fill values,
         # which we prepared in advance.
@@ -197,14 +192,31 @@ def interp1d_unc(
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interpolation_range):
-            uy_prev_sqr = uy[lo] ** 2
-            uy_next_sqr = uy[hi] ** 2
-            uy_new[interpolation_range] = np.sqrt(
-                (t_new[interpolation_range] - t_hi[interpolation_range]) ** 2
-                * uy_prev_sqr[interpolation_range]
-                + (t_new[interpolation_range] - t_lo[interpolation_range]) ** 2
-                * uy_next_sqr[interpolation_range]
-            ) / (t_hi[interpolation_range] - t_lo[interpolation_range])
+
+            if return_c:
+                # TODO continue here to compute C and afterwards properly handle
+                #  extrapolation.
+                # We return sensitivities as a matrix. We get it by writing out our
+                # equation to calculate the sensitivities as matrix equation. The
+                # sensitivities in the first place are:
+                C = np.zeros((len(t_new), len(uy)), 'float64')
+                L_1 = (t_new - t_hi) / (t_hi - t_lo)
+                L_2 = (t_new - t_lo) / (t_hi - t_lo)
+                # Do something to in each row of C set the column with the corresponding
+                # index of lo to L_1 and the column with the corresponding
+                # index of hi to L2.
+                C = C
+
+                uy_new = (C * np.diag(uy ** 2) * C.T).diagonal
+            else:
+                uy_prev_sqr = uy[lo] ** 2
+                uy_next_sqr = uy[hi] ** 2
+                uy_new[interpolation_range] = np.sqrt(
+                    (t_new[interpolation_range] - t_hi[interpolation_range]) ** 2
+                    * uy_prev_sqr[interpolation_range]
+                    + (t_new[interpolation_range] - t_lo[interpolation_range]) ** 2
+                    * uy_next_sqr[interpolation_range]
+                ) / (t_hi[interpolation_range] - t_lo[interpolation_range])
     else:
         raise NotImplementedError(
             "%s is unsupported yet. Let us know, that you need it." % kind

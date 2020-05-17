@@ -19,6 +19,7 @@ def timestamps_values_uncertainties_kind(
     kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest"),
     sorted_timestamps: Optional[bool] = True,
     extrapolate: Optional[Union[bool, str]] = False,
+    return_c: Optional[bool] = False,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
@@ -49,11 +50,14 @@ def timestamps_values_uncertainties_kind(
             `bounds_error = False`. If False each element of t_new is guaranteed to
             lie within the range of t. Can be set to "above" or "below" to guarantee
             at least one element of t_new to lie either below or above the bounds of t.
+        return_c : bool, optional
+            If True we request the sensitivities to be returned. If False we do not
+            request them. Defaults to False.
 
     Returns
     -------
-        A dict containing the randomly generated expected input parameters t, y, uy,
-        dt, kind for interp1d_unc()
+        A dict containing the randomly generated expected input parameters for
+        `interp1d_unc()`
     """
     # Set the maximum absolute value for floats to be really unique in calculations.
     float_abs_max = 1e64
@@ -141,6 +145,7 @@ def timestamps_values_uncertainties_kind(
         "fill_unc": fill_unc,
         "bounds_error": bounds_error,
         "assume_sorted": assume_sorted,
+        "return_c": return_c,
     }
 
 
@@ -355,6 +360,15 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
         uy_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
         == interp_inputs["fill_unc"][1]
     )
+
+
+@given(timestamps_values_uncertainties_kind(return_c=True))
+def test_extrapolate_with_return_c_interp1d_unc(interp_inputs):
+    # Filter those cases where at least one of t_new is above the maximum of t and
+    # fill_unc is a float, which means constant extrapolation with this value.
+    assume(2 < interp_inputs["t"].shape[0] != interp_inputs["t_new"].shape[0] > 2)
+    # Check that extrapolation works.
+    assert interp1d_unc(**interp_inputs)
 
 
 @given(st.integers(min_value=3, max_value=1000))
