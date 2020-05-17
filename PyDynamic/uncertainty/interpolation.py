@@ -119,13 +119,6 @@ def interp1d_unc(
         y = np.take(y, ind)
         uy = np.take(uy, ind)
     # ----------------------------------------------------------------------------------
-    # Check for ascending order of timestamps (or frequencies), because SciPy does not
-    # do that.
-    else:
-        if not np.all(t[1:] >= t[:-1]):
-            raise ValueError(
-                "Array of timestamps (or frequencies) needs to be in ascending order."
-            )
     # Check for proper dimensions of inputs which are not checked as desired by SciPy.
     if not len(y) == len(uy):
         raise ValueError(
