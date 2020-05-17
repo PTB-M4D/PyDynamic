@@ -138,18 +138,16 @@ def interp1d_unc(
         "fill_value": fill_value,
         "assume_sorted": True,
     }
+
+    # Inter- or extrapolate values in the desired fashion.
     interp_y = interp1d(t, y, **interp1d_params)
+    y_new = interp_y(t_new)
 
     if kind in ("previous", "next", "nearest"):
-        # Look up values.
-        y_new = interp_y(t_new)
         # Look up uncertainties.
         interp_uy = interp1d(t, uy, **interp1d_params)
         uy_new = interp_uy(t_new)
     elif kind == "linear":
-        # Inter- or extrapolate values.
-        y_new = interp_y(t_new)
-
         # This following section is taken from scipy.interpolate.interp1d to
         # determine the indices of the relevant timestamps or frequencies.
         # ------------------------------------------------------------------------------
