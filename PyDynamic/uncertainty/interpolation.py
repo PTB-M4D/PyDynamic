@@ -81,6 +81,9 @@ def interp1d_unc(
             If False, values of t can be in any order and they are sorted first. If
             True, t has to be an array of monotonically increasing values.
         return_c : bool, optional
+            This feature is not yet implemented, but will be provided in the near
+            future. Setting return_c to True thus results in an exception being
+            thrown for now.
             If True, return sensitivity coefficients for later use. If False
             sensitivity coefficients are not returned and internal computation is
             a little more efficient. Default is False.
@@ -177,11 +180,6 @@ def interp1d_unc(
                 "Unfortunately we did not yet implement this feature. It will be "
                 "present in the near future."
             )
-            # We return sensitivities as a matrix. We get it by writing out our
-            # equation to calculate the sensitivities as matrix equation. The
-            # sensitivities in the first place are:
-            # c_1 = (t_new - t_hi) / (t_hi - t_lo)
-            # c_2 = (t_new - t_lo) / (t_hi - t_lo)
 
         uy_new = np.sqrt(
             (t_new - t_hi) ** 2 * uy_prev_sqr + (t_new - t_lo) ** 2 * uy_next_sqr
