@@ -26,8 +26,8 @@ def interp1d_unc(
     kind: Optional[str] = "linear",
     copy=True,
     bounds_error: Optional[bool] = None,
-    fill_value: Optional[bool] = np.nan,
-    fill_unc: Optional[bool] = np.nan,
+    fill_value: Optional[Union[float, Tuple[float, float], str]] = np.nan,
+    fill_unc: Optional[Union[float, Tuple[float, float], str]] = np.nan,
     assume_sorted: Optional[bool] = True,
     return_c: Optional[bool] = False,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
