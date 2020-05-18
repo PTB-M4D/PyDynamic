@@ -225,12 +225,13 @@ def test_extrapolate_interp1d_unc(interp_inputs):
 
 
 @given(
-    timestamps_values_uncertainties_kind(sorted_timestamps=True, extrapolate="below")
+    timestamps_values_uncertainties_kind(
+        sorted_timestamps=True, extrapolate="below", restrict_fill_value="str"
+    )
 )
 def test_extrapolate_below_without_fill_value_interp1d_unc(interp_inputs):
-    # Filter those cases where at least one of t_new is below the minimum of t and
+    # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_value=="extrapolate", which means constant extrapolation from the boundaries.
-    assume(isinstance(interp_inputs["fill_value"], str))
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works, meaning in the present case, that the boundary
     # value of y is taken for all t_new below the original bound.
