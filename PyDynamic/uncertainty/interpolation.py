@@ -51,7 +51,7 @@ def interp1d_unc(
             ascending order.
         y : (N,) array_like
             A 1-D array of real values. The length of y must be equal to the length
-            of t
+            of t.
         uy : (N,) array_like
             A 1-D array of real values representing the uncertainties associated with y.
         kind : str, optional
@@ -91,11 +91,11 @@ def interp1d_unc(
             True, t has to be an array of monotonically increasing values.
         return_c : bool, optional
             This feature is not yet implemented, but will be provided in the near
-            future. Setting return_c to True thus results in an exception being
+            future. Setting `return_c` to True thus results in an exception being
             thrown for now.
             If True, return sensitivity coefficients for later use. If False
             sensitivity coefficients are not returned and internal computation is
-            a little more efficient. Default is False.
+            more efficient.
 
     Returns
     -------
