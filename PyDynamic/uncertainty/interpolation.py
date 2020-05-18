@@ -194,20 +194,19 @@ def interp1d_unc(
         if np.any(interpolation_range):
 
             if return_c:
-                # TODO continue here to compute C and afterwards properly handle
-                #  extrapolation.
-                # We return sensitivities as a matrix. We get it by writing out our
-                # equation to calculate the sensitivities as matrix equation. The
-                # sensitivities in the first place are:
-                C = np.zeros((len(t_new), len(uy)), 'float64')
+                # Prepare the sensitivity coefficients, which in
+                # the first place are the Lagrangian polynomials:
+                C = np.zeros((len(t_new), len(uy)), "float64")
                 L_1 = (t_new - t_hi) / (t_hi - t_lo)
                 L_2 = (t_new - t_lo) / (t_hi - t_lo)
-                # Do something to in each row of C set the column with the corresponding
-                # index of lo to L_1 and the column with the corresponding
-                # index of hi to L2.
-                C = C
-
-                uy_new = (C * np.diag(uy ** 2) * C.T).diagonal
+                # In each row of C set the column with the corresponding
+                # index in lo to L_1 and the column with the corresponding
+                # index in hi to L_2.
+                for index, C_row in enumerate(C):
+                    C_row[lo[index]] = L_1[index]
+                    C_row[hi[index]] = L_2[index]
+                # Compute the sensitivities' matrix.
+                uy_new = (C @ np.diag(uy ** 2) @ C.T).diagonal()
             else:
                 uy_prev_sqr = uy[lo] ** 2
                 uy_next_sqr = uy[hi] ** 2
