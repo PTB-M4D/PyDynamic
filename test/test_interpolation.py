@@ -1,4 +1,3 @@
-import itertools
 from typing import Dict, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
@@ -6,6 +5,7 @@ import hypothesis.strategies as st
 import numpy as np
 from hypothesis import assume, given
 from hypothesis.strategies import composite
+from numpy.testing import assert_allclose
 from pytest import raises
 
 from PyDynamic.uncertainty.interpolation import interp1d_unc
@@ -145,7 +145,7 @@ def timestamps_values_uncertainties_kind(
         strategy_params["elements"] = st.floats(
             min_value=t_min, max_value=t_max, **float_generic_params
         )
-        fill_value = fill_unc = None
+        fill_value = fill_unc = np.nan
         bounds_error = True
     else:
         # In case we want to extrapolate, draw some fill values for the
@@ -417,13 +417,26 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
     )
 
 
-@given(timestamps_values_uncertainties_kind(return_c=True))
-def test_extrapolate_with_return_c_interp1d_unc(interp_inputs):
+@given(timestamps_values_uncertainties_kind(return_c=True, kind_tuple=("linear",)))
+def test_compare_return_c_interp1d_unc(interp_inputs):
     # Filter those cases where at least one of t_new is above the maximum of t and
     # fill_unc is a float, which means constant extrapolation with this value.
-    assume(2 < interp_inputs["t"].shape[0] != interp_inputs["t_new"].shape[0] > 2)
+    uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
+    interp_inputs["return_c"] = False
+    uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
-    assert interp1d_unc(**interp_inputs)
+    assert_allclose(uy_new_with_sensitivities, uy_new_without_sensitivities, rtol=9e-15)
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        return_c=True, kind_tuple=("previous", "next", "nearest",)
+    )
+)
+def test_value_error_for_return_c_interp1d_unc(interp_inputs):
+    # Check erroneous calls with return_c and wrong kind.
+    with raises(ValueError):
+        interp1d_unc(**interp_inputs)
 
 
 @given(st.integers(min_value=3, max_value=1000))

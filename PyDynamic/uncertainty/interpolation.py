@@ -29,7 +29,10 @@ def interp1d_unc(
     fill_unc: Optional[Union[float, Tuple[float, float], str]] = np.nan,
     assume_sorted: Optional[bool] = True,
     return_c: Optional[bool] = False,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Union[
+    Tuple[np.ndarray, np.ndarray, np.ndarray],
+    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
+]:
     r"""Interpolate a 1-D function considering the associated uncertainties
 
     t and y are arrays of values used to approximate some function :math:`f \colon y
@@ -90,12 +93,12 @@ def interp1d_unc(
             If False, values of t can be in any order and they are sorted first. If
             True, t has to be an array of monotonically increasing values.
         return_c : bool, optional
-            This feature is not yet implemented, but will be provided in the near
-            future. Setting `return_c` to True thus results in an exception being
-            thrown for now.
-            If True, return sensitivity coefficients for later use. If False
-            sensitivity coefficients are not returned and internal computation is
-            more efficient.
+            If True, return sensitivity coefficients for later use. This is only
+            available for interpolation types other than 'previous', 'next' and
+            'nearest'. If False sensitivity coefficients are not returned and
+            internal computation is more efficient.
+
+    If `return_c` is False, which is the default behaviour, the method returns:
 
     Returns
     -------
@@ -105,6 +108,20 @@ def interp1d_unc(
             interpolated values
         uy_new : (M,) array_like
             interpolated associated uncertainties
+
+    Otherwise the method returns:
+
+    Returns
+    -------
+        t_new : (M,) array_like
+            interpolation timestamps (or frequencies)
+        y_new : (M,) array_like
+            interpolated values
+        uy_new : (M,) array_like
+            interpolated associated uncertainties
+        C : (M,N) array_like
+            sensitivity matrix :math:`C`, which is used to compute the uncertainties
+            :math:`U_{y_{new}} = \sqrt{C \operatorname{diag}(u_y^2) C^T`}
 
     References
     ----------
@@ -155,6 +172,11 @@ def interp1d_unc(
     y_new = interp_y(t_new)
 
     if kind in ("previous", "next", "nearest"):
+        if return_c:
+            raise ValueError(
+                "Returning the sensitivity matrix is only supported for interpolation "
+                "types other than 'previous', 'next' and 'nearest'."
+            )
         # Look up uncertainties.
         interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
         uy_new = interp_uy(t_new)
@@ -209,9 +231,10 @@ def interp1d_unc(
                 for index, C_row in enumerate(C):
                     C_row[lo[index]] = L_1[index]
                     C_row[hi[index]] = L_2[index]
-                # Compute the sensitivities' matrix.
-                uy_new = (C @ np.diag(uy ** 2) @ C.T).diagonal()
+                # Compute the uncertainties.
+                uy_new = np.sqrt((C @ np.diag(uy ** 2) @ C.T).diagonal())
 
+                return t_new, y_new, uy_new, C
             else:
                 # Since we do not need the sensitivity matrix, we compute
                 # uncertainties more efficient.
