@@ -113,7 +113,7 @@ def timestamps_values_uncertainties_kind(
         float_strategy = st.floats(**float_generic_params)
         fill_strategy = st.one_of(
             float_strategy,
-            st.tuples(*tuple(itertools.repeat(st.floats(**float_generic_params), 2))),
+            st.tuples(float_strategy, float_strategy),
             st.just("extrapolate"),
         )
         fill_value = draw(fill_strategy)
@@ -390,8 +390,7 @@ def test_linear_uy_in_interp1d_unc(n,):
 def test_wrong_input_lengths_call_interp1d(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
-        interp_inputs["y"] = np.tile(interp_inputs["y"], 2)
-        interp_inputs["uy"] = np.tile(interp_inputs["uy"], 3)
+        interp_inputs["uy"] = np.tile(interp_inputs["uy"], 2)
         interp1d_unc(**interp_inputs)
 
 
