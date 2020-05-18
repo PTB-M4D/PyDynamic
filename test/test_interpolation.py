@@ -109,7 +109,7 @@ def timestamps_values_uncertainties_kind(
         float_strategy = st.floats(**float_generic_params)
         fill_strategy = st.one_of(
             float_strategy,
-            st.tuples(*tuple(itertools.repeat(st.floats(**float_generic_params), 2))),
+            st.tuples(float_strategy, float_strategy),
             st.just("extrapolate"),
         )
         fill_value = draw(fill_strategy)
