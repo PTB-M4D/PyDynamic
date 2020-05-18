@@ -184,12 +184,6 @@ def interp1d_unc(
         # associated interpolated uncertainties following White, 2017.
         uy_new = np.empty_like(y_new)
 
-        if return_c:
-            raise NotImplementedError(
-                "Unfortunately we did not yet implement this feature. It will be "
-                "present in the near future."
-            )
-
         # Calculate boolean arrays of indices from t_new which are outside t's bounds...
         extrapolation_range = (t_new < np.min(t)) | (t_new > np.max(t))
         # .. and inside t's bounds.
@@ -219,6 +213,8 @@ def interp1d_unc(
                 uy_new = (C @ np.diag(uy ** 2) @ C.T).diagonal()
 
             else:
+                # Since we do not need the sensitivity matrix, we compute
+                # uncertainties more efficient.
                 uy_prev_sqr = uy[lo[interpolation_range]] ** 2
                 uy_next_sqr = uy[hi[interpolation_range]] ** 2
                 uy_new[interpolation_range] = np.sqrt(
