@@ -78,8 +78,13 @@ def interp1d_unc(
             - If “extrapolate”, then points outside the data range will be set
               to the first or last element of the values.
 
+            Both parameters `fill_value` and `fill_unc` should be
+            provided to ensure desired behaviour in the extrapolation range.
+
         fill_unc : array-like or (array-like, array_like) or “extrapolate”, optional
-            Usage and behaviour as described in `fill_value` but for the uncertainties
+            Usage and behaviour as described in `fill_value` but for the
+            uncertainties. Both parameters `fill_value` and `fill_unc` should be
+            provided to ensure desired behaviour in the extrapolation range.
 
         assume_sorted : bool, optional
             If False, values of t can be in any order and they are sorted first. If
@@ -136,10 +141,16 @@ def interp1d_unc(
     }
 
     # Inter- or extrapolate values in the desired fashion and especially ensure
-    # constant behaviour outside the original bounds. For this to rely on SciPy's
-    # handling of fill values we set those explicitly to boundary values of y.
-    if fill_value == "extrapolate":
-        fill_value = y[0], y[-1]
+    # constant behaviour outside the original bounds but do not bother in case
+    # exception would be thrown.
+    if not bounds_error:
+        # For this to rely on SciPy's handling of fill values we set those explicitly
+        # to boundary values of y or uy respectively.
+        if fill_value == "extrapolate":
+            fill_value = y[0], y[-1]
+        if fill_unc == "extrapolate":
+            fill_unc = uy[0], uy[-1]
+
     interp_y = interp1d(t, y, fill_value=fill_value, **interp1d_params)
     y_new = interp_y(t_new)
 
@@ -187,10 +198,6 @@ def interp1d_unc(
         # If extrapolation is needed, rely on SciPy's handling of fill values,
         # which we prepared in advance.
         if np.any(extrapolation_range):
-            # Set boundary values of uy for fill values to ensure constant behaviour
-            # outside original bounds.
-            if fill_unc == "extrapolate":
-                fill_unc = uy[0], uy[-1]
             interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
             uy_new[extrapolation_range] = interp_uy(t_new[extrapolation_range])
 
