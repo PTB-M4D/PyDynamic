@@ -9,8 +9,7 @@ This module contains the following function:
 * :func:`interp1d_unc`: Interpolate arbitrary time series considering the associated
   uncertainties
 """
-
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 from scipy.interpolate import interp1d
