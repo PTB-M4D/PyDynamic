@@ -203,13 +203,13 @@ def interp1d_unc(
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interpolation_range):
-            uy_prev_sqr = uy[lo] ** 2
-            uy_next_sqr = uy[hi] ** 2
+            uy_prev_sqr = uy[lo[interpolation_range]] ** 2
+            uy_next_sqr = uy[hi[interpolation_range]] ** 2
             uy_new[interpolation_range] = np.sqrt(
                 (t_new[interpolation_range] - t_hi[interpolation_range]) ** 2
-                * uy_prev_sqr[interpolation_range]
+                * uy_prev_sqr
                 + (t_new[interpolation_range] - t_lo[interpolation_range]) ** 2
-                * uy_next_sqr[interpolation_range]
+                * uy_next_sqr
             ) / (t_hi[interpolation_range] - t_lo[interpolation_range])
     else:
         raise NotImplementedError(
