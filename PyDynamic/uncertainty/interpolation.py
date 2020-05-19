@@ -261,7 +261,7 @@ def interp1d_unc(
                 # inside the interpolation range are the Lagrangian polynomials. We
                 # compute the Lagrangian polynomials for all interpolation nodes
                 # inside the original range.
-                L_1 = (t_new[interp_range] - t_hi) / (t_hi - t_lo)
+                L_1 = (t_new[interp_range] - t_hi) / (t_lo - t_hi)
                 L_2 = (t_new[interp_range] - t_lo) / (t_hi - t_lo)
 
                 # Create iterators needed to efficiently fill our sensitivity matrix
@@ -284,7 +284,10 @@ def interp1d_unc(
                 ]
             else:
                 # Since we do not need the sensitivity matrix, we compute
-                # uncertainties more efficient.
+                # uncertainties more efficient. The simplification of the equation by
+                # pulling the denominator out, just works because we work with the
+                # squared Lagrangians. Otherwise we would have to account for the
+                # summation order.
                 uy_prev_sqr = uy[lo] ** 2
                 uy_next_sqr = uy[hi] ** 2
                 uy_new[interp_range] = np.sqrt(
