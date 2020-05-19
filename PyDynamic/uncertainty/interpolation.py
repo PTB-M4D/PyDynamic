@@ -48,7 +48,7 @@ def interp1d_unc(
     ----------
         t_new : (M,) array_like
             A 1-D array of real values representing the timestamps (or frequencies) at
-            which to evaluate the interpolated values.
+            which to evaluate the interpolated values. t_new can be sorted in any order.
         t : (N,) array_like
             A 1-D array of real values representing timestamps (or frequencies) in
             ascending order.
@@ -221,17 +221,24 @@ def interp1d_unc(
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interpolation_range):
             if return_c:
-                # Prepare the sensitivity coefficients, which in
-                # the first place are the Lagrangian polynomials:
+                # Prepare the sensitivity coefficients, which in the first place
+                # inside the interpolation range are the Lagrangian polynomials:
                 C = np.zeros((len(t_new), len(uy)), "float64")
-                L_1 = (t_new - t_hi) / (t_hi - t_lo)
-                L_2 = (t_new - t_lo) / (t_hi - t_lo)
+                L_1 = (t_new[interpolation_range] - t_hi[interpolation_range]) / (
+                    t_hi[interpolation_range] - t_lo[interpolation_range]
+                )
+                L_1_it = iter(L_1)
+                L_2 = (t_new[interpolation_range] - t_lo[interpolation_range]) / (
+                    t_hi[interpolation_range] - t_lo[interpolation_range]
+                )
+                L_2_it = iter(L_2)
                 # In each row of C set the column with the corresponding
                 # index in lo to L_1 and the column with the corresponding
                 # index in hi to L_2.
                 for index, C_row in enumerate(C):
-                    C_row[lo[index]] = L_1[index]
-                    C_row[hi[index]] = L_2[index]
+                    if interpolation_range[index]:
+                        C_row[lo[index]] = next(L_1_it)
+                        C_row[hi[index]] = next(L_2_it)
                 # Compute the uncertainties.
                 uy_new = np.sqrt((C @ np.diag(uy ** 2) @ C.T).diagonal())
 
