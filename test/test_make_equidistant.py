@@ -5,7 +5,7 @@ from typing import Dict, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, example, given
+from hypothesis import given
 from hypothesis.strategies import composite
 from pytest import raises
 
@@ -96,18 +96,6 @@ def test_too_short_call_make_equidistant(interp_inputs):
         make_equidistant(interp_inputs["t"], interp_inputs["y"])
 
 
-from numpy import array
-
-
-@example(
-    {
-        "dt": 1.1417981541647915e46,
-        "kind": "linear",
-        "t": array([1.973629e62, 1.973629e62]),
-        "uy": array([0.00000000e00, 2.22044605e48]),
-        "y": array([0.00000000e00, 2.22044605e48]),
-    },
-)
 @given(timestamps_values_uncertainties_kind())
 def test_full_call_make_equidistant(interp_inputs):
     t_new, y_new, uy_new = make_equidistant(**interp_inputs)
