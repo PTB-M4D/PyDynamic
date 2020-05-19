@@ -182,13 +182,21 @@ def interp1d_unc(
         interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
         uy_new = interp_uy(t_new)
     elif kind == "linear":
-        # This following section is taken from scipy.interpolate.interp1d to
-        # determine the indices of the relevant timestamps or frequencies.
+        # Calculate boolean arrays of indices from t_new which are outside t's bounds...
+        extrap_range_below = t_new < np.min(t)
+        extrap_range_above = t_new > np.max(t)
+        extrap_range = extrap_range_below | extrap_range_above
+        # .. and inside t's bounds.
+        interp_range = ~extrap_range
+
+        # This following section is taken partly from scipy.interpolate.interp1d to
+        # determine the indices of the relevant original timestamps (or frequencies)
+        # for the interpolation.
         # ------------------------------------------------------------------------------
         # 2. Find where in the original data, the values to interpolate
         #    would be inserted.
         #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
-        t_new_indices = np.searchsorted(t, t_new)
+        t_new_indices = np.searchsorted(t, t_new[interp_range])
 
         # 3. Clip x_new_indices so that they are within the range of
         #    self.x indices and at least 1.  Removes mis-interpolation
@@ -230,14 +238,13 @@ def interp1d_unc(
             if return_c:
                 # Prepare the sensitivity coefficients, which in the first place
                 # inside the interpolation range are the Lagrangian polynomials:
+                # The matrix in the end needs to be of shape(M, N).
                 C = np.zeros((len(t_new), len(uy)), "float64")
-                L_1 = (t_new[interp_range] - t_hi[interp_range]) / (
-                    t_hi[interp_range] - t_lo[interp_range]
-                )
+                # Compute the Lagrangian polynomials for all interpolation nodes
+                # inside the original range.
+                L_1 = (t_new[interp_range] - t_hi) / (t_hi - t_lo)
                 L_1_it = iter(L_1)
-                L_2 = (t_new[interp_range] - t_lo[interp_range]) / (
-                    t_hi[interp_range] - t_lo[interp_range]
-                )
+                L_2 = (t_new[interp_range] - t_lo) / (t_hi - t_lo)
                 L_2_it = iter(L_2)
                 # In each row of C set the column with the corresponding
                 # index in lo to L_1 and the column with the corresponding
@@ -253,12 +260,12 @@ def interp1d_unc(
             else:
                 # Since we do not need the sensitivity matrix, we compute
                 # uncertainties more efficient.
-                uy_prev_sqr = uy[lo[interp_range]] ** 2
-                uy_next_sqr = uy[hi[interp_range]] ** 2
+                uy_prev_sqr = uy[lo] ** 2
+                uy_next_sqr = uy[hi] ** 2
                 uy_new[interp_range] = np.sqrt(
-                    (t_new[interp_range] - t_hi[interp_range]) ** 2 * uy_prev_sqr
-                    + (t_new[interp_range] - t_lo[interp_range]) ** 2 * uy_next_sqr
-                ) / (t_hi[interp_range] - t_lo[interp_range])
+                    (t_new[interp_range] - t_hi) ** 2 * uy_prev_sqr
+                    + (t_new[interp_range] - t_lo) ** 2 * uy_next_sqr
+                ) / (t_hi - t_lo)
     else:
         raise NotImplementedError(
             "%s is unsupported yet. Let us know, that you need it." % kind
