@@ -96,7 +96,7 @@ def interp1d_unc(
         return_c : bool, optional
             If True, return sensitivity coefficients for later use. This is only
             available for interpolation kind 'linear' and for
-            fill_value="extrapolate" at the moment. If False sensitivity
+            fill_unc="extrapolate" at the moment. If False sensitivity
             coefficients are not returned and internal computation is
             slightly more efficient.
 
