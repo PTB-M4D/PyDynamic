@@ -216,22 +216,31 @@ def interp1d_unc(
         # associated interpolated uncertainties following White, 2017.
         uy_new = np.empty_like(y_new)
 
-        # Calculate boolean arrays of indices from t_new which are outside t's bounds...
-        extrap_range_below = t_new < np.min(t)
-        extrap_range_above = t_new > np.max(t)
-        extrap_range = extrap_range_below | extrap_range_above
-        # .. and inside t's bounds.
-        interp_range = ~extrap_range
-
-        # If extrapolation is needed, rely on SciPy's handling of fill values,
-        # which we prepared in advance.
+        # If extrapolation is needed, fill in the values provided via fill_unc.
         if np.any(extrap_range):
-            # In case we have one float value to extrapolate the uncertainties below
-            # and above the original range, we construct the tuple version of
-            # fill_unc to allow for more efficient extrapolation in the linear case.
+            # At this point fill_unc is either a float (np.nan is a float as well) or
+            # a 2-tuple of floats. In case we have one float we set uy to this value
+            # inside the extrapolation range.
             if isinstance(fill_unc, float):
-                fill_unc = fill_unc, fill_unc
-            # TODO do actual extrapolation manually
+                uy_new[extrap_range] = fill_unc
+            else:
+                # Now fill_unc should be a 2-tuple, which we can fill into uy_new.
+                uy_new[extrap_range_below], uy_new[extrap_range_above] = fill_unc
+
+            if return_c:
+                # We are not sure yet, how we should extend the originally provided
+                # sensitivities in case of extrapolation. Should we insert one
+                # uncertainty for each interpolation node outside the original range
+                # or should we insert simply each one at the beginning and at the end
+                # of the originally provided vector?!
+                raise NotImplementedError(
+                    "Since we are not sure yet about the "
+                    "desired behaviour of returning "
+                    "sensitivities for extrapolation, "
+                    "this feature is not yet implemented, "
+                    "but right on its way. Check back soon or "
+                    "get in touch with us."
+                )
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interp_range):
