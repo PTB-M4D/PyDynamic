@@ -213,7 +213,7 @@ def interp1d_unc(
         # If extrapolation is needed, fill in the values provided via fill_unc.
         if np.any(extrap_range):
             # At this point fill_unc is either a float (np.nan is a float as well) or
-            # a 2-tuple of floats. In case we have one float we set uy to this value
+            # a 2-tuple of floats. In case we have one float we set uy_new to this value
             # inside the extrapolation range.
             if isinstance(fill_unc, float):
                 uy_new[extrap_range] = fill_unc
@@ -230,9 +230,9 @@ def interp1d_unc(
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interp_range):
-            # This following section is taken partly from scipy.interpolate.interp1d to
+            # This following section is taken mainly from scipy.interpolate.interp1d to
             # determine the indices of the relevant original timestamps (or frequencies)
-            # for the interpolation.
+            # just for the interpolation range.
             # --------------------------------------------------------------------------
             # 2. Find where in the original data, the values to interpolate
             #    would be inserted.
@@ -273,16 +273,16 @@ def interp1d_unc(
                     if interp_range[index]:
                         C_row[next(lo_it)] = next(L_1_it)
                         C_row[next(hi_it)] = next(L_2_it)
-                # Compute the uncertainties.
+                # Compute the standard uncertainties.
                 uy_new[interp_range] = np.sqrt(
                     np.sum(C[interp_range] ** 2 * uy ** 2, 1)
                 )
             else:
-                # Since we do not need the sensitivity matrix, we compute
-                # uncertainties more efficient. The simplification of the equation by
-                # pulling the denominator out, just works because we work with the
-                # squared Lagrangians. Otherwise we would have to account for the
-                # summation order.
+                # Since we do not need the sensitivity matrix, we compute uncertainties
+                # more efficient (although we are actually not so sure about this
+                # anymore). The simplification of the equation by pulling out the
+                # denominator, just works because we work with the squared Lagrangians.
+                # Otherwise we would have to account for the summation order.
                 uy_prev_sqr = uy[lo] ** 2
                 uy_next_sqr = uy[hi] ** 2
                 uy_new[interp_range] = np.sqrt(
