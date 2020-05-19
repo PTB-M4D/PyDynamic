@@ -215,13 +215,13 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     Parameters
     ----------
         t: (N,) array_like
-            timestamps in ascending order
+            timestamps (or frequencies)
         y: (N,) array_like
             corresponding measurement values
         uy: (N,) array_like
-            corresponding measurement values' uncertainties
+            corresponding measurement values' standard uncertainties
         dt: float, optional
-            desired interval length in seconds
+            desired interval length
         kind: str, optional
             Specifies the kind of interpolation for the measurement values
             as a string ('previous', 'next', 'nearest' or 'linear').
@@ -229,11 +229,11 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     Returns
     -------
         t_new : (M,) array_like
-            interpolation timestamps
+            interpolation timestamps (or frequencies)
         y_new : (M,) array_like
             interpolated measurement values
         uy_new : (M,) array_like
-            interpolated measurement values' uncertainties
+            interpolated measurement values' standard uncertainties
 
     References
     ----------
@@ -242,7 +242,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     from ..uncertainty.interpolation import interp1d_unc
 
     # Setup new vector of timestamps.
-    t_new = np.arange(t[0], t[-1], dt)
+    t_new = np.arange(np.min(t), np.max(t), dt)
 
     # Since np.arange in overflow situations results in the last value not guaranteed to
     # be smaller than t[-1], we need to check for this and delete this unexpected value.
