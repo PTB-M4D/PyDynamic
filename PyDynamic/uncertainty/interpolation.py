@@ -278,9 +278,9 @@ def interp1d_unc(
                         C_row[next(lo_it)] = next(L_1_it)
                         C_row[next(hi_it)] = next(L_2_it)
                 # Compute the uncertainties.
-                uy_new = np.sqrt((C @ np.diag(uy ** 2) @ C.T).diagonal())
-
-                return t_new, y_new, uy_new, C
+                uy_new[interp_range] = np.sqrt((C @ np.diag(uy ** 2) @ C.T).diagonal())[
+                    interp_range
+                ]
             else:
                 # Since we do not need the sensitivity matrix, we compute
                 # uncertainties more efficient.
@@ -295,4 +295,6 @@ def interp1d_unc(
             "%s is unsupported yet. Let us know, that you need it." % kind
         )
 
+    if return_c:
+        return t_new, y_new, uy_new, C
     return t_new, y_new, uy_new
