@@ -495,48 +495,44 @@ def test_return_c_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
 @given(
     timestamps_values_uncertainties_kind(
         return_c=True,
-        extrapolate="below",
+        extrapolate=True,
         kind_tuple=("linear",),
         restrict_fill_unc="str",
     )
 )
-def test_return_c_with_extrapolation_check_c_below_bound_interp1d_unc(interp_inputs,):
-    # Check if extrapolation with constant behaviour outside interpolation range and
-    # returning of sensitivities work as expected.
+def test_return_c_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
+    # Check if sensitivity computation parallel to linear interpolation and
+    # extrapolation with constant values works as expected.
     C = interp1d_unc(**interp_inputs)[3]
-    ind_cond = interp_inputs["t_new"] < np.min(interp_inputs["t"])
-    assert (
-        # Sum of rows in C matching the rule above.
-        np.sum(C[np.where(ind_cond)])
-        # Sum of elements at the last index in rows of C matching the rule above.
-        == np.sum(C[np.where(ind_cond), 0])
-        # Sum of elements in t_new matching the above rule.
-        == np.sum(ind_cond)
+
+    # Check that C has the right shape.
+    assert C.shape == (len(interp_inputs["t_new"]), len(interp_inputs["t"]))
+
+    # Find interpolation range because we reuse it.
+    interp_range = (interp_inputs["t_new"] >= np.min(interp_inputs["t"])) | (
+        interp_inputs["t_new"] <= np.max(interp_inputs["t"])
     )
 
+    # Check if each row corresponding to an extrapolated value contains exactly one
+    # non-zero sensitivity.
+    assert np.all(np.count_nonzero(C[np.where(~interp_range)], 1) == 1)
 
-@given(
-    timestamps_values_uncertainties_kind(
-        return_c=True,
-        extrapolate="above",
-        kind_tuple=("linear",),
-        restrict_fill_unc="str",
+    # Check if each row corresponding to an interpolated value contains either exactly
+    # one or exactly two non-zero sensitivities, which are the two possible cases
+    # when performing Lagrangian linear interpolation.
+    assert np.all(
+        np.any(
+            (
+                np.count_nonzero(C[np.where(interp_range)], 1) == 2,
+                np.count_nonzero(C[np.where(interp_range)], 1) == 1,
+            ),
+            0,
+        )
     )
-)
-def test_return_c_with_extrapolation_check_c_above_bound_interp1d_unc(interp_inputs,):
-    # Check if extrapolation with constant behaviour outside interpolation range
-    # results in the sensitivities being equal to 1 at the last index of the
-    # corresponding rows in C and only there differ from zero.
-    C = interp1d_unc(**interp_inputs)[3]
-    ind_cond = interp_inputs["t_new"] > np.max(interp_inputs["t"])
-    assert (
-        # Sum of rows in C matching the rule above.
-        np.sum(C[np.where(ind_cond)])
-        # Sum of elements at the last index in rows of C matching the rule above.
-        == np.sum(C[np.where(ind_cond), -1])
-        # Sum of elements in t_new matching the above rule.
-        == np.sum(ind_cond)
-    )
+
+    # Check if each row of sensitivities sum to one, which should hold for the
+    # Lagrangians and proves equality with one for extrapolation sensitivities.
+    assert_allclose(np.sum(C, 1), np.ones_like(interp_inputs["t_new"]))
 
 
 @given(
