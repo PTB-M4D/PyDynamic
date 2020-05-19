@@ -245,7 +245,8 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     t_new = np.arange(np.min(t), np.max(t), dt)
 
     # Since np.arange in overflow situations results in the last value not guaranteed to
-    # be smaller than t[-1], we need to check for this and delete this unexpected value.
+    # be smaller than t's maximum, we need to check for this and delete this unexpected
+    # value.
     if t_new[-1] > np.max(t):
         t_new = t_new[:-1]
 
