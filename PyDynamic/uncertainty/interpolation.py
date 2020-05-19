@@ -56,7 +56,8 @@ def interp1d_unc(
             A 1-D array of real values. The length of y must be equal to the length
             of t.
         uy : (N,) array_like
-            A 1-D array of real values representing the uncertainties associated with y.
+            A 1-D array of real values representing the standard uncertainties
+            associated with y.
         kind : str, optional
             Specifies the kind of interpolation for y as a string ('previous',
             'next', 'nearest' or 'linear'). Default is ‘linear’.
@@ -107,7 +108,7 @@ def interp1d_unc(
         y_new : (M,) array_like
             interpolated values
         uy_new : (M,) array_like
-            interpolated associated uncertainties
+            interpolated associated standard uncertainties
 
     Otherwise the method returns:
 
@@ -118,10 +119,10 @@ def interp1d_unc(
         y_new : (M,) array_like
             interpolated values
         uy_new : (M,) array_like
-            interpolated associated uncertainties
+            interpolated associated standard uncertainties
         C : (M,N) array_like
             sensitivity matrix :math:`C`, which is used to compute the uncertainties
-            :math:`U_{y_{new}} = \sqrt{C \operatorname{diag}(u_y^2) C^T`}
+            :math:`U_{y_{new}} = C \operatorname{diag}(u_y^2) C^T`
 
     References
     ----------
