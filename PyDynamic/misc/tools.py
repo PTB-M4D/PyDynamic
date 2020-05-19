@@ -246,7 +246,7 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
 
     # Since np.arange in overflow situations results in the last value not guaranteed to
     # be smaller than t[-1], we need to check for this and delete this unexpected value.
-    if t_new[-1] > t[-1]:
+    if t_new[-1] > np.max(t):
         t_new = t_new[:-1]
 
     return interp1d_unc(t_new, t, y, uy, kind)
