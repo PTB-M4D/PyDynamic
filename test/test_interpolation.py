@@ -269,7 +269,8 @@ def test_extrapolate_below_with_fill_value_interp1d_unc(interp_inputs):
 )
 def test_extrapolate_below_with_fill_values_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
-    # fill_value is a float, which means constant extrapolation with this value.
+    # fill_value is a tuple, which means constant extrapolation with its first
+    # element.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works.
     assert np.all(
@@ -318,7 +319,7 @@ def test_extrapolate_above_with_fill_value_interp1d_unc(interp_inputs):
 )
 def test_extrapolate_above_with_fill_values_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is above the maximum of t and
-    # fill_value is a float, which means constant extrapolation with this value.
+    # fill_value is a tuple, which means constant extrapolation with its second element.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works.
     assert np.all(
