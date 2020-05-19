@@ -158,7 +158,7 @@ def interp1d_unc(
         "assume_sorted": True,
     }
 
-    # Ensure constant behaviour outside the original bounds by setting fill_value
+    # Ensure constant values outside the original bounds by setting fill_value
     # and fill_unc accordingly but do not bother in case exception would be thrown.
     if not bounds_error:
         # For the extrapolation to rely on SciPy's handling of fill values in all

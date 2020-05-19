@@ -484,7 +484,7 @@ def test_return_c_with_extrapolation_check_below_bound_interp1d_unc(interp_input
 def test_return_c_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
     interp_inputs,
 ):
-    # Check if extrapolation with constant behaviour outside interpolation range and
+    # Check if extrapolation with constant values outside interpolation range and
     # returning sensitivities work as expected regarding extrapolation values
     # above original bound.
     uy_new = interp1d_unc(**interp_inputs)[2]
