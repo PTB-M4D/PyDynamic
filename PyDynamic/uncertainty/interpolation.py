@@ -95,9 +95,10 @@ def interp1d_unc(
             True, t has to be an array of monotonically increasing values.
         return_c : bool, optional
             If True, return sensitivity coefficients for later use. This is only
-            available for interpolation types other than 'previous', 'next' and
-            'nearest'. If False sensitivity coefficients are not returned and
-            internal computation is more efficient.
+            available for interpolation kind 'linear' and for
+            fill_value="extrapolate" at the moment. If False sensitivity
+            coefficients are not returned and internal computation is
+            slightly more efficient.
 
     If `return_c` is False, which is the default behaviour, the method returns:
 
@@ -122,7 +123,7 @@ def interp1d_unc(
             interpolated associated standard uncertainties
         C : (M,N) array_like
             sensitivity matrix :math:`C`, which is used to compute the uncertainties
-            :math:`U_{y_{new}} = C \operatorname{diag}(u_y^2) C^T`
+            :math:`U_{y_{new}} = C \cdot \operatorname{diag}(u_y^2) \cdot C^T`
 
     References
     ----------
@@ -169,19 +170,14 @@ def interp1d_unc(
         if fill_unc == "extrapolate":
             fill_unc = uy[0], uy[-1]
         elif return_c:
-            # This case is not so clear in terms of how to align the extrapolated
-            # uncertainties with the associated uncertainties of the values,
-            # so we throw an exception for now. One we deal with this, we will
-            # probably introduce another input parameter fill_sens which expects to
-            # be of shape (N,) or a 2-tuple of this shape, which is then used in C
-            # wherever an extrapolation is performed.
+            # Once we deal with this, we will probably introduce another input parameter
+            # fill_sens which is expected to be of shape (N,) or a 2-tuple of this
+            # shape, which is then used in C wherever an extrapolation is performed.
             raise NotImplementedError(
-                "Since we are not sure yet about the desired behaviour of returning "
-                "sensitivities for extrapolation without assuming constancy, "
-                "this feature is not yet implemented. Get in touch with us, "
-                "if you need it to discuss how to proceed. We are planning to add "
+                "This feature is not yet implemented.  We are planning to add "
                 "another input parameter which is meant to carry the sensitivities "
-                "for the extrapolated uncertainties."
+                "for the extrapolated uncertainties. Get in touch with us, "
+                "if you need it to discuss how to proceed."
             )
 
     # Inter- or extrapolate values in the desired fashion relying on SciPy.
