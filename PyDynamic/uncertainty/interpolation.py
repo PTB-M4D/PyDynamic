@@ -149,9 +149,8 @@ def interp1d_unc(
             "as array of measurement values."
         )
 
-    # Set up parameter dicts for calls of interp1d. We use it for actual
-    # "interpolation" (i.e. look-ups) in trivial cases and in the linear case to
-    # extrapolate.
+    # Set up parameter dicts for calls of interp1d. We use it for interpolating the
+    # values and "interpolation" (i.e. look-ups) of uncertainties in the trivial cases.
     interp1d_params = {
         "kind": kind,
         "copy": False,
@@ -180,7 +179,7 @@ def interp1d_unc(
                 "if you need it to discuss how to proceed."
             )
 
-    # Inter- or extrapolate values in the desired fashion relying on SciPy.
+    # Inter- and extrapolate values in the desired fashion relying on SciPy.
     interp_y = interp1d(t, y, fill_value=fill_value, **interp1d_params)
     y_new = interp_y(t_new)
 
