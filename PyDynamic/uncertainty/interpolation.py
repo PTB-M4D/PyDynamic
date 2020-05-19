@@ -158,17 +158,17 @@ def interp1d_unc(
         "assume_sorted": True,
     }
 
-    # Inter- or extrapolate values in the desired fashion and especially ensure
-    # constant behaviour outside the original bounds but do not bother in case
-    # exception would be thrown.
+    # Ensure constant behaviour outside the original bounds by setting fill_value
+    # and fill_unc accordingly but do not bother in case exception would be thrown.
     if not bounds_error:
-        # For this to rely on SciPy's handling of fill values we set those explicitly
-        # to boundary values of y or uy respectively.
+        # For the extrapolation to rely on SciPy's handling of fill values in all
+        # but the linear case we set those explicitly to boundary values of y and uy
+        # respectively.
         if fill_value == "extrapolate":
             fill_value = y[0], y[-1]
         if fill_unc == "extrapolate":
             fill_unc = uy[0], uy[-1]
-
+    # Inter- or extrapolate values in the desired fashion relying on SciPy.
     interp_y = interp1d(t, y, fill_value=fill_value, **interp1d_params)
     y_new = interp_y(t_new)
 
@@ -202,41 +202,48 @@ def interp1d_unc(
         t_lo = t[lo]
         t_hi = t[hi]
         # ------------------------------------------------------------------------------
+
         # Now we extend the interpolation from scipy.interpolate.interp1d by first
         # extrapolating the according values if required and then computing the
         # associated interpolated uncertainties following White, 2017.
         uy_new = np.empty_like(y_new)
 
         # Calculate boolean arrays of indices from t_new which are outside t's bounds...
-        extrapolation_range = (t_new < np.min(t)) | (t_new > np.max(t))
+        extrap_range_below = t_new < np.min(t)
+        extrap_range_above = t_new > np.max(t)
+        extrap_range = extrap_range_below | extrap_range_above
         # .. and inside t's bounds.
-        interpolation_range = ~extrapolation_range
+        interp_range = ~extrap_range
 
         # If extrapolation is needed, rely on SciPy's handling of fill values,
         # which we prepared in advance.
-        if np.any(extrapolation_range):
-            interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
-            uy_new[extrapolation_range] = interp_uy(t_new[extrapolation_range])
+        if np.any(extrap_range):
+            # In case we have one float value to extrapolate the uncertainties below
+            # and above the original range, we construct the tuple version of
+            # fill_unc to allow for more efficient extrapolation in the linear case.
+            if isinstance(fill_unc, float):
+                fill_unc = fill_unc, fill_unc
+            # TODO do actual extrapolation manually
 
         # If interpolation is needed, compute uncertainties following White, 2017.
-        if np.any(interpolation_range):
+        if np.any(interp_range):
             if return_c:
                 # Prepare the sensitivity coefficients, which in the first place
                 # inside the interpolation range are the Lagrangian polynomials:
                 C = np.zeros((len(t_new), len(uy)), "float64")
-                L_1 = (t_new[interpolation_range] - t_hi[interpolation_range]) / (
-                    t_hi[interpolation_range] - t_lo[interpolation_range]
+                L_1 = (t_new[interp_range] - t_hi[interp_range]) / (
+                    t_hi[interp_range] - t_lo[interp_range]
                 )
                 L_1_it = iter(L_1)
-                L_2 = (t_new[interpolation_range] - t_lo[interpolation_range]) / (
-                    t_hi[interpolation_range] - t_lo[interpolation_range]
+                L_2 = (t_new[interp_range] - t_lo[interp_range]) / (
+                    t_hi[interp_range] - t_lo[interp_range]
                 )
                 L_2_it = iter(L_2)
                 # In each row of C set the column with the corresponding
                 # index in lo to L_1 and the column with the corresponding
                 # index in hi to L_2.
                 for index, C_row in enumerate(C):
-                    if interpolation_range[index]:
+                    if interp_range[index]:
                         C_row[lo[index]] = next(L_1_it)
                         C_row[hi[index]] = next(L_2_it)
                 # Compute the uncertainties.
@@ -246,14 +253,12 @@ def interp1d_unc(
             else:
                 # Since we do not need the sensitivity matrix, we compute
                 # uncertainties more efficient.
-                uy_prev_sqr = uy[lo[interpolation_range]] ** 2
-                uy_next_sqr = uy[hi[interpolation_range]] ** 2
-                uy_new[interpolation_range] = np.sqrt(
-                    (t_new[interpolation_range] - t_hi[interpolation_range]) ** 2
-                    * uy_prev_sqr
-                    + (t_new[interpolation_range] - t_lo[interpolation_range]) ** 2
-                    * uy_next_sqr
-                ) / (t_hi[interpolation_range] - t_lo[interpolation_range])
+                uy_prev_sqr = uy[lo[interp_range]] ** 2
+                uy_next_sqr = uy[hi[interp_range]] ** 2
+                uy_new[interp_range] = np.sqrt(
+                    (t_new[interp_range] - t_hi[interp_range]) ** 2 * uy_prev_sqr
+                    + (t_new[interp_range] - t_lo[interp_range]) ** 2 * uy_next_sqr
+                ) / (t_hi[interp_range] - t_lo[interp_range])
     else:
         raise NotImplementedError(
             "%s is unsupported yet. Let us know, that you need it." % kind
