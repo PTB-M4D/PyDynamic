@@ -454,6 +454,44 @@ def test_return_c_with_extrapolation_interp1d_unc(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
+        return_c=True,
+        extrapolate=True,
+        kind_tuple=("linear",),
+        restrict_fill_unc="str",
+        sorted_timestamps=True,
+    )
+)
+def test_return_c_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs):
+    # Check if extrapolation with constant behaviour outside interpolation range and
+    # returning of sensitivities work as expected.
+    uy_new, C = interp1d_unc(**interp_inputs)[2:]
+    assert np.all(
+        uy_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        == interp_inputs["uy"][0]
+    )
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        return_c=True,
+        extrapolate=True,
+        kind_tuple=("linear",),
+        restrict_fill_unc="str",
+        sorted_timestamps=True,
+    )
+)
+def test_return_c_with_extrapolation_check_above_bound_interp1d_unc(interp_inputs):
+    # Check if extrapolation with constant behaviour outside interpolation range and
+    # returning of sensitivities work as expected.
+    uy_new, C = interp1d_unc(**interp_inputs)[2:]
+    assert np.all(
+        uy_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        == interp_inputs["uy"][-1]
+    )
+
+
+@given(
+    timestamps_values_uncertainties_kind(
         return_c=True, kind_tuple=("previous", "next", "nearest",)
     )
 )
