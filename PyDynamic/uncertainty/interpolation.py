@@ -168,6 +168,21 @@ def interp1d_unc(
             fill_value = y[0], y[-1]
         if fill_unc == "extrapolate":
             fill_unc = uy[0], uy[-1]
+        elif return_c:
+            # This case is not so clear in terms of how to align the extrapolated
+            # uncertainties with the associated uncertainties of the values,
+            # so we throw an exception for now. We are not sure yet, how we should
+            # extend the originally provided uncertainties in case of extrapolation.
+            # Should we insert one uncertainty for each interpolation node outside
+            # the original range or should we insert simply each one at the beginning
+            # and at the end of the originally provided vector of uncertainties?!
+            raise NotImplementedError(
+                "Since we are not sure yet about the desired behaviour of returning "
+                "sensitivities for extrapolation without assuming constancy, "
+                "this feature is not yet implemented. Get in touch with us, "
+                "if you need it to discuss how to proceed."
+            )
+
     # Inter- or extrapolate values in the desired fashion relying on SciPy.
     interp_y = interp1d(t, y, fill_value=fill_value, **interp1d_params)
     y_new = interp_y(t_new)
@@ -189,32 +204,15 @@ def interp1d_unc(
         # .. and inside t's bounds.
         interp_range = ~extrap_range
 
-        # This following section is taken partly from scipy.interpolate.interp1d to
-        # determine the indices of the relevant original timestamps (or frequencies)
-        # for the interpolation.
-        # ------------------------------------------------------------------------------
-        # 2. Find where in the original data, the values to interpolate
-        #    would be inserted.
-        #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
-        t_new_indices = np.searchsorted(t, t_new[interp_range])
-
-        # 3. Clip x_new_indices so that they are within the range of
-        #    self.x indices and at least 1.  Removes mis-interpolation
-        #    of x_new[n] = x[0]
-        t_new_indices = t_new_indices.clip(1, len(t) - 1).astype(int)
-
-        # 4. Calculate the slope of regions that each x_new value falls in.
-        lo = t_new_indices - 1
-        hi = t_new_indices
-
-        t_lo = t[lo]
-        t_hi = t[hi]
-        # ------------------------------------------------------------------------------
-
-        # Now we extend the interpolation from scipy.interpolate.interp1d by first
-        # extrapolating the according values if required and then computing the
-        # associated interpolated uncertainties following White, 2017.
+        # Initialize the result array for the standard uncertainties.
         uy_new = np.empty_like(y_new)
+
+        # Initialize the sensitivity matrix of shape (M, N) if needed.
+        if return_c:
+            C = np.zeros((len(t_new), len(uy)), "float64")
+
+        # First extrapolate the according values if required and then
+        # compute interpolated uncertainties following White, 2017.
 
         # If extrapolation is needed, fill in the values provided via fill_unc.
         if np.any(extrap_range):
@@ -228,40 +226,57 @@ def interp1d_unc(
                 uy_new[extrap_range_below], uy_new[extrap_range_above] = fill_unc
 
             if return_c:
-                # We are not sure yet, how we should extend the originally provided
-                # sensitivities in case of extrapolation. Should we insert one
-                # uncertainty for each interpolation node outside the original range
-                # or should we insert simply each one at the beginning and at the end
-                # of the originally provided vector?!
-                raise NotImplementedError(
-                    "Since we are not sure yet about the "
-                    "desired behaviour of returning "
-                    "sensitivities for extrapolation, "
-                    "this feature is not yet implemented, "
-                    "but right on its way. Check back soon or "
-                    "get in touch with us."
-                )
+                # In each row of C corresponding to an extrapolation value below the
+                # original range set the first column to 1 and in each row of C
+                # corresponding to an extrapolation value above the original range set
+                # the last column to 1.
+                C[:, 0], C[:, -1] = extrap_range_below, extrap_range_above
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interp_range):
+            # This following section is taken partly from scipy.interpolate.interp1d to
+            # determine the indices of the relevant original timestamps (or frequencies)
+            # for the interpolation.
+            # --------------------------------------------------------------------------
+            # 2. Find where in the original data, the values to interpolate
+            #    would be inserted.
+            #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
+            t_new_indices = np.searchsorted(t, t_new[interp_range])
+
+            # 3. Clip x_new_indices so that they are within the range of
+            #    self.x indices and at least 1.  Removes mis-interpolation
+            #    of x_new[n] = x[0]
+            t_new_indices = t_new_indices.clip(1, len(t) - 1).astype(int)
+
+            # 4. Calculate the slope of regions that each x_new value falls in.
+            lo = t_new_indices - 1
+            hi = t_new_indices
+
+            t_lo = t[lo]
+            t_hi = t[hi]
+            # --------------------------------------------------------------------------
             if return_c:
                 # Prepare the sensitivity coefficients, which in the first place
-                # inside the interpolation range are the Lagrangian polynomials:
-                # The matrix in the end needs to be of shape(M, N).
-                C = np.zeros((len(t_new), len(uy)), "float64")
-                # Compute the Lagrangian polynomials for all interpolation nodes
+                # inside the interpolation range are the Lagrangian polynomials. We
+                # compute the Lagrangian polynomials for all interpolation nodes
                 # inside the original range.
                 L_1 = (t_new[interp_range] - t_hi) / (t_hi - t_lo)
-                L_1_it = iter(L_1)
                 L_2 = (t_new[interp_range] - t_lo) / (t_hi - t_lo)
+
+                # Create iterators needed to efficiently fill our sensitivity matrix
+                # in the rows corresponding to interpolation range.
+                lo_it = iter(lo)
+                hi_it = iter(hi)
+                L_1_it = iter(L_1)
                 L_2_it = iter(L_2)
+
                 # In each row of C set the column with the corresponding
                 # index in lo to L_1 and the column with the corresponding
                 # index in hi to L_2.
                 for index, C_row in enumerate(C):
                     if interp_range[index]:
-                        C_row[lo[index]] = next(L_1_it)
-                        C_row[hi[index]] = next(L_2_it)
+                        C_row[next(lo_it)] = next(L_1_it)
+                        C_row[next(hi_it)] = next(L_2_it)
                 # Compute the uncertainties.
                 uy_new = np.sqrt((C @ np.diag(uy ** 2) @ C.T).diagonal())
 

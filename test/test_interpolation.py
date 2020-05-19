@@ -364,7 +364,6 @@ def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
 def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_unc is a tuple, which means constant extrapolation with its first element.
-    assume(isinstance(interp_inputs["fill_unc"], tuple))
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
     assert np.all(
@@ -434,11 +433,23 @@ def test_compare_return_c_interp1d_unc(interp_inputs):
         return_c=True, extrapolate=True, kind_tuple=("linear",)
     )
 )
-def test_return_c_with_extrapolation_interp1d_unc(interp_inputs):
-    # Since we are not sure about the desired behaviour in this case, for now we
+def test_failing_return_c_with_extrapolation_interp1d_unc(interp_inputs):
+    # Since we are not sure about the desired behaviour in these cases, for now we
     # check for exception being thrown.
+    assume(not isinstance(interp_inputs["fill_unc"], str))
     with raises(NotImplementedError):
         interp1d_unc(**interp_inputs)
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        return_c=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str"
+    )
+)
+def test_return_c_with_extrapolation_interp1d_unc(interp_inputs):
+    # Check if extrapolation with constant behaviour outside interpolation range and
+    # returning of sensitivities work as expected.
+    assert interp1d_unc(**interp_inputs)
 
 
 @given(
