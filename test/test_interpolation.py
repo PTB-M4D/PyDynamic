@@ -480,13 +480,62 @@ def test_return_c_with_extrapolation_check_below_bound_interp1d_unc(interp_input
         sorted_timestamps=True,
     )
 )
-def test_return_c_with_extrapolation_check_above_bound_interp1d_unc(interp_inputs):
+def test_return_c_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
+    interp_inputs,
+):
     # Check if extrapolation with constant behaviour outside interpolation range and
     # returning of sensitivities work as expected.
-    uy_new, C = interp1d_unc(**interp_inputs)[2:]
+    uy_new = interp1d_unc(**interp_inputs)[2]
     assert np.all(
         uy_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
         == interp_inputs["uy"][-1]
+    )
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        return_c=True,
+        extrapolate="below",
+        kind_tuple=("linear",),
+        restrict_fill_unc="str",
+    )
+)
+def test_return_c_with_extrapolation_check_c_below_bound_interp1d_unc(interp_inputs,):
+    # Check if extrapolation with constant behaviour outside interpolation range and
+    # returning of sensitivities work as expected.
+    C = interp1d_unc(**interp_inputs)[3]
+    ind_cond = interp_inputs["t_new"] < np.min(interp_inputs["t"])
+    assert (
+        # Sum of rows in C matching the rule above.
+        np.sum(C[np.where(ind_cond)])
+        # Sum of elements at the last index in rows of C matching the rule above.
+        == np.sum(C[np.where(ind_cond), 0])
+        # Sum of elements in t_new matching the above rule.
+        == np.sum(ind_cond)
+    )
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        return_c=True,
+        extrapolate="above",
+        kind_tuple=("linear",),
+        restrict_fill_unc="str",
+    )
+)
+def test_return_c_with_extrapolation_check_c_above_bound_interp1d_unc(interp_inputs,):
+    # Check if extrapolation with constant behaviour outside interpolation range
+    # results in the sensitivities being equal to 1 at the last index of the
+    # corresponding rows in C and only there differ from zero.
+    C = interp1d_unc(**interp_inputs)[3]
+    ind_cond = interp_inputs["t_new"] > np.max(interp_inputs["t"])
+    assert (
+        # Sum of rows in C matching the rule above.
+        np.sum(C[np.where(ind_cond)])
+        # Sum of elements at the last index in rows of C matching the rule above.
+        == np.sum(C[np.where(ind_cond), -1])
+        # Sum of elements in t_new matching the above rule.
+        == np.sum(ind_cond)
     )
 
 
