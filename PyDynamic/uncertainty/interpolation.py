@@ -171,16 +171,17 @@ def interp1d_unc(
         elif return_c:
             # This case is not so clear in terms of how to align the extrapolated
             # uncertainties with the associated uncertainties of the values,
-            # so we throw an exception for now. We are not sure yet, how we should
-            # extend the originally provided uncertainties in case of extrapolation.
-            # Should we insert one uncertainty for each interpolation node outside
-            # the original range or should we insert simply each one at the beginning
-            # and at the end of the originally provided vector of uncertainties?!
+            # so we throw an exception for now. One we deal with this, we will
+            # probably introduce another input parameter fill_sens which expects to
+            # be of shape (N,) or a 2-tuple of this shape, which is then used in C
+            # wherever an extrapolation is performed.
             raise NotImplementedError(
                 "Since we are not sure yet about the desired behaviour of returning "
                 "sensitivities for extrapolation without assuming constancy, "
                 "this feature is not yet implemented. Get in touch with us, "
-                "if you need it to discuss how to proceed."
+                "if you need it to discuss how to proceed. We are planning to add "
+                "another input parameter which is meant to carry the sensitivities "
+                "for the extrapolated uncertainties."
             )
 
     # Inter- or extrapolate values in the desired fashion relying on SciPy.
