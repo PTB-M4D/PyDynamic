@@ -21,7 +21,7 @@ def timestamps_values_uncertainties_kind(
     extrapolate: Optional[Union[bool, str]] = False,
     restrict_fill_value: Optional[str] = None,
     restrict_fill_unc: Optional[str] = None,
-    return_c: Optional[bool] = False,
+    returnC: Optional[bool] = False,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
@@ -58,7 +58,7 @@ def timestamps_values_uncertainties_kind(
             two floats, the string "extrapolate" or np.nan.
         restrict_fill_unc : str, optional
             Same as fill_value, but just for the uncertainties.
-        return_c : bool, optional
+        returnC : bool, optional
             If True we request the sensitivities to be returned. If False we do not
             request them. Defaults to False.
 
@@ -180,7 +180,7 @@ def timestamps_values_uncertainties_kind(
         "fill_unc": fill_unc,
         "bounds_error": bounds_error,
         "assume_sorted": assume_sorted,
-        "return_c": return_c,
+        "returnC": returnC,
     }
 
 
@@ -418,12 +418,12 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
     )
 
 
-@given(timestamps_values_uncertainties_kind(return_c=True, kind_tuple=("linear",)))
-def test_compare_return_c_interp1d_unc(interp_inputs):
+@given(timestamps_values_uncertainties_kind(returnC=True, kind_tuple=("linear",)))
+def test_compare_returnc_interp1d_unc(interp_inputs):
     # Compare the uncertainties computed from the sensitivities inside the
     # interpolation range and directly.
     uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
-    interp_inputs["return_c"] = False
+    interp_inputs["returnC"] = False
     uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation results match up to machine epsilon.
     assert_allclose(uy_new_with_sensitivities, uy_new_without_sensitivities, rtol=9e-15)
@@ -431,10 +431,10 @@ def test_compare_return_c_interp1d_unc(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
-        return_c=True, extrapolate=True, kind_tuple=("linear",)
+        returnC=True, extrapolate=True, kind_tuple=("linear",)
     )
 )
-def test_failing_return_c_with_extrapolation_interp1d_unc(interp_inputs):
+def test_failing_returnc_with_extrapolation_interp1d_unc(interp_inputs):
     # Since we have not implemented these cases, for now we
     # check for exception being thrown.
     assume(not isinstance(interp_inputs["fill_unc"], str))
@@ -444,10 +444,10 @@ def test_failing_return_c_with_extrapolation_interp1d_unc(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
-        return_c=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str"
+        returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str"
     )
 )
-def test_return_c_with_extrapolation_interp1d_unc(interp_inputs):
+def test_returnc_with_extrapolation_interp1d_unc(interp_inputs):
     # Check if extrapolation with constant values outside interpolation range and
     # returning of sensitivities is callable.
     assert interp1d_unc(**interp_inputs)
@@ -455,14 +455,14 @@ def test_return_c_with_extrapolation_interp1d_unc(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
-        return_c=True,
+        returnC=True,
         extrapolate=True,
         kind_tuple=("linear",),
         restrict_fill_unc="str",
         sorted_timestamps=True,
     )
 )
-def test_return_c_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs):
+def test_returnc_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs):
     # Check if extrapolation with constant values outside interpolation range and
     # returning sensitivities work as expected regarding extrapolation values
     # below original bound.
@@ -475,14 +475,14 @@ def test_return_c_with_extrapolation_check_below_bound_interp1d_unc(interp_input
 
 @given(
     timestamps_values_uncertainties_kind(
-        return_c=True,
+        returnC=True,
         extrapolate=True,
         kind_tuple=("linear",),
         restrict_fill_unc="str",
         sorted_timestamps=True,
     )
 )
-def test_return_c_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
+def test_returnc_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
     interp_inputs,
 ):
     # Check if extrapolation with constant values outside interpolation range and
@@ -497,13 +497,10 @@ def test_return_c_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
 
 @given(
     timestamps_values_uncertainties_kind(
-        return_c=True,
-        extrapolate=True,
-        kind_tuple=("linear",),
-        restrict_fill_unc="str",
+        returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str",
     )
 )
-def test_return_c_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
+def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
     # Check if sensitivity computation parallel to linear interpolation and
     # extrapolation with constant values works as expected regarding the shape and
     # content of the sensitivity matrix.
@@ -541,11 +538,11 @@ def test_return_c_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
 
 @given(
     timestamps_values_uncertainties_kind(
-        return_c=True, kind_tuple=("previous", "next", "nearest",)
+        returnC=True, kind_tuple=("previous", "next", "nearest",)
     )
 )
-def test_value_error_for_return_c_interp1d_unc(interp_inputs):
-    # Check erroneous calls with return_c and wrong kind.
+def test_value_error_for_returnc_interp1d_unc(interp_inputs):
+    # Check erroneous calls with returnC and wrong kind.
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
 

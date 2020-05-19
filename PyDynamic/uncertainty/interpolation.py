@@ -28,7 +28,7 @@ def interp1d_unc(
     fill_value: Optional[Union[float, Tuple[float, float], str]] = np.nan,
     fill_unc: Optional[Union[float, Tuple[float, float], str]] = np.nan,
     assume_sorted: Optional[bool] = True,
-    return_c: Optional[bool] = False,
+    returnC: Optional[bool] = False,
 ) -> Union[
     Tuple[np.ndarray, np.ndarray, np.ndarray],
     Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray],
@@ -93,14 +93,14 @@ def interp1d_unc(
         assume_sorted : bool, optional
             If False, values of t can be in any order and they are sorted first. If
             True, t has to be an array of monotonically increasing values.
-        return_c : bool, optional
+        returnC : bool, optional
             If True, return sensitivity coefficients for later use. This is only
             available for interpolation kind 'linear' and for
             fill_unc="extrapolate" at the moment. If False sensitivity
             coefficients are not returned and internal computation is
             slightly more efficient.
 
-    If `return_c` is False, which is the default behaviour, the method returns:
+    If `returnC` is False, which is the default behaviour, the method returns:
 
     Returns
     -------
@@ -168,7 +168,7 @@ def interp1d_unc(
             fill_value = y[0], y[-1]
         if fill_unc == "extrapolate":
             fill_unc = uy[0], uy[-1]
-        elif return_c:
+        elif returnC:
             # Once we deal with this, we will probably introduce another input parameter
             # fill_sens which is expected to be of shape (N,) or a 2-tuple of this
             # shape, which is then used in C wherever an extrapolation is performed.
@@ -184,7 +184,7 @@ def interp1d_unc(
     y_new = interp_y(t_new)
 
     if kind in ("previous", "next", "nearest"):
-        if return_c:
+        if returnC:
             raise ValueError(
                 "Returning the sensitivity matrix is only supported for interpolation "
                 "types other than 'previous', 'next' and 'nearest'."
@@ -204,7 +204,7 @@ def interp1d_unc(
         uy_new = np.empty_like(y_new)
 
         # Initialize the sensitivity matrix of shape (M, N) if needed.
-        if return_c:
+        if returnC:
             C = np.zeros((len(t_new), len(uy)), "float64")
 
         # First extrapolate the according values if required and then
@@ -221,7 +221,7 @@ def interp1d_unc(
                 # Now fill_unc should be a 2-tuple, which we can fill into uy_new.
                 uy_new[extrap_range_below], uy_new[extrap_range_above] = fill_unc
 
-            if return_c:
+            if returnC:
                 # In each row of C corresponding to an extrapolation value below the
                 # original range set the first column to 1 and in each row of C
                 # corresponding to an extrapolation value above the original range set
@@ -251,7 +251,7 @@ def interp1d_unc(
             t_lo = t[lo]
             t_hi = t[hi]
             # --------------------------------------------------------------------------
-            if return_c:
+            if returnC:
                 # Prepare the sensitivity coefficients, which in the first place
                 # inside the interpolation range are the Lagrangian polynomials. We
                 # compute the Lagrangian polynomials for all interpolation nodes
@@ -294,6 +294,6 @@ def interp1d_unc(
             "%s is unsupported yet. Let us know, that you need it." % kind
         )
 
-    if return_c:
+    if returnC:
         return t_new, y_new, uy_new, C
     return t_new, y_new, uy_new
