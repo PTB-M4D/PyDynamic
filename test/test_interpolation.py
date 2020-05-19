@@ -38,7 +38,7 @@ def timestamps_values_uncertainties_kind(
             (or frequencies), measurement values and associated uncertainties
         kind_tuple : tuple(str), optional
             the tuple of strings out of "linear", "previous", "next", "nearest",
-            "spline", "lagrange", "least-squares" from which the strategy for the
+            "spline", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
             "previous", "next", "nearest"
         sorted_timestamps : bool
@@ -571,7 +571,7 @@ def test_wrong_input_lengths_call_interp1d(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
-        kind_tuple=("spline", "lagrange", "least-squares")
+        kind_tuple=("spline", "least-squares")
     )
 )
 def test_raise_not_implemented_yet_interp1d(interp_inputs):
@@ -583,7 +583,7 @@ def test_raise_not_implemented_yet_interp1d(interp_inputs):
 @given(timestamps_values_uncertainties_kind(extrapolate=True))
 def test_raise_value_error_interp1d_unc(interp_inputs):
     # Check that interpolation with points outside the original domain raises
-    # exception.
+    # exception if requested.
     interp_inputs["bounds_error"] = True
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
