@@ -275,9 +275,9 @@ def interp1d_unc(
                         C_row[next(lo_it)] = next(L_1_it)
                         C_row[next(hi_it)] = next(L_2_it)
                 # Compute the uncertainties.
-                uy_new[interp_range] = np.sqrt((C @ np.diag(uy ** 2) @ C.T).diagonal())[
-                    interp_range
-                ]
+                uy_new[interp_range] = np.sqrt(
+                    np.sum(C[interp_range] ** 2 * uy ** 2, 1)
+                )
             else:
                 # Since we do not need the sensitivity matrix, we compute
                 # uncertainties more efficient. The simplification of the equation by
