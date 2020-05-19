@@ -435,14 +435,10 @@ def test_compare_return_c_interp1d_unc(interp_inputs):
     )
 )
 def test_return_c_with_extrapolation_interp1d_unc(interp_inputs):
-    # Filter those cases where at least one of t_new is above the maximum of t and
-    # fill_unc is a float, which means constant extrapolation with this value.
-    assume(3 == len(interp_inputs["t"]) < len(interp_inputs["t_new"]) > 2)
-    uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
-    interp_inputs["return_c"] = False
-    uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
-    # Check that extrapolation works.
-    assert_allclose(uy_new_with_sensitivities, uy_new_without_sensitivities, rtol=9e-15)
+    # Since we are not sure about the desired behaviour in this case, for now we
+    # check for exception being thrown.
+    with raises(NotImplementedError):
+        interp1d_unc(**interp_inputs)
 
 
 @given(
