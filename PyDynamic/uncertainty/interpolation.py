@@ -163,9 +163,10 @@ def interp1d_unc(
     if not bounds_error:
         # For the extrapolation to rely on SciPy's handling of fill values in all
         # but the linear case we set those explicitly to boundary values of y and uy
-        # respectively.
+        # respectively but handle those cases separately.
         if fill_value == "extrapolate":
             fill_value = y[0], y[-1]
+
         if fill_unc == "extrapolate":
             fill_unc = uy[0], uy[-1]
         elif returnC:
