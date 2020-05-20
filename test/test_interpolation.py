@@ -543,7 +543,7 @@ def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
 )
 def test_value_error_for_returnc_interp1d_unc(interp_inputs):
     # Check erroneous calls with returnC and wrong kind.
-    with raises(ValueError):
+    with raises(NotImplementedError):
         interp1d_unc(**interp_inputs)
 
 
