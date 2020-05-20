@@ -35,7 +35,7 @@ def timestamps_values_uncertainties_kind(
             measurement values and associated uncertainties
         kind_tuple: tuple(str), optional
             the tuple of strings out of "linear", "previous", "next", "nearest",
-            "spline", "lagrange", "least-squares" from which the strategy for the
+            "spline", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
             "previous", "next", "nearest".
         sorted_timestamps: bool
@@ -150,13 +150,8 @@ def test_linear_uy_in_make_equidistant(n):
     )
 
 
-@given(
-    timestamps_values_uncertainties_kind(
-        kind_tuple=("spline", "lagrange", "least-squares")
-    )
-)
+@given(timestamps_values_uncertainties_kind(kind_tuple=("spline", "least-squares")))
 def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
-    # Check that not implemented versions raise exceptions or alternatively if values
-    # don't allow for proper execution ValueErrors.
+    # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
         make_equidistant(**interp_inputs)
