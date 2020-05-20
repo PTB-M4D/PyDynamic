@@ -227,7 +227,9 @@ def interp1d_unc(
                 # In each row of C corresponding to an extrapolation value below the
                 # original range set the first column to 1 and in each row of C
                 # corresponding to an extrapolation value above the original range set
-                # the last column to 1.
+                # the last column to 1. It is important to do this before
+                # interpolating, because in general those two columns can contain
+                # non-zero values in the interpolation range.
                 C[:, 0], C[:, -1] = extrap_range_below, extrap_range_above
 
         # If interpolation is needed, compute uncertainties following White, 2017.
