@@ -277,7 +277,12 @@ def interp1d_unc(
                     if interp_range[index]:
                         C_row[next(lo_it)] = next(L_1_it)
                         C_row[next(hi_it)] = next(L_2_it)
-                # Compute the standard uncertainties.
+                # Compute the standard uncertainties avoiding to build the sparse
+                # covariance matrix diag(u_y^2). We reduce the equation C diag(u_y^2)
+                # C^T for now to a more efficient calculation, which will work as
+                # long as we deal with uncorrelated values, so that all information
+                # can be found on the diagonal of the covariance and thus the result
+                # matrix.
                 uy_new[interp_range] = np.sqrt(
                     np.sum(C[interp_range] ** 2 * uy ** 2, 1)
                 )
