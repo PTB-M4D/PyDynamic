@@ -1,4 +1,3 @@
-import itertools
 from typing import Dict, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
