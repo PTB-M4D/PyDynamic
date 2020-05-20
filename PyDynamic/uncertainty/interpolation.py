@@ -186,9 +186,10 @@ def interp1d_unc(
 
     if kind in ("previous", "next", "nearest"):
         if returnC:
-            raise ValueError(
-                "Returning the sensitivity matrix is only supported for interpolation "
-                "types other than 'previous', 'next' and 'nearest'."
+            raise NotImplementedError(
+                "Returning the sensitivity matrix for now is only supported for "
+                "interpolation types other than 'previous', 'next' and 'nearest'. Get"
+                "in touch with us, if you need this to discuss how to proceed."
             )
         # Look up uncertainties.
         interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
