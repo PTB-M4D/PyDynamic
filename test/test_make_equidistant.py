@@ -5,7 +5,7 @@ from typing import Dict, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-from hypothesis import assume, given
+from hypothesis import given
 from hypothesis.strategies import composite
 from pytest import raises
 
@@ -35,7 +35,7 @@ def timestamps_values_uncertainties_kind(
             measurement values and associated uncertainties
         kind_tuple: tuple(str), optional
             the tuple of strings out of "linear", "previous", "next", "nearest",
-            "spline", "lagrange", "least-squares" from which the strategy for the
+            "spline", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
             "previous", "next", "nearest".
         sorted_timestamps: bool
@@ -47,7 +47,7 @@ def timestamps_values_uncertainties_kind(
         dt, kind for make_equidistant()
     """
     # Set the maximum absolute value for floats to be really unique in calculations.
-    float_abs_max = 1e128
+    float_abs_max = 1e64
     # Set all common parameters for timestamps, measurements values and associated
     # uncertainties including allowed ranges and number of elements.
     shape_for_timestamps = hnp.array_shapes(
@@ -77,7 +77,7 @@ def timestamps_values_uncertainties_kind(
     dt = draw(
         st.floats(
             min_value=(np.max(t) - np.min(t)) * 1e-3,
-            max_value=np.max(t) - np.min(t),
+            max_value=(np.max(t) - np.min(t)) / 2,
             exclude_min=True,
             allow_nan=False,
             allow_infinity=False,
@@ -110,16 +110,6 @@ def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
         y_wrong = np.tile(interp_inputs["y"], 2)
         uy_wrong = np.tile(interp_inputs["uy"], 3)
         make_equidistant(interp_inputs["t"], y_wrong, uy_wrong)
-
-
-@given(timestamps_values_uncertainties_kind(sorted_timestamps=False))
-def test_wrong_input_order_call_make_equidistant(interp_inputs):
-    # Ensure the timestamps are not in ascending order.
-    assume(not np.all(interp_inputs["t"][1:] >= interp_inputs["t"][:-1]))
-    # Check erroneous calls with descending timestamps.
-    with raises(ValueError):
-        # Reverse order of t and call make_equidistant().
-        make_equidistant(**interp_inputs)
 
 
 @given(timestamps_values_uncertainties_kind())
@@ -160,13 +150,8 @@ def test_linear_uy_in_make_equidistant(n):
     )
 
 
-@given(
-    timestamps_values_uncertainties_kind(
-        kind_tuple=("spline", "lagrange", "least-squares")
-    )
-)
+@given(timestamps_values_uncertainties_kind(kind_tuple=("spline", "least-squares")))
 def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
-    # Check that not implemented versions raise exceptions or alternatively if values
-    # don't allow for proper execution ValueErrors.
+    # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
         make_equidistant(**interp_inputs)
