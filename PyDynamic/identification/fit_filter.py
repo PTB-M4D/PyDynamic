@@ -19,8 +19,6 @@ import warnings
 
 from ..model_estimation.fit_filter import LSFIR, LSIIR
 
-__all__ = ['LSIIR', 'LSFIR']
-
 warnings.simplefilter('default')
 warnings.warn(
     "The module *identification* will be combined with the module "

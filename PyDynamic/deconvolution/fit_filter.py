@@ -6,27 +6,27 @@ a given frequency response with associated uncertainties.
 
 This module contains the following functions:
 
-* :func:`invLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
+* :func:`LSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
   given frequency response.
-* :func:`invLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
+* :func:`LSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
   values with uncertainty
-* :func:`invLSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
+* :func:`LSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
   response values with uncertainty via Monte Carlo
-* :func:`invLSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`LSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values
-* :func:`invLSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`LSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values with uncertainty
 
 .. deprecated:: 1.2.71
     The module *deconvolution* will be combined with the module *identification* and
     renamed to *model_estimation* in the next major release 2.0.0. From then on you
-    should only use the new module *model_estimation* instead. The functions "LSFIR()",
-    "LSFIR_unc()", "LSIIR()", "LSIIR_unc()", "LSFIR_uncMC()" are then prefixed with an
-    "inv" for "inverse", indicating the treatment of the reciprocal of frequency
-    response values. Please use the new function names (e.g.
-    :func:`PyDynamic.model_estimation.invLSIIR_unc`) starting from version 1.4.1. The
-    old function names without preceding "inv" will only be preserved until the release
-    prior to version 2.0.0.
+    should only use the new module *model_estimation* instead. The functions
+    :func:`LSFIR`, :func:`LSFIR_unc`, :func:`LSIIR`, :func:`LSIIR_unc`,
+    :func:`LSFIR_uncMC` are then prefixed with an "inv" for "inverse", indicating the
+    treatment of the reciprocal of frequency response values. Please use the new
+    function names (e.g. :func:`PyDynamic.model_estimation.invLSIIR_unc`) starting from
+    version 1.4.1. The old function names without preceding "inv" will only be preserved
+    until the release prior to version 2.0.0.
 """
 
 import warnings
@@ -40,11 +40,6 @@ from ..model_estimation.fit_filter import (
 )
 
 __all__ = [
-    "invLSFIR",
-    "invLSFIR_unc",
-    "invLSIIR",
-    "invLSIIR_unc",
-    "invLSFIR_uncMC",
     "LSFIR",
     "LSFIR_unc",
     "LSIIR",
