@@ -515,8 +515,10 @@ def iLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 
     Returns
     -------
-        b, a : np.ndarray
-            IIR filter coefficients
+        b : np.ndarray
+            The IIR filter numerator coefficient vector in a 1-D sequence
+        a : np.ndarray
+            The IIR filter denominator coefficient vector in a 1-D sequence
         tau : int
             time delay (in samples)
 
