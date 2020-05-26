@@ -6,15 +6,15 @@ a given frequency response with associated uncertainties.
 
 This module contains the following functions:
 
-* :func:`iLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
+* :func:`invLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
   given frequency response.
-* :func:`iLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
+* :func:`invLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
   values with uncertainty
-* :func:`iLSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
+* :func:`invLSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
   response values with uncertainty via Monte Carlo
-* :func:`iLSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`invLSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values
-* :func:`iLSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`invLSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values with uncertainty
 
 .. deprecated:: 1.2.71
@@ -22,30 +22,30 @@ This module contains the following functions:
           *identification* and renamed to *model_estimation* in the next
           major release 2.0.0. From then on you should only use the new module
           *model_estimation* instead. The functions "LSFIR()", "LSFIR_unc()", "LSIIR()",
-          "LSIIR_unc()", "LSFIR_uncMC()" are then prefixed with an "i" for "inverse",
+          "LSIIR_unc()", "LSFIR_uncMC()" are then prefixed with an "inv" for "inverse",
           indicating the treatment of the reciprocal of frequency response values.
           Please use the new function names (e.g.
-          :func:`PyDynamic.model_estimation.iLSIIR_unc`) starting from version 1.4.1.
-          The old function names without preceding "i" will be only preserved until
+          :func:`PyDynamic.model_estimation.invLSIIR_unc`) starting from version 1.4.1.
+          The old function names without preceding "inv" will be only preserved until
           the release prior to version 2.0.0.
 """
 
 import warnings
 
 from ..model_estimation.fit_filter import (
-    iLSFIR,
-    iLSFIR_unc,
-    iLSFIR_uncMC,
-    iLSIIR,
-    iLSIIR_unc,
+    invLSFIR,
+    invLSFIR_unc,
+    invLSFIR_uncMC,
+    invLSIIR,
+    invLSIIR_unc,
 )
 
 __all__ = [
-    "iLSFIR",
-    "iLSFIR_unc",
-    "iLSIIR",
-    "iLSIIR_unc",
-    "iLSFIR_uncMC",
+    "invLSFIR",
+    "invLSFIR_unc",
+    "invLSIIR",
+    "invLSIIR_unc",
+    "invLSFIR_uncMC",
     "LSFIR",
     "LSFIR_unc",
     "LSIIR",
@@ -58,25 +58,25 @@ warnings.warn(
     "renamed to *model_estimation* in the next major release 2.0.0. From then on you"
     "should only use the new module *model_estimation* instead. The functions"
     "'LSFIR()', 'LSFIR_unc()', 'LSIIR()', 'LSIIR_unc()', 'LSFIR_uncMC()' are then"
-    "prefixed with an 'i' for 'inverse', indicating the treatment of the reciprocal"
+    "prefixed with an 'inv' for 'inverse', indicating the treatment of the reciprocal"
     "of frequency response values. Please use the new function names (e.g. "
-    ":func:`PyDynamic.model_estimation.iLSIIR_unc`) starting from version 1.4.1.",
+    ":func:`PyDynamic.model_estimation.invLSIIR_unc`) starting from version 1.4.1.",
     DeprecationWarning,
 )
 
 
 def LSFIR(H, N, tau, f, Fs, Wt=None):
     """.. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.iLSFIR`
+        Please use :func:`PyDynamic.model_estimation.invLSFIR`
     """
-    return iLSFIR(H=H, N=N, tau=tau, f=f, Fs=Fs, Wt=Wt)
+    return invLSFIR(H=H, N=N, tau=tau, f=f, Fs=Fs, Wt=Wt)
 
 
 def LSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
     """.. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.iLSFIR_unc`
+        Please use :func:`PyDynamic.model_estimation.invLSFIR_unc`
     """
-    return iLSFIR_unc(
+    return invLSFIR_unc(
         H=H,
         UH=UH,
         N=N,
@@ -91,22 +91,22 @@ def LSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
 
 def LSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
     """.. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.iLSFIR_uncMC`
+        Please use :func:`PyDynamic.model_estimation.invLSFIR_uncMC`
     """
-    return iLSFIR_uncMC(H=H, UH=UH, N=N, tau=tau, f=f, Fs=Fs, verbose=verbose)
+    return invLSFIR_uncMC(H=H, UH=UH, N=N, tau=tau, f=f, Fs=Fs, verbose=verbose)
 
 
 def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     """.. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.iLSIIR`
+        Please use :func:`PyDynamic.model_estimation.invLSIIR`
     """
-    return iLSIIR(
+    return invLSIIR(
         Hvals=Hvals, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau, justFit=justFit, verbose=verbose
     )
 
 
 def LSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
     """.. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.iLSIIR_unc`
+        Please use :func:`PyDynamic.model_estimation.invLSIIR_unc`
     """
-    return iLSIIR_unc(H=H, UH=UH, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau)
+    return invLSIIR_unc(H=H, UH=UH, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau)

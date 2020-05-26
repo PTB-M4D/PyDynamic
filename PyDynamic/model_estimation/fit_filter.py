@@ -10,15 +10,15 @@ This module contains the following functions:
 * :func:`LSIIR`: Least-squares IIR filter fit to a given frequency response
 * :func:`LSFIR`: Least-squares fit of a digital FIR filter to a given frequency
   response
-* :func:`iLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
+* :func:`invLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
   given frequency response.
-* :func:`iLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
+* :func:`invLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
   values with uncertainty
-* :func:`iLSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
+* :func:`invLSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
   response values with uncertainty via Monte Carlo
-* :func:`iLSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`invLSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values
-* :func:`iLSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
+* :func:`invLSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
   response values with uncertainty
 
 """
@@ -32,11 +32,11 @@ from ..misc.filterstuff import grpdelay, mapinside
 __all__ = [
     "LSIIR",
     "LSFIR",
-    "iLSFIR",
-    "iLSFIR_unc",
-    "iLSIIR",
-    "iLSIIR_unc",
-    "iLSFIR_uncMC"
+    "invLSFIR",
+    "invLSFIR_unc",
+    "invLSIIR",
+    "invLSIIR_unc",
+    "invLSFIR_uncMC"
     ]
 
 
@@ -229,7 +229,7 @@ def LSFIR(H, N, tau, f, Fs, Wt=None):
 
     return np.reshape(bFIR, (N + 1,))
 
-def iLSFIR(H, N, tau, f, Fs, Wt=None):
+def invLSFIR(H, N, tau, f, Fs, Wt=None):
     """	Least-squares fit of a digital FIR filter to the reciprocal of a given
     frequency response.
 
@@ -302,7 +302,7 @@ def iLSFIR(H, N, tau, f, Fs, Wt=None):
     return bFIR.flatten()
 
 
-def iLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
+def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
     """Design of FIR filter as fit to reciprocal of frequency response values
     with uncertainty
 
@@ -413,7 +413,7 @@ def iLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
     return bFIR, UbFIR
 
 
-def iLSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
+def invLSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
     """Design of FIR filter as fit to reciprocal of frequency response values
     with uncertainty
 
@@ -485,7 +485,7 @@ def iLSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
     return bFIR, UbFIR
 
 
-def iLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
+def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     """Design of a stable IIR filter as fit to reciprocal of frequency
     response values
 
@@ -584,7 +584,7 @@ def iLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     return bi, ai, int(tau)
 
 
-def iLSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
+def invLSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
     """Design of stabel IIR filter as fit to reciprocal of given frequency
     response with uncertainty
 
@@ -645,7 +645,7 @@ def iLSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
     AB = np.zeros((runs, Nb + Na + 1))
     Tau = np.zeros((runs,))
     for k in range(runs):
-        bi, ai, Tau[k] = iLSIIR(HH[k, :], Nb, Na, f, Fs, tau, verbose=False)
+        bi, ai, Tau[k] = invLSIIR(HH[k, :], Nb, Na, f, Fs, tau, verbose=False)
         AB[k, :] = np.hstack((ai[1:], bi))
 
     bi = np.mean(AB[:, Na:], axis=0)

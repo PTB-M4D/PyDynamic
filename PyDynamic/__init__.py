@@ -9,7 +9,6 @@ import uncertainty
 """
 
 from .deconvolution.fit_filter import LSFIR_unc, LSFIR_uncMC, LSIIR_unc
-from .identification import *
 from .misc import *
 from .model_estimation import *
 from .uncertainty import *
@@ -17,11 +16,11 @@ from .uncertainty import *
 __version__ = "1.4.0"
 
 __all__ = [
-    "iLSFIR",
-    "iLSIIR",
-    "iLSFIR_unc",
-    "iLSFIR_uncMC",
-    "iLSIIR_unc",
+    "invLSFIR",
+    "invLSIIR",
+    "invLSFIR_unc",
+    "invLSFIR_uncMC",
+    "invLSIIR_unc",
     "LSFIR",
     "LSIIR",
     "LSFIR_unc",

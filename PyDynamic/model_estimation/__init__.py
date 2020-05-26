@@ -8,17 +8,17 @@ with associated uncertainties.
 # See http://mathmet.org/projects/14SIP08 and
 # https://www.github.com/PTB-PSt1/PyDynamic
 
-from .fit_filter import (LSFIR, LSIIR, iLSFIR, iLSFIR_unc, iLSFIR_uncMC,
-                         iLSIIR, iLSIIR_unc)
+from .fit_filter import (LSFIR, LSIIR, invLSFIR, invLSFIR_unc, invLSFIR_uncMC,
+                         invLSIIR, invLSIIR_unc)
 from .fit_transfer import fit_sos
 
 __all__ = [
     "LSFIR",
     "LSIIR",
-    "iLSFIR",
-    "iLSIIR",
-    "iLSFIR_unc",
-    "iLSFIR_uncMC",
-    "iLSIIR_unc",
+    "invLSFIR",
+    "invLSIIR",
+    "invLSFIR_unc",
+    "invLSFIR_uncMC",
+    "invLSIIR_unc",
     "fit_sos",
 ]

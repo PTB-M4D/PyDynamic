@@ -61,7 +61,7 @@ H = np.r_[np.real(Hc), np.imag(Hc)]                         # best estimate in r
 UH= np.cov(np.c_[np.real(HMC),np.imag(HMC)],rowvar=0)       # covariance of real, imag
 UH= make_semiposdef(UH, verbose=True)                       # correct for numerical errors
 
-bF, UbF = deconv.iLSFIR_unc(H,UH,N,tau,f,Fs)                             # Calculation of FIR deconvolution filter and its assoc. unc.
+bF, UbF = deconv.invLSFIR_unc(H,UH,N,tau,f,Fs)                             # Calculation of FIR deconvolution filter and its assoc. unc.
 CbF = UbF/(np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis],(1,N+1))*
 		   np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis].T,(N+1,1)))      # correlation of filter coefficients
 
