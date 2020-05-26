@@ -66,8 +66,7 @@ warnings.warn(
 
 
 def LSFIR(H, N, tau, f, Fs, Wt=None):
-    """.. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.invLSFIR`
+    """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSFIR`
     """
     return invLSFIR(H=H, N=N, tau=tau, f=f, Fs=Fs, Wt=Wt)
 
@@ -90,14 +89,16 @@ def LSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
 
 
 def LSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
-    """.. deprecated:: 1.4.1
+    """
+    .. deprecated:: 1.4.1
         Please use :func:`PyDynamic.model_estimation.invLSFIR_uncMC`
     """
     return invLSFIR_uncMC(H=H, UH=UH, N=N, tau=tau, f=f, Fs=Fs, verbose=verbose)
 
 
 def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
-    """.. deprecated:: 1.4.1
+    """
+    .. deprecated:: 1.4.1
         Please use :func:`PyDynamic.model_estimation.invLSIIR`
     """
     return invLSIIR(
@@ -106,7 +107,8 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 
 
 def LSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
-    """.. deprecated:: 1.4.1
+    """
+    .. deprecated:: 1.4.1
         Please use :func:`PyDynamic.model_estimation.invLSIIR_unc`
     """
     return invLSIIR_unc(H=H, UH=UH, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau)
