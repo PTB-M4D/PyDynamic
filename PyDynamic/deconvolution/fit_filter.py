@@ -18,16 +18,15 @@ This module contains the following functions:
   response values with uncertainty
 
 .. deprecated:: 1.2.71
-          The module *deconvolution* will be combined with the module
-          *identification* and renamed to *model_estimation* in the next
-          major release 2.0.0. From then on you should only use the new module
-          *model_estimation* instead. The functions "LSFIR()", "LSFIR_unc()", "LSIIR()",
-          "LSIIR_unc()", "LSFIR_uncMC()" are then prefixed with an "inv" for "inverse",
-          indicating the treatment of the reciprocal of frequency response values.
-          Please use the new function names (e.g.
-          :func:`PyDynamic.model_estimation.invLSIIR_unc`) starting from version 1.4.1.
-          The old function names without preceding "inv" will be only preserved until
-          the release prior to version 2.0.0.
+    The module *deconvolution* will be combined with the module *identification* and
+    renamed to *model_estimation* in the next major release 2.0.0. From then on you
+    should only use the new module *model_estimation* instead. The functions "LSFIR()",
+    "LSFIR_unc()", "LSIIR()", "LSIIR_unc()", "LSFIR_uncMC()" are then prefixed with an
+    "inv" for "inverse", indicating the treatment of the reciprocal of frequency
+    response values. Please use the new function names (e.g.
+    :func:`PyDynamic.model_estimation.invLSIIR_unc`) starting from version 1.4.1. The
+    old function names without preceding "inv" will only be preserved until the release
+    prior to version 2.0.0.
 """
 
 import warnings
@@ -72,8 +71,7 @@ def LSFIR(H, N, tau, f, Fs, Wt=None):
 
 
 def LSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
-    """.. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.invLSFIR_unc`
+    """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSFIR_unc`
     """
     return invLSFIR_unc(
         H=H,
@@ -97,9 +95,7 @@ def LSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
 
 
 def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
-    """
-    .. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.invLSIIR`
+    """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSIIR`
     """
     return invLSIIR(
         Hvals=Hvals, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau, justFit=justFit, verbose=verbose
@@ -107,8 +103,6 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 
 
 def LSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
-    """
-    .. deprecated:: 1.4.1
-        Please use :func:`PyDynamic.model_estimation.invLSIIR_unc`
+    """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSIIR_unc`
     """
     return invLSIIR_unc(H=H, UH=UH, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau)
