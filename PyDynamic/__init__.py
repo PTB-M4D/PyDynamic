@@ -8,14 +8,20 @@ import uncertainty
 # https://www.github.com/eichstaedtPTB/PyDynamic
 """
 
-from .deconvolution.fit_filter import LSFIR, LSFIR_unc, LSIIR, LSIIR_unc, LSFIR_uncMC
+from .deconvolution.fit_filter import LSFIR_unc, LSFIR_uncMC, LSIIR_unc
 from .identification import *
 from .misc import *
+from .model_estimation import *
 from .uncertainty import *
 
 __version__ = "1.3.1"
 
 __all__ = [
+    "iLSFIR",
+    "iLSIIR",
+    "iLSFIR_unc",
+    "iLSFIR_uncMC",
+    "iLSIIR_unc",
     "LSFIR",
     "LSIIR",
     "LSFIR_unc",

@@ -8,6 +8,28 @@ frequency response with associated uncertainties.
 # See http://mathmet.org/projects/14SIP08 and
 # https://www.github.com/eichstaedtPTB/PyDynamic
 
-from .fit_filter import LSFIR, LSIIR, LSFIR_unc, LSFIR_uncMC, LSIIR_unc
+from .fit_filter import (
+    iLSFIR,
+    iLSIIR,
+    iLSFIR_unc,
+    iLSFIR_uncMC,
+    iLSIIR_unc,
+    LSFIR,
+    LSIIR,
+    LSFIR_unc,
+    LSFIR_uncMC,
+    LSIIR_unc,
+)
 
-__all__ = ["LSFIR", "LSIIR", "LSFIR_unc", "LSFIR_uncMC", "LSIIR_unc"]
+__all__ = [
+    "iLSFIR",
+    "iLSIIR",
+    "iLSFIR_unc",
+    "iLSFIR_uncMC",
+    "iLSIIR_unc",
+    "LSFIR",
+    "LSIIR",
+    "LSFIR_unc",
+    "LSFIR_uncMC",
+    "LSIIR_unc",
+]
