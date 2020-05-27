@@ -5,8 +5,8 @@ digital deconvolution filters by least-squares fitting to the reciprocal of a gi
 frequency response with associated uncertainties.
 """
 
-# See http://mathmet.org/projects/14SIP08 and
-# https://www.github.com/eichstaedtPTB/PyDynamic
+# See https://mathmet.org/projects/14SIP08 and
+# https://www.github.com/PTB-PSt1/PyDynamic
 
 from .fit_filter import (
     invLSFIR,
