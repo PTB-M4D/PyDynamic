@@ -27,5 +27,5 @@ Fitting filters to frequency response or reciprocal
 Identification of transfer function models
 ------------------------------------------
 
-.. automodule:: PyDynamic.identification.fit_transfer
+.. automodule:: PyDynamic.model_estimation.fit_transfer
     :members:
