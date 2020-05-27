@@ -16,4 +16,4 @@ Digital deconvolution filters
 -----------------------------
 
 .. automodule:: PyDynamic.deconvolution.fit_filter
-    :members:
+    :noindex:
