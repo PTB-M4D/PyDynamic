@@ -156,6 +156,7 @@ def test_FIR_IIR_identity():
 
     # define filter
     b = np.array([ 0.01967691, -0.01714282,  0.03329653, -0.01714282,  0.01967691])
+    #b = np.array([ 0.4, 0.3, 0.2, 0.2, -0.1])
     a = np.array([ 1.])
 
     # simulate input and output signals
@@ -168,8 +169,8 @@ def test_FIR_IIR_identity():
     sigma_noise = 1e-2                                    # std for input signal
     x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)    # generate input signal
     Ux = sigma_noise * np.ones_like(x)                    # uncertainty of input signal
-    Uab = np.diag(np.zeros((len(a) + len(b) -1)))         # uncertainty of IIR-parameters
-    Uab[2:8,2] = 0.001                                     # only a2 is uncertain
+    Uab = np.diag(np.arange((len(a) + len(b) -1)))         # uncertainty of IIR-parameters
+    Uab = 0.01 * Uab
 
     # run signal through both implementations
     y_iir, Uy_iir, _ = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
@@ -179,12 +180,12 @@ def test_FIR_IIR_identity():
     import scipy.signal
 
     fig, [ax1, ax2] = plt.subplots(nrows=2, ncols=1, sharex=True)
-    ax1.plot(time, Uy_iir, label='iir')
-    ax1.plot(time, Uy_fir, label="fir")
+    ax1.plot(time, Uy_iir, label='iir unc')
+    ax1.plot(time, Uy_fir, label="fir unc")
     ax1.legend()
     ax2.plot(time, np.abs(Uy_iir - Uy_fir))
     ax2.set_yscale("log")
     plt.show()
 
-    assert np.allclose(y_fir, y_iir, rtol=1e-5)
-    assert np.allclose(Uy_fir[len(b):], Uy_iir[len(b):], rtol=1e-5)
+    assert np.allclose(y_fir, y_iir)
+    assert np.allclose(Uy_fir[len(b):], Uy_iir[len(b):], rtol=1e-3)
