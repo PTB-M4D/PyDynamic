@@ -4,8 +4,8 @@ Design of deconvolution filters
 .. deprecated:: 1.2.71
     The package *deconvolution* will be combined with the package *identification* and
     renamed to *model_estimation* in the next major release 2.0.0. From then on you
-    should only use the new package *model_estimation* instead. The functions
-    :func:`LSFIR`, :func:`LSFIR_unc`, :func:`LSIIR`, :func:`LSIIR_unc`,
+    should only use the new package :doc:`PyDynamic.model_estimation` instead. The
+    functions :func:`LSFIR`, :func:`LSFIR_unc`, :func:`LSIIR`, :func:`LSIIR_unc`,
     :func:`LSFIR_uncMC` are then prefixed with an "inv" for "inverse", indicating the
     treatment of the reciprocal of frequency response values. Please use the new
     function names (e.g. :func:`PyDynamic.model_estimation.fit_filter.invLSIIR_unc`)
