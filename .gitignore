@@ -1,10 +1,15 @@
-.pytest_cache/
-__pycache__/
+# Build artifacts #
+###################
 build/
 dist/
 PyDynamic.egg-info/
+
+# Testing artifacts #
+#####################
+.pytest_cache/
+__pycache__/
 .coverage
 .coverage.*
 pytest.xml
-prep_test_DFT.py
 .hypothesis
+.tox
