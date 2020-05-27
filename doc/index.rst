@@ -20,8 +20,6 @@ Contents:
    Getting started.rst
    PyDynamic.uncertainty.rst
    PyDynamic.model_estimation.rst
-   PyDynamic.identification.rst
-   PyDynamic.deconvolution.rst
    PyDynamic.misc.rst
 
 Indices and tables
