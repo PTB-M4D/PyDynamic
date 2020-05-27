@@ -625,7 +625,7 @@ def invLSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
         * Eichstädt, Elster, Esward and Hessling [Eichst2010]_
 
     .. seealso:: :mod:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
-                 :mod:`PyDynamic.deconvolution.fit_filter.LSIIR`
+                 :mod:`PyDynamic.model_estimation.fit_filter.invLSIIR`
     """
 
     runs = 1000
