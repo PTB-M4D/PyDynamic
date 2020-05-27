@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""The module :mod:`PyDynamic.model_estimation.fit_transfer` contains several functions
+"""The module :mod:`PyDynamic.model_estimation.fit_transfer` contains a function
 for the identification of transfer function models.
 
 This module contains the following function:
