@@ -35,7 +35,7 @@ setup(
         "Source": "https://github.com/PTB-PSt1/PyDynamic/",
         "Tracker": "https://github.com/PTB-PSt1/PyDynamic/issues",
     },
-    install_requires=["ipykernel", "matplotlib", "numpy", "pandas", "scipy", "sympy"],
+    install_requires=["notebook", "matplotlib", "numpy", "pandas", "scipy"],
     python_requires=">=3.5",
     classifiers=[
         "Development Status :: 4 - Beta",
