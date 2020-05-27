@@ -9,11 +9,6 @@ frequency response with associated uncertainties.
 # https://www.github.com/PTB-PSt1/PyDynamic
 
 from .fit_filter import (
-    invLSFIR,
-    invLSIIR,
-    invLSFIR_unc,
-    invLSFIR_uncMC,
-    invLSIIR_unc,
     LSFIR,
     LSIIR,
     LSFIR_unc,
@@ -22,11 +17,6 @@ from .fit_filter import (
 )
 
 __all__ = [
-    "invLSFIR",
-    "invLSIIR",
-    "invLSFIR_unc",
-    "invLSFIR_uncMC",
-    "invLSIIR_unc",
     "LSFIR",
     "LSIIR",
     "LSFIR_unc",
