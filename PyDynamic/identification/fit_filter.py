@@ -18,10 +18,13 @@ import warnings
 
 from ..model_estimation.fit_filter import LSFIR, LSIIR
 
-warnings.simplefilter('default')
+__all__ = ["LSIIR", "LSFIR"]
+
+warnings.simplefilter("default")
 warnings.warn(
     "The module *identification* will be combined with the module "
     "*deconvolution* and renamed to *model_estimation* in the "
     "next major release 2.0.0. From version 1.4.1 on you should only use "
     "the new module *model_estimation* instead.",
-    DeprecationWarning)
+    DeprecationWarning,
+)
