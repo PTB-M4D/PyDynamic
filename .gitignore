@@ -14,3 +14,7 @@ __pycache__/
 pytest.xml
 .hypothesis
 .tox
+
+# Jupyter Notebook artifacts #
+##############################
+.ipynb_checkpoints/
