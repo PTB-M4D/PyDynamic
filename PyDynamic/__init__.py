@@ -9,6 +9,8 @@ import uncertainty
 """
 
 from .deconvolution.fit_filter import LSFIR_unc, LSFIR_uncMC, LSIIR_unc
+from .identification import *
+
 from .misc import *
 from .model_estimation import *
 from .uncertainty import *
