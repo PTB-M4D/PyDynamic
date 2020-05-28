@@ -15,7 +15,7 @@ The :mod:`PyDynamic.deconvolution.fit_filter` module implements methods for the
 design of digital deconvolution filters by least-squares fitting to the reciprocal of
 a given frequency response with associated uncertainties.
 
-This module contains the following functions:
+This module for now still contains the following functions:
 
 * :func:`LSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
   given frequency response.
