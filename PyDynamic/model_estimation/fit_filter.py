@@ -40,7 +40,7 @@ __all__ = [
     ]
 
 
-def fitIIR(
+def _fitIIR(
     Hvals: np.ndarray,
     tau: int,
     w: np.ndarray,
@@ -123,7 +123,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
 
-    b, a = fitIIR(Hvals, tau, w, E, Na, Nb, inv=False)
+    b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=False)
 
     if justFit:
         print("Calculation done. No stabilization requested.")
@@ -150,7 +150,7 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
         g2 = grpdelay(b, astab, Fs)[0]
         tau = np.ceil(tau + np.median(g2 - g1))
 
-        b, a = fitIIR(Hvals, tau, w, E, Na, Nb, inv=False)
+        b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=False)
         if np.count_nonzero(np.abs(np.roots(a)) > 1) > 0:
             astab = mapinside(a)
         else:
@@ -539,7 +539,7 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
 
-    bi, ai = fitIIR(Hvals, tau, w, E, Na, Nb, inv=True)
+    bi, ai = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=True)
 
     if justFit:  # no uncertainty evaluation
         return bi, ai
@@ -560,7 +560,7 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
         g2 = grpdelay(bi, astab, Fs)[0]
         tau = ceil(tau + median(g2 - g1))
 
-        bi, ai = fitIIR(Hvals, tau, w, E, Na, Nb, inv=True)
+        bi, ai = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=True)
         if count_nonzero(abs(roots(ai)) > 1) > 0:
             astab = mapinside(ai)
         else:
