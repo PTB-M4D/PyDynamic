@@ -102,10 +102,19 @@ us know. You may, for instance, drop an email to one of the [authors
 
 ### Examples
 
-Uncertainty propagation for the application of a FIR filter with coefficients
-*b* with which an uncertainty *ub* is associated. The filter input signal is
-*x* with known noise standard deviation *sigma*. The filter output signal
-is *y* with associated uncertainty *uy*.
+We have collected extended material for an easier introduction to PyDynamic in the two
+subfolders _examples_ and _tutorials_. In various Jupyter Notebooks and scripts we
+demonstrate the use of the provided methods to aid the first steps in PyDynamic. New
+features are introduced with an example from the beginning if feasible. We are currently
+moving this supporting collection to an external repository on GitHub. They will be
+available at
+[github.com/PTB-PSt1/PyDynamic_tutorials](https://github.com/PTB-PSt1/PyDynamic_tutorials)
+in the near future.
+
+Uncertainty propagation for the application of a FIR filter with coefficients *b* with
+which an uncertainty *ub* is associated. The filter input signal is *x* with known noise
+standard deviation *sigma*. The filter output signal is *y* with associated uncertainty
+*uy*.
 
 ```python
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
