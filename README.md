@@ -61,7 +61,7 @@ from PyDynamic import make_equidistant
 If you just want to use the software, the easiest way is to run from your
 system's command line
 
-```shell script
+```shell
 pip install PyDynamic
 ```
 
@@ -83,7 +83,7 @@ from PyDynamic.uncertainty import propagate_DFT
 
 Updates can then be installed via
 
-```shell script
+```shell
 pip install --upgrade PyDynamic
 ```
 
