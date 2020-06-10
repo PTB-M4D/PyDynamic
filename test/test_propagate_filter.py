@@ -139,12 +139,13 @@ def test_FIR_IIR_identity():
     # input signal + run methods
     sigma_noise = 1e-2                                    # std for input signal
     x = rect(time,100*Ts,250*Ts,1.0,noise=sigma_noise)    # generate input signal
-    Ux = sigma_noise * np.ones_like(x)                    # uncertainty of input signal
+    Ux = sigma_noise * np.ones_like(x)                    # uncertainty/autocorrelation of input signal
     Uab = np.diag(np.zeros((len(a) + len(b) -1)))         # fully certain filter-parameters, otherwise FIR and IIR do not match! (see docstring of IIRuncFilter)
 
-    # run signal through both implementations
-    y_iir, Uy_iir, _ = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
-    y_fir, Uy_fir = FIRuncFilter(x, Ux, theta=b, Utheta=Uab, kind="diag")
+    for kind in ["diag", "corr"]:
+        # run signal through both implementations
+        y_iir, Uy_iir, _ = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind=kind)
+        y_fir, Uy_fir = FIRuncFilter(x, Ux, theta=b, Utheta=Uab, kind=kind)
 
-    assert np.allclose(y_fir, y_iir)
-    assert np.allclose(Uy_fir[len(b):], Uy_iir[len(b):])
+        assert np.allclose(y_fir, y_iir)
+        assert np.allclose(Uy_fir[len(b):], Uy_iir[len(b):])

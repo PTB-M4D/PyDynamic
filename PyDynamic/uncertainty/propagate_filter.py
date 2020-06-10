@@ -336,12 +336,12 @@ def _get_corr_unc(b, a, Ux):
     """
 
     # get impulse response of IIR defined by (b,a)
-    h_theta = dimpulse((b, a, 1), x0 = 0.0, t=np.arange(0, len(Ux), step=1))[1][0]
+    h_theta = np.squeeze(dimpulse((b, a, 1), x0 = 0.0, t=np.arange(0, len(Ux), step=1))[1][0])
     
     # equation (20), note:
     # - for values r<0 or s<0 the contribution to the sum is zero (because h_theta is zero)
     # - Ux is the one-sided autocorrelation and assumed to be zero outside its range
-    corr_unc = np.sum(toeplitz(Ux) + toeplitz(h_theta))
+    corr_unc = np.sum(toeplitz(Ux) * np.outer(h_theta, h_theta))
 
     return corr_unc
 
