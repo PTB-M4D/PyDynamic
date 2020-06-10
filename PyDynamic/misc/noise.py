@@ -2,47 +2,45 @@
 """Collection of noise-signals
 
 This module contains the following functions:
-* white_gaussian: normal distributed signal amplitudes with equal power spectral density
-* power_law_noise: normal distributed signal amplitudes with power spectrum `~ f^\alpha`
-* power_law_acf: (theoretical) autocorrelation function of power law noise
-* ARMA: autoregressive moving average noise process
+
+* :func:`get_alpha`: normal distributed signal amplitudes with equal power
+  spectral density
+* :func:`power_law_noise`: normal distributed signal amplitudes with power spectrum
+  `:math:f^\alpha`
+* :func:`power_law_acf`: (theoretical) autocorrelation function of power law noise
+* :func:`ARMA`: autoregressive moving average noise process
 """
 
 import numpy as np
 from scipy.linalg import toeplitz
 
-__all__ = ['get_alpha', 'white_gaussian', 'power_law_noise', 'power_law_acf', 'ARMA']
+__all__ = ["get_alpha", "white_gaussian", "power_law_noise", "power_law_acf", "ARMA"]
 
 
 # define an alpha for every color
-colors = {"violet": 2,
-          "blue":  1,
-          "white": 0,
-          "pink": -1,
-          "red":  -2,
-          "brown": -2}
+colors = {"violet": 2, "blue": 1, "white": 0, "pink": -1, "red": -2, "brown": -2}
 
 
-def get_alpha(color_value = 0):
+def get_alpha(color_value=0):
     """
     Translate a color (given as string) into an exponent alpha or directly
     hand through a given numeric value of alpha.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
         color_value: str, int or float
             if string -> check against known colornames -> return alpha
             if numeric -> directly return value
 
-    Returns:
-    --------
+    Returns
+    -------
         alpha: float
     """
 
     if isinstance(color_value, str):
         if color_value in colors.keys():
             alpha = colors[color_value]
-        else: 
+        else:
             raise NotImplementedError(
             "Specified color ({COLOR}) of noise is not available. " \
             "Please choose from {COLORS} or define alpha directly." \
@@ -57,11 +55,11 @@ def get_alpha(color_value = 0):
     return float(alpha)
 
 
-def white_gaussian(N, mean = 0, std = 1):
-    return np.random.normal(loc=mean, scale = std, size = N)
+def white_gaussian(N, mean=0, std=1):
+    return np.random.normal(loc=mean, scale=std, size=N)
 
 
-def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std = 1.0):
+def power_law_noise(N=None, w=None, color_value="white", mean=0.0, std=1.0):
     """
     Generate colored noise by
     * generate white gaussian noise
@@ -71,8 +69,8 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
 
     based on [Zhivomirov2018](A Method for Colored Noise Generation)
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
         N: int
             length of noise to be generated
         w: numpy.ndarray
@@ -86,8 +84,8 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
         std: float
             standard deviation of the output signal
 
-    Returns:
-    --------
+    Returns
+    -------
         w_filt: filtered noise signal
     """
 
@@ -110,11 +108,11 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
     # note:
     # * this gives [1., 2., 3., ..., N+1] (in accordance with [Zhivomirov2018])
     # * ==> not W_filt ~ f^alpha, but rather W_filt ~ k^alpha
-    steps = N//2 + 1
+    steps = N // 2 + 1
     k = np.linspace(0, steps, steps) + 1
 
     # generate the filtered spectrum by multiplication with f^(alpha/2)
-    W_filt = W * np.power(k, alpha/2)
+    W_filt = W * np.power(k, alpha / 2)
 
     # calculate the filtered time-series (inverse fourier of modified spectrum)
     w_filt = np.fft.irfft(W_filt, N)
@@ -126,7 +124,7 @@ def power_law_noise(N = None, w = None, color_value = "white", mean = 0.0, std =
     return w_filt
 
 
-def power_law_acf(N, color_value = "white", std = 1.0):
+def power_law_acf(N, color_value="white", std=1.0):
     """
     Return the theoretic right-sided autocorrelation (Rww) of different colors of noise. 
 
@@ -137,8 +135,7 @@ def power_law_acf(N, color_value = "white", std = 1.0):
     alpha = get_alpha(color_value)
 
     # get index of frequencies (see notes of same line at power_law_noise() )
-    steps = (N)//2 + 1
-    k = np.linspace(0, steps, steps) + 1
+    k = np.linspace(0, N, N) + 1
 
     # generate and transform the power spectral density Sww
     Sww = np.power(k, alpha)
@@ -147,10 +144,10 @@ def power_law_acf(N, color_value = "white", std = 1.0):
     #Sww = Sww / np.sum(Sww) * len(k)   # probably unnecessary because of later normalization of Rww
 
     # inverse Fourier-transform to get Autocorrelation from PSD/Sww
-    Rww = np.fft.irfft(Sww, N)
+    Rww = np.fft.irfft(Sww)
     Rww = std**2 * Rww / Rww[0]           # This normalization ensures the given standard-deviation
 
-    return Rww
+    return Rww[:N]
 
 
 def ARMA(length, phi=0.0, theta=0.0, std=1.0):
