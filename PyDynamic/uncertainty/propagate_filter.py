@@ -228,6 +228,17 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
         state: dict
             dictionary of updated internal state
 
+    Note
+    ----
+        In case of `a == [1.0]` (an FIR filter), the results of :py:func:`IIRuncFilter` and :py:func:`FIRuncFilter` will differ!
+        
+        This is because IIRuncFilter propagates uncertainty according to the 
+        (first-order Taylor series of the) GUM, wheras FIRuncFilter takes full 
+        variance information into account (which leads to an additonal term). 
+        This is documented in the description of formula (33) of [Elster2008]_ . 
+
+        The difference can be visualized by running :ref:`examples/Digital filtering/validate_FIR_IIR_MC.py`
+
     References
     ----------
         * Link and Elster [Link2009]_
