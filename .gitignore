@@ -1,2 +1,16 @@
+# Build artifacts #
+###################
+build/
+dist/
+PyDynamic.egg-info/
+doc/_build
+
+# Testing artifacts #
+#####################
 .pytest_cache/
 __pycache__/
+.coverage
+.coverage.*
+pytest.xml
+.hypothesis
+.tox

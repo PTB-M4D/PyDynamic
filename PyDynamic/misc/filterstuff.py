@@ -1,38 +1,44 @@
 # -*- coding: utf-8 -*-
 r"""
-
-A collection of methods which are related to filter design.
+The :mod:`PyDynamic.misc.filterstuff` module is a collection of methods which are
+related to filter design.
 
 This module contains the following functions:
 
-* *db*: Calculation of decibel values :math:`20\log_{10}(x)` for a vector of
+* :func:`db`: Calculation of decibel values :math:`20\log_{10}(x)` for a vector of
   values
-* *ua*: Shortcut for calculation of unwrapped angle of complex values
-* *grpdelay*: Calculation of the group delay of a digital filter
-* *mapinside*: Maps the roots of polynomial with coefficients :math:`a`
+* :func:`ua`: Shortcut for calculation of unwrapped angle of complex values
+* :func:`grpdelay`: Calculation of the group delay of a digital filter
+* :func:`mapinside`: Maps the roots of polynomial with coefficients :math:`a`
   to the unit circle
-* *kaiser_lowpass*: Design of a FIR lowpass filter using the window technique
+* :func:`kaiser_lowpass`: Design of a FIR lowpass filter using the window technique
   with a Kaiser window.
-* *isstable*: Determine whether a given IIR filter is stable
-* *savitzky_golay*: Smooth (and optionally differentiate) data with a
+* :func:`isstable`: Determine whether a given IIR filter is stable
+* :func:`savitzky_golay`: Smooth (and optionally differentiate) data with a
   Savitzky-Golay filter
 
 """
 
 import numpy as np
 
-__all__ = ['db', 'ua', 'grpdelay', 'mapinside', 'kaiser_lowpass', 'isstable',
-           'savitzky_golay']
+__all__ = [
+    "db",
+    "ua",
+    "grpdelay",
+    "mapinside",
+    "kaiser_lowpass",
+    "isstable",
+    "savitzky_golay",
+]
 
 
 def db(vals):
-    # Calculation of decibel values :math:`20\log_{10}(x)` for a vector of
-    # values
+    """Calculation of decibel values :math:`20\log_{10}(x)` for a vector of values"""
     return 20 * np.log10(np.abs(vals))
 
 
 def ua(vals):
-    # Shortcut for calculation of unwrapped angle of complex values
+    """Shortcut for calculation of unwrapped angle of complex values"""
     return np.unwrap(np.angle(vals))
 
 
@@ -80,8 +86,8 @@ def grpdelay(b, a, Fs, nfft=512):
     gd = np.real(num / den) - Na
 
     f = np.arange(0.0, 2 * nfft - 1) / (2 * nfft) * Fs
-    f = f[:nfft + 1]
-    gd = gd[:len(f)]
+    f = f[: nfft + 1]
+    gd = gd[: len(f)]
     return gd, f
 
 
@@ -131,14 +137,15 @@ def kaiser_lowpass(L, fcut, Fs, beta=8.0):
     
     """
     from scipy.signal import firwin
+
     if np.mod(L, 2) == 0:
         L = L + 1
-    blow = firwin(L, 2 * fcut / Fs, window=('kaiser', beta))
+    blow = firwin(L, 2 * fcut / Fs, window=("kaiser", beta))
     shift = L / 2
     return blow, shift
 
 
-def isstable(b, a, ftype='digital'):
+def isstable(b, a, ftype="digital"):
     """Determine whether `IIR filter (b,a)` is stable
 
     Determine whether `IIR filter (b,a)` is stable by checking roots of the
@@ -159,9 +166,9 @@ def isstable(b, a, ftype='digital'):
                 
     """
     v = np.roots(a)
-    if ftype == 'digital':
+    if ftype == "digital":
         return not np.any(np.abs(v) > 1.0)
-    elif ftype == 'analog':
+    elif ftype == "analog":
         return not np.any(np.real(v) < 0)
 
 
@@ -228,12 +235,13 @@ def savitzky_golay(y, window_size, order, deriv=0, delta=1.0):
     order_range = range(order + 1)
     half_window = (window_size - 1) // 2
     # precompute coefficients
-    b = np.mat([[k ** i for i in order_range] for k in
-                range(-half_window, half_window + 1)])
+    b = np.mat(
+        [[k ** i for i in order_range] for k in range(-half_window, half_window + 1)]
+    )
     m = np.linalg.pinv(b).A[deriv] * factorial(deriv) / delta ** deriv
     # pad the signal at the extremes with
     # values taken from the signal itself
-    firstvals = y[0] - np.abs(y[1:half_window + 1][::-1] - y[0])
-    lastvals = y[-1] + np.abs(y[-half_window - 1:-1][::-1] - y[-1])
+    firstvals = y[0] - np.abs(y[1 : half_window + 1][::-1] - y[0])
+    lastvals = y[-1] + np.abs(y[-half_window - 1 : -1][::-1] - y[-1])
     y = np.concatenate((firstvals, y, lastvals))
-    return np.convolve(m[::-1], y, mode='valid')
+    return np.convolve(m[::-1], y, mode="valid")

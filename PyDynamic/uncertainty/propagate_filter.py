@@ -5,22 +5,23 @@ the application of a digital filter using the GUM approach.
 
 This modules contains the following functions:
 
-* *FIRuncFilter*: Uncertainty propagation for signal y and uncertain FIR
+* :func:`FIRuncFilter`: Uncertainty propagation for signal y and uncertain FIR
   filter theta
-* *IIRuncFilter*: Uncertainty propagation for the signal x and the uncertain
+* :func:`IIRuncFilter`: Uncertainty propagation for the signal x and the uncertain
   IIR filter (b,a)
 
-# Note: The Elster-Link paper for FIR filters assumes that the autocovariance
-is known and that noise is stationary!
+.. note:: The Elster-Link paper for FIR filters assumes that the autocovariance
+          is known and that noise is stationary!
 
 """
 
 import numpy as np
 from scipy.linalg import toeplitz, solve, solve_discrete_lyapunov
-from scipy.signal import lfilter, dimpulse
+from scipy.signal import lfilter, lfilter_zi, dimpulse
 from ..misc.tools import trimOrPad
 
-__all__ = ['FIRuncFilter', 'IIRuncFilter']
+__all__ = ["FIRuncFilter", "IIRuncFilter"]
+
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
@@ -62,12 +63,15 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
     """
 
-    Ntheta = len(theta)         # FIR filter size
-    #filterOrder = Ntheta - 1   # FIR filter order
+    Ntheta = len(theta)  # FIR filter size
+    # filterOrder = Ntheta - 1   # FIR filter order
+
+    if not isinstance(Utheta, np.ndarray):  # handle case of zero uncertainty filter
+        Utheta = np.zeros((Ntheta, Ntheta))
 
     # check which case of sigma_noise is necessary
     if isinstance(sigma_noise, float):
-        sigma2 = sigma_noise**2
+        sigma2 = sigma_noise ** 2
 
     elif isinstance(sigma_noise, np.ndarray):
         if kind == "diag":
@@ -106,11 +110,11 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 # assumed, that SP is constant with the first value of sigma2)
 
                 # V needs to be extended to cover Ntheta-1 timesteps more into the past
-                sigma2_extended = np.pad(sigma2, (Ntheta - 1, 0), mode="edge")  # ???
+                sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta - 1)), sigma2)
 
-                N = toeplitz(blow[::-1], np.zeros_like(sigma2_extended)).T
+                N = toeplitz(blow[1:][::-1], np.zeros_like(sigma2_extended)).T
                 M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
-                SP = np.diag(sigma2[0] * np.ones_like(blow))
+                SP = np.diag(sigma2[0] * np.ones_like(blow[1:]))
                 S = np.diag(sigma2_extended)
 
                 # Ulow is to be sliced from V, see below
@@ -118,37 +122,32 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
             elif kind == "corr":
 
-                # adjust the lengths of Bcorr and sigma2 to fit theta
+                # adjust the lengths sigma2 to fit blow and theta
                 # this either crops (unused) information or appends zero-information
                 # note1: this is the reason, why Ulow will have dimension (Ntheta x Ntheta) without further ado
-                # note2: in order to calculate Bcorr, the full length of blow is used (no information loss here)
 
                 # calculate Bcorr
-                Bcorr = np.correlate(blow, blow, 'full')
+                Bcorr = np.correlate(blow, blow, "full")
 
-                # pad/crop length of Bcorr on both sides
-                Bcorr_half = trimOrPad(Bcorr[len(blow)-1:], Ntheta)                  # select the right half of Bcorr, then pad or crop to length Ntheta
-                Bcorr_adjusted = np.pad(Bcorr_half, (Ntheta-1, 0), mode="reflect")   # restore symmetric correlation of length (2*Ntheta-1)
+                # pad or crop length of sigma2, then reflect some part to the left and invert the order
+                # [0 1 2 3 4 5 6 7] --> [0 0 0 7 6 5 4 3 2 1 0 1 2 3]
+                sigma2 = trimOrPad(sigma2, len(blow) + Ntheta - 1)
+                sigma2_reflect = np.pad(sigma2, (len(blow) - 1, 0), mode="reflect")
 
-                # pad or crop length of sigma2, then reflect the lower half to the left
-                # [0 1 2 3 4 5 6 7] --> [3 2 1 0 1 2 3 4 5 6 7]
-                sigma2 = trimOrPad(sigma2, 2*Ntheta)
-                sigma2_reflect = np.pad(sigma2, (Ntheta-2, 0), mode="reflect")
-
-                ycorr = np.correlate(sigma2_reflect, Bcorr_adjusted, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr_adjusted is symmetric
+                ycorr = np.correlate(sigma2_reflect, Bcorr, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr is symmetric
                 Ulow = toeplitz(ycorr)
 
-        xlow = lfilter(blow,1.0,y)
+        xlow, _ = lfilter(blow, 1.0, y, zi=y[0] * lfilter_zi(blow, 1.0))
 
-    else: # if blow is not provided
+    else:  # if blow is not provided
         if isinstance(sigma2, float):
             Ulow = np.eye(Ntheta) * sigma2
 
         elif isinstance(sigma2, np.ndarray):
 
             if kind == "diag":
-                # V needs to be extended to cover Ntheta-1 timesteps more into the past
-                sigma2_extended = np.pad(sigma2, (Ntheta - 1, 0), mode="edge")
+                # V needs to be extended to cover Ntheta timesteps more into the past
+                sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta - 1)), sigma2)
 
                 # Ulow is to be sliced from V, see below
                 V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
@@ -159,11 +158,11 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         xlow = y
 
     # apply FIR filter to calculate best estimate in accordance with GUM
-    x = lfilter(theta,1.0,xlow)
-    x = np.roll(x,-int(shift))
+    x, _ = lfilter(theta, 1.0, xlow, zi=xlow[0] * lfilter_zi(theta, 1.0))
+    x = np.roll(x, -int(shift))
 
     # add dimension to theta, otherwise transpose won't work
-    if len(theta.shape)==1:
+    if len(theta.shape) == 1:
         theta = theta[:, np.newaxis]
 
     # handle diag-case, where Ulow needs to be sliced from V
@@ -192,11 +191,9 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             unc[m] = XL.T.dot(Utheta.dot(XL))     # apply formula from paper
     
     ux = np.sqrt(np.abs(UncCov + unc))
+    ux = np.roll(ux, -int(shift))  # correct for delay
 
-    # correct for delay
-    ux = np.roll(ux,-int(shift))
-
-    return x, ux.flatten()                    # flatten in case that we still have 2D array
+    return x, ux.flatten()  # flatten in case that we still have 2D array
 
 
 def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
@@ -222,7 +219,7 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
             "corr": single sided autocovariance of stationary (colored/corrlated) noise
         state: dict
             An internal state (z, dz, P, cache) to start from - e.g. from a previous run of IIRuncFilter.
-            - If not given, (z, dz, P) are assumed to be zero.
+            - If not given, (z, dz, P) are calculated such that the signal was constant before the given range
             - If given, the input parameters (b, a, Uab) are ignored to avoid repetitive rebuild of the
               internal system description (instead, the cache is used). However a valid new state (i.e.
               with new b, a, Uab) can always be generated by using :py:func:`get_initial_state()`.
@@ -235,6 +232,17 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
             uncertainty associated with y
         state: dict
             dictionary of updated internal state
+
+    Note
+    ----
+        In case of `a == [1.0]` (an FIR filter), the results of :py:func:`IIRuncFilter` and :py:func:`FIRuncFilter` will differ!
+        
+        This is because IIRuncFilter propagates uncertainty according to the 
+        (first-order Taylor series of the) GUM, wheras FIRuncFilter takes full 
+        variance information into account (which leads to an additonal term). 
+        This is documented in the description of formula (33) of [Elster2008]_ . 
+
+        The difference can be visualized by running :ref:`examples/Digital filtering/validate_FIR_IIR_MC.py`
 
     References
     ----------
@@ -250,9 +258,9 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
     if not state:
         # calculate initial state
         if kind == "diag":
-            state = get_initial_state(b, a, Uab=Uab, x0=0.0, U0=0.0)
+            state = get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0])
         else:  # "corr"
-            state = get_initial_state(b, a, Uab=Uab, x0=0.0, U0=0.0, Ux=Ux)
+            state = get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0], Ux=Ux)
 
     z = state["z"]
     dz = state["dz"]

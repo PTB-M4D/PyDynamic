@@ -1,6 +1,5 @@
 ipykernel
 matplotlib
-pytest
 numpy
 pandas
 scipy

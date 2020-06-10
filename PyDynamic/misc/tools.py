@@ -1,36 +1,44 @@
 # -*- coding: utf-8 -*-
 """
-Collection of miscellaneous helper functions.
+The :mod:`PyDynamic.misc.tools` module is a collection of miscellaneous helper
+functions.
 
 This module contains the following functions:
 
-* *print_vec*: Print vector (1D array) to the console or return as formatted
+* :func:`print_vec`: Print vector (1D array) to the console or return as formatted
   string
-* *print_mat*: Print matrix (2D array) to the console or return as formatted
+* :func:`print_mat`: Print matrix (2D array) to the console or return as formatted
   string
-* *make_semiposdef*: Make quadratic matrix positive semi-definite
-* *FreqResp2RealImag*: Calculate real and imaginary parts from frequency
+* :func:`make_semiposdef`: Make quadratic matrix positive semi-definite
+* :func:`FreqResp2RealImag`: Calculate real and imaginary parts from frequency
   response
-* *make_equidistant*: Interpolate non-equidistant time series to equidistant
-* *trimOrPad*: trim or pad (with zeros) a vector to desired length
-* *progress_bar*: A simple and reusable progress-bar
+* :func:`make_equidistant`: Interpolate non-equidistant time series to equidistant
+* :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
+* :func:`progress_bar`: A simple and reusable progress-bar
 """
 
-import numpy as np
-from scipy.interpolate import interp1d
-from scipy.sparse import issparse, eye
-from scipy.sparse.linalg.eigen.arpack import eigs
 import sys
 
-__all__ = ['print_mat', 'print_vec', 'make_semiposdef', 'FreqResp2RealImag',
-           'make_equidistant', 'trimOrPad', 'progress_bar']
+import numpy as np
+from scipy.sparse import eye, issparse
+from scipy.sparse.linalg.eigen.arpack import eigs
+
+__all__ = [
+    "print_mat",
+    "print_vec",
+    "make_semiposdef",
+    "FreqResp2RealImag",
+    "make_equidistant",
+    "trimOrPad",
+    "progress_bar",
+]
 
 
 def trimOrPad(array, length, mode="constant"):
-
-    if len(array) < length: # pad zeros to the right if too short
-        return np.pad(array, (0,length - len(array)), mode=mode)
-    else:                   # trim to given length otherwise
+    """Trim or pad (with zeros) a vector to desired length"""
+    if len(array) < length:  # pad zeros to the right if too short
+        return np.pad(array, (0, length - len(array)), mode=mode)
+    else:  # trim to given length otherwise
         return array[0:length]
 
 
@@ -87,8 +95,11 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
         matrix = matrix.T
 
     s = "".join(
-        [print_vec(matrix[k, :], prec=prec, vertical=False, retS=True) + "\n"
-         for k in range(matrix.shape[0])])
+        [
+            print_vec(matrix[k, :], prec=prec, vertical=False, retS=True) + "\n"
+            for k in range(matrix.shape[0])
+        ]
+    )
 
     if retS:
         return s
@@ -97,24 +108,23 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
 
 
 def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
-    """
-    Make quadratic matrix positive semi-definite by increasing its eigenvalues
+    """Make quadratic matrix positive semi-definite by increasing its eigenvalues
 
     Parameters
     ----------
         matrix : (N,N) array_like
-        maxiter: int
+            the matrix to process
+        maxiter : int
             the maximum number of iterations for increasing the eigenvalues
-        tol: float
+        tol : float
             tolerance for deciding if pos. semi-def.
-        verbose: bool
-            If True print some more detail about input parameters.
+        verbose : bool
+            If `True` print smallest eigenvalue of the resulting matrix
 
     Returns
     -------
         (N,N) array_like
             quadratic positive semi-definite matrix
-
     """
     n, m = matrix.shape
     if n != m:
@@ -124,17 +134,14 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
         # enforce symmetric matrix
         matrix = 0.5 * (matrix + matrix.T)
         # calculate smallest eigenvalue
-        e = np.real(eigs(matrix, which="SR",
-                         return_eigenvectors=False)).min()
+        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
         count = 0
         # increase the eigenvalues until matrix is positive semi-definite
         while e < tol and count < maxiter:
             matrix += (np.absolute(e) + tol) * eye(n, format=matrix.format)
-            e = np.real(eigs(matrix, which="SR",
-                             return_eigenvectors=False)).min()
+            e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
             count += 1
-        e = np.real(eigs(matrix, which="SR",
-                         return_eigenvectors=False)).min()
+        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
     # same procedure for non-sparse matrices
     else:
         matrix = 0.5 * (matrix + matrix.T)
@@ -177,18 +184,20 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     """
 
     if len(Abs) != len(Phase) or 2 * len(Abs) != len(Unc):
-        raise ValueError('\nLength of inputs are inconsistent.')
+        raise ValueError("\nLength of inputs are inconsistent.")
 
     if len(Unc.shape) == 1:
         Unc = np.diag(Unc)
 
     Nf = len(Abs)
 
-    AbsPhas = np.random.multivariate_normal(np.hstack((Abs, Phase)), Unc,
-                                            int(MCruns))  # draw MC inputs
+    AbsPhas = np.random.multivariate_normal(
+        np.hstack((Abs, Phase)), Unc, int(MCruns)
+    )  # draw MC inputs
 
     H = AbsPhas[:, :Nf] * np.exp(
-        1j * AbsPhas[:, Nf:])  # calculate complex frequency response values
+        1j * AbsPhas[:, Nf:]
+    )  # calculate complex frequency response values
     RI = np.hstack((np.real(H), np.imag(H)))  # transform to real, imag
 
     Re = np.mean(RI[:, :Nf])
@@ -198,7 +207,7 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     return Re, Im, URI
 
 
-def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
+def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     """ Interpolate non-equidistant time series to equidistant
 
     Interpolate measurement values and propagate uncertainties accordingly.
@@ -206,70 +215,53 @@ def make_equidistant(t, y, uy, dt=5e-2, kind='linear'):
     Parameters
     ----------
         t: (N,) array_like
-            timestamps in ascending order
+            timestamps (or frequencies)
         y: (N,) array_like
             corresponding measurement values
         uy: (N,) array_like
-            corresponding measurement values' uncertainties
+            corresponding measurement values' standard uncertainties
         dt: float, optional
-            desired interval length in seconds
+            desired interval length
         kind: str, optional
             Specifies the kind of interpolation for the measurement values
             as a string ('previous', 'next', 'nearest' or 'linear').
 
     Returns
     -------
-        t_new : (N,) array_like
-            timestamps
-        y_new : (N,) array_like
-            measurement values
-        uy_new : (N,) array_like
-            measurement values' uncertainties
+        t_new : (M,) array_like
+            interpolation timestamps (or frequencies)
+        y_new : (M,) array_like
+            interpolated measurement values
+        uy_new : (M,) array_like
+            interpolated measurement values' standard uncertainties
 
     References
     ----------
         * White [White2017]_
     """
-    # Check for ascending order of timestamps.
-    if not np.all(t[1:] >= t[:-1]):
-        raise ValueError('Array of timestamps needs to be in ascending order.')
-    # Setup new vectors of timestamps.
-    t_new = np.arange(t[0], t[-1], dt)
-    # Interpolate measurement values in the desired fashion.
-    interp_y = interp1d(t, y, kind=kind)
-    y_new = interp_y(t_new)
+    from ..uncertainty.interpolation import interp1d_unc
 
-    if kind in ('previous', 'next', 'nearest'):
-        # Look up uncertainties in cases where it is applicable.
-        interp_uy = interp1d(t, uy, kind=kind)
-        uy_new = interp_uy(t_new)
-    else:
-        if kind == 'linear':
-            # Iterate over t_new as ndarray to find relevant timestamp indices.
-            indices = np.empty_like(t_new, dtype=int)
-            it_t_new = np.nditer(t_new, flags=['f_index'])
-            while not it_t_new.finished:
-                # Find indices of biggest of all timestamps smaller or equal
-                # than current time, assumes that timestamps are in ascending
-                # order.
-                indices[it_t_new.index] = np.where(t <= it_t_new[0])[0][-1]
-                it_t_new.iternext()
-            t_prev = t[indices]
-            t_next = t[indices + 1]
-            # Look up corresponding input uncertainties.
-            uy_prev_sqr = uy[indices] ** 2
-            uy_next_sqr = uy[indices + 1] ** 2
-            # Compute uncertainties for interpolated measurement values.
-            uy_new = np.sqrt((t_new - t_next) ** 2 * uy_prev_sqr +
-                             (t_new - t_prev) ** 2 * uy_next_sqr) / \
-                (t_next - t_prev)
-        else:
-            raise NotImplementedError
+    # Setup new vector of timestamps.
+    t_new = np.arange(np.min(t), np.max(t), dt)
 
-    return t_new, y_new, uy_new
+    # Since np.arange in overflow situations results in the last value not guaranteed to
+    # be smaller than t's maximum', we need to check for this and delete this
+    # unexpected value.
+    if t_new[-1] > np.max(t):
+        t_new = t_new[:-1]
+
+    return interp1d_unc(t_new, t, y, uy, kind)
 
 
-def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo_indicator =".", fout=sys.stdout):
+def progress_bar(
+    count,
+    count_max,
+    width=30,
+    prefix="",
+    done_indicator="#",
+    todo_indicator=".",
+    fout=sys.stdout,
+):
     """
     A simple and reusable progress-bar
 
@@ -291,12 +283,13 @@ def progress_bar(count, count_max, width=30, prefix="", done_indicator="#", todo
         fout: file-object, optional
             where the progress-bar should be written/printed to
     """
-    x = int(width * (count+1) / count_max)
+    x = int(width * (count + 1) / count_max)
     progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
         PREFIX=prefix,
         DONE=x * done_indicator,
-        NOTDONE=(width-x) * todo_indicator,
-        COUNT=count+1,
-        COUNTMAX=count_max)
+        NOTDONE=(width - x) * todo_indicator,
+        COUNT=count + 1,
+        COUNTMAX=count_max,
+    )
 
     fout.write(progressString)
