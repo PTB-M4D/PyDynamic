@@ -6,7 +6,7 @@ as provided by :class:`scipy.interpolate.interp1d`.
 
 This module contains the following function:
 
-* :func:`interp1d_unc`: Interpolate arbitrary time series considering the associated
+* :func:`interp1d_unc`: Interpolate arbitrary (time or frequency) series considering the associated
   uncertainties
 """
 from typing import Optional, Tuple, Union
@@ -18,8 +18,8 @@ __all__ = ["interp1d_unc"]
 
 
 def interp1d_unc(
-    t_new: np.ndarray,
-    t: np.ndarray,
+    x_new: np.ndarray,
+    x: np.ndarray,
     y: np.ndarray,
     uy: np.ndarray,
     kind: Optional[str] = "linear",
@@ -35,8 +35,8 @@ def interp1d_unc(
 ]:
     r"""Interpolate a 1-D function considering the associated uncertainties
 
-    t and y are arrays of values used to approximate some function :math:`f \colon y
-    = f(t)`.
+    x and y are arrays of values used to approximate some function :math:`f \colon y
+    = f(x)`.
 
     Note that calling :func:`interp1d_unc` with NaNs present in input values
     results in undefined behaviour.
@@ -46,10 +46,10 @@ def interp1d_unc(
 
     Parameters
     ----------
-        t_new : (M,) array_like
+        x_new : (M,) array_like
             A 1-D array of real values representing the timestamps (or frequencies) at
             which to evaluate the interpolated values. t_new can be sorted in any order.
-        t : (N,) array_like
+        x : (N,) array_like
             A 1-D array of real values representing timestamps (or frequencies) in
             ascending order.
         y : (N,) array_like
@@ -104,7 +104,7 @@ def interp1d_unc(
 
     Returns
     -------
-        t_new : (M,) array_like
+        x_new : (M,) array_like
             interpolation timestamps (or frequencies)
         y_new : (M,) array_like
             interpolated values
@@ -115,7 +115,7 @@ def interp1d_unc(
 
     Returns
     -------
-        t_new : (M,) array_like
+        x_new : (M,) array_like
             interpolation timestamps (or frequencies)
         y_new : (M,) array_like
             interpolated values
@@ -132,13 +132,13 @@ def interp1d_unc(
     # This is taken from the class scipy.interpolate.interp1d to copy and sort the
     # arrays in case that is requested and of course extended by the uncertainties.
     # ----------------------------------------------------------------------------------
-    t = np.array(t, copy=copy)
+    x = np.array(x, copy=copy)
     y = np.array(y, copy=copy)
     uy = np.array(uy, copy=copy)
 
     if not assume_sorted:
         ind = np.argsort(t)
-        t = t[ind]
+        x = x[ind]
         y = np.take(y, ind)
         uy = np.take(uy, ind)
     # ----------------------------------------------------------------------------------
@@ -181,8 +181,8 @@ def interp1d_unc(
             )
 
     # Inter- and extrapolate values in the desired fashion relying on SciPy.
-    interp_y = interp1d(t, y, fill_value=fill_value, **interp1d_params)
-    y_new = interp_y(t_new)
+    interp_y = interp1d(x, y, fill_value=fill_value, **interp1d_params)
+    y_new = interp_y(x_new)
 
     if kind in ("previous", "next", "nearest"):
         if returnC:
@@ -192,12 +192,12 @@ def interp1d_unc(
                 "in touch with us, if you need this to discuss how to proceed."
             )
         # Look up uncertainties.
-        interp_uy = interp1d(t, uy, fill_value=fill_unc, **interp1d_params)
-        uy_new = interp_uy(t_new)
+        interp_uy = interp1d(x, uy, fill_value=fill_unc, **interp1d_params)
+        uy_new = interp_uy(x_new)
     elif kind == "linear":
-        # Calculate boolean arrays of indices from t_new which are outside t's bounds...
-        extrap_range_below = t_new < np.min(t)
-        extrap_range_above = t_new > np.max(t)
+        # Calculate boolean arrays of indices from x_new which are outside x's bounds...
+        extrap_range_below = x_new < np.min(x)
+        extrap_range_above = x_new > np.max(x)
         extrap_range = extrap_range_below | extrap_range_above
         # .. and inside t's bounds.
         interp_range = ~extrap_range
@@ -207,7 +207,7 @@ def interp1d_unc(
 
         # Initialize the sensitivity matrix of shape (M, N) if needed.
         if returnC:
-            C = np.zeros((len(t_new), len(uy)), "float64")
+            C = np.zeros((len(x_new), len(uy)), "float64")
 
         # First extrapolate the according values if required and then
         # compute interpolated uncertainties following White, 2017.
@@ -240,28 +240,28 @@ def interp1d_unc(
             # --------------------------------------------------------------------------
             # 2. Find where in the original data, the values to interpolate
             #    would be inserted.
-            #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
-            t_new_indices = np.searchsorted(t, t_new[interp_range])
+            #    Note: If x_new[n] == x[m], then m is returned by searchsorted.
+            x_new_indices = np.searchsorted(x, x_new[interp_range])
 
             # 3. Clip x_new_indices so that they are within the range of
             #    self.x indices and at least 1.  Removes mis-interpolation
             #    of x_new[n] = x[0]
-            t_new_indices = t_new_indices.clip(1, len(t) - 1).astype(int)
+            x_new_indices = x_new_indices.clip(1, len(x) - 1).astype(int)
 
             # 4. Calculate the slope of regions that each x_new value falls in.
-            lo = t_new_indices - 1
-            hi = t_new_indices
+            lo = x_new_indices - 1
+            hi = x_new_indices
 
-            t_lo = t[lo]
-            t_hi = t[hi]
+            x_lo = x[lo]
+            x_hi = x[hi]
             # --------------------------------------------------------------------------
             if returnC:
                 # Prepare the sensitivity coefficients, which in the first place
                 # inside the interpolation range are the Lagrangian polynomials. We
                 # compute the Lagrangian polynomials for all interpolation nodes
                 # inside the original range.
-                L_1 = (t_new[interp_range] - t_hi) / (t_lo - t_hi)
-                L_2 = (t_new[interp_range] - t_lo) / (t_hi - t_lo)
+                L_1 = (x_new[interp_range] - x_hi) / (x_lo - x_hi)
+                L_2 = (x_new[interp_range] - x_lo) / (x_hi - x_lo)
 
                 # Create iterators needed to efficiently fill our sensitivity matrix
                 # in the rows corresponding to interpolation range.
@@ -295,14 +295,14 @@ def interp1d_unc(
                 uy_prev_sqr = uy[lo] ** 2
                 uy_next_sqr = uy[hi] ** 2
                 uy_new[interp_range] = np.sqrt(
-                    (t_new[interp_range] - t_hi) ** 2 * uy_prev_sqr
-                    + (t_new[interp_range] - t_lo) ** 2 * uy_next_sqr
-                ) / (t_hi - t_lo)
+                    (x_new[interp_range] - x_hi) ** 2 * uy_prev_sqr
+                    + (x_new[interp_range] - x_lo) ** 2 * uy_next_sqr
+                ) / (x_hi - x_lo)
     else:
         raise NotImplementedError(
             "%s is unsupported yet. Let us know, that you need it." % kind
         )
 
     if returnC:
-        return t_new, y_new, uy_new, C
-    return t_new, y_new, uy_new
+        return x_new, y_new, uy_new, C
+    return x_new, y_new, uy_new
