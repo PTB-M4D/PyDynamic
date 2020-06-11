@@ -3,15 +3,15 @@
 
 This module contains the following function:
 
-* :func:`fit_sos`: Fit second-order model to complex-valued frequency response
+* :func:`fit_som`: Fit second-order model to complex-valued frequency response
 """
 
 import numpy as np
 
-__all__ = ["fit_sos"]
+__all__ = ["fit_som"]
 
 
-def fit_sos(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
+def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
     """Fit second-order model to complex-valued frequency response
 
     Fit second-order model (spring-damper model) with parameters
