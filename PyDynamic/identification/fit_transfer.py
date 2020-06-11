@@ -11,6 +11,7 @@ for the identification of transfer function models.
 This module for now still contains the following function:
 
 * :func:`fit_sos`: Fit second-order model to complex-valued frequency response
+
 """
 import warnings
 
