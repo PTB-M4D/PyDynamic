@@ -4,6 +4,7 @@
 This module contains the following function:
 
 * :func:`fit_sos`: Fit second-order model to complex-valued frequency response
+
 """
 import warnings
 
