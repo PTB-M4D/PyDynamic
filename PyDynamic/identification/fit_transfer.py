@@ -10,11 +10,9 @@ for the identification of transfer function models.
 
 This module for now still contains the following function:
 
-* :func:`fit_som`: Fit second-order model to complex-valued frequency response
+* :func:`fit_sos`: Fit second-order model to complex-valued frequency response
 """
 import warnings
-
-import numpy as np
 
 from ..model_estimation.fit_transfer import fit_som
 
