@@ -187,7 +187,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     return x, ux.flatten()  # flatten in case that we still have 2D array
 
 
-def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
+def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="corr"):
     """
     Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
@@ -206,8 +206,8 @@ def IIRuncFilter(x, Ux, b, a, Uab, state = None, kind="diag"):
             covariance matrix for (a[1:],b)
         kind: string
             defines the interpretation of Ux, if Ux is a 1D-array
-            "diag": point-wise standard uncertainties of non-stationary white noise (default)
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise
+            "diag": point-wise standard uncertainties of non-stationary white noise
+            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
         state: dict
             An internal state (z, dz, P, cache) to start from - e.g. from a previous run of IIRuncFilter.
 
