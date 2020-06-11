@@ -9,6 +9,6 @@ transfer function models.
 """
 
 from .fit_filter import LSFIR, LSIIR
-from .fit_transfer import fit_sos
+from .fit_transfer import fit_som
 
-__all__ = ["LSFIR", "LSIIR", "fit_sos"]
+__all__ = ["LSFIR", "LSIIR", "fit_som"]

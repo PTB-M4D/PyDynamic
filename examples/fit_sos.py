@@ -6,7 +6,7 @@ to a set of frequency response values.
 
 from matplotlib.pyplot import *
 
-from PyDynamic.model_estimation.fit_transfer import fit_sos
+from PyDynamic.identification.fit_transfer import fit_som
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
 from PyDynamic.misc.tools import make_semiposdef
 
@@ -35,7 +35,7 @@ H = np.r_[np.real(Hc), np.imag(Hc)]
 UH = np.cov(np.r_[np.real(HMC), np.imag(HMC)], rowvar=True)
 UH = make_semiposdef(UH)
 
-p, Up, HMC2 = fit_sos(f, Hc, UH, scaling=1, MCruns=10000)
+p, Up, HMC2 = fit_som(f, Hc, UH, scaling=1, MCruns=10000)
 
 figure(1)
 errorbar(

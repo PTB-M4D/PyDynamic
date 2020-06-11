@@ -28,7 +28,7 @@ __all__ = [
     "LSFIR_unc",
     "LSFIR_uncMC",
     "LSIIR_unc",
-    "fit_sos",
+    "fit_som",
     "FreqResp2RealImag",
     "GUM_DFT",
     "GUM_iDFT",
