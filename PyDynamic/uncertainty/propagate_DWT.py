@@ -9,7 +9,7 @@ transform (DWT).
 import pywt
 import numpy as np
 import scipy.signal as scs
-from PyDynamic.uncertainty.propagate_filter import IIRuncFilter, get_initial_state, FIRuncFilter
+from .propagate_filter import IIRuncFilter, get_initial_state, FIRuncFilter
 
 
 __all__ = ["dwt", "wave_dec", "wave_dec_realtime",  "idwt", "wave_rec", "filter_design"]
