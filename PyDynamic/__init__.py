@@ -9,7 +9,7 @@ import uncertainty
 """
 
 from .deconvolution.fit_filter import LSFIR_unc, LSFIR_uncMC, LSIIR_unc
-from .identification import *
+from .identification.fit_transfer import fit_sos
 
 from .misc import *
 from .model_estimation import *
@@ -29,6 +29,7 @@ __all__ = [
     "LSFIR_uncMC",
     "LSIIR_unc",
     "fit_som",
+    "fit_sos",
     "FreqResp2RealImag",
     "GUM_DFT",
     "GUM_iDFT",
