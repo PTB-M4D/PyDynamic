@@ -10,7 +10,7 @@ with associated uncertainties.
 
 from .fit_filter import (LSFIR, LSIIR, invLSFIR, invLSFIR_unc, invLSFIR_uncMC,
                          invLSIIR, invLSIIR_unc)
-from .fit_transfer import fit_sos
+from .fit_transfer import fit_som
 
 __all__ = [
     "LSFIR",
@@ -20,5 +20,5 @@ __all__ = [
     "invLSFIR_unc",
     "invLSFIR_uncMC",
     "invLSIIR_unc",
-    "fit_sos",
+    "fit_som",
 ]

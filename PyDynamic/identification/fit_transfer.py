@@ -15,9 +15,7 @@ This module for now still contains the following function:
 """
 import warnings
 
-import numpy as np
-
-from ..model_estimation.fit_transfer import fit_sos
+from ..model_estimation.fit_transfer import fit_som
 
 __all__ = ["fit_sos"]
 
@@ -29,3 +27,8 @@ warnings.warn(
     "the new package *model_estimation* instead.",
     DeprecationWarning,
 )
+
+
+def fit_sos(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
+    """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.fit_som`"""
+    return fit_som(f=f, H=H, UH=UH, weighting=weighting, MCruns=MCruns, scaling=scaling)
