@@ -30,9 +30,10 @@ from .propagate_DWT import (
     dwt,
     wave_dec,
     wave_dec_realtime,
-    idwt,
+    inv_dwt,
     wave_rec,
     filter_design,
+    dwt_max_level,
 )
 
 __all__ = [
@@ -54,7 +55,8 @@ __all__ = [
     "dwt",
     "wave_dec",
     "wave_dec_realtime",
-    "idwt",
+    "inv_dwt",
     "wave_rec",
     "filter_design",
+    "dwt_max_level",
 ]

@@ -5,7 +5,7 @@ Perform test for uncertainty.propagate_DWT
 import matplotlib.pyplot as plt
 import numpy as np
 
-from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, idwt, wave_rec, filter_design, dwt_max_level, wave_dec_realtime
+from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, inv_dwt, wave_rec, filter_design, dwt_max_level, wave_dec_realtime
 
 import pywt
 
@@ -34,7 +34,7 @@ def test_dwt():
             ld, hd, lr, hr = filter_design(filter_name)
 
             # execute single level DWT
-            y1, Uy1, y2, Uy2, _ = dwt(x, Ux, ld, hd, kind="diag")
+            y1, Uy1, y2, Uy2, _ = dwt(x, Ux, ld, hd)
 
             # all output has same length
             assert y1.size == y2.size
@@ -66,7 +66,7 @@ def test_idwt():
             ld, hd, lr, hr = filter_design(filter_name)
 
             # execute single level DWT
-            x, Ux, _ = idwt(c_approx, Uc_approx, c_detail, Uc_detail, lr, hr, kind="diag")
+            x, Ux, _ = inv_dwt(c_approx, Uc_approx, c_detail, Uc_detail, lr, hr)
 
             # all output has same length
             assert x.size == Ux.size
@@ -91,10 +91,10 @@ def test_identity_single(make_plots=False):
             ld, hd, lr, hr = filter_design(filter_name)
 
             # single decomposition
-            y_approx, U_approx, y_detail, U_detail, _ = dwt(x, Ux, ld, hd, kind="diag")
+            y_approx, U_approx, y_detail, U_detail, _ = dwt(x, Ux, ld, hd)
 
             # single reconstruction
-            xr, Uxr, _ = idwt(y_approx, U_approx, y_detail, U_detail, lr, hr, kind="diag")
+            xr, Uxr, _ = inv_dwt(y_approx, U_approx, y_detail, U_detail, lr, hr)
 
             if x.size % 2 == 0:
                 assert x.size == xr.size
@@ -204,10 +204,10 @@ def test_identity_multi():
             ld, hd, lr, hr = filter_design(filter_name)
 
             # full decomposition
-            coeffs, Ucoeffs, ol = wave_dec(x, Ux, ld, hd, kind="diag")
+            coeffs, Ucoeffs, ol = wave_dec(x, Ux, ld, hd)
 
             # full reconstruction
-            xr, Uxr = wave_rec(coeffs, Ucoeffs, lr, hr, original_length=ol, kind="diag")
+            xr, Uxr = wave_rec(coeffs, Ucoeffs, lr, hr, original_length=ol)
 
             assert x.size == xr.size
             assert np.allclose(x, xr)

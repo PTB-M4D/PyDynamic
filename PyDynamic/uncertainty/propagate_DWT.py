@@ -10,9 +10,10 @@ This modules contains the following functions:
 * :func:`dwt`: single level DWT
 * :func:`wave_dec`: wavelet decomposition / multi level DWT
 * :func:`wave_dec_realtime"`: multi level DWT 
-* :func:`idwt`: single level inverse DWT
+* :func:`inv_dwt`: single level inverse DWT
 * :func:`wave_rec`: wavelet reconstruction / multi level inverse DWT
-* :func:`filter_desig`: provide common wavelet filters (via :py:mod:`PyWavelets`)
+* :func:`filter_design`: provide common wavelet filters (via :py:mod:`PyWavelets`)
+* :func:`dwt_max_level`: return the maximum achievable DWT level
 
 """
 
@@ -21,14 +22,14 @@ import pywt
 
 from .propagate_filter import IIRuncFilter, get_initial_state
 
-__all__ = ["dwt", "wave_dec", "wave_dec_realtime",  "idwt", "wave_rec", "filter_design"]
+__all__ = ["dwt", "wave_dec", "wave_dec_realtime", "inv_dwt", "wave_rec", "filter_design", "dwt_max_level"]
 
 
-def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
+def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1):
     """
-    Apply low-pass `l` and high-pass `h` to time-series data `x`.
-    The uncertainty is propgated through the transformation by using 
-    PyDynamic.uncertainty.FIRuncFilter. and propagate
+    Apply low-pass `lowpass` and high-pass `highpass` to time-series data `x`.
+    The uncertainty is propagated through the transformation by using 
+    :func:`PyDynamic.uncertainty.IIRuncFilter`.
 
     Return the subsampled results.
 
@@ -38,21 +39,20 @@ def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
             filter input signal
         Ux: float or np.ndarray
             float:    standard deviation of white noise in x
-            1D-array: interpretation depends on kind
-        l: np.ndarray
+            1D-array: point-wise standard uncertainties of non-stationary white noise 
+        lowpass: np.ndarray
             FIR filter coefficients
             representing a low-pass for decomposition
-        h: np.ndarray
+        highpass: np.ndarray
             FIR filter coefficients
             representing a high-pass for decomposition
-        kind: string
-            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
-            "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
         states: dictionary of internal high/lowpass-filter states
             allows to continue at the last used internal state from previous call
         realtime: Boolean
             for realtime applications, no signal padding has to be done before decomposition
+        subsample_start: int
+            At which position the subsampling should start, typically 1 (default) or 0. 
+            You should be happy with the default. We only need this to realize func:`wave_dec_realtime`. 
     
     Returns
     -------
@@ -69,21 +69,21 @@ def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
     """
 
     # prolongate signals if no realtime is needed
-    pad_len = 0
     if not realtime:
-        pad_len = l.size-1
+        pad_len = lowpass.size-1
         x = np.pad(x, (0, pad_len), mode="edge")
         Ux = np.pad(Ux, (0, pad_len), mode="edge")
 
     # init states if not given
     if not states:
-        states = {}
-        states["low"] = get_initial_state(l, [1.0], Uab=None, x0=x[0], U0=Ux[0])
-        states["high"] = get_initial_state(h, [1.0], Uab=None, x0=x[0], U0=Ux[0])
+        states = {
+            "low" : get_initial_state(lowpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]), 
+            "high": get_initial_state(highpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
+        }
 
     # propagate uncertainty through FIR-filter
-    c_approx, U_approx, states["low"] = IIRuncFilter(x, Ux, l, [1.0], Uab=None, kind=kind, state=states["low"])
-    c_detail, U_detail, states["high"] = IIRuncFilter(x, Ux, h, [1.0], Uab=None, kind=kind, state=states["high"])
+    c_approx, U_approx, states["low"] = IIRuncFilter(x, Ux, lowpass, [1.0], Uab=None, kind="diag", state=states["low"])
+    c_detail, U_detail, states["high"] = IIRuncFilter(x, Ux, highpass, [1.0], Uab=None, kind="diag", state=states["high"])
 
     # subsample to half the length
     c_approx = c_approx[subsample_start::2]
@@ -94,7 +94,7 @@ def dwt(x, Ux, l, h, kind, states=None, realtime=False, subsample_start=1):
     return c_approx, U_approx, c_detail, U_detail, states
 
 
-def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realtime=False):
+def inv_dwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass, states=None, realtime=False):
     """
     Single step of inverse discrete wavelet transform
 
@@ -108,16 +108,12 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
             high-pass output signal
         U_detail: np.ndarray
             high-pass output uncertainty
-        l: np.ndarray
+        lowpass: np.ndarray
             FIR filter coefficients
             representing a low-pass for reconstruction
-        h: np.ndarray
+        highpass: np.ndarray
             FIR filter coefficients
             representing a high-pass for reconstruction
-        kind: string
-            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
-            "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
         states: dictionary of internal high/lowpass-filter states
             allows to continue at the last used internal state from previous call
         realtime: Boolean
@@ -142,13 +138,14 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
 
     # init states if not given
     if not states:
-        states = {}
-        states["low"] = get_initial_state(l, [1.0], Uab=None, x0=0, U0=0)   # the value before the first entry is a zero,
-        states["high"] = get_initial_state(h, [1.0], Uab=None, x0=0, U0=0)  # if the upsampling would continue into the past
+        states = {
+            "low": get_initial_state(lowpass, [1.0], Uab=None, x0=0, U0=0),  # the value before the first entry is a zero, if the upsampling would continue into the past
+            "high": get_initial_state(highpass, [1.0], Uab=None, x0=0, U0=0), 
+        }
 
     # propagate uncertainty through FIR-filter
-    x_approx, Ux_approx, states["low"] = IIRuncFilter(c_approx, U_approx, l, [1.0], Uab=None, kind=kind, state=states["low"])
-    x_detail, Ux_detail, states["high"] = IIRuncFilter(c_detail, U_detail, h, [1.0], Uab=None, kind=kind, state=states["high"])
+    x_approx, Ux_approx, states["low"] = IIRuncFilter(c_approx, U_approx, lowpass, [1.0], Uab=None, kind="diag", state=states["low"])
+    x_detail, Ux_detail, states["high"] = IIRuncFilter(c_detail, U_detail, highpass, [1.0], Uab=None, kind="diag", state=states["high"])
 
     # add both parts
     if realtime:
@@ -156,7 +153,7 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
         Ux = Ux_detail + Ux_approx
     else:
         # remove prolongation if not realtime
-        ls = l.size - 2
+        ls = lowpass.size - 2
         x = x_detail[ls:] + x_approx[ls:]
         Ux = Ux_detail[ls:] + Ux_approx[ls:]
 
@@ -166,13 +163,14 @@ def idwt(c_approx, U_approx, c_detail, U_detail, l, h, kind, states=None, realti
 def filter_design(kind):
     """
     Provide low- and highpass filters suitable for discrete wavelet transformation.
+    This wraps :py:mod:`PyWavelets`.
     
     Parameters:
     -----------
         kind: string
             filter name, i.e. db4, coif6, gaus9, rbio3.3, ...
-            supported families: pywt.families(short=False)
-            supported wavelets: pywt.wavelist()
+            supported families: :func:`pywt.families`
+            supported wavelets: :func:`pywt.wavelist`
 
     Returns:
     --------
@@ -186,34 +184,43 @@ def filter_design(kind):
             high-pass filter for reconstruction
     """
 
-    if kind in pywt.wavelist():
-        w = pywt.Wavelet(kind)
-        ld = np.array(w.dec_lo)
-        hd = np.array(w.dec_hi)
-        lr = np.array(w.rec_lo)
-        hr = np.array(w.rec_hi)
+    w = pywt.Wavelet(kind)
+    ld = np.array(w.dec_lo)
+    hd = np.array(w.dec_hi)
+    lr = np.array(w.rec_lo)
+    hr = np.array(w.rec_hi)
 
-        return ld, hd, lr, hr
-
-    else:
-        raise NotImplementedError("The specified wavelet-kind \"{KIND}\" is not implemented.".format(KIND=kind))
-
+    return ld, hd, lr, hr
 
 def dwt_max_level(data_length, filter_length):
-    n_max = np.floor(np.log2(data_length / (filter_length - 1)))
-    return int(n_max)
+    """Return the highest achievable DWT level, given the provided data- and filter lengths
+    
+    Parameters
+    ----------
+        data_length: int
+            length of the data `x`, on which the DWT will be performed
+        filter_length: int
+            length of the lowpass which will be used to perform the DWT
+    
+    Returns
+    -------
+        n_max: int
+    """
+    n_max = int(np.floor(np.log2(data_length / (filter_length - 1))))
+    return n_max
 
 
-def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
+def wave_dec(x, Ux, lowpass, highpass, n=-1):
     """
     Multilevel discrete wavelet transformation of time-series x with uncertainty Ux.
 
     Parameters:
     -----------
         x: np.ndarray
-            ...
+            input signal
         Ux: float or np.ndarray
-            ...
+            float: standard deviation of white noise in x
+            1D-array: point-wise standard uncertainties of non-stationary white noise
         lowpass: np.ndarray
             decomposition low-pass for wavelet_block
         highpass: np.ndarray
@@ -222,10 +229,6 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
             consecutive repetitions of wavelet_block
             user is warned, if it is not possible to reach the specified depth
             ignored if set to -1 (default)
-        kind: string
-            only meaningfull in combination with isinstance(Ux, numpy.ndarray)
-            "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
 
     Returns:
     --------
@@ -242,7 +245,7 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
     # check if depth is reachable
     max_depth = dwt_max_level(x.size, lowpass.size)
     if n > max_depth:
-        raise UserWarning("Will run into trouble, max_depth = {MAX_DEPTH}, but you specified {DEPTH}".format(DEPTH=n, MAX_DEPTH=max_depth))
+        raise UserWarning("Will run into trouble, max_depth = {MAX_DEPTH}, but you specified {DEPTH}. Consider reducing the depth-to-be-achieved or prolong the input signal.".format(DEPTH=n, MAX_DEPTH=max_depth))
     elif n == -1:
         n = max_depth
 
@@ -256,7 +259,7 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
     for level in range(n):
         
         # execute wavelet block
-        c_approx, Uc_approx, c_detail, Uc_detail, states = dwt(c_approx, Uc_approx, lowpass, highpass, kind)
+        c_approx, Uc_approx, c_detail, Uc_detail, _ = dwt(c_approx, Uc_approx, lowpass, highpass)
 
         # save result
         coeffs.insert(0, c_detail)
@@ -268,8 +271,41 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1, kind="diag"):
     return coeffs, Ucoeffs, original_length
 
 
-def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, kind="diag", level_states=None):
+def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
+    """
+    Multilevel discrete wavelet transformation of time-series x with uncertainty Ux.
+    Similar to :func:`wave_dec`, but allows to start from the internal_state of a previous call.
 
+    Parameters:
+    -----------
+        x: np.ndarray
+            input signal
+        Ux: float or np.ndarray
+            float: standard deviation of white noise in x
+            1D-array: point-wise standard uncertainties of non-stationary white noise
+        lowpass: np.ndarray
+            decomposition low-pass for wavelet_block
+        highpass: np.ndarray
+            decomposition high-pass for wavelet_block
+        n: int
+            consecutive repetitions of wavelet_block
+            There is no maximum level in continuos wavelet transform, so the default is n=1. 
+        level_states: dict
+            internal state from previous call
+
+    Returns:
+    --------
+        coeffs: list of arrays
+            order of arrays within list is:
+            [cAn, cDn, cDn-1, ..., cD2, cD1]
+        Ucoeffs: list of arrays
+            uncertainty of coeffs, same order as coeffs
+        original_length: int
+            equals to len(x)
+            necessary to restore correct length 
+        level_states: dict
+            last internal state
+    """
     if level_states == None:
         level_states = {level: None for level in range(n)}
         level_states["counter"] = 0
@@ -290,7 +326,7 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, kind="diag", level_states=N
 
         # execute wavelet block
         if len(c_approx) > 0:
-            c_approx, Uc_approx, c_detail, Uc_detail, level_states[level] = dwt(c_approx, Uc_approx, lowpass, highpass, kind, realtime=True, states=level_states[level], subsample_start=subsample_start)
+            c_approx, Uc_approx, c_detail, Uc_detail, level_states[level] = dwt(c_approx, Uc_approx, lowpass, highpass, realtime=True, states=level_states[level], subsample_start=subsample_start)
         else:
             c_approx = np.empty(0)
             Uc_approx = np.empty(0)
@@ -310,7 +346,7 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, kind="diag", level_states=N
     return coeffs, Ucoeffs, original_length, level_states
 
 
-def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None, kind="diag"):
+def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None):
     """
     Multilevel discrete wavelet reconstruction of coefficients from levels back into time-series.
 
@@ -350,8 +386,8 @@ def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None, kind="dia
         c_approx = c_approx[:lc]
         U_approx = U_approx[:lc]
 
-        # execute idwt
-        c_approx, U_approx, states = idwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass, kind=kind)
+        # execute inv_dwt
+        c_approx, U_approx, _ = inv_dwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass)
     
     # bring to original length (does nothing if original_length == None)
     x = c_approx[:original_length]
