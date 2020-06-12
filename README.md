@@ -100,6 +100,16 @@ us know. You may, for instance, drop an email to one of the [authors
 ](mailto:bjoern.ludwig@ptb.de) or [Maximilian Gruber
 ](mailto:maximilian.gruber@ptb.de))
 
+### Optional Jupyter Notebook dependencies
+
+If you are familiar with Jupyter Notebooks, you find some examples in the _examples_ and
+the _tutorials_ subfolders of the source code repository. To execute these you need
+additional dependencies which you can install via
+
+```shell
+pip install PyDynamic[examples]
+```
+
 ### Examples
 
 We have collected extended material for an easier introduction to PyDynamic in the two
