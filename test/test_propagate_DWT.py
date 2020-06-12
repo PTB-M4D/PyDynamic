@@ -5,7 +5,15 @@ Perform test for uncertainty.propagate_DWT
 import matplotlib.pyplot as plt
 import numpy as np
 
-from PyDynamic.uncertainty.propagate_DWT import dwt, wave_dec, inv_dwt, wave_rec, filter_design, dwt_max_level, wave_dec_realtime
+from PyDynamic.uncertainty.propagate_DWT import (
+    dwt,
+    wave_dec,
+    inv_dwt,
+    wave_rec,
+    filter_design,
+    dwt_max_level,
+    wave_dec_realtime,
+)
 
 import pywt
 
@@ -23,10 +31,10 @@ def test_filter_design():
 
 
 def test_dwt():
-    
+
     for filter_name in ["db3", "db4"]:
 
-        for nx in [20,21,22,23]:
+        for nx in [20, 21, 22, 23]:
 
             x = np.random.randn(nx)
             Ux = 0.1 * (1 + np.random.random(nx))
@@ -56,7 +64,7 @@ def test_idwt():
 
     for filter_name in ["db3", "db4"]:
 
-        for nc in [20,21,22,23]:
+        for nc in [20, 21, 22, 23]:
 
             c_approx = np.random.randn(nc)
             Uc_approx = 0.1 * (1 + np.random.random(nc))
@@ -72,7 +80,7 @@ def test_idwt():
             assert x.size == Ux.size
 
             # output double the size of input minus filter
-            assert 2*c_approx.size - lr.size + 2 == x.size
+            assert 2 * c_approx.size - lr.size + 2 == x.size
 
             # compare to pywt
             r = pywt.idwt(c_approx, c_detail, filter_name, mode="constant")
@@ -85,7 +93,7 @@ def test_identity_single(make_plots=False):
 
         for nx in [20, 21, 22, 23]:
 
-            x = np.linspace(1,nx,nx)  # np.random.randn(nx)
+            x = np.linspace(1, nx, nx)  # np.random.randn(nx)
             Ux = 0.1 * (1 + np.random.random(nx))
 
             ld, hd, lr, hr = filter_design(filter_name)
@@ -104,7 +112,7 @@ def test_identity_single(make_plots=False):
                 assert x.size + 1 == xr.size
                 assert Ux.size + 1 == Uxr.size
                 assert np.allclose(x, xr[:-1])
-            
+
             if make_plots:
                 plt.plot(x)
                 plt.plot(xr)
@@ -123,7 +131,7 @@ def test_max_level():
 def test_decomposition():
     for filter_name in ["db2", "db3"]:
 
-        for nx in [20,21]:
+        for nx in [20, 21]:
 
             x = np.random.randn(nx)
             Ux = 0.1 * (1 + np.random.random(nx))
@@ -132,17 +140,17 @@ def test_decomposition():
 
             coeffs, Ucoeffs, ol = wave_dec(x, Ux, ld, hd)
 
-            #for c, Uc in zip(coeffs, Ucoeffs):
+            # for c, Uc in zip(coeffs, Ucoeffs):
             #    print(c)
             #    print("-"*60)
-            #print("="*60)
+            # print("="*60)
 
             # compare to the output of PyWavelet
-            result_pywt = pywt.wavedec(x, filter_name, mode='constant')
+            result_pywt = pywt.wavedec(x, filter_name, mode="constant")
 
             # compare output depth
             assert len(result_pywt) == len(coeffs)
-            
+
             # compare output in detail
             for a, b in zip(result_pywt, coeffs):
                 assert len(a) == len(b)
@@ -152,7 +160,7 @@ def test_decomposition():
 def test_decomposition_realtime():
     for filter_name in ["db2", "db3"]:
 
-        for nx in [20,21]:
+        for nx in [20, 21]:
 
             x = np.random.randn(nx)
             Ux = 0.1 * (1 + np.random.random(nx))
@@ -168,17 +176,27 @@ def test_decomposition_realtime():
             Ucoeffs_list = []
             z_b = None
             n_splits = 3
-            for x_batch, Ux_batch in zip(np.array_split(x, n_splits), np.array_split(Ux, n_splits)):
-                coeffs_b, Ucoeffs_b, ol_b, z_b = wave_dec_realtime(x_batch, Ux_batch, ld, hd, n=2, level_states=z_b)
+            for x_batch, Ux_batch in zip(
+                np.array_split(x, n_splits), np.array_split(Ux, n_splits)
+            ):
+                coeffs_b, Ucoeffs_b, ol_b, z_b = wave_dec_realtime(
+                    x_batch, Ux_batch, ld, hd, n=2, level_states=z_b
+                )
                 coeffs_list.append(coeffs_b)
                 Ucoeffs_list.append(Ucoeffs_b)
 
-            coeffs_b = [np.concatenate([coeffs[level] for coeffs in coeffs_list], axis=0) for level in range(len(coeffs_list[0]))]
-            Ucoeffs_b = [np.concatenate([Ucoeffs[level] for Ucoeffs in Ucoeffs_list], axis=0) for level in range(len(Ucoeffs_list[0]))]
+            coeffs_b = [
+                np.concatenate([coeffs[level] for coeffs in coeffs_list], axis=0)
+                for level in range(len(coeffs_list[0]))
+            ]
+            Ucoeffs_b = [
+                np.concatenate([Ucoeffs[level] for Ucoeffs in Ucoeffs_list], axis=0)
+                for level in range(len(Ucoeffs_list[0]))
+            ]
 
             # compare output depth
             assert len(coeffs_a) == len(coeffs_b)
-            
+
             # compare output in detail
             for a, b in zip(coeffs_a, coeffs_b):
                 assert len(a) == len(b)
@@ -195,10 +213,10 @@ def test_identity_multi():
 
         for nx in [20, 21, 203]:
 
-            x = np.linspace(1,nx,nx)  # np.random.randn(nx)
-            #Ux = 0.1 * (1 + np.random.random(nx))
+            x = np.linspace(1, nx, nx)  # np.random.randn(nx)
+            # Ux = 0.1 * (1 + np.random.random(nx))
             Ux = np.ones((nx))
-            Ux[nx//2:] = 2
+            Ux[nx // 2 :] = 2
             Ux = 0.1 * Ux
 
             ld, hd, lr, hr = filter_design(filter_name)
@@ -213,7 +231,7 @@ def test_identity_multi():
             assert np.allclose(x, xr)
             assert Ux.size == Uxr.size
 
-            #if nx == 203 and filter_name == "db4":
+            # if nx == 203 and filter_name == "db4":
             #    plt.plot(Ux)
             #    plt.plot(Uxr)
             #    plt.show()

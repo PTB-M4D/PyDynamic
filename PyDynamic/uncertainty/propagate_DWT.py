@@ -22,7 +22,15 @@ import pywt
 
 from .propagate_filter import IIRuncFilter, get_initial_state
 
-__all__ = ["dwt", "wave_dec", "wave_dec_realtime", "inv_dwt", "wave_rec", "filter_design", "dwt_max_level"]
+__all__ = [
+    "dwt",
+    "wave_dec",
+    "wave_dec_realtime",
+    "inv_dwt",
+    "wave_rec",
+    "filter_design",
+    "dwt_max_level",
+]
 
 
 def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1):
@@ -70,20 +78,24 @@ def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1
 
     # prolongate signals if no realtime is needed
     if not realtime:
-        pad_len = lowpass.size-1
+        pad_len = lowpass.size - 1
         x = np.pad(x, (0, pad_len), mode="edge")
         Ux = np.pad(Ux, (0, pad_len), mode="edge")
 
     # init states if not given
     if not states:
         states = {
-            "low" : get_initial_state(lowpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]), 
+            "low": get_initial_state(lowpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
             "high": get_initial_state(highpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
         }
 
     # propagate uncertainty through FIR-filter
-    c_approx, U_approx, states["low"] = IIRuncFilter(x, Ux, lowpass, [1.0], Uab=None, kind="diag", state=states["low"])
-    c_detail, U_detail, states["high"] = IIRuncFilter(x, Ux, highpass, [1.0], Uab=None, kind="diag", state=states["high"])
+    c_approx, U_approx, states["low"] = IIRuncFilter(
+        x, Ux, lowpass, [1.0], Uab=None, kind="diag", state=states["low"]
+    )
+    c_detail, U_detail, states["high"] = IIRuncFilter(
+        x, Ux, highpass, [1.0], Uab=None, kind="diag", state=states["high"]
+    )
 
     # subsample to half the length
     c_approx = c_approx[subsample_start::2]
@@ -94,7 +106,16 @@ def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1
     return c_approx, U_approx, c_detail, U_detail, states
 
 
-def inv_dwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass, states=None, realtime=False):
+def inv_dwt(
+    c_approx,
+    U_approx,
+    c_detail,
+    U_detail,
+    lowpass,
+    highpass,
+    states=None,
+    realtime=False,
+):
     """
     Single step of inverse discrete wavelet transform
 
@@ -130,22 +151,32 @@ def inv_dwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass, states=No
     """
 
     # upsample to double the length
-    indices = np.arange(1, c_detail.size+1)
+    indices = np.arange(1, c_detail.size + 1)
     c_approx = np.insert(c_approx, indices, 0)
-    U_approx = np.insert(U_approx / np.sqrt(2), indices, 0)  # why is this correction necessary?
+    U_approx = np.insert(
+        U_approx / np.sqrt(2), indices, 0
+    )  # why is this correction necessary?
     c_detail = np.insert(c_detail, indices, 0)
-    U_detail = np.insert(U_detail / np.sqrt(2), indices, 0)  # why is this correction necessary?
+    U_detail = np.insert(
+        U_detail / np.sqrt(2), indices, 0
+    )  # why is this correction necessary?
 
     # init states if not given
     if not states:
         states = {
-            "low": get_initial_state(lowpass, [1.0], Uab=None, x0=0, U0=0),  # the value before the first entry is a zero, if the upsampling would continue into the past
-            "high": get_initial_state(highpass, [1.0], Uab=None, x0=0, U0=0), 
+            "low": get_initial_state(
+                lowpass, [1.0], Uab=None, x0=0, U0=0
+            ),  # the value before the first entry is a zero, if the upsampling would continue into the past
+            "high": get_initial_state(highpass, [1.0], Uab=None, x0=0, U0=0),
         }
 
     # propagate uncertainty through FIR-filter
-    x_approx, Ux_approx, states["low"] = IIRuncFilter(c_approx, U_approx, lowpass, [1.0], Uab=None, kind="diag", state=states["low"])
-    x_detail, Ux_detail, states["high"] = IIRuncFilter(c_detail, U_detail, highpass, [1.0], Uab=None, kind="diag", state=states["high"])
+    x_approx, Ux_approx, states["low"] = IIRuncFilter(
+        c_approx, U_approx, lowpass, [1.0], Uab=None, kind="diag", state=states["low"]
+    )
+    x_detail, Ux_detail, states["high"] = IIRuncFilter(
+        c_detail, U_detail, highpass, [1.0], Uab=None, kind="diag", state=states["high"]
+    )
 
     # add both parts
     if realtime:
@@ -191,6 +222,7 @@ def filter_design(kind):
     hr = np.array(w.rec_hi)
 
     return ld, hd, lr, hr
+
 
 def dwt_max_level(data_length, filter_length):
     """Return the highest achievable DWT level, given the provided data- and filter lengths
@@ -245,21 +277,27 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1):
     # check if depth is reachable
     max_depth = dwt_max_level(x.size, lowpass.size)
     if n > max_depth:
-        raise UserWarning("Will run into trouble, max_depth = {MAX_DEPTH}, but you specified {DEPTH}. Consider reducing the depth-to-be-achieved or prolong the input signal.".format(DEPTH=n, MAX_DEPTH=max_depth))
+        raise UserWarning(
+            "Will run into trouble, max_depth = {MAX_DEPTH}, but you specified {DEPTH}. Consider reducing the depth-to-be-achieved or prolong the input signal.".format(
+                DEPTH=n, MAX_DEPTH=max_depth
+            )
+        )
     elif n == -1:
         n = max_depth
 
     c_approx = x
     Uc_approx = Ux
-    
+
     original_length = len(x)
     coeffs = []
     Ucoeffs = []
 
     for level in range(n):
-        
+
         # execute wavelet block
-        c_approx, Uc_approx, c_detail, Uc_detail, _ = dwt(c_approx, Uc_approx, lowpass, highpass)
+        c_approx, Uc_approx, c_detail, Uc_detail, _ = dwt(
+            c_approx, Uc_approx, lowpass, highpass
+        )
 
         # save result
         coeffs.insert(0, c_detail)
@@ -267,7 +305,7 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1):
         if level + 1 == n:  # save the details when in last level
             coeffs.insert(0, c_approx)
             Ucoeffs.insert(0, Uc_approx)
-    
+
     return coeffs, Ucoeffs, original_length
 
 
@@ -312,7 +350,7 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
 
     c_approx = x
     Uc_approx = Ux
-    
+
     original_length = len(x)
     coeffs = []
     Ucoeffs = []
@@ -321,12 +359,20 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
     for level in range(n):
         # check, where subsampling needs to start
         # (to remain consistency over multiple calls of wave_dec with argument-lengths not equal to 2^n)
-        i_n = i0 // 2**level
-        subsample_start = (i_n+1)%2
+        i_n = i0 // 2 ** level
+        subsample_start = (i_n + 1) % 2
 
         # execute wavelet block
         if len(c_approx) > 0:
-            c_approx, Uc_approx, c_detail, Uc_detail, level_states[level] = dwt(c_approx, Uc_approx, lowpass, highpass, realtime=True, states=level_states[level], subsample_start=subsample_start)
+            c_approx, Uc_approx, c_detail, Uc_detail, level_states[level] = dwt(
+                c_approx,
+                Uc_approx,
+                lowpass,
+                highpass,
+                realtime=True,
+                states=level_states[level],
+                subsample_start=subsample_start,
+            )
         else:
             c_approx = np.empty(0)
             Uc_approx = np.empty(0)
@@ -339,9 +385,9 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
         if level + 1 == n:  # save the details when in last level
             coeffs.insert(0, c_approx)
             Ucoeffs.insert(0, Uc_approx)
-    
+
     # update total counter modulo 2^n
-    level_states["counter"] = (level_states["counter"] + len(x)) % 2**n
+    level_states["counter"] = (level_states["counter"] + len(x)) % 2 ** n
 
     return coeffs, Ucoeffs, original_length, level_states
 
@@ -374,7 +420,7 @@ def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None):
         Ux: np.ndarray
             uncertainty of reconstructed signal
     """
-    
+
     # init the approximation coefficients
     c_approx = coeffs[0]
     U_approx = Ucoeffs[0]
@@ -387,8 +433,10 @@ def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None):
         U_approx = U_approx[:lc]
 
         # execute inv_dwt
-        c_approx, U_approx, _ = inv_dwt(c_approx, U_approx, c_detail, U_detail, lowpass, highpass)
-    
+        c_approx, U_approx, _ = inv_dwt(
+            c_approx, U_approx, c_detail, U_detail, lowpass, highpass
+        )
+
     # bring to original length (does nothing if original_length == None)
     x = c_approx[:original_length]
     Ux = U_approx[:original_length]
