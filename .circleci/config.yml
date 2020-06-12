@@ -142,6 +142,7 @@ workflows:
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
+          context: pypi.org publishing for PyDynamic
           requires:
               - test_python3.5
               - test_python3.6
