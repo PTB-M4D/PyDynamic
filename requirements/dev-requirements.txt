@@ -1,2 +1,2 @@
 # Reference the current default development requirements file.
--r dev-requirements-py37.txt
+-r dev-requirements-py38.txt

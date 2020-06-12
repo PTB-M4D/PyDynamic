@@ -1,6 +1,5 @@
-ipykernel
+notebook
 matplotlib
 numpy
 pandas
 scipy
-sympy

@@ -1,7 +1,3 @@
 -c requirements-py38.txt
 
-pytest
-pytest-cov
-python-semantic-release
-tox
-hypothesis
+-r dev-requirements.in
