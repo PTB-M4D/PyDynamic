@@ -16,11 +16,10 @@ This modules contains the following functions:
 
 """
 
-import pywt
 import numpy as np
-import scipy.signal as scs
-from .propagate_filter import IIRuncFilter, get_initial_state, FIRuncFilter
+import pywt
 
+from .propagate_filter import IIRuncFilter, get_initial_state
 
 __all__ = ["dwt", "wave_dec", "wave_dec_realtime",  "idwt", "wave_rec", "filter_design"]
 
