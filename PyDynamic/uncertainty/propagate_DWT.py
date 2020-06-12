@@ -4,6 +4,16 @@
 The :mod:`PyDynamic.uncertainty.propagate_DWT` module implements methods for
 the propagation of uncertainties in the application of the discrete wavelet
 transform (DWT).
+
+This modules contains the following functions:
+
+* :func:`dwt`: single level DWT
+* :func:`wave_dec`: wavelet decomposition / multi level DWT
+* :func:`wave_dec_realtime"`: multi level DWT 
+* :func:`idwt`: single level inverse DWT
+* :func:`wave_rec`: wavelet reconstruction / multi level inverse DWT
+* :func:`filter_desig`: provide common wavelet filters (via :py:mod:`PyWavelets`)
+
 """
 
 import pywt
