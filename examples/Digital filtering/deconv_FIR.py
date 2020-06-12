@@ -11,7 +11,7 @@ import numpy as np
 import scipy.signal as dsp
 import matplotlib.pyplot as plt
 
-import PyDynamic.deconvolution.fit_filter as deconv
+import PyDynamic.model_estimation.fit_filter as model_est
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.testsignals import shocklikeGaussian
 from PyDynamic.misc.filterstuff import kaiser_lowpass, db
@@ -61,7 +61,7 @@ H = np.r_[np.real(Hc), np.imag(Hc)]                         # best estimate in r
 UH= np.cov(np.c_[np.real(HMC),np.imag(HMC)],rowvar=0)       # covariance of real, imag
 UH= make_semiposdef(UH, verbose=True)                       # correct for numerical errors
 
-bF, UbF = deconv.LSFIR_unc(H,UH,N,tau,f,Fs)                             # Calculation of FIR deconvolution filter and its assoc. unc.
+bF, UbF = model_est.invLSFIR_unc(H,UH,N,tau,f,Fs)                             # Calculation of FIR deconvolution filter and its assoc. unc.
 CbF = UbF/(np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis],(1,N+1))*
 		   np.tile(np.sqrt(np.diag(UbF))[:,np.newaxis].T,(N+1,1)))      # correlation of filter coefficients
 
