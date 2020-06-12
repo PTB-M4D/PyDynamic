@@ -6,7 +6,7 @@ to a set of frequency response values.
 
 from matplotlib.pyplot import *
 
-from PyDynamic.identification.fit_transfer import fit_som
+from PyDynamic.model_estimation.fit_transfer import fit_som
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
 from PyDynamic.misc.tools import make_semiposdef
 
