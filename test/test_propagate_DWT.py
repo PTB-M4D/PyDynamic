@@ -2,23 +2,22 @@
 Perform test for uncertainty.propagate_DWT
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
+import pywt
 
 from PyDynamic.uncertainty.propagate_DWT import (
     dwt,
-    wave_dec,
-    inv_dwt,
-    wave_rec,
-    filter_design,
     dwt_max_level,
+    filter_design,
+    inv_dwt,
+    wave_dec,
     wave_dec_realtime,
+    wave_rec,
 )
-
-import pywt
 
 
 def test_filter_design():
+    """Check if connection to PyWavelets works as expected."""
 
     for filter_name in ["db3", "db4", "rbio3.3"]:
 
@@ -31,6 +30,7 @@ def test_filter_design():
 
 
 def test_dwt():
+    """Compare :func:`dwt` to the implementation of :mod:`PyWavelets`"""
 
     for filter_name in ["db3", "db4"]:
 
@@ -60,7 +60,8 @@ def test_dwt():
             assert np.allclose(cd, y2)
 
 
-def test_idwt():
+def test_inv_dwt():
+    """Compare :func:`inv_dwt` to the implementation of :mod:`PyWavelets`"""
 
     for filter_name in ["db3", "db4"]:
 
@@ -88,6 +89,7 @@ def test_idwt():
 
 
 def test_identity_single(make_plots=False):
+    """Test that x = inv_dwt(dwt(x)) for a single level DWT"""
 
     for filter_name in ["db3", "db4"]:
 
@@ -113,22 +115,14 @@ def test_identity_single(make_plots=False):
                 assert Ux.size + 1 == Uxr.size
                 assert np.allclose(x, xr[:-1])
 
-            if make_plots:
-                plt.plot(x)
-                plt.plot(xr)
-                plt.show()
-
-                plt.plot(Ux)
-                plt.plot(Uxr)
-                plt.show()
-
 
 def test_max_level():
     assert dwt_max_level(12, 5) == 1
     assert dwt_max_level(1000, 11) == 6
 
 
-def test_decomposition():
+def test_wave_dec():
+    """Compare :func:`wave_dec` to the implementation of :mod:`PyWavelets`"""
     for filter_name in ["db2", "db3"]:
 
         for nx in [20, 21]:
@@ -139,11 +133,6 @@ def test_decomposition():
             ld, hd, lr, hr = filter_design(filter_name)
 
             coeffs, Ucoeffs, ol = wave_dec(x, Ux, ld, hd)
-
-            # for c, Uc in zip(coeffs, Ucoeffs):
-            #    print(c)
-            #    print("-"*60)
-            # print("="*60)
 
             # compare to the output of PyWavelet
             result_pywt = pywt.wavedec(x, filter_name, mode="constant")
@@ -158,6 +147,10 @@ def test_decomposition():
 
 
 def test_decomposition_realtime():
+    """Check if repetitive calls to :func:`wave_dec_realtime` yield the same
+    result as a single call to the same function. (Because of different treatment 
+    of initial conditions, this can't be directly compared to :func:`wave_dec`.)
+    """
     for filter_name in ["db2", "db3"]:
 
         for nx in [20, 21]:
@@ -196,25 +189,55 @@ def test_decomposition_realtime():
 
             # compare output depth
             assert len(coeffs_a) == len(coeffs_b)
+            assert len(Ucoeffs_a) == len(Ucoeffs_b)
 
             # compare output in detail
             for a, b in zip(coeffs_a, coeffs_b):
                 assert len(a) == len(b)
                 assert np.allclose(a, b)
 
+            # compare output uncertainty in detail
+            for a, b in zip(Ucoeffs_a, Ucoeffs_b):
+                assert len(a) == len(b)
+                assert np.allclose(a, b)
 
-def test_reconstruction():
-    pass
+
+def test_wave_rec():
+    """Compare :func:`wave_rec` to the implementation of :mod:`PyWavelets`"""
+    for filter_name in ["db2", "db3"]:
+
+        for nx in [20, 21]:
+            # generate required coeffs-structure
+            coeff_lengths = [
+                len(c) for c in pywt.wavedec(np.zeros(nx), filter_name, mode="constant")
+            ]
+
+            coeffs = []
+            Ucoeffs = []
+            for i in coeff_lengths:
+                coeffs.append(np.random.random(i))
+                Ucoeffs.append(np.random.random(i))
+
+            # define a filter
+            ld, hd, lr, hr = filter_design(filter_name)
+
+            x, Ux = wave_rec(coeffs, Ucoeffs, lr, hr)
+
+            # compare to the output of PyWavelet
+            result_pywt = pywt.waverec(coeffs, filter_name, mode="constant")
+
+            # compare output of both methods
+            assert len(result_pywt) == len(x)
+            assert np.allclose(result_pywt, x)
 
 
 def test_identity_multi():
-
+    """Test that x = inv_dwt(dwt(x)) for a multi level DWT"""
     for filter_name in ["db3", "db4"]:
 
         for nx in [20, 21, 203]:
 
-            x = np.linspace(1, nx, nx)  # np.random.randn(nx)
-            # Ux = 0.1 * (1 + np.random.random(nx))
+            x = np.linspace(1, nx, nx)
             Ux = np.ones((nx))
             Ux[nx // 2 :] = 2
             Ux = 0.1 * Ux
@@ -230,8 +253,3 @@ def test_identity_multi():
             assert x.size == xr.size
             assert np.allclose(x, xr)
             assert Ux.size == Uxr.size
-
-            # if nx == 203 and filter_name == "db4":
-            #    plt.plot(Ux)
-            #    plt.plot(Uxr)
-            #    plt.show()
