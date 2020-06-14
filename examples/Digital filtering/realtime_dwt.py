@@ -1,24 +1,30 @@
-import sys
-sys.path.append(".")
+"""
+    Example how the discrete wavelet transformation can run continuously,
+    by repetitive calls of :func:`wave_dec_realtime`.
+    
+    The script runs infinitely and can be stopped by pressing "Ctrl + c".
+"""
+import itertools
+import random
+import time as tm
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
-
-import itertools
 import numpy as np
 import scipy.signal as scs
-import time as tm
-import random
+from matplotlib import rc
+from matplotlib.patches import Circle
 
-from PyDynamic.misc.testsignals import rect
-from PyDynamic.misc.buffer import Buffer
 import PyDynamic.uncertainty.propagate_DWT as wavelet
+from PyDynamic.misc.buffer import TimeSeriesBuffer as Buffer
+from PyDynamic.misc.testsignals import rect
 
 
-def main():
+
+def main(make_and_save_nice_plot=False):
+    
+    if make_and_save_nice_plot:
+        rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+        rc('text', usetex=True)
 
     # basics
     buffer_length = 120
@@ -29,8 +35,6 @@ def main():
     cycle_counter = 0
 
     # init wavelet stuff
-    #output = Buffer(buffer_length // 2)
-    #states = None
     ld, hd, lr, hr = wavelet.filter_design("db2")
     dwt_length = 21
 
@@ -69,8 +73,6 @@ def main():
     # simulate infinite stream of data
     while True:
         cycle_counter += 1
-        # log when cycle started
-        #cycle_start = tm.time()
 
         #ti = tm.time()
         ti = cycle_counter * cycle_duration
@@ -85,7 +87,7 @@ def main():
             t, v, u = signal.view_last(dwt_length)
             
             # multi level dwt with uncertainty
-            coeffs, Ucoeffs, ol, level_states = wavelet.wave_dec_realtime(v, u, ld, hd, n=n_levels, kind="diag", level_states=level_states)
+            coeffs, Ucoeffs, ol, level_states = wavelet.wave_dec_realtime(v, u, ld, hd, n=n_levels, level_states=level_states)
             
             # assign correct timestamps to the coefficients
             i0_old = (level_states["counter"] - len(t)) % 2**n_levels
@@ -98,15 +100,13 @@ def main():
 
             dwt_counter = 0
 
-            # change dwt length until next cycle, TESTING!!!
-            #dwt_length = random.choice([1, 2, 10, 21])
-            dwt_length = 20
+            # set dwt length until next cycle
+            dwt_length = random.choice([1, 2, 10, 21]) # could also be constant, e.g. dwt_length = 20
             print(dwt_length)
 
         # update plot every 5 iterations
         plot_counter += 1
-        #if plot_counter % 5 == 0:
-        if plot_counter % 5 == 0 and cycle_counter > buffer_length:
+        if plot_counter % 5 == 0 and cycle_counter > buffer_length: # skip plotting at startup, when buffer is still not fully filled
             # update plot
 
             ## get data to plot
@@ -139,14 +139,6 @@ def main():
                 c_line[1] = _ax.errorbar(t_coeff, v_coeff, yerr=u_coeff, linewidth=0, elinewidth=1.5, color="gray", capsize=3, zorder=0)
                 upper_unc = v_coeff+u_coeff
                 lower_unc = v_coeff-u_coeff
-                #data_line, caplines, barlinecols = c_line[1].lines
-                #data_line.set_xdata(t_coeff)
-                #data_line.set_ydata(v_coeff)
-                #caplines[0].set_xdata(t_coeff)
-                #caplines[0].set_ydata(upper_unc)
-                #caplines[1].set_xdata(t_coeff)
-                #caplines[1].set_ydata(lower_unc)
-                
 
                 if v_coeff.size != 0:
                     lim = [np.min(lower_unc), np.max(upper_unc)]
@@ -177,17 +169,12 @@ def main():
             # reset plot counter
             plot_counter = 0
 
-        # stop for plotting
-        #if cycle_counter % 7 == 0 and cycle_counter > buffer_length:
-        #    ex = input("Exit (y/n): ")
-        #    if ex == "y":
-        #        exit()
-
-        #tm.sleep(cycle_duration/2)
-
-
-
-
+        # stop at specific cycle for easier saving of plots
+        if make_and_save_nice_plot:
+            if cycle_counter % 7 == 0 and cycle_counter > buffer_length:
+                ex = input("Exit (y/n): ")
+                if ex == "y":
+                    exit()
 
 if __name__ == "__main__":
     try:
