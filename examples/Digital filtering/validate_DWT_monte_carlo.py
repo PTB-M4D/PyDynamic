@@ -1,12 +1,13 @@
-import scipy.signal as scs
+"""
+    Small script to validate DWT methdos with Monte-Carlo simulations.
+"""
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pywt
-import matplotlib.pyplot as plt
+import scipy.signal as scs
 
-import sys
-sys.path.append(".")
-
-from PyDynamic.uncertainty.propagate_DWT import dwt, idwt, filter_design
+from PyDynamic.uncertainty.propagate_DWT import dwt, filter_design, inv_dwt
 
 # monte carlo validation
 n_mc = 1000  # monte carlo runs
@@ -14,20 +15,20 @@ n_mc = 1000  # monte carlo runs
 for filter_name in ["db9"]:
 
     for nx in [101]:
-        
+
         # define input signal and uncertainty of input signal
-        x = np.clip(np.linspace(1,nx,nx), -10, 30)
+        x = np.clip(np.linspace(1, nx, nx), -10, 30)
         Ux = np.ones((nx))
-        Ux[nx//2:] = 2
+        Ux[nx // 2 :] = 2
         Ux = 1.0 * Ux
 
         ld, hd, lr, hr = filter_design(filter_name)
 
         # single decomposition with uncertainty
-        c_approx, U_approx, c_detail, U_detail, _ = dwt(x, Ux, ld, hd, kind="diag")
+        c_approx, U_approx, c_detail, U_detail, _ = dwt(x, Ux, ld, hd)
 
         # single reconstruction with uncertainty
-        xr, Uxr, _ = idwt(c_approx, U_approx, c_detail, U_detail, lr, hr, kind="diag")
+        xr, Uxr, _ = inv_dwt(c_approx, U_approx, c_detail, U_detail, lr, hr)
 
         # actual monte carlo
 
@@ -46,7 +47,7 @@ for filter_name in ["db9"]:
             xr_mc = pywt.idwt(c_approx_mc, c_detail_mc, filter_name, mode="constant")
             tmp_x.append(xr_mc)
 
-        # get distribution of results 
+        # get distribution of results
         c_mc_mean = np.mean(tmp_c, axis=0)
         c_mc_std = np.std(tmp_c, axis=0)
         xr_mc_mean = np.mean(tmp_x, axis=0)
@@ -64,7 +65,7 @@ for filter_name in ["db9"]:
         ax[0].plot(c_mc_mean, color="k", label="cA_mc mean")
         ax[0].plot(c_mc_mean + c_mc_std, color="k", linestyle=":", label="cA_mc + std")
         ax[0].plot(c_mc_mean - c_mc_std, color="k", linestyle=":", label="cA_mc - std")
-        
+
         # plot time series
         ## plot input
         ax[1].plot(x, color="c", label="x")
@@ -83,4 +84,3 @@ for filter_name in ["db9"]:
         ax[0].legend()
         ax[1].legend()
         plt.show()
-            
