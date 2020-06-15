@@ -60,7 +60,7 @@ def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1
             for realtime applications, no signal padding has to be done before decomposition
         subsample_start: int
             At which position the subsampling should start, typically 1 (default) or 0. 
-            You should be happy with the default. We only need this to realize func:`wave_dec_realtime`. 
+            You should be happy with the default. We only need this to realize :func:`wave_dec_realtime`. 
     
     Returns
     -------
