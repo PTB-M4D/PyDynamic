@@ -1,15 +1,11 @@
-import sys
-
-sys.path.append(".")
+import time as time_measure
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal as scs
-import time as time_measure
 
-from PyDynamic.misc.testsignals import rect, sine
 import PyDynamic.uncertainty.propagate_filter as pf
-
+from PyDynamic.misc.testsignals import rect, sine
 
 # define filter
 wp = 0.2
@@ -28,12 +24,13 @@ time = np.arange(nx) * Ts  # time values
 # input signal + run methods
 sigma_noise = 1e-2
 x = rect(time, 50 * Ts, 150 * Ts, 1.0, noise=sigma_noise)
-#x = sine(time, 1.0, 10/Fs, sigma_noise)
 Ux = sigma_noise * np.ones_like(x)
 Uab = 0.001 * np.diag(np.arange((len(a) + len(b) - 1)))
 
 # calculate result from IIR method
-y, Uy, _ = pf.IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")  # state=pf.get_initial_internal_state(b, a)
+y, Uy, _ = pf.IIRuncFilter(
+    x, Ux, b, a, Uab=Uab, kind="diag"
+)  # state=pf.get_initial_internal_state(b, a)
 
 # calculate fir result
 y_fir, Uy_fir = pf.FIRuncFilter(x, Ux, b, Utheta=Uab, kind="diag")
@@ -44,7 +41,6 @@ tmp_y = []
 for i in range(n_mc):
     x_mc = x + np.random.randn(nx) * Ux
     b_tmp = b + np.random.randn(len(b)) * np.sqrt(np.diag(Uab))
-    #a_tmp[2] = a[2] + np.sqrt(Uab[2,2]) * np.random.randn()
     y_mc = scs.lfilter(b_tmp, a, x_mc)
     tmp_y.append(y_mc)
 y_mc_mean = np.mean(tmp_y, axis=0)
@@ -78,9 +74,9 @@ ax3.plot(Uy_fir, color="b", label="fir: unc")
 ax3.plot(y_mc_std, color="k", label="mc: unc")
 
 ## plot differences between all three
-ax4.plot(np.abs(Uy - Uy_fir),       color="c", label="iir - fir: unc")
+ax4.plot(np.abs(Uy - Uy_fir), color="c", label="iir - fir: unc")
 ax4.plot(np.abs(Uy_fir - y_mc_std), color="y", label="fir - mc: unc")
-ax4.plot(np.abs(y_mc_std - Uy),     color="g", label="mc - iir: unc")
+ax4.plot(np.abs(y_mc_std - Uy), color="g", label="mc - iir: unc")
 
 # prettify
 ax1.legend()
