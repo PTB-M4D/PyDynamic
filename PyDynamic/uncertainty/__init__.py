@@ -20,7 +20,7 @@ from .propagate_DFT import (
     Time2AmpPhase,
 )
 
-from .propagate_filter import FIRuncFilter, IIRuncFilter
+from .propagate_filter import FIRuncFilter, IIRuncFilter, IIR_get_initial_state
 
 from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
 
@@ -37,6 +37,7 @@ __all__ = [
     "Time2AmpPhase",
     "FIRuncFilter",
     "IIRuncFilter",
+    "IIR_get_initial_state",
     "MC",
     "SMC",
     "UMC",

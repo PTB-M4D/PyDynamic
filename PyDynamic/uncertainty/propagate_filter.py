@@ -9,6 +9,8 @@ This modules contains the following functions:
   filter theta
 * :func:`IIRuncFilter`: Uncertainty propagation for the signal x and the uncertain
   IIR filter (b,a)
+* :func:`IIR_get_initial_state`: Get a valid internal state for :func:`IIRuncFilter`
+  that assumes a stationary signal before the first value. 
 
 .. note:: The Elster-Link paper for FIR filters assumes that the autocovariance
           is known and that noise is stationary!
@@ -21,7 +23,7 @@ from scipy.signal import dimpulse, lfilter, lfilter_zi
 
 from ..misc.tools import trimOrPad
 
-__all__ = ["FIRuncFilter", "IIRuncFilter", "get_initial_state"]
+__all__ = ["FIRuncFilter", "IIRuncFilter", "IIR_get_initial_state"]
 
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
@@ -404,30 +406,30 @@ def _get_corr_unc(b, a, Ux):
     return corr_unc
 
 
-def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
+def IIR_get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
     """
     Calculate the internal state for the IIRuncFilter-function corresponding to stationary
     non-zero input signal.
 
     Parameters
     ----------
-        b: np.ndarray
+        b : np.ndarray
             filter numerator coefficients
-        a: np.ndarray
+        a : np.ndarray
             filter denominator coefficients
-        Uab: np.ndarray
+        Uab : np.ndarray, optional (default: None)
             covariance matrix for (a[1:],b)
-        x0: float
+        x0 : float, optional (default: 1.0)
             stationary input value
-        U0: float
+        U0 : float, optional (default: 1.0)
             stationary input uncertainty
-        Ux: np.ndarray, optional
+        Ux : np.ndarray, optional (default: None)
             single sided autocovariance of stationary (colored/correlated) noise
             (needed in the `kind="corr"` case of :func:`IIRuncFilter`)
 
     Returns
     -------
-    internal_state: dict
+    internal_state : dict
         dictionary of state
  
     """
@@ -436,7 +438,7 @@ def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
     b, a, Uab = _adjust_filter_coefficients(b, a, Uab)
 
     # convert into state space representation
-    [A, B, C, D] = _tf2ss(b, a)
+    A, B, C, D = _tf2ss(b, a)
 
     # necessary intermediate variables
     p = len(A)
@@ -452,6 +454,7 @@ def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
     dzs = solve(IminusA, np.hstack(dA @ zs))
 
     # stationary uncertainty of internal state
+    # A * Ps * A^T - Ps + u^2 * B * B^T = 0
     Ps = solve_discrete_lyapunov(A, U0 ** 2 * np.outer(B, B))
 
     if isinstance(Ux, np.ndarray):
@@ -460,6 +463,7 @@ def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
         corr_unc = 0
 
     # bring results into the format that is used within IIRuncFilter
+    # this is the only place, where the structure of the cache is "documented"
     cache = {
         "system": (A, B, C, D),
         "corr_unc": corr_unc,
