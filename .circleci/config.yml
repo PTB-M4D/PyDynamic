@@ -141,7 +141,7 @@ workflows:
           pyenv: "py38"
       - test_deploy:
           # Test the 'deploy' job to avoid trouble when Pull Requests get merged and
-          # to preview publishing actions.
+          # to preview publishing actions and the new changelog.
           requires:
             - test_python3.5
             - test_python3.6
@@ -160,7 +160,9 @@ workflows:
               only: /master/
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
-          # Zenodo and PyPI.org.
+          # Zenodo and PyPI.org. This requires manual approval in the previous step,
+          # which is only triggered on branch master, thus this job here is
+          # triggered only on master as well.
           context: pypi.org publishing for PyDynamic
           requires:
             - confirm_release
