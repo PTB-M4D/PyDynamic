@@ -282,12 +282,14 @@ def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
             )
 
     # system, corr_unc and processed_input are cached as well to reduce computational load
-    if not state:
+    if state is None:
         # calculate initial state
         if kind == "diag":
-            state = get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0])
+            state = IIR_get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0])
         else:  # "corr"
-            state = get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0], Ux=Ux)
+            state = IIR_get_initial_state(
+                b, a, Uab=Uab, x0=x[0], U0=np.sqrt(Ux[0]), Ux=Ux
+            )
 
     z = state["z"]
     dz = state["dz"]
