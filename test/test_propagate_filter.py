@@ -156,4 +156,4 @@ def test_FIR_IIR_identity():
         y_fir, Uy_fir = FIRuncFilter(x, Ux, theta=b, Utheta=Uab, kind=kind)
 
         assert np.allclose(y_fir, y_iir)
-        assert np.allclose(Uy_fir[len(b) :], Uy_iir[len(b) :])
+        assert np.allclose(Uy_fir, Uy_iir)
