@@ -29,29 +29,29 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
     Parameters
     ----------
-        y: np.ndarray
+        y : np.ndarray
             filter input signal
-        sigma_noise: float or np.ndarray
+        sigma_noise : float or np.ndarray
             float:    standard deviation of white noise in y
             1D-array: interpretation depends on kind
-        theta: np.ndarray
+        theta : np.ndarray
             FIR filter coefficients
-        Utheta: np.ndarray
+        Utheta : np.ndarray, optional (default: None)
             covariance matrix associated with theta
-        shift: int
+        shift : int, optional (default: 0)
             time delay of filter output signal (in samples)
-        blow: np.ndarray
+        blow : np.ndarray, optional (default: None)
             optional FIR low-pass filter
-        kind: string
+        kind : string, optional (default: "corr")
             defines the interpretation of sigma_noise, if sigma_noise is a 1D-array
             "diag": point-wise standard uncertainties of non-stationary white noise
             "corr": single sided autocovariance of stationary (colored/correlated) noise (default)
 
     Returns
     -------
-        x: np.ndarray
+        x : np.ndarray
             FIR filter output signal
-        ux: np.ndarray
+        ux : np.ndarray
             point-wise uncertainties associated with x
 
 
