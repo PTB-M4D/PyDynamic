@@ -139,33 +139,29 @@ workflows:
           name: "test_python3.8"
           tag: "3.8"
           pyenv: "py38"
+      - test_deploy:
+          # Test the 'deploy' job to avoid trouble when Pull Requests get merged and
+          # to preview publishing actions.
+          requires:
+            - test_python3.5
+            - test_python3.6
+            - test_python3.7
+            - test_python3.8
+      - confirm_release:
+          type: approval
+          requires:
+            - test_deploy
+          filters:
+            branches:
+              # This assures the job only being triggered on branch master.
+              only: /master/
       - deploy:
           # Create 'deploy' job to create a release and publish it on GitHub,
           # Zenodo and PyPI.org.
           context: pypi.org publishing for PyDynamic
           requires:
-              - test_python3.5
-              - test_python3.6
-              - test_python3.7
-              - test_python3.8
-          filters:
-              branches:
-                # This assures the job only being triggered on branch master.
-                only: /master/
-      - test_deploy:
-          # Test the 'deploy' job to avoid trouble when Pull Requets get merged.
-          requires:
-              - test_python3.5
-              - test_python3.6
-              - test_python3.7
-              - test_python3.8
-          filters:
-              branches:
-                # This assures the job is not triggered on branch master, where the
-                # `deploy` job itself will be triggered. `test_deploy` is basically
-                # `deploy` with the `noop` parameter for `semantic-release` to
-                # trigger a dry-run.
-                ignore: /master/
+            - confirm_release
+
 jobs:
 
   # Define one 'test' job with parameters to deal with all desired cases. The
