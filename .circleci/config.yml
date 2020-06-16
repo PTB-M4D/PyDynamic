@@ -264,8 +264,7 @@ jobs:
             source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            echo "The changelog of the next release will contain:\n"
-            changes.
+            echo "The changelog of the next release will contain:"
             semantic-release --unreleased changelog
-            echo "The output of 'semantic-release --noop publish' is:\n"
+            echo "The output of 'semantic-release --noop publish' is:"
             semantic-release --noop publish
