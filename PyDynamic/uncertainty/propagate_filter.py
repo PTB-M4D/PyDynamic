@@ -79,10 +79,16 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         elif kind == "corr":
             sigma2 = sigma_noise
         else:
-            raise ValueError("unknown kind of sigma_noise")
+            raise ValueError(
+                f"Unknown kind `{kind}`. Don't now how to interpret the array sigma_noise."
+            )
 
     else:
-        raise ValueError("sigma_noise is neither of type float nor numpy.ndarray.")
+        raise ValueError(
+            "sigma_noise is `{0}`, but we expect a float or np.ndarray.".format(
+                type(sigma_noise)
+            )
+        )
 
     if isinstance(blow, np.ndarray):  # if blow is given
         # calculate low-pass filtered signal and propagate noise
@@ -255,6 +261,12 @@ def IIRuncFilter(x, Ux, b, a, Uab, state=None, kind="corr"):
         * Link and Elster [Link2009]_
 
     """
+
+    # check user input
+    if kind not in ("diag", "corr"):
+        raise ValueError(
+            f"`kind` is expected to be either 'diag' or 'corr' but '{kind}' was given."
+        )
 
     # make Ux an array
     if not isinstance(Ux, np.ndarray):
