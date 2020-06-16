@@ -264,7 +264,8 @@ jobs:
             source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            # Just print the changelog for all unpublished changes.
+            echo "The changelog of the next release will contain:\n"
+            changes.
             semantic-release --unreleased changelog
-            # Try a dry-run to preview new version and discover errors.
+            echo "The output of 'semantic-release --noop publish' is:\n"
             semantic-release --noop publish
