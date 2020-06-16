@@ -148,6 +148,9 @@ workflows:
             - test_python3.7
             - test_python3.8
       - confirm_release:
+          # This job allows for checking that the release we will create in the
+          # next step actually is the desired release, by observing the result of
+          # test_deploy.
           type: approval
           requires:
             - test_deploy
@@ -261,4 +264,7 @@ jobs:
             source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
+            # Just print the changelog for all unpublished changes.
+            semantic-release --unreleased changelog
+            # Try a dry-run to preview new version and discover errors.
             semantic-release --noop publish
