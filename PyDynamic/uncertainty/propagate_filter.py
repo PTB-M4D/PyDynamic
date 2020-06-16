@@ -484,7 +484,9 @@ def _adjust_filter_coefficients(b, a, Uab):
     # adjust filter coefficient uncertainties
     if isinstance(Uab, np.ndarray):
         if d != 0:
-            if Uab.shape == (len(a) + len(b) - 1, len(a) + len(b) - 1):
+            l_theta = len(a) + len(b) - 1
+            Uab_expected_shape = (l_theta, l_theta)
+            if Uab.shape == Uab_expected_shape:
                 if d < 0:
                     Uab = np.insert(
                         np.insert(Uab, [len(a) - 1] * (-d), 0, axis=0),
@@ -496,7 +498,9 @@ def _adjust_filter_coefficients(b, a, Uab):
                     Uab = np.hstack((Uab, np.zeros((Uab.shape[0], d))))
                     Uab = np.vstack((Uab, np.zeros((d, Uab.shape[1]))))
             else:
-                raise ValueError("Uab is not of correct shape.")
+                raise ValueError(
+                    f"Uab is of shape {Uab.shape}, but expected shape is {Uab_expected_shape} (len(a)+len(b)-1)"
+                )
 
     # adjust filter coefficients for later use
     if d < 0:
