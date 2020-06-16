@@ -209,7 +209,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     return x, ux.flatten()  # flatten in case that we still have 2D array
 
 
-def IIRuncFilter(x, Ux, b, a, Uab, state=None, kind="corr"):
+def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
     """
     Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
