@@ -309,45 +309,47 @@ def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
     # implementation of the state-space formulas from the paper
     for n in range(len(y)):
 
-        # calculate phi according to formulas (13) and (15) from paper
-        phi[:p] = np.transpose(
-            cT @ dz - np.transpose(b0 * z[::-1])
-        )  # derivative w.r.t. a_1,...,a_p
-        phi[p] = np.dot(-a[1:][::-1], z) + x[n]  # derivative w.r.t. b_0
-        phi[p + 1 :] = z[::-1]  # derivative w.r.t. b_1,...,b_p
+        # calculate output according to formulas (7)
+        y[n] = cT @ z + b0 * x[n]  # (7)
 
-        # calculate output and output uncertainty according to formulas (7), (12) and (19)
-        y[n] = np.dot(cT, z) + b0 * x[n]  # (7)
+        # if Uab is not given, use faster implementation
         if isinstance(Uab, np.ndarray):
+            # calculate phi according to formulas (13) and (15) from paper
+            phi[:p] = np.transpose(
+                cT @ dz - np.transpose(b0 * z[::-1])
+            )  # derivative w.r.t. a_1,...,a_p
+            phi[p] = -a[1:][::-1] @ z + x[n]  # derivative w.r.t. b_0
+            phi[p + 1 :] = z[::-1]  # derivative w.r.t. b_1,...,b_p
+
+            # output uncertainty according to formulas (12) and (19)
             if kind == "diag":
                 Uy[n] = (
                     phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * Ux[n])
                 )  # (12)
             else:  # "corr"
                 Uy[n] = phi.T @ Uab @ phi + corr_unc  # (19)
+
         else:  # Uab is None
+            # output uncertainty according to formulas (12) and (19)
             if kind == "diag":
                 Uy[n] = cT @ P @ cT.T + np.square(b0 * Ux[n])  # (12)
             else:  # "corr"
                 Uy[n] = corr_unc  # (19)
 
-        # timestep update
+        # timestep update preparations
         if kind == "diag":
-            P = A @ P @ A.T + np.square(Ux[n]) * np.outer(
-                bs, bs
-            )  # state uncertainty, formula (18)
+            u_square = np.square(Ux[n])  # as in formula (18)
         else:  # "corr"
-            P = A @ P @ A.T + Ux[0] * np.outer(
-                bs, bs
-            )  # state uncertainty, adopted from formula (18)
+            u_square = Ux[0]  # adopted for kind == "corr"
 
         # | DON'T | # because dA is sparse, this is not efficient:
-        # | RUN   | # dA = _get_derivative_A(p)
+        # | USE   | # dA = _get_derivative_A(p)
         # | THIS  | # dA_z = np.hstack(dA @ z)
-
         # this is efficient, because no tensor-multiplication is involved:
         dA_z = np.vstack((np.zeros((p - 1, p)), -z[::-1].T))
 
+        # timestep update
+        P = A @ P @ A.T + u_square * np.outer(bs, bs)  # state uncertainty, formula (18)
         dz = A @ dz + dA_z  # state derivative, formula (17)
         z = A @ z + bs * x[n]  # state, formula (6)
 
