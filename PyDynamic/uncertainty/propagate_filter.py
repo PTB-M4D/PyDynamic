@@ -270,7 +270,16 @@ def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
 
     # make Ux an array
     if not isinstance(Ux, np.ndarray):
-        Ux = Ux * np.ones_like(x)  # translate iid noise to vector
+        Ux = np.full(x.shape, Ux)  # translate iid noise to vector
+
+        if kind is not "diag":
+            kind = "diag"
+            raise UserWarning(
+                f"Ux of type float and `kind='{kind}'` was given. To ensure the behavior "
+                "described in the docstring (float -> standard deviation of white noise "
+                " in x), `kind='diag'` is set. \n"
+                "To suppress this warning, explicitly set `kind='diag'`"
+            )
 
     # system, corr_unc and processed_input are cached as well to reduce computational load
     if not state:
