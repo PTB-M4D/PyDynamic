@@ -629,8 +629,8 @@ def Time2AmpPhase_multi(x, Ux, selector=None):
 
     Parameters
     ----------
-        x: np.ndarray of shape (M,N)
-            M time domain signals of length N
+        x: np.ndarray of shape (M, nx)
+            M time domain signals of length nx
         Ux: np.ndarray of shape (M,)
             squared standard deviations representing noise variances of the
             signals x
@@ -644,8 +644,8 @@ def Time2AmpPhase_multi(x, Ux, selector=None):
         P: np.ndarray of shape (M,N)
             phase values
         UAP: np.ndarray of shape (M, 3N)
-            diagonals of the covariance matrices: [diag(UPP), diag(UAA),
-            diag(UPA)]
+            diagonals of the covariance matrices: [diag(UAA), diag(UAP),
+            diag(UPP)]
     """
     M, nx = x.shape
     assert len(Ux) == M
