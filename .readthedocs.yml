@@ -24,5 +24,4 @@ python:
 # Sphinx configuration
 sphinx:
   builder: html
-  configuration: doc/conf.py
   fail_on_warning: true
