@@ -6,3 +6,5 @@ hypothesis
 pylint
 rope
 black
+sphinx
+sphinx-rtd-theme
