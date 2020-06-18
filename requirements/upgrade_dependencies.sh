@@ -41,6 +41,6 @@ do
     # Create requirements.txt from requirements.in.
     pip-compile --upgrade --output-file requirements/requirements-$PYVENV.txt && \
     # Create dev-requirements...txt from dev-requirements...in.
-    pip-compile requirements/dev-requirements-$PYVENV.in --output-file requirements/dev-requirements-$PYVENV.txt && \
+    pip-compile --upgrade requirements/dev-requirements-$PYVENV.in --output-file requirements/dev-requirements-$PYVENV.txt && \
     deactivate
 done
