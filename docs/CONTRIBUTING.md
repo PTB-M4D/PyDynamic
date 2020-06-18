@@ -38,7 +38,10 @@ The PyDynamic development process is based on the following guiding principles:
 For collaboration we recommend forking the repository as described 
 [here](https://help.github.com/en/articles/fork-a-repo), apply the changes and open a
 Pull Request on GitHub as described
-[here](https://help.github.com/en/articles/creating-a-pull-request).
+[here](https://help.github.com/en/articles/creating-a-pull-request). For small
+changes this will be a sufficient setup, since this way even the full test suite will
+run against your changes. For more comprehensive work, you should read on carefully
+and follow the instructions.
    
 ### Initial development setup
 
@@ -67,3 +70,7 @@ executing e.g. for Python 3.8:
 ```shell
 (PyDynamic_venv) $ pip-sync requirements/dev-requirements-py38.txt requirements/requirements-py38.txt
 ```
+
+### Advised toolset
+
+We use black to implement our coding style, Sphinx for automated generation of our documentation on ReadTheDocs and pytest backed by hypothesis and coverage as our testing framework, executed by tox. For automated releases we use python-semantic-release in our pipeline on CircleCI. All requirements for contributions are derived from this.
