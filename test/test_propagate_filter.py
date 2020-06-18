@@ -3,6 +3,8 @@ Perform test for uncertainty.propagate_filter
 """
 
 import numpy as np
+import pytest
+import scipy
 
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian
@@ -11,6 +13,8 @@ from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.uncertainty.propagate_filter import (
     FIRuncFilter,
     IIRuncFilter,
+    _tf2ss,
+    _get_derivative_A,
 )
 
 # parameters of simulated measurement
@@ -86,10 +90,29 @@ def test_FIRuncFilter_diag():
         assert len(Uy) == len(x)
 
 
-def test_IIRuncFilter():
-    # define filter
+@pytest.fixture(scope="module")
+def iir_filter():
     b = np.array([0.01967691, -0.01714282, 0.03329653, -0.01714282, 0.01967691])
     a = np.array([1.0, -3.03302405, 3.81183153, -2.29112937, 0.5553678])
+    Uab = np.diag(np.zeros((len(a) + len(b) - 1)))  # uncertainty of IIR-parameters
+    Uab[2, 2] = 0.000001  # only a2 is uncertain
+
+    return {"b": b, "a": a, "Uab": Uab}
+
+
+@pytest.fixture(scope="module")
+def fir_filter():
+    b = np.array([0.01967691, -0.01714282, 0.03329653, -0.01714282, 0.01967691])
+    a = np.array([1.0,])
+    Uab = np.diag(
+        np.zeros((len(a) + len(b) - 1))
+    )  # fully certain filter-parameters, otherwise FIR and IIR do not match! (see docstring of IIRuncFilter)
+
+    return {"b": b, "a": a, "Uab": Uab}
+
+
+@pytest.fixture(scope="module")
+def input_signal():
 
     # simulate input and output signals
     Fs = 100e3  # sampling frequency (in Hz)
@@ -101,59 +124,100 @@ def test_IIRuncFilter():
     sigma_noise = 1e-2  # std for input signal
     x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)  # generate input signal
     Ux = sigma_noise * np.ones_like(x)  # uncertainty of input signal
-    Uab = np.diag(np.zeros((len(a) + len(b) - 1)))  # uncertainty of IIR-parameters
-    Uab[2, 2] = 0.000001  # only a2 is uncertain
 
-    # run x all at once
-    y, Uy, _ = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind="diag")
-    assert len(y) == len(x)
-    assert len(Uy) == len(x)
+    return {"x": x, "Ux": Ux}
+
+
+@pytest.fixture(scope="module")
+def run_IIRuncFilter_all_at_once(iir_filter, input_signal):
+    y, Uy, _ = IIRuncFilter(**input_signal, **iir_filter, kind="diag" )
+    return y, Uy
+
+@pytest.fixture(scope="module")
+def run_IIRuncFilter_in_chunks(iir_filter, input_signal):
 
     # slice x into smaller chunks and process them in batches
     # this tests the internal state options
     y_list = []
     Uy_list = []
     state = None
-    for x_batch, Ux_batch in zip(np.array_split(x, 200), np.array_split(Ux, 200)):
+    for x_batch, Ux_batch in zip(
+        np.array_split(input_signal["x"], 200), np.array_split(input_signal["Ux"], 200)
+    ):
         yi, Uyi, state = IIRuncFilter(
-            x_batch, Ux_batch, b, a, Uab=Uab, kind="diag", state=state
+            x_batch, Ux_batch, **iir_filter, kind="diag", state=state,
         )
         y_list.append(yi)
         Uy_list.append(Uyi)
-    yb = np.concatenate(y_list, axis=0)
-    Uyb = np.concatenate(Uy_list, axis=0)
-    assert len(yb) == len(x)
-    assert len(Uyb) == len(x)
+    y = np.concatenate(y_list, axis=0)
+    Uy = np.concatenate(Uy_list, axis=0)
+
+    return y, Uy
+
+
+def test_IIRuncFilter_shape_all_at_once(input_signal, run_IIRuncFilter_all_at_once):
+
+    y, Uy = run_IIRuncFilter_all_at_once
+
+    # compare lengths
+    assert len(y) == len(input_signal["x"])
+    assert len(Uy) == len(input_signal["Ux"])
+
+
+def test_IIRuncFilter_shape_in_chunks(
+    input_signal, run_IIRuncFilter_in_chunks
+):
+    y, Uy = run_IIRuncFilter_in_chunks
+
+    # compare lengths
+    assert len(y) == len(input_signal["x"])
+    assert len(Uy) == len(input_signal["Ux"])
+
+
+def test_IIRuncFilter_identity_nonchunk_chunk(
+    run_IIRuncFilter_all_at_once, run_IIRuncFilter_in_chunks
+):
+
+    y1, Uy1 = run_IIRuncFilter_all_at_once
+    y2, Uy2 = run_IIRuncFilter_in_chunks
 
     # check if both ways of calling IIRuncFilter yield the same result
-    assert np.allclose(yb, y)
-    assert np.allclose(Uyb, Uy)
+    assert np.allclose(y1, y2)
+    assert np.allclose(Uy1, Uy2)
 
 
-def test_FIR_IIR_identity():
-
-    # define filter
-    b = np.array([0.01967691, -0.01714282, 0.03329653, -0.01714282, 0.01967691])
-    a = np.array([1.0])
-
-    # simulate input and output signals
-    Fs = 100e3  # sampling frequency (in Hz)
-    Ts = 1 / Fs  # sampling interval length (in s)
-    nx = 500
-    time = np.arange(nx) * Ts  # time values
-
-    # input signal + run methods
-    sigma_noise = 1e-2  # std for input signal
-    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)  # generate input signal
-    Ux = sigma_noise * np.ones_like(x)  # uncertainty/autocorrelation of input signal
-    Uab = np.diag(
-        np.zeros((len(a) + len(b) - 1))
-    )  # fully certain filter-parameters, otherwise FIR and IIR do not match! (see docstring of IIRuncFilter)
+def test_FIR_IIR_identity(fir_filter, input_signal):
 
     for kind in ["diag", "corr"]:
         # run signal through both implementations
-        y_iir, Uy_iir, _ = IIRuncFilter(x, Ux, b, a, Uab=Uab, kind=kind)
-        y_fir, Uy_fir = FIRuncFilter(x, Ux, theta=b, Utheta=Uab, kind=kind)
+        y_iir, Uy_iir, _ = IIRuncFilter(*input_signal.values(), **fir_filter, kind=kind)
+        y_fir, Uy_fir = FIRuncFilter(
+            *input_signal.values(),
+            theta=fir_filter["b"],
+            Utheta=fir_filter["Uab"],
+            kind=kind,
+        )
 
         assert np.allclose(y_fir, y_iir)
         assert np.allclose(Uy_fir, Uy_iir)
+
+
+def test_tf2ss(iir_filter):
+    b, a, _ = iir_filter.values()
+    A1, B1, C1, D1 = _tf2ss(b, a)
+    A2, B2, C2, D2 = scipy.signal.tf2ss(b, a)
+
+    assert np.allclose(A1, A2[::-1, ::-1])
+    assert np.allclose(B1, B2[::-1, ::-1])
+    assert np.allclose(C1, C2[::-1, ::-1])
+    assert np.allclose(D1, D2[::-1, ::-1])
+
+
+def test_get_derivative_A():
+    p = 10
+    dA = _get_derivative_A(p)
+    index1 = np.arange(p)
+    index2 = np.full(p, -1)
+    index3 = index1[::-1]
+
+    assert np.allclose(dA[index1, index2, index3], index2)
