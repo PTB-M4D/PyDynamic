@@ -8,30 +8,9 @@ import scipy.signal as scs
 import PyDynamic.uncertainty.propagate_filter as pf
 from PyDynamic.misc.testsignals import rect
 
-
-# define some buffer to fill and consume
-class Buffer:
-    def __init__(self, maxlen=1000):
-        self.timestamps = deque(maxlen=maxlen)
-        self.values = deque(maxlen=maxlen)
-        self.uncertainties = deque(maxlen=maxlen)
-
-    def append(self, time=0.0, value=0.0, uncertainty=0.0):
-        self.timestamps.append(time)
-        self.values.append(value)
-        self.uncertainties.append(uncertainty)
-
-    def popleft(self):
-        t = self.timestamps.popleft()
-        v = self.values.popleft()
-        u = self.uncertainties.popleft()
-
-        return t, v, u
-
-
 for kind in ["corr", "diag"]:
 
-    for nx in [50, 100, 500, 1000, 5000, 10000]: # 50000, 100000, 500000
+    for nx in [50, 100, 500, 1000, 5000, 10000]:  # 50000, 100000, 500000
         # time
         Fs = 100e3  # sampling frequency (in Hz)
         Ts = 1 / Fs  # sampling interval length (in s)
