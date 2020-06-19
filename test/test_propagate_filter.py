@@ -185,21 +185,20 @@ def test_IIRuncFilter_identity_nonchunk_chunk(
     assert np.allclose(y1, y2)
     assert np.allclose(Uy1, Uy2)
 
+@pytest.mark.parametrize("kind", ["diag", "corr"])
+def test_FIR_IIR_identity(kind, fir_filter, input_signal):
 
-def test_FIR_IIR_identity(fir_filter, input_signal):
+    # run signal through both implementations
+    y_iir, Uy_iir, _ = IIRuncFilter(*input_signal.values(), **fir_filter, kind=kind)
+    y_fir, Uy_fir = FIRuncFilter(
+        *input_signal.values(),
+        theta=fir_filter["b"],
+        Utheta=fir_filter["Uab"],
+        kind=kind,
+    )
 
-    for kind in ["diag", "corr"]:
-        # run signal through both implementations
-        y_iir, Uy_iir, _ = IIRuncFilter(*input_signal.values(), **fir_filter, kind=kind)
-        y_fir, Uy_fir = FIRuncFilter(
-            *input_signal.values(),
-            theta=fir_filter["b"],
-            Utheta=fir_filter["Uab"],
-            kind=kind,
-        )
-
-        assert np.allclose(y_fir, y_iir)
-        assert np.allclose(Uy_fir, Uy_iir)
+    assert np.allclose(y_fir, y_iir)
+    assert np.allclose(Uy_fir, Uy_iir)
 
 
 def test_tf2ss(iir_filter):
