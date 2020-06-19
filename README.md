@@ -106,22 +106,19 @@ motivation and an insight into the mechanism in the
 
 For easy environment creation with Python built-in tools we provide a
 [`requirements.txt` file in the root of our repository](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements.txt).
-With this file one can create a virtual environment on any machine with a current
-Python installation as described in the [official docs of Python itself
-](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
+With this file one can create an exact copy of our known-to-work virtual environments on
+any machine with a current Python installation as described in the
+[official docs of Python itself](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
 
-It boils down to creating an environment in anywhere on your computer, then activate
-the fresh environment, so each following command is executed using the according
-Python interpreter and the locally installed packages as described in the
-[official docs](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments)
-and finally install the project's dependencies.
+It boils down to creating an environment anywhere on your computer, then activate
+it and finally install PyDynamic's dependencies.
 
 ##### _venv_ creation and installation in Windows
 
 In your Windows command prompt execute the following:
 
 ```shell
-> C:\PATH\TO\YOUR\PYTHON3\python -m venv LOCAL\PATH\TO\ENVS\PyDynamic_venv
+> py -3 -m venv LOCAL\PATH\TO\ENVS\PyDynamic_venv
 > LOCAL\PATH\TO\ENVS\PyDynamic_venv\Scripts\activate.bat
 (PyDynamic_venv) > pip install PyDynamic
 ```
@@ -159,7 +156,7 @@ of the above, e.g.
 ## Contributing to PyDynamic
 
 If you want to contribute code to the project you find additional set up and related
-information in our [Contributing advices and tips](docs/CONTRIBUTING.md).
+information in our [Contribution advices and tips](docs/CONTRIBUTING.md).
 
 If you have a feature request please take a look at the roadmap and the links
 provided there to find out more about planned and ongoing developments. If you
