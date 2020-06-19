@@ -15,8 +15,6 @@ We will cover
 - coding style
 - commit style
 - PR workflow
-- requirements handling
-- and probably more...
 
 ## Basic principles
 
@@ -73,4 +71,30 @@ executing e.g. for Python 3.8:
 
 ### Advised toolset
 
-We use black to implement our coding style, Sphinx for automated generation of our documentation on ReadTheDocs and pytest backed by hypothesis and coverage as our testing framework, executed by tox. For automated releases we use python-semantic-release in our pipeline on CircleCI. All requirements for contributions are derived from this.
+We use [_black_](https://pypi.org/project/black/) to implement our coding style,
+[_Sphinx_](https://pypi.org/project/Sphinx/) for automated generation of [our
+ documentation on ReadTheDocs](https://pydynamic.readthedocs.io/en/latest/) and
+[_pytest_](https://pypi.org/project/pytest/) backed by
+[_hypothesis_](https://pypi.org/project/hypothesis/) and
+[_coverage_](https://pypi.org/project/coverage/) as our testing framework, managed by
+[_tox_](https://pypi.org/project/tox/). For automated releases we use
+[_python-semantic-release_](https://github.com/relekang/python-semantic-release) in
+[our pipeline on _CircleCI_](https://app.circleci.com/pipelines/github/PTB-PSt1/PyDynamic)
+. All requirements for contributions are derived from this. If you followed the
+steps for the [initial development setup](#Initial-development-setup) you have
+everything at your hands.
+
+### Coding style
+
+As long as the readability of mathematical formulations is not impaired, our code
+should follow the guidelines of [PEP8](https://www.python.org/dev/peps/pep-0008/) and
+remain uniformly formatted.  For this purpose we use the Python package
+[_black_](https://pypi.org/project/black/). It is very easy to handle and [can be
+ integrated into most common IDEs](https://github.com/psf/black#editor-integration),
+so that it is automatically applied. 
+
+###  Testing
+
+We strive to increase [our code coverage](https://codecov.io/gh/PTB-PSt1/PyDynamic) with every change introduced. This requires that every new feature and every change to existing features is accompanied by appropriate testing, which checks the basic components and, if necessary, the integration into the big picture for correctness. For this purpose, it is usually sufficient to create appropriately named methods in one of the existing modules in the subfolder test or, if necessary, to add a new module that is also appropriately named.
+
+  
