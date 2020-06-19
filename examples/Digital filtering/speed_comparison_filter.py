@@ -1,5 +1,4 @@
 import time as tm
-from collections import deque
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,30 +7,9 @@ import scipy.signal as scs
 import PyDynamic.uncertainty.propagate_filter as pf
 from PyDynamic.misc.testsignals import rect
 
-
-# define some buffer to fill and consume
-class Buffer:
-    def __init__(self, maxlen=1000):
-        self.timestamps = deque(maxlen=maxlen)
-        self.values = deque(maxlen=maxlen)
-        self.uncertainties = deque(maxlen=maxlen)
-
-    def append(self, time=0.0, value=0.0, uncertainty=0.0):
-        self.timestamps.append(time)
-        self.values.append(value)
-        self.uncertainties.append(uncertainty)
-
-    def popleft(self):
-        t = self.timestamps.popleft()
-        v = self.values.popleft()
-        u = self.uncertainties.popleft()
-
-        return t, v, u
-
-
 for kind in ["corr", "diag"]:
 
-    for nx in [50, 100, 500, 1000, 5000, 10000]: # 50000, 100000, 500000
+    for nx in [50, 100, 500, 1000, 5000, 10000]:  # 50000, 100000, 500000
         # time
         Fs = 100e3  # sampling frequency (in Hz)
         Ts = 1 / Fs  # sampling interval length (in s)
@@ -59,7 +37,7 @@ for kind in ["corr", "diag"]:
         t2 = tm.time()
         y2, Uy2 = pf.FIRuncFilter(x, Ux, b, Utheta=Uab, kind=kind)
         t3 = tm.time()
-        print(f"nx = {nx}, kind = {kind}")
+        print("nx = {NX}, kind = {KIND}".format(NX=nx, KIND=kind))
         print("IIR took {0} seconds".format(t2 - t1))
         print("FIR took {0} seconds".format(t3 - t2))
         print("=" * 30)

@@ -9,6 +9,8 @@ This modules contains the following functions:
   filter theta
 * :func:`IIRuncFilter`: Uncertainty propagation for the signal x and the uncertain
   IIR filter (b,a)
+* :func:`IIR_get_initial_state`: Get a valid internal state for :func:`IIRuncFilter`
+  that assumes a stationary signal before the first value. 
 
 .. note:: The Elster-Link paper for FIR filters assumes that the autocovariance
           is known and that noise is stationary!
@@ -21,7 +23,7 @@ from scipy.signal import dimpulse, lfilter, lfilter_zi
 
 from ..misc.tools import trimOrPad
 
-__all__ = ["FIRuncFilter", "IIRuncFilter", "get_initial_state"]
+__all__ = ["FIRuncFilter", "IIRuncFilter", "IIR_get_initial_state"]
 
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
@@ -29,30 +31,30 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
     Parameters
     ----------
-        y: np.ndarray
+        y : np.ndarray
             filter input signal
-        sigma_noise: float or np.ndarray
+        sigma_noise : float or np.ndarray
             float:    standard deviation of white noise in y
             1D-array: interpretation depends on kind
-        theta: np.ndarray
+        theta : np.ndarray
             FIR filter coefficients
-        Utheta: np.ndarray or None
+        Utheta: np.ndarray, optional (default: None)
             covariance matrix associated with theta
             if None -> fully certain coefficients, reduces necessary calculations
-        shift: int
+        shift: int, optional (default: 0)
             time delay of filter output signal (in samples)
-        blow: np.ndarray
+        blow : np.ndarray, optional (default: None)
             optional FIR low-pass filter
-        kind: string
+        kind : string, optional (default: "corr")
             defines the interpretation of sigma_noise, if sigma_noise is a 1D-array
             "diag": point-wise standard uncertainties of non-stationary white noise
             "corr": single sided autocovariance of stationary (colored/correlated) noise (default)
 
     Returns
     -------
-        x: np.ndarray
+        x : np.ndarray
             FIR filter output signal
-        ux: np.ndarray
+        ux : np.ndarray
             point-wise uncertainties associated with x
 
 
@@ -80,10 +82,18 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         elif kind == "corr":
             sigma2 = sigma_noise
         else:
-            raise ValueError("unknown kind of sigma_noise")
+            raise ValueError(
+                "Unknown kind `{KIND}`. Don't now how to interpret the array sigma_noise.".format(
+                    KIND=kind
+                )
+            )
 
     else:
-        raise ValueError("sigma_noise is neither of type float nor numpy.ndarray.")
+        raise ValueError(
+            "sigma_noise is `{0}`, but we expect a float or np.ndarray.".format(
+                type(sigma_noise)
+            )
+        )
 
     if isinstance(blow, np.ndarray):  # if blow is given
         # calculate low-pass filtered signal and propagate noise
@@ -204,47 +214,47 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     return x, ux.flatten()  # flatten in case that we still have 2D array
 
 
-def IIRuncFilter(x, Ux, b, a, Uab, state=None, kind="corr"):
+def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
     """
     Uncertainty propagation for the signal x and the uncertain IIR filter (b,a)
 
     Parameters
     ----------
-        x: np.ndarray
+        x : np.ndarray
             filter input signal
-        Ux: float or np.ndarray
-            float:    standard deviation of white noise in y
+        Ux : float or np.ndarray
+            float:    standard deviation of white noise in x (requires `kind="diag"`)
             1D-array: interpretation depends on kind
-        b: np.ndarray
+        b : np.ndarray
             filter numerator coefficients
-        a: np.ndarray
+        a : np.ndarray
             filter denominator coefficients
-        Uab: np.ndarray
+        Uab : np.ndarray, optional (default: None)
             covariance matrix for (a[1:],b)
-        kind: string
-            defines the interpretation of Ux, if Ux is a 1D-array
-            "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/correlated) noise (default)
-        state: dict
+        state : dict, optional (default: None)
             An internal state (z, dz, P, cache) to start from - e.g. from a previous run of IIRuncFilter.
 
             * If not given, (z, dz, P) are calculated such that the signal was constant before the given range
             * If given, the input parameters (b, a, Uab) are ignored to avoid repetitive rebuild of the
               internal system description (instead, the cache is used). However a valid new state (i.e.
-              with new b, a, Uab) can always be generated by using :func:`get_initial_state`.
+              with new b, a, Uab) can always be generated by using :func:`IIR_get_initial_state`.
+        kind : string, optional (default: "corr")
+            defines the interpretation of Ux, if Ux is a 1D-array
+            "diag": point-wise standard uncertainties of non-stationary white noise
+            "corr": single sided autocovariance of stationary (colored/correlated) noise (default)
 
     Returns
     -------
-        y: np.ndarray
+        y : np.ndarray
             filter output signal
-        Uy: np.ndarray
+        Uy : np.ndarray
             uncertainty associated with y
-        state: dict
+        state : dict
             dictionary of updated internal state
 
     Note
     ----
-        In case of `a == [1.0]` (FIR filter), the results of :func:`IIRuncFilter` and :func:`FIRuncFilter` will differ!
+        In case of `a == [1.0]` (FIR filter), the results of :func:`IIRuncFilter` and :func:`FIRuncFilter` might differ!
         This is because IIRuncFilter propagates uncertainty according to the 
         (first-order Taylor series of the) GUM, whereas FIRuncFilter takes full 
         variance information into account (which leads to an additional term). 
@@ -257,17 +267,38 @@ def IIRuncFilter(x, Ux, b, a, Uab, state=None, kind="corr"):
 
     """
 
+    # check user input
+    if kind not in ("diag", "corr"):
+        raise ValueError(
+            "`kind` is expected to be either 'diag' or 'corr' but '{KIND}' was given.".format(
+                KIND=kind
+            )
+        )
+
     # make Ux an array
     if not isinstance(Ux, np.ndarray):
-        Ux = Ux * np.ones_like(x)  # translate iid noise to vector
+        Ux = np.full(x.shape, Ux)  # translate iid noise to vector
+
+        if kind is not "diag":
+            kind = "diag"
+            raise UserWarning(
+                "Ux of type float and `kind='{KIND}'` was given. To ensure the behavior "
+                "described in the docstring (float -> standard deviation of white noise "
+                " in x), `kind='diag'` is set. \n"
+                "To suppress this warning, explicitly set `kind='diag'`".format(
+                    KIND=kind
+                )
+            )
 
     # system, corr_unc and processed_input are cached as well to reduce computational load
-    if not state:
+    if state is None:
         # calculate initial state
         if kind == "diag":
-            state = get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0])
+            state = IIR_get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0])
         else:  # "corr"
-            state = get_initial_state(b, a, Uab=Uab, x0=x[0], U0=Ux[0], Ux=Ux)
+            state = IIR_get_initial_state(
+                b, a, Uab=Uab, x0=x[0], U0=np.sqrt(Ux[0]), Ux=Ux
+            )
 
     z = state["z"]
     dz = state["dz"]
@@ -287,45 +318,47 @@ def IIRuncFilter(x, Ux, b, a, Uab, state=None, kind="corr"):
     # implementation of the state-space formulas from the paper
     for n in range(len(y)):
 
-        # calculate phi according to formulas (13) and (15) from paper
-        phi[:p] = np.transpose(
-            cT @ dz - np.transpose(b0 * z[::-1])
-        )  # derivative w.r.t. a_1,...,a_p
-        phi[p] = np.dot(-a[1:][::-1], z) + x[n]  # derivative w.r.t. b_0
-        phi[p + 1 :] = z[::-1]  # derivative w.r.t. b_1,...,b_p
+        # calculate output according to formulas (7)
+        y[n] = cT @ z + b0 * x[n]  # (7)
 
-        # calculate output and output uncertainty according to formulas (7), (12) and (19)
-        y[n] = np.dot(cT, z) + b0 * x[n]  # (7)
+        # if Uab is not given, use faster implementation
         if isinstance(Uab, np.ndarray):
+            # calculate phi according to formulas (13) and (15) from paper
+            phi[:p] = np.transpose(
+                cT @ dz - np.transpose(b0 * z[::-1])
+            )  # derivative w.r.t. a_1,...,a_p
+            phi[p] = -a[1:][::-1] @ z + x[n]  # derivative w.r.t. b_0
+            phi[p + 1 :] = z[::-1]  # derivative w.r.t. b_1,...,b_p
+
+            # output uncertainty according to formulas (12) and (19)
             if kind == "diag":
                 Uy[n] = (
                     phi.T @ Uab @ phi + cT @ P @ cT.T + np.square(b0 * Ux[n])
                 )  # (12)
             else:  # "corr"
                 Uy[n] = phi.T @ Uab @ phi + corr_unc  # (19)
+
         else:  # Uab is None
+            # output uncertainty according to formulas (12) and (19)
             if kind == "diag":
                 Uy[n] = cT @ P @ cT.T + np.square(b0 * Ux[n])  # (12)
             else:  # "corr"
                 Uy[n] = corr_unc  # (19)
 
-        # timestep update
+        # timestep update preparations
         if kind == "diag":
-            P = A @ P @ A.T + np.square(Ux[n]) * np.outer(
-                bs, bs
-            )  # state uncertainty, formula (18)
+            u_square = np.square(Ux[n])  # as in formula (18)
         else:  # "corr"
-            P = A @ P @ A.T + Ux[0] * np.outer(
-                bs, bs
-            )  # state uncertainty, adopted from formula (18)
+            u_square = Ux[0]  # adopted for kind == "corr"
 
         # | DON'T | # because dA is sparse, this is not efficient:
-        # | RUN   | # dA = _get_derivative_A(p)
+        # | USE   | # dA = _get_derivative_A(p)
         # | THIS  | # dA_z = np.hstack(dA @ z)
-
         # this is efficient, because no tensor-multiplication is involved:
         dA_z = np.vstack((np.zeros((p - 1, p)), -z[::-1].T))
 
+        # timestep update
+        P = A @ P @ A.T + u_square * np.outer(bs, bs)  # state uncertainty, formula (18)
         dz = A @ dz + dA_z  # state derivative, formula (17)
         z = A @ z + bs * x[n]  # state, formula (6)
 
@@ -380,30 +413,30 @@ def _get_corr_unc(b, a, Ux):
     return corr_unc
 
 
-def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
+def IIR_get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
     """
     Calculate the internal state for the IIRuncFilter-function corresponding to stationary
     non-zero input signal.
 
     Parameters
     ----------
-        b: np.ndarray
+        b : np.ndarray
             filter numerator coefficients
-        a: np.ndarray
+        a : np.ndarray
             filter denominator coefficients
-        Uab: np.ndarray
+        Uab : np.ndarray, optional (default: None)
             covariance matrix for (a[1:],b)
-        x0: float
+        x0 : float, optional (default: 1.0)
             stationary input value
-        U0: float
+        U0 : float, optional (default: 1.0)
             stationary input uncertainty
-        Ux: np.ndarray, optional
+        Ux : np.ndarray, optional (default: None)
             single sided autocovariance of stationary (colored/correlated) noise
             (needed in the `kind="corr"` case of :func:`IIRuncFilter`)
 
     Returns
     -------
-    internal_state: dict
+    internal_state : dict
         dictionary of state
  
     """
@@ -412,7 +445,7 @@ def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
     b, a, Uab = _adjust_filter_coefficients(b, a, Uab)
 
     # convert into state space representation
-    [A, B, C, D] = _tf2ss(b, a)
+    A, B, C, D = _tf2ss(b, a)
 
     # necessary intermediate variables
     p = len(A)
@@ -428,6 +461,7 @@ def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
     dzs = solve(IminusA, np.hstack(dA @ zs))
 
     # stationary uncertainty of internal state
+    # A * Ps * A^T - Ps + u^2 * B * B^T = 0
     Ps = solve_discrete_lyapunov(A, U0 ** 2 * np.outer(B, B))
 
     if isinstance(Ux, np.ndarray):
@@ -436,6 +470,7 @@ def get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
         corr_unc = 0
 
     # bring results into the format that is used within IIRuncFilter
+    # this is the only place, where the structure of the cache is "documented"
     cache = {
         "system": (A, B, C, D),
         "corr_unc": corr_unc,
@@ -456,7 +491,9 @@ def _adjust_filter_coefficients(b, a, Uab):
     # adjust filter coefficient uncertainties
     if isinstance(Uab, np.ndarray):
         if d != 0:
-            if Uab.shape == (len(a) + len(b) - 1, len(a) + len(b) - 1):
+            l_theta = len(a) + len(b) - 1
+            Uab_expected_shape = (l_theta, l_theta)
+            if Uab.shape == Uab_expected_shape:
                 if d < 0:
                     Uab = np.insert(
                         np.insert(Uab, [len(a) - 1] * (-d), 0, axis=0),
@@ -468,7 +505,12 @@ def _adjust_filter_coefficients(b, a, Uab):
                     Uab = np.hstack((Uab, np.zeros((Uab.shape[0], d))))
                     Uab = np.vstack((Uab, np.zeros((d, Uab.shape[1]))))
             else:
-                raise ValueError("Uab is not of correct shape.")
+                raise ValueError(
+                    "Uab is of shape {ACTUAL_SHAPE}, but expected shape is {EXPECTED_SHAPE} "
+                    "(len(a)+len(b)-1)".format(
+                        ACTUAL_SHAPE=Uab.shape, EXPECTED_SHAPE=Uab_expected_shape
+                    )
+                )
 
     # adjust filter coefficients for later use
     if d < 0:
