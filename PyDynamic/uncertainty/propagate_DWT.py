@@ -43,36 +43,36 @@ def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1
 
     Parameters
     ----------
-        x: np.ndarray
+        x : np.ndarray
             filter input signal
-        Ux: float or np.ndarray
+        Ux : float or np.ndarray
             float:    standard deviation of white noise in x
             1D-array: point-wise standard uncertainties of non-stationary white noise 
-        lowpass: np.ndarray
+        lowpass : np.ndarray
             FIR filter coefficients
             representing a low-pass for decomposition
-        highpass: np.ndarray
+        highpass : np.ndarray
             FIR filter coefficients
             representing a high-pass for decomposition
-        states: dictionary of internal high/lowpass-filter states
+        states : dictionary of internal high/lowpass-filter states, optional (default: None)
             allows to continue at the last used internal state from previous call
-        realtime: Boolean
+        realtime : Boolean, optional (default: False)
             for realtime applications, no signal padding has to be done before decomposition
-        subsample_start: int
+        subsample_start : int, optional (default: 1)
             At which position the subsampling should start, typically 1 (default) or 0. 
             You should be happy with the default. We only need this to realize :func:`wave_dec_realtime`. 
     
     Returns
     -------
-        c_approx: np.ndarray
+        c_approx  : np.ndarray
             subsampled low-pass output signal
-        U_approx: np.ndarray
+        U_approx : np.ndarray
             subsampled low-pass output uncertainty
-        c_detail: np.ndarray
+        c_detail : np.ndarray
             subsampled high-pass output signal
-        U_detail: np.ndarray
+        U_detail : np.ndarray
             subsampled high-pass output uncertainty
-        states: dictionary of internal high/lowpass-filter states
+        states : dictionary of internal high/lowpass-filter states
             allows to continue at the last used internal state in next call
     """
 
@@ -121,32 +121,32 @@ def inv_dwt(
 
     Parameters
     ----------
-        c_approx: np.ndarray
+        c_approx : np.ndarray
             low-pass output signal
-        U_approx: np.ndarray
+        U_approx : np.ndarray
             low-pass output uncertainty
-        c_detail: np.ndarray
+        c_detail : np.ndarray
             high-pass output signal
-        U_detail: np.ndarray
+        U_detail : np.ndarray
             high-pass output uncertainty
-        lowpass: np.ndarray
+        lowpass : np.ndarray
             FIR filter coefficients
             representing a low-pass for reconstruction
-        highpass: np.ndarray
+        highpass : np.ndarray
             FIR filter coefficients
             representing a high-pass for reconstruction
-        states: dictionary of internal high/lowpass-filter states
+        states : dictionary of internal high/lowpass-filter states, optional (default: None)
             allows to continue at the last used internal state from previous call
-        realtime: Boolean
+        realtime : Boolean, optional (default: False)
             for realtime applications, no signal padding has to be undone after reconstruction
     
     Returns
     -------
-        x: np.ndarray
+        x : np.ndarray
             upsampled reconstructed signal
-        Ux: np.ndarray
+        Ux : np.ndarray
             upsampled uncertainty of reconstructed signal
-        states: dictionary of internal high/lowpass-filter states
+        states : dictionary of internal high/lowpass-filter states
             allows to continue at the last used internal state in next call
     """
 
@@ -198,20 +198,20 @@ def filter_design(kind):
     
     Parameters:
     -----------
-        kind: string
+        kind : string
             filter name, i.e. db4, coif6, gaus9, rbio3.3, ...
             supported families: :func:`pywt.families`
             supported wavelets: :func:`pywt.wavelist`
 
     Returns:
     --------
-        ld: np.ndarray
+        ld : np.ndarray
             low-pass filter for decomposition
-        hd: np.ndarray
+        hd : np.ndarray
             high-pass filter for decomposition
-        lr: np.ndarray
+        lr : np.ndarray
             low-pass filter for reconstruction
-        hr: np.ndarray
+        hr : np.ndarray
             high-pass filter for reconstruction
     """
 
@@ -248,28 +248,28 @@ def wave_dec(x, Ux, lowpass, highpass, n=-1):
 
     Parameters:
     -----------
-        x: np.ndarray
+        x : np.ndarray
             input signal
-        Ux: float or np.ndarray
+        Ux : float or np.ndarray
             float: standard deviation of white noise in x
             1D-array: point-wise standard uncertainties of non-stationary white noise
-        lowpass: np.ndarray
+        lowpass : np.ndarray
             decomposition low-pass for wavelet_block
-        highpass: np.ndarray
+        highpass : np.ndarray
             decomposition high-pass for wavelet_block
-        n: int
+        n : int, optional (default: -1)
             consecutive repetitions of wavelet_block
             user is warned, if it is not possible to reach the specified depth
-            ignored if set to -1 (default)
+            use highest possible level if set to -1 (default)
 
     Returns:
     --------
-        coeffs: list of arrays
+        coeffs : list of arrays
             order of arrays within list is:
             [cAn, cDn, cDn-1, ..., cD2, cD1]
-        Ucoeffs: list of arrays
+        Ucoeffs : list of arrays
             uncertainty of coeffs, same order as coeffs
-        original_length: int
+        original_length : int
             equals to len(x)
             necessary to restore correct length 
     """
@@ -316,32 +316,32 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
 
     Parameters:
     -----------
-        x: np.ndarray
+        x : np.ndarray
             input signal
-        Ux: float or np.ndarray
+        Ux : float or np.ndarray
             float: standard deviation of white noise in x
             1D-array: point-wise standard uncertainties of non-stationary white noise
-        lowpass: np.ndarray
+        lowpass : np.ndarray
             decomposition low-pass for wavelet_block
-        highpass: np.ndarray
+        highpass : np.ndarray
             decomposition high-pass for wavelet_block
-        n: int
+        n : int, optional (default: 1)
             consecutive repetitions of wavelet_block
             There is no maximum level in continuos wavelet transform, so the default is n=1. 
-        level_states: dict
+        level_states : dict, optional (default: None)
             internal state from previous call
 
     Returns:
     --------
-        coeffs: list of arrays
+        coeffs : list of arrays
             order of arrays within list is:
             [cAn, cDn, cDn-1, ..., cD2, cD1]
-        Ucoeffs: list of arrays
+        Ucoeffs : list of arrays
             uncertainty of coeffs, same order as coeffs
-        original_length: int
+        original_length : int
             equals to len(x)
             necessary to restore correct length 
-        level_states: dict
+        level_states : dict
             last internal state
     """
     if level_states == None:
@@ -398,26 +398,27 @@ def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None):
 
     Parameters:
     -----------
-        coeffs: list of arrays
+        coeffs : list of arrays
             order of arrays within list is:
             [cAn, cDn, cDn-1, ..., cD2, cD1]
             where:
-            - cAi: approximation coefficients array from i-th level
-            - cDi: detail coefficients array from i-th level
-        Ucoeffs: list of arrays
+
+            * cAi: approximation coefficients array from i-th level
+            * cDi: detail coefficients array from i-th level
+        Ucoeffs : list of arrays
             uncertainty of coeffs, same order as coeffs
-        lowpass: np.ndarray
+        lowpass : np.ndarray
             reconstruction low-pass for wavelet_block
-        highpass: np.ndarray
+        highpass : np.ndarray
             reconstruction high-pass for wavelet_block
-        original_length: optional, int
+        original_length : int, optional (default: None)
             necessary to restore correct length of original time-series
     
     Returns
     -------
-        x: np.ndarray
+        x : np.ndarray
             reconstructed signal
-        Ux: np.ndarray
+        Ux : np.ndarray
             uncertainty of reconstructed signal
     """
 
