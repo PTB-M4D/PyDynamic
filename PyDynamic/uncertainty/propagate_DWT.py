@@ -20,7 +20,7 @@ This modules contains the following functions:
 import numpy as np
 import pywt
 
-from .propagate_filter import IIRuncFilter, get_initial_state
+from .propagate_filter import IIRuncFilter, IIR_get_initial_state
 
 __all__ = [
     "dwt",
@@ -85,8 +85,8 @@ def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1
     # init states if not given
     if not states:
         states = {
-            "low": get_initial_state(lowpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
-            "high": get_initial_state(highpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
+            "low": IIR_get_initial_state(lowpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
+            "high": IIR_get_initial_state(highpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
         }
 
     # propagate uncertainty through FIR-filter
@@ -164,10 +164,10 @@ def inv_dwt(
     # init states if not given
     if not states:
         states = {
-            "low": get_initial_state(
+            "low": IIR_get_initial_state(
                 lowpass, [1.0], Uab=None, x0=0, U0=0
             ),  # the value before the first entry is a zero, if the upsampling would continue into the past
-            "high": get_initial_state(highpass, [1.0], Uab=None, x0=0, U0=0),
+            "high": IIR_get_initial_state(highpass, [1.0], Uab=None, x0=0, U0=0),
         }
 
     # propagate uncertainty through FIR-filter
