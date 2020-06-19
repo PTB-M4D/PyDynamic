@@ -167,7 +167,7 @@ us know. You may, for instance, drop an email to one of the [authors
 ](mailto:bjoern.ludwig@ptb.de) or [Maximilian Gruber
 ](mailto:maximilian.gruber@ptb.de))
 
-### Examples
+## Examples
 
 We have collected extended material for an easier introduction to PyDynamic in the two
 subfolders _examples_ and _tutorials_. In various Jupyter Notebooks and scripts we
