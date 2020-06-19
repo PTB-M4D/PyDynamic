@@ -104,14 +104,12 @@ motivation and an insight into the mechanism in the
 
 #### Create a virtual environment and install requirements
 
-For easy environment creation with Python built-in tools we provide a
-[`requirements.txt` file in the root of our repository](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements.txt).
-With this file one can create an exact copy of our known-to-work virtual environments on
-any machine with a current Python installation as described in the
+Creating a virtual environment with Python built-in tools is easy and explained
+in more detail in the
 [official docs of Python itself](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
 
 It boils down to creating an environment anywhere on your computer, then activate
-it and finally install PyDynamic's dependencies.
+it and finally install PyDynamic and its dependencies.
 
 ##### _venv_ creation and installation in Windows
 
