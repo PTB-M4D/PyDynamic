@@ -7,15 +7,6 @@ established workflows from the beginning. This guide should work on all platform
 please open an issue or ideally fix the problem and contribute to this guide as a
 start, if problems arise.
 
-We will cover
-
-- basic principles
-- initial set up
-- advised toolset
-- coding style
-- commit style
-- PR workflow
-
 ## Basic principles
 
 The PyDynamic development process is based on the following guiding principles: 
@@ -37,9 +28,9 @@ For collaboration we recommend forking the repository as described
 [here](https://help.github.com/en/articles/fork-a-repo), apply the changes and open a
 Pull Request on GitHub as described
 [here](https://help.github.com/en/articles/creating-a-pull-request). For small
-changes this will be a sufficient setup, since this way even the full test suite will
-run against your changes. For more comprehensive work, you should read on carefully
-and follow the instructions.
+changes it will be sufficient to just apply your changes on GitHub and send the PR
+right away. For more comprehensive work, you should read on carefully, follow the
+instructions.
    
 ### Initial development setup
 
@@ -91,10 +82,39 @@ should follow the guidelines of [PEP8](https://www.python.org/dev/peps/pep-0008/
 remain uniformly formatted.  For this purpose we use the Python package
 [_black_](https://pypi.org/project/black/). It is very easy to handle and [can be
  integrated into most common IDEs](https://github.com/psf/black#editor-integration),
-so that it is automatically applied. 
+so that it is automatically applied.
+
+### Commit style
+
+In order for the [semantic versioning](https://semver.org/) release automation and the
+[generation of a changelog](https://github.com/PTB-PSt1/PyDynamic/releases/tag/v1.4.0)
+from the commit messages to work, it is necessary to use 
+[conventional commit messages](https://www.conventionalcommits.org/en/v1.0.0/#summary)
+. As a result, parts of the commit messages appear in the changelog of the subsequent
+release and the respective commit is linked. We use the following types:
+
+- _feat_: for commits that introduce new features 
+- _docs_: for commits that contribute significantly to documentation
+- _fix_: commits in which bugs are fixed
+- _build_: Commits that affect packaging
+- _ci_: Commits that affect the CI pipeline
+- _test_: Commits that apply significant changes to tests
+- _chore_: Commits that affect other non-PyDynamic components (e.g. ReadTheDocs, Git
+, ... )
+- _revert_: commits, which undo previous commits using `git revert`
+- _refactor_: commits that merely reformulate, rename or similar
+- _style_: commits, which essentially make changes to line breaks and whitespace
+- _wip_: Commits which, as part of a whole, are not usually recognizable as one of the
+  above-mentioned types until later, usually during a PR merge.  The merge commit is
+  then marked as the corresponding type.
 
 ###  Testing
 
-We strive to increase [our code coverage](https://codecov.io/gh/PTB-PSt1/PyDynamic) with every change introduced. This requires that every new feature and every change to existing features is accompanied by appropriate testing, which checks the basic components and, if necessary, the integration into the big picture for correctness. For this purpose, it is usually sufficient to create appropriately named methods in one of the existing modules in the subfolder test or, if necessary, to add a new module that is also appropriately named.
-
-  
+We strive to increase [our code coverage](https://codecov.io/gh/PTB-PSt1/PyDynamic) with 
+every change introduced. This requires that every new feature and every change to 
+existing features is accompanied by appropriate _pytest_ testing, which checks the basic
+components for correctness and, if necessary, the integration into the big picture.
+For this purpose, it is usually sufficient to create
+[appropriately named](https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery)
+methods in one of the existing modules in the subfolder test or, if necessary, to add
+a new module that is also appropriately named.
