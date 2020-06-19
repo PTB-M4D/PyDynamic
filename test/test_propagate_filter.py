@@ -203,7 +203,8 @@ def test_FIR_IIR_identity(fir_filter, input_signal):
 
 
 def test_tf2ss(iir_filter):
-    b, a, _ = iir_filter.values()
+    b = iir_filter["b"]
+    a = iir_filter["a"]
     A1, B1, C1, D1 = _tf2ss(b, a)
     A2, B2, C2, D2 = scipy.signal.tf2ss(b, a)
 
