@@ -41,6 +41,7 @@ __all__ = [
     "Time2AmpPhase",
     "FIRuncFilter",
     "IIRuncFilter",
+    "IIR_get_initial_state",
     "MC",
     "SMC",
     "UMC",
