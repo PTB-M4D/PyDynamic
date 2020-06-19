@@ -1,6 +1,6 @@
-# PyDynamic advice and tips for collaboration
+# Advices and tips for contributors of PyDynamic
 
-If you want to become active as a developer, we provide all important information
+If you want to become active as developer, we provide all important information
 here to make the start as easy as possible. At the same time, the code you produce
 should be seamlessly integrable into PyDynamic by aligning your work with the
 established workflows from the beginning. This guide should work on all platforms, so
