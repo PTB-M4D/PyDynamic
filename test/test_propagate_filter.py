@@ -202,6 +202,7 @@ def test_FIR_IIR_identity(kind, fir_filter, input_signal):
 
 
 def test_tf2ss(iir_filter):
+    """compare output of _tf2ss to (the very similar) scipy.signal.tf2ss"""
     b = iir_filter["b"]
     a = iir_filter["a"]
     A1, B1, C1, D1 = _tf2ss(b, a)
@@ -214,10 +215,13 @@ def test_tf2ss(iir_filter):
 
 
 def test_get_derivative_A():
+    """dA is sparse and only a specifc diagonal is of value -1.0"""
     p = 10
     dA = _get_derivative_A(p)
     index1 = np.arange(p)
     index2 = np.full(p, -1)
     index3 = index1[::-1]
 
-    assert np.allclose(dA[index1, index2, index3], index2)
+    sliced_diagonal = np.full(p, -1.0)
+
+    assert np.allclose(dA[index1, index2, index3], sliced_diagonal)
