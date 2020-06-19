@@ -82,7 +82,9 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             sigma2 = sigma_noise
         else:
             raise ValueError(
-                f"Unknown kind `{kind}`. Don't now how to interpret the array sigma_noise."
+                "Unknown kind `{KIND}`. Don't now how to interpret the array sigma_noise.".format(
+                    KIND=kind
+                )
             )
 
     else:
@@ -267,7 +269,9 @@ def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
     # check user input
     if kind not in ("diag", "corr"):
         raise ValueError(
-            f"`kind` is expected to be either 'diag' or 'corr' but '{kind}' was given."
+            "`kind` is expected to be either 'diag' or 'corr' but '{KIND}' was given.".format(
+                KIND=kind
+            )
         )
 
     # make Ux an array
@@ -277,10 +281,12 @@ def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
         if kind is not "diag":
             kind = "diag"
             raise UserWarning(
-                f"Ux of type float and `kind='{kind}'` was given. To ensure the behavior "
+                "Ux of type float and `kind='{KIND}'` was given. To ensure the behavior "
                 "described in the docstring (float -> standard deviation of white noise "
                 " in x), `kind='diag'` is set. \n"
-                "To suppress this warning, explicitly set `kind='diag'`"
+                "To suppress this warning, explicitly set `kind='diag'`".format(
+                    KIND=kind
+                )
             )
 
     # system, corr_unc and processed_input are cached as well to reduce computational load
@@ -499,7 +505,10 @@ def _adjust_filter_coefficients(b, a, Uab):
                     Uab = np.vstack((Uab, np.zeros((d, Uab.shape[1]))))
             else:
                 raise ValueError(
-                    f"Uab is of shape {Uab.shape}, but expected shape is {Uab_expected_shape} (len(a)+len(b)-1)"
+                    "Uab is of shape {ACTUAL_SHAPE}, but expected shape is {EXPECTED_SHAPE} "
+                    "(len(a)+len(b)-1)".format(
+                        ACTUAL_SHAPE=Uab.shape, EXPECTED_SHAPE=Uab_expected_shape
+                    )
                 )
 
     # adjust filter coefficients for later use

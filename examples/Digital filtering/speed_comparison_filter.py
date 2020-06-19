@@ -59,7 +59,7 @@ for kind in ["corr", "diag"]:
         t2 = tm.time()
         y2, Uy2 = pf.FIRuncFilter(x, Ux, b, Utheta=Uab, kind=kind)
         t3 = tm.time()
-        print(f"nx = {nx}, kind = {kind}")
+        print("nx = {NX}, kind = {KIND}".format(NX=nx, KIND=kind))
         print("IIR took {0} seconds".format(t2 - t1))
         print("FIR took {0} seconds".format(t3 - t2))
         print("=" * 30)
