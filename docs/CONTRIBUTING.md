@@ -25,11 +25,12 @@ The PyDynamic development process is based on the following guiding principles:
 ### Get the code on GitHub and locally
 
 For collaboration we recommend forking the repository as described 
-[here](https://help.github.com/en/articles/fork-a-repo), apply the changes and open a
-Pull Request on GitHub as described
+[here](https://help.github.com/en/articles/fork-a-repo), apply the changes to your fork
+and open a Pull Request on GitHub as described
 [here](https://help.github.com/en/articles/creating-a-pull-request). For small
 changes it will be sufficient to just apply your changes on GitHub and send the PR
-right away. For more comprehensive work, you should read on carefully.
+right away. For more comprehensive work, you should clone your fork and read on
+carefully.
    
 ### Initial development setup
 
