@@ -95,7 +95,7 @@ Updates can then be installed via
 pip install --user --upgrade PyDynamic
 ```
 
-### Proper Python setup with virtual environment
+### Proper Python setup with virtual environment (**recommended**)
 
 The setup described above allows the quick and easy use of PyDynamic, but it also has
 its downsides. When working with Python we should rather always work in so-called
