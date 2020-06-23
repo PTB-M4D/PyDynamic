@@ -58,6 +58,12 @@ from PyDynamic import make_equidistant
 
 ## Installation
 
+There is a [quick way](#quick-setup-not-recommended) to get started but we advise to
+setup a virtual environment and guide through the process in the section
+[Proper Python setup with virtual environment](#proper-python-setup-with-virtual-environment)
+
+### Quick setup (**not recommended**)
+
 If you just want to use the software, the easiest way is to run from your
 system's command line
 
@@ -81,7 +87,7 @@ methods:
 from PyDynamic.uncertainty import propagate_DFT
 ```
 
-### Updating to the newest version
+#### Updating to the newest version
 
 Updates can then be installed via
 
@@ -137,7 +143,7 @@ Updates can then be installed on all platforms after activating the virtual envi
 via:
 
 ```shell
-pip install --upgrade PyDynamic
+(PyDynamic_venv) $ pip install --upgrade PyDynamic
 ```
 
 ### Optional Jupyter Notebook dependencies
