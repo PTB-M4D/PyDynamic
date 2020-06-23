@@ -118,3 +118,44 @@ For this purpose, it is usually sufficient to create
 [appropriately named](https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery)
 methods in one of the existing modules in the subfolder test or, if necessary, to add
 a new module that is also appropriately named.
+
+## Adding completely new functionality
+
+In case you add a new feature you generally follow the pattern:
+
+- read through and follow this contribution advices and tips, especially regarding 
+  the advised tool set and commit guidelines
+- open an according issue to submit a feature request and get in touch with other
+  PyDynamic developers and users
+- fork the repository or update the _master_ branch of your fork and create an
+  arbitrary named feature branch from _master_
+- decide which package and module your feature should be integrated into
+- if there is no suitable package or module, create a new one and a corresponding
+  module in the _test_ subdirectory with the same name prefixed by _test__
+- after adding you functionality add it to all higher-level `__all__` variables in
+  the module itself and in the higher-level `__init__.py`s
+- during development write tests in alignment with existing test modules, for example
+  [_test_interpolate_](https://github.com/PTB-PSt1/PyDynamic/blob/master/test/test_interpolate.py)
+  or [_test_propagate_filter_](https://github.com/PTB-PSt1/PyDynamic/blob/master/test/test_propagate_filter.py)
+- write docstrings in the
+  [NumPy docstring format](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
+- as early as possible create a draft pull request onto PyDynamic's _master_ branch
+- once you think your changes are ready to merge,
+  [request a review](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/requesting-a-pull-request-review)
+   from the _PTB-PSt1/pydynamic-devs_ (you will find them in the according drop-down) and
+   [mark your PR as _ready for review_](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review)
+- resolve the conversations and have your pull request merged 
+
+## Manage dependencies
+
+As stated in the README and above we use _pip-tools_ for dependency management. The
+requirements subdirectory contains a _requirements.txt_ and a _dev-requirements.txt_
+for all supported Python versions, with a suffix naming the version, for example
+_requirements-py35.txt_. To keep them up to date semi-automatically we use the bash
+script _requirements/upgrade_dependencies.sh_. It contains extensive comments on its
+use.
+
+## Licensing
+
+All contributions are released under PyDynamic's 
+[GNU Lesser General Public License v3.0](https://github.com/PTB-PSt1/PyDynamic/blob/master/licence.txt).
