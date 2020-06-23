@@ -7,7 +7,7 @@ established workflows from the beginning. This guide should work on all platform
 provide everything needed to start developing for PyDynamic, so please open an issue
 or ideally contribute to this guide as a start, if problems or questions arise.
 
-## Basic principles
+## Guiding principles
 
 The PyDynamic development process is based on the following guiding principles: 
 
@@ -119,7 +119,7 @@ For this purpose, it is usually sufficient to create
 methods in one of the existing modules in the subfolder test or, if necessary, to add
 a new module that is also appropriately named.
 
-## Adding completely new functionality
+## Workflow for adding completely new functionality
 
 In case you add a new feature you generally follow the pattern:
 
