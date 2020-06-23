@@ -3,9 +3,9 @@
 If you want to become active as developer, we provide all important information
 here to make the start as easy as possible. At the same time, the code you produce
 should be seamlessly integrable into PyDynamic by aligning your work with the
-established workflows from the beginning. This guide should work on all platforms, so
-please open an issue or ideally fix the problem and contribute to this guide as a
-start, if problems arise.
+established workflows from the beginning. This guide should work on all platforms and
+provide everything needed to start developing for PyDynamic, so please open an issue
+or ideally contribute to this guide as a start, if problems or questions arise.
 
 ## Basic principles
 
