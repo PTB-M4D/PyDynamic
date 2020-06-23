@@ -6,7 +6,7 @@ import numpy as np
 from hypothesis import assume, given
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose
-from pytest import deprecated_call, raises
+from pytest import raises
 
 from PyDynamic.uncertainty.interpolation import interp1d_unc
 
@@ -182,12 +182,6 @@ def timestamps_values_uncertainties_kind(
         "assume_sorted": assume_sorted,
         "returnC": returnC,
     }
-
-
-@given(timestamps_values_uncertainties_kind())
-def test_deprecated_call_interp1d_unc(interp_inputs):
-    with deprecated_call():
-        interp1d_unc(**interp_inputs)
 
 
 @given(timestamps_values_uncertainties_kind())
