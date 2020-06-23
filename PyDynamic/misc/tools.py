@@ -28,9 +28,9 @@ __all__ = [
     "print_vec",
     "make_semiposdef",
     "FreqResp2RealImag",
+    "make_equidistant",
     "trimOrPad",
     "progress_bar",
-    "make_equidistant",
 ]
 
 
