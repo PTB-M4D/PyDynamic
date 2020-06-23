@@ -143,9 +143,58 @@ In case you add a new feature you generally follow the pattern:
   branch
 - once you think your changes are ready to merge,
   [request a review](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/requesting-a-pull-request-review)
-   from the _PTB-PSt1/pydynamic-devs_ (you will find them in the according drop-down) and
-   [mark your PR as _ready for review_](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review)
-- resolve the conversations and have your pull request merged 
+  from the _PTB-PSt1/pydynamic-devs_ (you will find them in the according drop-down) and
+  [mark your PR as _ready for review_](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review)
+- at the latest now you will have the opportunity to review the documentation
+  automatically generated from the docstrings on ReadTheDocs after your reviewers
+  will set up everything 
+- resolve the conversations and have your pull request merged
+
+## Documentation
+
+The documentation of PyDynamic consists of three parts. Every adaptation of an
+existing feature and every new feature requires adjustments on all three levels:
+
+- user documentation on ReadTheDocs
+- examples in the form of Jupyter notebooks for extensive features and Python scripts
+  for features which can be comprehensively described with few lines of commented code 
+- developer documentation in the form of comments in the code
+
+### User documentation
+
+To locally generate a preview of what ReadTheDocs will generate from your docstrings,
+you can simply execute after activating your virtual environment:
+
+```shell
+(PyDynamic_venv) $ sphinx-build docs/ docs/_build
+Sphinx v3.1.1 in Verwendung
+making output directory...
+[...]
+build abgeschlossen.
+
+The HTML pages are in docs/_build.
+```
+
+After that you can open the file ./docs/_build/index.html relative to the project's
+root with your favourite browser. Simply re-execute the above command after each
+change to the docstrings to update your local version of the documentation.
+
+### Examples
+
+We want to provide extensive sample material for all PyDynamic features in order to
+simplify the use or even make it possible in the first place. We collect the
+examples in a separate repository [PyDynamic_tutorials
+](https://github.com/PTB-PSt1/PyDynamic_tutorials) separate from PyDynamic to
+better distinguish the core functionality from additional material. Please refer to
+the corresponding README for more information about the setup and create a pull
+request accompanying the pull request in PyDynamic according to the same procedure
+we describe here.
+
+### Comments in the code
+
+Regarding comments in the code we recommend to invest 45 minutes for the PyCon DE
+2019 Talk of Stefan Schwarzer, a 20+-years Python developer:
+[Commenting code - beyond common wisdom](https://www.youtube.com/watch?v=tP5uWCruaBs&list=PLHd2BPBhxqRLEhEaOFMWHBGpzyyF-ChZU&index=22&t=0s).
 
 ## Manage dependencies
 
