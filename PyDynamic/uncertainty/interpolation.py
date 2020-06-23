@@ -25,17 +25,5 @@ warnings.warn(
     "The module :mod:`PyDynamic.uncertainty.interpolation` will be renamed to "
     ":mod:`PyDynamic.uncertainty.interpolate` in the next major release 2.0.0. From "
     "version 1.4.3 on you should only use the new module instead.",
-    DeprecationWarning,
+    PendingDeprecationWarning,
 )
-
-
-def interpd1_unc(*args, **kwargs):
-    warnings.warn(
-        "The module :mod:`PyDynamic.uncertainty.interpolation` will be renamed to "
-        ":mod:`PyDynamic.uncertainty.interpolate` in the next major release 2.0.0. "
-        "From version 1.4.3 on you should only use the new module instead. Please "
-        "change 'from PyDynamic.uncertainty.interpolation import interp1d_unc' to "
-        "'from PyDynamic.uncertainty.interpolate import interp1d_unc'.",
-        DeprecationWarning,
-    )
-    interp1d_unc(*args, **kwargs)
