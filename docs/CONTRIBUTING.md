@@ -29,8 +29,7 @@ For collaboration we recommend forking the repository as described
 Pull Request on GitHub as described
 [here](https://help.github.com/en/articles/creating-a-pull-request). For small
 changes it will be sufficient to just apply your changes on GitHub and send the PR
-right away. For more comprehensive work, you should read on carefully, follow the
-instructions.
+right away. For more comprehensive work, you should read on carefully.
    
 ### Initial development setup
 
