@@ -133,7 +133,7 @@ $  /LOCAL/PATH/TO/ENVS/PyDynamic_venv/bin/activate
 
 #### Updating to the newest version
 
-Updates can then be installed on all platforms after activating the virtual environemnt
+Updates can then be installed on all platforms after activating the virtual environment
 via:
 
 ```shell
@@ -149,6 +149,31 @@ of the above, e.g.
 
 ```shell
 (PyDynamic_venv) $ pip install PyDynamic[examples]
+```
+
+### Install known to work dependencies' versions
+
+In case errors arise within PyDynamic, the first thing you can try is installing the
+known to work configuration of dependencies against which we run our test suite. This
+you can easily achieve with our version specific requirements files. First you need
+to install our dependency management package _pip-tools_, then find the Python
+version you are using with PyDynamic and finally install the provided dependency
+versions for your specific Python version. This is all done with the following
+sequence of commands after activating. Change the suffix `-py38` according to the
+ Python version you find after executing `(PyDynamic_venv) $ python --version`:
+
+```shell
+(PyDynamic_venv) $ pip install --upgrade pip-tools
+Collecting pip-tools
+[...]
+Successfully installed pip-tools-5.2.1
+(PyDynamic_venv) $ python --version
+Python 3.8.3
+(PyDynamic_venv) $ pip-sync requirements/dev-requirements-py38.txt requirements/requirements-py38.txt
+Collecting [...]
+[...]
+Successfully installed [...]
+(PyDynamic_venv) $
 ```
 
 ## Contributing to PyDynamic
