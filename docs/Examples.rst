@@ -1,10 +1,10 @@
 Examples
 ========
 
-On the project website and the separate
+On the project website in the *examples* and *tutorials* subfolders and the separate
 `PyDynamic_tutorials <https://github.com/PTB-PSt1/PyDynamic_tutorials>`_
-repository you can find various examples illustrating the application of PyDynamic in
-the *examples* and *tutorials* subfolders. Here is just a short list to get you started.
+repository you can find various examples illustrating the application of PyDynamic.
+Here is just a short list to get you started.
 
 Quick Examples
 --------------
@@ -48,10 +48,9 @@ More comprehensive examples you can find in provided Jupyter notebooks, which re
 additional dependencies to be installed. This can be achieved by appending
 :code:`[examples]` to PyDynamic in all of the above, e.g.
 
-.. code-block:: python
+.. code-block:: shell
 
-    from PyDynamic.uncertainty.propagate_DFT import GUM_DFT
-    X, UX = GUM_DFT(x, ux)
+    pip install PyDynamic[examples]
 
 Afterwards you can browser through the following list:
 
