@@ -7,7 +7,7 @@ established workflows from the beginning. This guide should work on all platform
 provide everything needed to start developing for PyDynamic, so please open an issue
 or ideally contribute to this guide as a start, if problems or questions arise.
 
-## Basic principles
+## Guiding principles
 
 The PyDynamic development process is based on the following guiding principles: 
 
@@ -35,9 +35,9 @@ carefully.
 ### Initial development setup
 
 This guide assumes you already have a valid runtime environment for PyDynamic as
-described in the [README](../README.md). To start developing, install the required
-dependencies for your specific Python version. To find it, activate the desired
-virtual environment and execute:
+described in the [README](https://github.com/PTB-PSt1/PyDynamic/blob/master/README.md).
+To start developing, install the required dependencies for your specific Python
+version. To find it, activate the desired virtual environment and execute:
 
 ```shell
 (PyDynamic_venv) $ python --version
@@ -119,7 +119,7 @@ For this purpose, it is usually sufficient to create
 methods in one of the existing modules in the subfolder test or, if necessary, to add
 a new module that is also appropriately named.
 
-## Adding completely new functionality
+## Workflow for adding completely new functionality
 
 In case you add a new feature you generally follow the pattern:
 
@@ -198,12 +198,14 @@ Regarding comments in the code we recommend to invest 45 minutes for the PyCon D
 
 ## Manage dependencies
 
-As stated in the README and above we use _pip-tools_ for dependency management. The
+As stated in the README and above we use
+[_pip-tools_](https://pypi.org/project/pip-tools/) for dependency management. The
 requirements subdirectory contains a _requirements.txt_ and a _dev-requirements.txt_
 for all supported Python versions, with a suffix naming the version, for example
-_requirements-py35.txt_. To keep them up to date semi-automatically we use the bash
-script _requirements/upgrade_dependencies.sh_. It contains extensive comments on its
-use.
+[_requirements-py35.txt_](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements/requirements-py35.txt)
+To keep them up to date semi-automatically we use the bash script
+[_requirements/upgrade_dependencies.sh_](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements/upgrade_dependencies.sh).
+It contains extensive comments on its use.
 
 ## Licensing
 
