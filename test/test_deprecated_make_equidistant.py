@@ -5,10 +5,9 @@ from typing import Dict, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
-import pytest
 from hypothesis import given
 from hypothesis.strategies import composite
-from pytest import raises
+from pytest import deprecated_call, raises
 
 from PyDynamic.misc.tools import make_equidistant
 
@@ -90,13 +89,7 @@ def timestamps_values_uncertainties_kind(
 
 @given(timestamps_values_uncertainties_kind())
 def test_deprecated_call_make_equidistant(interp_inputs):
-    with pytest.deprecated_call():
-        make_equidistant(**interp_inputs)
-
-
-@given(timestamps_values_uncertainties_kind())
-def test_deprecated_call_make_equidistant(interp_inputs):
-    with pytest.deprecated_call():
+    with deprecated_call():
         make_equidistant(**interp_inputs)
 
 
