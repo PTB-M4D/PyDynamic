@@ -35,9 +35,9 @@ carefully.
 ### Initial development setup
 
 This guide assumes you already have a valid runtime environment for PyDynamic as
-described in the [README](../README.md). To start developing, install the required
-dependencies for your specific Python version. To find it, activate the desired
-virtual environment and execute:
+described in the [README](https://github.com/PTB-PSt1/PyDynamic/blob/master/README.md).
+To start developing, install the required dependencies for your specific Python
+version. To find it, activate the desired virtual environment and execute:
 
 ```shell
 (PyDynamic_venv) $ python --version

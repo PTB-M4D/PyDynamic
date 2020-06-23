@@ -27,6 +27,12 @@ Contents:
    PyDynamic.identification.rst
    PyDynamic.misc.rst
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Comprehensive examples:
+
+   Examples.rst
+
 Indices and tables
 ==================
 
