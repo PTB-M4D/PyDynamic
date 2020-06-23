@@ -1,4 +1,4 @@
-# Getting started
+# Installation
 
 There is a [quick way](#quick-setup-not-recommended) to get started but we advise to
 setup a virtual environment and guide through the process in the section

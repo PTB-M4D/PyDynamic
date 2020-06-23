@@ -17,7 +17,7 @@ it is tested to work with Python 3.5 to 3.8.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Installation:
+   :caption: Getting started:
 
    Getting started.md
 
@@ -33,7 +33,7 @@ it is tested to work with Python 3.5 to 3.8.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Comprehensive examples:
+   :caption: Supplementary material:
 
    Examples.rst
 
