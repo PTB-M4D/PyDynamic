@@ -27,7 +27,7 @@ source ../../envs/PyDynamic-py35/bin/activate && \
 # Create requirements.txt from requirements.in.
 pip-compile --upgrade requirements/requirements.in --output-file requirements/requirements-py35.txt && \
 # Create dev-requirements...txt from dev-requirements...in.
-pip-compile requirements/dev-requirements-py35.in --output-file requirements/dev-requirements-py35.txt && \
+pip-compile --upgrade requirements/dev-requirements-py35.in --output-file requirements/dev-requirements-py35.txt && \
 deactivate
 
 # Handle all other Python versions via setup.py by cycling through the different Python
