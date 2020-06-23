@@ -18,13 +18,10 @@ This module contains the following functions:
 """
 
 import sys
-import warnings
 
 import numpy as np
 from scipy.sparse import eye, issparse
 from scipy.sparse.linalg.eigen.arpack import eigs
-
-from ..uncertainty.interpolate import make_equidistant
 
 __all__ = [
     "print_mat",
@@ -211,15 +208,19 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
 
 
 def make_equidistant(*args, **kwargs):
+    import warnings
+
+    from ..uncertainty.interpolate import make_equidistant
+
     warnings.warn(
         "The method :mod:`PyDynamic.misc.tools.make_equidistant` will be moved "
         "to :mod:`PyDynamic.uncertainty.interpolate.make_equidistant` in the next "
         "major release 2.0.0. From version 1.4.3 on you should only use the new method "
         "instead. Please change 'from PyDynamic.misc.tools import make_equidistant' to "
         "'from PyDynamic.uncertainty.interpolate import make_equidistant'.",
-        DeprecationWarning,
+        PendingDeprecationWarning,
     )
-    make_equidistant(*args, **kwargs)
+    return make_equidistant(*args, **kwargs)
 
 
 def progress_bar(
