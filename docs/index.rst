@@ -14,13 +14,17 @@ For the PyDynamic homepage go to
 upstream support <https://devguide.python.org/#status-of-python-branches>`_. Currently
 it is tested to work with Python 3.5 to 3.8.
 
-Contents:
 
 .. toctree::
    :maxdepth: 1
+   :caption: Installation:
 
    Getting started.md
-   CONTRIBUTING.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
    PyDynamic.uncertainty.rst
    PyDynamic.model_estimation.rst
    PyDynamic.deconvolution.rst
@@ -32,6 +36,12 @@ Contents:
    :caption: Comprehensive examples:
 
    Examples.rst
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contribute:
+
+   CONTRIBUTING.md
 
 Indices and tables
 ==================
