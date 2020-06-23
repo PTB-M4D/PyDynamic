@@ -124,7 +124,7 @@ a new module that is also appropriately named.
 In case you add a new feature you generally follow the pattern:
 
 - read through and follow this contribution advices and tips, especially regarding 
-  the advised tool set and commit guidelines
+  the [advised tool](#advised-toolset) set and [commit style](#commit-style)
 - open an according issue to submit a feature request and get in touch with other
   PyDynamic developers and users
 - fork the repository or update the _master_ branch of your fork and create an
@@ -132,14 +132,15 @@ In case you add a new feature you generally follow the pattern:
 - decide which package and module your feature should be integrated into
 - if there is no suitable package or module, create a new one and a corresponding
   module in the _test_ subdirectory with the same name prefixed by _test__
-- after adding you functionality add it to all higher-level `__all__` variables in
+- after adding your functionality add it to all higher-level `__all__` variables in
   the module itself and in the higher-level `__init__.py`s
 - during development write tests in alignment with existing test modules, for example
   [_test_interpolate_](https://github.com/PTB-PSt1/PyDynamic/blob/master/test/test_interpolate.py)
   or [_test_propagate_filter_](https://github.com/PTB-PSt1/PyDynamic/blob/master/test/test_propagate_filter.py)
 - write docstrings in the
   [NumPy docstring format](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
-- as early as possible create a draft pull request onto PyDynamic's _master_ branch
+- as early as possible create a draft pull request onto the upstream's _master_
+  branch
 - once you think your changes are ready to merge,
   [request a review](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/requesting-a-pull-request-review)
    from the _PTB-PSt1/pydynamic-devs_ (you will find them in the according drop-down) and
