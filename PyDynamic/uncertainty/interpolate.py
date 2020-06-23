@@ -14,7 +14,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 from scipy.interpolate import interp1d
 
-__all__ = ["interp1d_unc"]
+__all__ = ["interp1d_unc", "make_equidistant"]
 
 
 def interp1d_unc(
@@ -306,3 +306,52 @@ def interp1d_unc(
     if returnC:
         return t_new, y_new, uy_new, C
     return t_new, y_new, uy_new
+
+
+def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
+    """ Interpolate non-equidistant time series to equidistant
+
+    Interpolate measurement values and propagate uncertainties accordingly.
+
+    Parameters
+    ----------
+        t: (N,) array_like
+            timestamps (or frequencies)
+        y: (N,) array_like
+            corresponding measurement values
+        uy: (N,) array_like
+            corresponding measurement values' standard uncertainties
+        dt: float, optional
+            desired interval length
+        kind: str, optional
+            Specifies the kind of interpolation for the measurement values
+            as a string ('previous', 'next', 'nearest' or 'linear').
+
+    Returns
+    -------
+        t_new : (M,) array_like
+            interpolation timestamps (or frequencies)
+        y_new : (M,) array_like
+            interpolated measurement values
+        uy_new : (M,) array_like
+            interpolated measurement values' standard uncertainties
+
+    References
+    ----------
+        * White [White2017]_
+    """
+    from ..uncertainty.interpolation import interp1d_unc
+
+    # Find t's maximum.
+    t_max = np.max(t)
+
+    # Setup new vector of timestamps.
+    t_new = np.arange(np.min(t), t_max, dt)
+
+    # Since np.arange in overflow situations results in the biggest values not
+    # guaranteed to be smaller than t's maximum', we need to check for this and delete
+    # these unexpected values.
+    if t_new[-1] > t_max:
+        t_new = t_new[t_new <= t_max]
+
+    return interp1d_unc(t_new, t, y, uy, kind)

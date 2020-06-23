@@ -9,7 +9,7 @@ from hypothesis import given
 from hypothesis.strategies import composite
 from pytest import raises
 
-from PyDynamic.uncertainty.interpolate import make_equidistant
+from PyDynamic.misc.tools import make_equidistant
 
 
 @composite

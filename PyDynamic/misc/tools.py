@@ -18,19 +18,22 @@ This module contains the following functions:
 """
 
 import sys
+import warnings
 
 import numpy as np
 from scipy.sparse import eye, issparse
 from scipy.sparse.linalg.eigen.arpack import eigs
+
+from ..uncertainty.interpolate import make_equidistant
 
 __all__ = [
     "print_mat",
     "print_vec",
     "make_semiposdef",
     "FreqResp2RealImag",
-    "make_equidistant",
     "trimOrPad",
     "progress_bar",
+    "make_equidistant",
 ]
 
 
@@ -207,53 +210,16 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     return Re, Im, URI
 
 
-def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
-    """ Interpolate non-equidistant time series to equidistant
-
-    Interpolate measurement values and propagate uncertainties accordingly.
-
-    Parameters
-    ----------
-        t: (N,) array_like
-            timestamps (or frequencies)
-        y: (N,) array_like
-            corresponding measurement values
-        uy: (N,) array_like
-            corresponding measurement values' standard uncertainties
-        dt: float, optional
-            desired interval length
-        kind: str, optional
-            Specifies the kind of interpolation for the measurement values
-            as a string ('previous', 'next', 'nearest' or 'linear').
-
-    Returns
-    -------
-        t_new : (M,) array_like
-            interpolation timestamps (or frequencies)
-        y_new : (M,) array_like
-            interpolated measurement values
-        uy_new : (M,) array_like
-            interpolated measurement values' standard uncertainties
-
-    References
-    ----------
-        * White [White2017]_
-    """
-    from ..uncertainty.interpolation import interp1d_unc
-    
-    # Find t's maximum.
-    t_max = np.max(t)
-
-    # Setup new vector of timestamps.
-    t_new = np.arange(np.min(t), t_max, dt)
-
-    # Since np.arange in overflow situations results in the biggest values not
-    # guaranteed to be smaller than t's maximum', we need to check for this and delete
-    # these unexpected values.
-    if t_new[-1] > t_max:
-        t_new = t_new[t_new <= t_max]
-
-    return interp1d_unc(t_new, t, y, uy, kind)
+def make_equidistant(*args, **kwargs):
+    warnings.warn(
+        "The method :mod:`PyDynamic.misc.tools.make_equidistant` will be moved "
+        "to :mod:`PyDynamic.uncertainty.interpolate.make_equidistant` in the next "
+        "major release 2.0.0. From version 1.4.3 on you should only use the new method "
+        "instead. Please change 'from PyDynamic.misc.tools import make_equidistant' to "
+        "'from PyDynamic.uncertainty.interpolate import make_equidistant'.",
+        DeprecationWarning,
+    )
+    make_equidistant(*args, **kwargs)
 
 
 def progress_bar(
