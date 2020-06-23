@@ -20,6 +20,7 @@ Contents:
    :maxdepth: 1
 
    Getting started.rst
+   Getting started.md
    PyDynamic.uncertainty.rst
    PyDynamic.model_estimation.rst
    PyDynamic.deconvolution.rst
