@@ -340,8 +340,6 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
     ----------
         * White [White2017]_
     """
-    from ..uncertainty.interpolation import interp1d_unc
-
     # Find t's maximum.
     t_max = np.max(t)
 
