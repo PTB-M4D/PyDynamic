@@ -5,3 +5,5 @@ tox
 hypothesis
 pylint
 rope
+sphinx
+sphinx-rtd-theme
