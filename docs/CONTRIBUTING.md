@@ -1,4 +1,4 @@
-# Advices and tips for contributors of PyDynamic
+# Advices and tips for contributors
 
 If you want to become active as developer, we provide all important information
 here to make the start as easy as possible. At the same time, the code you produce
