@@ -259,7 +259,7 @@ jobs:
       # Fake publish, just to make sure everything works after merging a PR and
       # before actual release jos run.
       - run:
-          name: Run semantic-release --noop publish
+          name: Preview python-semantic-release actions
           command: |
             unset CIRCLE_PULL_REQUEST CIRCLE_PULL_REQUESTS CI_PULL_REQUEST \
               CI_PULL_REQUESTS
@@ -267,7 +267,13 @@ jobs:
             source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            echo "The changelog of the next release will contain:"
+            echo "
+            The changelog of the next release will contain:
+            "
             semantic-release --unreleased changelog
-            echo "The output of 'semantic-release --noop publish' is:"
+            echo "
+            -----------------------------------------------------------
+
+            python-semantic-release would perform the following actions:
+            "
             semantic-release --noop publish
