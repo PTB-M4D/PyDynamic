@@ -20,6 +20,8 @@ it is tested to work with Python 3.5 to 3.8.
    :caption: Getting started:
 
    Getting started.md
+   Examples.rst
+   CONTRIBUTING.md
 
 .. toctree::
    :maxdepth: 1
@@ -30,18 +32,6 @@ it is tested to work with Python 3.5 to 3.8.
    PyDynamic.deconvolution.rst
    PyDynamic.identification.rst
    PyDynamic.misc.rst
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Supplementary material:
-
-   Examples.rst
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Contribute:
-
-   CONTRIBUTING.md
 
 Indices and tables
 ==================
