@@ -1,11 +1,11 @@
 # Advices and tips for contributors
 
-If you want to become active as developer, we provide all important information
-here to make the start as easy as possible. At the same time, the code you produce
-should be seamlessly integrable into PyDynamic by aligning your work with the
-established workflows from the beginning. This guide should work on all platforms and
-provide everything needed to start developing for PyDynamic, so please open an issue
-or ideally contribute to this guide as a start, if problems or questions arise.
+If you want to become active as developer, we provide all important information here
+to make the start as easy as possible. The code you produce should be seamlessly
+integrable into PyDynamic by aligning your work with the established workflows.
+This guide should work on all platforms and provide everything needed to start
+developing for PyDynamic. Please open an issue or ideally contribute to this
+guide as a start, if problems or questions arise.
 
 ## Guiding principles
 
@@ -25,8 +25,8 @@ The PyDynamic development process is based on the following guiding principles:
 ### Get the code on GitHub and locally
 
 For collaboration we recommend forking the repository as described 
-[here](https://help.github.com/en/articles/fork-a-repo), apply the changes to your fork
-and open a Pull Request on GitHub as described
+[here](https://help.github.com/en/articles/fork-a-repo). Simply apply the changes to
+your fork and open a Pull Request on GitHub as described
 [here](https://help.github.com/en/articles/creating-a-pull-request). For small
 changes it will be sufficient to just apply your changes on GitHub and send the PR
 right away. For more comprehensive work, you should clone your fork and read on
@@ -51,10 +51,10 @@ specific versions:
 (PyDynamic_venv) $ pip install --upgrade pip pip-tools
 ```
 
-From the repository root you can then initially install or at any later time update
-all dependencies to the versions we use via _pip-tools_' command 
-[`pip-sync`](https://pypi.org/project/pip-tools/#example-usage-for-pip-sync) by
-executing e.g. for Python 3.8:
+You can then initially install or at any later time update
+all dependencies to the versions we use. From the repository root run _pip-tools_'
+command [`pip-sync`](https://pypi.org/project/pip-tools/#example-usage-for-pip-sync)
+e.g. for Python 3.8:
 
 ```shell
 (PyDynamic_venv) $ pip-sync requirements/dev-requirements-py38.txt requirements/requirements-py38.txt
@@ -64,11 +64,11 @@ executing e.g. for Python 3.8:
 
 We use [_black_](https://pypi.org/project/black/) to implement our coding style,
 [_Sphinx_](https://pypi.org/project/Sphinx/) for automated generation of [our
- documentation on ReadTheDocs](https://pydynamic.readthedocs.io/en/latest/) and
-[_pytest_](https://pypi.org/project/pytest/) backed by
+ documentation on ReadTheDocs](https://pydynamic.readthedocs.io/en/latest/). We use
+[_pytest_](https://pypi.org/project/pytest/) managed by
+[_tox_](https://pypi.org/project/tox/) as testing framework backed by
 [_hypothesis_](https://pypi.org/project/hypothesis/) and
-[_coverage_](https://pypi.org/project/coverage/) as our testing framework, managed by
-[_tox_](https://pypi.org/project/tox/). For automated releases we use
+[_coverage_](https://pypi.org/project/coverage/). For automated releases we use
 [_python-semantic-release_](https://github.com/relekang/python-semantic-release) in
 [our pipeline on _CircleCI_](https://app.circleci.com/pipelines/github/PTB-PSt1/PyDynamic)
 . All requirements for contributions are derived from this. If you followed the
@@ -78,20 +78,22 @@ everything at your hands.
 ### Coding style
 
 As long as the readability of mathematical formulations is not impaired, our code
-should follow the guidelines of [PEP8](https://www.python.org/dev/peps/pep-0008/) and
-remain uniformly formatted.  For this purpose we use the Python package
-[_black_](https://pypi.org/project/black/). It is very easy to handle and [can be
- integrated into most common IDEs](https://github.com/psf/black#editor-integration),
-so that it is automatically applied.
+should follow [PEP8](https://www.python.org/dev/peps/pep-0008/). For automating this 
+uniform formatting task we use the Python package
+[_black_](https://pypi.org/project/black/). It is easy to handle and [integrable into
+ most common IDEs](https://github.com/psf/black#editor-integration), such that it is
+automatically applied.
 
 ### Commit style
 
-In order for the [semantic versioning](https://semver.org/) release automation and the
-[generation of a changelog](https://github.com/PTB-PSt1/PyDynamic/releases/tag/v1.4.0)
-from the commit messages to work, it is necessary to use 
-[conventional commit messages](https://www.conventionalcommits.org/en/v1.0.0/#summary)
-. As a result, parts of the commit messages appear in the changelog of the subsequent
-release and the respective commit is linked. We use the following types:
+[Conventional commit messages](https://www.conventionalcommits.org/en/v1.0.0/#summary)
+are required for the following:
+
+- Releasing automatically according to [semantic versioning](https://semver.org/)
+- [Generating  a changelog automatically](https://github.com/PTB-PSt1/PyDynamic/releases/tag/v1.4.0)
+
+Parts of the commit messages and links appear in the changelogs of subsequent
+releases as a result. We use the following types:
 
 - _feat_: for commits that introduce new features 
 - _docs_: for commits that contribute significantly to documentation
@@ -104,20 +106,20 @@ release and the respective commit is linked. We use the following types:
 - _revert_: commits, which undo previous commits using `git revert`
 - _refactor_: commits that merely reformulate, rename or similar
 - _style_: commits, which essentially make changes to line breaks and whitespace
-- _wip_: Commits which, as part of a whole, are not usually recognizable as one of the
-  above-mentioned types until later, usually during a PR merge.  The merge commit is
-  then marked as the corresponding type.
+- _wip_: Commits which are not recognizable as one of the above-mentioned types until
+  later, usually during a PR merge.  The merge commit is then marked as the
+  corresponding type.
 
 ###  Testing
 
 We strive to increase [our code coverage](https://codecov.io/gh/PTB-PSt1/PyDynamic) with 
 every change introduced. This requires that every new feature and every change to 
-existing features is accompanied by appropriate _pytest_ testing, which checks the basic
+existing features is accompanied by appropriate _pytest_ testing. We test the basic
 components for correctness and, if necessary, the integration into the big picture.
-For this purpose, it is usually sufficient to create
+It is usually sufficient to create
 [appropriately named](https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery)
-methods in one of the existing modules in the subfolder test or, if necessary, to add
-a new module that is also appropriately named.
+methods in one of the existing modules in the subfolder test. If necessary add
+a new module that is appropriately named.
 
 ## Workflow for adding completely new functionality
 
@@ -134,6 +136,7 @@ In case you add a new feature you generally follow the pattern:
   module in the _test_ subdirectory with the same name prefixed by _test__
 - after adding your functionality add it to all higher-level `__all__` variables in
   the module itself and in the higher-level `__init__.py`s
+- if new dependencies are introduced, add them to _setup.py_ or _dev-requirements.in_
 - during development write tests in alignment with existing test modules, for example
   [_test_interpolate_](https://github.com/PTB-PSt1/PyDynamic/blob/master/test/test_interpolate.py)
   or [_test_propagate_filter_](https://github.com/PTB-PSt1/PyDynamic/blob/master/test/test_propagate_filter.py)
@@ -205,7 +208,9 @@ for all supported Python versions, with a suffix naming the version, for example
 [_requirements-py35.txt_](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements/requirements-py35.txt)
 To keep them up to date semi-automatically we use the bash script
 [_requirements/upgrade_dependencies.sh_](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements/upgrade_dependencies.sh).
-It contains extensive comments on its use.
+It contains extensive comments on its use. _pip-tools_' command `pip-compile` finds
+the right versions from the dependencies liste in _setup.py_ and the
+_dev-requirements.in_.
 
 ## Licensing
 
