@@ -139,7 +139,7 @@ workflows:
           name: "test_python3.8"
           tag: "3.8"
           pyenv: "py38"
-      - test_deploy:
+      - preview_release:
           # Test the 'deploy' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
           requires:
@@ -150,10 +150,10 @@ workflows:
       - confirm_release:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
-          # test_deploy.
+          # preview_release.
           type: approval
           requires:
-            - test_deploy
+            - preview_release
           filters:
             branches:
               # This assures the job only being triggered on branch master.
@@ -213,7 +213,7 @@ jobs:
       - store_results:
           pyenv: << parameters.pyenv >>
 
-      # Upload coverage report conditionally if the according parameter set to `true`.
+      # Upload coverage report if the according parameter is set to `true`.
       - when:
           condition: << parameters.send_cov >>
           steps:
@@ -235,7 +235,7 @@ jobs:
       - install__development_deps:
           pyenv: ${PYENV}
 
-      # Publish it!
+      # Publish it, if there is anything to publish!
       - run:
           name: Run semantic-release publish
           command: |
@@ -244,7 +244,7 @@ jobs:
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
 
-  test_deploy:
+  preview_release:
     executor:
       name: publisher
 
@@ -256,7 +256,8 @@ jobs:
       - install__development_deps:
           pyenv: ${PYENV}
 
-      # Fake publish, just to make sure everything works after merging this PR.
+      # Fake publish, just to make sure everything works after merging a PR and
+      # before actual release jos run.
       - run:
           name: Run semantic-release --noop publish
           command: |
