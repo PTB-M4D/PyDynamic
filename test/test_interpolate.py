@@ -68,7 +68,7 @@ def timestamps_values_uncertainties_kind(
         for_make_equidistant : bool, optional
             If True we return the expected parameters for calling `make_equidistant()`.
             If False (default) we return the expected parameters for calling
-            `make_equidistant()`.
+            `interp1d_unc()`.
 
     Returns
     -------
