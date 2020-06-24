@@ -140,14 +140,14 @@ workflows:
           tag: "3.8"
           pyenv: "py38"
       - preview_release:
-          # Test the 'deploy' job to avoid trouble when Pull Requests get merged and
+          # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
           requires:
             - test_python3.5
             - test_python3.6
             - test_python3.7
             - test_python3.8
-      - confirm_release:
+      - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
           # preview_release.
@@ -158,14 +158,14 @@ workflows:
             branches:
               # This assures the job only being triggered on branch master.
               only: /master/
-      - deploy:
-          # Create 'deploy' job to create a release and publish it on GitHub,
-          # Zenodo and PyPI.org. This requires manual approval in the previous step,
-          # which is only triggered on branch master, thus this job here is
-          # triggered only on master as well.
+      - release:
+          # Job to potentially create a release based on python-semantic-release's
+          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
+          # approval in the previous step, which is only triggered on branch master,
+          # thus this job here is triggered only on master as well.
           context: pypi.org publishing for PyDynamic
           requires:
-            - confirm_release
+            - confirm_previewed_release_actions
 
 jobs:
 
@@ -223,7 +223,7 @@ jobs:
                   source << parameters.pyenv >>/bin/activate
                   bash <(curl -s https://codecov.io/bash)
 
-  deploy:
+  release:
     executor:
       name: publisher
 
