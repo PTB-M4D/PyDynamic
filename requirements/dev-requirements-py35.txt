@@ -10,17 +10,18 @@ astroid==2.4.2            # via pylint
 attrs==19.3.0             # via -c requirements/requirements-py35.txt, hypothesis, pytest
 babel==2.8.0              # via sphinx
 bleach==3.1.5             # via -c requirements/requirements-py35.txt, readme-renderer
-certifi==2020.4.5.2       # via requests
+certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 click==7.1.2              # via python-semantic-release
 colorama==0.4.3           # via ndebug
+commonmark==0.9.1         # via recommonmark
 coverage==5.1             # via pytest-cov
 distlib==0.3.0            # via virtualenv
-docutils==0.16            # via readme-renderer, sphinx
+docutils==0.16            # via readme-renderer, recommonmark, sphinx
 filelock==3.0.12          # via tox, virtualenv
 gitdb2==2.0.6             # via gitpython
 gitpython==2.1.15         # via python-semantic-release
-hypothesis==5.16.1        # via -r requirements/dev-requirements.in
+hypothesis==5.18.0        # via -r requirements/dev-requirements.in
 idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx
 importlib-metadata==1.6.1  # via -c requirements/requirements-py35.txt, importlib-resources, pluggy, pytest, tox, virtualenv
@@ -47,6 +48,7 @@ python-gitlab==1.10.0     # via python-semantic-release
 python-semantic-release==5.0.2  # via -r requirements/dev-requirements-py35.in, -r requirements/dev-requirements.in
 pytz==2020.1              # via -c requirements/requirements-py35.txt, babel
 readme-renderer==26.0     # via twine
+recommonmark==0.6.0       # via -r requirements/dev-requirements.in
 requests-toolbelt==0.9.1  # via twine
 requests==2.24.0          # via python-gitlab, python-semantic-release, requests-toolbelt, sphinx, twine
 rope==0.17.0              # via -r requirements/dev-requirements.in
@@ -57,7 +59,7 @@ smmap==3.0.4              # via smmap2
 snowballstemmer==2.0.0    # via sphinx
 sortedcontainers==2.2.2   # via hypothesis
 sphinx-rtd-theme==0.5.0   # via -r requirements/dev-requirements.in
-sphinx==3.1.1             # via -r requirements/dev-requirements.in, sphinx-rtd-theme
+sphinx==3.1.1             # via -r requirements/dev-requirements.in, recommonmark, sphinx-rtd-theme
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
@@ -70,8 +72,8 @@ tqdm==4.46.1              # via twine
 twine==1.15.0             # via python-semantic-release
 typed-ast==1.4.1          # via astroid
 urllib3==1.25.9           # via requests
-virtualenv==20.0.23       # via tox
-wcwidth==0.2.4            # via -c requirements/requirements-py35.txt, pytest
+virtualenv==20.0.25       # via tox
+wcwidth==0.2.5            # via -c requirements/requirements-py35.txt, pytest
 webencodings==0.5.1       # via -c requirements/requirements-py35.txt, bleach
 wheel==0.34.2             # via python-semantic-release
 wrapt==1.12.1             # via astroid

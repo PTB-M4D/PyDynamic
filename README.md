@@ -58,11 +58,17 @@ from PyDynamic import make_equidistant
 
 ## Installation
 
+There is a [quick way](#quick-setup-not-recommended) to get started but we advise to
+setup a virtual environment and guide through the process in the section
+[Proper Python setup with virtual environment](#proper-python-setup-with-virtual-environment)
+
+### Quick setup (**not recommended**)
+
 If you just want to use the software, the easiest way is to run from your
 system's command line
 
 ```shell
-pip install PyDynamic
+pip install --user PyDynamic
 ```
 
 This will download the latest version from the Python package repository
@@ -81,17 +87,109 @@ methods:
 from PyDynamic.uncertainty import propagate_DFT
 ```
 
+#### Updating to the newest version
+
 Updates can then be installed via
 
 ```shell
-pip install --upgrade PyDynamic
+pip install --user --upgrade PyDynamic
 ```
 
-For collaboration we recommend forking the repository as described [here
-](https://help.github.com/en/articles/fork-a-repo), apply the changes and
-open a Pull Request on GitHub as described [here
-](https://help.github.com/en/articles/creating-a-pull-request). In this way
-any changes to PyDynamic can be applied very easily.
+### Proper Python setup with virtual environment (**recommended**)
+
+The setup described above allows the quick and easy use of PyDynamic, but it also has
+its downsides. When working with Python we should rather always work in so-called
+virtual environments, in which our project specific dependencies are satisfied
+without polluting or breaking other projects' dependencies and to avoid breaking all
+our dependencies in case of an update of our Python distribution.
+
+If you are not familiar with [Python virtual environments
+](https://docs.python.org/3/glossary.html#term-virtual-environment) you can get the
+motivation and an insight into the mechanism in the
+[official docs](https://docs.python.org/3/tutorial/venv.html).
+
+#### Create a virtual environment and install requirements
+
+Creating a virtual environment with Python built-in tools is easy and explained
+in more detail in the
+[official docs of Python itself](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
+
+It boils down to creating an environment anywhere on your computer, then activate
+it and finally install PyDynamic and its dependencies.
+
+##### _venv_ creation and installation in Windows
+
+In your Windows command prompt execute the following:
+
+```shell
+> py -3 -m venv LOCAL\PATH\TO\ENVS\PyDynamic_venv
+> LOCAL\PATH\TO\ENVS\PyDynamic_venv\Scripts\activate.bat
+(PyDynamic_venv) > pip install PyDynamic
+```
+
+##### _venv_ creation and installation on Mac and Linux
+
+In your terminal execute the following:
+
+```shell
+$ python3 -m venv /LOCAL/PATH/TO/ENVS/PyDynamic_venv
+$  /LOCAL/PATH/TO/ENVS/PyDynamic_venv/bin/activate
+(PyDynamic_venv) $ pip install PyDynamic
+```
+
+#### Updating to the newest version
+
+Updates can then be installed on all platforms after activating the virtual environment
+via:
+
+```shell
+(PyDynamic_venv) $ pip install --upgrade PyDynamic
+```
+
+### Optional Jupyter Notebook dependencies
+
+If you are familiar with Jupyter Notebooks, you find some examples in the _examples_ and
+the _tutorials_ subfolders of the source code repository. To execute these you need
+additional dependencies which you get by appending `[examples]` to PyDynamic in all
+of the above, e.g.
+
+```shell
+(PyDynamic_venv) $ pip install PyDynamic[examples]
+```
+
+### Install known to work dependencies' versions
+
+In case errors arise within PyDynamic, the first thing you can try is installing the
+known to work configuration of dependencies against which we run our test suite. This
+you can easily achieve with our version specific requirements files. First you need
+to install our dependency management package _pip-tools_, then find the Python
+version you are using with PyDynamic and finally install the provided dependency
+versions for your specific Python version. This is all done with the following
+sequence of commands after activating. Change the suffix `-py38` according to the
+ Python version you find after executing `(PyDynamic_venv) $ python --version`:
+
+```shell
+(PyDynamic_venv) $ pip install --upgrade pip-tools
+Collecting pip-tools
+[...]
+Successfully installed pip-tools-5.2.1
+(PyDynamic_venv) $ python --version
+Python 3.8.3
+(PyDynamic_venv) $ pip-sync requirements/dev-requirements-py38.txt requirements/requirements-py38.txt
+Collecting [...]
+[...]
+Successfully installed [...]
+(PyDynamic_venv) $
+```
+
+## Contributing to PyDynamic
+
+If you want to contribute code to the project you find additional set up and related
+information in our [Contribution advices and tips](docs/CONTRIBUTING.md).
+
+If you have a feature request please take a look at the roadmap and the links
+provided there to find out more about planned and ongoing developments. If you
+have the feeling, something is missing, let us know by opening an issue.
 
 If you have downloaded this software, we would be very thankful for letting
 us know. You may, for instance, drop an email to one of the [authors
@@ -100,17 +198,7 @@ us know. You may, for instance, drop an email to one of the [authors
 ](mailto:bjoern.ludwig@ptb.de) or [Maximilian Gruber
 ](mailto:maximilian.gruber@ptb.de))
 
-### Optional Jupyter Notebook dependencies
-
-If you are familiar with Jupyter Notebooks, you find some examples in the _examples_ and
-the _tutorials_ subfolders of the source code repository. To execute these you need
-additional dependencies which you can install via
-
-```shell
-pip install PyDynamic[examples]
-```
-
-### Examples
+## Examples
 
 We have collected extended material for an easier introduction to PyDynamic in the two
 subfolders _examples_ and _tutorials_. In various Jupyter Notebooks and scripts we
@@ -157,12 +245,14 @@ y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
 
 ## Roadmap
 
-1. Introducing a detailed contributing guide
 1. Implementation of robust measurement (sensor) models
 1. Extension to more complex noise and uncertainty models
 1. Introducing uncertainty propagation for Kalman filters
 
-For a comprehensive overview of current development activities and upcoming tasks, take a look at the [project board](https://github.com/PTB-PSt1/PyDynamic/projects/1), [issues](https://github.com/PTB-PSt1/PyDynamic/issues) and [pull requests](https://github.com/PTB-PSt1/PyDynamic/pulls).
+For a comprehensive overview of current development activities and upcoming tasks,
+take a look at the [project board](https://github.com/PTB-PSt1/PyDynamic/projects/1),
+[issues](https://github.com/PTB-PSt1/PyDynamic/issues) and
+[pull requests](https://github.com/PTB-PSt1/PyDynamic/pulls).
 
 ## Citation
 
