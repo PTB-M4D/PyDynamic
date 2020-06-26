@@ -23,9 +23,11 @@ This module contains the following functions:
 
 """
 import warnings
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import scipy.signal as dsp
+from scipy.optimize import lsq_linear
 
 from ..misc.filterstuff import grpdelay, mapinside
 
@@ -47,7 +49,8 @@ def _fitIIR(
     E: np.ndarray,
     Na: int,
     Nb: int,
-    inv: bool = False
+    inv: bool = False,
+    bounds: Optional[Tuple[np.ndarray, np.ndarray]] = None
     ):
     """The actual fitting routing for the least-squares IIR filter.
 
@@ -68,6 +71,12 @@ def _fitIIR(
         inv : bool, optional
             If True the least-squares fitting is performed for the reciprocal, if False
             for the actual frequency response
+        bounds : 2-tuple of array_like, optional
+             Lower and upper bounds on independent variables. Defaults to no
+             bounds. Each array must have shape (n,) or be a scalar,
+             in the latter case a bound will be the same for all variables. Use
+             np.inf with an appropriate sign to disable bounds on all or some
+             variables. (defaults to None)
 
     Returns
     -------
@@ -81,18 +90,24 @@ def _fitIIR(
     D = np.hstack((HEa, -Eb))
     Tmp1 = np.real(np.dot(np.conj(D.T), D))
     Tmp2 = np.real(np.dot(np.conj(D.T), -Htau))
-    ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
+    if bounds is None:
+        ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
+    else:
+        ab = lsq_linear(A=Tmp1, b=Tmp2, bounds=bounds)
     a = np.hstack((1.0, ab[:Na]))
     b = ab[Na:]
     return b, a
 
 
-def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
+def LSIIR(
+        Hvals,Nb, Na, f, Fs, tau=0, justFit=False,
+        bounds: Union[np.ndarray, str] = None
+):
     """Least-squares IIR filter fit to a given frequency response.
-    
+
     This method uses Gauss-Newton non-linear optimization and pole
     mapping for filter stabilization
-    
+
     Parameters
     ----------
         Hvals:   numpy array of (complex) frequency response values of shape (M,)
@@ -103,7 +118,13 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
         Fs:      sampling frequency
         tau:     integer initial estimate of time delay
         justFit: boolean, when true then no stabilization is carried out
-    
+        bounds:  2-tuple of array_like, optional
+                 Lower and upper bounds on independent variables. Defaults to no
+                 bounds. Each array must have shape (n,) or be a scalar,
+                 in the latter case a bound will be the same for all variables. Use
+                 np.inf with an appropriate sign to disable bounds on all or some
+                 variables.
+
     Returns
     -------
         b,a:    IIR filter coefficients as numpy arrays
@@ -123,14 +144,13 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
 
-    b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=False)
+    b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=False, bounds=bounds)
 
     if justFit:
         print("Calculation done. No stabilization requested.")
         if np.count_nonzero(np.abs(np.roots(a)) > 1) > 0:
             print("Obtained filter is NOT stable.")
-        sos = np.sum(
-            np.abs((dsp.freqz(b, a, 2 * np.pi * f / Fs)[1] - Hvals) ** 2))
+        sos = np.sum(np.abs((dsp.freqz(b, a, 2 * np.pi * f / Fs)[1] - Hvals) ** 2))
         print("Final sum of squares = %e" % sos)
         tau = 0
         return b, a, tau
@@ -160,15 +180,13 @@ def LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
     if np.count_nonzero(np.abs(np.roots(a)) > 1) > 0:
         print("Caution: The algorithm did NOT result in a stable IIR filter!")
         print(
-            "Maybe try again with a higher value of tau0 or a higher filter "
-            "order?")
+            "Maybe try again with a higher value of tau0 or a higher filter " "order?"
+        )
 
-    print(
-        "Least squares fit finished after %d iterations (tau=%d)." % (run, tau))
+    print("Least squares fit finished after %d iterations (tau=%d)." % (run, tau))
     Hd = dsp.freqz(b, a, 2 * np.pi * f / Fs)[1]
     Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
-    res = np.hstack(
-        (np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
+    res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
     rms = np.sqrt(np.sum(res ** 2) / len(f))
     print("Final rms error = %e \n\n" % rms)
 
