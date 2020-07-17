@@ -31,6 +31,9 @@ executors:
       PYENV: << parameters.pyenv >>
   tweeter: 
     working_directory: ~/repo
+    docker: 
+      - image: circleci/python:3.8
+
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -282,5 +285,14 @@ jobs:
             python-semantic-release would perform the following actions:
             "
             semantic-release --noop publish
+
+  #Job which issues a Tweet to the specified account
   tweet:
-    
+    executor:
+      name: tweeter
+    steps:
+      - run:
+          command: |  # use pipenv to install dependencies sudo pip3 install -r requirements.txt python PyTweeting.py 
+            echo "TweetyTweet"  
+
+               
