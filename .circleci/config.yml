@@ -29,6 +29,8 @@ executors:
       - image: circleci/python:<< parameters.tag >>
     environment:
       PYENV: << parameters.pyenv >>
+  tweeter: 
+    working_directory: ~/repo
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -166,7 +168,10 @@ workflows:
           context: pypi.org publishing for PyDynamic
           requires:
             - confirm_previewed_release_actions
-
+  tweet:
+    jobs:
+      - tweet:
+          name: "test_tweeting"
 jobs:
 
   # Define one 'test' job with parameters to deal with all desired cases. The
@@ -277,3 +282,5 @@ jobs:
             python-semantic-release would perform the following actions:
             "
             semantic-release --noop publish
+  tweet:
+    
