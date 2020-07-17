@@ -292,6 +292,7 @@ jobs:
     executor:
       name: tweeter
     steps:
+      - checkout
       - run:
           command: |  # use pipenv to install dependencies sudo pip3 install -r requirements.txt python PyTweeting.py 
             echo "TweetyTweet"
