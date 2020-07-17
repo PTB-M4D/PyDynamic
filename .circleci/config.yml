@@ -298,6 +298,6 @@ jobs:
             sudo pip3 install pipenv
             sudo pip3 install tweepy
             ls -a
-            python PyTweeting.py              
+                         
 
                
