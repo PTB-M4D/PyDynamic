@@ -299,6 +299,7 @@ jobs:
             sudo pip3 install pipenv
             sudo pip3 install tweepy
             ls -a
+            cd PyTweeting
             sudo python PyTweeting.py
                          
 
