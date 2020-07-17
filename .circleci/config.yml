@@ -293,6 +293,9 @@ jobs:
     steps:
       - run:
           command: |  # use pipenv to install dependencies sudo pip3 install -r requirements.txt python PyTweeting.py 
-            echo "TweetyTweet"  
+            echo "TweetyTweet"
+            sudo pip3 install pipenv
+            sudo pip3 install tweepy
+            python PyTweeting.py              
 
                
