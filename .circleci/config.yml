@@ -225,6 +225,7 @@ jobs:
       - when:
           condition: << parameters.send_cov >>
           steps:
+            - checkout  
             - run:
                 name: Upload coverage report
                 command: |
