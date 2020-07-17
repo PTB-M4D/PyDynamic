@@ -31,8 +31,17 @@ executors:
       PYENV: << parameters.pyenv >>
   tweeter: 
     working_directory: ~/repo
+    parameters:
+      tag:
+        type: string
+        default: "3.8"
+      pyenv:
+        type: string
+        default: "py38"
     docker: 
-      - image: circleci/python:3.6.4
+      - image: circleci/python:<< parameters.tag >>
+    environment:
+      PYENV: << parameters.pyenv >>      
 
 
 commands:
