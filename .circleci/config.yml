@@ -32,7 +32,7 @@ executors:
   tweeter: 
     working_directory: ~/repo
     docker: 
-      - image: circleci/python:3.8
+      - image: circleci/python:3.6.4
 
 
 commands:
