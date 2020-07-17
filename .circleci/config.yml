@@ -296,6 +296,6 @@ jobs:
             echo "TweetyTweet"
             sudo pip3 install pipenv
             sudo pip3 install tweepy
-            python PyTweeting.py              
+            python PyTweeting/PyTweeting.py              
 
                
