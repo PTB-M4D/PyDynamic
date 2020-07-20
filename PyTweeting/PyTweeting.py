@@ -21,7 +21,7 @@ auth.set_access_token('1166597179135471621-CtRH6kHoxYecyKlI0xOI7PeGV9lHAR',
                       'XaCGjngj88Ed6AZEnYh22mZLrFGCAI1RSaBV6XftO3rQG')
 
 api = tweepy.API(
-    auth)  # , proxy='https://webproxy.bs.ptb.de:8080') use when tweeting from inside
+    auth)#, proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
 
 api.update_status(generate_random_string())
