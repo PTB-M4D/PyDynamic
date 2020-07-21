@@ -152,6 +152,7 @@ commands:
     steps:
       - run:
           command: |
+            mkdir test
             echo "This is a TestString" >> /test/teststring.txt
       - persist_to_workspace:
           root: /test
