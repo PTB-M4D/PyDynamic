@@ -152,7 +152,6 @@ commands:
     steps:
       - run:
           command: |
-            cd /
             mkdir test
             ls -a
             echo "This is a TestString" >> teststring.txt
