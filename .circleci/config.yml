@@ -161,9 +161,10 @@ commands:
             cd workspace
             ls -a
             echo "This is a TestString" >> teststring.txt
-            ls -a
+            ls -d
             cd ..
             cd ..
+            ls -d
             find teststring.txt
       - persist_to_workspace:
           root: /tmp/workspace
