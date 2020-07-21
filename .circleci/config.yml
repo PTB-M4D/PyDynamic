@@ -210,10 +210,10 @@ workflows:
   tweet:
     jobs:
       - persist_file:
-          name: "testfile created"
+          name: "persist_file"
           context: Twitter.com publish release
       - tweet:
-          name: "test_tweeting"
+          name: "tweet"
           context: Twitter.com publish release
           requires:
             - persist_file
