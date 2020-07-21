@@ -144,6 +144,19 @@ commands:
           echo "$public_key"
           sudo pip3 install -r requirements.txt
           python3 PyTweeting.py
+  create_arbitrary_file:
+    description: "Try persisting a file to the workspace so that it is available for tweet"
+    parameters:
+      pyenv:
+        type: string
+    steps:
+      - run:
+          command: |
+            echo "This is a TestString" >> /test/teststring.txt
+      - persist_to_workspace:
+          root: /test
+          paths: /teststring.txt
+
 
 workflows:
   # Create workflow for testing and deploying PyDynamic.
@@ -196,9 +209,14 @@ workflows:
             - confirm_previewed_release_actions
   tweet:
     jobs:
+      - persist_file:
+          name: "testfile created"
+          context: Twitter.com publish release
       - tweet:
           name: "test_tweeting"
           context: Twitter.com publish release
+          requires:
+            - persist_file
 jobs:
 
   # Define one 'test' job with parameters to deal with all desired cases. The
@@ -319,6 +337,18 @@ jobs:
       - checkout
       - tweet:
           pyenv: ${PYENV}
-                         
+      - run:
+          command: |
+            ls -a
+            cd test
+            ls -a
 
+                         
+  #Job to persist a file to the Workspace
+  persist_file:
+    executor:
+      name: tweeter
+    steps:
+      - create_arbitrary_file:
+          pyenv: ${PYENV}
                
