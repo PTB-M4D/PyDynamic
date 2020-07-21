@@ -2,6 +2,7 @@
 """Tweet a random sequence of eight letters."""
 
 import random
+import os
 import string
 
 import tweepy as tweepy
@@ -14,8 +15,8 @@ def generate_random_string():
 
 
 print(generate_random_string())
-auth = tweepy.OAuthHandler('DJ3yOjQhddvAMkhDffs85kmfR',
-                           'yIw8OWpdoAOL167xpRBgpRtkBgHA7CuQQlI3M5DD2CFBNBnkuk')
+auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
+
 
 auth.set_access_token('1166597179135471621-CtRH6kHoxYecyKlI0xOI7PeGV9lHAR',
                       'XaCGjngj88Ed6AZEnYh22mZLrFGCAI1RSaBV6XftO3rQG')
