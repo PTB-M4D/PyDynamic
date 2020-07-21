@@ -164,7 +164,7 @@ commands:
             ls -a
             cd ..
             cd ..
-            where teststring.txt
+            find teststring.txt
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
