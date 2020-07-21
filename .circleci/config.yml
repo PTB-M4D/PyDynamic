@@ -168,8 +168,7 @@ commands:
             cd ..
             cd ..
             ls -d
-            ls -R
-            find teststring.txt
+            find . teststring.txt
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
