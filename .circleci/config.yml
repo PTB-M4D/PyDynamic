@@ -166,7 +166,6 @@ commands:
             cd ..
             cd ..
             cd ..
-            cd ..
             ls -d
             find . teststring.txt
       - persist_to_workspace:
