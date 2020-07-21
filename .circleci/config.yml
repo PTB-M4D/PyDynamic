@@ -164,7 +164,11 @@ commands:
             ls -d
             cd ..
             cd ..
+            cd ..
+            cd ..
+            cd ..
             ls -d
+            ls -R
             find teststring.txt
       - persist_to_workspace:
           root: /tmp/workspace
