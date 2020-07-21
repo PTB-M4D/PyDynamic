@@ -155,6 +155,7 @@ commands:
             mkdir test
             ls -a
             echo "This is a TestString" >> teststring.txt
+            ls -a
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
