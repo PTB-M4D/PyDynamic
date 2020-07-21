@@ -153,14 +153,20 @@ commands:
       - run:
           command: |
             mkdir test
+            mkdir tmp
+            ls -a
+            cd tmp
+            ls -a
+            mkdir workspace
+            cd workspace
             ls -a
             echo "This is a TestString" >> teststring.txt
             ls -a
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - target/application.jar
-            - build/*
+            - teststring.txt
+
 
 
 workflows:
