@@ -184,6 +184,7 @@ workflows:
     jobs:
       - tweet:
           name: "test_tweeting"
+          context: Twitter.com publish release
 jobs:
 
   # Define one 'test' job with parameters to deal with all desired cases. The
