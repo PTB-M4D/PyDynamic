@@ -156,8 +156,10 @@ commands:
             ls -a
             echo "This is a TestString" >> teststring.txt
       - persist_to_workspace:
-          root: /
-          paths: /teststring.txt
+          root: /tmp/workspace
+          paths:
+            - target/application.jar
+            - build/*
 
 
 workflows:
