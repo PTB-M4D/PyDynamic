@@ -162,6 +162,8 @@ commands:
             ls -a
             echo "This is a TestString" >> teststring.txt
             ls -a
+            cd ..
+            cd ..
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
