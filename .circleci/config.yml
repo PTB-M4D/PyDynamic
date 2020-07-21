@@ -133,8 +133,6 @@ commands:
   tweet:
     description: "Issue a tweet with release-relevant commit messages"
     parameters:
-      pyenv:
-        type: string
     steps:
     - checkout
     - run:
@@ -318,7 +316,7 @@ jobs:
     steps:
       - checkout
       - tweet:
-          pyenv: ${PYENV}
+          #pyenv: ${PYENV}
                          
 
                
