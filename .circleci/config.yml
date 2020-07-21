@@ -152,10 +152,10 @@ commands:
     steps:
       - run:
           command: |
-            mkdir test
-            echo "This is a TestString" >> /test/teststring.txt
+            mkdir test ls
+            echo "This is a TestString" >> teststring.txt
       - persist_to_workspace:
-          root: /test
+          root: /
           paths: /teststring.txt
 
 
