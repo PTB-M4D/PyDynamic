@@ -318,7 +318,7 @@ jobs:
     steps:
       - checkout
       - tweet:
-          #pyenv: ${PYENV}
+          pyenv: ${PYENV}
                          
 
                
