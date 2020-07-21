@@ -132,7 +132,6 @@ commands:
         path: test-results
   tweet:
     description: "Issue a tweet with release-relevant commit messages"
-    parameters:
     steps:
     - checkout
     - run:
