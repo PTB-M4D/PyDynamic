@@ -305,7 +305,7 @@ jobs:
       - run:
           command: |  # use pipenv to install dependencies sudo pip3 install -r requirements.txt python PyTweeting.py 
             echo "TweetyTweet"
-            sudo pip3 install - r requirements.txt
+            sudo pip3 install -r requirements.txt
             cd PyTweeting
             python3 PyTweeting.py
                          
