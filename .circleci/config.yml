@@ -152,13 +152,14 @@ commands:
     steps:
       - run:
           command: |
-
+            mkdir PyTweeting
+            cd PyTweeting
             echo "This is a TestString" >> tweet.txt
 
       - persist_to_workspace:
-          root: ./PyTweeting
+          root: .
           paths:
-            - tweet.txt
+            - PyTweeting/tweet.txt
 
 
 
