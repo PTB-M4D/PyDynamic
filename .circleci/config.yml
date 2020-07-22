@@ -141,7 +141,6 @@ commands:
         command: |  # use pipenv to install dependencies sudo pip3 install -r requirements.txt python PyTweeting.py
           echo "TweetyTweet"
           cd PyTweeting
-          echo "$public_key"
           sudo pip3 install -r requirements.txt
           python3 PyTweeting.py
   create_arbitrary_file:

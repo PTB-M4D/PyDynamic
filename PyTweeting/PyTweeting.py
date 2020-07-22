@@ -14,7 +14,6 @@ def generate_random_string():
     return res_string
 
 
-print(generate_random_string())
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
 
 
