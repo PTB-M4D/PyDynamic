@@ -342,7 +342,7 @@ jobs:
       - tweet:
           pyenv: ${PYENV}
       - attach_workspace:
-          - at: .
+          at: .
       - run:
           command: |
             ls -a
