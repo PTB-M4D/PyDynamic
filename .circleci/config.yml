@@ -153,12 +153,12 @@ commands:
       - run:
           command: |
 
-            echo "This is a TestString" >> teststring.txt
+            echo "This is a TestString" >> tweet.txt
 
       - persist_to_workspace:
-          root: .
+          root: ./PyTweeting
           paths:
-            - teststring.txt
+            - tweet.txt
 
 
 
@@ -346,8 +346,7 @@ jobs:
       - run:
           command: |
             ls -a
-            cd test
-            ls -a
+
 
                          
   #Job to persist a file to the Workspace
