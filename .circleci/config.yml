@@ -167,7 +167,6 @@ commands:
             cd ..
             cd ..
             ls -d
-            find . teststring.txt
             grep teststring
       - persist_to_workspace:
           root: /tmp/workspace
