@@ -29,4 +29,4 @@ api = tweepy.API(
     auth)#, proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
 print(read_from_file())
-api.update_status(read_from_file)
+api.update_status(read_from_file())
