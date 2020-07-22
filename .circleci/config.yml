@@ -160,7 +160,6 @@ commands:
             cd ..
             cd ..
             ls -d
-            grep teststring.txt
       - persist_to_workspace:
           root: .
           paths:
