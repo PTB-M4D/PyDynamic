@@ -153,6 +153,7 @@ commands:
       - run:
           command: |
             mkdir PyTweeting
+            ls -a
             cd PyTweeting
             echo "This is a TestString" >> tweet.txt
 
