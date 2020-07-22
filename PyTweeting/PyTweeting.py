@@ -13,6 +13,11 @@ def generate_random_string():
     res_string = ''.join(random.choice(letters) for i in range(8))
     return res_string
 
+def read_from_file( filename = 'tweet.txt'):
+    f=open(filename, 'r')
+    content = f.read()
+    return content
+
 
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
 
@@ -23,5 +28,5 @@ auth.set_access_token(os.getenv('private_key'),
 api = tweepy.API(
     auth)#, proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
-
-api.update_status(generate_random_string())
+print(read_from_file())
+api.update_status(read_from_file)
