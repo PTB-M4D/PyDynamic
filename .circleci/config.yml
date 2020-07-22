@@ -152,14 +152,7 @@ commands:
     steps:
       - run:
           command: |
-            mkdir test
-            mkdir tmp
-            ls -a
-            cd tmp
-            ls -a
-            mkdir workspace
-            cd workspace
-            ls -a
+
             echo "This is a TestString" >> teststring.txt
             ls -d
             cd ..
@@ -167,9 +160,9 @@ commands:
             cd ..
             cd ..
             ls -d
-            grep teststring
+            grep teststring.txt
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: .
           paths:
             - teststring.txt
 
