@@ -332,8 +332,10 @@ jobs:
             echo "
             The changelog of the next release will contain:
             "
+            semantic-release --unreleased changelog >>PyTweeting/tweet.txt
             cd PyTweeting
-            semantic-release --unreleased changelog >>tweet.txt
+            ls -a
+            cd ..
             echo "
             -----------------------------------------------------------
 
