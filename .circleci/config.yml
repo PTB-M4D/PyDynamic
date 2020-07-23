@@ -344,11 +344,6 @@ jobs:
           at: .
       - tweet:
           pyenv: ${PYENV}
-      - run:
-          command: |
-            ls -a
-            cd PyTweeting
-            ls -a
 
 
                          
