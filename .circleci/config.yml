@@ -323,6 +323,7 @@ jobs:
             source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
+            ls -a
             echo "
             The changelog of the next release will contain:
             "
