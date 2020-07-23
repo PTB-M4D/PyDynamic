@@ -212,6 +212,11 @@ workflows:
           context: pypi.org publishing for PyDynamic
           requires:
             - confirm_previewed_release_actions
+      - tweet:
+          name: "tweet"
+          context: Twitter.com publish release
+          requires:
+            - preview_release
   tweet:
     jobs:
       - persist_file:
@@ -327,13 +332,18 @@ jobs:
             echo "
             The changelog of the next release will contain:
             "
-            semantic-release --unreleased changelog
+            semantic-release --unreleased changelog >> PyTweeting/tweet.txt
             echo "
             -----------------------------------------------------------
 
             python-semantic-release would perform the following actions:
             "
             semantic-release --noop publish
+      - persist_to_workspace:
+          root: .
+          paths:
+            - PyTweeting/tweet.txt
+
 
   #Job which issues a Tweet to the specified account
   tweet:
