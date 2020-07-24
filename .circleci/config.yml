@@ -337,9 +337,15 @@ jobs:
             tweet.txt contains:
             "
             cat tweet.txt
+            echo "
+            tweet.txt ist copied to PyTweeting directory
+            "
             cp -f tweet.txt PyTweeting/tweet.txt
             cd PyTweeting
             ls -a
+            echo "
+            file content of tweet.txt in directory PyTweeting ist shoent here:
+
             cat tweet.txt
             cd ..
             echo "
