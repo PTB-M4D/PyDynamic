@@ -20,7 +20,7 @@ def read_from_file( filename = 'tweet.txt'):
 
 def generate_some_bold_letter():
     letters = string.ascii_lowercase
-    letter = random.joice(letters)
+    letter = random.choice(letters)
     return '\u0067'
 
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
