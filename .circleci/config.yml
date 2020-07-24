@@ -332,7 +332,7 @@ jobs:
             echo "
             The changelog of the next release will contain:
             "
-            let sto = semantic-release --unreleased changelog
+            let sto=semantic-release --unreleased changelog
             echo "$sto" >> tweet.txt
             cat tweet.txt
             cd PyTweeting
