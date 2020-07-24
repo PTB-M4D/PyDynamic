@@ -332,7 +332,7 @@ jobs:
             echo "
             The changelog of the next release will contain:
             "
-            $(semantic-release --unreleased changelog) >> tweet.txt
+            $(semantic-release --unreleased changelog)>>tweet.txt
             echo "
             tweet.txt contains:
             "
