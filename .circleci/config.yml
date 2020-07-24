@@ -344,8 +344,8 @@ jobs:
             cd PyTweeting
             ls -a
             echo "
-            file content of tweet.txt in directory PyTweeting ist shoent here:
-
+            file content of tweet.txt in directory PyTweeting ist shown here:
+            "
             cat tweet.txt
             cd ..
             echo "
