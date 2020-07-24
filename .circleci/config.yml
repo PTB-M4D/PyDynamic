@@ -346,7 +346,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - PyTweeting/tweet.txt
+            - tweet.txt
 
 
   #Job which issues a Tweet to the specified account             cat tweet.txt
