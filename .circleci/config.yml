@@ -338,10 +338,6 @@ jobs:
             "
             cat PyTweeting/tweet.txt
             echo "
-            tweet.txt ist copied to PyTweeting directory
-            "
-            cp -f tweet.txt PyTweeting/tweet.txt
-            echo "
             -----------------------------------------------------------
 
             python-semantic-release would perform the following actions:
