@@ -334,6 +334,7 @@ jobs:
             "
             semantic-release --unreleased changelog >> tweet.txt
             cat tweet.txt
+            cp -f tweet.txt PyTweeting/tweet.txt
             cd PyTweeting
             ls -a
             cd ..
