@@ -337,6 +337,7 @@ jobs:
             cp -f tweet.txt PyTweeting/tweet.txt
             cd PyTweeting
             ls -a
+            cat tweet.txt
             cd ..
             echo "
             -----------------------------------------------------------
