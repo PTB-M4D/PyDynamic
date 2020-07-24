@@ -333,7 +333,7 @@ jobs:
             The changelog of the next release will contain:
             "
             store = semantic-release --unreleased changelog
-            store < tweet.txt
+            $store >> tweet.txt
             cat tweet.txt
             cd PyTweeting
             ls -a
