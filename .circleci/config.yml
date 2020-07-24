@@ -336,7 +336,6 @@ jobs:
             semantic-release --unreleased changelog > ./PyTweeting/tweet.txt
             cd PyTweeting
             ls -a
-            cat tweet.txt
             cd ..
             echo "
             -----------------------------------------------------------
@@ -350,7 +349,7 @@ jobs:
             - PyTweeting/tweet.txt
 
 
-  #Job which issues a Tweet to the specified account
+  #Job which issues a Tweet to the specified account             cat tweet.txt
   tweet:
     executor:
       name: tweeter
