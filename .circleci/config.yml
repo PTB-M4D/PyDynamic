@@ -332,22 +332,15 @@ jobs:
             echo "
             The changelog of the next release will contain:
             "
-            semantic-release --unreleased changelog 2>&1 | tee tweet.txt
+            semantic-release --unreleased changelog 2>&1 | tee PyTweeting/tweet.txt
             echo "
             tweet.txt contains:
             "
-            cat tweet.txt
+            cat PyTweeting/tweet.txt
             echo "
             tweet.txt ist copied to PyTweeting directory
             "
             cp -f tweet.txt PyTweeting/tweet.txt
-            cd PyTweeting
-            ls -a
-            echo "
-            file content of tweet.txt in directory PyTweeting ist shown here:
-            "
-            cat tweet.txt
-            cd ..
             echo "
             -----------------------------------------------------------
 
