@@ -18,10 +18,14 @@ def read_from_file( filename = 'tweet.txt'):
     content = f.read()
     return content
 
-def generate_some_bold_letter():
-    letters = string.ascii_lowercase
-    letter = random.choice(letters)
-    return u"\U0001D479"
+def convert_to_bold (a: str) -> str:
+    converted = ''
+    for c in a:
+        c=chr( ord(c)+119744)
+        converted+=c
+    return converted
+
+
 
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
 
@@ -33,4 +37,4 @@ api = tweepy.API(
     auth)#, proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
 print(read_from_file())
-api.update_status(generate_some_bold_letter()+read_from_file()+generate_random_string())
+api.update_status(convert_to_bold(read_from_file())+generate_random_string())
