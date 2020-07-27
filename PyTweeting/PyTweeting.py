@@ -21,11 +21,10 @@ def read_from_file( filename = 'tweet.txt'):
 def convert_to_bold (a: str) -> str:
     converted = ''
     for c in a:
-        if c.isupper():
-            c = chr(ord(c) + 119743)
-
-        if c == ' ':
+        if c in {' ', '\n', '\t', '\r'}:
             c = c
+        elif c.isupper():
+            c = chr(ord(c) + 119743)
         else:
             c = chr(ord(c) + 119737)
         converted += c
