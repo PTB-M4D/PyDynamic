@@ -154,7 +154,7 @@ commands:
             mkdir PyTweeting
             ls -a
             cd PyTweeting
-            echo "This is a TestString" >> tweet.txt
+            echo "ABCDEFG" >> tweet.txt
 
       - persist_to_workspace:
           root: .
@@ -349,7 +349,7 @@ jobs:
             - PyTweeting/tweet.txt
 
 
-  #Job which issues a Tweet to the specified account             cat tweet.txt
+  #Job which issues a Tweet to the specified account
   tweet:
     executor:
       name: tweeter
