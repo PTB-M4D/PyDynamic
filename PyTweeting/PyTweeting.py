@@ -21,7 +21,7 @@ def read_from_file( filename = 'tweet.txt'):
 def convert_to_bold (a: str) -> str:
     converted = ''
     for c in a:
-        c=chr( ord(c)+119744)
+        c=chr( ord(c)+119743)
         converted+=c
     return converted
 
