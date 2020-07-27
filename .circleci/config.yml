@@ -154,7 +154,7 @@ commands:
             mkdir PyTweeting
             ls -a
             cd PyTweeting
-            echo "ABCDEFG" >> tweet.txt
+            echo "ABCDEFGabcdefg" >> tweet.txt
 
       - persist_to_workspace:
           root: .
