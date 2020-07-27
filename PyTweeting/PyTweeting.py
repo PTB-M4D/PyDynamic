@@ -13,15 +13,17 @@ def generate_random_string():
     res_string = ''.join(random.choice(letters) for i in range(8))
     return res_string
 
-def read_from_file( filename = 'tweet.txt'):
+
+def read_from_file(filename='tweet.txt'):
     f = open(filename, 'r')
     content = f.read()
     return content
 
-def convert_to_bold (a: str) -> str:
+
+def convert_to_bold(a: str) -> str:
     converted = ''
     for c in a:
-        if c in {' ', '\n', '\t', '\r'}:
+        if c in {' ', '\n', '\t', '\r' '#'}:
             c = c
         elif c.isupper():
             c = chr(ord(c) + 119743)
@@ -31,15 +33,13 @@ def convert_to_bold (a: str) -> str:
     return converted
 
 
-
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
-
 
 auth.set_access_token(os.getenv('private_key'),
                       os.getenv('private_token'))
 
 api = tweepy.API(
-    auth)#, proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
+    auth)  # , proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
 print(read_from_file())
-api.update_status(convert_to_bold(read_from_file())+generate_random_string())
+api.update_status(convert_to_bold(read_from_file()) + generate_random_string())
