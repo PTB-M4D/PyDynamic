@@ -25,7 +25,7 @@ def convert_to_bold(a: str) -> str:
     #a.replace("\#", " ", 10)
     for c in a:
         print(c)
-        if c in {' ', '\n', '\t', '\r', '\\#'}:
+        if c in {' ', '\n', '\t', '\r', '\\\\#'}:
             c = ' '
         elif c.isupper():
             c = chr(ord(c) + 119743)
