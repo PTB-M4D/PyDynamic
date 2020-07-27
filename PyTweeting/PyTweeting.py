@@ -14,14 +14,14 @@ def generate_random_string():
     return res_string
 
 def read_from_file( filename = 'tweet.txt'):
-    f=open(filename, 'r')
+    f = open(filename, 'r')
     content = f.read()
     return content
 
 def generate_some_bold_letter():
     letters = string.ascii_lowercase
     letter = random.choice(letters)
-    return '\u0067'
+    return u"\U0001D479"
 
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
 
