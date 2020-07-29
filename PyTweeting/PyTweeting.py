@@ -49,7 +49,7 @@ def format_md_to_unicode(to_format: str) -> str:
         if flag:
             flag = False
             to_add = convert_to_bold(string)
-        if string.__contains__('\\#'):
+        if string.__contains__(string, '\\#'):
             flag = True
             to_add = ''
         resulting_string += to_add + ' '
@@ -64,5 +64,5 @@ auth.set_access_token(os.getenv('private_key'),
 api = tweepy.API(
     auth)  # , proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
-print(read_from_file())
+print(format_md_to_unicode(read_from_file()))
 api.update_status(format_md_to_unicode(read_from_file()) + generate_random_string())
