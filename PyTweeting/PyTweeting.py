@@ -49,7 +49,7 @@ def format_md_to_unicode(to_format: str) -> str:
         if flag:
             flag = False
             to_add = convert_to_bold(string)
-        if string.__contains__(string, '\\#'):
+        if string.__contains__('\\#'):
             flag = True
             to_add = ''
         resulting_string += to_add + ' '
