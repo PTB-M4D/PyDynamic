@@ -59,7 +59,8 @@ def format_md_to_unicode(to_format: str) -> str:
 
 
 def remove_commit_hash(text : str) -> str:
-    new_text = re.sub('\(.*\)', '')
+    new_text = text
+    new_text = re.sub('\(.*\)', '', new_text)
     return new_text
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
 
