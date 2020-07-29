@@ -43,12 +43,11 @@ def convert_to_bold(a: str) -> str:
 
 def format_md_to_unicode(to_format: str) -> str:
     string_list : [str] = to_format.split('\n')
-    flag = True
     resulting_string : str = ''
     fragment: str
     for fragment in string_list:
         to_add = fragment
-        if fragment.__contains__('\\#'):
+        if '\\#' in fragment:
             to_add=convert_to_bold(fragment)
         resulting_string += to_add + ' '
     return resulting_string
