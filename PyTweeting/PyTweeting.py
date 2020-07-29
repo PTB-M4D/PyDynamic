@@ -42,7 +42,7 @@ def convert_to_bold(a: str) -> str:
 
 def format_md_to_unicode(to_format: str) -> str:
     string_list = to_format.split()
-    flag = False
+    flag = True
     resulting_string = ''
     for string in string_list:
         to_add = string
