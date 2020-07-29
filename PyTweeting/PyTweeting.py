@@ -32,24 +32,27 @@ def convert_to_bold(a: str) -> str:
         elif c.islower():
             c = chr(ord(c) + 119737)
         elif c.isdigit():
-            c = chr(ord(c)+120728)
+            c = chr(ord(c) + 120728)
         else:
             c = ''
         converted += c
         print(c)
     return converted
 
-def format_md_to_unicode(to_format: str)->str:
+
+def format_md_to_unicode(to_format: str) -> str:
     string_list = to_format.split()
     flag = False
     resulting_string = ''
     for string in string_list:
+        to_add = string
         if flag:
             flag = False
-            string = convert_to_bold(string)
+            to_add = convert_to_bold(string)
         if string.__contains__('\\#'):
             flag = True
-        resulting_string += string + ' '
+            to_add = ''
+        resulting_string += to_add + ' '
     return resulting_string
 
 
