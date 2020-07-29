@@ -3,6 +3,7 @@
 
 import random
 import os
+import re
 import string
 
 import tweepy as tweepy
@@ -57,6 +58,9 @@ def format_md_to_unicode(to_format: str) -> str:
     return resulting_string
 
 
+def remove_commit_hash(text : str) -> str:
+    new_text = re.sub('\(.*\)', '')
+    return new_text
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
 
 auth.set_access_token(os.getenv('private_key'),
@@ -65,5 +69,5 @@ auth.set_access_token(os.getenv('private_key'),
 api = tweepy.API(
     auth)  # , proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
-print(format_md_to_unicode(read_from_file()))
+print(format_md_to_unicode(remove_commit_hash(read_from_file())))
 api.update_status(format_md_to_unicode(read_from_file()) + generate_random_string())
