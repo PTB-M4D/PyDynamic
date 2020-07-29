@@ -44,12 +44,13 @@ def format_md_to_unicode(to_format: str) -> str:
     string_list : [str] = to_format.split(' ')
     flag = True
     resulting_string : str = ''
-    for string in string_list:
-        to_add = string
+    fragment: str
+    for fragment in string_list:
+        to_add = fragment
         if flag:
             flag = False
-            to_add = convert_to_bold(string)
-        if string.__contains__('\\#'):
+            to_add = convert_to_bold(fragment)
+        elif fragment.__contains__('\\#'):
             flag = True
             to_add = ''
         resulting_string += to_add + ' '
