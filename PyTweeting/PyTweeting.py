@@ -31,11 +31,26 @@ def convert_to_bold(a: str) -> str:
             c = chr(ord(c) + 119743)
         elif c.islower():
             c = chr(ord(c) + 119737)
+        elif c.isdigit():
+            c = chr(ord(c)+120728)
         else:
             c = ''
         converted += c
         print(c)
     return converted
+
+def format_md_to_unicode(to_format: str)->str:
+    string_list = to_format.split()
+    flag = False
+    resulting_string = ''
+    for string in string_list:
+        if flag:
+            flag = False
+            string = convert_to_bold(string)
+        if string.__contains__('\\#'):
+            flag = True
+        resulting_string += string + ' '
+    return resulting_string
 
 
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
@@ -47,4 +62,4 @@ api = tweepy.API(
     auth)  # , proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
 print(read_from_file())
-api.update_status(convert_to_bold(read_from_file()) + generate_random_string())
+api.update_status(format_md_to_unicode(read_from_file()) + generate_random_string())
