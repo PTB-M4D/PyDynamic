@@ -62,6 +62,13 @@ def remove_commit_hash(text : str) -> str:
     new_text = text
     new_text = re.sub('\(.*\)', '', new_text)
     return new_text
+
+
+def generate_tweet():
+    tweet = ''
+    tweet = format_md_to_unicode(remove_commit_hash(read_from_file()))
+
+
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
 
 auth.set_access_token(os.getenv('private_key'),
@@ -71,4 +78,4 @@ api = tweepy.API(
     auth)  # , proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
 # PTB Network
 print(format_md_to_unicode(remove_commit_hash(read_from_file())))
-api.update_status(format_md_to_unicode(read_from_file()) + generate_random_string())
+api.update_status(generate_tweet())
