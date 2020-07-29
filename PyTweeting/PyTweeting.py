@@ -41,9 +41,9 @@ def convert_to_bold(a: str) -> str:
 
 
 def format_md_to_unicode(to_format: str) -> str:
-    string_list = to_format.split()
+    string_list : [str] = to_format.split(' ')
     flag = True
-    resulting_string = ''
+    resulting_string : str = ''
     for string in string_list:
         to_add = string
         if flag:
