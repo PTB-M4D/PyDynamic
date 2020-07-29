@@ -64,9 +64,10 @@ def remove_commit_hash(text : str) -> str:
     return new_text
 
 
-def generate_tweet():
+def generate_tweet()->str:
     tweet = ''
     tweet = format_md_to_unicode(remove_commit_hash(read_from_file()))
+    return tweet
 
 
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
