@@ -42,18 +42,14 @@ def convert_to_bold(a: str) -> str:
 
 
 def format_md_to_unicode(to_format: str) -> str:
-    string_list : [str] = to_format.split(' ')
+    string_list : [str] = to_format.split('\n')
     flag = True
     resulting_string : str = ''
     fragment: str
     for fragment in string_list:
         to_add = fragment
-        if flag:
-            flag = False
-            to_add = convert_to_bold(fragment)
-        elif fragment.__contains__('\\#'):
-            flag = True
-            to_add = ''
+        if fragment.__contains__('\\#'):
+            to_add=convert_to_bold(fragment)
         resulting_string += to_add + ' '
     return resulting_string
 
@@ -65,8 +61,9 @@ def remove_commit_hash(text : str) -> str:
 
 
 def generate_tweet()->str:
-    tweet = ''
-    tweet = format_md_to_unicode(remove_commit_hash(read_from_file()))
+    file_content = read_from_file()
+    hash_less_commits = remove_commit_hash(file_content)
+    tweet = format_md_to_unicode(hash_less_commits)
     return tweet
 
 
