@@ -59,11 +59,11 @@ def remove_commit_hash(text : str) -> str:
     return new_text
 
 
-def generate_tweet()->str:
+def generate_tweet() -> str:
     file_content = read_from_file()
     hash_less_commits = remove_commit_hash(file_content)
     tweet = format_md_to_unicode(hash_less_commits)
-    return tweet
+    return tweet + '\n'+generate_random_string()
 
 
 auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
