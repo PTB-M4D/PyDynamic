@@ -47,7 +47,7 @@ def format_md_to_unicode(to_format: str) -> str:
     fragment: str
     for fragment in string_list:
         to_add= fragment.replace('*', u'\U000025cf')
-        if '\\#' in fragment:
+        if '#' in fragment:
             to_add=convert_to_bold(fragment)
         resulting_string += to_add + ' '
     return resulting_string
