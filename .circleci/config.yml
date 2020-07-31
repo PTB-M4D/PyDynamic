@@ -334,7 +334,7 @@ jobs:
             "
             git describe >> PyTweeting/tweet.txt
             echo "of PyDynamic will be released \n" >> PyTweeting/tweet.txt
-            semantic-release --unreleased changelog 2>&1 | tee PyTweeting/tweet.txt
+            semantic-release --unreleased changelog 2>>&1 | tee PyTweeting/tweet.txt
             echo "
             tweet.txt contains:
             "
