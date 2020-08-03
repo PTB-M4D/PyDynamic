@@ -332,8 +332,8 @@ jobs:
             echo "
             The changelog of the next release will contain:
             "
-            version = git describe
-            echo -n version>> PyTweeting/tweet.txt
+            version=$(git describe)
+            echo -n $version>> PyTweeting/tweet.txt
             echo -n "of PyDynamic will be released " >> PyTweeting/tweet.txt
             semantic-release --unreleased changelog 2>&1 | tee -a PyTweeting/tweet.txt
             echo "
