@@ -23,10 +23,13 @@ def read_from_file(filename='tweet.txt'):
 
 def convert_to_bold(a: str) -> str:
     converted = ''
-    a.replace('#', '')
+    if '#' in a:
+        print(a)
+        a.replace('#', '')
+        print(a)
     for c in a:
         print(c)
-        if(c in string.ascii_letters or c in string.digits):
+        if c in string.ascii_letters or c in string.digits:
 
             if c.isupper():
                 c = chr(ord(c) + 119743)
@@ -50,7 +53,7 @@ def format_md_to_unicode(to_format: str) -> str:
     for fragment in string_list:
         to_add= fragment.replace('*', u'\U000025cf')
         if '#' in fragment:
-            to_add=convert_to_bold(fragment)
+            to_add = convert_to_bold(fragment)
         resulting_string += to_add + '\n'
     return resulting_string
 
