@@ -337,7 +337,7 @@ jobs:
             echo " of PyDynamic will be released: " >> PyTweeting/tweet.txt
             semantic-release --unreleased changelog 2>&1 | tee -a PyTweeting/tweet.txt
             echo "
-            tweet.txt contains:
+            tweet.txt contains :
             "
             cat PyTweeting/tweet.txt
             echo "
