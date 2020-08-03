@@ -26,16 +26,18 @@ def convert_to_bold(a: str) -> str:
     a.replace("\\#", " ", 10)
     for c in a:
         print(c)
-        if c in {' ', '\n', '\t', '\r', '\\\\#'}:
+        if(c in string.ascii_letters or c in string.digits):
+
+            if c.isupper():
+                c = chr(ord(c) + 119743)
+            elif c.islower():
+                c = chr(ord(c) + 119737)
+            elif c.isdigit():
+                c = chr(ord(c) + 120728)
+        elif c in {' ', '\n', '\t', '\r', '\\\\#'}:
             c = ' '
-        elif c.isupper():
-            c = chr(ord(c) + 119743)
-        elif c.islower():
-            c = chr(ord(c) + 119737)
-        elif c.isdigit():
-            c = chr(ord(c) + 120728)
         else:
-            c = ''
+            c = c
         converted += c
         print(c)
     return converted
