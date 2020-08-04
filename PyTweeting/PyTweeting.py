@@ -17,7 +17,8 @@ def generate_random_string():
 
 def read_from_file(filename='tweet.txt'):
     f = open(filename, 'r')
-    content = f.read()
+    content:str = f.read()
+    content = content.lstrip()
     content = re.sub(' +', ' ', content)
 
     return content
