@@ -18,12 +18,13 @@ def generate_random_string():
 def read_from_file(filename='tweet.txt'):
     f = open(filename, 'r')
     content = f.read()
+    content = re.sub(' +', ' ', content)
+
     return content
 
 
 def convert_to_bold(a: str) -> str:
     converted = ''
-    a = re.sub(' +', ' ', a)
     for c in a:
         print(c)
         if c in string.ascii_letters or c in string.digits:
