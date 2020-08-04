@@ -338,6 +338,7 @@ jobs:
             semantic-release --unreleased changelog 2>&1 | tee -a PyTweeting/tweet.txt
             echo "Top three contributors by commits are: " >> PyTweeting/tweet.txt
             git shortlog -n -s | head -n 3 | tee -a PyTweeting/tweet.txt
+            git --get remote.origin.url | tee -a PyTweeting/tweet.txt
             echo "
             tweet.txt contains :
             "
