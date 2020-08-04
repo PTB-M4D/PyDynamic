@@ -56,11 +56,11 @@ def format_md_to_unicode(to_format: str) -> str:
         to_add = fragment.replace('*', u'\U000025cf')
         if '#' in fragment:
             to_add = convert_to_bold(fragment)
-        resulting_string += to_add + '\n'
+        resulting_string += to_add.lstrip('') + '\n'
     return resulting_string
 
 
-def remove_commit_hash(text : str) -> str:
+def remove_commit_hash(text: str) -> str:
     new_text = text
     new_text = re.sub('\(.*\)', '', new_text)
     return new_text
