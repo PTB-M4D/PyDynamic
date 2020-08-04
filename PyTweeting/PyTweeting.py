@@ -23,6 +23,7 @@ def read_from_file(filename='tweet.txt'):
 
 def convert_to_bold(a: str) -> str:
     converted = ''
+    a = re.sub(' +', ' ', a)
     for c in a:
         print(c)
         if c in string.ascii_letters or c in string.digits:
@@ -33,8 +34,10 @@ def convert_to_bold(a: str) -> str:
                 c = chr(ord(c) + 119737)
             elif c.isdigit():
                 c = chr(ord(c) + 120728)
-        elif c in {' ', '\n', '\t', '\r', '#'}:
+        elif c in {' ', '\n', '\t', '\r'}:
             c = ' '
+        elif c in {'#'}:
+            c= ''
         else:
             c = c
         converted += c
