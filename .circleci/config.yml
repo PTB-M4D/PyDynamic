@@ -336,6 +336,8 @@ jobs:
             echo -n $version>> PyTweeting/tweet.txt
             echo " of PyDynamic will be released: " >> PyTweeting/tweet.txt
             semantic-release --unreleased changelog 2>&1 | tee -a PyTweeting/tweet.txt
+            echo "Top three contributors by commits are: "
+            git shortlog -n -s | head -n 3 | tee -a PyTweeting/tweet.txt
             echo "
             tweet.txt contains :
             "
