@@ -18,3 +18,7 @@ pytest.xml
 # Jupyter Notebook artifacts #
 ##############################
 .ipynb_checkpoints/
+
+# Local Artifacts #
+########################
+versuch.txt
