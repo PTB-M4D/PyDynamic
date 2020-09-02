@@ -84,7 +84,12 @@ uniform formatting task we use the Python package
  most common IDEs](https://github.com/psf/black#editor-integration), such that it is
 automatically applied.
 
-### Commit style
+### Commit messages
+
+PyDynamic commit messages follow some conventions to be easily human and machine
+readable.
+
+#### Commit message structure
 
 [Conventional commit messages](https://www.conventionalcommits.org/en/v1.0.0/#summary)
 are required for the following:
@@ -95,9 +100,11 @@ are required for the following:
 Parts of the commit messages and links appear in the changelogs of subsequent
 releases as a result. We use the following types:
 
-- _feat_: for commits that introduce new features 
+- _feat_: for commits that introduce new features (this correlates with MINOR in
+  semantic versioning)
 - _docs_: for commits that contribute significantly to documentation
-- _fix_: commits in which bugs are fixed
+- _fix_: commits in which bugs are fixed (this correlates with PATCH in semantic
+  versioning)
 - _build_: Commits that affect packaging
 - _ci_: Commits that affect the CI pipeline
 - _test_: Commits that apply significant changes to tests
@@ -109,6 +116,37 @@ releases as a result. We use the following types:
 - _wip_: Commits which are not recognizable as one of the above-mentioned types until
   later, usually during a PR merge.  The merge commit is then marked as the
   corresponding type.
+
+Of the types mentioned above, the following appear in separate sections of the
+changelog:
+
+- _Feature_: _feat_
+- _Documentation_: _docs_
+- _Fix_: _fix_
+- _Test_: _test_
+
+#### Commit message styling
+
+Based on conventional commit messages, the so-called _<description>_ should complete
+the following sentence:
+ 
+> If this commit is applied, it will...
+
+The first line of a commit message should not exceed 100 characters.
+
+#### BREAKING CHANGEs
+
+If a commit changes parts of PyDynamic's public interface so that previously written
+code may no longer be executable, it is considered a BREAKING CHANGE (correlating
+with MAJOR in semantic versioning). This has to be marked by putting _BREAKING
+ CHANGE_ in the footer of the message as described in the [conventional commit messages
+](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+
+#### Examples
+
+For examples please checkout the
+[Git Log](https://github.com/PTB-PSt1/PyDynamic/commits/master).
+
 
 ###  Testing
 
