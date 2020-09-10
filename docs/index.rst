@@ -22,6 +22,7 @@ it is tested to work with Python 3.5 to 3.8.
    Getting started.md
    Examples.rst
    CONTRIBUTING.md
+   :doc:`PyDynamic tutorials:README.html`
 
 .. toctree::
    :maxdepth: 1
@@ -32,6 +33,24 @@ it is tested to work with Python 3.5 to 3.8.
    PyDynamic.deconvolution.rst
    PyDynamic.identification.rst
    PyDynamic.misc.rst
+
+.. toctree::
+   :numbered: 1
+   :maxdepth: 1
+   :caption: Deconvolution tutorial
+
+   PyDynamic_tutorials/deconvolution/01 Basic measurement data pre-processing.ipynb
+   PyDynamic_tutorials/deconvolution/02 Preparation of calibration data.ipynb
+   PyDynamic_tutorials/deconvolution/03 Interpolation and extrapolation of calibration data.ipynb
+   PyDynamic_tutorials/deconvolution/04 Calculation of impulse response of hydrophone.ipynb
+   PyDynamic_tutorials/deconvolution/05 Deconvolution in the frequency domain.ipynb
+   PyDynamic_tutorials/deconvolution/06 Regularized deconvolution.ipynb
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Uncertainty tutorial
+
+   PyDynamic_tutorials/uncertainty/interpolation.ipynb
 
 Indices and tables
 ==================

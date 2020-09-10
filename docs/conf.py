@@ -46,7 +46,7 @@ extensions = [
 intersphinx_mapping = {
     "SciPy": ("https://docs.scipy.org/doc/scipy/reference", None),
     "PyDynamic_tutorials": (
-        "https://pydynamic-tutorials.readthedocs.io/en/introduce_readthedocs/",
+        "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
     ),
 }
