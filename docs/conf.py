@@ -42,6 +42,13 @@ extensions = [
     "nbsphinx",
 ]
 
+# ReadTheDocs Sphinx theme option taken from
+# https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
+html_theme_options = {
+    # True hides the + signs to expand the menu entries in the sidebar.
+    'collapse_navigation': False,
+}
+
 # This should make SciPy documentation available inside our docs.
 intersphinx_mapping = {
     "SciPy": ("https://docs.scipy.org/doc/scipy/reference", None),
