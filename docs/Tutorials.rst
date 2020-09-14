@@ -29,4 +29,8 @@ Deconvolution
 Uncertainty
 -----------
 
-* :doc:`PyDynamic.uncertainty.interpolation <PyDynamic_tutorials:PyDynamic_tutorials/uncertainty/interpolation>`
+These tutorials introduce PyDynamic's capabilities of processing time-series with
+propagation of associated measurement uncertainties.
+
+* :doc:`Interpolate time-series
+<PyDynamic_tutorials:PyDynamic_tutorials/uncertainty/interpolation>`
