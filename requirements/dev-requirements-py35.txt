@@ -7,42 +7,54 @@
 alabaster==0.7.12         # via sphinx
 appdirs==1.4.4            # via virtualenv
 astroid==2.4.2            # via pylint
-attrs==20.2.0             # via -c requirements/requirements-py35.txt, hypothesis, pytest
+attrs==20.2.0             # via -c requirements/requirements-py35.txt, hypothesis, jsonschema, pytest
 babel==2.8.0              # via sphinx
-bleach==3.1.5             # via -c requirements/requirements-py35.txt, readme-renderer
+bleach==3.1.5             # via -c requirements/requirements-py35.txt, nbconvert, readme-renderer
 certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 click==7.1.2              # via python-semantic-release
 colorama==0.4.3           # via ndebug
 commonmark==0.9.1         # via recommonmark
 coverage==5.3             # via pytest-cov
+decorator==4.4.2          # via -c requirements/requirements-py35.txt, traitlets
+defusedxml==0.6.0         # via -c requirements/requirements-py35.txt, nbconvert
 distlib==0.3.1            # via virtualenv
-docutils==0.16            # via readme-renderer, recommonmark, sphinx
+docutils==0.16            # via nbsphinx, readme-renderer, recommonmark, sphinx
+entrypoints==0.3          # via -c requirements/requirements-py35.txt, nbconvert
 filelock==3.0.12          # via tox, virtualenv
 gitdb2==2.0.6             # via gitpython
 gitpython==2.1.15         # via python-semantic-release
 hypothesis==5.33.2        # via -r requirements/dev-requirements.in
 idna==2.10                # via requests
 imagesize==1.2.0          # via sphinx
-importlib-metadata==1.7.0  # via -c requirements/requirements-py35.txt, pluggy, pytest, tox, virtualenv
+importlib-metadata==1.7.0  # via -c requirements/requirements-py35.txt, jsonschema, pluggy, pytest, tox, virtualenv
 importlib-resources==3.0.0  # via virtualenv
 iniconfig==1.0.1          # via pytest
 invoke==0.11.1            # via python-semantic-release
+ipython-genutils==0.2.0   # via -c requirements/requirements-py35.txt, nbformat, traitlets
 isort==4.3.21             # via pylint
-jinja2==2.11.2            # via -c requirements/requirements-py35.txt, sphinx
+jinja2==2.11.2            # via -c requirements/requirements-py35.txt, nbconvert, nbsphinx, sphinx
+jsonschema==3.2.0         # via -c requirements/requirements-py35.txt, nbformat
+jupyter-core==4.6.3       # via -c requirements/requirements-py35.txt, nbconvert, nbformat
 lazy-object-proxy==1.4.3  # via astroid
 markupsafe==1.1.1         # via -c requirements/requirements-py35.txt, jinja2
 mccabe==0.6.1             # via pylint
+mistune==0.8.4            # via -c requirements/requirements-py35.txt, nbconvert
 more-itertools==8.5.0     # via pytest
+nbconvert==5.6.1          # via -c requirements/requirements-py35.txt, nbsphinx
+nbformat==5.0.7           # via -c requirements/requirements-py35.txt, nbconvert, nbsphinx
+nbsphinx==0.7.1           # via -r requirements/dev-requirements.in
 ndebug==0.1.1             # via python-semantic-release
 packaging==20.4           # via -c requirements/requirements-py35.txt, bleach, pytest, sphinx, tox
+pandocfilters==1.4.2      # via -c requirements/requirements-py35.txt, nbconvert
 pathlib2==2.3.5           # via pytest
 pkginfo==1.5.0.1          # via twine
 pluggy==0.13.1            # via pytest, tox
 py==1.9.0                 # via pytest, tox
-pygments==2.7.0           # via -c requirements/requirements-py35.txt, readme-renderer, sphinx
+pygments==2.7.0           # via -c requirements/requirements-py35.txt, nbconvert, readme-renderer, sphinx
 pylint==2.6.0             # via -r requirements/dev-requirements.in
 pyparsing==2.4.7          # via -c requirements/requirements-py35.txt, packaging
+pyrsistent==0.17.3        # via -c requirements/requirements-py35.txt, jsonschema
 pytest-cov==2.10.1        # via -r requirements/dev-requirements.in
 pytest==6.0.2             # via -r requirements/dev-requirements.in, pytest-cov
 python-gitlab==1.10.0     # via python-semantic-release
@@ -54,22 +66,24 @@ requests-toolbelt==0.9.1  # via twine
 requests==2.24.0          # via python-gitlab, python-semantic-release, requests-toolbelt, sphinx, twine
 rope==0.17.0              # via -r requirements/dev-requirements.in
 semver==2.10.2            # via python-semantic-release
-six==1.15.0               # via -c requirements/requirements-py35.txt, astroid, bleach, packaging, pathlib2, python-gitlab, readme-renderer, tox, virtualenv
+six==1.15.0               # via -c requirements/requirements-py35.txt, astroid, bleach, jsonschema, packaging, pathlib2, python-gitlab, readme-renderer, tox, traitlets, virtualenv
 smmap2==3.0.1             # via gitdb2
 smmap==3.0.4              # via smmap2
 snowballstemmer==2.0.0    # via sphinx
 sortedcontainers==2.2.2   # via hypothesis
 sphinx-rtd-theme==0.5.0   # via -r requirements/dev-requirements.in
-sphinx==3.2.1             # via -r requirements/dev-requirements.in, recommonmark, sphinx-rtd-theme
+sphinx==3.2.1             # via -r requirements/dev-requirements.in, nbsphinx, recommonmark, sphinx-rtd-theme
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
 sphinxcontrib-jsmath==1.0.1  # via sphinx
 sphinxcontrib-qthelp==1.0.3  # via sphinx
 sphinxcontrib-serializinghtml==1.1.4  # via sphinx
+testpath==0.4.4           # via -c requirements/requirements-py35.txt, nbconvert
 toml==0.10.0              # via pylint, pytest, python-semantic-release, tox
 tox==3.20.0               # via -r requirements/dev-requirements.in
 tqdm==4.49.0              # via twine
+traitlets==4.3.3          # via -c requirements/requirements-py35.txt, jupyter-core, nbconvert, nbformat, nbsphinx
 twine==1.15.0             # via python-semantic-release
 typed-ast==1.4.1          # via astroid
 urllib3==1.25.10          # via requests
