@@ -4,13 +4,15 @@
 #
 #    pip-compile --output-file=requirements/requirements-py37.txt
 #
+certifi==2020.6.20        # via matplotlib
 cycler==0.10.0            # via matplotlib
 kiwisolver==1.2.0         # via matplotlib
-matplotlib==3.2.2         # via PyDynamic (setup.py)
-numpy==1.19.0             # via PyDynamic (setup.py), matplotlib, pandas, scipy
-pandas==1.0.5             # via PyDynamic (setup.py)
+matplotlib==3.3.1         # via PyDynamic (setup.py)
+numpy==1.19.2             # via PyDynamic (setup.py), matplotlib, pandas, scipy
+pandas==1.1.2             # via PyDynamic (setup.py)
+pillow==7.2.0             # via matplotlib
 pyparsing==2.4.7          # via matplotlib
 python-dateutil==2.8.1    # via matplotlib, pandas
 pytz==2020.1              # via pandas
-scipy==1.5.0              # via PyDynamic (setup.py)
+scipy==1.5.2              # via PyDynamic (setup.py)
 six==1.15.0               # via cycler, python-dateutil
