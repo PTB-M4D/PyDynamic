@@ -169,7 +169,9 @@ def timestamps_values_uncertainties_kind(
                 min_value=t_min, max_value=t_max, **float_generic_params
             )
             fill_value = fill_unc = np.nan
-            bounds_error = True
+            # Switch between default value None and intentionally setting to True,
+            # which should behave identical.
+            bounds_error = draw(st.one_of(st.just(True), st.none()))
         else:
             # In case we want to extrapolate, draw some fill values for the
             # out-of-bounds range. Those will be either single floats or a 2-tuple of
@@ -445,6 +447,7 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
 def test_compare_returnc_interp1d_unc(interp_inputs):
     # Compare the uncertainties computed from the sensitivities inside the
     # interpolation range and directly.
+    assume(interp_inputs["bounds_error"] is None)
     uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
     interp_inputs["returnC"] = False
     uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
