@@ -447,7 +447,6 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
 def test_compare_returnc_interp1d_unc(interp_inputs):
     # Compare the uncertainties computed from the sensitivities inside the
     # interpolation range and directly.
-    assume(interp_inputs["bounds_error"] is None)
     uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
     interp_inputs["returnC"] = False
     uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
