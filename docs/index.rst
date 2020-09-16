@@ -12,7 +12,7 @@ For the PyDynamic homepage go to
 
 *PyDynamic* is written in Python 3 and strives to run with `all Python versions with
 upstream support <https://devguide.python.org/#status-of-python-branches>`_. Currently
-it is tested to work with Python 3.5 to 3.8.
+it is tested to work with Python 3.6 to 3.8.
 
 
 .. toctree::
@@ -32,6 +32,12 @@ it is tested to work with Python 3.5 to 3.8.
    PyDynamic.deconvolution.rst
    PyDynamic.identification.rst
    PyDynamic.misc.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials:
+
+   Tutorials.rst
 
 Indices and tables
 ==================
