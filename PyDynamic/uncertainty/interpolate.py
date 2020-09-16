@@ -169,8 +169,13 @@ def interp1d_unc(
 
         if fill_unc == "extrapolate":
             fill_unc = uy[0], uy[-1]
-        elif returnC:
-            # Once we deal with this, we will probably introduce another input parameter
+        elif bounds_error is not None and returnC:
+            # This means bounds_error is intentionally set to False and we want to
+            # extrapolate uncertainties with custom values. Additionally the sensitivity
+            # coefficients shall be returned. This is not yet possible, because in this
+            # case, we do not know, how to map the provided extrapolation values onto
+            # the original values and thus we cannot provide the coefficients. Once we
+            # deal with this, we will probably introduce another input parameter
             # fill_sens which is expected to be of shape (N,) or a 2-tuple of this
             # shape, which is then used in C wherever an extrapolation is performed.
             raise NotImplementedError(
