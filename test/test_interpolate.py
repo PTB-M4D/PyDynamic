@@ -170,7 +170,7 @@ def timestamps_values_uncertainties_kind(
             )
             fill_value = fill_unc = np.nan
             # Switch between default value None and intentionally setting to True,
-            # which should behave identical.
+            # which should behave identically.
             bounds_error = draw(st.one_of(st.just(True), st.none()))
         else:
             # In case we want to extrapolate, draw some fill values for the
