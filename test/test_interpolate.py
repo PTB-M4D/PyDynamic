@@ -169,7 +169,9 @@ def timestamps_values_uncertainties_kind(
                 min_value=t_min, max_value=t_max, **float_generic_params
             )
             fill_value = fill_unc = np.nan
-            bounds_error = True
+            # Switch between default value None and intentionally setting to True,
+            # which should behave identical.
+            bounds_error = draw(st.one_of(st.just(True), st.none()))
         else:
             # In case we want to extrapolate, draw some fill values for the
             # out-of-bounds range. Those will be either single floats or a 2-tuple of
