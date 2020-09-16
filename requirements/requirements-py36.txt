@@ -7,7 +7,7 @@
 certifi==2020.6.20        # via matplotlib
 cycler==0.10.0            # via matplotlib
 kiwisolver==1.2.0         # via matplotlib
-matplotlib==3.3.1         # via PyDynamic (setup.py)
+matplotlib==3.3.2         # via PyDynamic (setup.py)
 numpy==1.19.2             # via PyDynamic (setup.py), matplotlib, pandas, scipy
 pandas==1.1.2             # via PyDynamic (setup.py)
 pillow==7.2.0             # via matplotlib
