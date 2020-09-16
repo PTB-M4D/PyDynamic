@@ -20,8 +20,8 @@ if [ -f requirements.txt ] && [ -d ../PyDynamic/ ] && [ -d ../requirements/ ]; t
 fi
 
 # Handle all Python versions via setup.py by cycling through the different Python
-# environments and update the according two requirements files by issuing the
-# according pip-tools command pip-compile from within the specific environments.
+# environments and update the corresponding two requirements files by issuing the
+# appropriate pip-tools command pip-compile from within the specific environments.
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 for PYVENV in "py36" "py37" "py38"
 do
