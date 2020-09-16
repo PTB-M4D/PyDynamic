@@ -15,7 +15,7 @@ from .misc import *
 from .model_estimation import *
 from .uncertainty import *
 
-__version__ = "1.4.3"
+__version__ = "1.4.4"
 
 __all__ = [
     "invLSFIR",
