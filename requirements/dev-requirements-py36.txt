@@ -10,8 +10,8 @@ astroid==2.4.2            # via pylint
 async-generator==1.10     # via nbclient
 attrs==20.2.0             # via hypothesis, jsonschema, pytest
 babel==2.8.0              # via sphinx
-black==20.8b1             # via -r requirements/dev-requirements-py36.in
-bleach==3.1.5             # via nbconvert, readme-renderer
+black==20.8b1             # via -r requirements/dev-requirements.in
+bleach==3.2.0             # via nbconvert, readme-renderer
 certifi==2020.6.20        # via -c requirements/requirements-py36.txt, requests
 cffi==1.14.2              # via cryptography
 chardet==3.0.4            # via requests
