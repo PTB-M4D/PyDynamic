@@ -33,6 +33,12 @@ it is tested to work with Python 3.6 to 3.8.
    PyDynamic.identification.rst
    PyDynamic.misc.rst
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials:
+
+   Tutorials.rst
+
 Indices and tables
 ==================
 
