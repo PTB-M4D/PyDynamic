@@ -243,7 +243,7 @@ As stated in the README and above we use
 [_pip-tools_](https://pypi.org/project/pip-tools/) for dependency management. The
 requirements subdirectory contains a _requirements.txt_ and a _dev-requirements.txt_
 for all supported Python versions, with a suffix naming the version, for example
-[_requirements-py35.txt_](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements/requirements-py35.txt)
+[_requirements-py36.txt_](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements/requirements-py36.txt)
 To keep them up to date semi-automatically we use the bash script
 [_requirements/upgrade_dependencies.sh_](https://github.com/PTB-PSt1/PyDynamic/blob/master/requirements/upgrade_dependencies.sh).
 It contains extensive comments on its use. _pip-tools_' command `pip-compile` finds

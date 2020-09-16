@@ -123,10 +123,6 @@ workflows:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
       - test:
-          name: "test_python3.5"
-          tag: "3.5"
-          pyenv: "py35"
-      - test:
           name: "test_python3.6"
           tag: "3.6"
           pyenv: "py36"
@@ -143,7 +139,6 @@ workflows:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
           requires:
-            - test_python3.5
             - test_python3.6
             - test_python3.7
             - test_python3.8
