@@ -5,3 +5,4 @@ pandas
 scipy
 sympy
 PyWavelets
+time-series-buffer
