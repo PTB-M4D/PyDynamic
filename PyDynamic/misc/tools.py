@@ -240,15 +240,18 @@ def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
         * White [White2017]_
     """
     from ..uncertainty.interpolation import interp1d_unc
+    
+    # Find t's maximum.
+    t_max = np.max(t)
 
     # Setup new vector of timestamps.
-    t_new = np.arange(np.min(t), np.max(t), dt)
+    t_new = np.arange(np.min(t), t_max, dt)
 
-    # Since np.arange in overflow situations results in the last value not guaranteed to
-    # be smaller than t's maximum', we need to check for this and delete this
-    # unexpected value.
-    if t_new[-1] > np.max(t):
-        t_new = t_new[:-1]
+    # Since np.arange in overflow situations results in the biggest values not
+    # guaranteed to be smaller than t's maximum', we need to check for this and delete
+    # these unexpected values.
+    if t_new[-1] > t_max:
+        t_new = t_new[t_new <= t_max]
 
     return interp1d_unc(t_new, t, y, uy, kind)
 

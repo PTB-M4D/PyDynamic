@@ -61,13 +61,13 @@ from PyDynamic import make_equidistant
 If you just want to use the software, the easiest way is to run from your
 system's command line
 
-```shell script
+```shell
 pip install PyDynamic
 ```
 
 This will download the latest version from the Python package repository
 and copy it into your local folder of third-party libraries. Note that
-PyDynamic runs with **Python versions 3.5 to 3.8**. Usage in any Python
+PyDynamic runs with **Python versions 3.6 to 3.8**. Usage in any Python
 environment on your computer is then possible by
 
 ```python
@@ -83,7 +83,7 @@ from PyDynamic.uncertainty import propagate_DFT
 
 Updates can then be installed via
 
-```shell script
+```shell
 pip install --upgrade PyDynamic
 ```
 
@@ -100,12 +100,31 @@ us know. You may, for instance, drop an email to one of the [authors
 ](mailto:bjoern.ludwig@ptb.de) or [Maximilian Gruber
 ](mailto:maximilian.gruber@ptb.de))
 
+### Optional Jupyter Notebook dependencies
+
+If you are familiar with Jupyter Notebooks, you find some examples in the _examples_ and
+the _tutorials_ subfolders of the source code repository. To execute these you need
+additional dependencies which you can install via
+
+```shell
+pip install PyDynamic[examples]
+```
+
 ### Examples
 
-Uncertainty propagation for the application of a FIR filter with coefficients
-*b* with which an uncertainty *ub* is associated. The filter input signal is
-*x* with known noise standard deviation *sigma*. The filter output signal
-is *y* with associated uncertainty *uy*.
+We have collected extended material for an easier introduction to PyDynamic in the two
+subfolders _examples_ and _tutorials_. In various Jupyter Notebooks and scripts we
+demonstrate the use of the provided methods to aid the first steps in PyDynamic. New
+features are introduced with an example from the beginning if feasible. We are currently
+moving this supporting collection to an external repository on GitHub. They will be
+available at
+[github.com/PTB-PSt1/PyDynamic_tutorials](https://github.com/PTB-PSt1/PyDynamic_tutorials)
+in the near future.
+
+Uncertainty propagation for the application of a FIR filter with coefficients *b* with
+which an uncertainty *ub* is associated. The filter input signal is *x* with known noise
+standard deviation *sigma*. The filter output signal is *y* with associated uncertainty
+*uy*.
 
 ```python
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter

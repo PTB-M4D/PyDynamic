@@ -4,42 +4,13 @@
 #
 #    pip-compile --output-file=requirements/requirements-py36.txt
 #
-backcall==0.2.0           # via ipython
-certifi==2020.6.20        # via matplotlib
 cycler==0.10.0            # via matplotlib
-decorator==4.4.2          # via ipython, traitlets
-future==0.18.2            # via uncertainties
-ipykernel==5.3.4          # via PyDynamic (setup.py)
-ipython-genutils==0.2.0   # via traitlets
-ipython==7.16.1           # via ipykernel
-jedi==0.17.2              # via ipython
-jupyter-client==6.1.7     # via ipykernel
-jupyter-core==4.6.3       # via jupyter-client
 kiwisolver==1.2.0         # via matplotlib
-matplotlib==3.3.2         # via PyDynamic (setup.py)
-mpmath==1.1.0             # via sympy
-numpy==1.19.2             # via PyDynamic (setup.py), matplotlib, pandas, pywavelets, scipy, time-series-buffer
-pandas==1.1.2             # via PyDynamic (setup.py)
-parso==0.7.1              # via jedi
-pexpect==4.8.0            # via ipython
-pickleshare==0.7.5        # via ipython
-pillow==7.2.0             # via matplotlib
-prompt-toolkit==3.0.7     # via ipython
-ptyprocess==0.6.0         # via pexpect
-pygments==2.7.1           # via ipython
+matplotlib==3.2.2         # via PyDynamic (setup.py)
+numpy==1.18.5             # via PyDynamic (setup.py), matplotlib, pandas, scipy
+pandas==1.0.5             # via PyDynamic (setup.py)
 pyparsing==2.4.7          # via matplotlib
-python-dateutil==2.8.1    # via jupyter-client, matplotlib, pandas
+python-dateutil==2.8.1    # via matplotlib, pandas
 pytz==2020.1              # via pandas
-pywavelets==1.1.1         # via PyDynamic (setup.py)
-pyzmq==19.0.2             # via jupyter-client
-scipy==1.5.2              # via PyDynamic (setup.py)
-six==1.15.0               # via cycler, python-dateutil, traitlets
-sympy==1.6.2              # via PyDynamic (setup.py)
-time-series-buffer==0.1.4b0  # via PyDynamic (setup.py)
-tornado==6.0.4            # via ipykernel, jupyter-client
-traitlets==4.3.3          # via ipykernel, ipython, jupyter-client, jupyter-core
-uncertainties==3.1.4      # via time-series-buffer
-wcwidth==0.2.5            # via prompt-toolkit
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
+scipy==1.4.1              # via PyDynamic (setup.py)
+six==1.15.0               # via cycler, python-dateutil
