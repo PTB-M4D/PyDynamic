@@ -43,6 +43,7 @@ setup(
         "scipy",
         "sympy",
         "PyWavelets",
+        "time-series-buffer",
     ],
     python_requires=">=3.5",
     classifiers=[

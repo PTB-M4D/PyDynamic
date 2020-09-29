@@ -29,7 +29,7 @@ pathlib2==2.3.5           # via pytest
 pkginfo==1.5.0.1          # via twine
 pluggy==0.13.1            # via pytest, tox
 py==1.8.1                 # via pytest, tox
-pygments==2.6.1           # via -c requirements/requirements-py35.txt, readme-renderer
+pygments==2.7.1           # via -c requirements/requirements-py35.txt, readme-renderer
 pyparsing==2.4.7          # via -c requirements/requirements-py35.txt, packaging
 pytest-cov==2.8.1         # via -r requirements/dev-requirements-py35.in
 pytest==5.4.1             # via -r requirements/dev-requirements-py35.in, pytest-cov
@@ -49,7 +49,7 @@ tqdm==4.44.1              # via twine
 twine==1.15.0             # via python-semantic-release
 urllib3==1.25.8           # via requests
 virtualenv==20.0.15       # via tox
-wcwidth==0.2.4            # via -c requirements/requirements-py35.txt, pytest
+wcwidth==0.2.5            # via -c requirements/requirements-py35.txt, pytest
 webencodings==0.5.1       # via bleach
 wheel==0.34.2             # via python-semantic-release
 zipp==1.2.0               # via importlib-metadata, importlib-resources

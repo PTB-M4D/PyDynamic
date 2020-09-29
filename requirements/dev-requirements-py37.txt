@@ -7,7 +7,7 @@
 appdirs==1.4.4            # via virtualenv
 attrs==19.3.0             # via hypothesis, pytest
 bleach==3.1.5             # via readme-renderer
-certifi==2020.4.5.2       # via requests
+certifi==2020.6.20        # via -c requirements/requirements-py37.txt, requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 click-log==0.3.2          # via python-semantic-release
@@ -31,7 +31,7 @@ pkginfo==1.5.0.1          # via twine
 pluggy==0.13.1            # via pytest, tox
 py==1.8.1                 # via pytest, tox
 pycparser==2.20           # via cffi
-pygments==2.6.1           # via -c requirements/requirements-py37.txt, readme-renderer
+pygments==2.7.1           # via -c requirements/requirements-py37.txt, readme-renderer
 pyparsing==2.4.7          # via -c requirements/requirements-py37.txt, packaging
 pytest-cov==2.9.0         # via -r requirements/dev-requirements-py37.in
 pytest==5.4.3             # via -r requirements/dev-requirements-py37.in, pytest-cov
@@ -51,7 +51,7 @@ tqdm==4.46.1              # via twine
 twine==3.1.1              # via python-semantic-release
 urllib3==1.25.9           # via requests
 virtualenv==20.0.21       # via tox
-wcwidth==0.2.4            # via -c requirements/requirements-py37.txt, pytest
+wcwidth==0.2.5            # via -c requirements/requirements-py37.txt, pytest
 webencodings==0.5.1       # via bleach
 wheel==0.34.2             # via python-semantic-release
 zipp==3.1.0               # via importlib-metadata

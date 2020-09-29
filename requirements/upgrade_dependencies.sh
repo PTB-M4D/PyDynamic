@@ -20,7 +20,7 @@ fi
 
 # Handle Python 3.5 via requirements.in.
 # Activate according Python environment.
-source ../../envs/PyDynamic-py35/bin/activate && \
+source ../envs/PyDynamic-py35/bin/activate && \
 # Create requirements.txt from requirements.in.
 pip-compile --upgrade requirements/requirements.in --output-file requirements/requirements-py35.txt && \
 # Create dev-requirements...txt from dev-requirements...in.
@@ -32,7 +32,7 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 for PYVENV in "py36" "py37" "py38"
 do
     # Activate according Python environment.
-    source ../../envs/PyDynamic-$PYVENV/bin/activate && \
+    source ../envs/PyDynamic-$PYVENV/bin/activate && \
     # Create requirements.txt from requirements.in.
     pip-compile --upgrade --output-file requirements/requirements-$PYVENV.txt && \
     # Create dev-requirements...txt from dev-requirements...in.
