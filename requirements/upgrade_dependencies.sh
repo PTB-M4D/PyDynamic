@@ -26,10 +26,11 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 for PYVENV in "py36" "py37" "py38"
 do
     # Activate according Python environment.
-    source ../../envs/PyDynamic-$PYVENV/bin/activate && \
+    source ../envs/PyDynamic-$PYVENV/bin/activate && \
     # Create requirements.txt from requirements.in.
     pip-compile --upgrade --output-file requirements/requirements-$PYVENV.txt && \
     # Create dev-requirements...txt from dev-requirements...in.
-    pip-compile --upgrade requirements/dev-requirements-$PYVENV.in --output-file requirements/dev-requirements-$PYVENV.txt && \
+    pip-compile --upgrade requirements/dev-requirements-$PYVENV.in \
+        --output-file requirements/dev-requirements-$PYVENV.txt && \
     deactivate
 done
