@@ -7,7 +7,7 @@ import hypothesis.strategies as st
 import numpy as np
 from hypothesis import given
 from hypothesis.strategies import composite
-from pytest import raises
+from pytest import deprecated_call, raises
 
 from PyDynamic.misc.tools import make_equidistant
 
@@ -85,6 +85,12 @@ def timestamps_values_uncertainties_kind(
     )
     kind = draw(st.sampled_from(kind_tuple))
     return {"t": t, "y": y, "uy": uy, "dt": dt, "kind": kind}
+
+
+@given(timestamps_values_uncertainties_kind())
+def test_deprecated_call_make_equidistant(interp_inputs):
+    with deprecated_call():
+        make_equidistant(**interp_inputs)
 
 
 # noinspection PyArgumentList

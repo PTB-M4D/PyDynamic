@@ -3,7 +3,7 @@
 build/
 dist/
 PyDynamic.egg-info/
-doc/_build
+docs/_build
 
 # Testing artifacts #
 #####################

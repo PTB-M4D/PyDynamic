@@ -135,32 +135,32 @@ workflows:
           name: "test_python3.8"
           tag: "3.8"
           pyenv: "py38"
-      - test_deploy:
-          # Test the 'deploy' job to avoid trouble when Pull Requests get merged and
+      - preview_release:
+          # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
           requires:
             - test_python3.6
             - test_python3.7
             - test_python3.8
-      - confirm_release:
+      - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
-          # test_deploy.
+          # preview_release.
           type: approval
           requires:
-            - test_deploy
+            - preview_release
           filters:
             branches:
               # This assures the job only being triggered on branch master.
               only: /master/
-      - deploy:
-          # Create 'deploy' job to create a release and publish it on GitHub,
-          # Zenodo and PyPI.org. This requires manual approval in the previous step,
-          # which is only triggered on branch master, thus this job here is
-          # triggered only on master as well.
+      - release:
+          # Job to potentially create a release based on python-semantic-release's
+          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
+          # approval in the previous step, which is only triggered on branch master,
+          # thus this job here is triggered only on master as well.
           context: pypi.org publishing for PyDynamic
           requires:
-            - confirm_release
+            - confirm_previewed_release_actions
 
 jobs:
 
@@ -208,7 +208,7 @@ jobs:
       - store_results:
           pyenv: << parameters.pyenv >>
 
-      # Upload coverage report conditionally if the according parameter set to `true`.
+      # Upload coverage report if the according parameter is set to `true`.
       - when:
           condition: << parameters.send_cov >>
           steps:
@@ -218,7 +218,7 @@ jobs:
                   source << parameters.pyenv >>/bin/activate
                   bash <(curl -s https://codecov.io/bash)
 
-  deploy:
+  release:
     executor:
       name: publisher
 
@@ -230,7 +230,7 @@ jobs:
       - install__development_deps:
           pyenv: ${PYENV}
 
-      # Publish it!
+      # Publish it, if there is anything to publish!
       - run:
           name: Run semantic-release publish
           command: |
@@ -239,7 +239,7 @@ jobs:
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
 
-  test_deploy:
+  preview_release:
     executor:
       name: publisher
 
@@ -251,9 +251,10 @@ jobs:
       - install__development_deps:
           pyenv: ${PYENV}
 
-      # Fake publish, just to make sure everything works after merging this PR.
+      # Fake publish, just to make sure everything works after merging a PR and
+      # before actual release jos run.
       - run:
-          name: Run semantic-release --noop publish
+          name: Preview python-semantic-release actions
           command: |
             unset CIRCLE_PULL_REQUEST CIRCLE_PULL_REQUESTS CI_PULL_REQUEST \
               CI_PULL_REQUESTS
@@ -261,7 +262,13 @@ jobs:
             source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            echo "The changelog of the next release will contain:"
+            echo "
+            The changelog of the next release will contain:
+            "
             semantic-release --unreleased changelog
-            echo "The output of 'semantic-release --noop publish' is:"
+            echo "
+            -----------------------------------------------------------
+
+            python-semantic-release would perform the following actions:
+            "
             semantic-release --noop publish
