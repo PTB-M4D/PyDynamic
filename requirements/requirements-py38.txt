@@ -4,13 +4,21 @@
 #
 #    pip-compile --output-file=requirements/requirements-py38.txt
 #
+certifi==2020.6.20        # via matplotlib
 cycler==0.10.0            # via matplotlib
+future==0.18.2            # via uncertainties
 kiwisolver==1.2.0         # via matplotlib
-matplotlib==3.2.2         # via PyDynamic (setup.py)
-numpy==1.18.5             # via PyDynamic (setup.py), matplotlib, pandas, scipy
-pandas==1.0.5             # via PyDynamic (setup.py)
+matplotlib==3.3.2         # via PyDynamic (setup.py)
+mpmath==1.1.0             # via sympy
+numpy==1.19.2             # via PyDynamic (setup.py), matplotlib, pandas, pywavelets, scipy, time-series-buffer
+pandas==1.1.2             # via PyDynamic (setup.py)
+pillow==7.2.0             # via matplotlib
 pyparsing==2.4.7          # via matplotlib
 python-dateutil==2.8.1    # via matplotlib, pandas
 pytz==2020.1              # via pandas
-scipy==1.4.1              # via PyDynamic (setup.py)
+pywavelets==1.1.1         # via PyDynamic (setup.py)
+scipy==1.5.2              # via PyDynamic (setup.py)
 six==1.15.0               # via cycler, python-dateutil
+sympy==1.6.2              # via PyDynamic (setup.py)
+time-series-buffer==0.1.4b0  # via PyDynamic (setup.py)
+uncertainties==3.1.4      # via time-series-buffer

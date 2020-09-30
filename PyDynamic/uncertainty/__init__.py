@@ -26,6 +26,16 @@ from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
 
 from .interpolation import interp1d_unc
 
+from .propagate_DWT import (
+    dwt,
+    wave_dec,
+    wave_dec_realtime,
+    inv_dwt,
+    wave_rec,
+    filter_design,
+    dwt_max_level,
+)
+
 __all__ = [
     "GUM_DFT",
     "GUM_iDFT",
@@ -43,4 +53,11 @@ __all__ = [
     "UMC",
     "UMC_generic",
     "interp1d_unc",
+    "dwt",
+    "wave_dec",
+    "wave_dec_realtime",
+    "inv_dwt",
+    "wave_rec",
+    "filter_design",
+    "dwt_max_level",
 ]

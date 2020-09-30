@@ -36,7 +36,15 @@ setup(
         "Source": "https://github.com/PTB-PSt1/PyDynamic/tree/v{}/".format(VERSION),
         "Tracker": "https://github.com/PTB-PSt1/PyDynamic/issues",
     },
-    install_requires=["matplotlib", "numpy", "pandas", "scipy"],
+    install_requires=[
+        "matplotlib",
+        "numpy",
+        "pandas",
+        "scipy",
+        "sympy",
+        "PyWavelets",
+        "time-series-buffer",
+    ],
     # This allow to do "pip install PyDynamic[examples]" and get the dependencies to
     # execute the Jupyter Notebook examples.
     extras_require={"examples": ["notebook"],},

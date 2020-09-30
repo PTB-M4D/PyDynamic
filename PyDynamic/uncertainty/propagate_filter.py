@@ -38,9 +38,10 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             1D-array: interpretation depends on kind
         theta : np.ndarray
             FIR filter coefficients
-        Utheta : np.ndarray, optional (default: None)
+        Utheta: np.ndarray, optional (default: None)
             covariance matrix associated with theta
-        shift : int, optional (default: 0)
+            if None -> fully certain coefficients, reduces necessary calculations
+        shift: int, optional (default: 0)
             time delay of filter output signal (in samples)
         blow : np.ndarray, optional (default: None)
             optional FIR low-pass filter
@@ -187,7 +188,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     # handle diag-case, where Ulow needs to be sliced from V
     if kind == "diag":
         # UncCov needs to be calculated inside in its own for-loop
-        # V has dimension (len(sigma2) + Ntheta) * (len(sigma2) + Ntheta) --> slice a fitting Ulow of dimension (Ntheta x Ntheta)
+        # V has dimension (len(sigma2) + Ntheta - 1) * (len(sigma2) + Ntheta - 1) --> slice a fitting Ulow of dimension (Ntheta x Ntheta)
         UncCov = np.zeros((len(sigma2)))
 
         for k in range(len(sigma2)):
