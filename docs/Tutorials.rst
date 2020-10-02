@@ -32,4 +32,6 @@ Uncertainty
 These tutorials introduce PyDynamic's capabilities of processing time-series with
 the propagation of associated measurement uncertainties.
 
-* :doc:`Interpolate time-series <PyDynamic_tutorials:PyDynamic_tutorials/uncertainty/interpolation>`
+* :doc:`Basic measurement data pre-processing <PyDynamic_tutorials:PyDynamic_tutorials/uncertainty/01 Basic measurement data pre-processing>`
+* :doc:`Basic interpolation <PyDynamic_tutorials:PyDynamic_tutorials/uncertainty/02 Basic interpolation>`
+* :doc:`Basic extrapolation <PyDynamic_tutorials:PyDynamic_tutorials/uncertainty/03 Basic extrapolation>`
