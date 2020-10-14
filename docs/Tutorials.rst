@@ -5,8 +5,7 @@ Get assistance in using PyDynamic
 We prepared a collection of tutorials and examples to document, explain and
 illustrate the possibilities offered by *PyDynamic*. We will add more and more examples
 over time, especially those that are currently included in PyDynamic's codebase
-subfolders `examples <https://github.com/PTB-PSt1/PyDynamic/tree/master/examples>`_ and
-`tutorials <https://github.com/PTB-PSt1/PyDynamic/tree/master/tutorials>`_.
+subfolder `examples <https://github.com/PTB-PSt1/PyDynamic/tree/master/examples>`_.
 
 The following links take you to the webpages containing the tutorials' documentation.
 
