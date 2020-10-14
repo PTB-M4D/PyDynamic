@@ -1,3 +1,10 @@
+# The following command copies the first six commenting lines of this file into a new version of it, and refreshes the output of the intersphinx mappings command.
+#
+	# A=$(head -n 6 docs/pydynamic_tutorials-intersphinx-mappings.txt) && echo $A >docs/pydynamic_tutorials-intersphinx-mappings.txt && echo "# Last execution of 'python -msphinx.ext.intersphinx https://pydynamic-tutorials.readthedocs.io/en/latest/objects.inv >> docs/pydynamic_tutorials-intersphinx-mappings.txt'" on $(date +"%Y-%m-%d %H:%M") >> docs/pydynamic_tutorials-intersphinx-mappings.txt && python -msphinx.ext.intersphinx https://pydynamic-tutorials.readthedocs.io/en/latest/objects.inv >> docs/pydynamic_tutorials-intersphinx-mappings.txt
+#
+# More on intersphinx mappings and how to extract them from ReadTheDocs under https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#showing-all-links-of-an-intersphinx-mapping-file.
+#
+# Last execution of 'python -msphinx.ext.intersphinx https://pydynamic-tutorials.readthedocs.io/en/latest/objects.inv >> docs/pydynamic_tutorials-intersphinx-mappings.txt' on 2020-10-14 13:22
 std:doc
 	PyDynamic_tutorials/datasets/README      PyDynamic_tutorials datasets            : PyDynamic_tutorials/datasets/README.html
 	PyDynamic_tutorials/deconvolution/01 Basic measurement data pre-processing Basic measurement data pre-processing   : PyDynamic_tutorials/deconvolution/01%20Basic%20measurement%20data%20pre-processing.html
