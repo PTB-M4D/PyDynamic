@@ -51,8 +51,8 @@ and modules in the path, so that for example the following import statements are
 equivalent.
 
 ```python
-from PyDynamic.misc.tools import make_equidistant
-from PyDynamic.misc import make_equidistant
+from PyDynamic.uncertainty.interpolate import make_equidistant
+from PyDynamic.uncertainty import make_equidistant
 from PyDynamic import make_equidistant
 ```
 
