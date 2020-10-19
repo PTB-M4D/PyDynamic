@@ -60,7 +60,7 @@ def shift_uncertainty(x, ux, shift):
         return xs, ux
     if isinstance(ux, np.ndarray):
         if len(ux.shape) == 1:      # uncertainties given as vector
-            xs, np.roll(ux, shift)
+            return xs, np.roll(ux, shift)
         if len(ux.shape) == 2:      # full covariance matrix
             assert(ux.shape[0]==ux.shape[1])
             uxs = np.roll(ux, shift, axis=0)
