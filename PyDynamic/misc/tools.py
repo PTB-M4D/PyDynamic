@@ -69,7 +69,7 @@ def shift_uncertainty(x, ux, shift):
             uxs = np.roll(uxs, shift, axis=1)
             return xs, uxs
         else:
-            raise TypeError("Input uncertainty has incompatible type")
+            raise TypeError("Input uncertainty has incompatible shape")
     else:
         raise TypeError("Input uncertainty has incompatible type")
 
