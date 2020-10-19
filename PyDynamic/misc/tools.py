@@ -48,8 +48,10 @@ def shift_uncertainty(x, ux, shift):
 
     Returns
     -------
-        np.ndarray of shape (N,)
-            shifted x and shifted ux of same type as original
+        xs: (N,) array
+            shifted vector of estimates
+        uxs: float, np.ndarray of shape (N,) or of shape (N,N)
+            uncertainty associated with the shifted vector of estimates
     """
 
     assert(isinstance(shift, int))
