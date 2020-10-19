@@ -31,8 +31,45 @@ __all__ = [
     "make_equidistant",
     "trimOrPad",
     "progress_bar",
+    "shift_uncertainty"
 ]
 
+def shift_uncertainty(x, ux, shift):
+    """Shift the elements in the vector x (and associated uncertainty ux) by shift elements
+
+    Parameters
+    ----------
+        x: (N,) array_like
+            vector of estimates
+        ux: float, np.ndarray of shape (N,) or of shape (N,N)
+            uncertainty associated with the vector of estimates
+        shift: int
+            amount of shift
+
+    Returns
+    -------
+        np.ndarray of shape (N,)
+            shifted x and shifted ux of same type as original
+    """
+
+    assert(isinstance(shift, int))
+    # application of shift to the vector of estimates
+    xs = np.roll(x, shift)
+
+    if isinstance(ux, float):       # no shift necessary for ux
+        return xs, ux
+    if isinstance(ux, np.ndarray):
+        if len(ux.shape) == 1:      # uncertainties given as vector
+            xs, np.roll(ux, shift)
+        if len(ux.shape) == 2:      # full covariance matrix
+            assert(ux.shape[0]==ux.shape[1])
+            uxs = np.roll(ux, shift, axis=0)
+            uxs = np.roll(uxs, shift, axis=1)
+            return xs, uxs
+        else:
+            raise TypeError("Input uncertainty has incompatible type")
+    else:
+        raise TypeError("Input uncertainty has incompatible type")
 
 def trimOrPad(array, length, mode="constant"):
     """Trim or pad (with zeros) a vector to desired length"""
