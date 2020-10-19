@@ -65,8 +65,7 @@ def shift_uncertainty(x, ux, shift):
             return xs, np.roll(ux, shift)
         elif len(ux.shape) == 2:      # full covariance matrix
             assert(ux.shape[0]==ux.shape[1])
-            uxs = np.roll(ux, shift, axis=0)
-            uxs = np.roll(uxs, shift, axis=1)
+            uxs = np.roll(ux, (shift, shift), axis=(0,1))
             return xs, uxs
         else:
             raise TypeError("Input uncertainty has incompatible shape")
