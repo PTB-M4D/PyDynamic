@@ -35,7 +35,8 @@ __all__ = [
 ]
 
 def shift_uncertainty(x, ux, shift):
-    """Shift the elements in the vector x (and associated uncertainty ux) by shift elements
+    """Shift the elements in the vector x (and associated uncertainty ux) by shift elements.
+        This method uses :class:`numpy.roll` to shift the elements in x and ux. See documentation of np.roll for details.
 
     Parameters
     ----------
