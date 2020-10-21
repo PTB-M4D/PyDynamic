@@ -93,7 +93,7 @@ def _fitIIR(
     if bounds is None:
         ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
     else:
-        ab = lsq_linear(A=Tmp1, b=Tmp2, bounds=bounds)
+        ab = lsq_linear(A=Tmp1, b=Tmp2, bounds=bounds).x
     a = np.hstack((1.0, ab[:Na]))
     b = ab[Na:]
     return b, a
