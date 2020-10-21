@@ -178,10 +178,8 @@ def LSIIR(
         run = run + 1
 
     if np.count_nonzero(np.abs(np.roots(a)) > 1) > 0:
-        print("Caution: The algorithm did NOT result in a stable IIR filter!")
-        print(
-            "Maybe try again with a higher value of tau0 or a higher filter " "order?"
-        )
+        print("Caution: The algorithm did NOT result in a stable IIR filter!\n"
+              "Maybe try again with a higher value of tau0 or a higher filter order?")
 
     print("Least squares fit finished after %d iterations (tau=%d)." % (run, tau))
     Hd = dsp.freqz(b, a, 2 * np.pi * f / Fs)[1]
