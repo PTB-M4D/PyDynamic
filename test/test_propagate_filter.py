@@ -1,85 +1,120 @@
 """Perform test for uncertainty.propagate_filter"""
+import itertools
+import copy
 
 import numpy as np
+import pytest
 
-from PyDynamic.misc.filterstuff import kaiser_lowpass
-from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian
-from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 
-# parameters of simulated measurement
-Fs = 100e3  # sampling frequency (in Hz)
-Ts = 1 / Fs  # sampling interval length (in s)
 
-# nominal system parameters
-fcut = 20e3  # low-pass filter cut-off frequency (6 dB)
-L = 100  # filter order
-b1 = kaiser_lowpass(L, fcut, Fs)[0]
-b2 = kaiser_lowpass(L - 20, fcut, Fs)[0]
-
-# uncertain knowledge: cutoff between 19.5kHz and 20.5kHz
-runs = 1000
-FC = fcut + (2 * np.random.rand(runs) - 1) * 0.5e3
-
-B = np.zeros((runs, L + 1))
-for k in range(runs):  # Monte Carlo for filter coefficients of low-pass filter
-    B[k, :] = kaiser_lowpass(L, FC[k], Fs)[0]
-
-Ub = make_semiposdef(np.cov(B, rowvar=0))  # covariance matrix of MC result
-
-# simulate input and output signals
-nTime = 500
-time = np.arange(nTime) * Ts  # time values
-
-# different cases
-sigma_noise = 1e-2  # 1e-5
+def random_array(length):
+    array = np.random.randn(length)
+    return array
 
 
-def test_FIRuncFilter_float():
-
-    # input signal + run methods
-    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)
-
-    # apply uncertain FIR filter (GUM formula)
-    for blow in [None, b2]:
-        y, Uy = FIRuncFilter(x, sigma_noise, b1, Ub, blow=blow, kind="float")
-        assert len(y) == len(x)
-        assert len(Uy) == len(x)
+def random_nonnegative_array(length):
+    array = np.random.random(length)
+    return array
 
 
-def test_FIRuncFilter_corr():
-
-    # get an instance of noise, the covariance and the covariance-matrix with the
-    # specified color
-    color = "white"
-    noise = power_law_noise(N=nTime, color_value=color, std=sigma_noise)
-    Ux = power_law_acf(nTime, color_value=color, std=sigma_noise)
-
-    # input signal
-    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=noise)
-
-    # apply uncertain FIR filter (GUM formula)
-    for blow in [None, b2]:
-        y, Uy = FIRuncFilter(x, Ux, b1, Ub, blow=blow, kind="corr")
-        assert len(y) == len(x)
-        assert len(Uy) == len(x)
+def random_positive_definite_matrix(length):
+    matrix = np.random.random((length, length))
+    matrix = make_semiposdef(matrix)
+    return matrix
 
 
-def test_FIRuncFilter_diag():
-    sigma_diag = sigma_noise * (
-        1 + np.heaviside(np.arange(len(time)) - len(time) // 2, 0)
-    )  # std doubles after half of the time
-    noise = sigma_diag * white_gaussian(len(time))
+@pytest.fixture
+def valid_filters():
+    N = np.random.randint(1, 100)
+    theta = random_array(N)
 
-    # input signal + run methods
-    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=noise)
+    valid_filters = [
+        {"theta": theta, "Utheta": None},
+        {"theta": theta, "Utheta": random_positive_definite_matrix(N)},
+    ]
 
-    # apply uncertain FIR filter (GUM formula)
-    for blow in [None, b2]:
-        y, Uy = FIRuncFilter(x, sigma_diag, b1, Ub, blow=blow, kind="diag")
-        assert len(y) == len(x)
-        assert len(Uy) == len(x)
+    return valid_filters
+
+
+@pytest.fixture
+def valid_signals():
+    N = np.random.randint(100, 1000)
+    signal = random_array(N)
+
+    valid_signals = [
+        # {"y": signal, "sigma_noise": None, "kind": "float"},
+        {"y": signal, "sigma_noise": np.random.randn(), "kind": "float"},
+        {"y": signal, "sigma_noise": random_nonnegative_array(N), "kind": "diag"},
+        {"y": signal, "sigma_noise": random_nonnegative_array(N // 2), "kind": "corr"},
+    ]
+
+    return valid_signals
+
+
+@pytest.fixture
+def valid_lows():
+    N = np.random.randint(1, 10)
+    blow = random_array(N)
+
+    valid_lows = [
+        {"blow": None},
+        {"blow": blow},
+    ]
+
+    return valid_lows
+
+
+@pytest.fixture
+def equal_filters(valid_filters):
+
+    equal_filters = copy.copy(valid_filters)
+    equal_filters[1]["Utheta"] = 0.0 * equal_filters[1]["Utheta"]
+
+    return equal_filters
+
+
+@pytest.fixture
+def equal_signals(valid_signals):
+    equal_signals = copy.copy(valid_signals)
+
+    # some shortcuts
+    s = valid_signals[0]["sigma_noise"]
+    N = valid_signals[0]["y"].size
+
+    equal_signals[1]["sigma_noise"] = np.full(N, s)
+    equal_signals[2]["sigma_noise"] = np.zeros(N)
+    equal_signals[2]["sigma_noise"][0] = np.square(s)
+
+    return equal_signals
+
+
+def test_FIRuncFilter(valid_filters, valid_signals, valid_lows):
+
+    # run all combinations of filter and signals
+    for (f, s, l) in itertools.product(valid_filters, valid_signals, valid_lows):
+        y, Uy = FIRuncFilter(**f, **s, **l)
+        assert len(y) == len(s["y"])
+        assert len(Uy) == len(s["y"])
+
+
+def test_FIRuncFilter_equality(equal_filters, equal_signals):
+    all_y = []
+    all_uy = []
+
+    # run all combinations of filter and signals
+    for (f, s) in itertools.product(equal_filters, equal_signals):
+        y, uy = FIRuncFilter(**f, **s)
+        all_y.append(y)
+        all_uy.append(uy)
+
+    # check that all have the same output, as they are supposed to represent equal cases
+    for a, b in itertools.combinations(all_y, 2):
+        assert np.allclose(a, b)
+
+    for a, b in itertools.combinations(all_uy, 2):
+        assert np.allclose(a, b)
 
 
 def test_IIRuncFilter():
