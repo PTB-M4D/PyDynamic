@@ -1,6 +1,7 @@
 """Perform test for uncertainty.propagate_filter"""
 
 import numpy as np
+import pytest
 
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian
@@ -43,7 +44,7 @@ def test_FIRuncFilter_float():
 
     # apply uncertain FIR filter (GUM formula)
     for blow in [None, b2]:
-        y, Uy = FIRuncFilter(x, sigma_noise, b1, Ub, blow=blow, kind="float")
+        y, Uy = FIRuncFilter(x, sigma_noise, b1, Ub, blow=blow)
         assert len(y) == len(x)
         assert len(Uy) == len(x)
 
@@ -80,6 +81,19 @@ def test_FIRuncFilter_diag():
         y, Uy = FIRuncFilter(x, sigma_diag, b1, Ub, blow=blow, kind="diag")
         assert len(y) == len(x)
         assert len(Uy) == len(x)
+
+
+def test_FIRuncFilter_full_cov_matrix():
+    # Setup input signal + run methods
+    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)
+
+    # Setup dummy covariance matrix
+    U_sigma = np.full((len(x), len(x)), sigma_noise)
+
+    # Apply uncertain FIR filter with invalid noise input and check for expected errors.
+    for blow in [None, b2]:
+        with pytest.raises(ValueError):
+            FIRuncFilter(x, U_sigma, b1, Ub, blow=blow)
 
 
 def test_IIRuncFilter():
