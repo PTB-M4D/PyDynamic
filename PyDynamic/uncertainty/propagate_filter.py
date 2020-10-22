@@ -25,6 +25,7 @@ __all__ = ["FIRuncFilter", "IIRuncFilter"]
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
+
     A preceding FIR low-pass filter with coefficients `blow` can be provided optionally.
 
     Parameters
