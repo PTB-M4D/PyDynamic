@@ -25,6 +25,7 @@ __all__ = ["FIRuncFilter", "IIRuncFilter"]
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
+    An optional FIR low-pass filter with coefficients blow can be provided optionally.
 
     Parameters
     ----------
@@ -42,16 +43,16 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         blow: np.ndarray
             optional FIR low-pass filter
         kind: string
-            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
+            only meaningfull in combination with sigma_noise a 1D numpy array
             "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+            "corr": single sided autocovariance of stationary (colored/correlated) noise (default)
 
     Returns
     -------
         x: np.ndarray
             FIR filter output signal
         ux: np.ndarray
-            point-wise uncertainties associated with x
+            point-wise standard uncertainties associated with x
 
 
     References
@@ -63,7 +64,6 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     """
 
     Ntheta = len(theta)  # FIR filter size
-    # filterOrder = Ntheta - 1   # FIR filter order
 
     if not isinstance(Utheta, np.ndarray):  # handle case of zero uncertainty filter
         Utheta = np.zeros((Ntheta, Ntheta))
@@ -73,6 +73,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         sigma2 = sigma_noise ** 2
 
     elif isinstance(sigma_noise, np.ndarray):
+        assert (len(sigma_noise.shape)==1), "FIRuncFilter: Uncertainty associated with input signal must be a 1D array"
         if kind == "diag":
             sigma2 = sigma_noise ** 2
         elif kind == "corr":
