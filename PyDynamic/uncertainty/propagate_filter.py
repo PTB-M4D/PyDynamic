@@ -26,6 +26,8 @@ __all__ = ["FIRuncFilter", "IIRuncFilter"]
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
     """Uncertainty propagation for signal y and uncertain FIR filter theta
 
+    A preceding FIR low-pass filter with coefficients `blow` can be provided optionally.
+
     Parameters
     ----------
         y: np.ndarray
@@ -42,16 +44,17 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         blow: np.ndarray
             optional FIR low-pass filter
         kind: string
-            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
+            only meaningful in combination with sigma_noise a 1D numpy array
             "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+            "corr": single sided autocovariance of stationary (colored/correlated)
+                    noise (default)
 
     Returns
     -------
         x: np.ndarray
             FIR filter output signal
         ux: np.ndarray
-            point-wise uncertainties associated with x
+            point-wise standard uncertainties associated with x
 
 
     References
@@ -63,7 +66,6 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     """
 
     Ntheta = len(theta)  # FIR filter size
-    # filterOrder = Ntheta - 1   # FIR filter order
 
     if not isinstance(Utheta, np.ndarray):  # handle case of zero uncertainty filter
         Utheta = np.zeros((Ntheta, Ntheta))
@@ -72,7 +74,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     if isinstance(sigma_noise, float):
         sigma2 = sigma_noise ** 2
 
-    elif isinstance(sigma_noise, np.ndarray):
+    elif isinstance(sigma_noise, np.ndarray) and len(sigma_noise.shape) == 1:
         if kind == "diag":
             sigma2 = sigma_noise ** 2
         elif kind == "corr":
@@ -81,7 +83,12 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             raise ValueError("unknown kind of sigma_noise")
 
     else:
-        raise ValueError("sigma_noise is neither of type float nor numpy.ndarray.")
+        raise ValueError(
+            f"FIRuncFilter: Uncertainty sigma_noise associated "
+            f"with input signal is expected to be either a float or a 1D array but "
+            f"is of shape {sigma_noise.shape}. Please check documentation for input "
+            f"parameters sigma_noise and kind for more information."
+        )
 
 
     if isinstance(blow,np.ndarray):             # calculate low-pass filtered signal and propagate noise
