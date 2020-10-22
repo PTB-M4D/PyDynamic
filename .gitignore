@@ -18,9 +18,7 @@ pytest.xml
 # Jupyter Notebook artifacts #
 ##############################
 .ipynb_checkpoints/
-.idea/workspace.xml
-.idea/inspectionProfiles/profiles_settings.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/PyDynamic.iml
-.idea/vcs.xml
+
+# Environment artifacts #
+#########################
+.idea/
