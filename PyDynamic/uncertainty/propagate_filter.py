@@ -43,9 +43,10 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         blow: np.ndarray
             optional FIR low-pass filter
         kind: string
-            only meaningfull in combination with sigma_noise a 1D numpy array
+            only meaningful in combination with sigma_noise a 1D numpy array
             "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/correlated) noise (default)
+            "corr": single sided autocovariance of stationary (colored/correlated)
+                    noise (default)
 
     Returns
     -------
