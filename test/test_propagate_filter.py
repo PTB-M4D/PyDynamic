@@ -27,7 +27,7 @@ def random_positive_definite_matrix(length):
 
 @pytest.fixture
 def valid_filters():
-    N = np.random.randint(1, 100)
+    N = np.random.randint(2, 100)  # N >= 2, see scipy.linalg.companion
     theta = random_array(N)
 
     valid_filters = [
@@ -55,7 +55,7 @@ def valid_signals():
 
 @pytest.fixture
 def valid_lows():
-    N = np.random.randint(1, 10)
+    N = np.random.randint(2, 10)  # N >= 2, see scipy.linalg.companion
     blow = random_array(N)
 
     valid_lows = [
