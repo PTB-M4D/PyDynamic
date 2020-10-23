@@ -25,7 +25,6 @@ def random_positive_definite_matrix(length):
     return matrix
 
 
-@pytest.fixture
 def valid_filters():
     N = np.random.randint(2, 100)  # N >= 2, see scipy.linalg.companion
     theta = random_array(N)
@@ -38,7 +37,6 @@ def valid_filters():
     return valid_filters
 
 
-@pytest.fixture
 def valid_signals():
     N = np.random.randint(100, 1000)
     signal = random_array(N)
@@ -53,7 +51,6 @@ def valid_signals():
     return valid_signals
 
 
-@pytest.fixture
 def valid_lows():
     N = np.random.randint(2, 10)  # N >= 2, see scipy.linalg.companion
     blow = random_array(N)
@@ -67,21 +64,21 @@ def valid_lows():
 
 
 @pytest.fixture
-def equal_filters(valid_filters):
+def equal_filters():
+    equal_filters = valid_filters()
 
-    equal_filters = copy.copy(valid_filters)
     equal_filters[1]["Utheta"] = 0.0 * equal_filters[1]["Utheta"]
 
     return equal_filters
 
 
 @pytest.fixture
-def equal_signals(valid_signals):
-    equal_signals = copy.copy(valid_signals)
+def equal_signals():
+    equal_signals = valid_signals()
 
     # some shortcuts
-    s = valid_signals[0]["sigma_noise"]
-    N = valid_signals[0]["y"].size
+    s = equal_signals[0]["sigma_noise"]
+    N = equal_signals[0]["y"].size
 
     equal_signals[1]["sigma_noise"] = np.full(N, s)
     equal_signals[2]["sigma_noise"] = np.zeros(N)
@@ -89,14 +86,14 @@ def equal_signals(valid_signals):
 
     return equal_signals
 
+@pytest.mark.parametrize("f", valid_filters())
+@pytest.mark.parametrize("s", valid_signals())
+@pytest.mark.parametrize("l", valid_lows())
+def test_FIRuncFilter(f, s, l):
 
-def test_FIRuncFilter(valid_filters, valid_signals, valid_lows):
-
-    # run all combinations of filter and signals
-    for (f, s, l) in itertools.product(valid_filters, valid_signals, valid_lows):
-        y, Uy = FIRuncFilter(**f, **s, **l)
-        assert len(y) == len(s["y"])
-        assert len(Uy) == len(s["y"])
+    y, Uy = FIRuncFilter(**f, **s, **l)
+    assert len(y) == len(s["y"])
+    assert len(Uy) == len(s["y"])
 
 
 def test_FIRuncFilter_equality(equal_filters, equal_signals):
