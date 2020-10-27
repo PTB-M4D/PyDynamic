@@ -106,7 +106,7 @@ def test_FIRuncFilter(filters, signals, lowpasses):
     assert len(y) == len(signals["y"])
     assert len(Uy) == len(signals["y"])
 
-    # note: a direct against scipy.signal.lfilter is not needed,
+    # note: a direct comparison against scipy.signal.lfilter is not needed,
     #       as y is already computed using this method
 
 
