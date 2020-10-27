@@ -19,7 +19,7 @@ def random_nonnegative_array(length):
     return array
 
 
-def random_positive_definite_matrix(length):
+def random_semiposdef_matrix(length):
     matrix = np.random.random((length, length))
     matrix = make_semiposdef(matrix)
     return matrix
@@ -31,7 +31,7 @@ def valid_filters():
 
     valid_filters = [
         {"theta": theta, "Utheta": None},
-        {"theta": theta, "Utheta": random_positive_definite_matrix(N)},
+        {"theta": theta, "Utheta": random_semiposdef_matrix(N)},
     ]
 
     return valid_filters
