@@ -8,11 +8,11 @@ import pandas as pd
 
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 
-def evaluate(signal, filter, case="full/null/none"):
+def evaluate(signal, filter, case="full/zero/none"):
     # different covariance matrices
     if case == "full":
         U_theta = 1e-2 * np.eye(filter_length)
-    elif case == "null":
+    elif case == "zero":
         U_theta = np.zeros((filter_length, filter_length))
     elif case == "none":
         U_theta = None
@@ -29,7 +29,7 @@ def evaluate(signal, filter, case="full/null/none"):
 
 
 filter_lengths = [10, 50, 100, 200, 500, 1000, 2000]
-cases = ["full", "null", "none"]
+cases = ["full", "zero", "none"]
 results = pd.DataFrame(index=filter_lengths, columns=cases)
 
 
@@ -47,9 +47,6 @@ for filter_length in filter_lengths:
         runtime, y, uy = evaluate(signal, theta, case)
         results.loc[filter_length, case] = runtime
 
-        print(signal_length, filter_length, case, uy[:2])
-    print("="*10)
-
-# The expected result is, that `full` and `null` should be equally fast.
-# `none` will be much faster, although it yields the same results as `null`.
+# The expected result is, that `full` and `zero` should be roughly as fast (same range/magnitude).
+# `none` will be much faster and yields the same results as `zero`.
 print(results)
