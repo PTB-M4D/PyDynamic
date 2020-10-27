@@ -100,6 +100,9 @@ def test_FIRuncFilter(f, s, l):
     assert len(y) == len(s["y"])
     assert len(Uy) == len(s["y"])
 
+    # note: a direct against scipy.signal.lfilter is not needed, 
+    #       as y is already computed using this method
+
 
 def test_FIRuncFilter_equality(equal_filters, equal_signals):
     all_y = []
