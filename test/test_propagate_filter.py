@@ -19,7 +19,7 @@ def random_nonnegative_array(length):
     return array
 
 
-def random_positive_definite_matrix(length):
+def random_positive_semidefinite_matrix(length):
     matrix = np.random.random((length, length))
     matrix = make_semiposdef(matrix)
     return matrix
@@ -31,7 +31,7 @@ def valid_filters():
 
     valid_filters = [
         {"theta": theta, "Utheta": None},
-        {"theta": theta, "Utheta": random_positive_definite_matrix(N)},
+        {"theta": theta, "Utheta": random_positive_semidefinite_matrix(N)},
     ]
 
     return valid_filters
@@ -42,7 +42,6 @@ def valid_signals():
     signal = random_array(N)
 
     valid_signals = [
-        # {"y": signal, "sigma_noise": None, "kind": "float"},
         {"y": signal, "sigma_noise": np.random.randn(), "kind": "float"},
         {"y": signal, "sigma_noise": random_nonnegative_array(N), "kind": "diag"},
         {"y": signal, "sigma_noise": random_nonnegative_array(N // 2), "kind": "corr"},
@@ -86,14 +85,15 @@ def equal_signals():
 
     return equal_signals
 
-@pytest.mark.parametrize("f", valid_filters())
-@pytest.mark.parametrize("s", valid_signals())
-@pytest.mark.parametrize("l", valid_lows())
-def test_FIRuncFilter(f, s, l):
 
-    y, Uy = FIRuncFilter(**f, **s, **l)
-    assert len(y) == len(s["y"])
-    assert len(Uy) == len(s["y"])
+@pytest.mark.parametrize("filters", valid_filters())
+@pytest.mark.parametrize("signals", valid_signals())
+@pytest.mark.parametrize("lowpasses", valid_lows())
+def test_FIRuncFilter(filters, signals, lowpasses):
+    # Check expected output for thinkable permutations of input parameters.
+    y, Uy = FIRuncFilter(**filters, **signals, **lowpasses)
+    assert len(y) == len(signals["y"])
+    assert len(Uy) == len(signals["y"])
 
 
 def test_FIRuncFilter_equality(equal_filters, equal_signals):
