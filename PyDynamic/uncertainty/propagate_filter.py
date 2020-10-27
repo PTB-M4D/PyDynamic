@@ -62,7 +62,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     ----------
         * Elster and Link 2008 [Elster2008]_
 
-    .. seealso:: :mod:`PyDynamic.deconvolution.fit_filter`
+    .. seealso:: :mod:`PyDynamic.model_estimation.fit_filter`
 
     """
 
