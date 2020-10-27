@@ -37,11 +37,13 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             1D-array: interpretation depends on kind
         theta: np.ndarray
             FIR filter coefficients
-        Utheta: np.ndarray
+        Utheta: np.ndarray, optional
             covariance matrix associated with theta
-        shift: int
-            time delay of filter output signal (in samples)
-        blow: np.ndarray
+            if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations. 
+            see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+        shift: int, optional
+            time delay of filter output signal (in samples) (defaults to 0)
+        blow: np.ndarray, optional
             optional FIR low-pass filter
         kind: string
             only meaningful in combination with sigma_noise a 1D numpy array
@@ -66,9 +68,6 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     """
 
     Ntheta = len(theta)  # FIR filter size
-
-    if not isinstance(Utheta, np.ndarray):  # handle case of zero uncertainty filter
-        Utheta = np.zeros((Ntheta, Ntheta))
 
     # check which case of sigma_noise is necessary
     if isinstance(sigma_noise, float):
@@ -177,17 +176,34 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         # V has dimension (len(sigma2) + Ntheta) * (len(sigma2) + Ntheta) --> slice a fitting Ulow of dimension (Ntheta x Ntheta)
         UncCov = np.zeros((len(sigma2)))
 
-        for k in range(len(sigma2)):
-            Ulow = V[k:k+Ntheta,k:k+Ntheta]
-            UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta))))  # static part of uncertainty
+        if isinstance(Utheta, np.ndarray):
+            for k in range(len(sigma2)):
+                Ulow = V[k:k+Ntheta,k:k+Ntheta]
+                UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta))))  # static part of uncertainty
+        else:
+            for k in range(len(sigma2)):
+                Ulow = V[k:k+Ntheta,k:k+Ntheta]
+                UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)))  # static part of uncertainty
 
     else:
-        UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
+        if isinstance(Utheta, np.ndarray):
+            UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
+        else:
+            UncCov = theta.T.dot(Ulow.dot(theta))     # static part of uncertainty
 
-    unc = np.zeros_like(y)
-    for m in range(Ntheta,len(xlow)):
-        XL = xlow[m:m-Ntheta:-1, np.newaxis]  # extract necessary part from input signal
-        unc[m] = XL.T.dot(Utheta.dot(XL))     # apply formula from paper
+    if isinstance(Utheta, np.ndarray):
+        unc = np.empty_like(y)
+
+        # use extended signal to match assumption of stationary signal prior to first entry
+        xlow_extended = np.append(np.full(Ntheta - 1, xlow[0]), xlow)
+        
+        for m in range(len(xlow)):
+            # extract necessary part from input signal
+            XL = xlow_extended[m : m + Ntheta, np.newaxis][::-1]  
+            unc[m] = XL.T.dot(Utheta.dot(XL))  # apply formula from paper
+    else:
+        unc = np.zeros_like(y)
+    
     ux = np.sqrt(np.abs(UncCov + unc))
     ux = np.roll(ux, -int(shift))  # correct for delay
 
