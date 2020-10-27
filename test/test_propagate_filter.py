@@ -86,11 +86,12 @@ def equal_signals():
     N = np.random.randint(100, 1000)
     signal = random_array(N)
     s = np.random.randn()
+    acf = np.array([s ** 2] + [0] * (N - 1))
 
     equal_signals = [
         {"y": signal, "sigma_noise": s, "kind": "float"},
         {"y": signal, "sigma_noise": np.full(N, s), "kind": "diag"},
-        {"y": signal, "sigma_noise": np.array([s**2] + [0]*(N-1)), "kind": "corr"},
+        {"y": signal, "sigma_noise": acf, "kind": "corr"},
     ]
 
     return equal_signals
@@ -105,7 +106,7 @@ def test_FIRuncFilter(filters, signals, lowpasses):
     assert len(y) == len(signals["y"])
     assert len(Uy) == len(signals["y"])
 
-    # note: a direct against scipy.signal.lfilter is not needed, 
+    # note: a direct against scipy.signal.lfilter is not needed,
     #       as y is already computed using this method
 
 
