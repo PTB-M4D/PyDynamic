@@ -65,24 +65,29 @@ def valid_lows():
 
 @pytest.fixture
 def equal_filters():
-    equal_filters = valid_filters()
+    N = np.random.randint(2, 100)
+    theta = random_array(N)
 
-    equal_filters[1]["Utheta"] = 0.0 * equal_filters[1]["Utheta"]
+    equal_filters = [
+        {"theta": theta, "Utheta": None},
+        {"theta": theta, "Utheta": np.zeros((N, N))},
+    ]
 
     return equal_filters
 
 
 @pytest.fixture
 def equal_signals():
-    equal_signals = valid_signals()
-
     # some shortcuts
-    s = equal_signals[0]["sigma_noise"]
-    N = equal_signals[0]["y"].size
+    N = np.random.randint(100, 1000)
+    signal = random_array(N)
+    s = np.random.randn()
 
-    equal_signals[1]["sigma_noise"] = np.full(N, s)
-    equal_signals[2]["sigma_noise"] = np.zeros(N)
-    equal_signals[2]["sigma_noise"][0] = np.square(s)
+    equal_signals = [
+        {"y": signal, "sigma_noise": s, "kind": "float"},
+        {"y": signal, "sigma_noise": np.full(N, s), "kind": "diag"},
+        {"y": signal, "sigma_noise": np.array([s**2] + [0]*(N-1)), "kind": "corr"},
+    ]
 
     return equal_signals
 
