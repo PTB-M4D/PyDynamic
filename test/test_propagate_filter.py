@@ -1,6 +1,5 @@
 """Perform test for uncertainty.propagate_filter"""
 import itertools
-import copy
 
 import numpy as np
 import pytest
@@ -26,7 +25,7 @@ def random_semiposdef_matrix(length):
 
 
 def valid_filters():
-    N = np.random.randint(2, 100)  # N >= 2, see scipy.linalg.companion
+    N = np.random.randint(2, 100)  # scipy.linalg.companion requires N >= 2
     theta = random_array(N)
 
     valid_filters = [
@@ -42,7 +41,6 @@ def valid_signals():
     signal = random_array(N)
 
     valid_signals = [
-        # {"y": signal, "sigma_noise": None, "kind": "float"},
         {"y": signal, "sigma_noise": np.random.randn(), "kind": "float"},
         {"y": signal, "sigma_noise": random_nonnegative_array(N), "kind": "diag"},
         {"y": signal, "sigma_noise": random_nonnegative_array(N // 2), "kind": "corr"},
@@ -52,7 +50,7 @@ def valid_signals():
 
 
 def valid_lows():
-    N = np.random.randint(2, 10)  # N >= 2, see scipy.linalg.companion
+    N = np.random.randint(2, 10)  # scipy.linalg.companion requires N >= 2
     blow = random_array(N)
 
     valid_lows = [
@@ -65,7 +63,10 @@ def valid_lows():
 
 @pytest.fixture
 def equal_filters():
-    N = np.random.randint(2, 100)
+    # Create two filters with assumed identical FIRuncFilter() output to test
+    # equality of the more efficient with the standard implementation.
+
+    N = np.random.randint(2, 100)  # scipy.linalg.companion requires N >= 2
     theta = random_array(N)
 
     equal_filters = [
@@ -78,6 +79,9 @@ def equal_filters():
 
 @pytest.fixture
 def equal_signals():
+    # Create three signals with assumed identical FIRuncFilter() output to test
+    # equality of the different cases of input parameter 'kind'.
+
     # some shortcuts
     N = np.random.randint(100, 1000)
     signal = random_array(N)
@@ -91,20 +95,23 @@ def equal_signals():
 
     return equal_signals
 
-@pytest.mark.parametrize("f", valid_filters())
-@pytest.mark.parametrize("s", valid_signals())
-@pytest.mark.parametrize("l", valid_lows())
-def test_FIRuncFilter(f, s, l):
 
-    y, Uy = FIRuncFilter(**f, **s, **l)
-    assert len(y) == len(s["y"])
-    assert len(Uy) == len(s["y"])
+@pytest.mark.parametrize("filters", valid_filters())
+@pytest.mark.parametrize("signals", valid_signals())
+@pytest.mark.parametrize("lowpasses", valid_lows())
+def test_FIRuncFilter(filters, signals, lowpasses):
+    # Check expected output for thinkable permutations of input parameters.
+    y, Uy = FIRuncFilter(**filters, **signals, **lowpasses)
+    assert len(y) == len(signals["y"])
+    assert len(Uy) == len(signals["y"])
 
     # note: a direct against scipy.signal.lfilter is not needed, 
     #       as y is already computed using this method
 
 
 def test_FIRuncFilter_equality(equal_filters, equal_signals):
+    # Check expected output for being identical across different equivalent input
+    # parameter cases.
     all_y = []
     all_uy = []
 
