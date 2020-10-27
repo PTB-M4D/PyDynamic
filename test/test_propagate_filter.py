@@ -1,6 +1,5 @@
 """Perform test for uncertainty.propagate_filter"""
 import itertools
-import copy
 
 import numpy as np
 import pytest
