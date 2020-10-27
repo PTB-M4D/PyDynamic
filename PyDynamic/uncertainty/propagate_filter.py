@@ -37,13 +37,13 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             1D-array: interpretation depends on kind
         theta: np.ndarray
             FIR filter coefficients
-        Utheta: np.ndarray
+        Utheta: np.ndarray, optional
             covariance matrix associated with theta
-            if the filter is fully certain, use `Utheta = None` to make use of more efficient calculations. 
+            if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations. 
             see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
-        shift: int
-            time delay of filter output signal (in samples)
-        blow: np.ndarray
+        shift: int, optional
+            time delay of filter output signal (in samples) (defaults to 0)
+        blow: np.ndarray, optional
             optional FIR low-pass filter
         kind: string
             only meaningful in combination with sigma_noise a 1D numpy array
