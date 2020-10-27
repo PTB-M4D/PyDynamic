@@ -26,7 +26,7 @@ def random_positive_semidefinite_matrix(length):
 
 
 def valid_filters():
-    N = np.random.randint(2, 100)  # N >= 2, see scipy.linalg.companion
+    N = np.random.randint(2, 100)  # scipy.linalg.companion requires N >= 2
     theta = random_array(N)
 
     valid_filters = [
@@ -51,7 +51,7 @@ def valid_signals():
 
 
 def valid_lows():
-    N = np.random.randint(2, 10)  # N >= 2, see scipy.linalg.companion
+    N = np.random.randint(2, 10)  # scipy.linalg.companion requires N >= 2
     blow = random_array(N)
 
     valid_lows = [
@@ -64,6 +64,8 @@ def valid_lows():
 
 @pytest.fixture
 def equal_filters():
+    # Create two filters with assumed identical FIRuncFilter() output to test
+    # equality of the more efficient with the standard implementation.
     equal_filters = valid_filters()
 
     equal_filters[1]["Utheta"] = 0.0 * equal_filters[1]["Utheta"]
@@ -73,6 +75,8 @@ def equal_filters():
 
 @pytest.fixture
 def equal_signals():
+    # Create three signals with assumed identical FIRuncFilter() output to test
+    # equality of the different cases of input parameter 'kind'.
     equal_signals = valid_signals()
 
     # some shortcuts
@@ -97,6 +101,8 @@ def test_FIRuncFilter(filters, signals, lowpasses):
 
 
 def test_FIRuncFilter_equality(equal_filters, equal_signals):
+    # Check expected output for being identical across different equivalent input
+    # parameter cases.
     all_y = []
     all_uy = []
 
