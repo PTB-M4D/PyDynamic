@@ -192,10 +192,15 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             UncCov = theta.T.dot(Ulow.dot(theta))     # static part of uncertainty
 
     if isinstance(Utheta, np.ndarray):
-        unc = np.zeros_like(y)
-        for m in range(Ntheta,len(xlow)):
-            XL = xlow[m:m-Ntheta:-1, np.newaxis]  # extract necessary part from input signal
-            unc[m] = XL.T.dot(Utheta.dot(XL))     # apply formula from paper
+        unc = np.empty_like(y)
+
+        # use extended signal to match assumption of stationary signal prior to first entry
+        xlow_extended = np.append(np.full(Ntheta - 1, xlow[0]), xlow)
+        
+        for m in range(len(xlow)):
+            # extract necessary part from input signal
+            XL = xlow_extended[m : m + Ntheta, np.newaxis][::-1]  
+            unc[m] = XL.T.dot(Utheta.dot(XL))  # apply formula from paper
     else:
         unc = np.zeros_like(y)
     
