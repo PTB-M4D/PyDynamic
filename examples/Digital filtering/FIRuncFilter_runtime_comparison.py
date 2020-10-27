@@ -21,7 +21,7 @@ def evaluate(signal, filter, case="full/null/none"):
     
     # measure runtime (timeit.timeit is unable to use both local+global variables)
     start = time.time()
-    y, Uy = FIRuncFilter(signal, sigma_noise, theta, U_theta, blow=None, kind='float')
+    y, Uy = FIRuncFilter(signal, sigma_noise, theta, U_theta, blow=None)
     end = time.time()
     runtime = end - start
 
