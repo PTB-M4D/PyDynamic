@@ -29,8 +29,6 @@ it is tested to work with Python 3.6 to 3.8.
 
    PyDynamic.uncertainty.rst
    PyDynamic.model_estimation.rst
-   PyDynamic.deconvolution.rst
-   PyDynamic.identification.rst
    PyDynamic.misc.rst
 
 .. toctree::
