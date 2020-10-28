@@ -179,17 +179,17 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         if isinstance(Utheta, np.ndarray):
             for k in range(len(sigma2)):
                 Ulow = V[k:k+Ntheta,k:k+Ntheta]
-                UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta))))  # static part of uncertainty
+                UncCov[k] = np.squeeze(np.flip(theta).T.dot(Ulow.dot(np.flip(theta))) + np.abs(np.trace(Ulow.dot(np.flip(Utheta)))))  # static part of uncertainty
         else:
             for k in range(len(sigma2)):
                 Ulow = V[k:k+Ntheta,k:k+Ntheta]
-                UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)))  # static part of uncertainty
+                UncCov[k] = np.squeeze(np.flip(theta).T.dot(Ulow.dot(np.flip(theta))))  # static part of uncertainty
 
     else:
         if isinstance(Utheta, np.ndarray):
-            UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
+            UncCov = np.flip(theta).T.dot(Ulow.dot(np.flip(theta))) + np.abs(np.trace(Ulow.dot(np.flip(Utheta))))      # static part of uncertainty
         else:
-            UncCov = theta.T.dot(Ulow.dot(theta))     # static part of uncertainty
+            UncCov = np.flip(theta).T.dot(Ulow.dot(np.flip(theta)))     # static part of uncertainty
 
     if isinstance(Utheta, np.ndarray):
         unc = np.empty_like(y)
@@ -199,8 +199,8 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
         
         for m in range(len(xlow)):
             # extract necessary part from input signal
-            XL = xlow_extended[m : m + Ntheta, np.newaxis][::-1]  
-            unc[m] = XL.T.dot(Utheta.dot(XL))  # apply formula from paper
+            XL = xlow_extended[m : m + Ntheta, np.newaxis]
+            unc[m] = XL.T.dot(np.flip(Utheta).dot(XL))  # apply formula from paper
     else:
         unc = np.zeros_like(y)
     
