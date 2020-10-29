@@ -2,11 +2,17 @@
 import itertools
 
 import numpy as np
-import scipy
 import pytest
+import scipy
 
-from PyDynamic.misc.tools import make_semiposdef, trimOrPad
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from PyDynamic.misc.testsignals import rect
+from PyDynamic.misc.tools import make_semiposdef
+from PyDynamic.uncertainty.propagate_filter import (
+    _get_derivative_A,
+    _tf2ss,
+    FIRuncFilter,
+    IIRuncFilter,
+)
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 
 
