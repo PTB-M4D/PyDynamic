@@ -10,7 +10,7 @@ import warnings
 __all__ = ["interp1d_unc"]
 
 
-def interp1d_unc(**kwargs):
+def interp1d_unc(*args, **kwargs):
     """
     .. deprecated:: 2.0.0
     Please use :func:`PyDynamic.uncertainty.interpolate.interp1d_unc`
