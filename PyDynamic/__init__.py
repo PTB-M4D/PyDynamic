@@ -8,19 +8,27 @@ import uncertainty
 # https://www.github.com/eichstaedtPTB/PyDynamic
 """
 
-from .deconvolution.fit_filter import LSFIR, LSFIR_unc, LSIIR, LSIIR_unc, LSFIR_uncMC
-from .identification import *
+from .deconvolution.fit_filter import LSFIR_unc, LSFIR_uncMC, LSIIR_unc
+from .identification.fit_transfer import fit_sos
+
 from .misc import *
+from .model_estimation import *
 from .uncertainty import *
 
-__version__ = "1.4.0"
+__version__ = "1.4.4"
 
 __all__ = [
+    "invLSFIR",
+    "invLSIIR",
+    "invLSFIR_unc",
+    "invLSFIR_uncMC",
+    "invLSIIR_unc",
     "LSFIR",
     "LSIIR",
     "LSFIR_unc",
     "LSFIR_uncMC",
     "LSIIR_unc",
+    "fit_som",
     "fit_sos",
     "FreqResp2RealImag",
     "GUM_DFT",
@@ -31,8 +39,16 @@ __all__ = [
     "AmpPhase2DFT",
     "AmpPhase2Time",
     "Time2AmpPhase",
+    "dwt",
+    "wave_dec",
+    "wave_dec_realtime",
+    "inv_dwt",
+    "wave_rec",
+    "filter_design",
+    "dwt_max_level",
     "FIRuncFilter",
     "IIRuncFilter",
+    "IIR_get_initial_state",
     "MC",
     "SMC",
     "UMC",

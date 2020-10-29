@@ -20,11 +20,21 @@ from .propagate_DFT import (
     Time2AmpPhase,
 )
 
-from .propagate_filter import FIRuncFilter, IIRuncFilter
+from .propagate_filter import FIRuncFilter, IIRuncFilter, IIR_get_initial_state
 
 from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
 
 from .interpolation import interp1d_unc
+
+from .propagate_DWT import (
+    dwt,
+    wave_dec,
+    wave_dec_realtime,
+    inv_dwt,
+    wave_rec,
+    filter_design,
+    dwt_max_level,
+)
 
 __all__ = [
     "GUM_DFT",
@@ -37,9 +47,17 @@ __all__ = [
     "Time2AmpPhase",
     "FIRuncFilter",
     "IIRuncFilter",
+    "IIR_get_initial_state",
     "MC",
     "SMC",
     "UMC",
     "UMC_generic",
     "interp1d_unc",
+    "dwt",
+    "wave_dec",
+    "wave_dec_realtime",
+    "inv_dwt",
+    "wave_rec",
+    "filter_design",
+    "dwt_max_level",
 ]

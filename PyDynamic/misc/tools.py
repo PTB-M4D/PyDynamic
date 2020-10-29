@@ -18,6 +18,7 @@ This module contains the following functions:
 """
 
 import sys
+import warnings
 
 import numpy as np
 from scipy.sparse import eye, issparse
@@ -207,50 +208,21 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
     return Re, Im, URI
 
 
-def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
-    """ Interpolate non-equidistant time series to equidistant
-
-    Interpolate measurement values and propagate uncertainties accordingly.
-
-    Parameters
-    ----------
-        t: (N,) array_like
-            timestamps (or frequencies)
-        y: (N,) array_like
-            corresponding measurement values
-        uy: (N,) array_like
-            corresponding measurement values' standard uncertainties
-        dt: float, optional
-            desired interval length
-        kind: str, optional
-            Specifies the kind of interpolation for the measurement values
-            as a string ('previous', 'next', 'nearest' or 'linear').
-
-    Returns
-    -------
-        t_new : (M,) array_like
-            interpolation timestamps (or frequencies)
-        y_new : (M,) array_like
-            interpolated measurement values
-        uy_new : (M,) array_like
-            interpolated measurement values' standard uncertainties
-
-    References
-    ----------
-        * White [White2017]_
+def make_equidistant(*args, **kwargs):
     """
-    from ..uncertainty.interpolation import interp1d_unc
-
-    # Setup new vector of timestamps.
-    t_new = np.arange(np.min(t), np.max(t), dt)
-
-    # Since np.arange in overflow situations results in the last value not guaranteed to
-    # be smaller than t's maximum', we need to check for this and delete this
-    # unexpected value.
-    if t_new[-1] > np.max(t):
-        t_new = t_new[:-1]
-
-    return interp1d_unc(t_new, t, y, uy, kind)
+    .. deprecated:: 2.0.0
+    Please use :func:`PyDynamic.uncertainty.interpolate.interp1d_unc`
+    """
+    warnings.warn(
+        "The method `PyDynamic.misc.tools.make_equidistant` is moved "
+        "to :mod:`PyDynamic.uncertainty.interpolate.make_equidistant` since the last "
+        "major release 2.0.0. Please switch to the current module immediately and use "
+        "the current function "
+        ":func:`PyDynamic.uncertainty.interpolate.make_equidistant`. Please change "
+        "'from PyDynamic.misc.tools import make_equidistant' to 'from "
+        "PyDynamic.uncertainty.interpolate import make_equidistant'.",
+        DeprecationWarning,
+    )
 
 
 def progress_bar(

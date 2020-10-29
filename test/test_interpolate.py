@@ -8,7 +8,7 @@ from hypothesis.strategies import composite
 from numpy.testing import assert_allclose
 from pytest import raises
 
-from PyDynamic.uncertainty.interpolation import interp1d_unc
+from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
 
 
 @composite
@@ -22,6 +22,7 @@ def timestamps_values_uncertainties_kind(
     restrict_fill_value: Optional[str] = None,
     restrict_fill_unc: Optional[str] = None,
     returnC: Optional[bool] = False,
+    for_make_equidistant: Optional[bool] = False,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
@@ -30,37 +31,44 @@ def timestamps_values_uncertainties_kind(
         draw : callable
             this is a hypothesis internal callable to actually draw from provided
             strategies
-        min_count : int
+        min_count : int, optional
             the minimum number of elements expected inside the arrays of timestamps
-             (or frequencies), measurement values and associated uncertainties
-        max_count : int
+             (or frequencies), measurement values and associated uncertainties.
+             (default = 2)
+        max_count : int, optional
             the maximum number of elements expected inside the arrays of timestamps
             (or frequencies), measurement values and associated uncertainties
+            (default is None)
         kind_tuple : tuple(str), optional
             the tuple of strings out of "linear", "previous", "next", "nearest",
             "spline", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
             "previous", "next", "nearest"
-        sorted_timestamps : bool
-            if True the timestamps (or frequencies) are guaranteed to be in ascending
-            order, if False they still might be by coincidence or not
+        sorted_timestamps : bool, optional
+            if True (default) the timestamps (or frequencies) are guaranteed to be in
+            ascending order, if False they still might be by coincidence or not
         extrapolate : bool or str, optional
             If True the interpolation timestamps (or frequencies) are generated such
             that extrapolation is necessary by guarantying at least one of the
             interpolation timestamps (or frequencies) outside the original bounds
             and accordingly setting appropriate values for `fill_value` and
-            `bounds_error = False`. If False each element of t_new is guaranteed to
-            lie within the range of t. Can be set to "above" or "below" to guarantee
-            at least one element of t_new to lie either below or above the bounds of t.
+            `bounds_error = False`. If False (default) each element of t_new is
+            guaranteed to lie within the range of t. Can be set to "above" or "below"
+            to guarantee at least one element of t_new to lie either below or above
+            the bounds of t.
         restrict_fill_value : str, optional
             String specifying the desired strategy for drawing a fill_value. One of
             "float", "tuple", "str", "nan" to guarantee either a float, a tuple of
-            two floats, the string "extrapolate" or np.nan.
+            two floats, the string "extrapolate" or np.nan. (default is None)
         restrict_fill_unc : str, optional
-            Same as fill_value, but just for the uncertainties.
+            Same as fill_value, but just for the uncertainties. (default is None)
         returnC : bool, optional
-            If True we request the sensitivities to be returned. If False we do not
-            request them. Defaults to False.
+            If True we request the sensitivities to be returned. If False (default) we
+            do not request them.
+        for_make_equidistant : bool, optional
+            If True we return the expected parameters for calling `make_equidistant()`.
+            If False (default) we return the expected parameters for calling
+            `interp1d_unc()`.
 
     Returns
     -------
@@ -133,60 +141,77 @@ def timestamps_values_uncertainties_kind(
     y = draw(hnp.arrays(**strategy_params))
     uy = draw(hnp.arrays(**strategy_params))
 
-    # Reset shape for interpolation timestamps (or frequencies).
-    strategy_params["shape"] = shape_for_timestamps
-    # Look up minimum and maximum of original timestamps (or frequencies) just once.
-    t_min = np.min(t)
-    t_max = np.max(t)
-
-    if not extrapolate:
-        # In case we do not want to extrapolate, use range of "original" timestamps (or
-        # frequencies) as boundaries.
-        strategy_params["elements"] = st.floats(
-            min_value=t_min, max_value=t_max, **float_generic_params
-        )
-        fill_value = fill_unc = np.nan
-        bounds_error = True
-    else:
-        # In case we want to extrapolate, draw some fill values for the
-        # out-of-bounds range. Those will be either single floats or a 2-tuple of
-        # floats or the special value "extrapolate".
-        fill_value = draw_fill_values(restrict_fill_value)
-        fill_unc = draw_fill_values(restrict_fill_unc)
-        bounds_error = False
-
-    # Draw interpolation timestamps (or frequencies).
-    t_new = draw(hnp.arrays(**strategy_params))
-
-    if extrapolate:
-        # In case we want to extrapolate, make sure we actually do after having drawn
-        # the timestamps (or frequencies) not to randomly have drawn values inside
-        # original bounds and if even more constraints are given ensure those.
-        assume(np.min(t_new) < np.min(t) or np.max(t_new) > np.max(t))
-        if extrapolate == "above":
-            assume(np.max(t_new) > np.max(t))
-        else:
-            assume(np.min(t_new) < np.min(t))
-
+    # Draw the interpolation kind from the provided tuple.
     kind = draw(st.sampled_from(kind_tuple))
-    assume_sorted = sorted_timestamps
-    return {
-        "t_new": t_new,
-        "t": t,
-        "y": y,
-        "uy": uy,
-        "kind": kind,
-        "fill_value": fill_value,
-        "fill_unc": fill_unc,
-        "bounds_error": bounds_error,
-        "assume_sorted": assume_sorted,
-        "returnC": returnC,
-    }
+
+    if for_make_equidistant:
+        dt = draw(
+            st.floats(
+                min_value=(np.max(t) - np.min(t)) * 1e-3,
+                max_value=(np.max(t) - np.min(t)) / 2,
+                exclude_min=True,
+                allow_nan=False,
+                allow_infinity=False,
+            )
+        )
+        return {"t": t, "y": y, "uy": uy, "dt": dt, "kind": kind}
+    else:
+        # Reset shape for interpolation timestamps (or frequencies).
+        strategy_params["shape"] = shape_for_timestamps
+        # Look up minimum and maximum of original timestamps (or frequencies) just once.
+        t_min = np.min(t)
+        t_max = np.max(t)
+
+        if not extrapolate:
+            # In case we do not want to extrapolate, use range of "original"
+            # timestamps (or frequencies) as boundaries.
+            strategy_params["elements"] = st.floats(
+                min_value=t_min, max_value=t_max, **float_generic_params
+            )
+            fill_value = fill_unc = np.nan
+            # Switch between default value None and intentionally setting to True,
+            # which should behave identically.
+            bounds_error = draw(st.one_of(st.just(True), st.none()))
+        else:
+            # In case we want to extrapolate, draw some fill values for the
+            # out-of-bounds range. Those will be either single floats or a 2-tuple of
+            # floats or the special value "extrapolate".
+            fill_value = draw_fill_values(restrict_fill_value)
+            fill_unc = draw_fill_values(restrict_fill_unc)
+            bounds_error = False
+
+        # Draw interpolation timestamps (or frequencies).
+        t_new = draw(hnp.arrays(**strategy_params))
+
+        if extrapolate:
+            # In case we want to extrapolate, make sure we actually do after having
+            # drawn the timestamps (or frequencies) not to randomly have drawn values
+            # inside original bounds and if even more constraints are given ensure
+            # those.
+            assume(np.min(t_new) < np.min(t) or np.max(t_new) > np.max(t))
+            if extrapolate == "above":
+                assume(np.max(t_new) > np.max(t))
+            else:
+                assume(np.min(t_new) < np.min(t))
+
+        assume_sorted = sorted_timestamps
+        return {
+            "t_new": t_new,
+            "t": t,
+            "y": y,
+            "uy": uy,
+            "kind": kind,
+            "fill_value": fill_value,
+            "fill_unc": fill_unc,
+            "bounds_error": bounds_error,
+            "assume_sorted": assume_sorted,
+            "returnC": returnC,
+        }
 
 
 @given(timestamps_values_uncertainties_kind())
-def test_usual_call(interp_inputs):
-    t_new, y_new, uy_new = interp1d_unc(**interp_inputs)
+def test_usual_call_interp1d_unc(interp_inputs):
+    t_new, y_new, uy_new = interp1d_unc(**interp_inputs)[:]
     # Check the equal dimensions of the minimum calls output.
     assert len(t_new) == len(y_new) == len(uy_new)
 
@@ -584,3 +609,85 @@ def test_raise_value_error_interp1d_unc(interp_inputs):
     interp_inputs["bounds_error"] = True
     with raises(ValueError):
         interp1d_unc(**interp_inputs)
+
+
+# noinspection PyArgumentList
+@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+def test_too_short_call_make_equidistant(interp_inputs):
+    # Check erroneous calls with too few inputs.
+    with raises(TypeError):
+        make_equidistant(interp_inputs["t"])
+        make_equidistant(interp_inputs["t"], interp_inputs["y"])
+
+
+@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+def test_full_call_make_equidistant(interp_inputs):
+    t_new, y_new, uy_new = make_equidistant(**interp_inputs)
+    # Check the equal dimensions of the minimum calls output.
+    assert len(t_new) == len(y_new) == len(uy_new)
+
+
+@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
+    # Check erroneous calls with unequally long inputs.
+    with raises(ValueError):
+        y_wrong = np.tile(interp_inputs["y"], 2)
+        uy_wrong = np.tile(interp_inputs["uy"], 3)
+        make_equidistant(interp_inputs["t"], y_wrong, uy_wrong)
+
+
+@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+def test_t_new_to_dt_make_equidistant(interp_inputs):
+    t_new = make_equidistant(**interp_inputs)[0]
+    delta_t_new = np.diff(t_new)
+    # Check if the new timestamps are ascending.
+    assert not np.any(delta_t_new < 0)
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        kind_tuple=("previous", "next", "nearest"), for_make_equidistant=True
+    )
+)
+def test_prev_in_make_equidistant(interp_inputs):
+    y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
+    # Check if all 'interpolated' values are present in the actual values.
+    assert np.all(np.isin(y_new, interp_inputs["y"]))
+    assert np.all(np.isin(uy_new, interp_inputs["uy"]))
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        kind_tuple=["linear"], for_make_equidistant=True
+    )
+)
+def test_linear_in_make_equidistant(interp_inputs):
+    y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
+    # Check if all interpolated values lie in the range of the original values.
+    assert np.all(np.amin(interp_inputs["y"]) <= y_new)
+    assert np.all(np.amax(interp_inputs["y"]) >= y_new)
+
+
+@given(st.integers(min_value=3, max_value=1000))
+def test_linear_uy_in_make_equidistant(n):
+    # Check for given input, if interpolated uncertainties equal 1 and
+    # :math:`sqrt(2) / 2`.
+    dt_unit = 2
+    t_unit = np.arange(0, n, dt_unit)
+    y = uy_unit = np.ones_like(t_unit)
+    dt_half = dt_unit / 2
+    uy_new = make_equidistant(t_unit, y, uy_unit, dt_half, "linear")[2]
+    assert np.all(uy_new[0:n:dt_unit] == 1) and np.all(
+        uy_new[1:n:dt_unit] == np.sqrt(2) / 2
+    )
+
+
+@given(
+    timestamps_values_uncertainties_kind(
+        kind_tuple=("spline", "least-squares"), for_make_equidistant=True
+    )
+)
+def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
+    # Check that not implemented versions raise exceptions.
+    with raises(NotImplementedError):
+        make_equidistant(**interp_inputs)

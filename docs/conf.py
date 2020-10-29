@@ -38,18 +38,35 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.intersphinx",
+    "recommonmark",
+    "nbsphinx",
 ]
 
+# ReadTheDocs Sphinx theme option taken from
+# https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
+html_theme_options = {
+    # True hides the + signs to expand the menu entries in the sidebar.
+    'collapse_navigation': False,
+}
+
 # This should make SciPy documentation available inside our docs.
-intersphinx_mapping = {"python": ("https://docs.scipy.org/doc/scipy/reference", None)}
+intersphinx_mapping = {
+    "SciPy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "PyDynamic_tutorials": (
+        "https://pydynamic-tutorials.readthedocs.io/en/latest/",
+        None,
+    ),
+}
+
+nbsphinx_allow_errors = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = [".rst", ".md"]
+# source_suffix = ".rst"
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -70,7 +87,7 @@ author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
 # built documents.
 #
 # The short X.Y version.
-version = "1.3"
+version = "1.4.4"
 # The full version, including alpha/beta/rc tags.
 # release = "1.3.1"
 
