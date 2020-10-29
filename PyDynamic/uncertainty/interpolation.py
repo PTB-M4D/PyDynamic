@@ -7,14 +7,18 @@
 """
 import warnings
 
-from .interpolate import interp1d_unc
-
 __all__ = ["interp1d_unc"]
 
-warnings.simplefilter("default")
-warnings.warn(
-    "The module :mod:`PyDynamic.uncertainty.interpolation` is renamed to "
-    ":mod:`PyDynamic.uncertainty.interpolate` since the last major release 2.0.0. "
-    "Please switch to the current module immediately.",
-    DeprecationWarning,
-)
+
+def interp1d_unc(**kwargs):
+    """
+    .. deprecated:: 2.0.0
+    Please use :func:`PyDynamic.uncertainty.interpolate.interp1d_unc`
+    """
+    warnings.warn(
+        "The module *interpolation* is renamed to "
+        ":mod:`PyDynamic.uncertainty.interpolate` since the last major release 2.0.0. "
+        "Please switch to the current module immediately and use the current function "
+        ":func:`PyDynamic.uncertainty.interpolate.interp1d_unc`.",
+        DeprecationWarning,
+    )
