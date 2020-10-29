@@ -46,7 +46,7 @@ def valid_signals():
     valid_signals = [
         {"y": signal, "sigma_noise": np.random.randn(), "kind": "float"},
         {"y": signal, "sigma_noise": random_nonnegative_array(N), "kind": "diag"},
-        {"y": signal, "sigma_noise": random_array(N // 2), "kind": "corr"},
+        {"y": signal, "sigma_noise": random_nonnegative_array(N // 2), "kind": "corr"},
     ]
 
     return valid_signals
