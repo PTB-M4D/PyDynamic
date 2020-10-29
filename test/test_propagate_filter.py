@@ -135,7 +135,7 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
 
 # in the following test, we exclude the case of a valid signal with uncertainty given as
 # the right-sided auto-covariance (acf). This is done, because we currently do not ensure, that
-# the random-drawn acf generates a positive-semidefinite Toeplitz-matrix. Therefore we cannot 
+# the random-drawn acf generates a positive-semidefinite Toeplitz-matrix. Therefore we cannot
 # construct a valid and equivalent input for the Monte-Carlo method in that case.
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals()[:2])  # exclude kind="corr"
@@ -155,26 +155,36 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
     a = [1.0]
     if isinstance(filters["Utheta"], np.ndarray):
         Uab = filters["Utheta"]
-    else:  # Utheta == None 
+    else:  # Utheta == None
         Uab = np.zeros((len(b), len(b)))  # MC-method cant deal with Utheta = None
 
     blow = lowpasses["blow"]
+    if isinstance(blow, np.ndarray):
+        n_blow = len(blow)
+    else:
+        n_blow = 0
 
     ## run FIR with MC and extract diagonal of returned covariance
     y_mc, uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000)
     uy_mc = np.sqrt(np.diag(uy_mc))
 
-    
     # HACK: for visualization during debugging
     # import matplotlib.pyplot as plt
     # plt.plot(uy_fir, label="fir")
     # plt.plot(uy_mc, label="mc")
+    # plt.title("filter: {0}, signal: {1}".format(len(b), len(x)))
     # plt.legend()
     # plt.show()
     # /HACK
 
     # approximative comparison after swing-in of MC-result
-    assert np.allclose(uy_fir[len(b) :], uy_mc[len(b) :], atol=1e-1, rtol=1e-1)
+    # (which is after the combined length of blow and b)
+    assert np.allclose(
+        uy_fir[len(b) + n_blow :],
+        uy_mc[len(b) + n_blow :],
+        atol=1e-1,
+        rtol=1e-1,
+    )
 
 
 def test_IIRuncFilter():
