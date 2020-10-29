@@ -170,6 +170,13 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     if len(theta.shape) == 1:
         theta = theta[:, np.newaxis]
 
+    # NOTE: In the code below whereever `theta` or `Utheta` get used, they need to be flipped. 
+    #       This is necessary to take the time-order of both variables into account. (Which is descending
+    #       for `theta` and `Utheta` but ascending for `Ulow`.)
+    #       
+    #       Further details and illustrations showing the effect of not-flipping
+    #       can be found at https://github.com/PTB-PSt1/PyDynamic/issues/183
+
     # handle diag-case, where Ulow needs to be sliced from V
     if kind == "diag":
         # UncCov needs to be calculated inside in its own for-loop
