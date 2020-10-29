@@ -20,7 +20,7 @@ warning = (
 __all__ = ["fit_sos"]
 
 
-def fit_sos(**kwargs):
+def fit_sos(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.fit_som`"""
     warnings.warn(
         f"{warning}:func:`PyDynamic.model_estimation.fit_som`.", DeprecationWarning

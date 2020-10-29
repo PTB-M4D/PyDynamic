@@ -20,14 +20,14 @@ warning = (
 __all__ = ["LSIIR", "LSFIR"]
 
 
-def LSIIR(**kwargs):
+def LSIIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.LSIIR`"""
     warnings.warn(
         f"{warning}:func:`PyDynamic.model_estimation.LSIIR`.", DeprecationWarning
     )
 
 
-def LSFIR(**kwargs):
+def LSFIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.LSFIR`"""
     warnings.warn(
         f"{warning}:func:`PyDynamic.model_estimation.LSFIR`.", DeprecationWarning

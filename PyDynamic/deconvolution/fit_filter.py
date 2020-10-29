@@ -34,14 +34,14 @@ __all__ = [
 ]
 
 
-def LSFIR(**kwargs):
+def LSFIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSFIR`"""
     warnings.warn(
         f"{warning}:func:`PyDynamic.model_estimation.invLSFIR`.", DeprecationWarning
     )
 
 
-def LSFIR_unc(**kwargs):
+def LSFIR_unc(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSFIR_unc`
     """
     warnings.warn(
@@ -49,7 +49,7 @@ def LSFIR_unc(**kwargs):
     )
 
 
-def LSFIR_uncMC(**kwargs):
+def LSFIR_uncMC(*args, **kwargs):
     """
     .. deprecated:: 1.4.1
         Please use :func:`PyDynamic.model_estimation.invLSFIR_uncMC`
@@ -60,14 +60,14 @@ def LSFIR_uncMC(**kwargs):
     )
 
 
-def LSIIR(**kwargs):
+def LSIIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSIIR`"""
     warnings.warn(
         f"{warning}:func:`PyDynamic.model_estimation.invLSIIR`.", DeprecationWarning
     )
 
 
-def LSIIR_unc(**kwargs):
+def LSIIR_unc(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSIIR_unc`
     """
     warnings.warn(
