@@ -11,5 +11,7 @@ from PyDynamic.misc.tools import make_equidistant
 )
 def test_deprecated_call(function):
     module = inspect.getmodule(function)
-    pytest.deprecated_call(function)
-    pytest.deprecated_call(getattr(module, function.__name__))
+    with pytest.raises(DeprecationWarning):
+        pytest.deprecated_call(function)
+    with pytest.raises(DeprecationWarning):
+        pytest.deprecated_call(getattr(module, function.__name__))
