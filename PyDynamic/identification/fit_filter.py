@@ -7,9 +7,6 @@
     immediately.
 """
 
-import warnings
-
-
 warning = (
     "The module *identification* is combined with the module *deconvolution* and "
     "renamed to :mod:`PyDynamic.model_estimation` since the last major release 2.0.0. "
@@ -22,13 +19,9 @@ __all__ = ["LSIIR", "LSFIR"]
 
 def LSIIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.LSIIR`"""
-    warnings.warn(
-        f"{warning}:func:`PyDynamic.model_estimation.LSIIR`.", DeprecationWarning
-    )
+    raise DeprecationWarning(f"{warning}:func:`PyDynamic.model_estimation.LSIIR`.")
 
 
 def LSFIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.LSFIR`"""
-    warnings.warn(
-        f"{warning}:func:`PyDynamic.model_estimation.LSFIR`.", DeprecationWarning
-    )
+    raise DeprecationWarning(f"{warning}:func:`PyDynamic.model_estimation.LSFIR`.")

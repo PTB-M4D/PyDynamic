@@ -11,9 +11,6 @@
     :func:`PyDynamic.model_estimation.fit_filter.invLSIIR_unc`).
 """
 
-import warnings
-
-
 warning = (
     "The module *deconvolution* is combined with the module *identification* "
     "and renamed to :mod:`PyDynamic.model_estimation` since the last major "
@@ -36,16 +33,14 @@ __all__ = [
 
 def LSFIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSFIR`"""
-    warnings.warn(
-        f"{warning}:func:`PyDynamic.model_estimation.invLSFIR`.", DeprecationWarning
-    )
+    raise DeprecationWarning(f"{warning}:func:`PyDynamic.model_estimation.invLSFIR`.")
 
 
 def LSFIR_unc(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSFIR_unc`
     """
-    warnings.warn(
-        f"{warning}:func:`PyDynamic.model_estimation.invLSFIR_unc`.", DeprecationWarning
+    raise DeprecationWarning(
+        f"{warning}:func:`PyDynamic.model_estimation.invLSFIR_unc`."
     )
 
 
@@ -54,22 +49,19 @@ def LSFIR_uncMC(*args, **kwargs):
     .. deprecated:: 1.4.1
         Please use :func:`PyDynamic.model_estimation.invLSFIR_uncMC`
     """
-    warnings.warn(
-        f"{warning}:func:`PyDynamic.model_estimation.invLSFIR_uncMC`.",
-        DeprecationWarning,
+    raise DeprecationWarning(
+        f"{warning}:func:`PyDynamic.model_estimation.invLSFIR_uncMC`."
     )
 
 
 def LSIIR(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSIIR`"""
-    warnings.warn(
-        f"{warning}:func:`PyDynamic.model_estimation.invLSIIR`.", DeprecationWarning
-    )
+    raise DeprecationWarning(f"{warning}:func:`PyDynamic.model_estimation.invLSIIR`.")
 
 
 def LSIIR_unc(*args, **kwargs):
     """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.invLSIIR_unc`
     """
-    warnings.warn(
-        f"{warning}:func:`PyDynamic.model_estimation.invLSIIR_unc`.", DeprecationWarning
+    raise DeprecationWarning(
+        f"{warning}:func:`PyDynamic.model_estimation.invLSIIR_unc`."
     )

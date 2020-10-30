@@ -20,5 +20,7 @@ from PyDynamic import deconvolution, identification
 )
 def test_deprecated_call(function):
     module = inspect.getmodule(function)
-    pytest.deprecated_call(function)
-    pytest.deprecated_call(getattr(module, function.__name__))
+    with pytest.raises(DeprecationWarning):
+        function()
+    with pytest.raises(DeprecationWarning):
+        getattr(module, function.__name__).__call__()
