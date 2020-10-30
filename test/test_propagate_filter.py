@@ -1,93 +1,200 @@
-"""
-Perform test for uncertainty.propagate_filter
-"""
+"""Perform test for uncertainty.propagate_filter"""
+import itertools
 
 import numpy as np
 import pytest
 import scipy
 
-from PyDynamic.misc.filterstuff import kaiser_lowpass
-from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
 from PyDynamic.uncertainty.propagate_filter import (
+    _get_derivative_A,
+    _tf2ss,
     FIRuncFilter,
     IIRuncFilter,
-    _tf2ss,
-    _get_derivative_A,
 )
-
-# parameters of simulated measurement
-Fs = 100e3  # sampling frequency (in Hz)
-Ts = 1 / Fs  # sampling interval length (in s)
-
-# nominal system parameters
-fcut = 20e3  # low-pass filter cut-off frequency (6 dB)
-L = 100  # filter order
-b1 = kaiser_lowpass(L, fcut, Fs)[0]
-b2 = kaiser_lowpass(L - 20, fcut, Fs)[0]
-
-# uncertain knowledge: cutoff between 19.5kHz and 20.5kHz
-runs = 1000
-FC = fcut + (2 * np.random.rand(runs) - 1) * 0.5e3
-
-B = np.zeros((runs, L + 1))
-for k in range(runs):  # Monte Carlo for filter coefficients of low-pass filter
-    B[k, :] = kaiser_lowpass(L, FC[k], Fs)[0]
-
-Ub = make_semiposdef(np.cov(B, rowvar=0))  # covariance matrix of MC result
-
-# simulate input and output signals
-nTime = 500
-time = np.arange(nTime) * Ts  # time values
-
-# different cases
-sigma_noise = 1e-2  # 1e-5
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 
 
-def test_FIRuncFilter_float():
-
-    # input signal + run methods
-    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)
-
-    # apply uncertain FIR filter (GUM formula)
-    for blow in [None, b2]:
-        y, Uy = FIRuncFilter(x, sigma_noise, b1, Ub, blow=blow, kind="float")
-        assert len(y) == len(x)
-        assert len(Uy) == len(x)
+def random_array(length):
+    array = np.random.randn(length)
+    return array
 
 
-def test_FIRuncFilter_corr():
-
-    # get an instance of noise, the covariance and the covariance-matrix with the specified color
-    color = "white"
-    noise = power_law_noise(N=nTime, color_value=color, std=sigma_noise)
-    Ux = power_law_acf(nTime, color_value=color, std=sigma_noise)
-
-    # input signal
-    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=noise)
-
-    # apply uncertain FIR filter (GUM formula)
-    for blow in [None, b2]:
-        y, Uy = FIRuncFilter(x, Ux, b1, Ub, blow=blow, kind="corr")
-        assert len(y) == len(x)
-        assert len(Uy) == len(x)
+def random_nonnegative_array(length):
+    array = np.random.random(length)
+    return array
 
 
-def test_FIRuncFilter_diag():
-    sigma_diag = sigma_noise * (
-        1 + np.heaviside(np.arange(len(time)) - len(time) // 2, 0)
-    )  # std doubles after half of the time
-    noise = sigma_diag * white_gaussian(len(time))
+def random_semiposdef_matrix(length):
+    matrix = np.random.random((length, length))
+    matrix = make_semiposdef(matrix)
+    return matrix
 
-    # input signal + run methods
-    x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=noise)
 
-    # apply uncertain FIR filter (GUM formula)
-    for blow in [None, b2]:
-        y, Uy = FIRuncFilter(x, sigma_diag, b1, Ub, blow=blow, kind="diag")
-        assert len(y) == len(x)
-        assert len(Uy) == len(x)
+def valid_filters():
+    N = np.random.randint(2, 100)  # scipy.linalg.companion requires N >= 2
+    theta = random_array(N)
+
+    valid_filters = [
+        {"theta": theta, "Utheta": None},
+        {"theta": theta, "Utheta": np.zeros((N, N))},
+        {"theta": theta, "Utheta": random_semiposdef_matrix(N)},
+    ]
+
+    return valid_filters
+
+
+def valid_signals():
+    N = np.random.randint(100, 1000)
+    signal = random_array(N)
+
+    valid_signals = [
+        {"y": signal, "sigma_noise": np.random.randn(), "kind": "float"},
+        {"y": signal, "sigma_noise": random_nonnegative_array(N), "kind": "diag"},
+        {"y": signal, "sigma_noise": random_nonnegative_array(N // 2), "kind": "corr"},
+    ]
+
+    return valid_signals
+
+
+def valid_lows():
+    N = np.random.randint(2, 10)  # scipy.linalg.companion requires N >= 2
+    blow = random_array(N)
+
+    valid_lows = [
+        {"blow": None},
+        {"blow": blow},
+    ]
+
+    return valid_lows
+
+
+@pytest.fixture
+def equal_filters():
+    # Create two filters with assumed identical FIRuncFilter() output to test
+    # equality of the more efficient with the standard implementation.
+
+    N = np.random.randint(2, 100)  # scipy.linalg.companion requires N >= 2
+    theta = random_array(N)
+
+    equal_filters = [
+        {"theta": theta, "Utheta": None},
+        {"theta": theta, "Utheta": np.zeros((N, N))},
+    ]
+
+    return equal_filters
+
+
+@pytest.fixture
+def equal_signals():
+    # Create three signals with assumed identical FIRuncFilter() output to test
+    # equality of the different cases of input parameter 'kind'.
+
+    # some shortcuts
+    N = np.random.randint(100, 1000)
+    signal = random_array(N)
+    s = np.random.randn()
+    acf = np.array([s ** 2] + [0] * (N - 1))
+
+    equal_signals = [
+        {"y": signal, "sigma_noise": s, "kind": "float"},
+        {"y": signal, "sigma_noise": np.full(N, s), "kind": "diag"},
+        {"y": signal, "sigma_noise": acf, "kind": "corr"},
+    ]
+
+    return equal_signals
+
+
+@pytest.mark.parametrize("filters", valid_filters())
+@pytest.mark.parametrize("signals", valid_signals())
+@pytest.mark.parametrize("lowpasses", valid_lows())
+def test_FIRuncFilter(filters, signals, lowpasses):
+    # Check expected output for thinkable permutations of input parameters.
+    y, Uy = FIRuncFilter(**filters, **signals, **lowpasses)
+    assert len(y) == len(signals["y"])
+    assert len(Uy) == len(signals["y"])
+
+    # note: a direct comparison against scipy.signal.lfilter is not needed,
+    #       as y is already computed using this method
+
+
+def test_FIRuncFilter_equality(equal_filters, equal_signals):
+    # Check expected output for being identical across different equivalent input
+    # parameter cases.
+    all_y = []
+    all_uy = []
+
+    # run all combinations of filter and signals
+    for (f, s) in itertools.product(equal_filters, equal_signals):
+        y, uy = FIRuncFilter(**f, **s)
+        all_y.append(y)
+        all_uy.append(uy)
+
+    # check that all have the same output, as they are supposed to represent equal cases
+    for a, b in itertools.combinations(all_y, 2):
+        assert np.allclose(a, b)
+
+    for a, b in itertools.combinations(all_uy, 2):
+        assert np.allclose(a, b)
+
+
+# in the following test, we exclude the case of a valid signal with uncertainty given as
+# the right-sided auto-covariance (acf). This is done, because we currently do not ensure, that
+# the random-drawn acf generates a positive-semidefinite Toeplitz-matrix. Therefore we cannot
+# construct a valid and equivalent input for the Monte-Carlo method in that case.
+@pytest.mark.parametrize("filters", valid_filters())
+@pytest.mark.parametrize("signals", valid_signals()[:2])  # exclude kind="corr"
+@pytest.mark.parametrize("lowpasses", valid_lows())
+def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
+    # Check output for thinkable permutations of input parameters against a Monte Carlo approach.
+
+    # run method
+    y_fir, uy_fir = FIRuncFilter(**filters, **signals, **lowpasses)
+
+    # run Monte Carlo simulation of an FIR
+    ## adjust input to match conventions of MC
+    x = signals["y"]
+    ux = signals["sigma_noise"]
+
+    b = filters["theta"]
+    a = [1.0]
+    if isinstance(filters["Utheta"], np.ndarray):
+        Uab = filters["Utheta"]
+    else:  # Utheta == None
+        Uab = np.zeros((len(b), len(b)))  # MC-method cant deal with Utheta = None
+
+    blow = lowpasses["blow"]
+    if isinstance(blow, np.ndarray):
+        n_blow = len(blow)
+    else:
+        n_blow = 0
+
+    ## run FIR with MC and extract diagonal of returned covariance
+    y_mc, uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000)
+    uy_mc = np.sqrt(np.diag(uy_mc))
+
+    # HACK: for visualization during debugging
+    # import matplotlib.pyplot as plt
+    # plt.plot(uy_fir, label="fir")
+    # plt.plot(uy_mc, label="mc")
+    # plt.title("filter: {0}, signal: {1}".format(len(b), len(x)))
+    # plt.legend()
+    # plt.show()
+    # /HACK
+
+    # approximative comparison after swing-in of MC-result
+    # (which is after the combined length of blow and b)
+    assert np.allclose(
+        uy_fir[len(b) + n_blow :],
+        uy_mc[len(b) + n_blow :],
+        atol=1e-1,
+        rtol=1e-1,
+    )
+
+
+def test_IIRuncFilter():
+    pass
 
 
 @pytest.fixture(scope="module")

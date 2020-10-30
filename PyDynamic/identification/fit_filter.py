@@ -1,30 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-.. deprecated:: 1.2.71
-    The package *identification* will be combined with the package *deconvolution* and
-    renamed to *model_estimation* in the next major release 2.0.0. From version 1.4.1 on
-    you should only use the new package :doc:`PyDynamic.model_estimation` instead.
-
-This module contains several functions to carry out a least-squares fit to a
-given complex frequency response.
-
-This module for now still contains the following functions:
-
-* :func:`LSIIR`: Least-squares IIR filter fit to a given frequency response
-* :func:`LSFIR`: Least-squares fit of a digital FIR filter to a given frequency
-  response
+.. deprecated:: 2.0.0
+    The module *identification* is combined with the module *deconvolution* and
+    renamed to :mod:`PyDynamic.model_estimation` since the last major release 2.0.0.
+    *identification* might be removed any time. Please switch to the current module
+    immediately.
 """
-import warnings
 
-from ..model_estimation.fit_filter import LSFIR, LSIIR
+warning = (
+    "The module *identification* is combined with the module *deconvolution* and "
+    "renamed to :mod:`PyDynamic.model_estimation` since the last major release 2.0.0. "
+    "*identification* might be removed any time. Please switch to the current module "
+    "immediately. Please use the current function name "
+)
 
 __all__ = ["LSIIR", "LSFIR"]
 
-warnings.simplefilter("default")
-warnings.warn(
-    "The module *identification* will be combined with the module "
-    "*deconvolution* and renamed to *model_estimation* in the "
-    "next major release 2.0.0. From version 1.4.1 on you should only use "
-    "the new module *model_estimation* instead.",
-    DeprecationWarning,
-)
+
+def LSIIR(*args, **kwargs):
+    """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.LSIIR`"""
+    raise DeprecationWarning(f"{warning}:func:`PyDynamic.model_estimation.LSIIR`.")
+
+
+def LSFIR(*args, **kwargs):
+    """.. deprecated:: 1.4.1 Please use :func:`PyDynamic.model_estimation.LSFIR`"""
+    raise DeprecationWarning(f"{warning}:func:`PyDynamic.model_estimation.LSFIR`.")

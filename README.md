@@ -51,8 +51,8 @@ and modules in the path, so that for example the following import statements are
 equivalent.
 
 ```python
-from PyDynamic.misc.tools import make_equidistant
-from PyDynamic.misc import make_equidistant
+from PyDynamic.uncertainty.interpolate import make_equidistant
+from PyDynamic.uncertainty import make_equidistant
 from PyDynamic import make_equidistant
 ```
 
@@ -60,7 +60,7 @@ from PyDynamic import make_equidistant
 
 There is a [quick way](#quick-setup-not-recommended) to get started but we advise to
 setup a virtual environment and guide through the process in the section
-[Proper Python setup with virtual environment](#proper-python-setup-with-virtual-environment)
+[Proper Python setup with virtual environment](#proper-python-setup-with-virtual-environment-recommended)
 
 ### Quick setup (**not recommended**)
 
