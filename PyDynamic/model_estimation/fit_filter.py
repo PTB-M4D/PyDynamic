@@ -329,10 +329,11 @@ def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None
         Fs: float
             sampling frequency of digital filter
         wt: np.ndarray of shape (2M,) - optional
-            array of weights for a weighted least-squares method
+            array of weights for a weighted least-squares method (default = None
+            results in no weighting)
         verbose: bool, optional
-            whether to print statements to the command line
-        trunc_svd_tol: float
+            whether to print statements to the command line (default = True)
+        trunc_svd_tol: float, optional
             lower bound for singular values to be considered for pseudo-inverse
 
     Returns
@@ -379,7 +380,9 @@ def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None
     # Step 2: Fit filter coefficients and evaluate uncertainties
     if isinstance(wt, np.ndarray):
         if wt.shape != np.diag(UiH).shape[0]:
-            raise ValueError("User-defined weighting has wrong dimension.")
+            raise ValueError("invLSFIR_unc: User-defined weighting has wrong "
+                             "dimension. wt is expected to be of length "
+                             f"{2 * Nf} but is of length {wt.shape}.")
     else:
         wt = np.ones(2 * Nf)
 
@@ -413,7 +416,7 @@ def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None
     return bFIR, UbFIR
 
 
-def invLSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
+def invLSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
     """Design of FIR filter as fit to reciprocal of frequency response values
     with uncertainty
 
@@ -440,8 +443,11 @@ def invLSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
             frequencies corresponding to H
         Fs: float
             sampling frequency of digital filter
+        wt: np.ndarray of shape (2M,) - optional
+            array of weights for a weighted least-squares method (default = None
+            results in no weighting)
         verbose: bool, optional
-            whether to print statements to the command line
+            whether to print statements to the command line (default = True)
 
     Returns
     -------
@@ -465,11 +471,19 @@ def invLSFIR_uncMC(H, UH, N, tau, f, Fs, verbose=True):
     HRI = np.random.multivariate_normal(np.hstack((np.real(H), np.imag(H))), UH, runs)
 
     # Step 2: Fitting the filter coefficients
+    Nf = len(f)
+    if isinstance(wt, np.ndarray):
+        if wt.shape != 2 * Nf:
+            raise ValueError("invLSFIR_uncMC: User-defined weighting has wrong "
+                             "dimension. wt is expected to be of length "
+                             f"{2 * Nf} but is of length {wt.shape}.")
+    else:
+        wt = np.ones(2 * Nf)
+
     E = np.exp(-1j * 2 * np.pi * np.dot(f[:, np.newaxis] / Fs,
                                         np.arange(N + 1)[:, np.newaxis].T))
     X = np.vstack((np.real(E), np.imag(E)))
-
-    Nf = len(f)
+    X = np.dot(np.diag(wt), X)
     bF = np.zeros((N + 1, runs))
     resn = np.zeros((runs,))
     for k in range(runs):
