@@ -12,7 +12,8 @@
 # supported Python versions, with pip-tools installed. Those environments need to be
 # placed at ../envs/PyDynamic-PYTHONVERSION relative to the project root. The proper
 # naming for the versions you find in the line starting with 'for PYVENV in ' in this
-# script.
+# script. If you want to execute this script on Windows you should adapt line 33
+# appropriately.
 # The script starts with navigating to the project root, if it was called from
 # the subfolder ./requirements/.
 if [ -f requirements.txt ] && [ -d ../PyDynamic/ ] && [ -d ../requirements/ ]; then
@@ -23,14 +24,19 @@ fi
 # environments and update the corresponding two requirements files by issuing the
 # appropriate pip-tools command pip-compile from within the specific environments.
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-for PYVENV in "py36" "py37" "py38"
+for PYVENV in "6" "7" "8"
 do
+    echo "
+Compile dependencies for Python3.$PYVENV
+==================================
+    "
     # Activate according Python environment.
-    source ../envs/PyDynamic-$PYVENV/bin/activate && \
-    # Create requirements.txt from requirements.in.
-    pip-compile --upgrade --output-file requirements/requirements-$PYVENV.txt && \
+    source ../envs/PyDynamic-py3$PYVENV/bin/activate && \
+    # Upgrade pip and pip-tools.
+    python -m pip install --upgrade pip pip-tools && \
+    # Create requirements...txt from setup.py.
+    python -m piptools compile --upgrade --output-file requirements/requirements-py3$PYVENV.txt && \
     # Create dev-requirements...txt from dev-requirements...in.
-    pip-compile --upgrade requirements/dev-requirements-$PYVENV.in \
-        --output-file requirements/dev-requirements-$PYVENV.txt && \
+    python -m piptools compile --upgrade requirements/dev-requirements-py3$PYVENV.in --output-file requirements/dev-requirements-py3$PYVENV.txt && \
     deactivate
 done
