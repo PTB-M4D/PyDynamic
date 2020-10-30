@@ -12,12 +12,12 @@ from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
 
 
 @composite
-def timestamps_values_uncertainties_kind(
+def values_uncertainties_kind(
     draw,
     min_count: Optional[int] = 2,
     max_count: Optional[int] = None,
     kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest"),
-    sorted_timestamps: Optional[bool] = True,
+    sorted_xs: Optional[bool] = True,
     extrapolate: Optional[Union[bool, str]] = False,
     restrict_fill_value: Optional[str] = None,
     restrict_fill_unc: Optional[str] = None,
@@ -32,30 +32,27 @@ def timestamps_values_uncertainties_kind(
             this is a hypothesis internal callable to actually draw from provided
             strategies
         min_count : int, optional
-            the minimum number of elements expected inside the arrays of timestamps
-             (or frequencies), measurement values and associated uncertainties.
-             (default = 2)
+            the minimum number of elements expected inside the arrays of x and y
+            values and associated uncertainties. (default = 2)
         max_count : int, optional
-            the maximum number of elements expected inside the arrays of timestamps
-            (or frequencies), measurement values and associated uncertainties
-            (default is None)
+            the maximum number of elements expected inside the arrays of x and y values
+            and associated uncertainties (default is None)
         kind_tuple : tuple(str), optional
             the tuple of strings out of "linear", "previous", "next", "nearest",
             "spline", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
             "previous", "next", "nearest"
-        sorted_timestamps : bool, optional
-            if True (default) the timestamps (or frequencies) are guaranteed to be in
+        sorted_xs : bool, optional
+            if True (default) the x values are guaranteed to be in
             ascending order, if False they still might be by coincidence or not
         extrapolate : bool or str, optional
-            If True the interpolation timestamps (or frequencies) are generated such
-            that extrapolation is necessary by guarantying at least one of the
-            interpolation timestamps (or frequencies) outside the original bounds
-            and accordingly setting appropriate values for `fill_value` and
-            `bounds_error = False`. If False (default) each element of t_new is
-            guaranteed to lie within the range of t. Can be set to "above" or "below"
-            to guarantee at least one element of t_new to lie either below or above
-            the bounds of t.
+            If True the array to evaluate the interpolant at are generated such that
+            extrapolation is necessary by guarantying at least one of the values
+            outside the original bounds and accordingly setting appropriate values
+            for `fill_value` and `bounds_error = False`. If False (default) each
+            element of x_new is guaranteed to lie within the range of x. Can be set
+            to "above" or "below" to guarantee at least one element of x_new to lie
+            either below or above the bounds of x.
         restrict_fill_value : str, optional
             String specifying the desired strategy for drawing a fill_value. One of
             "float", "tuple", "str", "nan" to guarantee either a float, a tuple of
@@ -115,29 +112,28 @@ def timestamps_values_uncertainties_kind(
         "allow_nan": False,
         "allow_infinity": False,
     }
-    # Set all common parameters for timestamps (or frequencies), measurements values
-    # and associated uncertainties.
-    shape_for_timestamps = hnp.array_shapes(
+    # Set all common parameters for x and y values and associated uncertainties.
+    shape_for_x = hnp.array_shapes(
         max_dims=1, min_side=min_count, max_side=max_count
     )
     strategy_params = {
         "dtype": np.float,
-        "shape": shape_for_timestamps,
+        "shape": shape_for_x,
         "elements": st.floats(
             min_value=-float_abs_max, max_value=float_abs_max, **float_generic_params
         ),
         "unique": True,
     }
-    # Draw "original" timestamps (or frequencies).
-    t = draw(hnp.arrays(**strategy_params))
-    # Sort timestamps (or frequencies) in ascending order.
-    if sorted_timestamps:
-        ind = np.argsort(t)
-        t = t[ind]
+    # Draw "original" x values.
+    x = draw(hnp.arrays(**strategy_params))
+    # Sort x values in ascending order.
+    if sorted_xs:
+        ind = np.argsort(x)
+        x = x[ind]
 
-    # Reuse "original" timestamps (or frequencies) shape for measurements values and
-    # associated uncertainties and draw both.
-    strategy_params["shape"] = np.shape(t)
+    # Reuse "original" x values' shape for y values and associated uncertainties and
+    # draw both.
+    strategy_params["shape"] = np.shape(x)
     y = draw(hnp.arrays(**strategy_params))
     uy = draw(hnp.arrays(**strategy_params))
 
@@ -145,28 +141,28 @@ def timestamps_values_uncertainties_kind(
     kind = draw(st.sampled_from(kind_tuple))
 
     if for_make_equidistant:
-        dt = draw(
+        dx = draw(
             st.floats(
-                min_value=(np.max(t) - np.min(t)) * 1e-3,
-                max_value=(np.max(t) - np.min(t)) / 2,
+                min_value=(np.max(x) - np.min(x)) * 1e-3,
+                max_value=(np.max(x) - np.min(x)) / 2,
                 exclude_min=True,
                 allow_nan=False,
                 allow_infinity=False,
             )
         )
-        return {"t": t, "y": y, "uy": uy, "dt": dt, "kind": kind}
+        return {"x": x, "y": y, "uy": uy, "dx": dx, "kind": kind}
     else:
-        # Reset shape for interpolation timestamps (or frequencies).
-        strategy_params["shape"] = shape_for_timestamps
-        # Look up minimum and maximum of original timestamps (or frequencies) just once.
-        t_min = np.min(t)
-        t_max = np.max(t)
+        # Reset shape for values to evaluate the interpolant at.
+        strategy_params["shape"] = shape_for_x
+        # Look up minimum and maximum of original x values just once.
+        x_min = np.min(x)
+        x_max = np.max(x)
 
         if not extrapolate:
             # In case we do not want to extrapolate, use range of "original"
-            # timestamps (or frequencies) as boundaries.
+            # x values as boundaries.
             strategy_params["elements"] = st.floats(
-                min_value=t_min, max_value=t_max, **float_generic_params
+                min_value=x_min, max_value=x_max, **float_generic_params
             )
             fill_value = fill_unc = np.nan
             # Switch between default value None and intentionally setting to True,
@@ -180,24 +176,24 @@ def timestamps_values_uncertainties_kind(
             fill_unc = draw_fill_values(restrict_fill_unc)
             bounds_error = False
 
-        # Draw interpolation timestamps (or frequencies).
-        t_new = draw(hnp.arrays(**strategy_params))
+        # Draw values to evaluate the interpolant at.
+        x_new = draw(hnp.arrays(**strategy_params))
 
         if extrapolate:
             # In case we want to extrapolate, make sure we actually do after having
-            # drawn the timestamps (or frequencies) not to randomly have drawn values
-            # inside original bounds and if even more constraints are given ensure
-            # those.
-            assume(np.min(t_new) < np.min(t) or np.max(t_new) > np.max(t))
+            # drawn the values to evaluate the interpolant at not to randomly have
+            # drawn values inside original bounds and if even more constraints are
+            # given ensure those.
+            assume(np.min(x_new) < np.min(x) or np.max(x_new) > np.max(x))
             if extrapolate == "above":
-                assume(np.max(t_new) > np.max(t))
+                assume(np.max(x_new) > np.max(x))
             else:
-                assume(np.min(t_new) < np.min(t))
+                assume(np.min(x_new) < np.min(x))
 
-        assume_sorted = sorted_timestamps
+        assume_sorted = sorted_xs
         return {
-            "t_new": t_new,
-            "t": t,
+            "x_new": x_new,
+            "x": x,
             "y": y,
             "uy": uy,
             "kind": kind,
@@ -209,14 +205,14 @@ def timestamps_values_uncertainties_kind(
         }
 
 
-@given(timestamps_values_uncertainties_kind())
+@given(values_uncertainties_kind())
 def test_usual_call_interp1d_unc(interp_inputs):
     t_new, y_new, uy_new = interp1d_unc(**interp_inputs)[:]
     # Check the equal dimensions of the minimum calls output.
     assert len(t_new) == len(y_new) == len(uy_new)
 
 
-@given(timestamps_values_uncertainties_kind())
+@given(values_uncertainties_kind())
 def test_wrong_input_length_y_call_interp1d_unc(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     interp_inputs["y"] = np.tile(interp_inputs["y"], 2)
@@ -224,7 +220,7 @@ def test_wrong_input_length_y_call_interp1d_unc(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
-@given(timestamps_values_uncertainties_kind())
+@given(values_uncertainties_kind())
 def test_wrong_input_length_uy_call_interp1d_unc(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     interp_inputs["uy"] = np.tile(interp_inputs["uy"], 2)
@@ -232,7 +228,7 @@ def test_wrong_input_length_uy_call_interp1d_unc(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
-@given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
+@given(values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
 def test_trivial_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
@@ -240,7 +236,7 @@ def test_trivial_in_interp1d_unc(interp_inputs):
     assert np.all(np.isin(uy_new, interp_inputs["uy"]))
 
 
-@given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
+@given(values_uncertainties_kind(kind_tuple=["linear"]))
 def test_linear_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
@@ -248,202 +244,202 @@ def test_linear_in_interp1d_unc(interp_inputs):
     assert np.all(np.max(interp_inputs["y"]) >= y_new)
 
 
-@given(timestamps_values_uncertainties_kind(extrapolate=True))
+@given(values_uncertainties_kind(extrapolate=True))
 def test_extrapolate_interp1d_unc(interp_inputs):
     # Check that extrapolation is executable in general.
     assert interp1d_unc(**interp_inputs)
 
 
 @given(
-    timestamps_values_uncertainties_kind(
-        sorted_timestamps=True, extrapolate="below", restrict_fill_value="str"
+    values_uncertainties_kind(
+        sorted_xs=True, extrapolate="below", restrict_fill_value="str"
     )
 )
 def test_extrapolate_below_without_fill_value_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is below the minimum of t and
+    # Deal with those cases where at least one of x_new is below the minimum of x and
     # fill_value=="extrapolate", which means constant extrapolation from the boundaries.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all t_new below the original bound.
+    # value of y is taken for all x_new below the original bound.
     assert np.all(
-        y_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        y_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["y"][0]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         extrapolate="below", restrict_fill_value="float"
     )
 )
 def test_extrapolate_below_with_fill_value_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is below the minimum of t and
+    # Deal with those cases where at least one of x_new is below the minimum of x and
     # fill_value is a float, which means constant extrapolation with this value.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works.
     assert np.all(
-        y_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        y_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["fill_value"]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         extrapolate="below", restrict_fill_value="tuple"
     )
 )
 def test_extrapolate_below_with_fill_values_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is below the minimum of t and
+    # Deal with those cases where at least one of x_new is below the minimum of x and
     # fill_value is a tuple, which means constant extrapolation with its first
     # element.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works.
     assert np.all(
-        y_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        y_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["fill_value"][0]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
-        sorted_timestamps=True, extrapolate="above", restrict_fill_value="str"
+    values_uncertainties_kind(
+        sorted_xs=True, extrapolate="above", restrict_fill_value="str"
     )
 )
 def test_extrapolate_above_without_fill_value_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is above the maximum of t and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_value=="extrapolate", which means constant extrapolation from the boundaries.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all t_new above the original bound.
+    # value of y is taken for all x _newabove the original bound.
     assert np.all(
-        y_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        y_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["y"][-1]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         extrapolate="above", restrict_fill_value="float"
     )
 )
 def test_extrapolate_above_with_fill_value_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is above the maximum of t and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_value is a float, which means constant extrapolation with this value.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works.
     assert np.all(
-        y_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        y_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["fill_value"]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         extrapolate="above", restrict_fill_value="tuple"
     )
 )
 def test_extrapolate_above_with_fill_values_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is above the maximum of t and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_value is a tuple, which means constant extrapolation with its second element.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works.
     assert np.all(
-        y_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        y_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["fill_value"][1]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
-        sorted_timestamps=True, extrapolate="below", restrict_fill_unc="str"
+    values_uncertainties_kind(
+        sorted_xs=True, extrapolate="below", restrict_fill_unc="str"
     )
 )
 def test_extrapolate_below_without_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is below the minimum of t and
+    # Deal with those cases where at least one of x_new is below the minimum of x and
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all t_new below the original bound.
+    # value of y is taken for all x _newbelow the original bound.
     assert np.all(
-        uy_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["uy"][0]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(extrapolate="below", restrict_fill_unc="float")
+    values_uncertainties_kind(extrapolate="below", restrict_fill_unc="float")
 )
 def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is below the minimum of t and
+    # Deal with those cases where at least one of x_new is below the minimum of x and
     # fill_unc is a float, which means constant extrapolation with this value.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
     assert np.all(
-        uy_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["fill_unc"]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(extrapolate="below", restrict_fill_unc="tuple")
+    values_uncertainties_kind(extrapolate="below", restrict_fill_unc="tuple")
 )
 def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is below the minimum of t and
+    # Deal with those cases where at least one of x _newis below the minimum of x and
     # fill_unc is a tuple, which means constant extrapolation with its first element.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
     assert np.all(
-        uy_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["fill_unc"][0]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
-        sorted_timestamps=True, extrapolate="above", restrict_fill_unc="str"
+    values_uncertainties_kind(
+        sorted_xs=True, extrapolate="above", restrict_fill_unc="str"
     )
 )
 def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is above the maximum of t and
+    # Deal with those cases where at least one of x _newis above the maximum of x and
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all t_new above the original bound.
+    # value of y is taken for all x _newabove the original bound.
     assert np.all(
-        uy_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["uy"][-1]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(extrapolate="above", restrict_fill_unc="float")
+    values_uncertainties_kind(extrapolate="above", restrict_fill_unc="float")
 )
 def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is above the maximum of t and
+    # Deal with those cases where at least one of x _newis above the maximum of x and
     # fill_unc is a float, which means constant extrapolation with this value.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
     assert np.all(
-        uy_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["fill_unc"]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(extrapolate="above", restrict_fill_unc="tuple")
+    values_uncertainties_kind(extrapolate="above", restrict_fill_unc="tuple")
 )
 def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of t_new is above the maximum of t and
+    # Deal with those cases where at least one of x _newis above the maximum of x and
     # fill_unc is a tuple, which means constant extrapolation with its second element.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
     assert np.all(
-        uy_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["fill_unc"][1]
     )
 
 
-@given(timestamps_values_uncertainties_kind(returnC=True, kind_tuple=("linear",)))
+@given(values_uncertainties_kind(returnC=True, kind_tuple=("linear",)))
 def test_compare_returnc_interp1d_unc(interp_inputs):
     # Compare the uncertainties computed from the sensitivities inside the
     # interpolation range and directly.
@@ -455,7 +451,7 @@ def test_compare_returnc_interp1d_unc(interp_inputs):
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         returnC=True, extrapolate=True, kind_tuple=("linear",)
     )
 )
@@ -468,7 +464,7 @@ def test_failing_returnc_with_extrapolation_interp1d_unc(interp_inputs):
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str"
     )
 )
@@ -479,12 +475,12 @@ def test_returnc_with_extrapolation_interp1d_unc(interp_inputs):
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         returnC=True,
         extrapolate=True,
         kind_tuple=("linear",),
         restrict_fill_unc="str",
-        sorted_timestamps=True,
+        sorted_xs=True,
     )
 )
 def test_returnc_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs):
@@ -493,18 +489,18 @@ def test_returnc_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs
     # below original bound.
     uy_new, C = interp1d_unc(**interp_inputs)[2:]
     assert np.all(
-        uy_new[interp_inputs["t_new"] < np.min(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["uy"][0]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         returnC=True,
         extrapolate=True,
         kind_tuple=("linear",),
         restrict_fill_unc="str",
-        sorted_timestamps=True,
+        sorted_xs=True,
     )
 )
 def test_returnc_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
@@ -515,13 +511,13 @@ def test_returnc_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
     # above original bound.
     uy_new = interp1d_unc(**interp_inputs)[2]
     assert np.all(
-        uy_new[interp_inputs["t_new"] > np.max(interp_inputs["t"])]
+        uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["uy"][-1]
     )
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str",
     )
 )
@@ -532,11 +528,11 @@ def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
     C = interp1d_unc(**interp_inputs)[3]
 
     # Check that C has the right shape.
-    assert C.shape == (len(interp_inputs["t_new"]), len(interp_inputs["t"]))
+    assert C.shape == (len(interp_inputs["x_new"]), len(interp_inputs["x"]))
 
     # Find interpolation range because we reuse it.
-    interp_range = (interp_inputs["t_new"] >= np.min(interp_inputs["t"])) | (
-        interp_inputs["t_new"] <= np.max(interp_inputs["t"])
+    interp_range = (interp_inputs["x_new"] >= np.min(interp_inputs["x"])) | (
+        interp_inputs["x_new"] <= np.max(interp_inputs["x"])
     )
 
     # Check if each row corresponding to an extrapolated value contains exactly one
@@ -558,11 +554,11 @@ def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
 
     # Check if each row of sensitivities sum to one, which should hold for the
     # Lagrangians and proves equality with one for extrapolation sensitivities.
-    assert_allclose(np.sum(C, 1), np.ones_like(interp_inputs["t_new"]))
+    assert_allclose(np.sum(C, 1), np.ones_like(interp_inputs["x_new"]))
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         returnC=True, kind_tuple=("previous", "next", "nearest",)
     )
 )
@@ -576,18 +572,18 @@ def test_value_error_for_returnc_interp1d_unc(interp_inputs):
 def test_linear_uy_in_interp1d_unc(n,):
     # Check for given input, if interpolated uncertainties equal 1 and
     # :math:`sqrt(2) / 2`.
-    dt_unit = 2
-    dt_half = dt_unit / 2
-    t_new = np.arange(0, n, dt_half)
-    t_unit = np.arange(0, n + dt_half, dt_unit)
-    y = uy_unit = np.ones_like(t_unit)
-    uy_new = interp1d_unc(t_new, t_unit, y, uy_unit, "linear")[2]
-    assert np.all(uy_new[0:n:dt_unit] == 1) and np.all(
-        uy_new[1:n:dt_unit] == np.sqrt(2) / 2
+    dx_unit = 2
+    dx_half = dx_unit / 2
+    x_new = np.arange(0, n, dx_half)
+    x_unit = np.arange(0, n + dx_half, dx_unit)
+    y = uy_unit = np.ones_like(x_unit)
+    uy_new = interp1d_unc(x_new, x_unit, y, uy_unit, "linear")[2]
+    assert np.all(uy_new[0:n:dx_unit] == 1) and np.all(
+        uy_new[1:n:dx_unit] == np.sqrt(2) / 2
     )
 
 
-@given(timestamps_values_uncertainties_kind())
+@given(values_uncertainties_kind())
 def test_wrong_input_lengths_call_interp1d(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
@@ -595,14 +591,14 @@ def test_wrong_input_lengths_call_interp1d(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
-@given(timestamps_values_uncertainties_kind(kind_tuple=("spline", "least-squares")))
+@given(values_uncertainties_kind(kind_tuple=("spline", "least-squares")))
 def test_raise_not_implemented_yet_interp1d(interp_inputs):
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
         interp1d_unc(**interp_inputs)
 
 
-@given(timestamps_values_uncertainties_kind(extrapolate=True))
+@given(values_uncertainties_kind(extrapolate=True))
 def test_raise_value_error_interp1d_unc(interp_inputs):
     # Check that interpolation with points outside the original domain raises
     # exception if requested.
@@ -612,40 +608,40 @@ def test_raise_value_error_interp1d_unc(interp_inputs):
 
 
 # noinspection PyArgumentList
-@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@given(values_uncertainties_kind(for_make_equidistant=True))
 def test_too_short_call_make_equidistant(interp_inputs):
     # Check erroneous calls with too few inputs.
     with raises(TypeError):
-        make_equidistant(interp_inputs["t"])
-        make_equidistant(interp_inputs["t"], interp_inputs["y"])
+        make_equidistant(interp_inputs["x"])
+        make_equidistant(interp_inputs["x"], interp_inputs["y"])
 
 
-@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@given(values_uncertainties_kind(for_make_equidistant=True))
 def test_full_call_make_equidistant(interp_inputs):
     t_new, y_new, uy_new = make_equidistant(**interp_inputs)
     # Check the equal dimensions of the minimum calls output.
     assert len(t_new) == len(y_new) == len(uy_new)
 
 
-@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@given(values_uncertainties_kind(for_make_equidistant=True))
 def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
         y_wrong = np.tile(interp_inputs["y"], 2)
         uy_wrong = np.tile(interp_inputs["uy"], 3)
-        make_equidistant(interp_inputs["t"], y_wrong, uy_wrong)
+        make_equidistant(interp_inputs["x"], y_wrong, uy_wrong)
 
 
-@given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@given(values_uncertainties_kind(for_make_equidistant=True))
 def test_t_new_to_dt_make_equidistant(interp_inputs):
-    t_new = make_equidistant(**interp_inputs)[0]
-    delta_t_new = np.diff(t_new)
-    # Check if the new timestamps are ascending.
-    assert not np.any(delta_t_new < 0)
+    x_new = make_equidistant(**interp_inputs)[0]
+    delta_x_new = np.diff(x_new)
+    # Check if x_new is ascending.
+    assert not np.any(delta_x_new < 0)
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         kind_tuple=("previous", "next", "nearest"), for_make_equidistant=True
     )
 )
@@ -657,7 +653,7 @@ def test_prev_in_make_equidistant(interp_inputs):
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         kind_tuple=["linear"], for_make_equidistant=True
     )
 )
@@ -683,7 +679,7 @@ def test_linear_uy_in_make_equidistant(n):
 
 
 @given(
-    timestamps_values_uncertainties_kind(
+    values_uncertainties_kind(
         kind_tuple=("spline", "least-squares"), for_make_equidistant=True
     )
 )
