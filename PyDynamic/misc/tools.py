@@ -247,19 +247,19 @@ def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
 
 
 def make_equidistant(*args, **kwargs):
-    import warnings
-
-    from ..uncertainty.interpolate import make_equidistant
-
-    warnings.warn(
-        "The method :mod:`PyDynamic.misc.tools.make_equidistant` will be moved "
-        "to :mod:`PyDynamic.uncertainty.interpolate.make_equidistant` in the next "
-        "major release 2.0.0. From version 1.4.3 on you should only use the new method "
-        "instead. Please change 'from PyDynamic.misc.tools import make_equidistant' to "
-        "'from PyDynamic.uncertainty.interpolate import make_equidistant'.",
-        PendingDeprecationWarning,
+    """
+    .. deprecated:: 2.0.0
+    Please use :func:`PyDynamic.uncertainty.interpolate.interp1d_unc`
+    """
+    raise DeprecationWarning(
+        "The method `PyDynamic.misc.tools.make_equidistant` is moved "
+        "to :mod:`PyDynamic.uncertainty.interpolate.make_equidistant` since the last "
+        "major release 2.0.0. Please switch to the current module immediately and use "
+        "the current function "
+        ":func:`PyDynamic.uncertainty.interpolate.make_equidistant`. Please change "
+        "'from PyDynamic.misc.tools import make_equidistant' to 'from "
+        "PyDynamic.uncertainty.interpolate import make_equidistant'."
     )
-    return make_equidistant(*args, **kwargs)
 
 
 def progress_bar(

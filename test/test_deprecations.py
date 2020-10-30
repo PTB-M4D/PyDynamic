@@ -3,11 +3,15 @@ import inspect
 import pytest
 
 from PyDynamic import deconvolution, identification
+from PyDynamic.misc.tools import make_equidistant
+from PyDynamic.uncertainty.interpolation import interp1d_unc
 
 
 @pytest.mark.parametrize(
     "function",
     [
+        interp1d_unc,
+        make_equidistant,
         deconvolution.LSIIR,
         deconvolution.LSFIR,
         deconvolution.LSFIR_unc,
