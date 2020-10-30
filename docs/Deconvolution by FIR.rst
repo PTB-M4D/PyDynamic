@@ -20,7 +20,7 @@ Design of a digital deconvolution filter (FIR type)
 
 .. code:: python
 
-    from PyDynamic.deconvolution.fit_filter import LSFIR_unc
+    from PyDynamic.model_estimation.fit_filter import invLSFIR_unc
     from PyDynamic.misc.SecondOrderSystem import *
     from PyDynamic.misc.testsignals import shocklikeGaussian
     from PyDynamic.misc.filterstuff import kaiser_lowpass, db
@@ -155,11 +155,7 @@ such that the filtered signal
 
 .. math:: \hat{x}[n] = (g\ast y)[n] \qquad n=1,\ldots,M
 
-<<<<<<< HEAD
-is an estimate of the system's input signal at the discrete time points
-=======
 is an estimate of the system's input signal at the discrete time points.
->>>>>>> devel1
 
 Publication
 
@@ -197,7 +193,7 @@ Filter coefficients and associated uncertainties are thus obtained as
 
     # Calculation of FIR deconvolution filter and its assoc. unc.
     N = 12; tau = N//2
-    bF, UbF = deconv.LSFIR_unc(H,UH,N,tau,f,Fs)
+    bF, UbF = invLSFIR_unc(H,UH,N,tau,f,Fs)
 
 
 .. parsed-literal::
@@ -301,8 +297,8 @@ Fit an FIR filter to the reciprocal of the measured frequency response
 
 .. code:: python
 
-    from PyDynamic.deconvolution.fit_filter import LSFIR_unc
-    bF, UbF = LSFIR_unc(H,UH,N,tau,f,Fs, verbose=False)
+    from PyDynamic.model_estimation.fit_filter import invLSFIR_unc
+    bF, UbF = invLSFIR_unc(H,UH,N,tau,f,Fs, verbose=False)
 
 with
 

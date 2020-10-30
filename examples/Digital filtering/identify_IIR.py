@@ -4,13 +4,13 @@
 
     Try to play with this script by changing the parameters of the 2nd order system or the order of the fitted filter.
 
-.. seealso:: :mod:`..identification.fit_filter`
+.. seealso:: :mod:`..model_estimation.fit_filter`
 """
 import numpy as np
 from matplotlib.pyplot import figure, cla, show
 from scipy.signal import freqz
 
-import PyDynamic.identification.fit_filter as fit_filter
+import PyDynamic.model_estimation.fit_filter as fit_filter
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
 from PyDynamic.misc.filterstuff import db
 

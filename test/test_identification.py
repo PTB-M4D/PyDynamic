@@ -6,7 +6,7 @@ Perform tests on identification sub-packages.
 
 import numpy as np
 
-from PyDynamic.identification import fit_filter
+from PyDynamic.model_estimation import fit_filter
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
 
 
