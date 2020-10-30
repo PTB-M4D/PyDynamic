@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-The :mod:`PyDynamic.identification` package implements the least-squares fit of an
-IIR or FIR digital filter to a given frequency response and the identification of
-transfer function models.
-
-# See http://mathmet.org/projects/14SIP08 and
-# https://www.github.com/eichstaedtPTB/PyDynamic
+.. deprecated:: 2.0.0
+    The module *identification* is combined with the module *deconvolution* and
+    renamed to :mod:`PyDynamic.model_estimation` since the last major release 2.0.0.
+    *identification* might be removed any time. Please switch to the current module
+    immediately.
 """
 
 from .fit_filter import LSFIR, LSIIR
