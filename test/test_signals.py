@@ -2,16 +2,18 @@
 """ Perform tests on methods to create testsignals."""
 
 import numpy as np
+from hypothesis import given, strategies as st
 from numpy.testing import assert_almost_equal
 from pytest import approx
-from examples.working_with_signals import demonstrate_signal
 
+from examples.working_with_signals import demonstrate_signal
 from PyDynamic.misc.testsignals import (
     shocklikeGaussian,
     GaussianPulse,
     rect,
     squarepulse,
     sine,
+    multi_sine,
 )
 
 N = 2048
@@ -91,43 +93,41 @@ class TestSine:
         assert_almost_equal(np.max(x), 1.0)
         assert_almost_equal(np.min(x), -1.0)
 
-    def test_medium_call_freq_multiples_sine(self):
-        # Initialize fixed frequency and number of repetitions.
-        np.random.seed(130)
-        freq = 100 * np.random.rand()
-        rep = 10 * freq
+    @given(
+        st.floats(min_value=1, max_value=1e64, allow_infinity=False, allow_nan=False),
+        st.integers(min_value=1, max_value=1000),
+    )
+    def test_medium_call_freq_multiples_sine(self, freq, rep):
         # Create time vector with timestamps near multiples of frequency.
-        fixed_freq_time = get_timestamps(time[0], rep, freq)
+        fixed_freq_time = get_timestamps(time[0], rep * 1 / freq, 1 / freq)
         x = sine(fixed_freq_time, freq=freq)
         # Check if signal at multiples of frequency is start value of signal.
         for i_x in x:
             assert_almost_equal(i_x, 0)
 
-    def test_medium_call_max_sine(self):
-        # Initialize fixed amplitude.
-        np.random.seed(11201)
-        amp = np.random.rand()
+    @given(st.floats(min_value=0, exclude_min=True, allow_infinity=False))
+    def test_medium_call_max_sine(self, amp):
+        # Test if casual timesignal's maximum equals the input amplitude.
+
         x = sine(time, amp=amp)
         # Check for minimal callability and that maximum amplitude at
         # timestamps is below default.
         assert np.max(np.abs(x)) <= amp
 
-    def test_medium_call_hi_res_max_sine(self):
+    @given(st.floats(min_value=0, exclude_min=True, allow_infinity=False))
+    def test_medium_call_hi_res_max_sine(self, amp):
+        # Test if high-resoluted timesignal's maximum equals the input amplitude.
+
         # Initialize fixed amplitude.
-        np.random.seed(1101)
-        amp = np.random.rand()
         x = sine(self.hi_res_time, amp=amp)
         # Check for minimal callability with high resolution time vector and
         # that maximum amplitude at timestamps is almost equal default.
         assert_almost_equal(np.max(x), amp)
         assert_almost_equal(np.min(x), -amp)
 
-    def test_full_call_sine(self):
+    @given(st.floats(), st.floats(), st.floats())
+    def test_full_call_sine(self, amp, freq, noise):
         # Check for all possible calls.
-        np.random.seed(1121)
-        amp = np.random.rand()
-        freq = 100 * np.random.rand()
-        noise = np.random.rand()
         sine(time)
         sine(time, amp)
         sine(time, amp=amp)
@@ -141,6 +141,18 @@ class TestSine:
         sine(time, freq=freq, noise=noise)
         sine(time, amp=amp, freq=freq, noise=noise)
 
+    @given(st.floats(), st.floats())
+    def test_compare_multisine_with_sine(self, freq, amp):
+        # Compare the result of a call of sine and a similar call of multi_sine
+        # with one-element lists of amplitudes and frequencies.
+
+        x = sine(time=time, amp=amp, freq=freq)
+        multi_x = multi_sine(time=time, amps=[amp], freqs=[freq])
+        # Check for minimal callability and that maximum amplitude at
+        # timestamps is below default.
+        assert_almost_equal(x, multi_x)
+
 
 def test_signal_example():
+    # Test executability of the demonstrate_signal example.
     demonstrate_signal()

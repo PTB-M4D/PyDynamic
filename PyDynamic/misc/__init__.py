@@ -25,6 +25,7 @@ __all__ = [
     "rect",
     "corr_noise",
     "sine",
+    "multi_sine",
     "print_vec",
     "print_mat",
     "make_semiposdef",
@@ -50,6 +51,7 @@ from .testsignals import (
     rect,
     corr_noise,
     sine,
+    multi_sine,
 )
 from .noise import ARMA
 from .tools import (

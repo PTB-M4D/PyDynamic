@@ -60,6 +60,7 @@ __all__ = [
     "rect",
     "corr_noise",
     "sine",
+    "multi_sine",
     "ARMA",
     "print_vec",
     "print_mat",
