@@ -22,8 +22,8 @@ This module contains the following functions:
   response values with uncertainty
 
 """
-import warnings
 from typing import Optional, Tuple
+from warnings import warn
 
 import numpy as np
 import scipy.signal as dsp
@@ -89,10 +89,10 @@ def _fitIIR(
 
 
 def LSIIR(Hvals: np.ndarray, Nb: int, Na: int, f: np.ndarray, Fs: float,
-          tau: Optional[int]=0,
-          justFit: Optional[bool]=False,
-          verbose: Optional[bool]=True,
-          inv: Optional[bool]=False) -> Tuple[np.ndarray, np.ndarray, int]:
+          tau: Optional[int] = 0,
+          justFit: Optional[bool] = False,
+          verbose: Optional[bool] = True,
+          inv: Optional[bool] = False) -> Tuple[np.ndarray, np.ndarray, int]:
     """Least-squares IIR filter fit to a given frequency response or its reciprocal
 
     For the forward problem this method uses Gauss-Newton non-linear optimization.
@@ -170,11 +170,8 @@ def LSIIR(Hvals: np.ndarray, Nb: int, Na: int, f: np.ndarray, Fs: float,
 
     # Determine if the computed filter already is stable.
     unstable = not check_stability(a)
-
     # Initialize the warning message in case the final filter still is unstable.
-    if unstable:
-        warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR " \
-                  f"filter!"
+    warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # In case the user specified not to check for stability and stabilize the filter
     # if necessary, we just return the result so far and inform
@@ -275,6 +272,7 @@ def LSFIR(H, N, tau, f, Fs, Wt=None):
             "norm %e" % res)
 
     return np.reshape(bFIR, (N + 1,))
+
 
 def invLSFIR(H, N, tau, f, Fs, Wt=None):
     """	Least-squares fit of a digital FIR filter to the reciprocal of a given
@@ -589,10 +587,15 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     * Eichstädt, Elster, Esward, Hessling [Eichst2010]_
 
     """
+    warn("invLSIIR: The method invLSIIR() will be removed in the next major release "
+         "3.0.0. Please switch to the current method LSIIR() with the same input "
+         "parameters as in your call of invLSIIR in the same order and "
+         "additionally specify inv=True.", PendingDeprecationWarning)
     return LSIIR(Hvals=Hvals, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau, justFit=justFit,
                  verbose=verbose, inv=True)
 
 
+# TODO continue introducing this logic into LSIIR based on UHvals=None or not
 def invLSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
     """Design of stabel IIR filter as fit to reciprocal of given frequency
     response with uncertainty
