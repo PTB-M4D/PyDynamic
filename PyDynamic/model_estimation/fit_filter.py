@@ -49,30 +49,33 @@ def _fitIIR(
     Na: int,
     Nb: int,
     inv: bool = False
-    ):
-    """The actual fitting routing for the least-squares IIR filter.
+) -> Tuple[np.ndarray, np.ndarray]:
+    r"""The actual fitting routing for the least-squares IIR filter.
 
     Parameters
     ----------
-        Hvals :  (M,) np.ndarray
-            (complex) frequency response values
-        tau : integer
-            initial estimate of time delay
-        w : np.ndarray
-            :math:`2 * np.pi * f / Fs`
-        E : np.ndarray
-            :math:`np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
-        Nb : int
-            numerator polynomial order
-        Na : int
-            denominator polynomial order
-        inv : bool, optional
-            If True the least-squares fitting is performed for the reciprocal, if False
-            for the actual frequency response
+    Hvals : np.ndarray of shape (M,)
+        (complex) frequency response values
+    tau : integer
+        initial estimate of time delay
+    w : np.ndarray
+        :math:`2 * \pi * f / Fs`
+    E : np.ndarray
+        :math:`exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
+    Nb : int
+        numerator polynomial order
+    Na : int
+        denominator polynomial order
+    inv : bool, optional
+        If True the least-squares fitting is performed for the reciprocal, if False
+        (default) for the actual frequency response
 
     Returns
     -------
-        b, a : IIR filter coefficients as numpy arrays
+    b : np.ndarray
+        The IIR filter numerator coefficient vector in a 1-D sequence.
+    a : np.ndarray
+        The IIR filter denominator coefficient vector in a 1-D sequence.
     """
     exponent = -1 if inv else 1
     Ea = E[:, 1:Na + 1]
@@ -88,16 +91,26 @@ def _fitIIR(
     return b, a
 
 
-def LSIIR(Hvals: np.ndarray, Nb: int, Na: int, f: np.ndarray, Fs: float,
-          tau: Optional[int] = 0,
-          justFit: Optional[bool] = False,
-          verbose: Optional[bool] = True,
-          inv: Optional[bool] = False) -> Tuple[np.ndarray, np.ndarray, int]:
+def LSIIR(
+    Hvals: np.ndarray,
+    Nb: int,
+    Na: int,
+    f: np.ndarray,
+    Fs: float,
+    tau: Optional[int] = 0,
+    justFit: Optional[bool] = False,
+    verbose: Optional[bool] = True,
+    max_stab_iter: Optional[int] = 50,
+    inv: Optional[bool] = False,
+    UHvals: Optional[np.ndarray] = None,
+    mc_runs: Optional[int] = 1000,
+) -> Tuple[np.ndarray, np.ndarray, int]:
     """Least-squares IIR filter fit to a given frequency response or its reciprocal
 
     For the forward problem this method uses Gauss-Newton non-linear optimization.
     For the inverse problem it uses the equation-error method. The filter then is
-    stabilized by pole mapping and introduction of a time delay.
+    stabilized by pole mapping and introduction of a time delay. Associated
+    uncertainties are optionally propagated when provided using the Monte Carlo method.
     
     Parameters
     ----------
@@ -116,28 +129,42 @@ def LSIIR(Hvals: np.ndarray, Nb: int, Na: int, f: np.ndarray, Fs: float,
         `justFit = True` this parameter is not used and `tau = 0` will be returned.
     justFit : bool, optional
         If True then no stabilization is carried out, if False  (default) filter is
-        stabilized.
+        stabilized. This parameter is only available for reasons of backward
+        compatibility. Please use `max_stab_iter = 0` from now on and leave `justFit`
+        untouched. `justFit` will be removed in a future release.
     verbose : bool, optional
         If True (default) be more talkative on stdout. Otherwise no output is written
         anywhere.
+    max_stab_iter : int, optional
+        Maximum count of iterations for stabilizing the resulting filter. If no
+        stabilization is should be carried out, this parameter can be set to 0.
+        Default is 50
     inv : bool, optional
         If False (default) apply the forward method, otherwise perform the fit for
         the reciprocal of the frequency response.
+    UHvals : array_like of shape (2M, 2M), optional
+        Uncertainties associated with real and imaginary part of H.
+    mc_runs : int, optional
+        Number of Monte Carlo runs (default = 1000)
     
     Returns
     -------
-    b : array_like
+    b : np.ndarray
         The IIR filter numerator coefficient vector in a 1-D sequence.
-    a : array_like
+    a : np.ndarray
         The IIR filter denominator coefficient vector in a 1-D sequence.
     tau : int
         Filter time delay (in samples).
+    # TODO adapt comment to final implementation
+    Uab : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
+        Uncertainties associated with [a[1:],b] based on `UHvals`.
 
     References
     ----------
     * Eichstädt et al. 2010 [Eichst2010]_
     * Vuerinckx et al. 1996 [Vuer1996]_
 
+    .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
     """
     def check_stability(denominator_coeff: np.ndarray) -> bool:
         """Determine if filter with certain denominator coefficients is stable
@@ -155,59 +182,76 @@ def LSIIR(Hvals: np.ndarray, Nb: int, Na: int, f: np.ndarray, Fs: float,
         """
         return np.count_nonzero(np.abs(np.roots(denominator_coeff)) > 1) > 0
 
+    if UHvals:
+        # Step 1: Propagation of uncertainties to frequency response
+
+        # Draw real and imaginary parts of frequency response values with white noise.
+        HRI = np.random.multivariate_normal(mean=np.hstack((np.real(Hvals), np.imag(
+            Hvals))), cov=UHvals, size=mc_runs)
+        HHvals = HRI[:, : len(f)] + 1j * HRI[:, len(f):]
+
     if verbose:
+        monte_carlo_message = f" Uncertainties of the filter coefficients are " \
+                              f"evaluated using the GUM S2 Monte Carlo method " \
+                              f"with {mc_runs} runs."
         print(
             f"LSIIR: Least-squares fit of an order {max(Nb, Na)} digital IIR filter to"
             f"{' the reciprocal of' if inv else ''} a frequency response "
-            f"given by {len(Hvals)} values.\n"
+            f"given by {len(Hvals)} values.{monte_carlo_message if UHvals else ''}"
             )
 
-    w = 2 * np.pi * f / Fs
-    Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
-    E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
-
-    b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
-
-    # Determine if the computed filter already is stable.
-    unstable = not check_stability(a)
-    # Initialize the warning message in case the final filter still is unstable.
+    # Initialize the warning message in case the final filter will still be unstable.
     warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
+# TODO rewrite this part to incorporate the MC method if needed.
+    # In case we have a covariance matrix for (the reciprocal of) the frequency
+    # response values given, we propagate the corresponding uncertainties using the
+    # Monte Carlo method.
+    if UHvals:
 
-    # In case the user specified not to check for stability and stabilize the filter
-    # if necessary, we just return the result so far and inform
-    if justFit:
-        if verbose:
-            sos = np.sum(
-                np.abs((dsp.freqz(b, a, 2 * np.pi * f / Fs)[1] - Hvals) ** 2))
-            if unstable:
-                print(f"LSIIR: Calculation done. No stabilization requested"
-                      f". {warning_unstable if unstable else ''}Final sum of squares = "
-                      f"{sos}")
-        # Since no stabilization was done, we return tau = 0 regardless of the
-        # desired initial estimate of the time delay provided for the stabilization.
-        return b, a, 0
-
-    # Initialize counter which we use to report about required iteration count.
-    run = 1
-    while unstable and run < 50:
-        # Stabilize filter coefficients with a maximum of 50 iterations.
-        astab = mapinside(a)
-        g1 = grpdelay(b, a, Fs)[0]
-        g2 = grpdelay(b, astab, Fs)[0]
-        tau = np.ceil(tau + np.median(g2 - g1))
-
+        # Prepare and conduct actual fit.
+        w = 2 * np.pi * f / Fs
+        Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
+        E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
         b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
 
-        # Prepare abortion in case filter is stable.
-        if check_stability(a):
-            unstable = False
-        run += 1
+        # Determine if the computed filter already is stable.
+        unstable = not check_stability(a)
 
+        # In case the user specified not to check for stability and stabilize the filter
+        # if necessary, we just return the result so far and inform
+        if justFit:
+            if verbose:
+                sos = np.sum(
+                    np.abs((dsp.freqz(b, a, 2 * np.pi * f / Fs)[1] - Hvals) ** 2))
+                if unstable:
+                    print(f"LSIIR: Calculation done. No stabilization requested"
+                          f". {warning_unstable if unstable else ''}Final sum of squares = "
+                          f"{sos}")
+            # Since no stabilization was done, we return tau = 0 regardless of the
+            # desired initial estimate of the time delay provided for the stabilization.
+            return b, a, 0
+
+        # Initialize counter which we use to report about required iteration count.
+        current_stab_iter = 1
+        while unstable and current_stab_iter < max_stab_iter:
+            # Stabilize filter coefficients with a maximum of 50 iterations.
+            astab = mapinside(a)
+            g1 = grpdelay(b, a, Fs)[0]
+            g2 = grpdelay(b, astab, Fs)[0]
+            tau = np.ceil(tau + np.median(g2 - g1))
+
+            b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
+
+            # Prepare abortion in case filter is stable.
+            if check_stability(a):
+                unstable = False
+            current_stab_iter += 1
+########################################################################################
     if verbose:
         if unstable:
             print(f"LSIIR: {warning_unstable} Maybe try again with a higher value of "
                   f"tau or a higher filter order? Least squares fit finished after "
-                  f"{run} stabilization iterations (tau = {tau}).")
+                  f"{current_stab_iter} stabilization iterations (tau = {tau}).")
 
         Hd = dsp.freqz(b, a, 2 * np.pi * f / Fs)[1]
         Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
@@ -652,7 +696,7 @@ def invLSIIR_unc(H, UH, Nb, Na, f, Fs, tau=0):
     # Step 1: Propagation of uncertainties to frequency response
     HRI = np.random.multivariate_normal(np.hstack((np.real(H), np.imag(H))), UH, runs)
     HH = HRI[:, : len(f)] + 1j * HRI[:, len(f) :]
-
+# TODO From here on the logic needs to be transferred into lines 204--248.
     # Step 2: Fit filter and evaluate uncertainties (Monte Carlo method)
     AB = np.zeros((runs, Nb + Na + 1))
     Tau = np.zeros((runs,))
