@@ -243,8 +243,8 @@ def LSIIR(
         # Determine if the computed filter already is stable.
         unstable = not check_stability(a_i)
 
-        # In case the user specified not to check for stability and stabilize the filter
-        # if necessary, we just return the result so far and inform about hte result.
+        # In case the user specified not to check for stability, 
+        # we skip the rest of the current Monte Carlo run and inform the user.
         if justFit:
             if verbose:
                 sos = np.sum(np.abs((dsp.freqz(b_i, a_i, w)[1] - Hvals) ** 2))
@@ -265,13 +265,13 @@ def LSIIR(
 
         # Initialize counter which we use to report about required iteration count.
         current_stab_iter = 0
-        # Stabilize filter coefficients with a maximum of 50 iterations.
+        # Stabilize filter coefficients with a maximum number of iterations as specified.
         while unstable and current_stab_iter < max_stab_iter:
             # Compute appropriate time delay for the stabilization of the filter.
             a_stab = mapinside(a_i)
             g_1 = grpdelay(b_i, a_i, Fs)[0]
             g_2 = grpdelay(b_i, a_stab, Fs)[0]
-            taus[mc_run] = np.ceil(taus[mc_run] + np.median(g_2 - g_1))
+            taus[mc_run] += np.ceil(np.median(g_2 - g_1))
 
             # Conduct stabilization step through time delay.
             b_i, a_i = _fitIIR(Hvals, taus[mc_run], w, E, Na, Nb, inv=inv)
