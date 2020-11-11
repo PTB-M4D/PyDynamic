@@ -7,19 +7,16 @@ frequency response each with associated uncertainties.
 
 This module contains the following functions:
 
-* :func:`LSIIR`: Least-squares IIR filter fit to a given frequency response
+* :func:`LSIIR`: Least-squares IIR filter fit to a given frequency response or its
+  reciprocal optionally propagating uncertainties.
 * :func:`LSFIR`: Least-squares fit of a digital FIR filter to a given frequency
-  response
+  response.
 * :func:`invLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
   given frequency response.
 * :func:`invLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
   values with uncertainty
 * :func:`invLSFIR_uncMC`: Design of FIR filter as fit to reciprocal of frequency
   response values with uncertainty via Monte Carlo
-* :func:`invLSIIR`: Design of a stable IIR filter as fit to reciprocal of frequency
-  response values
-* :func:`invLSIIR_unc`: Design of a stable IIR filter as fit to reciprocal of frequency
-  response values with uncertainty
 
 """
 from typing import Optional, Tuple, Union
@@ -35,8 +32,6 @@ __all__ = [
     "LSFIR",
     "invLSFIR",
     "invLSFIR_unc",
-    "invLSIIR",
-    "invLSIIR_unc",
     "invLSFIR_uncMC"
     ]
 

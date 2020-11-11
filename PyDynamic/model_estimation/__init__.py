@@ -16,9 +16,7 @@ __all__ = [
     "LSFIR",
     "LSIIR",
     "invLSFIR",
-    "invLSIIR",
     "invLSFIR_unc",
     "invLSFIR_uncMC",
-    "invLSIIR_unc",
     "fit_som",
 ]
