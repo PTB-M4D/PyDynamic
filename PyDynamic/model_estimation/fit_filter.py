@@ -245,9 +245,7 @@ def LSIIR(
         # Initialize counter which we use to report about required iteration count.
         current_stab_iter = 0
         # Stabilize filter coefficients with a maximum number of iterations.
-        while unstable and (
-            current_stab_iter := current_stab_iter + 1 <= max_stab_iter
-        ):
+        while unstable and current_stab_iter < max_stab_iter:
             # Compute appropriate time delay for the stabilization of the filter.
             a_stab = mapinside(a_i)
             g_1 = grpdelay(b_i, a_i, Fs)[0]
@@ -259,6 +257,7 @@ def LSIIR(
 
             # Prepare abortion in case filter is stable.
             unstable = not isstable(b=b_i, a=a_i, ftype="digital")
+            current_stab_iter += 1
 
         # Finally store filter stacked filter parameters.
         as_and_bs[mc_run, :] = np.hstack((a_i[1:], b_i))
