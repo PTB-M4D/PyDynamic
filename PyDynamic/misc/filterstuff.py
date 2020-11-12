@@ -13,7 +13,7 @@ This module contains the following functions:
   to the unit circle
 * :func:`kaiser_lowpass`: Design of a FIR lowpass filter using the window technique
   with a Kaiser window.
-* :func:`isstable`: Determine whether a given IIR filter is stable
+* :func:`isstable`: Determine whether an IIR filter with certain coefficients is stable
 * :func:`savitzky_golay`: Smooth (and optionally differentiate) data with a
   Savitzky-Golay filter
 
@@ -33,7 +33,7 @@ __all__ = [
 
 
 def db(vals):
-    """Calculation of decibel values :math:`20\log_{10}(x)` for a vector of values"""
+    r"""Calculation of decibel values :math:`20\log_{10}(x)` for a vector of values"""
     return 20 * np.log10(np.abs(vals))
 
 
@@ -146,29 +146,35 @@ def kaiser_lowpass(L, fcut, Fs, beta=8.0):
 
 
 def isstable(b, a, ftype="digital"):
-    """Determine whether `IIR filter (b,a)` is stable
+    """Determine whether an IIR filter with certain coefficients is stable
 
-    Determine whether `IIR filter (b,a)` is stable by checking roots of the
-    polynomial ´a´.
+    Determine whether IIR filter with coefficients `b` and `a` is stable by checking
+    the roots of the polynomial `a`.
     
     Parameters
     ----------
-        b: ndarray
-            filter numerator coefficients
-        a: ndarray
-            filter denominator coefficients
-        ftype: string
-            type of filter (`digital` or `analog`)
+    b : ndarray
+        Filter numerator coefficients. These are only part of the input
+        parameters for compatibility reasons (especially with MATLAB code). During the
+        computation they are actually not used.
+    a : ndarray
+        Filter denominator coefficients.
+    ftype : string, optional
+        Filter type. 'digital' if in discrete-time (default) and 'analog' if in
+        continuous-time.
+
     Returns
     -------
-        stable: bool
-            whether filter is stable or not
-                
+    stable : bool
+        Whether filter is stable or not.
     """
     v = np.roots(a)
+    # Check if all of the roots of the polynomial made from the filter coefficients...
     if ftype == "digital":
+        # ... lie inside the unit circle in discrete time.
         return not np.any(np.abs(v) > 1.0)
     elif ftype == "analog":
+        # ... are non-negative in continuous time.
         return not np.any(np.real(v) < 0)
 
 
