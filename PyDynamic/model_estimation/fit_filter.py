@@ -25,7 +25,7 @@ from warnings import warn
 import numpy as np
 import scipy.signal as dsp
 
-from ..misc.filterstuff import grpdelay, mapinside
+from ..misc.filterstuff import grpdelay, isstable, mapinside
 
 __all__ = [
     "LSIIR",
@@ -87,22 +87,23 @@ def _fitIIR(
 
 
 def LSIIR(
-        Hvals: np.ndarray,
-        Nb: int,
-        Na: int,
-        f: np.ndarray,
-        Fs: float,
-        tau: Optional[int] = 0,
-        justFit: Optional[bool] = False,
-        verbose: Optional[bool] = True,
-        max_stab_iter: Optional[int] = 50,
-        inv: Optional[bool] = False,
-        UHvals: Optional[np.ndarray] = None,
-        mc_runs: Optional[int] = 1000,
+    Hvals: np.ndarray,
+    Nb: int,
+    Na: int,
+    f: np.ndarray,
+    Fs: float,
+    tau: Optional[int] = 0,
+    justFit: Optional[bool] = False,
+    verbose: Optional[bool] = True,
+    max_stab_iter: Optional[int] = 50,
+    inv: Optional[bool] = False,
+    UHvals: Optional[np.ndarray] = None,
+    mc_runs: Optional[int] = 1000,
 ) -> Union[
     Tuple[np.ndarray, np.ndarray, int], Tuple[np.ndarray, np.ndarray, int, np.ndarray]
 ]:
-    """Least-squares IIR filter fit to a given frequency response or its reciprocal
+    """Least-squares (time-discrete) IIR filter fit to a given frequency response or
+    its reciprocal
 
     For the forward problem this method uses Gauss-Newton non-linear optimization.
     For the inverse problem it uses the equation-error method. The filter then is
@@ -174,23 +175,6 @@ def LSIIR(
             "untouched. `justFit` will be removed in a future release.",
             PendingDeprecationWarning,
         )
-
-    def check_stability(denominator_coeff: np.ndarray) -> bool:
-        """Determine if filter with certain denominator coefficients is stable
-
-        Parameters
-        ----------
-        denominator_coeff : array_like
-            The filter denominator coefficient vector in a 1-D sequence.
-
-        Returns
-        -------
-        bool
-            True if filter designed with denominator coefficients `denominator_coeff`
-            is stable, False otherwise.
-        """
-        return np.count_nonzero(np.abs(np.roots(denominator_coeff)) > 1) > 0
-
     # Make sure we enter for loop later on at least once if either Monte Carlo is
     # really used or not and exactly once in case it is not.
     if UHvals is None or mc_runs <= 0:
@@ -236,9 +220,9 @@ def LSIIR(
         b_i, a_i = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
 
         # Determine if the computed filter already is stable.
-        unstable = not check_stability(a_i)
+        unstable = not isstable(b=b_i, a=a_i, ftype="digital")
 
-        # In case the user specified not to check for stability, 
+        # In case the user specified not to check for stability,
         # we skip the rest of the current Monte Carlo run and inform the user.
         if justFit:
             if verbose:
@@ -260,8 +244,10 @@ def LSIIR(
 
         # Initialize counter which we use to report about required iteration count.
         current_stab_iter = 0
-        # Stabilize filter coefficients with a maximum number of iterations as specified.
-        while unstable and current_stab_iter < max_stab_iter:
+        # Stabilize filter coefficients with a maximum number of iterations.
+        while unstable and (
+            current_stab_iter := current_stab_iter + 1 <= max_stab_iter
+        ):
             # Compute appropriate time delay for the stabilization of the filter.
             a_stab = mapinside(a_i)
             g_1 = grpdelay(b_i, a_i, Fs)[0]
@@ -272,9 +258,7 @@ def LSIIR(
             b_i, a_i = _fitIIR(Hvals, taus[mc_run], w, E, Na, Nb, inv=inv)
 
             # Prepare abortion in case filter is stable.
-            if check_stability(a_i):
-                unstable = False
-            current_stab_iter += 1
+            unstable = not isstable(b=b_i, a=a_i, ftype="digital")
 
         # Finally store filter stacked filter parameters.
         as_and_bs[mc_run, :] = np.hstack((a_i[1:], b_i))
