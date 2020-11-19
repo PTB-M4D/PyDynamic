@@ -23,9 +23,12 @@ from ..misc.tools import trimOrPad
 __all__ = ["FIRuncFilter", "IIRuncFilter"]
 
 
-def _fir_filter(x, theta, Ux=None, Utheta=None, constant_before_t0=True):
+def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary"):
     """Uncertainty propagation for signal x with covariance Ux
-       and uncertain FIR filter theta with covariance Utheta
+       and uncertain FIR filter theta with covariance Utheta.
+
+       If either Ux or Utheta are omitted (None), then corresponding terms are not
+       calculated to reduce computation time. 
 
     Parameters
     ----------
@@ -39,6 +42,10 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, constant_before_t0=True):
             covariance matrix associated with theta
             if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
             see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+        initial_conditions: str, optional
+            stationary: assume signal + uncertainty are constant before t=0 (default)
+            zero: assume signal + uncertainty are zero before t=0
+
 
     Returns
     -------
@@ -58,33 +65,55 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, constant_before_t0=True):
 
     Ntheta = len(theta)  # FIR filter size
 
+    if initial_conditions == "constant":
+        x0 = x[0]
 
-    if constant_before_t0:
-        # propagate filter
-        y, _ = lfilter(theta, 1.0, x, zi=x[0] * lfilter_zi(theta, 1.0))
-
-        # extend signal+covariance Ntheta steps into the past
-        x_extended = np.r_[np.full((Ntheta - 1), x[0]), x]
-        Ux_extended = _stationary_prepend_covariance(Ux, Ntheta - 1)
-
-        # propagate uncertainty
-        Uy = (
-            convolve(np.outer(theta, theta), Ux_extended, mode="valid")
-            + convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
-            + convolve(Ux_extended, Utheta.T, mode="valid")
-        )
+    elif initial_conditions == "zero":
+        x0 = 0.0
 
     else:
-        # propagate filter
-        y = lfilter(theta, 1.0, x)
+        raise ValueError(f"'initial_conditions' = '{initial_conditions}'.")
 
-        # propagate uncertainty
-        Uy = (
-            convolve(np.outer(theta, theta), Ux, mode="full")
-            + convolve(np.outer(x, x), Utheta, mode="full")
-            + convolve(Ux, Utheta.T, mode="full")
-        )
-        Uy = Uy[:len(x), :len(x)]  # remove "overhang" at the end
+    # propagate filter
+    y, _ = lfilter(theta, 1.0, x, zi=x0 * lfilter_zi(theta, 1.0))
+
+    # propagate uncertainty
+
+    ## only calculate subterms, that are non-zero (compare eq. 34 of paper)
+    t_Ux_t = 0
+    x_Ut_x = 0
+    Tr_Ux_Ut = 0
+
+    if Ux is not None:
+        ## extend covariance Ntheta steps into the past
+        if initial_conditions == "constant":
+            Ux_extended = _stationary_prepend_covariance(Ux, Ntheta - 1)
+
+        elif initial_conditions == "zero":
+            # extend covariance Ntheta steps into the past
+            Ux_extended = np.pad(
+                Ux,
+                ((Ntheta - 1, 0), (Ntheta - 1, 0)),
+                "constant",
+                constant_values=0,
+            )
+
+        # calc subterm
+        t_Ux_t = convolve(np.outer(theta, theta), Ux_extended, mode="valid")
+    
+    if Utheta is not None:    
+        ## extend signal Ntheta steps into the past
+        x_extended = np.r_[np.full((Ntheta - 1), x0), x]
+
+        # calc subterm
+        x_Ut_x = convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
+    
+    if (Ux is not None) and (Utheta is not None):
+        # calc subterm
+        Tr_Ux_Ut = convolve(Ux_extended, Utheta.T, mode="valid")
+
+    ## add subterms of Uy
+    Uy = t_Ux_t + x_Ut_x + Tr_Ux_Ut
 
     return y, Uy
 
