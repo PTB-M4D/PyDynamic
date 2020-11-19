@@ -17,10 +17,88 @@ This modules contains the following functions:
 
 import numpy as np
 from scipy.linalg import toeplitz
-from scipy.signal import lfilter, lfilter_zi, dimpulse
+from scipy.signal import lfilter, lfilter_zi, dimpulse, convolve
 from ..misc.tools import trimOrPad
 
 __all__ = ["FIRuncFilter", "IIRuncFilter"]
+
+
+def _fir_filter(x, theta, Ux=None, Utheta=None, constant_before_t0=True):
+    """Uncertainty propagation for signal x with covariance Ux
+       and uncertain FIR filter theta with covariance Utheta
+
+    Parameters
+    ----------
+        x: np.ndarray
+            filter input signal
+        theta: np.ndarray
+            FIR filter coefficients
+        Ux: np.ndarray, optional
+            covariance matrix of input signal
+        Utheta: np.ndarray, optional
+            covariance matrix associated with theta
+            if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
+            see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+
+    Returns
+    -------
+        y: np.ndarray
+            FIR filter output signal
+        Uy: np.ndarray
+            covariance matrix of filter output y
+
+
+    References
+    ----------
+        * Elster and Link 2008 [Elster2008]_
+
+    .. seealso:: :mod:`PyDynamic.deconvolution.fit_filter`
+
+    """
+
+    Ntheta = len(theta)  # FIR filter size
+
+
+    if constant_before_t0:
+        # propagate filter
+        y, _ = lfilter(theta, 1.0, x, zi=x[0] * lfilter_zi(theta, 1.0))
+
+        # extend signal+covariance Ntheta steps into the past
+        x_extended = np.r_[np.full((Ntheta - 1), x[0]), x]
+        Ux_extended = _stationary_prepend_covariance(Ux, Ntheta - 1)
+
+        # propagate uncertainty
+        Uy = (
+            convolve(np.outer(theta, theta), Ux_extended, mode="valid")
+            + convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
+            + convolve(Ux_extended, Utheta.T, mode="valid")
+        )
+
+    else:
+        # propagate filter
+        y = lfilter(theta, 1.0, x)
+
+        # propagate uncertainty
+        Uy = (
+            convolve(np.outer(theta, theta), Ux, mode="full")
+            + convolve(np.outer(x, x), Utheta, mode="full")
+            + convolve(Ux, Utheta.T, mode="full")
+        )
+        Uy = Uy[:len(x), :len(x)]  # remove "overhang" at the end
+
+    return y, Uy
+
+
+def _stationary_prepend_covariance(U, n):
+    """ Prepend covariance matrix U by n steps into the past"""
+
+    c = np.r_[U[:, 0], np.zeros(n)]
+    r = np.r_[U[0, :], np.zeros(n)]
+
+    U_adjusted = toeplitz(c, r)
+    U_adjusted[n:, n:] = U
+
+    return U_adjusted
 
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
@@ -39,7 +117,7 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             FIR filter coefficients
         Utheta: np.ndarray, optional
             covariance matrix associated with theta
-            if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations. 
+            if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
             see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
         shift: int, optional
             time delay of filter output signal (in samples) (defaults to 0)
@@ -89,12 +167,15 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
             f"parameters sigma_noise and kind for more information."
         )
 
-
-    if isinstance(blow,np.ndarray):             # calculate low-pass filtered signal and propagate noise
+    if isinstance(
+        blow, np.ndarray
+    ):  # calculate low-pass filtered signal and propagate noise
 
         if isinstance(sigma2, float):
-            Bcorr = np.correlate(blow, blow, 'full') # len(Bcorr) == 2*Ntheta - 1
-            ycorr = sigma2 * Bcorr[len(blow)-1:]     # only the upper half of the correlation is needed
+            Bcorr = np.correlate(blow, blow, "full")  # len(Bcorr) == 2*Ntheta - 1
+            ycorr = (
+                sigma2 * Bcorr[len(blow) - 1 :]
+            )  # only the upper half of the correlation is needed
 
             # trim / pad to length Ntheta
             ycorr = trimOrPad(ycorr, Ntheta)
@@ -118,7 +199,10 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta - 1)), sigma2)
 
                 N = toeplitz(blow[1:][::-1], np.zeros_like(sigma2_extended)).T
-                M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
+                M = toeplitz(
+                    trimOrPad(blow, len(sigma2_extended)),
+                    np.zeros_like(sigma2_extended),
+                )
                 SP = np.diag(sigma2[0] * np.ones_like(blow[1:]))
                 S = np.diag(sigma2_extended)
 
@@ -139,7 +223,9 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 sigma2 = trimOrPad(sigma2, len(blow) + Ntheta - 1)
                 sigma2_reflect = np.pad(sigma2, (len(blow) - 1, 0), mode="reflect")
 
-                ycorr = np.correlate(sigma2_reflect, Bcorr, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr is symmetric
+                ycorr = np.correlate(
+                    sigma2_reflect, Bcorr, mode="valid"
+                )  # used convolve in a earlier version, should make no difference as Bcorr is symmetric
                 Ulow = toeplitz(ycorr)
 
         xlow, _ = lfilter(blow, 1.0, y, zi=y[0] * lfilter_zi(blow, 1.0))
@@ -155,7 +241,9 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
                 sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta - 1)), sigma2)
 
                 # Ulow is to be sliced from V, see below
-                V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
+                V = np.diag(
+                    sigma2_extended
+                )  #  this is not Ulow, same thing as in the case of a provided blow (see above)
 
             elif kind == "corr":
                 Ulow = toeplitz(trimOrPad(sigma2, Ntheta))
@@ -170,10 +258,10 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
     if len(theta.shape) == 1:
         theta = theta[:, np.newaxis]
 
-    # NOTE: In the code below whereever `theta` or `Utheta` get used, they need to be flipped. 
+    # NOTE: In the code below whereever `theta` or `Utheta` get used, they need to be flipped.
     #       This is necessary to take the time-order of both variables into account. (Which is descending
     #       for `theta` and `Utheta` but ascending for `Ulow`.)
-    #       
+    #
     #       Further details and illustrations showing the effect of not-flipping
     #       can be found at https://github.com/PTB-PSt1/PyDynamic/issues/183
 
@@ -185,32 +273,41 @@ def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="c
 
         if isinstance(Utheta, np.ndarray):
             for k in range(len(sigma2)):
-                Ulow = V[k:k+Ntheta,k:k+Ntheta]
-                UncCov[k] = np.squeeze(np.flip(theta).T.dot(Ulow.dot(np.flip(theta))) + np.abs(np.trace(Ulow.dot(np.flip(Utheta)))))  # static part of uncertainty
+                Ulow = V[k : k + Ntheta, k : k + Ntheta]
+                UncCov[k] = np.squeeze(
+                    np.flip(theta).T.dot(Ulow.dot(np.flip(theta)))
+                    + np.abs(np.trace(Ulow.dot(np.flip(Utheta))))
+                )  # static part of uncertainty
         else:
             for k in range(len(sigma2)):
-                Ulow = V[k:k+Ntheta,k:k+Ntheta]
-                UncCov[k] = np.squeeze(np.flip(theta).T.dot(Ulow.dot(np.flip(theta))))  # static part of uncertainty
+                Ulow = V[k : k + Ntheta, k : k + Ntheta]
+                UncCov[k] = np.squeeze(
+                    np.flip(theta).T.dot(Ulow.dot(np.flip(theta)))
+                )  # static part of uncertainty
 
     else:
         if isinstance(Utheta, np.ndarray):
-            UncCov = np.flip(theta).T.dot(Ulow.dot(np.flip(theta))) + np.abs(np.trace(Ulow.dot(np.flip(Utheta))))      # static part of uncertainty
+            UncCov = np.flip(theta).T.dot(Ulow.dot(np.flip(theta))) + np.abs(
+                np.trace(Ulow.dot(np.flip(Utheta)))
+            )  # static part of uncertainty
         else:
-            UncCov = np.flip(theta).T.dot(Ulow.dot(np.flip(theta)))     # static part of uncertainty
+            UncCov = np.flip(theta).T.dot(
+                Ulow.dot(np.flip(theta))
+            )  # static part of uncertainty
 
     if isinstance(Utheta, np.ndarray):
         unc = np.empty_like(y)
 
         # use extended signal to match assumption of stationary signal prior to first entry
         xlow_extended = np.append(np.full(Ntheta - 1, xlow[0]), xlow)
-        
+
         for m in range(len(xlow)):
             # extract necessary part from input signal
             XL = xlow_extended[m : m + Ntheta, np.newaxis]
             unc[m] = XL.T.dot(np.flip(Utheta).dot(XL))  # apply formula from paper
     else:
         unc = np.zeros_like(y)
-    
+
     ux = np.sqrt(np.abs(UncCov + unc))
     ux = np.roll(ux, -int(shift))  # correct for delay
 
