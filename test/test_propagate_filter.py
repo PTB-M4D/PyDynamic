@@ -6,7 +6,11 @@ import scipy
 import pytest
 
 from PyDynamic.misc.tools import make_semiposdef, trimOrPad
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from PyDynamic.uncertainty.propagate_filter import (
+    FIRuncFilter,
+    FIRuncFilter_2,
+    _fir_filter,
+)
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 
 
@@ -20,10 +24,10 @@ def random_nonnegative_array(length):
     return array
 
 
-def random_semiposdef_matrix(length):
-    matrix = np.random.random((length, length))
-    matrix = make_semiposdef(matrix)
-    return matrix
+def random_covariance_matrix(length):
+    # construct a valid (but random) covariance matrix
+    cov = np.cov(np.random.random((length, length)))
+    return cov
 
 
 def valid_filters():
@@ -33,7 +37,7 @@ def valid_filters():
     valid_filters = [
         {"theta": theta, "Utheta": None},
         {"theta": theta, "Utheta": np.zeros((N, N))},
-        {"theta": theta, "Utheta": random_semiposdef_matrix(N)},
+        {"theta": theta, "Utheta": random_covariance_matrix(N)},
     ]
 
     return valid_filters
@@ -185,6 +189,24 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
         atol=1e-1,
         rtol=1e-1,
     )
+
+
+
+@pytest.mark.parametrize("filters", valid_filters())
+@pytest.mark.parametrize("signals", valid_signals())
+@pytest.mark.parametrize("lowpasses", valid_lows())
+def test_FIRuncFilter_2(filters, signals, lowpasses):
+    # Compare output of both functions for thinkable permutations of input parameters.
+    y, Uy = FIRuncFilter(**filters, **signals, **lowpasses)
+    y2, Uy2 = FIRuncFilter_2(**filters, **signals, **lowpasses)
+
+    # check output dimensions
+    assert len(y2) == len(signals["y"])
+    assert Uy2.shape == (len(signals["y"]), len(signals["y"]))
+    
+    # check value identity
+    assert np.allclose(y, y2)
+    assert np.allclose(Uy, np.sqrt(np.diag(Uy2)))
 
 
 def test_IIRuncFilter():
