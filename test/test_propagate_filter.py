@@ -209,5 +209,37 @@ def test_FIRuncFilter_2(filters, signals, lowpasses):
     assert np.allclose(Uy, np.sqrt(np.diag(Uy2)))
 
 
+def test_fir_filter_MC_comparison():
+    N_signal = np.random.randint(20, 25)
+    x = random_array(N_signal)
+    Ux = random_covariance_matrix(N_signal)
+
+    N_theta = np.random.randint(2, 5)  # scipy.linalg.companion requires N >= 2
+    theta = random_array(N_theta)  # scipy.signal.firwin(N_theta, 0.1)
+    Utheta = random_covariance_matrix(N_theta)
+
+    # run method
+    y_fir, Uy_fir = _fir_filter(x, theta, Ux, Utheta, initial_conditions="zero")
+
+    ## run FIR with MC and extract diagonal of returned covariance
+    y_mc, Uy_mc = MC(x, Ux, theta, [1.0], Utheta, blow=None, runs=10000)
+
+    # HACK: for visualization during debugging
+    # import matplotlib.pyplot as plt
+    # fig, ax = plt.subplots(nrows=1, ncols=3)
+    # ax[0].plot(y_fir, label="fir")
+    # ax[0].plot(y_mc, label="mc")
+    # ax[0].set_title("filter: {0}, signal: {1}".format(len(theta), len(x)))
+    # ax[0].legend()
+    # ax[1].imshow(Uy_fir)
+    # ax[2].imshow(Uy_mc)
+    # plt.show()
+    # /HACK
+
+    # approximate comparison
+    assert Uy_fir.shape == Uy_mc.shape
+    assert np.allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
+
+
 def test_IIRuncFilter():
     pass
