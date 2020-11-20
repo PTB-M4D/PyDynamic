@@ -28,7 +28,7 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary")
        and uncertain FIR filter theta with covariance Utheta.
 
        If either Ux or Utheta are omitted (None), then corresponding terms are not
-       calculated to reduce computation time. 
+       calculated to reduce computation time.
 
     Parameters
     ----------
@@ -100,14 +100,14 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary")
 
         # calc subterm
         t_Ux_t = convolve(np.outer(theta, theta), Ux_extended, mode="valid")
-    
-    if Utheta is not None:    
+
+    if Utheta is not None:
         ## extend signal Ntheta steps into the past
         x_extended = np.r_[np.full((Ntheta - 1), x0), x]
 
         # calc subterm
         x_Ut_x = convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
-    
+
     if (Ux is not None) and (Utheta is not None):
         # calc subterm
         Tr_Ux_Ut = convolve(Ux_extended, Utheta.T, mode="valid")
@@ -128,6 +128,71 @@ def _stationary_prepend_covariance(U, n):
     U_adjusted[n:, n:] = U
 
     return U_adjusted
+
+
+def FIRuncFilter_2(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
+    """This method keeps the signature of `PyDynamic.uncertainty.FIRuncFilter`, but internally
+    works differently and returns a full covariance matrix. Also, sigma_noise can be a full
+    covariance matrix.
+
+    Returns
+    -------
+        x: np.ndarray
+            FIR filter output signal
+        ux: np.ndarray
+            covariance matrix containing uncertainties associated with x
+
+
+    References
+    ----------
+        * Elster and Link 2008 [Elster2008]_
+
+    .. seealso:: :mod:`PyDynamic.deconvolution.fit_filter`
+
+    """
+
+    Ntheta = len(theta)  # FIR filter size
+
+    # check which case of sigma_noise is necessary
+    if isinstance(sigma_noise, float):
+        Uy = np.diag(np.full(len(y), sigma_noise ** 2))
+
+    elif isinstance(sigma_noise, np.ndarray):
+
+        if len(sigma_noise.shape) == 1:
+            if kind == "diag":
+                Uy = np.diag(sigma_noise ** 2)
+            elif kind == "corr":
+                Uy = toeplitz(trimOrPad(sigma_noise, len(y)))
+            else:
+                raise ValueError("unknown kind of sigma_noise")
+
+        elif len(sigma_noise.shape) == 2:
+            Uy = sigma_noise
+
+    else:
+        raise ValueError(
+            "Unsupported value of sigma_noise. Please check the documentation."
+        )
+
+    # filter operation(s)
+    if isinstance(blow, np.ndarray):
+        # apply (fully certain) lowpass-filter
+        xlow, Ulow = _fir_filter(y, blow, Uy, None, initial_conditions="stationary")
+
+        # apply filter to lowpass-filtered signal
+        x, Ux = _fir_filter(xlow, theta, Ulow, Utheta, initial_conditions="stationary")
+
+    else:
+        # apply filter to input signal
+        x, Ux = _fir_filter(y, theta, Uy, Utheta, initial_conditions="stationary")
+
+    # shift result
+    if shift != 0:
+        x = np.roll(x, -int(shift))
+        Ux = np.roll(Ux, (-int(shift), -int(shift)))
+
+    return x, Ux
 
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
