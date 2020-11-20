@@ -191,7 +191,6 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
     )
 
 
-
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals())
 @pytest.mark.parametrize("lowpasses", valid_lows())
@@ -203,7 +202,7 @@ def test_FIRuncFilter_2(filters, signals, lowpasses):
     # check output dimensions
     assert len(y2) == len(signals["y"])
     assert Uy2.shape == (len(signals["y"]), len(signals["y"]))
-    
+
     # check value identity
     assert np.allclose(y, y2)
     assert np.allclose(Uy, np.sqrt(np.diag(Uy2)))

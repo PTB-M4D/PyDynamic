@@ -20,7 +20,7 @@ from .propagate_DFT import (
     Time2AmpPhase,
 )
 
-from .propagate_filter import FIRuncFilter, IIRuncFilter
+from .propagate_filter import FIRuncFilter, IIRuncFilter, FIRuncFilter_2
 
 from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
 
