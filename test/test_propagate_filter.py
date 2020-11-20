@@ -27,6 +27,7 @@ def random_nonnegative_array(length):
 def random_covariance_matrix(length):
     # construct a valid (but random) covariance matrix
     cov = np.cov(np.random.random((length, length)))
+    cov = cov + np.mean(cov)  # to get better condition number
     return cov
 
 
