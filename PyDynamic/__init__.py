@@ -40,6 +40,7 @@ __all__ = [
     "AmpPhase2Time",
     "Time2AmpPhase",
     "FIRuncFilter",
+    "FIRuncFilter_2",
     "IIRuncFilter",
     "MC",
     "SMC",

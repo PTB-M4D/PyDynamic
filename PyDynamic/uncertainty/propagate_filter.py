@@ -20,7 +20,7 @@ from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi, dimpulse, convolve
 from ..misc.tools import trimOrPad
 
-__all__ = ["FIRuncFilter", "IIRuncFilter"]
+__all__ = ["FIRuncFilter", "IIRuncFilter", "FIRuncFilter_2"]
 
 
 def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary"):
@@ -178,14 +178,14 @@ def FIRuncFilter_2(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind=
     # filter operation(s)
     if isinstance(blow, np.ndarray):
         # apply (fully certain) lowpass-filter
-        xlow, Ulow = _fir_filter(y, blow, Uy, None, initial_conditions="stationary")
+        xlow, Ulow = _fir_filter(y, blow, Uy, None, initial_conditions="constant")
 
         # apply filter to lowpass-filtered signal
-        x, Ux = _fir_filter(xlow, theta, Ulow, Utheta, initial_conditions="stationary")
+        x, Ux = _fir_filter(xlow, theta, Ulow, Utheta, initial_conditions="constant")
 
     else:
         # apply filter to input signal
-        x, Ux = _fir_filter(y, theta, Uy, Utheta, initial_conditions="stationary")
+        x, Ux = _fir_filter(y, theta, Uy, Utheta, initial_conditions="constant")
 
     # shift result
     if shift != 0:
