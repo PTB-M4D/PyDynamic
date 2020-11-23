@@ -24,6 +24,12 @@ def random_nonnegative_array(length):
     return array
 
 
+def random_rightsided_autocorrelation(length):
+    array = random_array(length)
+    acf = scipy.signal.correlate(array, array, mode="full")
+    return acf[len(acf) // 2 :]
+
+
 def random_covariance_matrix(length):
     """construct a valid (but random) covariance matrix with good condition number"""
 
@@ -64,7 +70,11 @@ def valid_signals():
     valid_signals = [
         {"y": signal, "sigma_noise": np.random.randn(), "kind": "float"},
         {"y": signal, "sigma_noise": random_nonnegative_array(N), "kind": "diag"},
-        {"y": signal, "sigma_noise": random_nonnegative_array(N // 2), "kind": "corr"},
+        {
+            "y": signal,
+            "sigma_noise": random_rightsided_autocorrelation(N // 2),
+            "kind": "corr",
+        },
     ]
 
     return valid_signals
@@ -245,11 +255,15 @@ def test_fir_filter_MC_comparison():
     # ax[0].set_title("filter: {0}, signal: {1}".format(len(theta), len(x)))
     # ax[0].legend()
     # ax[1].imshow(Uy_fir)
+    # ax[1].set_title("FIR")
     # ax[2].imshow(Uy_mc)
+    # ax[2].set_title("MC")
     # plt.show()
     # /HACK
 
     # approximate comparison
+    assert np.all(np.diag(Uy_fir) >= 0)
+    assert np.all(np.diag(Uy_mc) >= 0)
     assert Uy_fir.shape == Uy_mc.shape
     assert np.allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
 
