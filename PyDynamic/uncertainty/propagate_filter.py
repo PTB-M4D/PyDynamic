@@ -17,7 +17,8 @@ This modules contains the following functions:
 
 import numpy as np
 from scipy.linalg import toeplitz
-from scipy.signal import lfilter, lfilter_zi, dimpulse, convolve
+from scipy.signal import lfilter, lfilter_zi, dimpulse
+from scipy.signal import oaconvolve as convolve
 from ..misc.tools import trimOrPad
 
 __all__ = ["FIRuncFilter", "IIRuncFilter", "FIRuncFilter_2"]
