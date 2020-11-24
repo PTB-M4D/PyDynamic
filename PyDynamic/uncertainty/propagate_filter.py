@@ -18,7 +18,7 @@ This modules contains the following functions:
 import numpy as np
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi, dimpulse
-from scipy.signal import oaconvolve as convolve
+from scipy.signal import convolve
 from ..misc.tools import trimOrPad
 
 __all__ = ["FIRuncFilter", "IIRuncFilter", "FIRuncFilter_2"]
@@ -79,12 +79,9 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary")
     y, _ = lfilter(theta, 1.0, x, zi=x0 * lfilter_zi(theta, 1.0))
 
     # propagate uncertainty
+    Uy = np.zeros((len(x), len(x)))
 
     ## only calculate subterms, that are non-zero (compare eq. 34 of paper)
-    t_Ux_t = 0
-    x_Ut_x = 0
-    Tr_Ux_Ut = 0
-
     if Ux is not None:
         ## extend covariance Ntheta steps into the past
         if initial_conditions == "constant":
@@ -99,22 +96,19 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary")
                 constant_values=0,
             )
 
-        # calc subterm
-        t_Ux_t = convolve(np.outer(theta, theta), Ux_extended, mode="valid")
+        # calc subterm theta^T * Ux * theta
+        Uy += convolve(np.outer(theta, theta), Ux_extended, mode="valid")
 
     if Utheta is not None:
         ## extend signal Ntheta steps into the past
         x_extended = np.r_[np.full((Ntheta - 1), x0), x]
 
-        # calc subterm
-        x_Ut_x = convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
+        # calc subterm x^T * Utheta * x
+        Uy += convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
 
     if (Ux is not None) and (Utheta is not None):
-        # calc subterm
-        Tr_Ux_Ut = convolve(Ux_extended, Utheta.T, mode="valid")
-
-    ## add subterms of Uy
-    Uy = t_Ux_t + x_Ut_x + Tr_Ux_Ut
+        # calc subterm Tr(Ux * Utheta)
+        Uy += convolve(Ux_extended, Utheta.T, mode="valid")
 
     return y, Uy
 
