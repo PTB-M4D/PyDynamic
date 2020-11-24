@@ -225,11 +225,11 @@ def test_FIRuncFilter_2(filters, signals, lowpasses):
 
     # check output dimensions
     assert len(y2) == len(signals["y"])
-    assert Uy2.shape == (len(signals["y"]), len(signals["y"]))
+    assert Uy2.shape == (len(signals["y"]),)
 
     # check value identity
     assert np.allclose(y, y2)
-    assert np.allclose(Uy, np.sqrt(np.diag(Uy2)))
+    assert np.allclose(Uy, Uy2)
 
 
 def test_fir_filter_MC_comparison():

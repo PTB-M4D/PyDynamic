@@ -130,7 +130,7 @@ def _stationary_prepend_covariance(U, n):
     return U_adjusted
 
 
-def FIRuncFilter_2(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
+def FIRuncFilter_2(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr", legacy_return=True):
     """This method keeps the signature of `PyDynamic.uncertainty.FIRuncFilter`, but internally
     works differently and returns a full covariance matrix. Also, sigma_noise can be a full
     covariance matrix.
@@ -192,7 +192,10 @@ def FIRuncFilter_2(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind=
         x = np.roll(x, -int(shift))
         Ux = np.roll(Ux, (-int(shift), -int(shift)))
 
-    return x, Ux
+    if legacy_return:
+        return x, np.sqrt(np.abs(np.diag(Ux)))
+    else:
+        return x, Ux
 
 
 def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
