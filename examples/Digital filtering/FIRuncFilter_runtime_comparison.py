@@ -28,13 +28,13 @@ def evaluate(signal, filter, case="full/zero/none"):
     return runtime, y, Uy
 
 
-filter_lengths = [10, 50, 100, 200, 500, 1000, 2000]
+filter_lengths = [10, 50, 100, 200, 500, 1000]
 cases = ["full", "zero", "none"]
 results = pd.DataFrame(index=filter_lengths, columns=cases)
 
 
 # prepare signal
-signal_length = 10000
+signal_length = 2000
 sigma_noise = 1e-2  # 1e-5
 signal = sigma_noise * np.random.randn(signal_length)
 
