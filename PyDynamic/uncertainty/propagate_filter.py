@@ -24,7 +24,7 @@ from ..misc.tools import trimOrPad
 __all__ = ["FIRuncFilter", "IIRuncFilter", "FIRuncFilter_2"]
 
 
-def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary"):
+def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="constant"):
     """Uncertainty propagation for signal x with covariance Ux
        and uncertain FIR filter theta with covariance Utheta.
 
@@ -33,34 +33,39 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary")
 
     Parameters
     ----------
-        x: np.ndarray
-            filter input signal
-        theta: np.ndarray
-            FIR filter coefficients
-        Ux: np.ndarray, optional
-            covariance matrix of input signal
-        Utheta: np.ndarray, optional
-            covariance matrix associated with theta
-            if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
-            see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
-        initial_conditions: str, optional
-            stationary: assume signal + uncertainty are constant before t=0 (default)
-            zero: assume signal + uncertainty are zero before t=0
+    x : np.ndarray
+        filter input signal
+    theta : np.ndarray
+        FIR filter coefficients
+    Ux : np.ndarray, optional
+        covariance matrix associated with x
+        1D: diagonal of covariance matrix ([ux11^2, ux22^2, ..., uxnn^2])
+        2D: full covariance matrix of input signal
+        if the signal is fully certain, use `Ux = None` (default) to make use of more efficient calculations.
+    Utheta : np.ndarray, optional
+        covariance matrix associated with theta
+        1D: diagonal of covariance matrix ([ut11^2, ut22^2, ..., utnn^2])
+        2D: full covariance matrix of input signal
+        if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
+        see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+    initial_conditions : str, optional
+        constant: assume signal + uncertainty are constant before t=0 (default)
+        zero: assume signal + uncertainty are zero before t=0
 
 
     Returns
     -------
-        y: np.ndarray
-            FIR filter output signal
-        Uy: np.ndarray
-            covariance matrix of filter output y
+    y : np.ndarray
+        FIR filter output signal
+    Uy : np.ndarray
+        covariance matrix of filter output y
 
 
     References
     ----------
-        * Elster and Link 2008 [Elster2008]_
+    * Elster and Link 2008 [Elster2008]_
 
-    .. seealso:: :mod:`PyDynamic.deconvolution.fit_filter`
+    .. seealso:: :mod:`PyDynamic.model_estimation.fit_filter`
 
     """
 
@@ -69,11 +74,15 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="stationary")
     if initial_conditions == "constant":
         x0 = x[0]
 
+    # Note: currently only used in testing for comparison against Monte Carlo method
     elif initial_conditions == "zero":
         x0 = 0.0
 
     else:
-        raise ValueError(f"'initial_conditions' = '{initial_conditions}'.")
+        raise ValueError(
+            f"_fit_filter: You provided 'initial_conditions' = '{initial_conditions}'."
+            f"However, only 'zero' or 'constant' are currently supported."
+        )
 
     # propagate filter
     y, _ = lfilter(theta, 1.0, x, zi=x0 * lfilter_zi(theta, 1.0))
