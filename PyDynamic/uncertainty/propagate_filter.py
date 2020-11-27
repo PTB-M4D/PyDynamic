@@ -65,6 +65,12 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="constant"):
 
     """
 
+    # Note to future developers:
+    # The functions _fir_filter and _fir_filter_diag share
+    # the same logic. If adjustments become necessary (e.g.
+    # due to bug fixing) please also consider adjusting it
+    # in the other function as well.
+
     Ntheta = len(theta)  # FIR filter size
 
     if initial_conditions == "constant":
@@ -161,6 +167,12 @@ def _fir_filter_diag(
 
     """
 
+    # Note to future developers:
+    # The functions _fir_filter and _fir_filter_diag share
+    # the same logic. If adjustments become necessary (e.g.
+    # due to bug fixing) please also consider adjusting it
+    # in the other function as well.
+
     Ntheta = len(theta)  # FIR filter size
 
     if initial_conditions == "constant":
@@ -249,7 +261,7 @@ def FIRuncFilter_2(
     theta : np.ndarray
         FIR filter coefficients
     Utheta : np.ndarray, optional
-        1D-array: diagonal of covariance matrix
+        1D-array: coefficient-wise standard uncertainties of filter
         2D-array: covariance matrix associated with theta
         if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
         see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
@@ -262,12 +274,14 @@ def FIRuncFilter_2(
         "diag": point-wise standard uncertainties of non-stationary white noise
         "corr": single sided autocovariance of stationary (colored/correlated)
         noise (default)
+    return_full_covariance : bool, optional
+        whether or not to return a full covariance of the output, defaults to False
 
     Returns
     -------
     x : np.ndarray
         FIR filter output signal
-    ux : np.ndarray
+    Ux : np.ndarray
         return_full_covariance == False : point-wise standard uncertainties associated with x (default)
         return_full_covariance == True : covariance matrix containing uncertainties associated with x
 
@@ -280,31 +294,47 @@ def FIRuncFilter_2(
 
     """
 
-    # check for special cases, that we can compute much faster
+    # Check for special cases, that we can compute much faster:
+    ## These special cases come from the default behavior of the `old` FIRuncFilter
+    ## implementation, which always returned only the square-root of the main diagonal
+    ## of the covariance matrix.
+    ## The special case is activated, if the user does not want a full covariance of
+    ## the result (return_full_covariance == False). Furthermore, sigma_noise and Utheta
+    ## must be representable by pure diagonal covariance matricies (i.e. they are of type
+    ## None, float or 1D-array). By the same reasoning, we need to exclude cases
+    ## of preceding low-pass filtering, as the covariance of the low-pass-filtered
+    ## signal would no longer be purely diagonal. 
+    ## Computation is then based on eq. 33 [Elster2008]_ - which is substantially
+    ## faster (typically by orders of magnitude) when compared to the full covariance
+    ## calculation.
+    ## Check this example: <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+
     if (
-        (
+        (not return_full_covariance)  # no need for full covariance
+        and (  # cases of sigma_noise, that support the faster computation
             isinstance(sigma_noise, float)
             or (isinstance(sigma_noise, np.ndarray) and len(sigma_noise.shape) == 1)
             or (sigma_noise is None)
         )
-        and (
+        and (  # cases of Utheta, that support the faster computation
             isinstance(Utheta, float)
             or (isinstance(Utheta, np.ndarray) and len(Utheta.shape) == 1)
             or (Utheta is None)
         )
+        # the low-pass-filtered signal wouldn't have pure diagonal covariance
         and (blow is None)
-        and (kind == "diag" or not isinstance(sigma_noise, np.ndarray))
-        and (not return_full_covariance)
+        # if sigma_noise is 1D, it must represent the diagonal of a covariance matrix
+        and (kind == "diag" or not isinstance(sigma_noise, np.ndarray))  
     ):
         if isinstance(sigma_noise, float):
-            Uy_diag = np.full_like(y, sigma_noise**2)
+            Uy_diag = np.full_like(y, sigma_noise ** 2)
         else:
             Uy_diag = np.square(sigma_noise)
 
         if isinstance(Utheta, float):
             Utheta_diag = np.full_like(theta, Utheta)
         else:
-            Utheta_diag = Utheta
+            Utheta_diag = np.square(Utheta)
 
         x, Ux_diag = _fir_filter_diag(
             y, theta, Uy_diag, Utheta_diag, initial_conditions="constant"
