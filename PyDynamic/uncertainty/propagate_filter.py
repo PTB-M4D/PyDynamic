@@ -328,13 +328,17 @@ def FIRuncFilter_2(
     ):
         if isinstance(sigma_noise, float):
             Uy_diag = np.full_like(y, sigma_noise ** 2)
-        else:
+        elif isinstance(sigma_noise, np.ndarray):
             Uy_diag = np.square(sigma_noise)
+        else:
+            Uy_diag = sigma_noise
 
         if isinstance(Utheta, float):
             Utheta_diag = np.full_like(theta, Utheta)
-        else:
+        elif isinstance(Utheta, np.ndarray):
             Utheta_diag = np.square(Utheta)
+        else:
+            Utheta_diag = Utheta
 
         x, Ux_diag = _fir_filter_diag(
             y, theta, Uy_diag, Utheta_diag, initial_conditions="constant"
