@@ -74,7 +74,25 @@ def shift_uncertainty(x, ux, shift):
         raise TypeError("Input uncertainty has incompatible type")
 
 def trimOrPad(array, length, mode="constant"):
-    """Trim or pad (with zeros) a vector to desired length"""
+    """Trim or pad (with zeros) a vector to the desired length
+
+    Parameters
+    ----------
+    array : list, 1D np.ndarray
+        original data
+    length : int
+        length of output
+    mode : str, optional
+        handed over to np.pad, default "constant"
+
+    Returns
+    -------
+    array_modified : np.ndarray of shape (length,)
+        An array that is either trimmed or zero-padded to achieve
+        the required `length`. Both actions are applied to the
+        right side of the array
+    """
+    
     if len(array) < length:  # pad zeros to the right if too short
         return np.pad(array, (0, length - len(array)), mode=mode)
     else:  # trim to given length otherwise
