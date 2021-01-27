@@ -167,14 +167,6 @@ def LSIIR(
 
     .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
     """
-    if justFit:
-        warn(
-            "LSIIR: The parameter justFit is only available for reasons of backward "
-            "compatibility. You seem to intend to skip stabilization. Please from "
-            "now on use `max_stab_iter = 0` in that case and leave `justFit` "
-            "untouched. `justFit` will be removed in a future release.",
-            PendingDeprecationWarning,
-        )
     # Make sure we enter for loop later on at least once if either Monte Carlo is
     # really used or not and exactly once in case it is not.
     if UHvals is None or mc_runs <= 0:
@@ -657,13 +649,6 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     * Eichstädt, Elster, Esward, Hessling [Eichst2010]_
 
     """
-    warn(
-        "invLSIIR: The method invLSIIR() will be removed in the next major release "
-        "3.0.0. Please switch to the current method LSIIR() with the same input "
-        "parameters as in your call of invLSIIR in the same order and "
-        "additionally specify inv=True.",
-        PendingDeprecationWarning,
-    )
     return LSIIR(
         Hvals=Hvals,
         Nb=Nb,
@@ -725,15 +710,6 @@ def invLSIIR_unc(
     .. seealso:: :mod:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
                  :mod:`PyDynamic.model_estimation.fit_filter.invLSIIR`
     """
-    warn(
-        "invLSIIR_unc: The method invLSIIR_unc() will be removed in the next major "
-        "release 3.0.0. Please switch to the current method LSIIR() with the same "
-        "input parameters as in your call of invLSIIR_unc and additionally specify "
-        "inv=True. Just make sure to adapt order or names to the current "
-        "implementation which you will find in the documentation or in the code of "
-        "LSIIR.",
-        PendingDeprecationWarning,
-    )
     print(
         f"invLSIIR_unc: Least-squares fit of an order {max(Nb, Na)} digital IIR "
         f"filter to the reciprocal of a frequency response given by {len(H)} "
