@@ -3,11 +3,36 @@
 
 import numpy as np
 import pytest
-import scipy.signal as dsp
+# import scipy.signal as dsp
 from numpy.testing import assert_almost_equal
 
-from PyDynamic import grpdelay, mapinside
+from PyDynamic import grpdelay, mapinside, sos_FreqResp
 from PyDynamic.model_estimation import fit_filter
+
+
+@pytest.fixture
+def LSIIR_parameters():
+    """Design a sample measurement system and a corresponding frequency response."""
+    # measurement system
+    f0 = 36e3  # system resonance frequency in Hz
+    S0 = 0.124  # system static gain
+    delta = 0.0055  # system damping
+
+    f = np.linspace(0, 80e3, 30)  # frequencies for fitting the system
+    Hvals = sos_FreqResp(S0, delta, f0, f)  # frequency response of the 2nd order system
+
+    # %% fitting the IIR filter
+
+    Fs = 500e3  # sampling frequency
+    Na = 4
+    Nb = 4  # IIR filter order (Na - denominator, Nb - numerator)
+    return {
+        "Hvals": Hvals,
+        "Na": Na,
+        "Nb": Nb,
+        "f": f,
+        "Fs": Fs,
+    }
 
 
 @pytest.fixture
@@ -44,31 +69,31 @@ def former_LSIIR():
         """
 
         def _fitIIR(
-            Hvals: np.ndarray,
-            tau: int,
-            w: np.ndarray,
-            E: np.ndarray,
-            Na: int,
-            Nb: int,
-            inv: bool = False,
+            _Hvals: np.ndarray,
+            _tau: int,
+            _w: np.ndarray,
+            _E: np.ndarray,
+            _Na: int,
+            _Nb: int,
+            _inv: bool = False,
         ):
             """The actual fitting routing for the least-squares IIR filter.
 
             Parameters
             ----------
-                Hvals :  (M,) np.ndarray
+                _Hvals :  (M,) np.ndarray
                     (complex) frequency response values
-                tau : integer
+                _tau : integer
                     initial estimate of time delay
-                w : np.ndarray
+                _w : np.ndarray
                     :math:`2 * np.pi * f / Fs`
-                E : np.ndarray
+                _E : np.ndarray
                     :math:`np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
-                Nb : int
+                _Nb : int
                     numerator polynomial order
-                Na : int
+                _Na : int
                     denominator polynomial order
-                inv : bool, optional
+                _inv : bool, optional
                     If True the least-squares fitting is performed for the reciprocal,
                     if False
                     for the actual frequency response
@@ -77,18 +102,18 @@ def former_LSIIR():
             -------
                 b, a : IIR filter coefficients as numpy arrays
             """
-            exponent = -1 if inv else 1
-            Ea = E[:, 1 : Na + 1]
-            Eb = E[:, : Nb + 1]
-            Htau = np.exp(-1j * w * tau) * Hvals ** exponent
+            exponent = -1 if _inv else 1
+            Ea = _E[:, 1: _Na + 1]
+            Eb = _E[:, : _Nb + 1]
+            Htau = np.exp(-1j * _w * tau) * _Hvals ** exponent
             HEa = np.dot(np.diag(Htau), Ea)
             D = np.hstack((HEa, -Eb))
             Tmp1 = np.real(np.dot(np.conj(D.T), D))
             Tmp2 = np.real(np.dot(np.conj(D.T), -Htau))
             ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
-            a = np.hstack((1.0, ab[:Na]))
-            b = ab[Na:]
-            return b, a
+            a_coeff = np.hstack((1.0, ab[:_Na]))
+            b_coeff = ab[_Na:]
+            return b_coeff, a_coeff
 
         # print("\nLeast-squares fit of an order %d digital IIR filter" % max(Nb, Na))
         # print("to a frequency response given by %d values.\n" % len(Hvals))
@@ -97,7 +122,7 @@ def former_LSIIR():
         Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
         E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
 
-        b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=False)
+        b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, _inv=False)
 
         if justFit:
             # print("Calculation done. No stabilization requested.")
@@ -124,7 +149,7 @@ def former_LSIIR():
             g2 = grpdelay(b, astab, Fs)[0]
             tau = np.ceil(tau + np.median(g2 - g1))
 
-            b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=False)
+            b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, _inv=False)
             if np.count_nonzero(np.abs(np.roots(a)) > 1) > 0:
                 astab = mapinside(a)
             else:
@@ -139,10 +164,10 @@ def former_LSIIR():
 
         # print(
         #    "Least squares fit finished after %d iterations (tau=%d)." % (run, tau))
-        Hd = dsp.freqz(b, a, 2 * np.pi * f / Fs)[1]
-        Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
-        res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
-        rms = np.sqrt(np.sum(res ** 2) / len(f))
+        # Hd = dsp.freqz(b, a, 2 * np.pi * f / Fs)[1]
+        # Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
+        # res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
+        # rms = np.sqrt(np.sum(res ** 2) / len(f))
         # print("Final rms error = %e \n\n" % rms)
 
         return b, a, int(tau)
