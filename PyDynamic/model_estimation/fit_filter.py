@@ -105,7 +105,7 @@ def LSIIR(
     """Least-squares (time-discrete) IIR filter fit to a given frequency response or
     its reciprocal
 
-    For the forward problem this method uses Gauss-Newton non-linear optimization.
+    For the case of fitting an IIR filter model to a frequency response this method calculates the IIR filter coefficients as a least-squares fit.
     For the inverse problem it uses the equation-error method. The filter then is
     stabilized by pole mapping and introduction of a time delay. Associated
     uncertainties are optionally propagated when provided using the Monte Carlo method.
