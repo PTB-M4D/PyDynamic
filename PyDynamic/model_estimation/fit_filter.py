@@ -164,7 +164,7 @@ def LSIIR(
     """
     # Make sure we enter for loop later on at least once if either Monte Carlo is
     # really used or not and exactly once in case it is not.
-    if UHvals is None or mc_runs <= 0:
+    if UHvals is None:
         mc_runs = 1
 
     # Augment (the reciprocal of) the frequency response with normally distributed
