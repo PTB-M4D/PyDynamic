@@ -93,7 +93,6 @@ def LSIIR(
     f: np.ndarray,
     Fs: float,
     tau: Optional[int] = 0,
-    justFit: Optional[bool] = False,
     verbose: Optional[bool] = True,
     max_stab_iter: Optional[int] = 50,
     inv: Optional[bool] = False,
@@ -127,20 +126,14 @@ def LSIIR(
         Initial estimate of time delay for filter stabilization (default = 0). If
         `max_stab_iter = 0` this parameter is not used and `tau = 0` will be
         returned.
-    justFit : bool, optional
-        If True then no stabilization is carried out, if False (default) filter is
-        stabilized. This parameter is only available for reasons of backward
-        compatibility. If you intend to skip stabilization please from now on use
-        `max_stab_iter = 0` and leave `justFit` untouched. `justFit` will be removed
-        in a future release.
     verbose : bool, optional
         If True (default) be more talkative on stdout. Otherwise no output is written
         anywhere.
     max_stab_iter : int, optional
         Maximum count of iterations for stabilizing the resulting filter. If no
         stabilization should be carried out, this parameter can be set to 0 (default =
-        50). As long as `justFit` still exists `max_stab_iter` parameter has no
-        effect if `justFit = True`.
+        50). This parameter replaced the previous `justFit` which was dropped in
+        PyDynamic 2.0.0.
     inv : bool, optional
         If False (default) apply the fit to the frequency response values directly,
         otherwise fit to the reciprocal of the frequency response values.
@@ -218,7 +211,7 @@ def LSIIR(
 
         # In case the user specified not to check for stability,
         # we skip the rest of the current Monte Carlo run and inform the user.
-        if justFit or max_stab_iter == 0:
+        if max_stab_iter == 0:
             if verbose:
                 sos = np.sum(np.abs((dsp.freqz(b_i, a_i, w)[1] - Hvals) ** 2))
                 print(
@@ -651,16 +644,20 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     * Eichstädt, Elster, Esward, Hessling [Eichst2010]_
 
     """
+    if justFit:
+        return LSIIR(
+            Hvals=Hvals,
+            Nb=Nb,
+            Na=Na,
+            f=f,
+            Fs=Fs,
+            tau=tau,
+            verbose=verbose,
+            max_stab_iter=0,
+            inv=True,
+        )
     return LSIIR(
-        Hvals=Hvals,
-        Nb=Nb,
-        Na=Na,
-        f=f,
-        Fs=Fs,
-        tau=tau,
-        justFit=justFit,
-        verbose=verbose,
-        inv=True,
+        Hvals=Hvals, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau, verbose=verbose, inv=True
     )
 
 
