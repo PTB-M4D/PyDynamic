@@ -105,10 +105,11 @@ def LSIIR(
     """Least-squares (time-discrete) IIR filter fit to a given frequency response or
     its reciprocal
 
-    For the case of fitting an IIR filter model to a frequency response this method calculates the IIR filter coefficients as a least-squares fit.
-    For the inverse problem it uses the equation-error method. The filter then is
-    stabilized by pole mapping and introduction of a time delay. Associated
-    uncertainties are optionally propagated when provided using the Monte Carlo method.
+    Least-squares fit of an IIR filter model to either the reciprocal of a set of
+    frequency response values or directly to the frequency response values. The
+    filter then optionally is stabilized by pole mapping and introduction of a time
+    delay. Associated uncertainties are optionally propagated when provided using the
+    Monte Carlo method.
 
     Parameters
     ----------
@@ -124,7 +125,8 @@ def LSIIR(
         Sampling frequency for digital IIR filter.
     tau : int, optional
         Initial estimate of time delay for filter stabilization (default = 0). If
-        `justFit = True` this parameter is not used and `tau = 0` will be returned.
+        `max_stab_iter = 0` this parameter is not used and `tau = 0` will be
+        returned.
     justFit : bool, optional
         If True then no stabilization is carried out, if False (default) filter is
         stabilized. This parameter is only available for reasons of backward
@@ -140,8 +142,8 @@ def LSIIR(
         50). As long as `justFit` still exists `max_stab_iter` parameter has no
         effect if `justFit = True`.
     inv : bool, optional
-        If False (default) apply the forward method, otherwise perform the fit for
-        the reciprocal of the frequency response.
+        If False (default) apply the fit to the frequency response values directly,
+        otherwise fit to the reciprocal of the frequency response values.
     UHvals : array_like of shape (2M, 2M), optional
         Uncertainties associated with real and imaginary part of H.
     mc_runs : int, optional
@@ -157,7 +159,7 @@ def LSIIR(
     tau : int
         Filter time delay (in samples).
     Uab : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
-        Uncertainties associated with [a[1:],b]. Will only be returned if `UHvals`
+        Uncertainties associated with `[a[1:],b]`. Will only be returned if `UHvals`
         was provided.
 
     References
@@ -251,7 +253,7 @@ def LSIIR(
             unstable = not isstable(b=b_i, a=a_i, ftype="digital")
             current_stab_iter += 1
 
-        # Finally store filter stacked filter parameters.
+        # Finally store stacked filter parameters.
         as_and_bs[mc_run, :] = np.hstack((a_i[1:], b_i))
         stab_iters[mc_run] = current_stab_iter
 
@@ -610,8 +612,8 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     """Least-squares IIR filter fit to the reciprocal of given frequency response values
 
     Least-squares fit of a digital IIR filter to the reciprocal of a given set
-    of frequency response values using the equation-error method and
-    stabilization by pole mapping and introduction of a time delay.
+    of frequency response values and stabilization by pole mapping and introduction
+    of a time delay.
 
     Parameters
     ----------
@@ -629,7 +631,7 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
         Initial estimate of time delay for filter stabilization (default = 0). If
         `justFit = True` this parameter is not used and `tau = 0` will be returned.
     justFit : bool, optional
-        If True then no stabilization is carried out, if False  (default) filter is
+        If True then no stabilization is carried out, if False (default) filter is
         stabilized.
     verbose : bool, optional
         If True (default) be more talkative on stdout. Otherwise no output is written
@@ -675,7 +677,7 @@ def invLSIIR_unc(
 
     Least-squares fit of a digital IIR filter to the reciprocal of a given set
     of frequency response values with given associated uncertainty.
-    Propagation of uncertainties is carried out using the Monte Carlo method.
+    Propagation of uncertainties is carried out using the GUM S2 Monte Carlo method.
 
     Parameters
     ----------
