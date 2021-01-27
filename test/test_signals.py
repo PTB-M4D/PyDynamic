@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Perform tests on methods to create testsignals."""
-
+import matplotlib
 import numpy as np
 from hypothesis import given, strategies as st
 from numpy.testing import assert_almost_equal
@@ -8,12 +8,12 @@ from pytest import approx
 
 from examples.working_with_signals import demonstrate_signal
 from PyDynamic.misc.testsignals import (
-    shocklikeGaussian,
     GaussianPulse,
     rect,
-    squarepulse,
+    shocklikeGaussian,
     sine,
     multi_sine,
+    squarepulse,
 )
 
 N = 2048
@@ -153,6 +153,9 @@ class TestSine:
         assert_almost_equal(x, multi_x)
 
 
-def test_signal_example():
+def test_signal_example(monkeypatch):
     # Test executability of the demonstrate_signal example.
+    # With this expression we override the matplotlib.pyplot.show method with a
+    # lambda expression returning None but only for this one test.
+    monkeypatch.setattr(matplotlib.pyplot, "show", lambda: None, raising=True)
     demonstrate_signal()
