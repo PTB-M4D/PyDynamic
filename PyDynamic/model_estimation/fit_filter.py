@@ -140,8 +140,8 @@ def LSIIR(
     UHvals : array_like of shape (2M, 2M), optional
         Uncertainties associated with real and imaginary part of H.
     mc_runs : int, optional
-        Number of Monte Carlo runs, which has to be >= 1 (default = 1000). Only
-        used if uncertainties `UHvals` are provided. Otherwise this input has no effect.
+        Number of Monte Carlo runs >= 1 (default = 1000). Only used if uncertainties 
+         `UHvals` are provided. Otherwise this input has no effect.
 
     Returns
     -------
