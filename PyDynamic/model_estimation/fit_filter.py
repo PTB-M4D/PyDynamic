@@ -218,7 +218,7 @@ def LSIIR(
 
         # In case the user specified not to check for stability,
         # we skip the rest of the current Monte Carlo run and inform the user.
-        if justFit:
+        if justFit or max_stab_iter == 0:
             if verbose:
                 sos = np.sum(np.abs((dsp.freqz(b_i, a_i, w)[1] - Hvals) ** 2))
                 print(
