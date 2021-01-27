@@ -104,11 +104,12 @@ def LSIIR(
     """Least-squares (time-discrete) IIR filter fit to a given frequency response or
     its reciprocal
 
-    Least-squares fit of an IIR filter model to either the reciprocal of a set of
-    frequency response values or directly to the frequency response values. The
+    For fitting an IIR filter model to the reciprocal of the frequency response values
+    or directly to the frequency response values provided by the user, this method
+    uses a least-squares fit to determine an estimate of the filter coefficients. The
     filter then optionally is stabilized by pole mapping and introduction of a time
     delay. Associated uncertainties are optionally propagated when provided using the
-    Monte Carlo method.
+    GUM S2 Monte Carlo method.
 
     Parameters
     ----------
