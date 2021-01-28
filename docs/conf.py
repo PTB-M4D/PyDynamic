@@ -46,7 +46,7 @@ extensions = [
 # https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
 html_theme_options = {
     # True hides the + signs to expand the menu entries in the sidebar.
-    'collapse_navigation': False,
+    "collapse_navigation": False,
 }
 
 # This should make SciPy documentation available inside our docs.
@@ -87,7 +87,7 @@ author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
 # built documents.
 #
 # The short X.Y version.
-version = "1.6.0"
+version = "1.6.1"
 # The full version, including alpha/beta/rc tags.
 # release = "1.3.1"
 

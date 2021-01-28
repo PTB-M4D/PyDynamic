@@ -5,8 +5,8 @@ from os import path
 
 from setuptools import find_packages, setup
 
-# Get release version from PyDynamic __init__.py
-from PyDynamic import __version__ as VERSION
+# Get release version from Sphinx' docs/conf.py
+from docs.conf import version as VERSION
 
 
 def get_readme():
