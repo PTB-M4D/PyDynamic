@@ -206,7 +206,7 @@ def LSIIR(
         b_i, a_i = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
 
         # Initialize counter which we use to report about required iteration count.
-        current_stab_iter = 0
+        current_stab_iter = 1
 
         # Determine if the computed filter already is stable.
         if isstable(b=b_i, a=a_i, ftype="digital"):
@@ -233,7 +233,7 @@ def LSIIR(
                 a_stab = mapinside(a_i)
                 g_1 = grpdelay(b_i, a_i, Fs)[0]
                 g_2 = grpdelay(b_i, a_stab, Fs)[0]
-                taus[mc_run] += np.ceil(np.median(g_2 - g_1))
+                taus[mc_run] = np.ceil(taus[mc_run] + np.median(g_2 - g_1))
 
                 # Conduct stabilization step through time delay.
                 b_i, a_i = _fitIIR(Hvals, taus[mc_run], w, E, Na, Nb, inv=inv)
