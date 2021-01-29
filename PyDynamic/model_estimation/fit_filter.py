@@ -20,7 +20,6 @@ This module contains the following functions:
 
 """
 from typing import Optional, Tuple, Union
-from warnings import warn
 
 import numpy as np
 import scipy.signal as dsp
