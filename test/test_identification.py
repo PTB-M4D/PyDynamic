@@ -21,8 +21,8 @@ def LSIIR_parameters(draw):
     # measurement system
     f0 = draw(
         hst.floats(
-            min_value=20e3,
-            max_value=1e5,
+            min_value=1e2,
+            max_value=1e6,
             **float_generic_params,
         )
     )  # originally this was set to 36e3 for the system resonance frequency in Hz
@@ -37,21 +37,21 @@ def LSIIR_parameters(draw):
 
     delta = draw(
         hst.floats(
-            min_value=1e-4,
-            max_value=1e-2,
+            min_value=1e-5,
+            max_value=1e-1,
             **float_generic_params,
         )
     )  # originally this was set to 0.0055 for the system damping
     dim = draw(
         hst.integers(
             min_value=1,
-            max_value=30,
+            max_value=60,
         )
     )  # originally this was set to 30 for the number of frequencies
     maximum_frequency = draw(
         hst.floats(
-            min_value=1e3,
-            max_value=1e5,
+            min_value=1e2,
+            max_value=1e6,
             **float_generic_params,
         )
     )  # originally this was set to 80e3 for the system damping
