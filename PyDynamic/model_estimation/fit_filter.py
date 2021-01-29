@@ -26,13 +26,7 @@ import scipy.signal as dsp
 
 from ..misc.filterstuff import grpdelay, isstable, mapinside
 
-__all__ = [
-    "LSIIR",
-    "LSFIR",
-    "invLSFIR",
-    "invLSFIR_unc",
-    "invLSFIR_uncMC"
-    ]
+__all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
 
 
 def _fitIIR(
@@ -42,7 +36,7 @@ def _fitIIR(
     E: np.ndarray,
     Na: int,
     Nb: int,
-    inv: bool = False
+    inv: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray]:
     r"""The actual fitting routing for the least-squares IIR filter.
 
@@ -72,8 +66,8 @@ def _fitIIR(
         The IIR filter denominator coefficient vector in a 1-D sequence.
     """
     exponent = -1 if inv else 1
-    Ea = E[:, 1:Na + 1]
-    Eb = E[:, :Nb + 1]
+    Ea = E[:, 1 : Na + 1]
+    Eb = E[:, : Nb + 1]
     Htau = np.exp(-1j * w * tau) * Hvals ** exponent
     HEa = np.dot(np.diag(Htau), Ea)
     D = np.hstack((HEa, -Eb))
@@ -83,6 +77,65 @@ def _fitIIR(
     a = np.hstack((1.0, ab[:Na]))
     b = ab[Na:]
     return b, a
+
+
+def _iterate_stabilization(
+    b: np.ndarray,
+    a: np.ndarray,
+    tau: int,
+    w: np.ndarray,
+    E: np.ndarray,
+    Hvals: np.ndarray,
+    Nb: int,
+    Na: int,
+    Fs: float,
+    inv: Optional[bool] = False,
+) -> Tuple[np.ndarray, np.ndarray, float, bool]:
+    r"""Conduct one iteration of the stabilization via time delay
+
+    b : np.ndarray
+        The initial IIR filter numerator coefficient vector in a 1-D sequence.
+    a : np.ndarray
+        The initial IIR filter denominator coefficient vector in a 1-D sequence.
+    tau : int
+        Initial estimate of time delay for filter stabilization.
+    w : np.ndarray
+        :math:`2 * \pi * f / Fs`
+    E : np.ndarray
+        :math:`exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
+    Hvals : np.ndarray of shape (M,)
+        (complex) frequency response values
+    Nb : int
+        numerator polynomial order
+    Na : int
+        denominator polynomial order
+    Fs : float
+        Sampling frequency for digital IIR filter.
+    inv : bool, optional
+        If True the least-squares fitting is performed for the reciprocal, if False
+        (default) for the actual frequency response
+
+    Returns
+    -------
+    b : np.ndarray
+        The IIR filter numerator coefficient vector in a 1-D sequence.
+    a : np.ndarray
+        The IIR filter denominator coefficient vector in a 1-D sequence.
+    tau : int
+        Filter time delay (in samples).
+    stable : bool
+        True if the delayed filter is stable and False if not.
+    """
+    # Compute appropriate time delay for the stabilization of the filter.
+    a_stab = mapinside(a)
+    g_1 = grpdelay(b, a, Fs)[0]
+    g_2 = grpdelay(b, a_stab, Fs)[0]
+    tau += np.ceil(np.median(g_2 - g_1))
+
+    # Conduct stabilization step through time delay.
+    b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
+
+    return b, a, tau, isstable(b=b, a=a, ftype="digital")
 
 
 def LSIIR(
@@ -194,7 +247,7 @@ def LSIIR(
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
     as_and_bs = np.empty((mc_runs, Nb + Na + 1))
-    taus = np.full((mc_runs,),fill_value=tau, dtype=int)
+    taus = np.empty((mc_runs,), dtype=int)
     tau_max = tau
     stab_iters = np.zeros((mc_runs,), dtype=int)
     if tau == 0 and max_stab_iter == 0:
@@ -240,10 +293,23 @@ def LSIIR(
 
                 # Conduct stabilization step through time delay.
                 b_i, a_i = _fitIIR(Hvals, taus[mc_run], w, E, Na, Nb, inv=inv)
-
-                # Prepare abortion in case filter is stable.
-                if isstable(b=b_i, a=a_i, ftype="digital"):
-                    relevant_filters[mc_run] = True
+                (
+                    b_i,
+                    a_i,
+                    taus[mc_run],
+                    relevant_filters[mc_run],
+                ) = _iterate_stabilization(
+                    b=b_i,
+                    a=a_i,
+                    tau=taus[mc_run],
+                    w=w,
+                    E=E,
+                    Hvals=Hvals,
+                    Nb=Nb,
+                    Na=Na,
+                    Fs=Fs,
+                    inv=inv,
+                )
 
                 current_stab_iter += 1
             else:
@@ -264,10 +330,10 @@ def LSIIR(
         as_and_bs[mc_run, :] = np.hstack((a_i[1:], b_i))
         stab_iters[mc_run] = current_stab_iter
 
-    b = np.mean(as_and_bs[relevant_filters, Na:], axis=0)
-    a = np.hstack((np.array([1.0]), np.mean(as_and_bs[relevant_filters, :Na], axis=0)))
-    tau = int(np.amax(taus[relevant_filters]))
-    stab_iter = np.mean(stab_iters[relevant_filters])
+    b = np.mean(as_and_bs[:, Na:], axis=0)
+    a = np.hstack((np.array([1.0]), np.mean(as_and_bs[:, :Na], axis=0)))
+    tau = int(np.amax(taus[:]))
+    stab_iter = np.mean(stab_iters[:])
 
     if verbose:
         if not isstable(b, a, ftype="digital"):
@@ -327,8 +393,7 @@ def LSFIR(H, N, tau, f, Fs, Wt=None):
             weights = np.diag(Wt)
         else:
             weights = np.eye(len(f)) * Wt
-        X = np.vstack(
-            [np.real(np.dot(weights, E)), np.imag(np.dot(weights, E))])
+        X = np.vstack([np.real(np.dot(weights, E)), np.imag(np.dot(weights, E))])
     else:
         X = np.vstack([np.real(E), np.imag(E)])
 
@@ -340,13 +405,14 @@ def LSFIR(H, N, tau, f, Fs, Wt=None):
     if not isinstance(res, np.ndarray):
         print(
             "Calculation of FIR filter coefficients finished with residual "
-            "norm %e" % res)
+            "norm %e" % res
+        )
 
     return np.reshape(bFIR, (N + 1,))
 
 
 def invLSFIR(H, N, tau, f, Fs, Wt=None):
-    """	Least-squares fit of a digital FIR filter to the reciprocal of a given
+    """Least-squares fit of a digital FIR filter to the reciprocal of a given
     frequency response.
 
     Parameters
@@ -485,25 +551,39 @@ def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None
 
     # Vectorized Monte Carlo for propagation to inverse
     absHMC = HRI[:, :Nf] ** 2 + HRI[:, Nf:] ** 2
-    HiMC = np.hstack(((HRI[:, :Nf] * np.tile(np.cos(omtau), (runs, 1)) +
-                       HRI[:, Nf:] * np.tile(np.sin(omtau), (runs, 1))) /
-                      absHMC,
-                      (HRI[:, Nf:] * np.tile(np.cos(omtau), (runs, 1)) -
-                       HRI[:, :Nf] * np.tile(np.sin(omtau), (runs, 1))) /
-                      absHMC))
+    HiMC = np.hstack(
+        (
+            (
+                HRI[:, :Nf] * np.tile(np.cos(omtau), (runs, 1))
+                + HRI[:, Nf:] * np.tile(np.sin(omtau), (runs, 1))
+            )
+            / absHMC,
+            (
+                HRI[:, Nf:] * np.tile(np.cos(omtau), (runs, 1))
+                - HRI[:, :Nf] * np.tile(np.sin(omtau), (runs, 1))
+            )
+            / absHMC,
+        )
+    )
     UiH = np.cov(HiMC, rowvar=False)
 
     # Step 2: Fit filter coefficients and evaluate uncertainties
     if isinstance(wt, np.ndarray):
         if wt.shape != np.diag(UiH).shape[0]:
-            raise ValueError("invLSFIR_unc: User-defined weighting has wrong "
-                             "dimension. wt is expected to be of length "
-                             f"{2 * Nf} but is of length {wt.shape}.")
+            raise ValueError(
+                "invLSFIR_unc: User-defined weighting has wrong "
+                "dimension. wt is expected to be of length "
+                f"{2 * Nf} but is of length {wt.shape}."
+            )
     else:
         wt = np.ones(2 * Nf)
 
-    E = np.exp(-1j * 2 * np.pi * np.dot(f[:, np.newaxis] / Fs,
-                                        np.arange(N + 1)[:, np.newaxis].T))
+    E = np.exp(
+        -1j
+        * 2
+        * np.pi
+        * np.dot(f[:, np.newaxis] / Fs, np.arange(N + 1)[:, np.newaxis].T)
+    )
     X = np.vstack((np.real(E), np.imag(E)))
     X = np.dot(np.diag(wt), X)
     Hm = H * np.exp(1j * 2 * np.pi * f / Fs * tau)
@@ -590,14 +670,20 @@ def invLSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
     Nf = len(f)
     if isinstance(wt, np.ndarray):
         if wt.shape != 2 * Nf:
-            raise ValueError("invLSFIR_uncMC: User-defined weighting has wrong "
-                             "dimension. wt is expected to be of length "
-                             f"{2 * Nf} but is of length {wt.shape}.")
+            raise ValueError(
+                "invLSFIR_uncMC: User-defined weighting has wrong "
+                "dimension. wt is expected to be of length "
+                f"{2 * Nf} but is of length {wt.shape}."
+            )
     else:
         wt = np.ones(2 * Nf)
 
-    E = np.exp(-1j * 2 * np.pi * np.dot(f[:, np.newaxis] / Fs,
-                                        np.arange(N + 1)[:, np.newaxis].T))
+    E = np.exp(
+        -1j
+        * 2
+        * np.pi
+        * np.dot(f[:, np.newaxis] / Fs, np.arange(N + 1)[:, np.newaxis].T)
+    )
     X = np.vstack((np.real(E), np.imag(E)))
     X = np.dot(np.diag(wt), X)
     bF = np.zeros((N + 1, runs))
