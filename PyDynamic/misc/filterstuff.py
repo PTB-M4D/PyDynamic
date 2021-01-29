@@ -170,6 +170,10 @@ def isstable(b, a, ftype="digital"):
         return not np.any(np.abs(v) > 1.0)
     elif ftype == "analog":
         return not np.any(np.real(v) < 0)
+    else:
+        raise ValueError(f"isstable: filter type 'ftype={ftype}'unknown. Please "
+                         f"check documentation and choose a valid assignment for "
+                         f"'ftype' or leave out to fallback to default.")
 
 
 def savitzky_golay(y, window_size, order, deriv=0, delta=1.0):
