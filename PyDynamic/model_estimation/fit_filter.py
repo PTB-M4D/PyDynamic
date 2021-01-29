@@ -7,8 +7,8 @@ frequency response each with associated uncertainties.
 
 This module contains the following functions:
 
-* :func:`LSIIR`: Least-squares IIR filter fit to a given frequency response or its
-  reciprocal optionally propagating uncertainties.
+* :func:`LSIIR`: Least-squares (time-discrete) IIR filter fit to a given frequency
+  response or its reciprocal optionally propagating uncertainties.
 * :func:`LSFIR`: Least-squares fit of a digital FIR filter to a given frequency
   response.
 * :func:`invLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
@@ -159,8 +159,7 @@ def LSIIR(
 ) -> Union[
     Tuple[np.ndarray, np.ndarray, int], Tuple[np.ndarray, np.ndarray, int, np.ndarray]
 ]:
-    """Least-squares (time-discrete) IIR filter fit to a given frequency response or
-    its reciprocal
+    """Least-squares (time-discrete) IIR filter fit to frequency response or reciprocal
 
     For fitting an IIR filter model to the reciprocal of the frequency response values
     or directly to the frequency response values provided by the user, this method
@@ -182,9 +181,7 @@ def LSIIR(
     Fs : float
         Sampling frequency for digital IIR filter.
     tau : int, optional
-        Initial estimate of time delay for filter stabilization (default = 0). If
-        `max_stab_iter = 0` this parameter is not used and `tau = 0` will be
-        returned.
+        Initial estimate of time delay for obtaining a stable filter (default = 0).
     verbose : bool, optional
         If True (default) be more talkative on stdout. Otherwise no output is written
         anywhere.
@@ -199,8 +196,8 @@ def LSIIR(
     UHvals : array_like of shape (2M, 2M), optional
         Uncertainties associated with real and imaginary part of H.
     mc_runs : int, optional
-        Number of Monte Carlo runs >= 1 (default = 1000). Only used if uncertainties 
-         `UHvals` are provided. Otherwise this input has no effect.
+        Number of Monte Carlo runs (default = 1000). Only used if uncertainties
+        `UHvals` are provided.
 
     Returns
     -------
@@ -221,8 +218,8 @@ def LSIIR(
 
     .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
     """
-    # Make sure we enter for loop later on at least once if either Monte Carlo is
-    # really used or not and exactly once in case it is not.
+    # Make sure we enter for loop later on exactly once in case no uncertainty
+    # propagation is requested.
     if UHvals is None:
         mc_runs = 1
 
