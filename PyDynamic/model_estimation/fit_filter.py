@@ -323,7 +323,7 @@ def LSIIR(
 
     b = np.mean(as_and_bs[:, Na:], axis=0)
     a = np.hstack((np.array([1.0]), np.mean(as_and_bs[:, :Na], axis=0)))
-    tau = np.mean(taus)
+    tau = int(np.mean(taus))
     stab_iter = np.mean(stab_iters)
 
     if verbose:
@@ -342,9 +342,9 @@ def LSIIR(
 
     if UHvals:
         Uab = np.cov(as_and_bs, rowvar=False)
-        return b, a, int(tau), Uab
+        return b, a, tau, Uab
     else:
-        return b, a, int(tau)
+        return b, a, tau
 
 
 def LSFIR(H, N, tau, f, Fs, Wt=None):
