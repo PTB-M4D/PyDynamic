@@ -230,7 +230,7 @@ def LSIIR(
         Hvals_ri_unc = np.random.multivariate_normal(
             mean=np.hstack((np.real(Hvals), np.imag(Hvals))), cov=UHvals, size=mc_runs
         )
-        Hvals = Hvals_ri_unc[:, : len(f)] + 1j * Hvals_ri_unc[:, len(f):]
+        Hvals = Hvals_ri_unc[:, : len(f)] + 1j * Hvals_ri_unc[:, len(f) :]
 
     # Let the user know what we are doing in case it is requested.
     if verbose:
