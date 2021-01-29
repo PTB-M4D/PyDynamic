@@ -194,10 +194,13 @@ def LSIIR(
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
     as_and_bs = np.empty((mc_runs, Nb + Na + 1))
-    taus = np.empty((mc_runs,), dtype=int)
+    taus = np.full((mc_runs,),fill_value=tau, dtype=int)
     tau_max = tau
     stab_iters = np.zeros((mc_runs,), dtype=int)
-    stable_filters = np.zeros((mc_runs,), dtype=bool)
+    if tau == 0 and max_stab_iter == 0:
+        relevant_filters = np.ones((mc_runs,), dtype=bool)
+    else:
+        relevant_filters = np.zeros((mc_runs,), dtype=bool)
 
     # Conduct the Monte Carlo runs or in case we did not have uncertainties execute
     # just once the actual algorithm.
@@ -210,7 +213,7 @@ def LSIIR(
 
         # Determine if the computed filter already is stable.
         if isstable(b=b_i, a=a_i, ftype="digital"):
-            stable_filters[mc_run] = True
+            relevant_filters[mc_run] = True
             taus[mc_run] = tau
         else:
             # If the filter by now is unstable we already tried once to stabilize with
@@ -221,14 +224,14 @@ def LSIIR(
                 current_stab_iter += 1
 
             if isstable(b=b_i, a=a_i, ftype="digital"):
-                stable_filters[mc_run] = True
+                relevant_filters[mc_run] = True
 
             # Set the either needed delay for reaching stability or the initial
             # delay to start iterations.
             taus[mc_run] = tau_max
 
             # Stabilize filter coefficients with a maximum number of iterations.
-            while not stable_filters[mc_run] and current_stab_iter < max_stab_iter:
+            while not relevant_filters[mc_run] and current_stab_iter < max_stab_iter:
                 # Compute appropriate time delay for the stabilization of the filter.
                 a_stab = mapinside(a_i)
                 g_1 = grpdelay(b_i, a_i, Fs)[0]
@@ -240,7 +243,7 @@ def LSIIR(
 
                 # Prepare abortion in case filter is stable.
                 if isstable(b=b_i, a=a_i, ftype="digital"):
-                    stable_filters[mc_run] = True
+                    relevant_filters[mc_run] = True
 
                 current_stab_iter += 1
             else:
@@ -253,7 +256,7 @@ def LSIIR(
                         f"{'' if UHvals is None else f'for MC run {mc_run} '}"
                         f"finished. Conducted {current_stab_iter} attempts to "
                         f"stabilize filter. "
-                        f"{'' if stable_filters[mc_run] else warning_unstable} "
+                        f"{'' if relevant_filters[mc_run] else warning_unstable} "
                         f"Final sum of squares = {sos}"
                     )
 
@@ -261,10 +264,10 @@ def LSIIR(
         as_and_bs[mc_run, :] = np.hstack((a_i[1:], b_i))
         stab_iters[mc_run] = current_stab_iter
 
-    b = np.mean(as_and_bs[:, Na:], axis=0)
-    a = np.hstack((np.array([1.0]), np.mean(as_and_bs[:, :Na], axis=0)))
-    tau = int(np.mean(taus))
-    stab_iter = np.mean(stab_iters)
+    b = np.mean(as_and_bs[relevant_filters, Na:], axis=0)
+    a = np.hstack((np.array([1.0]), np.mean(as_and_bs[relevant_filters, :Na], axis=0)))
+    tau = int(np.amax(taus[relevant_filters]))
+    stab_iter = np.mean(stab_iters[relevant_filters])
 
     if verbose:
         if not isstable(b, a, ftype="digital"):
