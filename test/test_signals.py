@@ -2,7 +2,7 @@
 """ Perform tests on methods to create testsignals."""
 import matplotlib
 import numpy as np
-from hypothesis import given, strategies as st
+from hypothesis import given, strategies as hst
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
@@ -94,8 +94,8 @@ class TestSine:
         assert_almost_equal(np.min(x), -1.0)
 
     @given(
-        st.floats(min_value=1, max_value=1e64, allow_infinity=False, allow_nan=False),
-        st.integers(min_value=1, max_value=1000),
+        hst.floats(min_value=1, max_value=1e64, allow_infinity=False, allow_nan=False),
+        hst.integers(min_value=1, max_value=1000),
     )
     def test_medium_call_freq_multiples_sine(self, freq, rep):
         # Create time vector with timestamps near multiples of frequency.
@@ -105,7 +105,7 @@ class TestSine:
         for i_x in x:
             assert_almost_equal(i_x, 0)
 
-    @given(st.floats(min_value=0, exclude_min=True, allow_infinity=False))
+    @given(hst.floats(min_value=0, exclude_min=True, allow_infinity=False))
     def test_medium_call_max_sine(self, amp):
         # Test if casual timesignal's maximum equals the input amplitude.
 
@@ -114,7 +114,7 @@ class TestSine:
         # timestamps is below default.
         assert np.max(np.abs(x)) <= amp
 
-    @given(st.floats(min_value=0, exclude_min=True, allow_infinity=False))
+    @given(hst.floats(min_value=0, exclude_min=True, allow_infinity=False))
     def test_medium_call_hi_res_max_sine(self, amp):
         # Test if high-resoluted timesignal's maximum equals the input amplitude.
 
@@ -125,7 +125,7 @@ class TestSine:
         assert_almost_equal(np.max(x), amp)
         assert_almost_equal(np.min(x), -amp)
 
-    @given(st.floats(), st.floats(), st.floats())
+    @given(hst.floats(), hst.floats(), hst.floats())
     def test_full_call_sine(self, amp, freq, noise):
         # Check for all possible calls.
         sine(time)
@@ -141,7 +141,7 @@ class TestSine:
         sine(time, freq=freq, noise=noise)
         sine(time, amp=amp, freq=freq, noise=noise)
 
-    @given(st.floats(), st.floats())
+    @given(hst.floats(), hst.floats())
     def test_compare_multisine_with_sine(self, freq, amp):
         # Compare the result of a call of sine and a similar call of multi_sine
         # with one-element lists of amplitudes and frequencies.
