@@ -288,20 +288,19 @@ def LSIIR(
 
             # Stabilize filter coefficients with a maximum number of iterations.
             while not stable_filters[mc_run] and current_stab_iter < max_stab_iter:
-                b_i, a_i, taus[mc_run], stable_filters[mc_run] = _iterate_stabilization(
-                    b=b_i,
-                    a=a_i,
-                    tau=taus[mc_run],
-                    w=w,
-                    E=E,
-                    Hvals=Hvals,
-                    Nb=Nb,
-                    Na=Na,
-                    Fs=Fs,
-                    inv=inv,
-                )
+                # Compute appropriate time delay for the stabilization of the filter.
+                a_stab = mapinside(a_i)
+                g_1 = grpdelay(b_i, a_i, Fs)[0]
+                g_2 = grpdelay(b_i, a_stab, Fs)[0]
+                taus[mc_run] += np.ceil(np.median(g_2 - g_1))
+
+                # Conduct stabilization step through time delay.
+                b_i, a_i = _fitIIR(Hvals, taus[mc_run], w, E, Na, Nb, inv=inv)
 
                 # Prepare abortion in case filter is stable.
+                if isstable(b=b_i, a=a_i, ftype="digital"):
+                    stable_filters[mc_run] = True
+
                 current_stab_iter += 1
             else:
                 if taus[mc_run] > tau_max:
