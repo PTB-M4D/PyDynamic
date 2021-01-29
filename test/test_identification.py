@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """Perform tests on identification part of package model_estimation."""
+from collections import namedtuple
 
 import numpy as np
-from hypothesis import example, given, strategies as hst
-from numpy.testing import assert_almost_equal
-import scipy.signal as dsp
 
-from PyDynamic import grpdelay, mapinside, sos_FreqResp
+# import scipy.signal as dsp
+from hypothesis import given, strategies as hst
+from numpy.testing import assert_almost_equal
+
+from PyDynamic import grpdelay, isstable, mapinside, sos_FreqResp
 from PyDynamic.model_estimation import fit_filter
 
 
@@ -88,6 +90,30 @@ def LSIIR_parameters(draw):
     }
 
 
+def _compute_fitting_parameters(LSIIR_params):
+    """Compute the parameters needed to calculate a least-square fit of an IIR model"""
+    w = 2 * np.pi * LSIIR_params["f"] / LSIIR_params["Fs"]
+    Ns = np.arange(0, max(LSIIR_params["Nb"], LSIIR_params["Na"]) + 1)[:, np.newaxis]
+    E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
+
+    return {"w": w, "E": E}
+
+
+def _fit_filter(parameters):
+    """This provides a IIR least-squares filter fit to a frequency response"""
+    Filter = namedtuple("Filter", ["b", "a"])
+
+    b, a = fit_filter._fitIIR(
+        Hvals=parameters["Hvals"],
+        tau=0,
+        **_compute_fitting_parameters(parameters),
+        Na=parameters["Na"],
+        Nb=parameters["Nb"],
+        inv=False,
+    )
+    return Filter(b=b, a=a)
+
+
 def _former_fitIIR(
     _Hvals: np.ndarray,
     _tau: int,
@@ -167,53 +193,6 @@ def _former_LSIIR(Hvals, Nb, Na, f, Fs, tau=0, justFit=False):
 
     """
 
-    def _fitIIR(
-        _Hvals: np.ndarray,
-        _tau: int,
-        _w: np.ndarray,
-        _E: np.ndarray,
-        _Na: int,
-        _Nb: int,
-        _inv: bool = False,
-    ):
-        """The actual fitting routing for the least-squares IIR filter.
-
-        Parameters
-        ----------
-            _Hvals :  (M,) np.ndarray
-                (complex) frequency response values
-            _tau : integer
-                initial estimate of time delay
-            _w : np.ndarray
-                :math:`2 * np.pi * f / Fs`
-            _E : np.ndarray
-                :math:`np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
-            _Nb : int
-                numerator polynomial order
-            _Na : int
-                denominator polynomial order
-            _inv : bool, optional
-                If True the least-squares fitting is performed for the reciprocal,
-                if False
-                for the actual frequency response
-
-        Returns
-        -------
-            b, a : IIR filter coefficients as numpy arrays
-        """
-        exponent = -1 if _inv else 1
-        Ea = _E[:, 1 : _Na + 1]
-        Eb = _E[:, : _Nb + 1]
-        Htau = np.exp(-1j * _w * tau) * _Hvals ** exponent
-        HEa = np.dot(np.diag(Htau), Ea)
-        D = np.hstack((HEa, -Eb))
-        Tmp1 = np.real(np.dot(np.conj(D.T), D))
-        Tmp2 = np.real(np.dot(np.conj(D.T), -Htau))
-        ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
-        a_coeff = np.hstack((1.0, ab[:_Na]))
-        b_coeff = ab[_Na:]
-        return b_coeff, a_coeff
-
     # print("\nLeast-squares fit of an order %d digital IIR filter" % max(Nb, Na))
     # print("to a frequency response given by %d values.\n" % len(Hvals))
 
@@ -283,18 +262,23 @@ def test_LSIIR_outputs_format(parameters):
     assert tau >= 0
 
 
+@given(LSIIR_parameters())
+def test_isstable_results_against_former_implementations(LSIIR_parameters):
+    """This takes the implementation prior to the rewrite and compares results."""
+    fitted_filter = _fit_filter(LSIIR_parameters)
+    assert not (
+        np.count_nonzero(np.abs(np.roots(fitted_filter.a)) > 1) > 0
+    ) == isstable(fitted_filter.b, fitted_filter.a, ftype="digital")
+
+
 @given(LSIIR_parameters(), hst.integers(min_value=0, max_value=100), hst.booleans())
 def test_fitIIR_results_against_former_implementations(LSIIR_parameters, tau, inv):
     """This takes the implementation prior to the rewrite and compares results."""
     # Initialize parameters.
-    w = 2 * np.pi * LSIIR_parameters["f"] / LSIIR_parameters["Fs"]
-    Ns = np.arange(0, max(LSIIR_parameters["Nb"], LSIIR_parameters["Na"]) + 1)[:, np.newaxis]
-    E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
     fit_params = {
         "Hvals": LSIIR_parameters["Hvals"],
         "tau": tau,
-        "w": w,
-        "E": E,
+        **_compute_fitting_parameters(LSIIR_params=LSIIR_parameters),
         "Na": LSIIR_parameters["Na"],
         "Nb": LSIIR_parameters["Nb"],
         "inv": inv,
@@ -312,7 +296,6 @@ def test_fitIIR_results_against_former_implementations(LSIIR_parameters, tau, in
 
     assert_almost_equal(b_current, b_former)
     assert_almost_equal(a_current, a_former)
-
 
 
 @given(LSIIR_parameters())
