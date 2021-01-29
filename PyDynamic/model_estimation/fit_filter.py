@@ -286,13 +286,6 @@ def LSIIR(
             # Stabilize filter coefficients with a maximum number of iterations.
             while not relevant_filters[mc_run] and current_stab_iter < max_stab_iter:
                 # Compute appropriate time delay for the stabilization of the filter.
-                a_stab = mapinside(a_i)
-                g_1 = grpdelay(b_i, a_i, Fs)[0]
-                g_2 = grpdelay(b_i, a_stab, Fs)[0]
-                taus[mc_run] = np.ceil(taus[mc_run] + np.median(g_2 - g_1))
-
-                # Conduct stabilization step through time delay.
-                b_i, a_i = _fitIIR(Hvals, taus[mc_run], w, E, Na, Nb, inv=inv)
                 (
                     b_i,
                     a_i,
@@ -330,10 +323,13 @@ def LSIIR(
         as_and_bs[mc_run, :] = np.hstack((a_i[1:], b_i))
         stab_iters[mc_run] = current_stab_iter
 
-    b = np.mean(as_and_bs[:, Na:], axis=0)
-    a = np.hstack((np.array([1.0]), np.mean(as_and_bs[:, :Na], axis=0)))
-    tau = int(np.amax(taus[:]))
-    stab_iter = np.mean(stab_iters[:])
+    # If we did not find any stable filter, calculate the final result from all filters.
+    if not np.any(relevant_filters):
+        relevant_filters = np.ones_like(relevant_filters)
+    b = np.mean(as_and_bs[relevant_filters, Na:], axis=0)
+    a = np.hstack((np.array([1.0]), np.mean(as_and_bs[relevant_filters, :Na], axis=0)))
+    tau = int(np.amax(taus[relevant_filters]))
+    stab_iter = np.mean(stab_iters[relevant_filters])
 
     if verbose:
         if not isstable(b, a, ftype="digital"):
