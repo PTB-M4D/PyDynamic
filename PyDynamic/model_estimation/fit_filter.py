@@ -275,7 +275,7 @@ def LSIIR(
                 f"LSIIR: {warning_unstable} Maybe try again with a higher value of "
                 f"tau or a higher filter order? Least squares fit finished after "
                 f"{stab_iter} stabilization iterations "
-                f"{'on average ' if UHvals and mc_runs > 1 else ''}(tau = {tau})."
+                f"{'on average ' if mc_runs > 1 else ''}(tau = {tau})."
             )
 
         Hd = dsp.freqz(b, a, w)[1] * np.exp(1j * w * tau)
