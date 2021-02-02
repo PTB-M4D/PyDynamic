@@ -258,7 +258,7 @@ def test_LSIIR_outputs_format(parameters):
 
     assert len(b) == parameters["Nb"] + 1
     assert len(a) == parameters["Na"] + 1
-    assert isinstance(tau, int)
+    assert isinstance(tau, np.integer)
     assert tau >= 0
 
 
