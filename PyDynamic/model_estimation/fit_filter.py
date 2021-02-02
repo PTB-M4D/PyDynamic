@@ -323,33 +323,75 @@ def LSIIR(
         as_and_bs[mc_run, :] = np.hstack((a_i[1:], b_i))
         stab_iters[mc_run] = current_stab_iter
 
-    # If we did not find any stable filter, calculate the final result from all filters.
-    if not np.any(relevant_filters):
-        relevant_filters = np.ones_like(relevant_filters)
-    b = np.mean(as_and_bs[relevant_filters, Na:], axis=0)
-    a = np.hstack((np.array([1.0]), np.mean(as_and_bs[relevant_filters, :Na], axis=0)))
-    tau = int(np.amax(taus[relevant_filters]))
-    stab_iter = np.mean(stab_iters[relevant_filters])
+    # If we actually ran Monte Carlo simulation we compute the resulting filter.
+    if mc_runs > 1:
+        # If we did not find any stable filter, calculate the final result from all
+        # filters.
+        if not np.any(relevant_filters):
+            relevant_filters = np.ones_like(relevant_filters)
+        b_res = np.mean(as_and_bs[relevant_filters, Na:], axis=0)
+        a_res = np.hstack(
+            (np.array([1.0]), np.mean(as_and_bs[relevant_filters, :Na], axis=0))
+        )
+        stab_iter_mean = np.mean(stab_iters[relevant_filters])
+
+        final_stab_iter = 1
+
+        # Determine if the resulting filter already is stable and if not stabilize with
+        # an initial delay of the previous maximum delay.
+        if not isstable(b=b_res, a=a_res, ftype="digital"):
+            final_tau = tau_max
+            b_res, a_res = _fitIIR(Hvals, final_tau, w, E, Na, Nb, inv=inv)
+            final_stab_iter += 1
+
+        final_stable = isstable(b=b_res, a=a_res, ftype="digital")
+
+        while not final_stable and final_stab_iter < max_stab_iter:
+            # Compute appropriate time delay for the stabilization of the resulting
+            # filter.
+            (b_res, a_res, final_tau, final_stable,) = _iterate_stabilization(
+                b=b_res,
+                a=a_res,
+                tau=final_tau,
+                w=w,
+                E=E,
+                Hvals=Hvals,
+                Nb=Nb,
+                Na=Na,
+                Fs=Fs,
+                inv=inv,
+            )
+
+            final_stab_iter += 1
+    else:
+        # If we did not conduct Monte Carlo simulation, we just gather final results.
+        b_res = b_i
+        a_res = a_i
+        stab_iter_mean = final_stab_iter = current_stab_iter
+        final_stable = relevant_filters[0]
+        final_tau = taus[0]
 
     if verbose:
-        if not isstable(b, a, ftype="digital"):
+        if not final_stable:
             print(
                 f"LSIIR: {warning_unstable} Maybe try again with a higher value of "
                 f"tau or a higher filter order? Least squares fit finished after "
-                f"{stab_iter} stabilization iterations "
-                f"{'on average ' if mc_runs > 1 else ''}(tau = {tau})."
+                f"{stab_iter_mean} stabilization iterations "
+                f"{f'on average ' if mc_runs > 1 else ''}"
+                f"{f'and with {final_stab_iter} for the final filter ' if final_stab_iter != stab_iter_mean else ''}"
+                f"(final tau = {final_tau})."
             )
 
-        Hd = dsp.freqz(b, a, w)[1] * np.exp(1j * w * tau)
+        Hd = dsp.freqz(b_res, a_res, w)[1] * np.exp(1j * w * tau)
         res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
         rms = np.sqrt(np.sum(res ** 2) / len(f))
         print(f"LSIIR: Final rms error = {rms}.\n\n")
 
     if UHvals:
         Uab = np.cov(as_and_bs, rowvar=False)
-        return b, a, tau, Uab
+        return b_res, a_res, final_tau, Uab
     else:
-        return b, a, tau
+        return b_res, a_res, final_tau
 
 
 def LSFIR(H, N, tau, f, Fs, Wt=None):
