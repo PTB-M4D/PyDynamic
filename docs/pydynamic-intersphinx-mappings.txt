@@ -1,0 +1,244 @@
+# The following command copies the first six commenting lines of this file into a new version of it, and refreshes the output of the intersphinx mappings command.
+#
+	# A=$(head -n 6 docs/pydynamic-intersphinx-mappings.txt) && echo $A 	>docs/pydynamic-intersphinx-mappings.txt && echo "# Last execution of 'python -msphinx.ext.intersphinx https://pydynamic.readthedocs.io/en/latest/objects.inv >> docs/pydynamic-intersphinx-mappings.txt'" on $(date +"%Y-%m-%d %H:%M") >> docs/pydynamic-intersphinx-mappings.txt && python -msphinx.ext.intersphinx https://pydynamic.readthedocs.io/en/latest/objects.inv >> docs/pydynamic-intersphinx-mappings.txt
+#
+# More on intersphinx mappings and how to extract them from ReadTheDocs under https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#showing-all-links-of-an-intersphinx-mapping-file.
+#
+# Last execution of 'python -msphinx.ext.intersphinx https://pydynamic.readthedocs.io/en/latest/objects.inv >> docs/pydynamic-intersphinx-mappings.txt' on 2020-10-14 13:24
+py:class
+	PyDynamic.misc.testsignals.corr_noise    PyDynamic.misc.html#PyDynamic.misc.testsignals.corr_noise
+py:function
+	PyDynamic.misc.SecondOrderSystem.sos_FreqResp PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_FreqResp
+	PyDynamic.misc.SecondOrderSystem.sos_absphase PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_absphase
+	PyDynamic.misc.SecondOrderSystem.sos_phys2filter PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_phys2filter
+	PyDynamic.misc.SecondOrderSystem.sos_realimag PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_realimag
+	PyDynamic.misc.filterstuff.db            PyDynamic.misc.html#PyDynamic.misc.filterstuff.db
+	PyDynamic.misc.filterstuff.grpdelay      PyDynamic.misc.html#PyDynamic.misc.filterstuff.grpdelay
+	PyDynamic.misc.filterstuff.isstable      PyDynamic.misc.html#PyDynamic.misc.filterstuff.isstable
+	PyDynamic.misc.filterstuff.kaiser_lowpass PyDynamic.misc.html#PyDynamic.misc.filterstuff.kaiser_lowpass
+	PyDynamic.misc.filterstuff.mapinside     PyDynamic.misc.html#PyDynamic.misc.filterstuff.mapinside
+	PyDynamic.misc.filterstuff.savitzky_golay PyDynamic.misc.html#PyDynamic.misc.filterstuff.savitzky_golay
+	PyDynamic.misc.filterstuff.ua            PyDynamic.misc.html#PyDynamic.misc.filterstuff.ua
+	PyDynamic.misc.noise.ARMA                PyDynamic.misc.html#PyDynamic.misc.noise.ARMA
+	PyDynamic.misc.noise.get_alpha           PyDynamic.misc.html#PyDynamic.misc.noise.get_alpha
+	PyDynamic.misc.noise.power_law_acf       PyDynamic.misc.html#PyDynamic.misc.noise.power_law_acf
+	PyDynamic.misc.noise.power_law_noise     PyDynamic.misc.html#PyDynamic.misc.noise.power_law_noise
+	PyDynamic.misc.testsignals.GaussianPulse PyDynamic.misc.html#PyDynamic.misc.testsignals.GaussianPulse
+	PyDynamic.misc.testsignals.rect          PyDynamic.misc.html#PyDynamic.misc.testsignals.rect
+	PyDynamic.misc.testsignals.shocklikeGaussian PyDynamic.misc.html#PyDynamic.misc.testsignals.shocklikeGaussian
+	PyDynamic.misc.testsignals.sine          PyDynamic.misc.html#PyDynamic.misc.testsignals.sine
+	PyDynamic.misc.testsignals.squarepulse   PyDynamic.misc.html#PyDynamic.misc.testsignals.squarepulse
+	PyDynamic.misc.tools.FreqResp2RealImag   PyDynamic.misc.html#PyDynamic.misc.tools.FreqResp2RealImag
+	PyDynamic.misc.tools.make_semiposdef     PyDynamic.misc.html#PyDynamic.misc.tools.make_semiposdef
+	PyDynamic.misc.tools.print_mat           PyDynamic.misc.html#PyDynamic.misc.tools.print_mat
+	PyDynamic.misc.tools.print_vec           PyDynamic.misc.html#PyDynamic.misc.tools.print_vec
+	PyDynamic.misc.tools.progress_bar        PyDynamic.misc.html#PyDynamic.misc.tools.progress_bar
+	PyDynamic.misc.tools.trimOrPad           PyDynamic.misc.html#PyDynamic.misc.tools.trimOrPad
+	PyDynamic.model_estimation.fit_filter.LSFIR PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.LSFIR
+	PyDynamic.model_estimation.fit_filter.LSIIR PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.LSIIR
+	PyDynamic.model_estimation.fit_filter.invLSFIR PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSFIR
+	PyDynamic.model_estimation.fit_filter.invLSFIR_unc PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSFIR_unc
+	PyDynamic.model_estimation.fit_filter.invLSFIR_uncMC PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSFIR_uncMC
+	PyDynamic.model_estimation.fit_filter.invLSIIR PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSIIR
+	PyDynamic.model_estimation.fit_filter.invLSIIR_unc PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSIIR_unc
+	PyDynamic.model_estimation.fit_transfer.fit_som PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_transfer.fit_som
+	PyDynamic.uncertainty.interpolation.interp1d_unc PyDynamic.uncertainty.html#PyDynamic.uncertainty.interpolation.interp1d_unc
+	PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT
+	PyDynamic.uncertainty.propagate_DFT.AmpPhase2Time PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2Time
+	PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase
+	PyDynamic.uncertainty.propagate_DFT.DFT_deconv PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_deconv
+	PyDynamic.uncertainty.propagate_DFT.DFT_multiply PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_multiply
+	PyDynamic.uncertainty.propagate_DFT.DFT_transferfunction PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_transferfunction
+	PyDynamic.uncertainty.propagate_DFT.GUM_DFT PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFT
+	PyDynamic.uncertainty.propagate_DFT.GUM_DFTfreq PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFTfreq
+	PyDynamic.uncertainty.propagate_DFT.GUM_iDFT PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_iDFT
+	PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase
+	PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase_multi PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase_multi
+	PyDynamic.uncertainty.propagate_MonteCarlo.MC PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.MC
+	PyDynamic.uncertainty.propagate_MonteCarlo.SMC PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.SMC
+	PyDynamic.uncertainty.propagate_MonteCarlo.UMC PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.UMC
+	PyDynamic.uncertainty.propagate_MonteCarlo.UMC_generic PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.UMC_generic
+	PyDynamic.uncertainty.propagate_filter.FIRuncFilter PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_filter.FIRuncFilter
+	PyDynamic.uncertainty.propagate_filter.IIRuncFilter PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_filter.IIRuncFilter
+py:module
+	PyDynamic.misc.SecondOrderSystem         PyDynamic.misc.html#module-PyDynamic.misc.SecondOrderSystem
+	PyDynamic.misc.filterstuff               PyDynamic.misc.html#module-PyDynamic.misc.filterstuff
+	PyDynamic.misc.noise                     PyDynamic.misc.html#module-PyDynamic.misc.noise
+	PyDynamic.misc.testsignals               PyDynamic.misc.html#module-PyDynamic.misc.testsignals
+	PyDynamic.misc.tools                     PyDynamic.misc.html#module-PyDynamic.misc.tools
+	PyDynamic.model_estimation.fit_filter    PyDynamic.model_estimation.html#module-PyDynamic.model_estimation.fit_filter
+	PyDynamic.model_estimation.fit_transfer  PyDynamic.model_estimation.html#module-PyDynamic.model_estimation.fit_transfer
+	PyDynamic.uncertainty.interpolation      PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.interpolation
+	PyDynamic.uncertainty.propagate_DFT      PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.propagate_DFT
+	PyDynamic.uncertainty.propagate_MonteCarlo PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.propagate_MonteCarlo
+	PyDynamic.uncertainty.propagate_filter   PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.propagate_filter
+std:doc
+	CONTRIBUTING                             Advices and tips for contributors       : CONTRIBUTING.html
+	Deconvolution by FIR                     Design of a digital deconvolution filter (FIR type): Deconvolution%20by%20FIR.html
+	Deconvolution in the DFT domain          Deconvolution in the frequency domain (DFT): Deconvolution%20in%20the%20DFT%20domain.html
+	Examples                                 Examples.html
+	Getting started                          Installation                            : Getting%20started.html
+	PyDynamic.deconvolution                  Design of deconvolution filters         : PyDynamic.deconvolution.html
+	PyDynamic.identification                 Fitting filters and transfer functions models: PyDynamic.identification.html
+	PyDynamic.misc                           Miscellaneous                           : PyDynamic.misc.html
+	PyDynamic.model_estimation               Model estimation                        : PyDynamic.model_estimation.html
+	PyDynamic.uncertainty                    Evaluation of uncertainties             : PyDynamic.uncertainty.html
+	Tutorials                                Get assistance in using PyDynamic       : Tutorials.html
+	Uncertainty propagation for IIR filters  Uncertainty%20propagation%20for%20IIR%20filters.html
+	index                                    PyDynamic - Analysis of dynamic measurements: index.html
+std:label
+	/contributing.md                         Advices and tips for contributors       : CONTRIBUTING.html
+	/contributing.md#advices-and-tips-for-contributors Advices and tips for contributors       : CONTRIBUTING.html#advices-and-tips-for-contributors
+	/contributing.md#advised-toolset         Advised toolset                         : CONTRIBUTING.html#advised-toolset
+	/contributing.md#breaking-changes        BREAKING CHANGEs                        : CONTRIBUTING.html#breaking-changes
+	/contributing.md#coding-style            Coding style                            : CONTRIBUTING.html#coding-style
+	/contributing.md#comments-in-the-code    Comments in the code                    : CONTRIBUTING.html#comments-in-the-code
+	/contributing.md#commit-message-structure Commit message structure                : CONTRIBUTING.html#commit-message-structure
+	/contributing.md#commit-message-styling  Commit message styling                  : CONTRIBUTING.html#commit-message-styling
+	/contributing.md#commit-messages         Commit messages                         : CONTRIBUTING.html#commit-messages
+	/contributing.md#documentation           Documentation                           : CONTRIBUTING.html#documentation
+	/contributing.md#examples                Examples                                : CONTRIBUTING.html#examples
+	/contributing.md#get-started-developing  Get started developing                  : CONTRIBUTING.html#get-started-developing
+	/contributing.md#get-the-code-on-github-and-locally Get the code on GitHub and locally      : CONTRIBUTING.html#get-the-code-on-github-and-locally
+	/contributing.md#guiding-principles      Guiding principles                      : CONTRIBUTING.html#guiding-principles
+	/contributing.md#id1                     Examples                                : CONTRIBUTING.html#id1
+	/contributing.md#initial-development-setup Initial development setup               : CONTRIBUTING.html#initial-development-setup
+	/contributing.md#licensing               Licensing                               : CONTRIBUTING.html#licensing
+	/contributing.md#manage-dependencies     Manage dependencies                     : CONTRIBUTING.html#manage-dependencies
+	/contributing.md#testing                 Testing                                 : CONTRIBUTING.html#testing
+	/contributing.md#user-documentation      User documentation                      : CONTRIBUTING.html#user-documentation
+	/contributing.md#workflow-for-adding-completely-new-functionality Workflow for adding completely new functionality: CONTRIBUTING.html#workflow-for-adding-completely-new-functionality
+	/deconvolution by fir.rst                Design of a digital deconvolution filter (FIR type): Deconvolution%20by%20FIR.html
+	/deconvolution by fir.rst#basic-workflow-in-pydynamic Basic workflow in PyDynamic             : Deconvolution%20by%20FIR.html#basic-workflow-in-pydynamic
+	/deconvolution by fir.rst#design-of-a-digital-deconvolution-filter-fir-type Design of a digital deconvolution filter (FIR type): Deconvolution%20by%20FIR.html#design-of-a-digital-deconvolution-filter-fir-type
+	/deconvolution by fir.rst#design-of-the-deconvolution-filter Design of the deconvolution filter      : Deconvolution%20by%20FIR.html#design-of-the-deconvolution-filter
+	/deconvolution by fir.rst#problem-description Problem description                     : Deconvolution%20by%20FIR.html#problem-description
+	/deconvolution by fir.rst#simulated-measurement Simulated measurement                   : Deconvolution%20by%20FIR.html#simulated-measurement
+	/deconvolution in the dft domain.rst     Deconvolution in the frequency domain (DFT): Deconvolution%20in%20the%20DFT%20domain.html
+	/deconvolution in the dft domain.rst#deconvolution-in-the-frequency-domain Deconvolution in the frequency domain   : Deconvolution%20in%20the%20DFT%20domain.html#deconvolution-in-the-frequency-domain
+	/deconvolution in the dft domain.rst#deconvolution-in-the-frequency-domain-dft Deconvolution in the frequency domain (DFT): Deconvolution%20in%20the%20DFT%20domain.html#deconvolution-in-the-frequency-domain-dft
+	/deconvolution in the dft domain.rst#propagation-from-frequency-to-time-domain Propagation from frequency to time domain: Deconvolution%20in%20the%20DFT%20domain.html#propagation-from-frequency-to-time-domain
+	/deconvolution in the dft domain.rst#propagation-from-time-to-frequency-domain Propagation from time to frequency domain: Deconvolution%20in%20the%20DFT%20domain.html#propagation-from-time-to-frequency-domain
+	/deconvolution in the dft domain.rst#summary-of-pydynamic-workflow-for-deconvolution-in-dft-domain Summary of PyDynamic workflow for deconvolution in DFT domain: Deconvolution%20in%20the%20DFT%20domain.html#summary-of-pydynamic-workflow-for-deconvolution-in-dft-domain
+	/deconvolution in the dft domain.rst#uncertainties-for-measurement-system-w-r-t-real-and-imaginary-parts Uncertainties for measurement system w.r.t. real and imaginary parts: Deconvolution%20in%20the%20DFT%20domain.html#uncertainties-for-measurement-system-w-r-t-real-and-imaginary-parts
+	/examples.rst                            Examples                                : Examples.html
+	/examples.rst#detailed-examples          Detailed examples                       : Examples.html#detailed-examples
+	/examples.rst#examples                   Examples                                : Examples.html#examples
+	/examples.rst#quick-examples             Quick Examples                          : Examples.html#quick-examples
+	/getting started.md                      Installation                            : Getting%20started.html
+	/getting started.md#create-a-virtual-environment-and-install-requirements Create a virtual environment and install requirements: Getting%20started.html#create-a-virtual-environment-and-install-requirements
+	/getting started.md#id1                  Updating to the newest version          : Getting%20started.html#id1
+	/getting started.md#installation         Installation                            : Getting%20started.html#installation
+	/getting started.md#proper-python-setup-with-virtual-environment-recommended Proper Python setup with virtual environment  (recommended): Getting%20started.html#proper-python-setup-with-virtual-environment-recommended
+	/getting started.md#quick-setup-not-recommended Quick setup (not recommended)           : Getting%20started.html#quick-setup-not-recommended
+	/getting started.md#updating-to-the-newest-version Updating to the newest version          : Getting%20started.html#updating-to-the-newest-version
+	/getting started.md#venv-creation-and-installation-in-windows venv creation and installation in Windows: Getting%20started.html#venv-creation-and-installation-in-windows
+	/getting started.md#venv-creation-and-installation-on-mac-and-linux venv creation and installation on Mac and Linux: Getting%20started.html#venv-creation-and-installation-on-mac-and-linux
+	/index.rst                               PyDynamic - Analysis of dynamic measurements: index.html
+	/index.rst#indices-and-tables            Indices and tables                      : index.html#indices-and-tables
+	/index.rst#pydynamic-analysis-of-dynamic-measurements PyDynamic - Analysis of dynamic measurements: index.html#pydynamic-analysis-of-dynamic-measurements
+	/index.rst#references                    References                              : index.html#references
+	/pydynamic.deconvolution.rst             Design of deconvolution filters         : PyDynamic.deconvolution.html
+	/pydynamic.deconvolution.rst#design-of-deconvolution-filters Design of deconvolution filters         : PyDynamic.deconvolution.html#design-of-deconvolution-filters
+	/pydynamic.identification.rst            Fitting filters and transfer functions models: PyDynamic.identification.html
+	/pydynamic.identification.rst#fitting-filters-and-transfer-functions-models Fitting filters and transfer functions models: PyDynamic.identification.html#fitting-filters-and-transfer-functions-models
+	/pydynamic.identification.rst#fitting-filters-to-frequency-response Fitting filters to frequency response   : PyDynamic.identification.html#fitting-filters-to-frequency-response
+	/pydynamic.identification.rst#identification-of-transfer-function-models Identification of transfer function models: PyDynamic.identification.html#identification-of-transfer-function-models
+	/pydynamic.misc.rst                      Miscellaneous                           : PyDynamic.misc.html
+	/pydynamic.misc.rst#miscellaneous        Miscellaneous                           : PyDynamic.misc.html#miscellaneous
+	/pydynamic.misc.rst#module-pydynamic.misc.filterstuff Tools for digital filters               : PyDynamic.misc.html#module-PyDynamic.misc.filterstuff
+	/pydynamic.misc.rst#module-pydynamic.misc.noise Noise related functions                 : PyDynamic.misc.html#module-PyDynamic.misc.noise
+	/pydynamic.misc.rst#module-pydynamic.misc.secondordersystem Tools for 2nd order systems             : PyDynamic.misc.html#module-PyDynamic.misc.SecondOrderSystem
+	/pydynamic.misc.rst#module-pydynamic.misc.testsignals Test signals                            : PyDynamic.misc.html#module-PyDynamic.misc.testsignals
+	/pydynamic.misc.rst#module-pydynamic.misc.tools Miscellaneous useful helper functions   : PyDynamic.misc.html#module-PyDynamic.misc.tools
+	/pydynamic.misc.rst#pydynamic.misc.filterstuff.db PyDynamic.misc.filterstuff.db           : PyDynamic.misc.html#PyDynamic.misc.filterstuff.db
+	/pydynamic.misc.rst#pydynamic.misc.filterstuff.grpdelay PyDynamic.misc.filterstuff.grpdelay     : PyDynamic.misc.html#PyDynamic.misc.filterstuff.grpdelay
+	/pydynamic.misc.rst#pydynamic.misc.filterstuff.isstable PyDynamic.misc.filterstuff.isstable     : PyDynamic.misc.html#PyDynamic.misc.filterstuff.isstable
+	/pydynamic.misc.rst#pydynamic.misc.filterstuff.kaiser_lowpass PyDynamic.misc.filterstuff.kaiser_lowpass: PyDynamic.misc.html#PyDynamic.misc.filterstuff.kaiser_lowpass
+	/pydynamic.misc.rst#pydynamic.misc.filterstuff.mapinside PyDynamic.misc.filterstuff.mapinside    : PyDynamic.misc.html#PyDynamic.misc.filterstuff.mapinside
+	/pydynamic.misc.rst#pydynamic.misc.filterstuff.savitzky_golay PyDynamic.misc.filterstuff.savitzky_golay: PyDynamic.misc.html#PyDynamic.misc.filterstuff.savitzky_golay
+	/pydynamic.misc.rst#pydynamic.misc.filterstuff.ua PyDynamic.misc.filterstuff.ua           : PyDynamic.misc.html#PyDynamic.misc.filterstuff.ua
+	/pydynamic.misc.rst#pydynamic.misc.noise.arma PyDynamic.misc.noise.ARMA               : PyDynamic.misc.html#PyDynamic.misc.noise.ARMA
+	/pydynamic.misc.rst#pydynamic.misc.noise.get_alpha PyDynamic.misc.noise.get_alpha          : PyDynamic.misc.html#PyDynamic.misc.noise.get_alpha
+	/pydynamic.misc.rst#pydynamic.misc.noise.power_law_acf PyDynamic.misc.noise.power_law_acf      : PyDynamic.misc.html#PyDynamic.misc.noise.power_law_acf
+	/pydynamic.misc.rst#pydynamic.misc.noise.power_law_noise PyDynamic.misc.noise.power_law_noise    : PyDynamic.misc.html#PyDynamic.misc.noise.power_law_noise
+	/pydynamic.misc.rst#pydynamic.misc.secondordersystem.sos_absphase PyDynamic.misc.SecondOrderSystem.sos_absphase: PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_absphase
+	/pydynamic.misc.rst#pydynamic.misc.secondordersystem.sos_freqresp PyDynamic.misc.SecondOrderSystem.sos_FreqResp: PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_FreqResp
+	/pydynamic.misc.rst#pydynamic.misc.secondordersystem.sos_phys2filter PyDynamic.misc.SecondOrderSystem.sos_phys2filter: PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_phys2filter
+	/pydynamic.misc.rst#pydynamic.misc.secondordersystem.sos_realimag PyDynamic.misc.SecondOrderSystem.sos_realimag: PyDynamic.misc.html#PyDynamic.misc.SecondOrderSystem.sos_realimag
+	/pydynamic.misc.rst#pydynamic.misc.testsignals.corr_noise PyDynamic.misc.testsignals.corr_noise   : PyDynamic.misc.html#PyDynamic.misc.testsignals.corr_noise
+	/pydynamic.misc.rst#pydynamic.misc.testsignals.gaussianpulse PyDynamic.misc.testsignals.GaussianPulse: PyDynamic.misc.html#PyDynamic.misc.testsignals.GaussianPulse
+	/pydynamic.misc.rst#pydynamic.misc.testsignals.rect PyDynamic.misc.testsignals.rect         : PyDynamic.misc.html#PyDynamic.misc.testsignals.rect
+	/pydynamic.misc.rst#pydynamic.misc.testsignals.shocklikegaussian PyDynamic.misc.testsignals.shocklikeGaussian: PyDynamic.misc.html#PyDynamic.misc.testsignals.shocklikeGaussian
+	/pydynamic.misc.rst#pydynamic.misc.testsignals.sine PyDynamic.misc.testsignals.sine         : PyDynamic.misc.html#PyDynamic.misc.testsignals.sine
+	/pydynamic.misc.rst#pydynamic.misc.testsignals.squarepulse PyDynamic.misc.testsignals.squarepulse  : PyDynamic.misc.html#PyDynamic.misc.testsignals.squarepulse
+	/pydynamic.misc.rst#pydynamic.misc.tools.freqresp2realimag PyDynamic.misc.tools.FreqResp2RealImag  : PyDynamic.misc.html#PyDynamic.misc.tools.FreqResp2RealImag
+	/pydynamic.misc.rst#pydynamic.misc.tools.make_semiposdef PyDynamic.misc.tools.make_semiposdef    : PyDynamic.misc.html#PyDynamic.misc.tools.make_semiposdef
+	/pydynamic.misc.rst#pydynamic.misc.tools.print_mat PyDynamic.misc.tools.print_mat          : PyDynamic.misc.html#PyDynamic.misc.tools.print_mat
+	/pydynamic.misc.rst#pydynamic.misc.tools.print_vec PyDynamic.misc.tools.print_vec          : PyDynamic.misc.html#PyDynamic.misc.tools.print_vec
+	/pydynamic.misc.rst#pydynamic.misc.tools.progress_bar PyDynamic.misc.tools.progress_bar       : PyDynamic.misc.html#PyDynamic.misc.tools.progress_bar
+	/pydynamic.misc.rst#pydynamic.misc.tools.trimorpad PyDynamic.misc.tools.trimOrPad          : PyDynamic.misc.html#PyDynamic.misc.tools.trimOrPad
+	/pydynamic.model_estimation.rst          Model estimation                        : PyDynamic.model_estimation.html
+	/pydynamic.model_estimation.rst#model-estimation Model estimation                        : PyDynamic.model_estimation.html#model-estimation
+	/pydynamic.model_estimation.rst#module-pydynamic.model_estimation.fit_filter Fitting filters to frequency response or reciprocal: PyDynamic.model_estimation.html#module-PyDynamic.model_estimation.fit_filter
+	/pydynamic.model_estimation.rst#module-pydynamic.model_estimation.fit_transfer Identification of transfer function models: PyDynamic.model_estimation.html#module-PyDynamic.model_estimation.fit_transfer
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_filter.invlsfir PyDynamic.model_estimation.fit_filter.invLSFIR: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSFIR
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_filter.invlsfir_unc PyDynamic.model_estimation.fit_filter.invLSFIR_unc: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSFIR_unc
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_filter.invlsfir_uncmc PyDynamic.model_estimation.fit_filter.invLSFIR_uncMC: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSFIR_uncMC
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_filter.invlsiir PyDynamic.model_estimation.fit_filter.invLSIIR: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSIIR
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_filter.invlsiir_unc PyDynamic.model_estimation.fit_filter.invLSIIR_unc: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.invLSIIR_unc
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_filter.lsfir PyDynamic.model_estimation.fit_filter.LSFIR: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.LSFIR
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_filter.lsiir PyDynamic.model_estimation.fit_filter.LSIIR: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_filter.LSIIR
+	/pydynamic.model_estimation.rst#pydynamic.model_estimation.fit_transfer.fit_som PyDynamic.model_estimation.fit_transfer.fit_som: PyDynamic.model_estimation.html#PyDynamic.model_estimation.fit_transfer.fit_som
+	/pydynamic.uncertainty.rst               Evaluation of uncertainties             : PyDynamic.uncertainty.html
+	/pydynamic.uncertainty.rst#evaluation-of-uncertainties Evaluation of uncertainties             : PyDynamic.uncertainty.html#evaluation-of-uncertainties
+	/pydynamic.uncertainty.rst#module-pydynamic.uncertainty.interpolation Uncertainty evaluation for interpolation: PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.interpolation
+	/pydynamic.uncertainty.rst#module-pydynamic.uncertainty.propagate_dft Uncertainty evaluation for the DFT      : PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.propagate_DFT
+	/pydynamic.uncertainty.rst#module-pydynamic.uncertainty.propagate_filter Uncertainty evaluation for digital filtering: PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.propagate_filter
+	/pydynamic.uncertainty.rst#module-pydynamic.uncertainty.propagate_montecarlo Monte Carlo methods for digital filtering: PyDynamic.uncertainty.html#module-PyDynamic.uncertainty.propagate_MonteCarlo
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.interpolation.interp1d_unc PyDynamic.uncertainty.interpolation.interp1d_unc: PyDynamic.uncertainty.html#PyDynamic.uncertainty.interpolation.interp1d_unc
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.ampphase2dft PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2DFT
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.ampphase2time PyDynamic.uncertainty.propagate_DFT.AmpPhase2Time: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.AmpPhase2Time
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.dft2ampphase PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT2AmpPhase
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.dft_deconv PyDynamic.uncertainty.propagate_DFT.DFT_deconv: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_deconv
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.dft_multiply PyDynamic.uncertainty.propagate_DFT.DFT_multiply: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_multiply
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.dft_transferfunction PyDynamic.uncertainty.propagate_DFT.DFT_transferfunction: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.DFT_transferfunction
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.gum_dft PyDynamic.uncertainty.propagate_DFT.GUM_DFT: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFT
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.gum_dftfreq PyDynamic.uncertainty.propagate_DFT.GUM_DFTfreq: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_DFTfreq
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.gum_idft PyDynamic.uncertainty.propagate_DFT.GUM_iDFT: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.GUM_iDFT
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.time2ampphase PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_dft.time2ampphase_multi PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase_multi: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_DFT.Time2AmpPhase_multi
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_filter.firuncfilter PyDynamic.uncertainty.propagate_filter.FIRuncFilter: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_filter.FIRuncFilter
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_filter.iiruncfilter PyDynamic.uncertainty.propagate_filter.IIRuncFilter: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_filter.IIRuncFilter
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_montecarlo.mc PyDynamic.uncertainty.propagate_MonteCarlo.MC: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.MC
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_montecarlo.smc PyDynamic.uncertainty.propagate_MonteCarlo.SMC: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.SMC
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_montecarlo.umc PyDynamic.uncertainty.propagate_MonteCarlo.UMC: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.UMC
+	/pydynamic.uncertainty.rst#pydynamic.uncertainty.propagate_montecarlo.umc_generic PyDynamic.uncertainty.propagate_MonteCarlo.UMC_generic: PyDynamic.uncertainty.html#PyDynamic.uncertainty.propagate_MonteCarlo.UMC_generic
+	/tutorials.rst                           Get assistance in using PyDynamic       : Tutorials.html
+	/tutorials.rst#deconvolution             Deconvolution                           : Tutorials.html#deconvolution
+	/tutorials.rst#get-assistance-in-using-pydynamic Get assistance in using PyDynamic       : Tutorials.html#get-assistance-in-using-pydynamic
+	/tutorials.rst#getting-started-with-the-tutorials Getting started with the tutorials      : Tutorials.html#getting-started-with-the-tutorials
+	/tutorials.rst#uncertainty               Uncertainty                             : Tutorials.html#uncertainty
+	/uncertainty propagation for iir filters.rst Uncertainty propagation for IIR filters : Uncertainty%20propagation%20for%20IIR%20filters.html
+	/uncertainty propagation for iir filters.rst#basic-workflow-in-pydynamic Basic workflow in PyDynamic             : Uncertainty%20propagation%20for%20IIR%20filters.html#basic-workflow-in-pydynamic
+	/uncertainty propagation for iir filters.rst#example Example                                 : Uncertainty%20propagation%20for%20IIR%20filters.html#example
+	/uncertainty propagation for iir filters.rst#implementation-in-pydynamic Implementation in PyDynamic             : Uncertainty%20propagation%20for%20IIR%20filters.html#implementation-in-pydynamic
+	/uncertainty propagation for iir filters.rst#linearisation-based-uncertainty-propagation Linearisation-based uncertainty propagation: Uncertainty%20propagation%20for%20IIR%20filters.html#linearisation-based-uncertainty-propagation
+	/uncertainty propagation for iir filters.rst#monte-carlo-method-for-uncertainty-propagation Monte-Carlo method for uncertainty propagation: Uncertainty%20propagation%20for%20IIR%20filters.html#monte-carlo-method-for-uncertainty-propagation
+	/uncertainty propagation for iir filters.rst#uncertainty-propagation-for-iir-filters Uncertainty propagation for IIR filters : Uncertainty%20propagation%20for%20IIR%20filters.html#uncertainty-propagation-for-iir-filters
+	/uncertainty propagation for iir filters.rst#using-gum-linearization Using GUM linearization                 : Uncertainty%20propagation%20for%20IIR%20filters.html#using-gum-linearization
+	/uncertainty propagation for iir filters.rst#using-sequential-gum-monte-carlo-method Using sequential GUM Monte Carlo method : Uncertainty%20propagation%20for%20IIR%20filters.html#using-sequential-gum-monte-carlo-method
+	eichst2010                               index.html#eichst2010
+	eichst2012                               index.html#eichst2012
+	eichst2016                               index.html#eichst2016
+	elster2008                               index.html#elster2008
+	genindex                                 Index                                   : genindex.html
+	link2009                                 index.html#link2009
+	modindex                                 Module Index                            : py-modindex.html
+	numrec                                   index.html#numrec
+	py-modindex                              Python Module Index                     : py-modindex.html
+	savitzky                                 index.html#savitzky
+	search                                   Search Page                             : search.html
+	smith                                    index.html#smith
+	vuer1996                                 index.html#vuer1996
+	white2017                                index.html#white2017

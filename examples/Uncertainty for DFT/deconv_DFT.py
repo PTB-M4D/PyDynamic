@@ -54,7 +54,7 @@ HLc = lowpass(f)
 HL = np.r_[np.real(HLc), np.imag(HLc)]
 # application of low-pass filter
 print('Propagating uncertainty through the low-pass filter')
-XH, UXH = DFT_multiply(XH, UXH, HL)
+XH, UXH = DFT_multiply(XH, HL, UXH)
 # propagation back to time domain
 print("Propagating uncertainty associated with the estimate back to time domain\n")
 xh,Uxh = GUM_iDFT(XH,UXH,Nx=N)

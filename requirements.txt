@@ -1,7 +1,0 @@
-ipykernel
-matplotlib
-pytest
-numpy
-pandas
-scipy
-sympy
