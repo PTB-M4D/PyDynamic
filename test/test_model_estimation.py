@@ -263,29 +263,29 @@ def test_LSIIR_outputs_format(parameters):
 
 
 @given(LSIIR_parameters())
-def test_isstable_results_against_former_implementations(LSIIR_parameters):
+def test_isstable_results_against_former_implementations(params):
     """This takes the implementation prior to the rewrite and compares results.
 
     The original implementation was a check against the exact statement we put into
     this test as seen here:
     https://github.com/PTB-PSt1/PyDynamic/blob/00c19662333d23c580a9f60750e60021712d8393/PyDynamic/model_estimation/fit_filter.py#L138
     """
-    fitted_filter = _fit_filter(LSIIR_parameters)
+    fitted_filter = _fit_filter(params)
     assert not (
         np.count_nonzero(np.abs(np.roots(fitted_filter.a)) > 1) > 0
     ) == isstable(fitted_filter.b, fitted_filter.a, ftype="digital")
 
 
 @given(LSIIR_parameters(), hst.integers(min_value=0, max_value=100), hst.booleans())
-def test_fitIIR_results_against_former_implementations(LSIIR_parameters, tau, inv):
+def test_fitIIR_results_against_former_implementations(params, tau, inv):
     """This takes the implementation prior to the rewrite and compares results."""
     # Initialize parameters.
     fit_params = {
-        "Hvals": LSIIR_parameters["Hvals"],
+        "Hvals": params["Hvals"],
         "tau": tau,
-        **_compute_fitting_parameters(LSIIR_params=LSIIR_parameters),
-        "Na": LSIIR_parameters["Na"],
-        "Nb": LSIIR_parameters["Nb"],
+        **_compute_fitting_parameters(LSIIR_params=params),
+        "Na": params["Na"],
+        "Nb": params["Nb"],
         "inv": inv,
     }
 
@@ -304,10 +304,10 @@ def test_fitIIR_results_against_former_implementations(LSIIR_parameters, tau, in
 
 
 @given(LSIIR_parameters())
-def test_LSIIR_results_against_former_implementations(parameters):
+def test_LSIIR_results_against_former_implementations(params):
     """This takes the implementation prior to the rewrite and compares results."""
-    b_current, a_current, tau_current = fit_filter.LSIIR(**parameters)
-    b_former, a_former, tau_former = _former_LSIIR(**parameters)
+    b_current, a_current, tau_current = fit_filter.LSIIR(**params)
+    b_former, a_former, tau_former = _former_LSIIR(**params)
 
     assert_almost_equal(b_current, b_former)
     assert_almost_equal(a_current, a_former)
