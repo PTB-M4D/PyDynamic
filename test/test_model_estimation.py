@@ -264,7 +264,12 @@ def test_LSIIR_outputs_format(parameters):
 
 @given(LSIIR_parameters())
 def test_isstable_results_against_former_implementations(LSIIR_parameters):
-    """This takes the implementation prior to the rewrite and compares results."""
+    """This takes the implementation prior to the rewrite and compares results.
+
+    The original implementation was a check against the exact statement we put into
+    this test as seen here:
+    https://github.com/PTB-PSt1/PyDynamic/blob/00c19662333d23c580a9f60750e60021712d8393/PyDynamic/model_estimation/fit_filter.py#L138
+    """
     fitted_filter = _fit_filter(LSIIR_parameters)
     assert not (
         np.count_nonzero(np.abs(np.roots(fitted_filter.a)) > 1) > 0
