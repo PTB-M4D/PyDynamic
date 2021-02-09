@@ -87,7 +87,7 @@ def _prod(A, B):
     """Calculate the matrix-vector product, or vector-matrix product
 
     Calculate the product that corresponds to diag(A)*B or A*diag(B),
-    respectively; depending	on which of A,B is the matrix and which the vector.
+    respectively; depending on which of A,B is the matrix and which the vector.
 
     This is an internal helper function.
     """
@@ -163,7 +163,7 @@ def GUM_DFT(
         x : numpy.ndarray of shape (M,)
             vector of time domain signal values
         Ux : numpy.ndarray
-            covariance matrix associated with x, shape (M,M) or 
+            covariance matrix associated with x, shape (M,M) or
             vector of squared standard uncertainties, shape (M,) or
             noise variance as float
         N : int, optional
@@ -199,7 +199,12 @@ def GUM_DFT(
     if isinstance(N, int):
         L = N - len(x)
         assert L >= 0
-        x = np.r_[x.copy(), np.zeros(L,)]  # zero-padding
+        x = np.r_[
+            x.copy(),
+            np.zeros(
+                L,
+            ),
+        ]  # zero-padding
     N = len(x)
     if np.mod(N, 2) == 0:  # N is even
         M = N + 2
