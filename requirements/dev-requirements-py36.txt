@@ -279,7 +279,7 @@ tornado==6.1
     # via jupyter-client
 tox==3.21.4
     # via -r requirements/dev-requirements.in
-tqdm==4.56.1
+tqdm==4.56.2
     # via twine
 traitlets==4.3.3
     # via
