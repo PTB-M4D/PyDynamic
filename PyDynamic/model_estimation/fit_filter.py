@@ -19,6 +19,7 @@ This module contains the following functions:
   response values with uncertainty via Monte Carlo
 
 """
+import inspect
 from typing import Optional, Tuple, Union
 
 import numpy as np
@@ -43,7 +44,8 @@ def _fitIIR(
     Parameters
     ----------
     Hvals : np.ndarray of shape (M,)
-        (complex) frequency response values
+        (Complex) frequency response values. If inv is True, then Hvals must not be
+        constant zero.
     tau : integer
         initial estimate of time delay
     w : np.ndarray
@@ -55,8 +57,9 @@ def _fitIIR(
     Na : int
         denominator polynomial order
     inv : bool, optional
-        If True the least-squares fitting is performed for the reciprocal, if False
-        (default) for the actual frequency response
+        If True the least-squares fitting is performed for the reciprocal,
+        which means Hvals must not be constant zero then. If False (default) for the
+        actual frequency response.
 
     Returns
     -------
@@ -65,6 +68,13 @@ def _fitIIR(
     a : np.ndarray
         The IIR filter denominator coefficient vector in a 1-D sequence.
     """
+    if inv and np.all(Hvals == 0):
+        raise ValueError(
+            f"{inspect.stack()[1].function}: It is not possible to compute the "
+            f"reciprocal of zero but the provided frequency "
+            f"response{'s are constant ' if len(Hvals) > 1 else 'is '} zero. Please "
+            f"provide other frequency responses 'Hvals'."
+        )
     exponent = -1 if inv else 1
     Ea = E[:, 1 : Na + 1]
     Eb = E[:, : Nb + 1]

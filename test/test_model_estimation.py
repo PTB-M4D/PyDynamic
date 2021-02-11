@@ -312,3 +312,20 @@ def test_LSIIR_results_against_former_implementations(params):
     assert_almost_equal(b_current, b_former)
     assert_almost_equal(a_current, a_former)
     assert_almost_equal(tau_current, tau_former)
+
+
+@given(lsiir_base_params=LSIIR_parameters())
+def test_fitIIR_exception(
+    lsiir_base_params, provide_fitted_filter, compute_fitting_parameters
+):
+    """This checks if _fitIIR raises the expected exception in case of zero division"""
+    assume(np.all(lsiir_base_params["Hvals"] == 0))
+    with pytest.raises(ValueError):
+        fit_filter._fitIIR(
+            Hvals=lsiir_base_params["Hvals"],
+            tau=0,
+            **compute_fitting_parameters(lsiir_base_params),
+            Na=lsiir_base_params["Na"],
+            Nb=lsiir_base_params["Nb"],
+            inv=True,
+        )
