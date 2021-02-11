@@ -241,7 +241,7 @@ from PyDynamic.uncertainty.propagate_MonteCarlo import SMC
 y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
 ```
 
-![PyDynamic Workflow Deconvolution](https://mathmet.org/projects/14SIP08/Deconvolution.png)
+![PyDynamic Workflow Deconvolution](https://raw.githubusercontent.com/PTB-PSt1/PyDynamic/master/docs/Deconvolution.png)
 
 ## Roadmap
 
