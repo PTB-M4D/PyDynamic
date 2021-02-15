@@ -326,6 +326,15 @@ def FIRuncFilter(
         # if sigma_noise is 1D, it must represent the diagonal of a covariance matrix
         and (kind == "diag" or not isinstance(sigma_noise, np.ndarray))
     ):
+        # note to user
+        print(
+            "FIRuncFilter: Output uncertainty will be given as 1D-array of point-wise "
+            "standard uncertainties. Although this requires significantly lesser computations, "
+            "it ignores correlation information. Every FIR-filtered signal will have "
+            "off-diagonal entries in its covariance matrix (assuming the filter is longer "
+            "than 1). To get the full output covariance matrix, use 'return_full_covariance=True'."
+        )
+
         if isinstance(sigma_noise, float):
             Uy_diag = np.full_like(y, sigma_noise ** 2)
         elif isinstance(sigma_noise, np.ndarray):
