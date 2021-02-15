@@ -384,7 +384,9 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
     # Check output for thinkable permutations of input parameters against a Monte Carlo approach.
 
     # run method
-    y_fir, uy_fir = FIRuncFilter(**filters, **signals, **lowpasses)
+    y_fir, Uy_fir = FIRuncFilter(
+        **filters, **signals, **lowpasses, return_full_covariance=True
+    )
 
     # run Monte Carlo simulation of an FIR
     ## adjust input to match conventions of MC
@@ -405,24 +407,33 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
         n_blow = 0
 
     ## run FIR with MC and extract diagonal of returned covariance
-    y_mc, uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000)
-    uy_mc = np.sqrt(np.diag(uy_mc))
+    y_mc, Uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000)
 
-    # HACK: for visualization during debugging
+    # HACK for visualization during debugging
     # import matplotlib.pyplot as plt
-    # plt.plot(uy_fir, label="fir")
-    # plt.plot(uy_mc, label="mc")
-    # plt.title("filter: {0}, signal: {1}".format(len(b), len(x)))
-    # plt.legend()
+    # fig, ax = plt.subplots(nrows=1, ncols=3)
+    # ax[0].plot(y_fir, label="fir")
+    # ax[0].plot(y_mc, label="mc")
+    # ax[0].set_title("filter: {0}, signal: {1}".format(len(b), len(x)))
+    # ax[0].legend()
+    # ax[1].imshow(Uy_fir)
+    # ax[1].set_title("FIR")
+    # ax[2].imshow(Uy_mc)
+    # ax[2].set_title("MC")
     # plt.show()
     # /HACK
+
+    # check basic properties
+    assert np.all(np.diag(Uy_fir) >= 0)
+    assert np.all(np.diag(Uy_mc) >= 0)
+    assert Uy_fir.shape == Uy_mc.shape
 
     # approximative comparison after swing-in of MC-result
     # (which is after the combined length of blow and b)
     assert np.allclose(
-        uy_fir[len(b) + n_blow :],
-        uy_mc[len(b) + n_blow :],
-        atol=1e-1,
+        Uy_fir[len(b) + n_blow :, len(b) + n_blow :],
+        Uy_mc[len(b) + n_blow :, len(b) + n_blow :],
+        atol=2e-1*Uy_fir[0,0],
         rtol=1e-1,
     )
 
