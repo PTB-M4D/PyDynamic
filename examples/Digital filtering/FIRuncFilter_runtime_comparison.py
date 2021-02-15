@@ -6,7 +6,7 @@ import numpy as np
 import time
 import pandas as pd
 
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter_2 as FIRuncFilter
+from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 
 def evaluate(signal, filter, case="full/zero/none"):
     # different covariance matrices
