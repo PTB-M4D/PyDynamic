@@ -4,10 +4,7 @@
 
 ## v1.7.0 (2021-02-16)
 ### Feature
-* **FIRuncFilter_2:** Add FIR filter with full covariance support ([`b937a8b`](https://github.com/PTB-PSt1/PyDynamic/commit/b937a8b979f947df3149aeda38401b90fc522ef4))
-
-### Fix
-* **test_propagate_filter:** Relax Monte Carlo threshold ([`91b1c66`](https://github.com/PTB-PSt1/PyDynamic/commit/91b1c66971abaf8a363306d0e99c465f44221e7f))
+* **FIRuncFilter:** Add FIR filter with full covariance support ([`b937a8b`](https://github.com/PTB-PSt1/PyDynamic/commit/b937a8b979f947df3149aeda38401b90fc522ef4))
 
 ### Documentation
 * **trimOrPad:** Enhance docstring ([`4c0da58`](https://github.com/PTB-PSt1/PyDynamic/commit/4c0da58e2c9d2bcae212a757f7b80ef65f602cd1))
