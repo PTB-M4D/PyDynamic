@@ -16,8 +16,8 @@ This module contains the following functions:
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 * :func:`progress_bar`: A simple and reusable progress-bar
 """
-
 import sys
+from typing import Optional
 
 import numpy as np
 from scipy.sparse import eye, issparse
@@ -164,24 +164,35 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
         print(s)
 
 
-def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
+def make_semiposdef(
+    matrix: np.ndarray,
+    maxiter: Optional[int] = 10,
+    tol: Optional[float] = 1e-12,
+    verbose: Optional[bool] = False,
+) -> np.ndarray:
     """Make quadratic matrix positive semi-definite by increasing its eigenvalues
 
     Parameters
     ----------
-        matrix : (N,N) array_like
-            the matrix to process
-        maxiter : int
-            the maximum number of iterations for increasing the eigenvalues
-        tol : float
-            tolerance for deciding if pos. semi-def.
-        verbose : bool
-            If `True` print smallest eigenvalue of the resulting matrix
+    matrix : array_like of shape (N,N)
+        the matrix to process
+    maxiter : int, optional
+        the maximum number of iterations for increasing the eigenvalues, defaults to 10
+    tol : float, optional
+        tolerance for deciding if pos. semi-def., defaults to 1e-12
+    verbose : bool, optional
+        If True print smallest eigenvalue of the resulting matrix, if False (default)
+        be quiet
 
     Returns
     -------
-        (N,N) array_like
-            quadratic positive semi-definite matrix
+    (N,N) array_like
+        quadratic positive semi-definite matrix
+
+    Raises
+    ------
+    ValueError
+        If matrix is not square.
     """
     n, m = matrix.shape
     if n != m:
