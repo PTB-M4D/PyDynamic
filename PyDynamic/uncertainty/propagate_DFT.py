@@ -969,37 +969,26 @@ def DFT_deconv(
             f"{len(H)} and Y is of length {len(Y)}."
         )
 
-    if len(UY.shape) == 2:
-        if UH.shape != (len(H), len(H)):
-            raise ValueError(
-                f"Each dimension of UH is expected to match the length of H, but "
-                f"H is of length {len(H)} and UH is of shape {UH.shape}."
-            )
-        if UH.shape != UY.shape:
-            raise ValueError(
-                f"The dimensions of UH and UY are expected to match but UH is of shape "
-                f"{UH.shape} and UY is of shape {UY.shape}."
-            )
-        N = UH.shape[0] - 2
-    else:
-        if len(UH) != len(H):
-            raise ValueError(
-                f"AmpPhase2DFT: The dimensions of UH and H are expected to match but "
-                f"UH is of length {len(UH)} and H is of length {len(H)}."
-            )
-        if len(UY) != len(Y):
-            raise ValueError(
-                f"AmpPhase2DFT: The dimensions of UH and H are expected to match but "
-                f"UH is of length {len(UH)} and H is of length {len(H)}."
-            )
-        N = len(UH) - 2
-
+    N = len(UH) - 2
     if np.mod(N, 2) != 0:
         raise ValueError(
-            "AmpPhase2DFT: Dimension of covariance matrix UH is "
+            "DFT_deconv: Dimension of covariance matrix UH is "
             f"supposed to be even, but UH has {N+2} rows. Please "
             f"provide covariance matrix of dimension {len(H)} x "
             f" {len(H)}."
+        )
+
+    if len(UY) != len(Y) or (len(UY.shape) == 2 and UY.shape != (len(Y), len(Y))):
+        if UY.shape != (len(Y), len(Y)):
+            raise ValueError(
+                f"DFT_deconv:Each dimension of UY is expected to match the length of "
+                f"Y, but Y is of length {len(Y)} and UY is of shape {UY.shape}."
+            )
+
+    if len(UH) != len(H) or (len(UH.shape) == 2 and UH.shape != (len(H), len(H))):
+        raise ValueError(
+            f"DFT_deconv: The dimensions of UH and H are expected to match, "
+            f"but H is of length {len(H)} and UH is of shape {UH.shape}."
         )
 
     # real and imaginary parts of system and signal
@@ -1032,8 +1021,9 @@ def DFT_deconv(
         # np.ndarray
     except MemoryError:
         print(
-            "Could not put covariance matrix together due to memory constraints.\n"
-            "Returning the three blocks (A,B,C) such that U = [[A,B],[B.T,C]] instead."
+            "DFT_deconv: Could not put covariance matrix together due to memory "
+            "constraints.\nReturning the three blocks (A,B,C) such that U = [[A,B],"
+            "[B.T,C]] instead."
         )
         UX = (URRX, URIX, UIIX)
         # type: Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray]
