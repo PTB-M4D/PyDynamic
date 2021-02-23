@@ -823,6 +823,11 @@ def AmpPhase2Time(
         If dimension of UAP is not even.
     """
     N = UAP.shape[0] - 2
+    if A.shape != P.shape:
+        raise ValueError(
+            f"AmpPhase2Time: The dimensions of A and P are expected to match but A is "
+            f"of shape {A.shape} and P is of shape {P.shape}."
+        )
     if np.mod(N, 2) != 0:
         raise ValueError(
             "AmpPhase2Time: Dimension of covariance matrix UAP is "
