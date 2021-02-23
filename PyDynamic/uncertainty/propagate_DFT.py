@@ -935,7 +935,7 @@ def DFT_deconv(
     Parameters
     ----------
     H : np.ndarray of shape (2M,)
-        real and imaginary parts of frequency response values (N an even integer)
+        real and imaginary parts of frequency response values (M an even integer)
     Y : np.ndarray of shape (2M,)
         real and imaginary parts of DFT values
     UH : np.ndarray of shape (2M,2M) or (2M,)
