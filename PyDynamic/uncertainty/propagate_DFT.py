@@ -190,7 +190,7 @@ def GUM_DFT(
     x: np.ndarray,
     Ux: Union[np.ndarray, float],
     N: Optional[int] = None,
-    window=None,
+    window: Optional[np.ndarray] = None,
     CxCos: Optional[np.ndarray] = None,
     CxSin: Optional[np.ndarray] = None,
     returnC: Optional[bool] = False,
