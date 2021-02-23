@@ -56,6 +56,12 @@ intersphinx_mapping = {
         "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
     ),
+    "np": (
+        "http://docs.scipy.org/doc/numpy/",
+        None,
+    ),
+    "Python": ("https://docs.python.org/3", None),
+
 }
 
 nbsphinx_allow_errors = True
