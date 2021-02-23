@@ -949,8 +949,8 @@ def DFT_deconv(
         real and imaginary parts of DFT values of deconv result
     UX : np.ndarray of shape (2M,2M) or 3-tuple of np.ndarray of shape (M,M)
         Covariance matrix associated with real and imaginary part of X. If the matrix
-        fully assembled does not fit the memory, we return the autocovariances for the
-        real parts ``URRX``, the imaginary parts ``UIIX`` and the covariances for
+        fully assembled does not fit the memory, we return the auto-covariance for the
+        real parts ``URRX``and the imaginary parts ``UIIX`` and the covariance between
         the real and imaginary parts ``URIX`` as separate
         :class:`np.ndarrays <numpy.ndarray>` arranged as follows: ``(URRX, URIX, UIIX)``
 
