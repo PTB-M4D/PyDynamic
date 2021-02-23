@@ -484,7 +484,7 @@ def DFT2AmpPhase(
     keep_sparse: Optional[bool] = False,
     tol: Optional[float] = 1.0,
     return_type: Optional[str] = "separate",
-) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.array]]:
+) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray]]:
     """Transformation from real and imaginary parts to magnitude and phase
 
     Calculate the matrix
@@ -947,8 +947,12 @@ def DFT_deconv(
     -------
     X : np.ndarray of shape (2M,)
         real and imaginary parts of DFT values of deconv result
-    UX : np.ndarray of shape (2M,2M)
-        covariance matrix associated with real and imaginary part of X
+    UX : np.ndarray of shape (2M,2M) or 3-tuple of np.ndarray of shape (M,M)
+        Covariance matrix associated with real and imaginary part of X. If the matrix
+        fully assembled does not fit the memory, we return the autocovariances for the
+        real parts ``URRX``, the imaginary parts ``UIIX`` and the covariances for
+        the real and imaginary parts ``URIX`` as separate
+        :class:`np.ndarrays <numpy.ndarray>` arranged as follows: ``(URRX, URIX, UIIX)``
 
     References
     ----------
