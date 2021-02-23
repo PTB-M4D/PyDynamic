@@ -938,8 +938,8 @@ def DFT_deconv(
         real and imaginary parts of frequency response values (N an even integer)
     Y : np.ndarray of shape (2M,)
         real and imaginary parts of DFT values
-    UH : np.ndarray of shape (2M,2M)
-        covariance matrix associated with H
+    UH : np.ndarray of shape (2M,2M) or (2M,)
+        full covariance or diagonal of the covariance matrix associated with H
     UY : np.ndarray of shape (2M,2M) or (2M,)
         full covariance or diagonal of the covariance matrix associated with Y
 
