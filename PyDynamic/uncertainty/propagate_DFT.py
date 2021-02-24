@@ -979,11 +979,10 @@ def DFT_deconv(
         )
 
     if UY.shape not in ((len(Y), len(Y)), (len(Y),)):
-        if UY.shape != (len(Y), len(Y)):
-            raise ValueError(
-                f"DFT_deconv:Each dimension of UY is expected to match the length of "
-                f"Y, but Y is of length {len(Y)} and UY is of shape {UY.shape}."
-            )
+        raise ValueError(
+            f"DFT_deconv:Each dimension of UY is expected to match the length of "
+            f"Y, but Y is of length {len(Y)} and UY is of shape {UY.shape}."
+        )
 
     if UH.shape not in ((len(H), len(H)), (len(H),)):
         raise ValueError(
