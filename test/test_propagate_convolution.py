@@ -4,38 +4,112 @@ Test PyDynamic.uncertainty.propagate_convolve
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.linalg import toeplitz
-
+import pytest
 from PyDynamic.uncertainty.propagate_convolution import convolve_unc
 
 
-def test_convolution():
-    # check for even/uneven and longer/equal/shorter n1 + n2 
-    for n1 in [10, 15, 20]:
-        for n2 in [10, 15, 20]:
+def random_array(length):
+    array = np.random.randn(length)
+    return array
 
-            # define signals
-            x1 = np.random.randn(n1)
-            u1 = 0.01 * (1 + np.random.rand(n1))
 
-            x2 = np.random.randn(n2)
-            u2 = 0.01 * (1 + np.random.rand(n2))
+def random_covariance_matrix(length):
+    """construct a valid (but random) covariance matrix with good condition number"""
 
-            # test all modes of numpy convolve
-            for mode in ["full", "valid", "same"]:
+    # because np.cov estimates the mean from data, the returned covariance matrix
+    # has one eigenvalue close to numerical zero (rank n-1).
+    # This leads to a singular matrix, which is badly suited to be used as valid
+    # covariance matrix. To circumvent this:
 
-                # calculate the convolution of x1 and x2
-                y, Uy = convolve_unc(x1, u1, x2, u2, mode=mode)
-                y_numpy = np.convolve(x1, x2, mode=mode)
+    ## draw random (n+1, n+1) matrix
+    cov = np.cov(np.random.random((length + 1, length + 1)))
 
-                # compare results
-                assert len(y) == len(Uy)
-                assert len(y) == len(y_numpy)
-                assert np.allclose(y, y_numpy)
-                
-                # visualize
-                # print(n1, n2, mode)
-                # plt.plot(y, label="PyDynamic")
-                # plt.plot(y_numpy, label="NumPy")
-                # plt.legend()
-                # plt.show()
+    ## calculate SVD
+    u, s, vh = np.linalg.svd(cov, full_matrices=False, hermitian=True)
+
+    ## reassemble a covariance of size (n, n) by discarding the smallest singular value
+    cov_adjusted = (u[:-1, :-1] * s[:-1]) @ vh[:-1, :-1]
+
+    return cov_adjusted
+
+
+def valid_inputs(reduced_set=False):
+
+    valid_inputs = []
+
+    for n in [10, 15, 20]:
+        x_signal = random_array(n)
+        u_signal = random_covariance_matrix(n)
+
+        if reduced_set:
+            valid_inputs.append([x_signal, u_signal])
+        else:
+            valid_inputs.append([x_signal, None])
+            valid_inputs.append([x_signal, np.diag(np.diag(u_signal))])
+            valid_inputs.append([x_signal, u_signal])
+
+    return valid_inputs
+
+
+def valid_modes():
+    return ["full", "valid", "same"]
+
+
+@pytest.mark.parametrize("input_1", valid_inputs())
+@pytest.mark.parametrize("input_2", valid_inputs())
+@pytest.mark.parametrize("mode", valid_modes())
+def test_convolution(input_1, input_2, mode):
+
+    # calculate the convolution of x1 and x2
+    y, Uy = convolve_unc(*input_1, *input_2, mode)
+    y_numpy = np.convolve(input_1[0], input_2[0], mode=mode)
+
+    # compare results
+    assert len(y) == len(Uy)
+    assert len(y) == len(y_numpy)
+    assert np.allclose(y, y_numpy)
+
+    # visualize
+    # print(n1, n2, mode)
+    # plt.plot(y, label="PyDynamic")
+    # plt.plot(y_numpy, label="NumPy")
+    # plt.legend()
+    # plt.show()
+
+
+@pytest.mark.parametrize("input_1", valid_inputs(reduced_set=True))
+@pytest.mark.parametrize("input_2", valid_inputs(reduced_set=True))
+@pytest.mark.parametrize("mode", valid_modes())
+def test_convolution_monte_carlo(input_1, input_2, mode):
+
+    # pydynamic calculation
+    y, Uy = convolve_unc(*input_1, *input_2, mode)
+
+    # Monte Carlo simulation
+    mc_results = []
+    n_runs = 20000
+    XX1 = np.random.multivariate_normal(*input_1, size=n_runs)
+    XX2 = np.random.multivariate_normal(*input_2, size=n_runs)
+    for x1, x2 in zip(XX1, XX2):
+        conv = np.convolve(x1, x2, mode=mode)
+        mc_results.append(conv)    
+
+    y_mc = np.mean(mc_results, axis=0)
+    Uy_mc = np.cov(mc_results, rowvar=False)
+    
+    # HACK: for visualization during debugging
+    # import matplotlib.pyplot as plt
+    # fig, ax = plt.subplots(nrows=1, ncols=3)
+    # ax[0].plot(y, label="fir")
+    # ax[0].plot(y_mc, label="mc")
+    # ax[0].set_title("mode: {0}, x1: {1}, x2: {2}".format(mode, len(x1), len(x2)))
+    # ax[0].legend()
+    # ax[1].imshow(Uy)
+    # ax[1].set_title("PyDynamic")
+    # ax[2].imshow(Uy_mc)
+    # ax[2].set_title("numpy MC")
+    # plt.show()
+    # /HACK
+
+    assert np.allclose(y, y_mc, rtol=1e-1, atol=1e-1)
+    assert np.allclose(Uy, Uy_mc, rtol=1e-1, atol=1e-1)
