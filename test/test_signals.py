@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 """ Perform tests on methods to create testsignals."""
-
+import matplotlib
 import numpy as np
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
-from PyDynamic.misc.testsignals import shocklikeGaussian, GaussianPulse, rect, \
-    squarepulse, sine
+from examples.working_with_signals import demonstrate_signal
+from PyDynamic.misc.testsignals import (
+    GaussianPulse,
+    rect,
+    shocklikeGaussian,
+    sine,
+    squarepulse,
+)
 
 N = 2048
 Ts = 0.01
@@ -27,12 +33,11 @@ def test_shocklikeGaussian():
     # zero noise
     x = shocklikeGaussian(time, t0, m0, sigma, noise=0.0)
     assert_almost_equal(np.max(x), m0)
-    assert np.std(x[:N // 10]) < 1e-10
+    assert np.std(x[: N // 10]) < 1e-10
     # noisy signal
     nstd = 1e-2
     x = shocklikeGaussian(time, t0, m0, sigma, noise=nstd)
-    assert_almost_equal(
-        np.round(np.std(x[:N // 10]) * 100) / 100, nstd)
+    assert_almost_equal(np.round(np.std(x[: N // 10]) * 100) / 100, nstd)
 
 
 def test_GaussianPulse():
@@ -42,12 +47,11 @@ def test_GaussianPulse():
     x = GaussianPulse(time, t0, m0, sigma, noise=0.0)
     assert_almost_equal(np.max(x), m0)
     assert_almost_equal(time[x.argmax()], t0)
-    assert np.std(x[:N // 10]) < 1e-10
+    assert np.std(x[: N // 10]) < 1e-10
     # noisy signal
     nstd = 1e-2
     x = GaussianPulse(time, t0, m0, sigma, noise=nstd)
-    assert_almost_equal(
-        np.round(np.std(x[:N // 10]) * 100) / 100, nstd)
+    assert_almost_equal(np.round(np.std(x[: N // 10]) * 100) / 100, nstd)
 
 
 def test_rect():
@@ -136,3 +140,10 @@ class TestSine:
         sine(time, amp, freq=freq, noise=noise)
         sine(time, freq=freq, noise=noise)
         sine(time, amp=amp, freq=freq, noise=noise)
+
+
+def test_signal_example(monkeypatch):
+    # With this expression we override the matplotlib.pyplot.show method with a
+    # lambda expression returning None but only for this one test.
+    monkeypatch.setattr(matplotlib.pyplot, "show", lambda: None, raising=True)
+    demonstrate_signal()

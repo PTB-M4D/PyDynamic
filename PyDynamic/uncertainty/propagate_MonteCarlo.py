@@ -10,13 +10,12 @@ uncertainties for digital filtering.
 
 This module contains the following functions:
 
-* *MC*: Standard Monte Carlo method for application of digital filter
-* *SMC*: Sequential Monte Carlo method with reduced computer memory requirements
-* *UMC*: Update Monte Carlo method for application of digital filters with
+* :func:`MC`: Standard Monte Carlo method for application of digital filter
+* :func:`SMC`: Sequential Monte Carlo method with reduced computer memory requirements
+* :func:`UMC`: Update Monte Carlo method for application of digital filters with
   reduced computer memory requirements
-* *UMC_generic*: Update Monte Carlo method with reduced computer memory
+* :func:`UMC_generic`: Update Monte Carlo method with reduced computer memory
   requirements
-
 """
 
 import functools
@@ -38,7 +37,8 @@ __all__ = ["MC", "SMC", "UMC", "UMC_generic"]
 
 
 class Normal_ZeroCorr:
-    """     Multivariate normal distribution with zero correlation"""
+    """Multivariate normal distribution with zero correlation"""
+
     def __init__(self, loc=np.zeros(1), scale=np.zeros(1)):
         """
         Parameters
@@ -77,11 +77,13 @@ class Normal_ZeroCorr:
                 else:
                     raise ValueError(
                         "loc and scale do not have the same dimensions. (And "
-                        "none of them has dim == 1)")
+                        "none of them has dim == 1)"
+                    )
 
         else:
-            raise TypeError("At least one of loc or scale must be of type "
-                            "numpy.ndarray.")
+            raise TypeError(
+                "At least one of loc or scale must be of type " "numpy.ndarray."
+            )
 
     def rvs(self, size=1):
         # This function mimics the behavior of the scipy stats package
@@ -153,41 +155,36 @@ def MC(
         else:
             dist = stats.multivariate_normal(x, Ux)  # colored noise
     elif isinstance(Ux, float):
-        dist = Normal_ZeroCorr(loc=x, scale=Ux)      # iid noise
+        dist = Normal_ZeroCorr(loc=x, scale=Ux)  # iid noise
     else:
         raise NotImplementedError("The supplied type of uncertainty is not implemented")
 
     unst_count = 0  # Count how often in the MC runs the IIR filter is unstable.
     st_inds = list()
     if verbose:
-        sys.stdout.write('MC progress: ')
+        sys.stdout.write("MC progress: ")
     for k in range(runs):
         xn = dist.rvs()  # draw filter input signal
         if not blow is None:
             if alow is None:
                 alow = 1.0  # FIR low-pass filter
             xn = lfilter(blow, alow, xn)  # low-pass filtered input signal
-        bb = Theta[k, Na - 1:]
-        aa = np.hstack((1.0, Theta[k, :Na - 1]))
+        bb = Theta[k, Na - 1 :]
+        aa = np.hstack((1.0, Theta[k, : Na - 1]))
         if isstable(bb, aa):
             Y[k, :] = lfilter(bb, aa, xn)
             st_inds.append(k)
         else:
             unst_count += 1  # don't apply the IIR filter if it's unstable
         if np.mod(k, 0.1 * runs) == 0 and verbose:
-            sys.stdout.write(' %d%%' % (np.round(100.0 * k / runs)))
+            sys.stdout.write(" %d%%" % (np.round(100.0 * k / runs)))
     if verbose:
         sys.stdout.write(" 100%\n")
 
     if unst_count > 0:
-        print("In %d Monte Carlo %d filters have been unstable" % (
-            runs, unst_count))
-        print(
-            "These results will not be considered for calculation of mean and "
-            "std")
-        print(
-            "However, if return_samples is 'True' then ALL samples are "
-            "returned.")
+        print("In %d Monte Carlo %d filters have been unstable" % (runs, unst_count))
+        print("These results will not be considered for calculation of mean and " "std")
+        print("However, if return_samples is 'True' then ALL samples are " "returned.")
 
     Y = np.roll(Y, int(shift), axis=1)  # correct for the (known) sample delay
 
@@ -326,7 +323,7 @@ def SMC(
         A = np.zeros((runs, Nb))
 
     # Fixed part of state-space model.
-    c = Coefs[:, Na + 1:] - np.multiply(np.tile(b0[:, np.newaxis], (1, Nb)), A)
+    c = Coefs[:, Na + 1 :] - np.multiply(np.tile(b0[:, np.newaxis], (1, Nb)), A)
     States = np.zeros(np.shape(A))  # initialise matrix of states
 
     calcP = False  # by default no percentiles requested
@@ -360,7 +357,8 @@ def SMC(
         if isinstance(alow, np.ndarray):  # apply low-pass filter
             X = np.hstack((x[index] + E, X[:, :-1]))
             Xl = np.hstack(
-                (X.dot(blow.T) - Xl[:, :len(alow)].dot(alow[1:]), Xl[:, :-1]))
+                (X.dot(blow.T) - Xl[:, : len(alow)].dot(alow[1:]), Xl[:, :-1])
+            )
         elif isinstance(blow, np.ndarray):
             X = np.hstack((x[index] + E, X[:, :-1]))
             Xl = X.dot(blow)
@@ -372,9 +370,11 @@ def SMC(
             Xl = Xl[:, np.newaxis]
 
         # State-space system output.
-        Y = np.sum(np.multiply(c, States), axis=1) + \
-            np.multiply(b0, Xl[:, 0]) + \
-            (np.random.rand(runs) * 2 * Delta - Delta)
+        Y = (
+            np.sum(np.multiply(c, States), axis=1)
+            + np.multiply(b0, Xl[:, 0])
+            + (np.random.rand(runs) * 2 * Delta - Delta)
+        )
         # Calculate state updates.
         Z = -np.sum(np.multiply(A, States), axis=1) + Xl[:, 0]
         # Store state updates and remove old ones.
@@ -386,7 +386,7 @@ def SMC(
             P[:, index] = sp.stats.mstats.mquantiles(np.asarray(Y), prob=Perc)
 
         if np.mod(index, np.round(0.1 * len(x))) == 0:
-            print(' %d%%' % (np.round(100.0 * index / len(x))), end="")
+            print(" %d%%" % (np.round(100.0 * index / len(x))), end="")
 
     print(" 100%")
 
@@ -479,7 +479,6 @@ def UMC(
         blow = blow / alow[0]
         alow = alow / alow[0]
 
-
     # define generic functions to hand over to UMC_generic
 
     # variate the coefficients of filter as main simulation influence
@@ -487,14 +486,16 @@ def UMC(
     draw_samples = lambda size: np.random.multivariate_normal(ab, Uab, size)
 
     # how to evaluate functions
-    params = {"nbb": b.size,
-              "x": x,
-              "sigma": sigma,
-              "blow": blow,
-              "alow": alow,
-              "Delta": Delta,
-              "phi": phi,
-              "theta": theta}
+    params = {
+        "nbb": b.size,
+        "x": x,
+        "sigma": sigma,
+        "blow": blow,
+        "alow": alow,
+        "Delta": Delta,
+        "phi": phi,
+        "theta": theta,
+    }
     evaluate = functools.partial(_UMCevaluate, **params)
 
     # run UMC
@@ -515,8 +516,8 @@ def UMC(
             interp_e = interp1d(G, e)
 
             # save credibility intervals
-            y_cred_low[m,k] = interp_e((1-credible_interval)/2)
-            y_cred_high[m,k] = interp_e((1+credible_interval)/2)
+            y_cred_low[m, k] = interp_e((1 - credible_interval) / 2)
+            y_cred_high[m, k] = interp_e((1 + credible_interval) / 2)
 
     return y, Uy, y_cred_low, y_cred_high, happr
 
@@ -553,11 +554,11 @@ def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
     ```
     """
 
-    naa = len(th) - nbb + 1        # theta contains all but the first entry of aa
-    aa = np.append(1, th[:naa-1])  # insert coeff 1 at position 0 to restore aa
-    bb = th[naa-1:]                # restore bb
+    naa = len(th) - nbb + 1  # theta contains all but the first entry of aa
+    aa = np.append(1, th[: naa - 1])  # insert coeff 1 at position 0 to restore aa
+    bb = th[naa - 1 :]  # restore bb
 
-    e = ARMA(x.size, phi = phi, theta = theta, std = sigma)
+    e = ARMA(x.size, phi=phi, theta=theta, std=sigma)
 
     xlow = lfilter(blow, alow, x + e)
     d = Delta * (2 * np.random.random_sample(size=x.size) - 1 )   # uniform distribution [-Delta, Delta]
@@ -649,7 +650,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     # ------------ preparations for update formulae ------------
 
     # set up list of MC results
-    Y_init = [None]*runs_init
+    Y_init = [None] * runs_init
 
     # init samples to be evaluated
     samples = draw_samples(runs_init)
@@ -658,7 +659,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     for k, result in enumerate(map_func(evaluate, samples)):
         Y_init[k] = result
         progress_bar(k, runs_init, prefix="UMC initialisation:     ")
-    print("\n") # to escape the carriage-return of progress_bar
+    print("\n")  # to escape the carriage-return of progress_bar
 
     # get size of in- and output (was so far not explicitly known)
     input_shape = samples[0].shape
@@ -679,7 +680,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
 
     # ----------------- run MC block-wise -----------------------
 
-    nblocks = math.ceil(runs/blocksize)
+    nblocks = math.ceil(runs / blocksize)
 
     # remember all evaluated simulations, if wanted
     if return_samples:
@@ -698,11 +699,11 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         for k, result in enumerate(map_func(evaluate, samples)):
             Y[k] = result.ravel()
 
-        if m == 0: # first block
-            y  = np.mean(Y, axis=0)
-            Uy = np.matmul((Y-y).T, (Y-y))
+        if m == 0:  # first block
+            y = np.mean(Y, axis=0)
+            Uy = np.matmul((Y - y).T, (Y - y))
 
-        else: # updating y and Uy from results of current block
+        else:  # updating y and Uy from results of current block
             K0 = m * blocksize
             K_seq = curr_block
 
@@ -718,12 +719,12 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             for h in happr.values():
                 h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
 
-        ymin = np.min(np.vstack((ymin,Y)), axis=0)
-        ymax = np.max(np.vstack((ymax,Y)), axis=0)
+        ymin = np.min(np.vstack((ymin, Y)), axis=0)
+        ymax = np.max(np.vstack((ymax, Y)), axis=0)
 
         # save results if wanted
         if return_samples:
-            block_start = m*blocksize
+            block_start = m * blocksize
             block_end = block_start + curr_block
             sims["samples"][block_start:block_end] = samples
             sims["results"][block_start:block_end] = np.asarray([element.reshape(output_shape) for element in Y])
@@ -731,13 +732,12 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         progress_bar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
     print("\n") # to escape the carriage-return of progress_bar
 
-
     # ----------------- post-calculation steps -----------------------
 
     # replace edge limits by ymin and ymax, resp.
     for h in happr.values():
-        h["bin-edges"][0,:]  = np.min(np.vstack((ymin, h["bin-edges"][0,:])), axis=0)
-        h["bin-edges"][-1,:] = np.min(np.vstack((ymax, h["bin-edges"][-1,:])), axis=0)
+        h["bin-edges"][0, :] = np.min(np.vstack((ymin, h["bin-edges"][0, :])), axis=0)
+        h["bin-edges"][-1, :] = np.min(np.vstack((ymax, h["bin-edges"][-1, :])), axis=0)
 
     if return_samples:
         return y, Uy, happr, output_shape, sims

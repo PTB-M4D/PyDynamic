@@ -5,185 +5,406 @@ the application of a digital filter using the GUM approach.
 
 This modules contains the following functions:
 
-* *FIRuncFilter*: Uncertainty propagation for signal y and uncertain FIR
+* :func:`FIRuncFilter`: Uncertainty propagation for signal y and uncertain FIR
   filter theta
-* *IIRuncFilter*: Uncertainty propagation for the signal x and the uncertain
+* :func:`IIRuncFilter`: Uncertainty propagation for the signal x and the uncertain
   IIR filter (b,a)
 
-# Note: The Elster-Link paper for FIR filters assumes that the autocovariance
-is known and that noise is stationary!
+.. note:: The Elster-Link paper for FIR filters assumes that the autocovariance
+          is known and that noise is stationary!
 
 """
 
 import numpy as np
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi, dimpulse
+from scipy.signal import convolve
 from ..misc.tools import trimOrPad
 
-__all__ = ['FIRuncFilter', 'IIRuncFilter']
+__all__ = ["FIRuncFilter", "IIRuncFilter"]
 
-def FIRuncFilter(y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"):
-    """Uncertainty propagation for signal y and uncertain FIR filter theta
+
+def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="constant"):
+    """Uncertainty propagation for signal x with covariance Ux
+       and uncertain FIR filter theta with covariance Utheta.
+
+       If either Ux or Utheta are omitted (None), then corresponding terms are not
+       calculated to reduce computation time.
 
     Parameters
     ----------
-        y: np.ndarray
-            filter input signal
-        sigma_noise: float or np.ndarray
-            float:    standard deviation of white noise in y
-            1D-array: interpretation depends on kind
-        theta: np.ndarray
-            FIR filter coefficients
-        Utheta: np.ndarray
-            covariance matrix associated with theta
-        shift: int
-            time delay of filter output signal (in samples)
-        blow: np.ndarray
-            optional FIR low-pass filter
-        kind: string
-            only meaningfull in combination with isinstance(sigma_noise, numpy.ndarray)
-            "diag": point-wise standard uncertainties of non-stationary white noise
-            "corr": single sided autocovariance of stationary (colored/corrlated) noise (default)
+    x : np.ndarray
+        filter input signal
+    theta : np.ndarray
+        FIR filter coefficients
+    Ux : np.ndarray, optional
+        covariance matrix associated with x
+        if the signal is fully certain, use `Ux = None` (default) to make use of more efficient calculations.
+    Utheta : np.ndarray, optional
+        covariance matrix associated with theta
+        if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
+        see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+    initial_conditions : str, optional
+        constant: assume signal + uncertainty are constant before t=0 (default)
+        zero: assume signal + uncertainty are zero before t=0
+
 
     Returns
     -------
-        x: np.ndarray
-            FIR filter output signal
-        ux: np.ndarray
-            point-wise uncertainties associated with x
+    y : np.ndarray
+        FIR filter output signal
+    Uy : np.ndarray
+        covariance matrix of filter output y
 
 
     References
     ----------
-        * Elster and Link 2008 [Elster2008]_
+    * Elster and Link 2008 [Elster2008]_
 
-    .. seealso:: :mod:`PyDynamic.deconvolution.fit_filter`
+    .. seealso:: :mod:`PyDynamic.model_estimation.fit_filter`
 
     """
 
-    Ntheta = len(theta)         # FIR filter size
-    #filterOrder = Ntheta - 1   # FIR filter order
+    # Note to future developers:
+    # The functions _fir_filter and _fir_filter_diag share
+    # the same logic. If adjustments become necessary (e.g.
+    # due to bug fixing) please also consider adjusting it
+    # in the other function as well.
 
-    if not isinstance(Utheta, np.ndarray):      # handle case of zero uncertainty filter
-        Utheta = np.zeros((Ntheta, Ntheta))
+    Ntheta = len(theta)  # FIR filter size
 
-    # check which case of sigma_noise is necessary
-    if isinstance(sigma_noise, float):
-        sigma2 = sigma_noise**2
+    if initial_conditions == "constant":
+        x0 = x[0]
 
-    elif isinstance(sigma_noise, np.ndarray):
-        if kind == "diag":
-            sigma2 = sigma_noise ** 2
-        elif kind == "corr":
-            sigma2 = sigma_noise
+    # Note: currently only used in testing for comparison against Monte Carlo method
+    elif initial_conditions == "zero":
+        x0 = 0.0
+
+    else:
+        raise ValueError(
+            f"_fit_filter: You provided 'initial_conditions' = '{initial_conditions}'."
+            f"However, only 'zero' or 'constant' are currently supported."
+        )
+
+    # propagate filter
+    y, _ = lfilter(theta, 1.0, x, zi=x0 * lfilter_zi(theta, 1.0))
+
+    # propagate uncertainty
+    Uy = np.zeros((len(x), len(x)))
+
+    ## only calculate subterms, that are non-zero (compare eq. 34 of paper)
+    if Ux is not None:
+        ## extend covariance Ntheta steps into the past
+        if initial_conditions == "constant":
+            Ux_extended = _stationary_prepend_covariance(Ux, Ntheta - 1)
+
+        elif initial_conditions == "zero":
+            # extend covariance Ntheta steps into the past
+            Ux_extended = np.pad(
+                Ux,
+                ((Ntheta - 1, 0), (Ntheta - 1, 0)),
+                "constant",
+                constant_values=0,
+            )
+
+        # calc subterm theta^T * Ux * theta
+        Uy += convolve(np.outer(theta, theta), Ux_extended, mode="valid")
+
+    if Utheta is not None:
+        ## extend signal Ntheta steps into the past
+        x_extended = np.r_[np.full((Ntheta - 1), x0), x]
+
+        # calc subterm x^T * Utheta * x
+        Uy += convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
+
+    if (Ux is not None) and (Utheta is not None):
+        # calc subterm Tr(Ux * Utheta)
+        Uy += convolve(Ux_extended, Utheta.T, mode="valid")
+
+    return y, Uy
+
+
+def _fir_filter_diag(
+    x, theta, Ux_diag=None, Utheta_diag=None, initial_conditions="constant"
+):
+    """Uncertainty propagation for signal x with covariance diagonal Ux_diag
+       and uncertain FIR filter theta with covariance diagonal Utheta_diag.
+
+       If either Ux_diag or Utheta_diag are omitted (None), then corresponding terms are not
+       calculated to reduce computation time.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        filter input signal
+    theta : np.ndarray
+        FIR filter coefficients
+    Ux_diag : np.ndarray, optional
+        diagonal of covariance matrix ([ux11^2, ux22^2, ..., uxnn^2])
+        if the signal is fully certain, use `Ux_diag = None` (default) to make use of more efficient calculations.
+    Utheta_diag : np.ndarray, optional
+        diagonal of covariance matrix ([ut11^2, ut22^2, ..., utnn^2])
+        if the filter is fully certain, use `Utheta_diag = None` (default) to make use of more efficient calculations.
+        see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+    initial_conditions : str, optional
+        constant: assume signal + uncertainty are constant before t=0 (default)
+        zero: assume signal + uncertainty are zero before t=0
+
+
+    Returns
+    -------
+    y : np.ndarray
+        FIR filter output signal
+    Uy_diag : np.ndarray
+        diagonal of covariance matrix of filter output y
+
+
+    References
+    ----------
+    * Elster and Link 2008 [Elster2008]_
+
+    .. seealso:: :mod:`PyDynamic.model_estimation.fit_filter`
+
+    """
+
+    # Note to future developers:
+    # The functions _fir_filter and _fir_filter_diag share
+    # the same logic. If adjustments become necessary (e.g.
+    # due to bug fixing) please also consider adjusting it
+    # in the other function as well.
+
+    Ntheta = len(theta)  # FIR filter size
+
+    if initial_conditions == "constant":
+        x0 = x[0]
+
+    # Note: currently only used in testing for comparison against Monte Carlo method
+    elif initial_conditions == "zero":
+        x0 = 0.0
+
+    else:
+        raise ValueError(
+            f"_fit_filter: You provided 'initial_conditions' = '{initial_conditions}'."
+            f"However, only 'zero' or 'constant' are currently supported."
+        )
+
+    # propagate filter
+    y, _ = lfilter(theta, 1.0, x, zi=x0 * lfilter_zi(theta, 1.0))
+
+    # propagate uncertainty
+    Uy_diag = np.zeros(len(x))
+
+    ## only calculate subterms, that are non-zero (compare eq. 34 of paper)
+    if Ux_diag is not None:
+        ## extend covariance Ntheta steps into the past
+        if initial_conditions == "constant":
+            Ux0 = Ux_diag[0]
+        elif initial_conditions == "zero":
+            Ux0 = 0.0
+        Ux_diag_extended = np.r_[np.full((Ntheta - 1), Ux0), Ux_diag]
+
+        # calc subterm theta^T * Ux * theta
+        Uy_diag += convolve(np.square(theta), Ux_diag_extended, mode="valid")
+
+    if Utheta_diag is not None:
+        ## extend signal Ntheta steps into the past
+        x_extended = np.r_[np.full((Ntheta - 1), x0), x]
+
+        # calc subterm x^T * Utheta * x
+        Uy_diag += convolve(np.square(x_extended), Utheta_diag, mode="valid")
+
+    if (Ux_diag is not None) and (Utheta_diag is not None):
+        # calc subterm Tr(Ux * Utheta)
+        Uy_diag += convolve(Ux_diag_extended, Utheta_diag, mode="valid")
+
+    return y, Uy_diag
+
+
+def _stationary_prepend_covariance(U, n):
+    """ Prepend covariance matrix U by n steps into the past"""
+
+    c = np.r_[U[:, 0], np.zeros(n)]
+    r = np.r_[U[0, :], np.zeros(n)]
+
+    U_adjusted = toeplitz(c, r)
+    U_adjusted[n:, n:] = U
+
+    return U_adjusted
+
+
+def FIRuncFilter(
+    y,
+    sigma_noise,
+    theta,
+    Utheta=None,
+    shift=0,
+    blow=None,
+    kind="corr",
+    return_full_covariance=False,
+):
+    """Uncertainty propagation for signal y and uncertain FIR filter theta
+
+    A preceding FIR low-pass filter with coefficients `blow` can be provided optionally.
+
+    This method keeps the signature of `PyDynamic.uncertainty.FIRuncFilter`, but internally
+    works differently and can return a full covariance matrix. Also, sigma_noise can be a full
+    covariance matrix.
+
+    Parameters
+    ----------
+    y : np.ndarray
+        filter input signal
+    sigma_noise : float or np.ndarray
+        float:    standard deviation of white noise in y
+        1D-array: interpretation depends on kind
+        2D-array: full covariance of input
+    theta : np.ndarray
+        FIR filter coefficients
+    Utheta : np.ndarray, optional
+        1D-array: coefficient-wise standard uncertainties of filter
+        2D-array: covariance matrix associated with theta
+        if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
+        see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+    shift : int, optional
+        time delay of filter output signal (in samples) (defaults to 0)
+    blow : np.ndarray, optional
+        optional FIR low-pass filter
+    kind : string
+        only meaningful in combination with sigma_noise a 1D numpy array
+        "diag": point-wise standard uncertainties of non-stationary white noise
+        "corr": single sided autocovariance of stationary (colored/correlated)
+        noise (default)
+    return_full_covariance : bool, optional
+        whether or not to return a full covariance of the output, defaults to False
+
+    Returns
+    -------
+    x : np.ndarray
+        FIR filter output signal
+    Ux : np.ndarray
+        return_full_covariance == False : point-wise standard uncertainties associated with x (default)
+        return_full_covariance == True : covariance matrix containing uncertainties associated with x
+
+
+    References
+    ----------
+    * Elster and Link 2008 [Elster2008]_
+
+    .. seealso:: :mod:`PyDynamic.model_estimation.fit_filter`
+
+    """
+
+    # Check for special cases, that we can compute much faster:
+    ## These special cases come from the default behavior of the `old` FIRuncFilter
+    ## implementation, which always returned only the square-root of the main diagonal
+    ## of the covariance matrix.
+    ## The special case is activated, if the user does not want a full covariance of
+    ## the result (return_full_covariance == False). Furthermore, sigma_noise and Utheta
+    ## must be representable by pure diagonal covariance matricies (i.e. they are of type
+    ## None, float or 1D-array). By the same reasoning, we need to exclude cases
+    ## of preceding low-pass filtering, as the covariance of the low-pass-filtered
+    ## signal would no longer be purely diagonal.
+    ## Computation is then based on eq. 33 [Elster2008]_ - which is substantially
+    ## faster (typically by orders of magnitude) when compared to the full covariance
+    ## calculation.
+    ## Check this example: <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+    
+    # note to user
+    if not return_full_covariance:
+        print(
+            "FIRuncFilter: Output uncertainty will be given as 1D-array of point-wise "
+            "standard uncertainties. Although this requires significantly lesser computations, "
+            "it ignores correlation information. Every FIR-filtered signal will have "
+            "off-diagonal entries in its covariance matrix (assuming the filter is longer "
+            "than 1). To get the full output covariance matrix, use 'return_full_covariance=True'."
+        )
+
+    if (
+        (not return_full_covariance)  # no need for full covariance
+        and (  # cases of sigma_noise, that support the faster computation
+            isinstance(sigma_noise, float)
+            or (isinstance(sigma_noise, np.ndarray) and len(sigma_noise.shape) == 1)
+            or (sigma_noise is None)
+        )
+        and (  # cases of Utheta, that support the faster computation
+            isinstance(Utheta, float)
+            or (isinstance(Utheta, np.ndarray) and len(Utheta.shape) == 1)
+            or (Utheta is None)
+        )
+        # the low-pass-filtered signal wouldn't have pure diagonal covariance
+        and (blow is None)
+        # if sigma_noise is 1D, it must represent the diagonal of a covariance matrix
+        and (kind == "diag" or not isinstance(sigma_noise, np.ndarray))
+    ):
+
+        if isinstance(sigma_noise, float):
+            Uy_diag = np.full_like(y, sigma_noise ** 2)
+        elif isinstance(sigma_noise, np.ndarray):
+            Uy_diag = np.square(sigma_noise)
         else:
-            raise ValueError("unknown kind of sigma_noise")
+            Uy_diag = sigma_noise
 
+        if isinstance(Utheta, float):
+            Utheta_diag = np.full_like(theta, Utheta)
+        elif isinstance(Utheta, np.ndarray):
+            Utheta_diag = np.square(Utheta)
+        else:
+            Utheta_diag = Utheta
+
+        x, Ux_diag = _fir_filter_diag(
+            y, theta, Uy_diag, Utheta_diag, initial_conditions="constant"
+        )
+        return x, np.sqrt(np.abs(Ux_diag))
+
+    # otherwise, the method computes full covariance information
     else:
-        raise ValueError("sigma_noise is neither of type float nor numpy.ndarray.")
+        Ntheta = len(theta)  # FIR filter size
 
+        # check which case of sigma_noise is necessary
+        if isinstance(sigma_noise, float):
+            Uy = np.diag(np.full(len(y), sigma_noise ** 2))
 
-    if isinstance(blow,np.ndarray):             # calculate low-pass filtered signal and propagate noise
+        elif isinstance(sigma_noise, np.ndarray):
 
-        if isinstance(sigma2, float):
-            Bcorr = np.correlate(blow, blow, 'full') # len(Bcorr) == 2*Ntheta - 1
-            ycorr = sigma2 * Bcorr[len(blow)-1:]     # only the upper half of the correlation is needed
+            if len(sigma_noise.shape) == 1:
+                if kind == "diag":
+                    Uy = np.diag(sigma_noise ** 2)
+                elif kind == "corr":
+                    Uy = toeplitz(trimOrPad(sigma_noise, len(y)))
+                else:
+                    raise ValueError("unknown kind of sigma_noise")
 
-            # trim / pad to length Ntheta
-            ycorr = trimOrPad(ycorr, Ntheta)
-            Ulow = toeplitz(ycorr)
+            elif len(sigma_noise.shape) == 2:
+                Uy = sigma_noise
 
-        elif isinstance(sigma2, np.ndarray):
+        else:
+            raise ValueError(
+                "Unsupported value of sigma_noise. Please check the documentation."
+            )
 
-            if kind == "diag":
-                # [Leeuw1994](Covariance matrix of ARMA errors in closed form) can be used, to derive this formula
-                # The given "blow" corresponds to a MA(q)-process.
-                # Going through the calculations of Leeuw, but assuming
-                # that E(vv^T) is a diagonal matrix with non-identical elements,
-                # the covariance matrix V becomes (see Leeuw:corollary1)
-                # V = N * SP * N^T + M * S * M^T
-                # N, M are defined as in the paper
-                # and SP is the covariance of input-noise prior to the observed time-interval
-                # (SP needs be available len(blow)-timesteps into the past. Here it is
-                # assumed, that SP is constant with the first value of sigma2)
+        # filter operation(s)
+        if isinstance(blow, np.ndarray):
+            # apply (fully certain) lowpass-filter
+            xlow, Ulow = _fir_filter(y, blow, Uy, None, initial_conditions="constant")
 
-                # V needs to be extended to cover Ntheta-1 timesteps more into the past
-                sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta-1)), sigma2)
+            # apply filter to lowpass-filtered signal
+            x, Ux = _fir_filter(
+                xlow, theta, Ulow, Utheta, initial_conditions="constant"
+            )
 
-                N = toeplitz(blow[1:][::-1], np.zeros_like(sigma2_extended)).T
-                M = toeplitz(trimOrPad(blow, len(sigma2_extended)), np.zeros_like(sigma2_extended))
-                SP = np.diag(sigma2[0] * np.ones_like(blow[1:]))
-                S = np.diag(sigma2_extended)
+        else:
+            # apply filter to input signal
+            x, Ux = _fir_filter(y, theta, Uy, Utheta, initial_conditions="constant")
 
-                # Ulow is to be sliced from V, see below
-                V = N.dot(SP).dot(N.T) + M.dot(S).dot(M.T)
+        # shift result
+        if shift != 0:
+            x = np.roll(x, -int(shift))
+            Ux = np.roll(Ux, (-int(shift), -int(shift)))
 
-            elif kind == "corr":
-
-                # adjust the lengths sigma2 to fit blow and theta
-                # this either crops (unused) information or appends zero-information
-                # note1: this is the reason, why Ulow will have dimension (Ntheta x Ntheta) without further ado
-
-                # calculate Bcorr
-                Bcorr = np.correlate(blow, blow, 'full')
-
-                # pad or crop length of sigma2, then reflect some part to the left and invert the order
-                # [0 1 2 3 4 5 6 7] --> [0 0 0 7 6 5 4 3 2 1 0 1 2 3]
-                sigma2 = trimOrPad(sigma2, len(blow) + Ntheta - 1)
-                sigma2_reflect = np.pad(sigma2, (len(blow) - 1, 0), mode="reflect")
-
-                ycorr = np.correlate(sigma2_reflect, Bcorr, mode="valid") # used convolve in a earlier version, should make no difference as Bcorr is symmetric
-                Ulow = toeplitz(ycorr)
-
-        xlow, _ = lfilter(blow, 1.0, y, zi = y[0] * lfilter_zi(blow, 1.0))
-
-    else: # if blow is not provided
-        if isinstance(sigma2, float):
-            Ulow = np.eye(Ntheta) * sigma2
-
-        elif isinstance(sigma2, np.ndarray):
-
-            if kind == "diag":
-                # V needs to be extended to cover Ntheta timesteps more into the past
-                sigma2_extended = np.append(sigma2[0] * np.ones((Ntheta-1)), sigma2)
-
-                # Ulow is to be sliced from V, see below
-                V = np.diag(sigma2_extended) #  this is not Ulow, same thing as in the case of a provided blow (see above)
-
-            elif kind == "corr":
-                Ulow = toeplitz(trimOrPad(sigma2, Ntheta))
-
-        xlow = y
-
-    # apply FIR filter to calculate best estimate in accordance with GUM
-    x, _ = lfilter(theta, 1.0, xlow, zi=xlow[0] * lfilter_zi(theta, 1.0))
-    x = np.roll(x,-int(shift))
-
-    # add dimension to theta, otherwise transpose won't work
-    if len(theta.shape)==1:
-        theta = theta[:, np.newaxis]
-
-    # handle diag-case, where Ulow needs to be sliced from V
-    if kind == "diag":
-        # UncCov needs to be calculated inside in its own for-loop
-        # V has dimension (len(sigma2) + Ntheta) * (len(sigma2) + Ntheta) --> slice a fitting Ulow of dimension (Ntheta x Ntheta)
-        UncCov = np.zeros((len(sigma2)))
-
-        for k in range(len(sigma2)):
-            Ulow = V[k:k+Ntheta,k:k+Ntheta]
-            UncCov[k] = np.squeeze(theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta))))  # static part of uncertainty
-
-    else:
-        UncCov = theta.T.dot(Ulow.dot(theta)) + np.abs(np.trace(Ulow.dot(Utheta)))      # static part of uncertainty
-
-    unc = np.zeros_like(y)
-    for m in range(Ntheta,len(xlow)):
-        XL = xlow[m:m-Ntheta:-1, np.newaxis]  # extract necessary part from input signal
-        unc[m] = XL.T.dot(Utheta.dot(XL))     # apply formula from paper
-    ux = np.sqrt(np.abs(UncCov + unc))
-    ux = np.roll(ux,-int(shift))              # correct for delay
-
-    return x, ux.flatten()                    # flatten in case that we still have 2D array
+        if return_full_covariance:
+            return x, Ux
+        else:
+            return x, np.sqrt(np.abs(np.diag(Ux)))
 
 
 def IIRuncFilter(x, noise, b, a, Uab):

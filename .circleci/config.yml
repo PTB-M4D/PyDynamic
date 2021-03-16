@@ -5,214 +5,270 @@
 version: 2.1
 
 executors:
+  # Define a parameterized executor which accepts two parameters to choose the python
+  # version which will be used for the docker image and the tox actions.
   tester:
+    working_directory: ~/repo
+    parameters:
+      tag:
+        type: string
+        default: "3.8"
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:<< parameters.tag >>
+  # Define the executor for the Python semantic release.
   publisher:
+    working_directory: ~/repo
+    parameters:
+      tag:
+        type: string
+        default: "3.8"
+      pyenv:
+        type: string
+        default: "py38"
     docker:
-      - image: circleci/python:3.8
+      - image: circleci/python:<< parameters.tag >>
+    environment:
+      PYENV: << parameters.pyenv >>
+
+commands:
+  # Reusable command to prepare the environment for testing.
+  create_folders_and_venv:
+    description: "Prepare everything."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
+    # Checkout code.
+    - checkout
+    # Create test-result folder.
+    - run:
+        name: Create test result folder
+        command: |
+          mkdir test-results
+
+    # Create PyDynamic virtual environment.
+    - run:
+        name: Create virtual environment
+        command: |
+          python3 -m venv << parameters.pyenv >>
+          source << parameters.pyenv >>/bin/activate
+          pip install --upgrade pip setuptools
+
+  # Reusable command to install production dependencies.
+  install__production_deps:
+    description: "Install production dependencies."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
+
+    # Install dependencies.
+    - run:
+        name: Install production dependencies
+        command: |
+          source << parameters.pyenv >>/bin/activate
+          pip install -r requirements/requirements-<< parameters.pyenv >>.txt
+
+  # Reusable command to install development dependencies.
+  install__development_deps:
+    description: "Install development dependencies."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
+
+    # Install dependencies.
+    - run:
+        name: Install development dependencies
+        command: |
+          source << parameters.pyenv >>/bin/activate
+          pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
+
+  # Reusable command to conduct actual testing.
+  tox:
+    description: "Perform tox testing."
+    parameters:
+      pyenv:
+        type: string
+    steps:
+
+    # Perform tox testing.
+    - run:
+        name: Perform tox testing
+        command: |
+          source << parameters.pyenv >>/bin/activate
+          tox -e << parameters.pyenv >> | tee --append test-results/pytest.log
+
+  # Reusable command to store the previously generated test results.
+  store_results:
+    description: "Store test results and artifacts."
+    parameters:
+      pyenv:
+        type: string
+    steps:
+    # Store test results.
+    - store_artifacts:
+        path: test-results
+        destination: test-results
+
+    - store_test_results:
+        path: test-results
 
 workflows:
   # Create workflow for testing and deploying PyDynamic.
   test_and_deploy:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
-      - test
-      - install
-      - deploy:
-          # Create 'deploy' job to create a release and publish it on GitHub,
-          # Zenodo and PyPI.org.
+      - test:
+          name: "test_python3.6"
+          tag: "3.6"
+          pyenv: "py36"
+      - test:
+          name: "test_python3.7"
+          tag: "3.7"
+          pyenv: "py37"
+          send_cov: true
+      - test:
+          name: "test_python3.8"
+          tag: "3.8"
+          pyenv: "py38"
+      - preview_release:
+          # Test the 'release' job to avoid trouble when Pull Requests get merged and
+          # to preview publishing actions and the new changelog.
           requires:
-              - test
-              - install
-          filters:
-              branches:
-                # This assures the job only being triggered on branch master.
-                only: /master/
-      - test_deploy:
-          # Test the 'deploy' job to avoid trouble when Pull Requets get merged.
+            - test_python3.6
+            - test_python3.7
+            - test_python3.8
+      - confirm_previewed_release_actions:
+          # This job allows for checking that the release we will create in the
+          # next step actually is the desired release, by observing the result of
+          # preview_release.
+          type: approval
           requires:
-              - test
-              - install
+            - preview_release
           filters:
-              branches:
-                # This assures the job is not triggered on branch master, where the
-                # `deploy` job itself will be triggered. `test_deploy` is basically
-                # `deploy` with the `noop` parameter for `semantic-release` to
-                # trigger a dry-run.
-                ignore: /master/
+            branches:
+              # This assures the job only being triggered on branch master.
+              only: /master/
+      - release:
+          # Job to potentially create a release based on python-semantic-release's
+          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
+          # approval in the previous step, which is only triggered on branch master,
+          # thus this job here is triggered only on master as well.
+          context: pypi.org publishing for PyDynamic
+          requires:
+            - confirm_previewed_release_actions
+
 jobs:
+
+  # Define one 'test' job with parameters to deal with all desired cases. The
+  # reason for this is the desire to ensure the following for all supported Python
+  # versions referring to the docs:
+  #
+  # - all tests are guaranteed to pass
+  # - PyDynamic with respect to its `setup.py` successfully installs
+  #
+  # Additionally we want to create one coverage report during all these tests (which are
+  # of course the same for all versions).
   test:
-    executor: tester
+    # Define all parameters, where 'tag' is used for the docker image and 'pyenv' is
+    # the string which is used in tox to identify the current Python version. We reuse
+    # this variable basically everywhere we deal with the virtual environment.
+    # 'send_cov' is the conditional for either sending the produced coverage report
+    # to codecov or not.
+    parameters:
+      tag:
+        type: string
+        default: "3.8"
+      pyenv:
+        type: string
+        default: "py38"
+      send_cov:
+        type: boolean
+        default: false
 
-    working_directory: ~/repo
+    # Specify the executor and hand over the docker image tag parameter.
+    executor:
+      name: tester
+      tag: << parameters.tag >>
+
+    # Specify the steps to execute during this test jobs.
+    steps:
+      - create_folders_and_venv:
+          pyenv: << parameters.pyenv >>
+      - install__production_deps:
+          pyenv: << parameters.pyenv >>
+      - install__development_deps:
+          pyenv: << parameters.pyenv >>
+      - tox:
+          pyenv: << parameters.pyenv >>
+      - store_results:
+          pyenv: << parameters.pyenv >>
+
+      # Upload coverage report if the according parameter is set to `true`.
+      - when:
+          condition: << parameters.send_cov >>
+          steps:
+            - run:
+                name: Upload coverage report
+                command: |
+                  source << parameters.pyenv >>/bin/activate
+                  bash <(curl -s https://codecov.io/bash)
+
+  release:
+    executor:
+      name: publisher
 
     steps:
-      # Checkout code.
-      - checkout
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install__development_deps:
+          pyenv: ${PYENV}
 
-      # Create folder for test results.
-      - run:
-          name: Create test result folder
-          command: |
-            mkdir test-reports
-
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements/requirements.txt" }}
-            # Fallback to using the latest cache if no exact match is found.
-            - v1-dependencies-
-
-      # Install dependencies and Codecov reporter if necessary.
-      - run:
-          name: Install dependencies
-          command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
-            pip install -r requirements/dev-requirements.txt
-
-      - save_cache:
-          key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
-          paths:
-            - ./test_env
-
-      # Run tests with coverage report and upload results to Codecov!
-      - run:
-          name: Run tests
-          command: |
-            source venv/bin/activate
-            pytest -v --junitxml=test-reports/pytest.xml \
-            --cov=PyDynamic/ > test-reports/pytest.log
-
-      # Upload coverage report.
-      - run:
-          name: Upload coverage report
-          command: |
-            source venv/bin/activate
-            bash <(curl -s https://codecov.io/bash)
-
-      # Store test results.
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
-
-      - store_test_results:
-          path: test-reports
-
-  install:
-    executor: tester
-
-    working_directory: ~/repo
-
-    steps:
-      # Checkout code.
-      - checkout
-
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements/requirements.txt" }}
-            # Fallback to using the latest cache if no exact match is found.
-            - v1-dependencies-
-
-      # Install dependencies and Codecov reporter if necessary.
-      - run:
-          name: Install dependencies
-          command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
-
-      - save_cache:
-          paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements/requirements.txt" }}
-
-      # Install PyDynamic.
-      - run:
-          name: Install PyDynamic
-          command: |
-            source venv/bin/activate
-            python3 setup.py install
-
-  deploy:
-    executor: publisher
-
-    working_directory: ~/repo
-
-    steps:
-      # Checkout code.
-      - checkout
-
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            # Specify the unique identifier for the cache.
-            - publisher-dependencies
-
-      # Install dependencies.
-      - run:
-          name: Install python dependencies
-          command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install python-semantic-release
-
-      - save_cache:
-          key: publisher-dependencies
-          paths:
-            - ./venv
-
-      # Publish it!
+      # Publish it, if there is anything to publish!
       - run:
           name: Run semantic-release publish
           command: |
-            source venv/bin/activate
+            source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
 
-  test_deploy:
-    executor: publisher
-
-    working_directory: ~/repo
+  preview_release:
+    executor:
+      name: publisher
 
     steps:
-      # Checkout code.
-      - checkout
+      - create_folders_and_venv:
+          pyenv: ${PYENV}
+      - install__production_deps:
+          pyenv: ${PYENV}
+      - install__development_deps:
+          pyenv: ${PYENV}
 
-      # Download and cache dependencies.
-      - restore_cache:
-          keys:
-            # Specify the unique identifier for the cache.
-            - publisher-dependencies-{{ checksum "requirements/requirements.txt" }}
-
-      # Install dependencies.
+      # Fake publish, just to make sure everything works after merging a PR and
+      # before actual release jos run.
       - run:
-          name: Install python dependencies
+          name: Preview python-semantic-release actions
           command: |
-            python3 -m venv venv
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
-            pip install python-semantic-release
-
-      - save_cache:
-          key: publisher-dependencies-{{ checksum "requirements/requirements.txt" }}
-          paths:
-            - ./venv
-
-      # Pretend to publish, just to make sure everything works after merging those PR.
-      - run:
-          name: Run semantic-release publish
-          command: |
-            source venv/bin/activate
+            unset CIRCLE_PULL_REQUEST CIRCLE_PULL_REQUESTS CI_PULL_REQUEST \
+              CI_PULL_REQUESTS
+            export CIRCLE_BRANCH=master
+            source ${PYENV}/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            export CIRCLE_BRANCH=master
+            echo "
+            The changelog of the next release will contain:
+            "
+            semantic-release --unreleased changelog
+            echo "
+            -----------------------------------------------------------
+
+            python-semantic-release would perform the following actions:
+            "
             semantic-release --noop publish
