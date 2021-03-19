@@ -80,7 +80,7 @@ def test_convolution(input_1, input_2, mode):
     if mode in numpy_modes:
         y_ref = np.convolve(input_1[0], input_2[0], mode=mode)
     elif mode in scipy_modes:
-        y_ref = sn.convolve(input_1[0], input_2[0], mode=mode)
+        y_ref = sn.convolve1d(input_1[0], input_2[0], mode=mode)
     else:
         raise ValueError(f"Unsupported Mode <{mode}>")
 
@@ -103,14 +103,14 @@ def test_convolution_monte_carlo(input_1, input_2, mode):
 
     # Monte Carlo simulation
     mc_results = []
-    n_runs = 200000
+    n_runs = 20000
     XX1 = np.random.multivariate_normal(*input_1, size=n_runs)
     XX2 = np.random.multivariate_normal(*input_2, size=n_runs)
     for x1, x2 in zip(XX1, XX2):
         if mode in numpy_modes:
             conv = np.convolve(x1, x2, mode=mode)
         elif mode in scipy_modes:
-            conv = sn.convolve(x1, x2, mode=mode)
+            conv = sn.convolve1d(x1, x2, mode=mode)
         else:
             raise ValueError(f"Unsupported Mode <{mode}>")
         mc_results.append(conv)
@@ -119,16 +119,21 @@ def test_convolution_monte_carlo(input_1, input_2, mode):
     Uy_mc = np.cov(mc_results, rowvar=False)
 
     # HACK: for visualization during debugging
-    import matplotlib.pyplot as plt
-    # fig, ax = plt.subplots(nrows=1, ncols=3)
+    # import matplotlib.pyplot as plt
+    # fig, ax = plt.subplots(nrows=1, ncols=4)
+    # _min = min(Uy.min(), Uy_mc.min())
+    # _max = max(Uy.max(), Uy_mc.max())
     # ax[0].plot(y, label="fir")
     # ax[0].plot(y_mc, label="mc")
     # ax[0].set_title("mode: {0}, x1: {1}, x2: {2}".format(mode, len(x1), len(x2)))
     # ax[0].legend()
-    # ax[1].imshow(Uy)
+    # ax[1].imshow(Uy, vmin=_min, vmax=_max)
     # ax[1].set_title("PyDynamic")
-    # ax[2].imshow(Uy_mc)
+    # ax[2].imshow(Uy_mc, vmin=_min, vmax=_max)
     # ax[2].set_title("numpy MC")
+    # img = ax[3].imshow(np.log(np.abs(Uy-Uy_mc)))
+    # ax[3].set_title("log(abs(diff))")
+    # fig.colorbar(img, ax=ax[3])
     # plt.show()
     # /HACK
 

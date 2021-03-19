@@ -186,29 +186,14 @@ def _pad_covariance(U, n_prepend=0, n_append=0, mode="edge"):
         if mode == "zero":
             U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="constant", constant_values=0.0)
 
-        elif mode in ["stationary", "symmetric", "reflect"]:
-            
-            # prepend
-            c = np.r_[U[:, 0], np.zeros(n_prepend)]
-            r = np.r_[U[0, :], np.zeros(n_prepend)]
-            U_prepended = toeplitz(c, r)
-            U_prepended[n_prepend:, n_prepend:] = U
+        elif mode in "symmetric":  # dcba|abcd|dcba
+            U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="symmetric")
 
-            # append
-            c = np.r_[np.zeros(n_append), U_prepended[:, -1]][::-1]
-            r = np.r_[np.zeros(n_append), U_prepended[-1, :]][::-1]
-            U_adjusted = toeplitz(c, r)
-            U_adjusted[:-n_append, :-n_append] = U_prepended
+        elif mode == "reflect":  # dcb|abcd|cba
+            U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="reflect")
 
-            # mirror if necessary
-            if mode in "symmetric":  # dcba|abcd|dcba
-                U_adjusted[:n_prepend,:n_prepend] = U[:n_prepend,:n_prepend][::-1,::-1]
-                U_adjusted[-n_append:, -n_append:] = U[-n_append:, -n_append:][::-1,::-1]
-
-            # reflect if necessary
-            elif mode in "reflect":  # dcb|abcd|cba
-                U_adjusted[:n_prepend+1,:n_prepend+1] = U[:n_prepend+1,:n_prepend+1][::-1,::-1]
-                U_adjusted[-n_append-1:, -n_append-1:] = U[-n_append-1:, -n_append-1:][::-1,::-1]
+        elif mode == "stationary":
+            U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="edge")
 
         else:
             raise ValueError("_pad_covariance: Mode \"{MODE}\" is not supported.".format(MODE=mode))
