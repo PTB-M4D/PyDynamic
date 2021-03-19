@@ -73,7 +73,10 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         # append len(b)-1 zeros to x1/U1
         pad_len = len(x2)-1
         x1_mod = np.pad(x1, (0, pad_len), mode="constant", constant_values=0)
-        U1_mod = _pad_covariance(U1, 0, pad_len, mode="zero")
+        if isinstance(U1, np.ndarray):
+            U1_mod = np.pad(U1, ((0, pad_len), (0, pad_len)), mode="constant", constant_values=0)
+        else:
+            U1_mod = None
 
         # apply _fir_filter
         y, Uy = _fir_filter(x=x1_mod, theta=x2, Ux=U1_mod, Utheta=U2, initial_conditions="zero")
@@ -86,8 +89,11 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         # append (len(x2)-1)//2 to x1
         pad_len = (len(x2)-1)//2
         x1_mod = np.pad(x1, (0, pad_len), mode="constant", constant_values=0)
-        U1_mod = _pad_covariance(U1, 0, pad_len, mode="zero")
-
+        if isinstance(U1, np.ndarray):
+            U1_mod = np.pad(U1, ((0, pad_len), (0, pad_len)), mode="constant", constant_values=0)
+        else:
+            U1_mod = None
+        
         # apply _fir_filter
         y, Uy = _fir_filter(x=x1_mod, theta=x2, Ux=U1_mod, Utheta=U2, initial_conditions="zero")
 
@@ -95,44 +101,26 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         conv = y[pad_len:]
         Uconv = Uy[pad_len:, pad_len:]
 
-    elif mode == "nearest":
+    elif mode in ["nearest", "reflect", "mirror"]:
+
+        # scipy.ndimage.convolve1d and numpy.pad use different (but overlapping) terminology
+        mode_translation = {
+            "nearest" : "edge",
+            "reflect" : "symmetric",
+            "mirror" : "reflect",
+        }
+        pad_mode = mode_translation[mode]
 
         # append (len(x2)-1)//2 to x1
         n1 = len(x1)
         n2 = len(x2)
         pad_len = (n2+1)//2
-        x1_mod = np.pad(x1, (pad_len, pad_len), mode="edge")
-        U1_mod = _pad_covariance(U1, pad_len, pad_len, mode="stationary")
-
-        # apply _fir_filter
-        y, Uy = _fir_filter(x=x1_mod, theta=x2, Ux=U1_mod, Utheta=U2, initial_conditions="zero")
-
-        # remove leading and trailing entries from output
-        conv = y[n2:n2+n1]
-        Uconv = Uy[n2:n2+n1, n2:n2+n1]
-
-    elif mode == "reflect":
-        # append (len(x2)-1)//2 to x1
-        n1 = len(x1)
-        n2 = len(x2)
-        pad_len = (n2+1)//2
-        x1_mod = np.pad(x1, (pad_len, pad_len), mode="symmetric")
-        U1_mod = _pad_covariance(U1, pad_len, pad_len, mode="symmetric")
-
-        # apply _fir_filter
-        y, Uy = _fir_filter(x=x1_mod, theta=x2, Ux=U1_mod, Utheta=U2, initial_conditions="zero")
-
-        # remove leading and trailing entries from output
-        conv = y[n2:n2+n1]
-        Uconv = Uy[n2:n2+n1, n2:n2+n1]
-
-    elif mode == "mirror":
-        # append (len(x2)-1)//2 to x1
-        n1 = len(x1)
-        n2 = len(x2)
-        pad_len = (n2+1)//2
-        x1_mod = np.pad(x1, (pad_len, pad_len), mode="reflect")
-        U1_mod = _pad_covariance(U1, pad_len, pad_len, mode="reflect")
+        x1_mod = np.pad(x1, (pad_len, pad_len), mode=pad_mode)
+        # only append, if U is an array (leave it as None)
+        if isinstance(U1, np.ndarray):
+            U1_mod = np.pad(U1, ((pad_len, pad_len), (pad_len, pad_len)), mode=pad_mode)
+        else:
+            U1_mod = None
 
         # apply _fir_filter
         y, Uy = _fir_filter(x=x1_mod, theta=x2, Ux=U1_mod, Utheta=U2, initial_conditions="zero")
@@ -145,60 +133,3 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         raise ValueError("convolve_unc: Mode \"{MODE}\" is not supported.".format(MODE=mode))
 
     return conv, Uconv
-
-
-def _pad_covariance(U, n_prepend=0, n_append=0, mode="edge"):
-    """
-        Pad (prepend and append) values to an existing covariance-matrix
-
-        Parameters
-        ----------
-        U : np.ndarray (N,N)
-            covariance matrix to be extended
-        n_prepend : int
-            how many diagonal elements to extend into the past
-        n_append : int
-            how many diagonal elements to extend into the future
-        mode : string, optional
-            - zero: assume zero uncertainty outside
-            - stationary: assume that diagonals are stationary before first value and after last value (aaaa|abcd|dddd)
-            - symmetric: mirrored along edge , unknown values in off-diagonals are filled by "stationary"-strategy (dcba|abcd|dcba)
-            - reflect: mirrored along edge, unknown values in off-diagonals are filled by "stationary"-strategy (dcb|abcd|cba)
-
-        Return
-        ------
-        U_adjusted : np.ndarray (N+n_prepend+n_append, N+n_prepend+n_append)
-            The padded covariance matrix according to mode
-        
-
-        Note: 
-        The terminology of boundary behavior is not consistent across this function, numpy.pad and scipy.ndimage.convolve1D:
-            - zero       <-> numpy constant  <-> scipy constant <-> 0000|abcd|0000
-            - stationary <-> numpy edge      <-> scipy nearest  <-> aaaa|abcd|dddd
-            - symmetric  <-> numpy symmetric <-> scipy reflect  <-> dcba|abcd|dcba
-            - reflect    <-> numpy reflect   <-> scipy mirror   <->  dcb|abcd|cba
-
-    """
-
-    # only append, if U is an array (leave it as None)
-    if isinstance(U, np.ndarray):
-
-        if mode == "zero":
-            U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="constant", constant_values=0.0)
-
-        elif mode in "symmetric":  # dcba|abcd|dcba
-            U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="symmetric")
-
-        elif mode == "reflect":  # dcb|abcd|cba
-            U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="reflect")
-
-        elif mode == "stationary":
-            U_adjusted = np.pad(U, ((n_prepend, n_append), (n_prepend, n_append)), mode="edge")
-
-        else:
-            raise ValueError("_pad_covariance: Mode \"{MODE}\" is not supported.".format(MODE=mode))
-    
-    else:
-        U_adjusted = None
-
-    return U_adjusted
