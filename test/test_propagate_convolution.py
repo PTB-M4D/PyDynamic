@@ -4,6 +4,7 @@ Test PyDynamic.uncertainty.propagate_convolve
 
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.ndimage as sn
 import pytest
 from PyDynamic.uncertainty.propagate_convolution import convolve_unc
 
@@ -51,8 +52,18 @@ def valid_inputs(reduced_set=False):
     return valid_inputs
 
 
-def valid_modes():
-    return ["full", "valid", "same"]
+def valid_modes(kind="all"):
+    scipy_modes = ["nearest", "reflect", "mirror"]
+    numpy_modes = ["full", "valid", "same"]
+
+    if kind == "all":
+        return numpy_modes + scipy_modes
+    elif kind == "scipy":
+        return scipy_modes
+    elif kind == "numpy":
+        return numpy_modes
+    else:
+        return []
 
 
 @pytest.mark.parametrize("input_1", valid_inputs())
@@ -60,21 +71,23 @@ def valid_modes():
 @pytest.mark.parametrize("mode", valid_modes())
 def test_convolution(input_1, input_2, mode):
 
+    scipy_modes = valid_modes("scipy")
+    numpy_modes = valid_modes("numpy")
+
     # calculate the convolution of x1 and x2
     y, Uy = convolve_unc(*input_1, *input_2, mode)
-    y_numpy = np.convolve(input_1[0], input_2[0], mode=mode)
+
+    if mode in numpy_modes:
+        y_ref = np.convolve(input_1[0], input_2[0], mode=mode)
+    elif mode in scipy_modes:
+        y_ref = sn.convolve(input_1[0], input_2[0], mode=mode)
+    else:
+        raise ValueError(f"Unsupported Mode <{mode}>")
 
     # compare results
     assert len(y) == len(Uy)
-    assert len(y) == len(y_numpy)
-    assert np.allclose(y, y_numpy)
-
-    # visualize
-    # print(n1, n2, mode)
-    # plt.plot(y, label="PyDynamic")
-    # plt.plot(y_numpy, label="NumPy")
-    # plt.legend()
-    # plt.show()
+    assert len(y) == len(y_ref)
+    assert np.allclose(y, y_ref)
 
 
 @pytest.mark.parametrize("input_1", valid_inputs(reduced_set=True))
@@ -82,23 +95,31 @@ def test_convolution(input_1, input_2, mode):
 @pytest.mark.parametrize("mode", valid_modes())
 def test_convolution_monte_carlo(input_1, input_2, mode):
 
+    scipy_modes = valid_modes("scipy")
+    numpy_modes = valid_modes("numpy")
+
     # pydynamic calculation
     y, Uy = convolve_unc(*input_1, *input_2, mode)
 
     # Monte Carlo simulation
     mc_results = []
-    n_runs = 20000
+    n_runs = 200000
     XX1 = np.random.multivariate_normal(*input_1, size=n_runs)
     XX2 = np.random.multivariate_normal(*input_2, size=n_runs)
     for x1, x2 in zip(XX1, XX2):
-        conv = np.convolve(x1, x2, mode=mode)
-        mc_results.append(conv)    
+        if mode in numpy_modes:
+            conv = np.convolve(x1, x2, mode=mode)
+        elif mode in scipy_modes:
+            conv = sn.convolve(x1, x2, mode=mode)
+        else:
+            raise ValueError(f"Unsupported Mode <{mode}>")
+        mc_results.append(conv)
 
     y_mc = np.mean(mc_results, axis=0)
     Uy_mc = np.cov(mc_results, rowvar=False)
-    
+
     # HACK: for visualization during debugging
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
     # fig, ax = plt.subplots(nrows=1, ncols=3)
     # ax[0].plot(y, label="fir")
     # ax[0].plot(y_mc, label="mc")
