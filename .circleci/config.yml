@@ -158,7 +158,9 @@ workflows:
           # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
           # approval in the previous step, which is only triggered on branch master,
           # thus this job here is triggered only on master as well.
-          context: pypi.org publishing for PyDynamic
+          context:
+            - pypi.org publishing for PyDynamic
+            - GitHub pushes to BjoernLudwigPTB's public_repos
           requires:
             - confirm_previewed_release_actions
 
