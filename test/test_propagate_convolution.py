@@ -1,11 +1,10 @@
-"""
-Test PyDynamic.uncertainty.propagate_convolve 
-"""
+"""Test PyDynamic.uncertainty.propagate_convolve"""
 
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy.ndimage as sn
 import pytest
+import scipy.ndimage as sn
+from hypothesis import assume, given, strategies as hst
+
 from PyDynamic.uncertainty.propagate_convolution import convolve_unc
 
 
@@ -139,3 +138,14 @@ def test_convolution_monte_carlo(input_1, input_2, mode):
 
     assert np.allclose(y, y_mc, rtol=1e-1, atol=1e-1)
     assert np.allclose(Uy, Uy_mc, rtol=1e-1, atol=1e-1)
+
+
+@pytest.mark.parametrize("input_1", valid_inputs(reduced_set=True))
+@pytest.mark.parametrize("input_2", valid_inputs(reduced_set=True))
+@given(hst.text())
+def test_convolution(input_1, input_2, mode):
+    set_of_valid_modes = set(valid_modes())
+    assume(mode not in set_of_valid_modes)
+
+    with pytest.raises(ValueError):
+        convolve_unc(*input_1, *input_2, mode)
