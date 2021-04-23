@@ -27,12 +27,12 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         first input signal
     U1 : np.ndarray, (N, N)
         full 2D-covariance matrix associated with x1
-        if the signal is fully certain, use `U1 = None` (default) to make use of more efficient calculations.
+        if the signal is fully certain, use `U1 = None` to make use of more efficient calculations.
     x2 : np.ndarray, (M,)
         second input signal
     U2 : np.ndarray, (M, M)
         full 2D-covariance matrix associated with x2
-        if the signal is fully certain, use `U2 = None` (default) to make use of more efficient calculations.
+        if the signal is fully certain, use `U2 = None` to make use of more efficient calculations.
     mode : str, optional
         :func:`numpy.convolve`-modes:
 
