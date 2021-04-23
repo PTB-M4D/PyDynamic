@@ -80,8 +80,6 @@ def test_convolution(input_1, input_2, mode):
         y_ref = np.convolve(input_1[0], input_2[0], mode=mode)
     elif mode in scipy_modes:
         y_ref = sn.convolve1d(input_1[0], input_2[0], mode=mode)
-    else:
-        raise ValueError(f"Unsupported Mode <{mode}>")
 
     # compare results
     assert len(y) == len(Uy)
@@ -110,8 +108,6 @@ def test_convolution_monte_carlo(input_1, input_2, mode):
             conv = np.convolve(x1, x2, mode=mode)
         elif mode in scipy_modes:
             conv = sn.convolve1d(x1, x2, mode=mode)
-        else:
-            raise ValueError(f"Unsupported Mode <{mode}>")
         mc_results.append(conv)
 
     y_mc = np.mean(mc_results, axis=0)
