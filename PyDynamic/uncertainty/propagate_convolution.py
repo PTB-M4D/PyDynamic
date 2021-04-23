@@ -55,9 +55,10 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
 
     References
     ----------
-    .. seealso:: :mod:`numpy.convolve`
-    .. seealso:: :mod:`scipy.ndimage.convolve1d`
-    .. seealso:: :mod:`PyDynamic.uncertainty.propagate_filter._fir_filter`
+    .. seealso::
+        :func:`numpy.convolve`
+        :func:`scipy.ndimage.convolve1d`
+        :func:`PyDynamic.uncertainty.propagate_filter._fir_filter`
     """
 
     # if a numpy-mode is chosen, x1 is expected to be the longer signal
