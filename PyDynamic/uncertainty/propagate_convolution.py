@@ -64,13 +64,8 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
     # if a numpy-mode is chosen, x1 is expected to be the longer signal
     # remember that pure convolution is commutative
     if len(x1) < len(x2) and mode in ["valid", "full", "same"]:
-        tmp = x1
-        x1 = x2
-        x2 = tmp
-
-        tmp = U1
-        U1 = U2
-        U2 = tmp
+        x1, x2 = x2, x1
+        U1, U2 = U2, U1
 
     # actual computation
     if mode == "valid":
