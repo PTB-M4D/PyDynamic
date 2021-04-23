@@ -34,11 +34,14 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         full 2D-covariance matrix associated with x2
         if the signal is fully certain, use `U2 = None` (default) to make use of more efficient calculations.
     mode : str, optional
-        numpy.convolve-modes:
+        :func:`numpy.convolve`-modes:
+
         - full:  len(y) == N+M-1 (default)
         - valid: len(y) == max(M, N) - min(M, N) + 1
         - same:  len(y) == max(M, N) (value+covariance are padded with zeros)
-        scipy.ndimage.convolve1d-modes:
+        
+        :func:`scipy.ndimage.convolve1d`-modes:
+
         - nearest: len(y) == N (value+covariance are padded with by stationary assumption)
         - reflect:  len(y) == N
         - mirror:   len(y) == N
