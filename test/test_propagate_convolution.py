@@ -52,17 +52,17 @@ def valid_inputs(reduced_set=False):
 
 
 def valid_modes(kind="all"):
-    scipy_modes = ["nearest", "reflect", "mirror"]
-    numpy_modes = ["full", "valid", "same"]
+    scipy_modes = {"nearest", "reflect", "mirror"}
+    numpy_modes = {"full", "valid", "same"}
 
     if kind == "all":
-        return numpy_modes + scipy_modes
+        return numpy_modes.union(scipy_modes)
     elif kind == "scipy":
         return scipy_modes
     elif kind == "numpy":
         return numpy_modes
     else:
-        return []
+        return set()
 
 
 @pytest.mark.parametrize("input_1", valid_inputs())
