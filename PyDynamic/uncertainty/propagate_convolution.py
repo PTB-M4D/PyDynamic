@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+The convolution operation is a common operation in signal and data
+processing. Convolving signals is mathematically similar to a filter
+application. 
+
+This module contains the following function:
+* :func:`convolve_unc`: Convolution with uncertainty propagation based on FIR-filter
+"""
 
 import numpy as np
 
