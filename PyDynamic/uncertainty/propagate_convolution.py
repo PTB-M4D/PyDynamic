@@ -147,8 +147,6 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         Uconv = Uy[n2 : n2 + n1, n2 : n2 + n1]
 
     else:
-        raise ValueError(
-            'convolve_unc: Mode "{MODE}" is not supported.'.format(MODE=mode)
-        )
+        raise ValueError(f'convolve_unc: Mode "{mode}" is not supported.')
 
     return conv, Uconv
