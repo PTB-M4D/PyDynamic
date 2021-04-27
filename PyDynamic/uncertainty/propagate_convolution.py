@@ -74,12 +74,12 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         # apply _fir_filter directly
         y, Uy = _fir_filter(x=x1, theta=x2, Ux=U1, Utheta=U2, initial_conditions="zero")
 
-        # remove first len(x2)-1 entries from output
+        # compensate boundary adjustments from _fir_filter
         conv = y[len(x2) - 1 :]
         Uconv = Uy[len(x2) - 1 :, len(x2) - 1 :]
 
     elif mode == "full":
-        # append len(b)-1 zeros to x1/U1
+        # append zeros to adapt to _fir_filter mechanism
         pad_len = len(x2) - 1
         x1_mod = np.pad(x1, (0, pad_len), mode="constant", constant_values=0)
         if isinstance(U1, np.ndarray):
@@ -99,7 +99,7 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         Uconv = Uy
 
     elif mode == "same":
-        # append (len(x2)-1)//2 to x1
+        # append zeros to adapt to _fir_filter mechanism
         pad_len = (len(x2) - 1) // 2
         x1_mod = np.pad(x1, (0, pad_len), mode="constant", constant_values=0)
         if isinstance(U1, np.ndarray):
@@ -114,7 +114,7 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
             x=x1_mod, theta=x2, Ux=U1_mod, Utheta=U2, initial_conditions="zero"
         )
 
-        # remove first (len(x2)-1)//2 entries from output
+        # compensate boundary adjustments from _fir_filter
         conv = y[pad_len:]
         Uconv = Uy[pad_len:, pad_len:]
 
@@ -128,12 +128,12 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         }
         pad_mode = mode_translation[mode]
 
-        # append (len(x2)-1)//2 to x1
+        # prepend and append to x1 and U1 to get requested boundary effect
         n1 = len(x1)
         n2 = len(x2)
         pad_len = (n2 + 1) // 2
         x1_mod = np.pad(x1, (pad_len, pad_len), mode=pad_mode)
-        # only append, if U is an array (leave it as None)
+        # we assume that U1 is an array or None
         if isinstance(U1, np.ndarray):
             U1_mod = np.pad(U1, ((pad_len, pad_len), (pad_len, pad_len)), mode=pad_mode)
         else:
@@ -144,7 +144,7 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
             x=x1_mod, theta=x2, Ux=U1_mod, Utheta=U2, initial_conditions="zero"
         )
 
-        # remove leading and trailing entries from output
+        # compensate boundary adjustments from _fir_filter
         conv = y[n2 : n2 + n1]
         Uconv = Uy[n2 : n2 + n1, n2 : n2 + n1]
 
