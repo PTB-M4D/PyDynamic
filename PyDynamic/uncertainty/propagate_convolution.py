@@ -20,8 +20,7 @@ __all__ = ["convolve_unc"]
 def convolve_unc(x1, U1, x2, U2, mode="full"):
     """
     An implementation of the discrete convolution of two signals with uncertainty propagation.
-    The code builds on PyDynamic.uncertainty._fir_filter, as convolution and filter application
-    are mathematically nearly identical. However, boundary effects need to be taken into account.
+    It supports the convolution modes of :func:`numpy.convolve` and :func:`scipy.ndimage.convolve1d`.
 
     Parameters
     ----------
@@ -29,19 +28,19 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         first input signal
     U1 : np.ndarray, (N, N)
         full 2D-covariance matrix associated with x1
-        if the signal is fully certain, use `U1 = None` to make use of more efficient calculations.
+        if the signal is fully certain, use ``U1 = None`` to make use of more efficient calculations.
     x2 : np.ndarray, (M,)
         second input signal
     U2 : np.ndarray, (M, M)
         full 2D-covariance matrix associated with x2
-        if the signal is fully certain, use `U2 = None` to make use of more efficient calculations.
+        if the signal is fully certain, use ``U2 = None`` to make use of more efficient calculations.
     mode : str, optional
         :func:`numpy.convolve`-modes:
 
         - full:  len(y) == N+M-1 (default)
         - valid: len(y) == max(M, N) - min(M, N) + 1
         - same:  len(y) == max(M, N) (value+covariance are padded with zeros)
-        
+
         :func:`scipy.ndimage.convolve1d`-modes:
 
         - nearest: len(y) == N (value+covariance are padded with by stationary assumption)
@@ -50,9 +49,9 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
 
     Returns
     -------
-    y : np.ndarray
+    conv : np.ndarray
         convoluted output signal
-    Uy : np.ndarray
+    Uconv : np.ndarray
         full 2D-covariance matrix of y
 
     References
@@ -60,7 +59,6 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
     .. seealso::
         :func:`numpy.convolve`
         :func:`scipy.ndimage.convolve1d`
-        :func:`PyDynamic.uncertainty.propagate_filter._fir_filter`
     """
 
     # if a numpy-mode is chosen, x1 is expected to be the longer signal
