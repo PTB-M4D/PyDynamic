@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The convolution operation is a common operation in signal and data
 processing. Convolving signals is mathematically similar to a filter
