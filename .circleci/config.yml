@@ -113,9 +113,6 @@ commands:
   # Reusable command to store the previously generated test results.
   store_results:
     description: "Store test results and artifacts."
-    parameters:
-      pyenv:
-        type: string
     steps:
     # Store test results.
     - store_artifacts:
@@ -218,8 +215,7 @@ jobs:
           pyenv: << parameters.pyenv >>
       - tox:
           pyenv: << parameters.pyenv >>
-      - store_results:
-          pyenv: << parameters.pyenv >>
+      - store_results
 
       # Upload coverage report if the according parameter is set to `true`.
       - when:
@@ -295,8 +291,7 @@ jobs:
             conda activate PyDynamic_conda_env
             tox | tee --append test-results/pytest.log
 
-      - store_results:
-          pyenv: "py38"
+      - store_results
 
   release:
     executor:
