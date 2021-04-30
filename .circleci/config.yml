@@ -131,27 +131,27 @@ workflows:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
       - test:
-          name: "test_python3.6"
+          name: "test_python_py36"
           tag: "3.6"
           pyenv: "py36"
       - test:
-          name: "test_python3.7"
+          name: "test_python_py37"
           tag: "3.7"
           pyenv: "py37"
           send_cov: true
       - test:
-          name: "test_python3.8"
+          name: "test_python_py38"
           tag: "3.8"
           pyenv: "py38"
-      - test_conda3.8
+      - test_conda_py38
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
           requires:
-            - test_python3.6
-            - test_python3.7
-            - test_python3.8
-            - test_conda3.8
+            - test_python_py36
+            - test_python_py37
+            - test_python_py38
+            - test_conda_py38
       - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
@@ -241,7 +241,7 @@ jobs:
 
   # Define one 'test' job to run the test suite against the
   # installed dependencies from the environment.yml.
-  test_conda3.8:
+  test_conda_py38:
 
     executor: conda_tester
 
