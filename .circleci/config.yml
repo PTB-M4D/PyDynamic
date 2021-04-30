@@ -7,7 +7,7 @@ version: 2.1
 executors:
   # Define a parameterized executor which accepts two parameters to choose the python
   # version which will be used for the docker image and the tox actions.
-  tester:
+  venv_tester:
     working_directory: ~/repo
     parameters:
       tag:
@@ -15,6 +15,10 @@ executors:
         default: "3.8"
     docker:
       - image: circleci/python:<< parameters.tag >>
+  conda_tester:
+    working_directory: ~/repo
+    docker:
+      - image: cimg/base
   # Define the executor for the Python semantic release.
   publisher:
     working_directory: ~/repo
@@ -32,12 +36,8 @@ executors:
 
 commands:
   # Reusable command to prepare the environment for testing.
-  create_folders_and_venv:
-    description: "Prepare everything."
-    parameters:
-      pyenv:
-        type: string
-        default: "py38"
+  create_folders:
+    description: "Checkout code and prepare test results location."
     steps:
     # Checkout code.
     - checkout
@@ -47,6 +47,14 @@ commands:
         command: |
           mkdir test-results
 
+  # Reusable command to prepare the environment for testing.
+  create_venv:
+    description: "Prepare virtual environment."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
     # Create PyDynamic virtual environment.
     - run:
         name: Create virtual environment
@@ -56,7 +64,7 @@ commands:
           pip install --upgrade pip setuptools
 
   # Reusable command to install production dependencies.
-  install__production_deps:
+  install_production_deps:
     description: "Install production dependencies."
     parameters:
       pyenv:
@@ -72,7 +80,7 @@ commands:
           pip install -r requirements/requirements-<< parameters.pyenv >>.txt
 
   # Reusable command to install development dependencies.
-  install__development_deps:
+  install_development_deps:
     description: "Install development dependencies."
     parameters:
       pyenv:
@@ -135,6 +143,7 @@ workflows:
           name: "test_python3.8"
           tag: "3.8"
           pyenv: "py38"
+      - test_conda3.8
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
@@ -142,6 +151,7 @@ workflows:
             - test_python3.6
             - test_python3.7
             - test_python3.8
+            - test_conda3.8
       - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
@@ -194,16 +204,17 @@ jobs:
 
     # Specify the executor and hand over the docker image tag parameter.
     executor:
-      name: tester
+      name: venv_tester
       tag: << parameters.tag >>
 
     # Specify the steps to execute during this test jobs.
     steps:
-      - create_folders_and_venv:
+      - create_folders
+      - create_venv:
           pyenv: << parameters.pyenv >>
-      - install__production_deps:
+      - install_production_deps:
           pyenv: << parameters.pyenv >>
-      - install__development_deps:
+      - install_development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
           pyenv: << parameters.pyenv >>
@@ -218,18 +229,85 @@ jobs:
                 name: Upload coverage report
                 command: |
                   source << parameters.pyenv >>/bin/activate
-                  bash <(curl -s https://codecov.io/bash)
+                curl -s https://codecov.io/bash > codecov;
+                VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
+                for i in 1 256 512
+                do
+                  shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
+                  shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
+                done
+                chmod u+x codecov
+                ./codecov
+
+  # Define one 'test' job to run the test suite against the
+  # installed dependencies from the environment.yml.
+  test_conda3.8:
+
+    executor: conda_tester
+
+    steps:
+      - create_folders
+      - run:
+          name: Install Miniconda
+          command: |
+            wget "https://repo.anaconda.com/miniconda/\
+            Miniconda3-latest-Linux-x86_64.sh" -O $HOME/miniconda.sh
+            mkdir -p $HOME/.conda
+            bash $HOME/miniconda.sh -b -p /home/circleci/conda
+            source $HOME/conda/etc/profile.d/conda.sh
+            hash -r
+            conda config --set always_yes yes --set changeps1 no
+            conda update -q conda
+            echo 'export PATH=$HOME/conda/bin:$PATH' >> $BASH_ENV
+
+      # Download and cache dependencies.
+      - restore_cache:
+          keys:
+            # Specify the unique identifier for the cache.
+            - v1-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
+            # Fallback to using the latest cache if no exact match is found.
+            - v1-conda-dependencies-
+
+      # Create environment and install extra_requires dependencies manually.
+      - run:
+          name: Create or update environment
+          command: |
+            if [ -d "$HOME/conda/envs/" ]; then
+                conda env update --prune --file requirements/environment.yml
+            else
+                conda env create -f requirements/environment.yml
+            fi
+            source $HOME/conda/etc/profile.d/conda.sh
+            conda activate PyDynamic_conda_env
+            pip install -r requirements/dev-requirements.txt
+
+      - save_cache:
+          paths:
+            - /home/circleci/conda/envs/
+          key: >-
+            v1-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
+
+      # Run tests! We use pytest's test-runner.
+      - run:
+          name: Run tests
+          command: |
+            source $HOME/conda/etc/profile.d/conda.sh
+            conda activate PyDynamic_conda_env
+            tox | tee --append test-results/pytest.log
+
+      - store_test_artifacts_and_results
 
   release:
     executor:
       name: publisher
 
     steps:
-      - create_folders_and_venv:
+      - create_folders
+      - create_venv:
           pyenv: ${PYENV}
-      - install__production_deps:
+      - install_production_deps:
           pyenv: ${PYENV}
-      - install__development_deps:
+      - install_development_deps:
           pyenv: ${PYENV}
 
       # Publish it, if there is anything to publish!
@@ -246,7 +324,8 @@ jobs:
       name: publisher
 
     steps:
-      - create_folders_and_venv:
+      - create_folders
+      - create_venv:
           pyenv: ${PYENV}
       - install__production_deps:
           pyenv: ${PYENV}
