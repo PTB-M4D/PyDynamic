@@ -295,7 +295,8 @@ jobs:
             conda activate PyDynamic_conda_env
             tox | tee --append test-results/pytest.log
 
-      - store_results
+      - store_results:
+          pyenv: "py38"
 
   release:
     executor:
