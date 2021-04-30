@@ -323,9 +323,9 @@ jobs:
       - create_folders
       - create_venv:
           pyenv: ${PYENV}
-      - install__production_deps:
+      - install_production_deps:
           pyenv: ${PYENV}
-      - install__development_deps:
+      - install_development_deps:
           pyenv: ${PYENV}
 
       # Fake publish, just to make sure everything works after merging a PR and
