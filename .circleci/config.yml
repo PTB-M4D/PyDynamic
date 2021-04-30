@@ -295,7 +295,7 @@ jobs:
             conda activate PyDynamic_conda_env
             tox | tee --append test-results/pytest.log
 
-      - store_test_artifacts_and_results
+      - store_results
 
   release:
     executor:
