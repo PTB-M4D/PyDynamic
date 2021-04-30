@@ -18,7 +18,7 @@ executors:
   conda_tester:
     working_directory: ~/repo
     docker:
-      - image: cimg/base
+      - image: cimg/base:2021.04
   # Define the executor for the Python semantic release.
   publisher:
     working_directory: ~/repo
