@@ -322,7 +322,7 @@ def interp1d_unc(
                 C_sqr = np.square(C[interp_range])
 
                 # if at some point time-uncertainties are of interest, White2017
-                # already provides the formulas
+                # already provides the formulas (eq. (17))
 
                 # ut = np.zeros_like(t)
                 # ut_new = np.zeros_like(t_new)
@@ -336,7 +336,7 @@ def interp1d_unc(
                 # )
                 # uy_new[interp_range] = np.sqrt(a1 - a2 + a3)
 
-                # without consideration of time-uncertainty
+                # without consideration of time-uncertainty eq. (17) becomes
                 uy_new[interp_range] = np.sqrt(np.dot(C_sqr, np.square(uy)))
     else:
         raise NotImplementedError(
