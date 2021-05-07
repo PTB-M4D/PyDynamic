@@ -369,18 +369,18 @@ def interp1d_unc(
 
             # calculate sensitivity
             C[interp_range] = np.array([Fi(t_new[interp_range]) for Fi in F]).T
-            C2 = np.square(C[interp_range])
+            C_sqr = np.square(C[interp_range])
 
             # if at some point time-uncertainties are of interest, White2017 already provides the formulas
             # ut = np.zeros_like(t)
             # ut_new = np.zeros_like(t_new)
-            # a1 = np.dot(C2, np.square(uy))
-            # a2 = np.dot(C2, np.squeeze(np.square(interp_y._spline(t, nu=1))) * np.square(ut))
+            # a1 = np.dot(C_sqr, np.square(uy))
+            # a2 = np.dot(C_sqr, np.squeeze(np.square(interp_y._spline(t, nu=1))) * np.square(ut))
             # a3 = np.square(np.squeeze(interp_y._spline(t_new, nu=1))) * np.square(ut_new)
             # uy_new[interp_range] = np.sqrt(a1 - a2 + a3)
 
             # without consideration of time-uncertainty
-            uy_new[interp_range] = np.sqrt(np.dot(C2, np.square(uy)))
+            uy_new[interp_range] = np.sqrt(np.dot(C_sqr, np.square(uy)))
     else:
         raise NotImplementedError(
             "%s is unsupported yet. Let us know, that you need it." % kind
