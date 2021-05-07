@@ -345,17 +345,15 @@ def interp1d_unc(
 
             # Calculate the uncertainty by generating a spline of sensitivity 
             # coefficients. This procedure is described by eq. (19) of White2017.
-            F = []
+            F_is = []
             for i in range(len(t)):
-                tf = t
-                xf = np.zeros_like(t)
-                xf[i] = 1.0
-                f_tck = splrep(tf, xf, k=3)
-                Fi = BSpline(*f_tck)
-                F.append(Fi)
+                x_temp = np.zeros_like(t)
+                x_temp[i] = 1.0
+                F_i = BSpline(*splrep(t, x_temp, k=3))
+                F_is.append(F_i)
 
-            # calculate sensitivity
-            C[interp_range] = np.array([Fi(t_new[interp_range]) for Fi in F]).T
+            # Calculate sensitivity coefficients.
+            C[interp_range] = np.array([F_i(t_new[interp_range]) for F_i in F_is]).T
             C2 = np.square(C[interp_range])
 
             # if at some point time-uncertainties are of interest, White2017 already provides the formulas
