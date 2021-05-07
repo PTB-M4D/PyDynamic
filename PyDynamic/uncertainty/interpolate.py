@@ -342,19 +342,6 @@ def interp1d_unc(
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interp_range):
-            # This following section is taken mainly from scipy.interpolate.interp1d to
-            # determine the indices of the relevant original timestamps (or frequencies)
-            # just for the interpolation range.
-            # --------------------------------------------------------------------------
-            # 2. Find where in the original data, the values to interpolate
-            #    would be inserted.
-            #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
-            t_new_indices = np.searchsorted(t, t_new[interp_range])
-
-            # 3. Clip x_new_indices so that they are within the range of
-            #    self.x indices and at least 1.  Removes mis-interpolation
-            #    of x_new[n] = x[0]
-            t_new_indices = t_new_indices.clip(1, len(t) - 1).astype(int)
 
             # Calculate the uncertainty by generating a spline of sensitivity 
             # coefficients. This procedure is described by eq. (19) of White2017.
