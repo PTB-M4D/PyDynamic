@@ -241,10 +241,10 @@ def interp1d_unc(
         if np.any(interp_range):
 
             if kind == "linear":
-                # This following section is taken mainly from scipy.interpolate.interp1d to
-                # determine the indices of the relevant original timestamps (or frequencies)
-                # just for the interpolation range.
-                # --------------------------------------------------------------------------
+                # This following section is taken mainly from
+                # scipy.interpolate.interp1d to determine the indices of the relevant
+                # original timestamps (or frequencies) just for the interpolation range.
+                # ----------------------------------------------------------------------
                 # 2. Find where in the original data, the values to interpolate
                 #    would be inserted.
                 #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
@@ -261,7 +261,7 @@ def interp1d_unc(
 
                 t_lo = t[lo]
                 t_hi = t[hi]
-                # --------------------------------------------------------------------------
+                # ----------------------------------------------------------------------
                 if returnC:
                     # Prepare the sensitivity coefficients, which in the first place
                     # inside the interpolation range are the Lagrangian polynomials. We
@@ -285,20 +285,21 @@ def interp1d_unc(
                             C_row[next(lo_it)] = next(L_1_it)
                             C_row[next(hi_it)] = next(L_2_it)
                     # Compute the standard uncertainties avoiding to build the sparse
-                    # covariance matrix diag(u_y^2). We reduce the equation C diag(u_y^2)
-                    # C^T for now to a more efficient calculation, which will work as
-                    # long as we deal with uncorrelated values, so that all information
-                    # can be found on the diagonal of the covariance and thus the result
-                    # matrix.
+                    # covariance matrix diag(u_y^2). We reduce the equation C diag(
+                    # u_y^2) C^T for now to a more efficient calculation, which will
+                    # work as long as we deal with uncorrelated values, so that all
+                    # information can be found on the diagonal of the covariance and
+                    # thus the result matrix.
                     uy_new[interp_range] = np.sqrt(
                         np.sum(C[interp_range] ** 2 * uy ** 2, 1)
                     )
                 else:
-                    # Since we do not need the sensitivity matrix, we compute uncertainties
-                    # more efficient (although we are actually not so sure about this
-                    # anymore). The simplification of the equation by pulling out the
-                    # denominator, just works because we work with the squared Lagrangians.
-                    # Otherwise we would have to account for the summation order.
+                    # Since we do not need the sensitivity matrix, we compute
+                    # uncertainties more efficient (although we are actually not so
+                    # sure about this anymore). The simplification of the equation by
+                    # pulling out the denominator, just works because we work with
+                    # the squared Lagrangians. Otherwise we would have to account for
+                    # the summation order.
                     uy_prev_sqr = uy[lo] ** 2
                     uy_next_sqr = uy[hi] ** 2
                     uy_new[interp_range] = np.sqrt(
@@ -320,12 +321,19 @@ def interp1d_unc(
                 C[interp_range] = np.array([F_i(t_new[interp_range]) for F_i in F_is]).T
                 C_sqr = np.square(C[interp_range])
 
-                # if at some point time-uncertainties are of interest, White2017 already provides the formulas
+                # if at some point time-uncertainties are of interest, White2017
+                # already provides the formulas
+
                 # ut = np.zeros_like(t)
                 # ut_new = np.zeros_like(t_new)
                 # a1 = np.dot(C_sqr, np.square(uy))
-                # a2 = np.dot(C_sqr, np.squeeze(np.square(interp_y._spline(t, nu=1))) * np.square(ut))
-                # a3 = np.square(np.squeeze(interp_y._spline(t_new, nu=1))) * np.square(ut_new)
+                # a2 = np.dot(
+                #     C_sqr,
+                #     np.squeeze(np.square(interp_y._spline(t, nu=1))) * np.square(ut),
+                # )
+                # a3 = np.square(np.squeeze(interp_y._spline(t_new, nu=1))) * np.square(
+                #     ut_new
+                # )
                 # uy_new[interp_range] = np.sqrt(a1 - a2 + a3)
 
                 # without consideration of time-uncertainty
@@ -341,7 +349,7 @@ def interp1d_unc(
 
 
 def make_equidistant(t, y, uy, dt=5e-2, kind="linear"):
-    """ Interpolate non-equidistant time series to equidistant
+    """Interpolate non-equidistant time series to equidistant
 
     Interpolate measurement values and propagate uncertainties accordingly.
 
