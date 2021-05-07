@@ -81,6 +81,9 @@ def interp1d_unc(
               for both bounds as `below, above = fill_value, fill_value`.
             - If “extrapolate”, then points outside the data range will be set
               to the first or last element of the values.
+            - If cubic-interpolation, C2-continuity at the transition to the 
+              extrapolation-range is not guaranteed. This behavior might change
+              in future implementations, see issue #210 for details. 
 
             Both parameters `fill_value` and `fill_unc` should be
             provided to ensure desired behaviour in the extrapolation range.
