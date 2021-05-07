@@ -356,8 +356,8 @@ def interp1d_unc(
             #    of x_new[n] = x[0]
             t_new_indices = t_new_indices.clip(1, len(t) - 1).astype(int)
 
-            # 4. Calculate the uncertainty
-            # generate spline of sensitivities, this procedure is described by eq. (19) of White2017
+            # Calculate the uncertainty by generating a spline of sensitivity 
+            # coefficients. This procedure is described by eq. (19) of White2017.
             F = []
             for i in range(len(t)):
                 tf = t
