@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.9.0 (2021-05-11)
+### Feature
+* **interp1d_unc:** Add cubic bspline interpolation-kind ([`f0c6d19`](https://github.com/PTB-PSt1/PyDynamic/commit/f0c6d19bad71816f5c6d95803f734e77567931ea))
+
+### Documentation
+* **interp1d_unc:** Add example for kind = "cubic" ([`8c2ce38`](https://github.com/PTB-PSt1/PyDynamic/commit/8c2ce38af4cb4a391da9e82c23c5754f494892ad))
+
 ## v1.8.0 (2021-04-28)
 ### Feature
 * **propagate_convolution:** Convolution with full covariance propagation ([`299165e`](https://github.com/PTB-PSt1/PyDynamic/commit/299165ef630ef54bcb877e8a3260038805609e4f))
