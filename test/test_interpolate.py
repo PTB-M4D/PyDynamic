@@ -14,9 +14,9 @@ from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
 @composite
 def timestamps_values_uncertainties_kind(
     draw,
-    min_count: Optional[int] = 2,
+    min_count: Optional[int] = 4,
     max_count: Optional[int] = None,
-    kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest"),
+    kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest", "cubic"),
     sorted_timestamps: Optional[bool] = True,
     extrapolate: Optional[Union[bool, str]] = False,
     restrict_fill_value: Optional[str] = None,
@@ -43,7 +43,7 @@ def timestamps_values_uncertainties_kind(
             the tuple of strings out of "linear", "previous", "next", "nearest",
             "spline", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
-            "previous", "next", "nearest"
+            "previous", "next", "nearest", "cubic"
         sorted_timestamps : bool, optional
             if True (default) the timestamps (or frequencies) are guaranteed to be in
             ascending order, if False they still might be by coincidence or not
@@ -469,7 +469,7 @@ def test_failing_returnc_with_extrapolation_interp1d_unc(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
-        returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str"
+        returnC=True, extrapolate=True, kind_tuple=("linear", "cubic"), restrict_fill_unc="str"
     )
 )
 def test_returnc_with_extrapolation_interp1d_unc(interp_inputs):
@@ -482,7 +482,7 @@ def test_returnc_with_extrapolation_interp1d_unc(interp_inputs):
     timestamps_values_uncertainties_kind(
         returnC=True,
         extrapolate=True,
-        kind_tuple=("linear",),
+        kind_tuple=("linear", "cubic"),
         restrict_fill_unc="str",
         sorted_timestamps=True,
     )
@@ -502,7 +502,7 @@ def test_returnc_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs
     timestamps_values_uncertainties_kind(
         returnC=True,
         extrapolate=True,
-        kind_tuple=("linear",),
+        kind_tuple=("linear", "cubic"),
         restrict_fill_unc="str",
         sorted_timestamps=True,
     )
