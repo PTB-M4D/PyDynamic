@@ -5,7 +5,9 @@ PyDynamic is a Python software package developed jointly by mathematicians from
 `Physikalisch-Technische Bundesanstalt <www.ptb.de>`_ (Germany) and
 `National Physical Laboratory <www.npl.co.uk>`_ (UK) as part of the joint
 European Research Project
-`EMPIR 14SIP08 Dynamic <https://mathmet.org/projects/14SIP08>`_.
+`EMPIR 14SIP08 Dynamic <https://www.euramet.org/research-innovation/search
+-research-projects/details/project/standards-and-software-to-maximise-end-user
+-uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_.
 
 For the PyDynamic homepage go to
 `GitHub <https://github.com/PTB-PSt1/PyDynamic>`_.

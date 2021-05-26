@@ -3,8 +3,12 @@
 The `PyDynamic.misc` module provides various functions and methods which are
 used in the examples and in some of the other implemented routines.
 
-# See http://mathmet.org/projects/14SIP08 and
-# https://www.github.com/eichstaedtPTB/PyDynamic
+.. seealso::
+
+   - `initial project website <https://www.euramet.org/research-innovation/search
+     -research-projects/details/project/standards-and-software-to-maximise-end-user
+     -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
+   - `GitHub website <https://www.github.com/PTB-PSt1/PyDynamic>`_
 """
 
 __all__ = [
