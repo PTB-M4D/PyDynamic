@@ -30,7 +30,7 @@ pytz==2021.1
     # via pandas
 scipy==1.5.4
     # via PyDynamic (setup.py)
-six==1.15.0
+six==1.16.0
     # via
     #   cycler
     #   python-dateutil

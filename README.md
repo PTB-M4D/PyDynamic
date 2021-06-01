@@ -271,11 +271,11 @@ Part of this work is developed as part of the Joint Research Project [17IND12 Me
 ](http://met4fof.eu) of the European Metrology Programme for Innovation and
 Research (EMPIR).
 
-This work was part of the Joint Support for Impact project [14SIP08
-](http://mathmet.org/projects/14SIP08) of the European Metrology Programme for
-Innovation and Research (EMPIR). The [EMPIR](http://msu.euramet.org) is
-jointly funded by the EMPIR participating countries within EURAMET and the
-European Union.
+This work was part of the Joint Support for Impact project
+[14SIP08](https://www.euramet.org/research-innovation/search-research-projects/details/project/standards-and-software-to-maximise-end-user-uptake-of-nmi-calibrations-of-dynamic-force-torque-and/)
+of the European Metrology Programme for Innovation and Research (EMPIR). The
+[EMPIR](http://msu.euramet.org) is jointly funded by the EMPIR participating 
+countries within EURAMET and the European Union.
 
 ## Disclaimer
 
