@@ -6,6 +6,8 @@ from hypothesis import HealthCheck, settings
 # disables the 'too_slow' health check. See
 # https://hypothesis.readthedocs.io/en/latest/healthchecks.html#hypothesis.HealthCheck
 # for some details.
-settings.register_profile("ci", suppress_health_check=(HealthCheck.too_slow,))
+settings.register_profile(
+    name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
+)
 if "CIRCLECI" in os.environ:
     settings.load_profile("ci")
