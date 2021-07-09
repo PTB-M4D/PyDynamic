@@ -101,6 +101,9 @@ commands:
     parameters:
       pyenv:
         type: string
+      posargs:
+        type: string
+        default: ""
     steps:
 
     # Perform tox testing.
@@ -108,7 +111,7 @@ commands:
         name: Perform tox testing
         command: |
           source << parameters.pyenv >>/bin/activate
-          tox -e << parameters.pyenv >>
+          tox -e << parameters.pyenv >> << parameters.posargs >>
 
   # Reusable command to store the previously generated test results.
   store_results:
@@ -187,7 +190,10 @@ jobs:
     # the string which is used in tox to identify the current Python version. We reuse
     # this variable basically everywhere we deal with the virtual environment.
     # 'send_cov' is the conditional for either sending the produced coverage report
-    # to codecov or not.
+    # to codecov or not. 'posargs' will be handed over to the commands of
+    # tox step. We use this to extend the default test suite execution from only
+    # those tests not marked with 'slow' to all tests during the nightly scheduled
+    # pipeline runs.
     parameters:
       tag:
         type: string
@@ -198,6 +204,9 @@ jobs:
       send_cov:
         type: boolean
         default: false
+      posargs:
+        type: string
+        default: ""
 
     # Specify the executor and hand over the docker image tag parameter.
     executor:
@@ -215,6 +224,7 @@ jobs:
           pyenv: << parameters.pyenv >>
       - tox:
           pyenv: << parameters.pyenv >>
+          posargs: << parameters.posargs >>
       - store_results
 
       # Upload coverage report if the according parameter is set to `true`.
@@ -238,6 +248,14 @@ jobs:
   # Define one 'test' job to run the test suite against the
   # installed dependencies from the environment.yml.
   test_conda_py38:
+    # Define all parameters, where 'posargs' will be handed over to the commands of
+    # the tox step. We use this to extend the default test suite execution from only
+    # those tests not marked with 'slow' to all tests during the nightly scheduled
+    # pipeline runs.
+    parameters:
+      posargs:
+        type: string
+        default: ""
 
     executor: conda_tester
 
@@ -289,7 +307,7 @@ jobs:
           command: |
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
-            tox
+            tox << parameters.posargs >>
 
       - store_results
 
