@@ -126,6 +126,32 @@ commands:
         path: test-results
 
 workflows:
+  nightly_test:
+    triggers:
+      - schedule:
+          cron: "0 19 * * *"
+          filters:
+            branches:
+              
+    jobs:
+      # Create 'test' job to test PyDynamic every night thoroughly.
+      - test:
+          name: "test_python_py36"
+          tag: "3.6"
+          pyenv: "py36"
+          posargs: "--"
+      - test:
+          name: "test_python_py37"
+          tag: "3.7"
+          pyenv: "py37"
+          posargs: "--"
+      - test:
+          name: "test_python_py38"
+          tag: "3.8"
+          pyenv: "py38"
+          posargs: "--"
+      - test_conda_py38:
+          posargs: "--"
   # Create workflow for testing and deploying PyDynamic.
   test_and_deploy:
     jobs:
