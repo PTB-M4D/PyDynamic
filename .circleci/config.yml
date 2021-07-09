@@ -132,7 +132,7 @@ workflows:
           cron: "5 19 * * *"
           filters:
             branches:
-              only: /*/
+              only: /.*/
     jobs:
       # Create 'test' job to test PyDynamic every night thoroughly.
       - test:
