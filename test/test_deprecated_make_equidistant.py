@@ -5,6 +5,7 @@ from typing import Dict, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import given
 from hypothesis.strategies import composite
 from pytest import deprecated_call, raises
@@ -88,6 +89,7 @@ def timestamps_values_uncertainties_kind(
 
 
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.scheduled
 def test_deprecated_call_make_equidistant(interp_inputs):
     with deprecated_call():
         make_equidistant(**interp_inputs)
@@ -95,6 +97,7 @@ def test_deprecated_call_make_equidistant(interp_inputs):
 
 # noinspection PyArgumentList
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.scheduled
 def test_too_short_call_make_equidistant(interp_inputs):
     # Check erroneous calls with too few inputs.
     with raises(TypeError):
@@ -110,6 +113,7 @@ def test_full_call_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.scheduled
 def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
@@ -119,6 +123,7 @@ def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.scheduled
 def test_t_new_to_dt_make_equidistant(interp_inputs):
     t_new = make_equidistant(**interp_inputs)[0]
     delta_t_new = np.diff(t_new)
@@ -127,6 +132,7 @@ def test_t_new_to_dt_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
+@pytest.mark.scheduled
 def test_prev_in_make_equidistant(interp_inputs):
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
@@ -135,6 +141,7 @@ def test_prev_in_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
+@pytest.mark.scheduled
 def test_linear_in_make_equidistant(interp_inputs):
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
@@ -143,6 +150,7 @@ def test_linear_in_make_equidistant(interp_inputs):
 
 
 @given(st.integers(min_value=3, max_value=1000))
+@pytest.mark.scheduled
 def test_linear_uy_in_make_equidistant(n):
     # Check for given input, if interpolated uncertainties equal 1 and
     # :math:`sqrt(2) / 2`.
@@ -157,6 +165,7 @@ def test_linear_uy_in_make_equidistant(n):
 
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=("spline", "least-squares")))
+@pytest.mark.scheduled
 def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):

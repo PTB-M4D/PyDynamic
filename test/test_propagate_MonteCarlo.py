@@ -1,21 +1,17 @@
 # -*- coding: utf-8 -*-
 """ Perform tests on the method *uncertainty.propagate_MonteCarlo*"""
 
-import numpy as np
-from pytest import raises
 import functools
-import scipy
-
-from PyDynamic.misc.testsignals import rect
-from PyDynamic.misc.tools import make_semiposdef
-from PyDynamic.misc.filterstuff import kaiser_lowpass
-#from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian, ARMA
-from PyDynamic.uncertainty.propagate_MonteCarlo import MC, SMC, UMC, ARMA, UMC_generic, _UMCevaluate
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pytest
 
-
-
+from PyDynamic.misc.filterstuff import kaiser_lowpass
+from PyDynamic.misc.testsignals import rect
+from PyDynamic.misc.tools import make_semiposdef
+# from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian, ARMA
+from PyDynamic.uncertainty.propagate_MonteCarlo import ARMA, MC, UMC, UMC_generic
 
 ##### some definitions for all tests
 
@@ -143,6 +139,7 @@ def test_UMC_generic(visualizeOutput=False):
     assert sims["results"][0].shape == output_shape
 
 
+@pytest.mark.scheduled
 def test_compare_MC_UMC():
 
     np.random.seed(12345)
