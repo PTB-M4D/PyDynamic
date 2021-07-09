@@ -337,8 +337,7 @@ jobs:
 
     steps:
       - create_folders
-      - create_venv:
-          pyenv: ${PYENV}
+      - create_venv
       - install_production_deps:
           pyenv: ${PYENV}
       - install_development_deps:
@@ -359,8 +358,7 @@ jobs:
 
     steps:
       - create_folders
-      - create_venv:
-          pyenv: ${PYENV}
+      - create_venv
       - install_production_deps:
           pyenv: ${PYENV}
       - install_development_deps:
