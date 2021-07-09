@@ -1,9 +1,9 @@
 # PyDynamic
 
-[![CircleCI](https://circleci.com/gh/PTB-PSt1/PyDynamic.svg?style=shield)](https://circleci.com/gh/PTB-PSt1/PyDynamic)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/397eebc52073457a824e5657c305dc92)](https://www.codacy.com/app/PTB-PSt1/PyDynamic?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PTB-PSt1/PyDynamic&amp;utm_campaign=Badge_Grade)
+[![CircleCI](https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield)](https://circleci.com/gh/PTB-M4D/PyDynamic)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/db86b58d6fa5446e8408644c8196f5e2)](https://www.codacy.com/gh/PTB-M4D/PyDynamic/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PTB-M4D/PyDynamic&amp;utm_campaign=Badge_Grade)
 [![Documentation Status](https://readthedocs.org/projects/pydynamic/badge/?version=latest)](https://pydynamic.readthedocs.io/?badge=latest)
-[![Codecov Badge](https://codecov.io/gh/PTB-PSt1/PyDynamic/branch/master/graph/badge.svg)](https://codecov.io/gh/PTB-PSt1/PyDynamic)
+[![Codecov Badge](https://codecov.io/gh/PTB-M4D/PyDynamic/branch/master/graph/badge.svg)](https://codecov.io/gh/PTB-M4D/PyDynamic)
 [![DOI](https://zenodo.org/badge/34848642.svg)](https://zenodo.org/badge/latestdoi/34848642)
 
 ## Python package for the analysis of dynamic measurements
@@ -44,7 +44,7 @@ The documentation for PyDynamic can be found on
 
 The fundamental structure of PyDynamic is shown in the following figure.
 
-![PyDynamic package diagram](https://raw.githubusercontent.com/PTB-PSt1/PyDynamic/master/docs/PyDynamic_package_diagram.png)
+![PyDynamic package diagram](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_package_diagram.png)
 
 However, imports should generally be possible without explicitly naming all packages
 and modules in the path, so that for example the following import statements are all
@@ -193,7 +193,7 @@ have the feeling, something is missing, let us know by opening an issue.
 
 If you have downloaded this software, we would be very thankful for letting
 us know. You may, for instance, drop an email to one of the [authors
-](https://github.com/PTB-PSt1/PyDynamic/graphs/contributors) (e.g.
+](https://github.com/PTB-M4D/PyDynamic/graphs/contributors) (e.g.
 [Sascha Eichstädt](mailto:sascha.eichstaedt@ptb.de), [Björn Ludwig
 ](mailto:bjoern.ludwig@ptb.de) or [Maximilian Gruber
 ](mailto:maximilian.gruber@ptb.de))
@@ -206,7 +206,7 @@ demonstrate the use of the provided methods to aid the first steps in PyDynamic.
 features are introduced with an example from the beginning if feasible. We are currently
 moving this supporting collection to an external repository on GitHub. They will be
 available at
-[github.com/PTB-PSt1/PyDynamic_tutorials](https://github.com/PTB-PSt1/PyDynamic_tutorials)
+[github.com/PTB-M4D/PyDynamic_tutorials](https://github.com/PTB-M4D/PyDynamic_tutorials)
 in the near future.
 
 Uncertainty propagation for the application of a FIR filter with coefficients *b* with
@@ -241,7 +241,7 @@ from PyDynamic.uncertainty.propagate_MonteCarlo import SMC
 y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
 ```
 
-![PyDynamic Workflow Deconvolution](https://raw.githubusercontent.com/PTB-PSt1/PyDynamic/master/docs/Deconvolution.png)
+![PyDynamic Workflow Deconvolution](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/Deconvolution.png)
 
 ## Roadmap
 
@@ -250,9 +250,9 @@ y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
 1. Introducing uncertainty propagation for Kalman filters
 
 For a comprehensive overview of current development activities and upcoming tasks,
-take a look at the [project board](https://github.com/PTB-PSt1/PyDynamic/projects/1),
-[issues](https://github.com/PTB-PSt1/PyDynamic/issues) and
-[pull requests](https://github.com/PTB-PSt1/PyDynamic/pulls).
+take a look at the [project board](https://github.com/PTB-M4D/PyDynamic/projects/1),
+[issues](https://github.com/PTB-M4D/PyDynamic/issues) and
+[pull requests](https://github.com/PTB-M4D/PyDynamic/pulls).
 
 ## Citation
 
