@@ -1,6 +1,10 @@
 """
-See http://mathmet.org/projects/14SIP08 and
-https://github.com/PTB-PSt1/PyDynamic/
+.. seealso::
+
+   - `initial project website <https://www.euramet.org/research-innovation/search
+     -research-projects/details/project/standards-and-software-to-maximise-end-user
+     -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
+   - `GitHub website <https://www.github.com/PTB-PSt1/PyDynamic>`_
 """
 
 
@@ -8,7 +12,7 @@ from .misc import *
 from .model_estimation import *
 from .uncertainty import *
 
-__version__ = "1.6.1"
+__version__ = "1.9.0"
 
 __all__ = [
     "invLSFIR",

@@ -24,7 +24,7 @@ numpy==1.19.5
     #   time-series-buffer
 pandas==1.1.5
     # via PyDynamic (setup.py)
-pillow==8.1.0
+pillow==8.2.0
     # via matplotlib
 pyparsing==2.4.7
     # via matplotlib
@@ -38,7 +38,7 @@ pywavelets==1.1.1
     # via PyDynamic (setup.py)
 scipy==1.5.4
     # via PyDynamic (setup.py)
-six==1.15.0
+six==1.16.0
     # via
     #   cycler
     #   python-dateutil

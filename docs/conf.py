@@ -56,6 +56,12 @@ intersphinx_mapping = {
         "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
     ),
+    "np": (
+        "http://docs.scipy.org/doc/numpy/",
+        None,
+    ),
+    "Python": ("https://docs.python.org/3", None),
+
 }
 
 nbsphinx_allow_errors = True
@@ -84,10 +90,10 @@ author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
-# built documents.
+# built documents.K
 #
 # The short X.Y version.
-version = "1.6.1"
+version = "1.9.0"
 # The full version, including alpha/beta/rc tags.
 # release = "1.3.1"
 
