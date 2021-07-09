@@ -50,17 +50,13 @@ commands:
   # Reusable command to prepare the environment for testing.
   create_venv:
     description: "Prepare virtual environment."
-    parameters:
-      pyenv:
-        type: string
-        default: "py38"
     steps:
     # Create PyDynamic virtual environment.
     - run:
         name: Create virtual environment
         command: |
-          python3 -m venv << parameters.pyenv >>
-          source << parameters.pyenv >>/bin/activate
+          python3 -m venv venv
+          source venv/bin/activate
           pip install --upgrade pip setuptools
 
   # Reusable command to install production dependencies.
@@ -76,7 +72,7 @@ commands:
     - run:
         name: Install production dependencies
         command: |
-          source << parameters.pyenv >>/bin/activate
+          source venv/bin/activate
           pip install -r requirements/requirements-<< parameters.pyenv >>.txt
 
   # Reusable command to install development dependencies.
@@ -92,7 +88,7 @@ commands:
     - run:
         name: Install development dependencies
         command: |
-          source << parameters.pyenv >>/bin/activate
+          source venv/bin/activate
           pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
 
   # Reusable command to conduct actual testing.
@@ -101,28 +97,54 @@ commands:
     parameters:
       pyenv:
         type: string
+      posargs:
+        type: string
+        default: ""
     steps:
 
     # Perform tox testing.
     - run:
         name: Perform tox testing
         command: |
-          source << parameters.pyenv >>/bin/activate
-          tox -e << parameters.pyenv >> | tee --append test-results/pytest.log
+          source venv/bin/activate
+          tox -e << parameters.pyenv >> << parameters.posargs >>
 
   # Reusable command to store the previously generated test results.
   store_results:
-    description: "Store test results and artifacts."
+    description: "Store test results."
     steps:
-    # Store test results.
-    - store_artifacts:
-        path: test-results
-        destination: test-results
-
     - store_test_results:
         path: test-results
 
 workflows:
+  nightly_test:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only: /.*/
+    jobs:
+      # Create 'test' job to test PyDynamic every night thoroughly.
+      - test:
+          name: "nightly_test_python_py36"
+          tag: "3.6"
+          pyenv: "py36"
+          posargs: "-- ''"
+      - test:
+          name: "nightly_test_python_py37"
+          tag: "3.7"
+          pyenv: "py37"
+          posargs: "-- ''"
+      - test:
+          name: "nightly_test_python_py38"
+          tag: "3.8"
+          pyenv: "py38"
+          posargs: "-- ''"
+      - test_conda_py38:
+          name: "nightly_test_conda_py38"
+          posargs: "-- ''"
+
   # Create workflow for testing and deploying PyDynamic.
   test_and_deploy:
     jobs:
@@ -187,7 +209,10 @@ jobs:
     # the string which is used in tox to identify the current Python version. We reuse
     # this variable basically everywhere we deal with the virtual environment.
     # 'send_cov' is the conditional for either sending the produced coverage report
-    # to codecov or not.
+    # to codecov or not. 'posargs' will be handed over to the commands of
+    # tox step. We use this to extend the default test suite execution from only
+    # those tests not marked with 'slow' to all tests during the nightly scheduled
+    # pipeline runs.
     parameters:
       tag:
         type: string
@@ -198,6 +223,9 @@ jobs:
       send_cov:
         type: boolean
         default: false
+      posargs:
+        type: string
+        default: ""
 
     # Specify the executor and hand over the docker image tag parameter.
     executor:
@@ -207,14 +235,14 @@ jobs:
     # Specify the steps to execute during this test jobs.
     steps:
       - create_folders
-      - create_venv:
-          pyenv: << parameters.pyenv >>
+      - create_venv
       - install_production_deps:
           pyenv: << parameters.pyenv >>
       - install_development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
           pyenv: << parameters.pyenv >>
+          posargs: << parameters.posargs >>
       - store_results
 
       # Upload coverage report if the according parameter is set to `true`.
@@ -224,7 +252,7 @@ jobs:
             - run:
                 name: Upload coverage report
                 command: |
-                  source << parameters.pyenv >>/bin/activate
+                  source venv/bin/activate
                   curl -s https://codecov.io/bash > codecov;
                   VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
                   for i in 1 256 512
@@ -238,6 +266,14 @@ jobs:
   # Define one 'test' job to run the test suite against the
   # installed dependencies from the environment.yml.
   test_conda_py38:
+    # Define all parameters, where 'posargs' will be handed over to the commands of
+    # the tox step. We use this to extend the default test suite execution from only
+    # those tests not marked with 'slow' to all tests during the nightly scheduled
+    # pipeline runs.
+    parameters:
+      posargs:
+        type: string
+        default: ""
 
     executor: conda_tester
 
@@ -289,7 +325,7 @@ jobs:
           command: |
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
-            tox | tee --append test-results/pytest.log
+            tox << parameters.posargs >>
 
       - store_results
 
@@ -299,8 +335,7 @@ jobs:
 
     steps:
       - create_folders
-      - create_venv:
-          pyenv: ${PYENV}
+      - create_venv
       - install_production_deps:
           pyenv: ${PYENV}
       - install_development_deps:
@@ -310,7 +345,7 @@ jobs:
       - run:
           name: Run semantic-release publish
           command: |
-            source ${PYENV}/bin/activate
+            source venv/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             semantic-release publish
@@ -321,8 +356,7 @@ jobs:
 
     steps:
       - create_folders
-      - create_venv:
-          pyenv: ${PYENV}
+      - create_venv
       - install_production_deps:
           pyenv: ${PYENV}
       - install_development_deps:
@@ -336,7 +370,7 @@ jobs:
             unset CIRCLE_PULL_REQUEST CIRCLE_PULL_REQUESTS CI_PULL_REQUEST \
               CI_PULL_REQUESTS
             export CIRCLE_BRANCH=master
-            source ${PYENV}/bin/activate
+            source venv/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
             echo "
