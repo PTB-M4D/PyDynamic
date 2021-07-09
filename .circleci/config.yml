@@ -95,6 +95,8 @@ commands:
   tox:
     description: "Perform tox testing."
     parameters:
+      pyenv:
+        type: string
       posargs:
         type: string
         default: ""
@@ -105,7 +107,7 @@ commands:
         name: Perform tox testing
         command: |
           source venv/bin/activate
-          tox << parameters.posargs >>
+          tox -e << parameters.pyenv >> << parameters.posargs >>
 
   # Reusable command to store the previously generated test results.
   store_results:
@@ -239,6 +241,7 @@ jobs:
       - install_development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
+          pyenv: << parameters.pyenv >>
           posargs: << parameters.posargs >>
       - store_results
 
