@@ -381,7 +381,7 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals()[:2])  # exclude kind="corr"
 @pytest.mark.parametrize("lowpasses", valid_lows())
-@pytest.mark.scheduled
+@pytest.mark.slow
 def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
     # Check output for thinkable permutations of input parameters against a Monte Carlo approach.
 
@@ -443,7 +443,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals())
 @pytest.mark.parametrize("lowpasses", valid_lows())
-@pytest.mark.scheduled
+@pytest.mark.slow
 def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
     # Compare output of both functions for thinkable permutations of input parameters.
     y, Uy = legacy_FIRuncFilter(**filters, **signals, **lowpasses)
@@ -458,7 +458,7 @@ def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
     assert np.allclose(Uy, Uy2)
 
 
-@pytest.mark.scheduled
+@pytest.mark.slow
 def test_fir_filter_MC_comparison():
     N_signal = np.random.randint(20, 25)
     x = random_array(N_signal)

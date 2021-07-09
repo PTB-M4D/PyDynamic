@@ -139,7 +139,7 @@ def test_UMC_generic(visualizeOutput=False):
     assert sims["results"][0].shape == output_shape
 
 
-@pytest.mark.scheduled
+@pytest.mark.slow
 def test_compare_MC_UMC():
 
     np.random.seed(12345)

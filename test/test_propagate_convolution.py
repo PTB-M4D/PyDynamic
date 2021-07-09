@@ -68,7 +68,7 @@ def valid_modes(kind="all"):
 @pytest.mark.parametrize("input_1", valid_inputs())
 @pytest.mark.parametrize("input_2", valid_inputs())
 @pytest.mark.parametrize("mode", valid_modes())
-@pytest.mark.scheduled
+@pytest.mark.slow
 def test_convolution(input_1, input_2, mode):
 
     scipy_modes = valid_modes("scipy")
@@ -98,7 +98,7 @@ def test_convolution_common_call():
 @pytest.mark.parametrize("input_1", valid_inputs(reduced_set=True))
 @pytest.mark.parametrize("input_2", valid_inputs(reduced_set=True))
 @pytest.mark.parametrize("mode", valid_modes())
-@pytest.mark.scheduled
+@pytest.mark.slow
 def test_convolution_monte_carlo(input_1, input_2, mode):
 
     scipy_modes = valid_modes("scipy")

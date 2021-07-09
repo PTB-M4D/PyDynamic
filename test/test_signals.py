@@ -79,14 +79,14 @@ class TestSine:
     # Test the sine signal.
     hi_res_time = get_timestamps(0, 2 * np.pi, 1e-5)
 
-    @pytest.mark.scheduled
+    @pytest.mark.slow
     def test_minimal_call_max_sine(self):
         x = sine(time)
         # Check for minimal callability and that maximum amplitude at
         # timestamps is below default.
         assert np.max(np.abs(x)) <= 1.0
 
-    @pytest.mark.scheduled
+    @pytest.mark.slow
     def test_minimal_call_hi_res_max_sine(self):
         x = sine(self.hi_res_time)
         # Check for minimal callability with high resolution time vector and
@@ -94,7 +94,7 @@ class TestSine:
         assert_almost_equal(np.max(x), 1.0)
         assert_almost_equal(np.min(x), -1.0)
 
-    @pytest.mark.scheduled
+    @pytest.mark.slow
     def test_medium_call_freq_multiples_sine(self):
         # Initialize fixed frequency and number of repetitions.
         np.random.seed(130)
@@ -107,7 +107,7 @@ class TestSine:
         for i_x in x:
             assert_almost_equal(i_x, 0)
 
-    @pytest.mark.scheduled
+    @pytest.mark.slow
     def test_medium_call_max_sine(self):
         # Initialize fixed amplitude.
         np.random.seed(11201)
@@ -117,7 +117,7 @@ class TestSine:
         # timestamps is below default.
         assert np.max(np.abs(x)) <= amp
 
-    @pytest.mark.scheduled
+    @pytest.mark.slow
     def test_medium_call_hi_res_max_sine(self):
         # Initialize fixed amplitude.
         np.random.seed(1101)
@@ -148,7 +148,7 @@ class TestSine:
         sine(time, amp=amp, freq=freq, noise=noise)
 
 
-@pytest.mark.scheduled
+@pytest.mark.slow
 def test_signal_example(monkeypatch):
     # With this expression we override the matplotlib.pyplot.show method with a
     # lambda expression returning None but only for this one test.
