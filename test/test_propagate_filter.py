@@ -4,11 +4,12 @@ import itertools
 import numpy as np
 import pytest
 import scipy
-from PyDynamic.misc.tools import make_semiposdef, trimOrPad
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter, _fir_filter
-from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
+
+from PyDynamic.misc.tools import trimOrPad
+from PyDynamic.uncertainty.propagate_filter import _fir_filter, FIRuncFilter
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 
 
 def random_array(length):
@@ -380,6 +381,7 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals()[:2])  # exclude kind="corr"
 @pytest.mark.parametrize("lowpasses", valid_lows())
+@pytest.mark.scheduled
 def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
     # Check output for thinkable permutations of input parameters against a Monte Carlo approach.
 
@@ -433,7 +435,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
     assert np.allclose(
         Uy_fir[len(b) + n_blow :, len(b) + n_blow :],
         Uy_mc[len(b) + n_blow :, len(b) + n_blow :],
-        atol=2e-1*Uy_fir.max(),  # very broad check, increase runs for better fit
+        atol=2e-1 * Uy_fir.max(),  # very broad check, increase runs for better fit
         rtol=1e-1,
     )
 
@@ -441,6 +443,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals())
 @pytest.mark.parametrize("lowpasses", valid_lows())
+@pytest.mark.scheduled
 def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
     # Compare output of both functions for thinkable permutations of input parameters.
     y, Uy = legacy_FIRuncFilter(**filters, **signals, **lowpasses)
@@ -455,6 +458,7 @@ def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
     assert np.allclose(Uy, Uy2)
 
 
+@pytest.mark.scheduled
 def test_fir_filter_MC_comparison():
     N_signal = np.random.randint(20, 25)
     x = random_array(N_signal)

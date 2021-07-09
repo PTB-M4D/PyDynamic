@@ -2,6 +2,7 @@
 """ Perform tests on methods to create testsignals."""
 import matplotlib
 import numpy as np
+import pytest
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
@@ -142,6 +143,7 @@ class TestSine:
         sine(time, amp=amp, freq=freq, noise=noise)
 
 
+@pytest.mark.scheduled
 def test_signal_example(monkeypatch):
     # With this expression we override the matplotlib.pyplot.show method with a
     # lambda expression returning None but only for this one test.

@@ -3,6 +3,7 @@ from typing import Dict, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import assume, given
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose
@@ -16,7 +17,13 @@ def timestamps_values_uncertainties_kind(
     draw,
     min_count: Optional[int] = 4,
     max_count: Optional[int] = None,
-    kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest", "cubic"),
+    kind_tuple: Optional[Tuple[str]] = (
+        "linear",
+        "previous",
+        "next",
+        "nearest",
+        "cubic",
+    ),
     sorted_timestamps: Optional[bool] = True,
     extrapolate: Optional[Union[bool, str]] = False,
     restrict_fill_value: Optional[str] = None,
@@ -469,7 +476,10 @@ def test_failing_returnc_with_extrapolation_interp1d_unc(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
-        returnC=True, extrapolate=True, kind_tuple=("linear", "cubic"), restrict_fill_unc="str"
+        returnC=True,
+        extrapolate=True,
+        kind_tuple=("linear", "cubic"),
+        restrict_fill_unc="str",
     )
 )
 def test_returnc_with_extrapolation_interp1d_unc(interp_inputs):
@@ -522,10 +532,15 @@ def test_returnc_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
 
 @given(
     timestamps_values_uncertainties_kind(
-        returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str",
+        returnC=True,
+        extrapolate=True,
+        kind_tuple=("linear",),
+        restrict_fill_unc="str",
     )
 )
-def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
+def test_returnc_with_extrapolation_check_c_interp1d_unc(
+    interp_inputs,
+):
     # Check if sensitivity computation parallel to linear interpolation and
     # extrapolation with constant values works as expected regarding the shape and
     # content of the sensitivity matrix.
@@ -563,7 +578,12 @@ def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
 
 @given(
     timestamps_values_uncertainties_kind(
-        returnC=True, kind_tuple=("previous", "next", "nearest",)
+        returnC=True,
+        kind_tuple=(
+            "previous",
+            "next",
+            "nearest",
+        ),
     )
 )
 def test_value_error_for_returnc_interp1d_unc(interp_inputs):
@@ -573,7 +593,9 @@ def test_value_error_for_returnc_interp1d_unc(interp_inputs):
 
 
 @given(st.integers(min_value=3, max_value=1000))
-def test_linear_uy_in_interp1d_unc(n,):
+def test_linear_uy_in_interp1d_unc(
+    n,
+):
     # Check for given input, if interpolated uncertainties equal 1 and
     # :math:`sqrt(2) / 2`.
     dt_unit = 2
@@ -603,6 +625,7 @@ def test_raise_not_implemented_yet_interp1d(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(extrapolate=True))
+@pytest.mark.scheduled
 def test_raise_value_error_interp1d_unc(interp_inputs):
     # Check that interpolation with points outside the original domain raises
     # exception if requested.
