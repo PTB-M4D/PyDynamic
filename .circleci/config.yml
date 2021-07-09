@@ -129,7 +129,7 @@ workflows:
   nightly_test:
     triggers:
       - schedule:
-          cron: "8 19 * * *"
+          cron: "0 0 * * *"
           filters:
             branches:
               only: /.*/
