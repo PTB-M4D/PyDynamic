@@ -10,7 +10,7 @@ European Research Project
 -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_.
 
 For the PyDynamic homepage go to
-`GitHub <https://github.com/PTB-PSt1/PyDynamic>`_.
+`GitHub <https://github.com/PTB-M4D/PyDynamic>`_.
 
 *PyDynamic* is written in Python 3 and strives to run with `all Python versions with
 upstream support <https://devguide.python.org/#status-of-python-branches>`_. Currently
