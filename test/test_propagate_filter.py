@@ -10,12 +10,12 @@ from scipy.signal import lfilter, lfilter_zi
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import trimOrPad
 from PyDynamic.uncertainty.propagate_filter import (
-    _fir_filter, _get_derivative_A, _tf2ss, FIRuncFilter, IIRuncFilter,
+    _fir_filter,
+    _get_derivative_A,
+    _tf2ss,
+    FIRuncFilter,
+    IIRuncFilter,
 )
-from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-
-from PyDynamic.misc.tools import trimOrPad
-from PyDynamic.uncertainty.propagate_filter import _fir_filter, FIRuncFilter
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 
 
@@ -519,7 +519,11 @@ def iir_filter():
 @pytest.fixture(scope="module")
 def fir_filter():
     b = np.array([0.01967691, -0.01714282, 0.03329653, -0.01714282, 0.01967691])
-    a = np.array([1.0,])
+    a = np.array(
+        [
+            1.0,
+        ]
+    )
     Uab = np.diag(
         np.zeros((len(a) + len(b) - 1))
     )  # fully certain filter-parameters, otherwise FIR and IIR do not match! (see docstring of IIRuncFilter)
@@ -546,8 +550,9 @@ def input_signal():
 
 @pytest.fixture(scope="module")
 def run_IIRuncFilter_all_at_once(iir_filter, input_signal):
-    y, Uy, _ = IIRuncFilter(**input_signal, **iir_filter, kind="diag" )
+    y, Uy, _ = IIRuncFilter(**input_signal, **iir_filter, kind="diag")
     return y, Uy
+
 
 @pytest.fixture(scope="module")
 def run_IIRuncFilter_in_chunks(iir_filter, input_signal):
@@ -561,7 +566,11 @@ def run_IIRuncFilter_in_chunks(iir_filter, input_signal):
         np.array_split(input_signal["x"], 200), np.array_split(input_signal["Ux"], 200)
     ):
         yi, Uyi, state = IIRuncFilter(
-            x_batch, Ux_batch, **iir_filter, kind="diag", state=state,
+            x_batch,
+            Ux_batch,
+            **iir_filter,
+            kind="diag",
+            state=state,
         )
         y_list.append(yi)
         Uy_list.append(Uyi)
@@ -580,9 +589,7 @@ def test_IIRuncFilter_shape_all_at_once(input_signal, run_IIRuncFilter_all_at_on
     assert len(Uy) == len(input_signal["Ux"])
 
 
-def test_IIRuncFilter_shape_in_chunks(
-    input_signal, run_IIRuncFilter_in_chunks
-):
+def test_IIRuncFilter_shape_in_chunks(input_signal, run_IIRuncFilter_in_chunks):
     y, Uy = run_IIRuncFilter_in_chunks
 
     # compare lengths
@@ -600,6 +607,7 @@ def test_IIRuncFilter_identity_nonchunk_chunk(
     # check if both ways of calling IIRuncFilter yield the same result
     assert np.allclose(y1, y2)
     assert np.allclose(Uy1, Uy2)
+
 
 @pytest.mark.parametrize("kind", ["diag", "corr"])
 def test_FIR_IIR_identity(kind, fir_filter, input_signal):

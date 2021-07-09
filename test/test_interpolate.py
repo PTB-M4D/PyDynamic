@@ -120,9 +120,7 @@ def values_uncertainties_kind(
         "allow_infinity": False,
     }
     # Set all common parameters for x and y values and associated uncertainties.
-    shape_for_x = hnp.array_shapes(
-        max_dims=1, min_side=min_count, max_side=max_count
-    )
+    shape_for_x = hnp.array_shapes(max_dims=1, min_side=min_count, max_side=max_count)
     strategy_params = {
         "dtype": np.float,
         "shape": shape_for_x,
@@ -280,11 +278,7 @@ def test_extrapolate_below_without_fill_value_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(
-        extrapolate="below", restrict_fill_value="float"
-    )
-)
+@given(values_uncertainties_kind(extrapolate="below", restrict_fill_value="float"))
 @pytest.mark.slow
 def test_extrapolate_below_with_fill_value_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x_new is below the minimum of x and
@@ -297,11 +291,7 @@ def test_extrapolate_below_with_fill_value_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(
-        extrapolate="below", restrict_fill_value="tuple"
-    )
-)
+@given(values_uncertainties_kind(extrapolate="below", restrict_fill_value="tuple"))
 @pytest.mark.slow
 def test_extrapolate_below_with_fill_values_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x_new is below the minimum of x and
@@ -333,11 +323,7 @@ def test_extrapolate_above_without_fill_value_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(
-        extrapolate="above", restrict_fill_value="float"
-    )
-)
+@given(values_uncertainties_kind(extrapolate="above", restrict_fill_value="float"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_value_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x_new is above the maximum of x and
@@ -350,11 +336,7 @@ def test_extrapolate_above_with_fill_value_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(
-        extrapolate="above", restrict_fill_value="tuple"
-    )
-)
+@given(values_uncertainties_kind(extrapolate="above", restrict_fill_value="tuple"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_values_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x_new is above the maximum of x and
@@ -385,9 +367,7 @@ def test_extrapolate_below_without_fill_unc_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(extrapolate="below", restrict_fill_unc="float")
-)
+@given(values_uncertainties_kind(extrapolate="below", restrict_fill_unc="float"))
 @pytest.mark.slow
 def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x_new is below the minimum of x and
@@ -400,9 +380,7 @@ def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(extrapolate="below", restrict_fill_unc="tuple")
-)
+@given(values_uncertainties_kind(extrapolate="below", restrict_fill_unc="tuple"))
 @pytest.mark.slow
 def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x _newis below the minimum of x and
@@ -433,9 +411,7 @@ def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(extrapolate="above", restrict_fill_unc="float")
-)
+@given(values_uncertainties_kind(extrapolate="above", restrict_fill_unc="float"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x _newis above the maximum of x and
@@ -448,9 +424,7 @@ def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
     )
 
 
-@given(
-    values_uncertainties_kind(extrapolate="above", restrict_fill_unc="tuple")
-)
+@given(values_uncertainties_kind(extrapolate="above", restrict_fill_unc="tuple"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of x _newis above the maximum of x and
@@ -476,9 +450,7 @@ def test_compare_returnc_interp1d_unc(interp_inputs):
 
 
 @given(
-    values_uncertainties_kind(
-        returnC=True, extrapolate=True, kind_tuple=("linear",)
-    )
+    values_uncertainties_kind(returnC=True, extrapolate=True, kind_tuple=("linear",))
 )
 @pytest.mark.slow
 def test_failing_returnc_with_extrapolation_interp1d_unc(interp_inputs):
@@ -706,11 +678,7 @@ def test_prev_in_make_equidistant(interp_inputs):
     assert np.all(np.isin(uy_new, interp_inputs["uy"]))
 
 
-@given(
-    values_uncertainties_kind(
-        kind_tuple=["linear"], for_make_equidistant=True
-    )
-)
+@given(values_uncertainties_kind(kind_tuple=["linear"], for_make_equidistant=True))
 @pytest.mark.slow
 def test_linear_in_make_equidistant(interp_inputs):
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
