@@ -12,7 +12,7 @@ This module contains the following function:
 from typing import Optional, Tuple, Union
 
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, splrep, BSpline
 
 __all__ = ["interp1d_unc", "make_equidistant"]
 
@@ -59,7 +59,7 @@ def interp1d_unc(
             associated with y.
         kind : str, optional
             Specifies the kind of interpolation for y as a string ('previous',
-            'next', 'nearest' or 'linear'). Default is ‘linear’.
+            'next', 'nearest', 'linear' or 'cubic'). Default is ‘linear’.
         copy : bool, optional
             If True, the method makes internal copies of x and y. If False,
             references to x and y are used. The default is to copy.
@@ -79,6 +79,9 @@ def interp1d_unc(
               for both bounds as `below, above = fill_value, fill_value`.
             - If “extrapolate”, then points outside the data range will be set
               to the first or last element of the values.
+            - If cubic-interpolation, C2-continuity at the transition to the
+              extrapolation-range is not guaranteed. This behavior might change
+              in future implementations, see issue #210 for details.
 
             Both parameters `fill_value` and `fill_unc` should be
             provided to ensure desired behaviour in the extrapolation range.
@@ -199,7 +202,7 @@ def interp1d_unc(
         # Look up uncertainties.
         interp_uy = interp1d(x, uy, fill_value=fill_unc, **interp1d_params)
         uy_new = interp_uy(x_new)
-    elif kind == "linear":
+    elif kind in ("linear", "cubic"):
         # Calculate boolean arrays of indices from t_new which are outside t's bounds...
         extrap_range_below = x_new < np.min(x)
         extrap_range_above = x_new > np.max(x)
@@ -211,7 +214,7 @@ def interp1d_unc(
         uy_new = np.empty_like(y_new)
 
         # Initialize the sensitivity matrix of shape (M, N) if needed.
-        if returnC:
+        if returnC or kind == "cubic":
             C = np.zeros((len(x_new), len(uy)), "float64")
 
         # First extrapolate the according values if required and then
@@ -239,70 +242,104 @@ def interp1d_unc(
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interp_range):
-            # This following section is taken mainly from scipy.interpolate.interp1d to
-            # determine the indices of the relevant original x values just for the
-            # interpolation range.
-            # --------------------------------------------------------------------------
-            # 2. Find where in the original data, the values to interpolate
-            #    would be inserted.
-            #    Note: If t_new[n] == t[m], then m is returned by searchsorted.
-            t_new_indices = np.searchsorted(x, x_new[interp_range])
 
-            # 3. Clip x_new_indices so that they are within the range of
-            #    self.x indices and at least 1.  Removes mis-interpolation
-            #    of x_new[n] = x[0]
-            t_new_indices = t_new_indices.clip(1, len(x) - 1).astype(int)
+            if kind == "linear":
+                # This following section is taken mainly from
+                # scipy.interpolate.interp1d to determine the indices of the relevant
+                # original x values just for the interpolation range.
+                # ----------------------------------------------------------------------
+                # 2. Find where in the original data, the values to interpolate
+                #    would be inserted.
+                #    Note: If x_new[n] == x[m], then m is returned by searchsorted.
+                x_new_indices = np.searchsorted(x, x_new[interp_range])
 
-            # 4. Calculate the slope of regions that each x_new value falls in.
-            lo = t_new_indices - 1
-            hi = t_new_indices
+                # 3. Clip x_new_indices so that they are within the range of
+                #    self.x indices and at least 1.  Removes mis-interpolation
+                #    of x_new[n] = x[0]
+                x_new_indices = x_new_indices.clip(1, len(x) - 1).astype(int)
 
-            t_lo = x[lo]
-            t_hi = x[hi]
-            # --------------------------------------------------------------------------
-            if returnC:
-                # Prepare the sensitivity coefficients, which in the first place
-                # inside the interpolation range are the Lagrangian polynomials. We
-                # compute the Lagrangian polynomials for all interpolation nodes
-                # inside the original range.
-                L_1 = (x_new[interp_range] - t_hi) / (t_lo - t_hi)
-                L_2 = (x_new[interp_range] - t_lo) / (t_hi - t_lo)
+                # 4. Calculate the slope of regions that each x_new value falls in.
+                lo = x_new_indices - 1
+                hi = x_new_indices
 
-                # Create iterators needed to efficiently fill our sensitivity matrix
-                # in the rows corresponding to interpolation range.
-                lo_it = iter(lo)
-                hi_it = iter(hi)
-                L_1_it = iter(L_1)
-                L_2_it = iter(L_2)
+                x_lo = x[lo]
+                x_hi = x[hi]
+                # --------------------------------------------------------------------------
+                if returnC:
+                    # Prepare the sensitivity coefficients, which in the first place
+                    # inside the interpolation range are the Lagrangian polynomials. We
+                    # compute the Lagrangian polynomials for all interpolation nodes
+                    # inside the original range.
+                    L_1 = (x_new[interp_range] - x_hi) / (x_lo - x_hi)
+                    L_2 = (x_new[interp_range] - x_lo) / (x_hi - x_lo)
 
-                # In each row of C set the column with the corresponding
-                # index in lo to L_1 and the column with the corresponding
-                # index in hi to L_2.
-                for index, C_row in enumerate(C):
-                    if interp_range[index]:
-                        C_row[next(lo_it)] = next(L_1_it)
-                        C_row[next(hi_it)] = next(L_2_it)
-                # Compute the standard uncertainties avoiding to build the sparse
-                # covariance matrix diag(u_y^2). We reduce the equation C diag(u_y^2)
-                # C^T for now to a more efficient calculation, which will work as
-                # long as we deal with uncorrelated values, so that all information
-                # can be found on the diagonal of the covariance and thus the result
-                # matrix.
-                uy_new[interp_range] = np.sqrt(
-                    np.sum(C[interp_range] ** 2 * uy ** 2, 1)
-                )
-            else:
-                # Since we do not need the sensitivity matrix, we compute uncertainties
-                # more efficient (although we are actually not so sure about this
-                # anymore). The simplification of the equation by pulling out the
-                # denominator, just works because we work with the squared Lagrangians.
-                # Otherwise we would have to account for the summation order.
-                uy_prev_sqr = uy[lo] ** 2
-                uy_next_sqr = uy[hi] ** 2
-                uy_new[interp_range] = np.sqrt(
-                    (x_new[interp_range] - t_hi) ** 2 * uy_prev_sqr
-                    + (x_new[interp_range] - t_lo) ** 2 * uy_next_sqr
-                ) / (t_hi - t_lo)
+                    # Create iterators needed to efficiently fill our sensitivity matrix
+                    # in the rows corresponding to interpolation range.
+                    lo_it = iter(lo)
+                    hi_it = iter(hi)
+                    L_1_it = iter(L_1)
+                    L_2_it = iter(L_2)
+
+                    # In each row of C set the column with the corresponding
+                    # index in lo to L_1 and the column with the corresponding
+                    # index in hi to L_2.
+                    for index, C_row in enumerate(C):
+                        if interp_range[index]:
+                            C_row[next(lo_it)] = next(L_1_it)
+                            C_row[next(hi_it)] = next(L_2_it)
+                    # Compute the standard uncertainties avoiding to build the sparse
+                    # covariance matrix diag(u_y^2). We reduce the equation C diag(u_y^2)
+                    # C^T for now to a more efficient calculation, which will work as
+                    # long as we deal with uncorrelated values, so that all information
+                    # can be found on the diagonal of the covariance and thus the result
+                    # matrix.
+                    uy_new[interp_range] = np.sqrt(
+                        np.sum(C[interp_range] ** 2 * uy ** 2, 1)
+                    )
+                else:
+                    # Since we do not need the sensitivity matrix, we compute uncertainties
+                    # more efficient (although we are actually not so sure about this
+                    # anymore). The simplification of the equation by pulling out the
+                    # denominator, just works because we work with the squared Lagrangians.
+                    # Otherwise we would have to account for the summation order.
+                    uy_prev_sqr = uy[lo] ** 2
+                    uy_next_sqr = uy[hi] ** 2
+                    uy_new[interp_range] = np.sqrt(
+                        (x_new[interp_range] - x_hi) ** 2 * uy_prev_sqr
+                        + (x_new[interp_range] - x_lo) ** 2 * uy_next_sqr
+                    ) / (x_hi - x_lo)
+
+            elif kind == "cubic":
+                # Calculate the uncertainty by generating a spline of sensitivity
+                # coefficients. This procedure is described by eq. (19) of White2017.
+                F_is = []
+                for i in range(len(x)):
+                    x_temp = np.zeros_like(x)
+                    x_temp[i] = 1.0
+                    F_i = BSpline(*splrep(x, x_temp, k=3))
+                    F_is.append(F_i)
+
+                # Calculate sensitivity coefficients.
+                C[interp_range] = np.array([F_i(x_new[interp_range]) for F_i in F_is]).T
+                C_sqr = np.square(C[interp_range])
+
+                # if at some point time-uncertainties are of interest, White2017
+                # already provides the formulas (eq. (17))
+
+                # ut = np.zeros_like(t)
+                # ut_new = np.zeros_like(t_new)
+                # a1 = np.dot(C_sqr, np.square(uy))
+                # a2 = np.dot(
+                #     C_sqr,
+                #     np.squeeze(np.square(interp_y._spline(t, nu=1))) * np.square(ut),
+                # )
+                # a3 = np.square(np.squeeze(interp_y._spline(t_new, nu=1))) * np.square(
+                #     ut_new
+                # )
+                # uy_new[interp_range] = np.sqrt(a1 - a2 + a3)
+
+                # without consideration of time-uncertainty eq. (17) becomes
+                uy_new[interp_range] = np.sqrt(np.dot(C_sqr, np.square(uy)))
     else:
         raise NotImplementedError(
             f"interp1d_unc: The kind of interpolation '{kind}' is unsupported yet. Let "
@@ -349,8 +386,7 @@ def make_equidistant(
             desired interval length (defaults to 5e-2)
         kind : str, optional
             Specifies the kind of interpolation for y as a string ('previous',
-            'next', 'nearest' or 'linear'). Default is ‘linear’.
-
+            'next', 'nearest', 'linear' or 'cubic'). Default is ‘linear’.
     Returns
     -------
         x_new : (M,) array_like

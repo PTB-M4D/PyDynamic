@@ -5,8 +5,12 @@ propagation of uncertainty for the most common use cases in the analysis of
 dynamic measurements including filtering, Monte Carlo methods and time
 series interpolation.
 
-# See http://mathmet.org/projects/14SIP08 and
-# https://www.github.com/eichstaedtPTB/PyDynamic
+.. seealso::
+
+   `initial project website <https://www.euramet.org/research-innovation/search
+   -research-projects/details/project/standards-and-software-to-maximise-end-user
+   -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
+   `GitHub website <https://www.github.com/PTB-PSt1/PyDynamic>`_
 """
 
 from .propagate_DFT import (
