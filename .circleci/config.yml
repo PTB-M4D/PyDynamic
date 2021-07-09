@@ -129,10 +129,10 @@ workflows:
   nightly_test:
     triggers:
       - schedule:
-          cron: "0 19 * * *"
+          cron: "5 19 * * *"
           filters:
             branches:
-              
+              only: /*/
     jobs:
       # Create 'test' job to test PyDynamic every night thoroughly.
       - test:
