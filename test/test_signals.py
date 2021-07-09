@@ -2,18 +2,18 @@
 """ Perform tests on methods to create testsignals."""
 import matplotlib
 import numpy as np
-from hypothesis import given, strategies as hst
 import pytest
+from hypothesis import given, strategies as hst
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
 from examples.working_with_signals import demonstrate_signal
 from PyDynamic.misc.testsignals import (
     GaussianPulse,
+    multi_sine,
     rect,
     shocklikeGaussian,
     sine,
-    multi_sine,
     squarepulse,
 )
 
