@@ -24,7 +24,7 @@ The PyDynamic development process is based on the following guiding principles:
 
 ### Get the code on GitHub and locally
 
-For collaboration we recommend forking the repository as described 
+For collaboration, we recommend forking the repository as described 
 [here](https://help.github.com/en/articles/fork-a-repo). Simply apply the changes to
 your fork and open a Pull Request on GitHub as described
 [here](https://help.github.com/en/articles/creating-a-pull-request). For small
@@ -54,7 +54,7 @@ specific versions:
 You can then initially install or at any later time update
 all dependencies to the versions we use. From the repository root run _pip-tools_'
 command [`sync`](https://pypi.org/project/pip-tools/#example-usage-for-pip-sync)
-e.g. for Python 3.8:
+e.g., for Python 3.8:
 
 ```shell
 (PyDynamic_venv) $ python -m piptools sync requirements/dev-requirements-py38.txt 
@@ -87,8 +87,8 @@ automatically applied.
 
 ### Commit messages
 
-PyDynamic commit messages follow some conventions to be easily human and machine
-readable.
+PyDynamic commit messages follow some conventions to be easily human and 
+machine-readable.
 
 #### Commit message structure
 
@@ -109,7 +109,7 @@ releases as a result. We use the following types:
 - _build_: Commits that affect packaging
 - _ci_: Commits that affect the CI pipeline
 - _test_: Commits that apply significant changes to tests
-- _chore_: Commits that affect other non-PyDynamic components (e.g. ReadTheDocs, Git
+- _chore_: Commits that affect other non-PyDynamic components (e.g., ReadTheDocs, Git
 , ... )
 - _revert_: commits, which undo previous commits using `git revert`
 - _refactor_: commits that merely reformulate, rename or similar
@@ -157,7 +157,7 @@ existing features is accompanied by appropriate _pytest_ testing. We test the ba
 components for correctness and, if necessary, the integration into the big picture.
 It is usually sufficient to create
 [appropriately named](https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery)
-methods in one of the existing modules in the subfolder test. If necessary add
+methods in one of the existing modules in the subfolder test. If necessary, add
 a new module that is appropriately named.
 
 ## Workflow for adding completely new functionality
@@ -217,7 +217,7 @@ build abgeschlossen.
 The HTML pages are in docs/_build.
 ```
 
-After that you can open the file ./docs/_build/index.html relative to the project's
+After that, you can open the file ./docs/_build/index.html relative to the project's
 root with your favourite browser. Simply re-execute the above command after each
 change to the docstrings to update your local version of the documentation.
 
@@ -234,7 +234,7 @@ we describe here.
 
 ### Comments in the code
 
-Regarding comments in the code we recommend to invest 45 minutes for the PyCon DE
+Regarding comments in the code we recommend investing 45 minutes for the PyCon DE
 2019 Talk of Stefan Schwarzer, a 20+-years Python developer:
 [Commenting code - beyond common wisdom](https://www.youtube.com/watch?v=tP5uWCruaBs&list=PLHd2BPBhxqRLEhEaOFMWHBGpzyyF-ChZU&index=22&t=0s).
 
@@ -242,13 +242,13 @@ Regarding comments in the code we recommend to invest 45 minutes for the PyCon D
 
 As stated in the README and above we use
 [_pip-tools_](https://pypi.org/project/pip-tools/) for dependency management. The
-requirements subdirectory contains a _requirements.txt_ and a _dev-requirements.txt_
+requirements' subdirectory contains a _requirements.txt_ and a _dev-requirements.txt_
 for all supported Python versions, with a suffix naming the version, for example
 [_requirements-py36.txt_](https://github.com/PTB-M4D/PyDynamic/blob/master/requirements/requirements-py36.txt)
 To keep them up to date semi-automatically we use the bash script
 [_requirements/upgrade_dependencies.sh_](https://github.com/PTB-M4D/PyDynamic/blob/master/requirements/upgrade_dependencies.sh).
 It contains extensive comments on its use. _pip-tools_' command `pip-compile` finds
-the right versions from the dependencies liste in _setup.py_ and the
+the right versions from the dependencies listed in _setup.py_ and the
 _dev-requirements.in_.
 
 ## Licensing
