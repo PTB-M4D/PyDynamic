@@ -32,7 +32,7 @@ PyDynamic – Python package for the analysis of dynamic measurements
 
 <p align="justify">
 The goal of this package is to provide a starting point for users in metrology and
-related areas who deal with time-dependent i.e., *dynamic*, measurements. The
+related areas who deal with time-dependent i.e., <i>dynamic</i>, measurements. The
 initial version of this software was developed as part of a joint research project of
 the national metrology institutes from Germany and the UK, i.e.
 <a href="https://www.ptb.de/cms/en.html">Physikalisch-Technische Bundesanstalt</a> 
