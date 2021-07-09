@@ -639,7 +639,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
 
     # check if parallel computation is required
     # this allows to circumvent a multiprocessing-problem on windows-machines
-    # see: https://github.com/PTB-PSt1/PyDynamic/issues/84
+    # see: https://github.com/PTB-M4D/PyDynamic/issues/84
     if n_cpu == 1:
         map_func = map
     else:
