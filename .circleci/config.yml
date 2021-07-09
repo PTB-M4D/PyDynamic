@@ -50,17 +50,13 @@ commands:
   # Reusable command to prepare the environment for testing.
   create_venv:
     description: "Prepare virtual environment."
-    parameters:
-      pyenv:
-        type: string
-        default: "py38"
     steps:
     # Create PyDynamic virtual environment.
     - run:
         name: Create virtual environment
         command: |
-          python3 -m venv << parameters.pyenv >>
-          source << parameters.pyenv >>/bin/activate
+          python3 -m venv venv
+          source venv/bin/activate
           pip install --upgrade pip setuptools
 
   # Reusable command to install production dependencies.
@@ -76,7 +72,7 @@ commands:
     - run:
         name: Install production dependencies
         command: |
-          source << parameters.pyenv >>/bin/activate
+          source venv/bin/activate
           pip install -r requirements/requirements-<< parameters.pyenv >>.txt
 
   # Reusable command to install development dependencies.
@@ -92,15 +88,13 @@ commands:
     - run:
         name: Install development dependencies
         command: |
-          source << parameters.pyenv >>/bin/activate
+          source venv/bin/activate
           pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
 
   # Reusable command to conduct actual testing.
   tox:
     description: "Perform tox testing."
     parameters:
-      pyenv:
-        type: string
       posargs:
         type: string
         default: ""
@@ -110,8 +104,8 @@ commands:
     - run:
         name: Perform tox testing
         command: |
-          source << parameters.pyenv >>/bin/activate
-          tox -e << parameters.pyenv >> << parameters.posargs >>
+          source venv/bin/activate
+          tox << parameters.posargs >>
 
   # Reusable command to store the previously generated test results.
   store_results:
@@ -239,14 +233,12 @@ jobs:
     # Specify the steps to execute during this test jobs.
     steps:
       - create_folders
-      - create_venv:
-          pyenv: << parameters.pyenv >>
+      - create_venv
       - install_production_deps:
           pyenv: << parameters.pyenv >>
       - install_development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
-          pyenv: << parameters.pyenv >>
           posargs: << parameters.posargs >>
       - store_results
 
@@ -340,8 +332,7 @@ jobs:
 
     steps:
       - create_folders
-      - create_venv:
-          pyenv: ${PYENV}
+      - create_venv
       - install_production_deps:
           pyenv: ${PYENV}
       - install_development_deps:
@@ -362,8 +353,7 @@ jobs:
 
     steps:
       - create_folders
-      - create_venv:
-          pyenv: ${PYENV}
+      - create_venv
       - install_production_deps:
           pyenv: ${PYENV}
       - install_development_deps:
