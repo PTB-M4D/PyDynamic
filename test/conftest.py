@@ -7,4 +7,5 @@ from hypothesis import HealthCheck, settings
 # https://hypothesis.readthedocs.io/en/latest/healthchecks.html#hypothesis.HealthCheck
 # for some details.
 settings.register_profile("ci", suppress_health_check=(HealthCheck.too_slow,))
-settings.load_profile(os.getenv(u"CIRCLECI", "ci"))
+if os.getenv(u"CIRCLECI", "False") == "True":
+    settings.load_profile("ci")
