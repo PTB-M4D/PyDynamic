@@ -3,6 +3,7 @@
 import matplotlib
 import numpy as np
 from hypothesis import given, strategies as st
+import pytest
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
@@ -80,12 +81,14 @@ class TestSine:
     # Test the sine signal.
     hi_res_time = get_timestamps(0, 2 * np.pi, 1e-5)
 
+    @pytest.mark.slow
     def test_minimal_call_max_sine(self):
         x = sine(time)
         # Check for minimal callability and that maximum amplitude at
         # timestamps is below default.
         assert np.max(np.abs(x)) <= 1.0
 
+    @pytest.mark.slow
     def test_minimal_call_hi_res_max_sine(self):
         x = sine(self.hi_res_time)
         # Check for minimal callability with high resolution time vector and
@@ -97,6 +100,7 @@ class TestSine:
         st.floats(min_value=1, max_value=1e64, allow_infinity=False, allow_nan=False),
         st.integers(min_value=1, max_value=1000),
     )
+    @pytest.mark.slow
     def test_medium_call_freq_multiples_sine(self, freq, rep):
         # Create time vector with timestamps near multiples of frequency.
         fixed_freq_time = get_timestamps(time[0], rep * 1 / freq, 1 / freq)
@@ -106,6 +110,7 @@ class TestSine:
             assert_almost_equal(i_x, 0)
 
     @given(st.floats(min_value=0, exclude_min=True, allow_infinity=False))
+    @pytest.mark.slow
     def test_medium_call_max_sine(self, amp):
         # Test if casual timesignal's maximum equals the input amplitude.
 
@@ -115,6 +120,7 @@ class TestSine:
         assert np.max(np.abs(x)) <= amp
 
     @given(st.floats(min_value=0, exclude_min=True, allow_infinity=False))
+    @pytest.mark.slow
     def test_medium_call_hi_res_max_sine(self, amp):
         # Test if high-resoluted timesignal's maximum equals the input amplitude.
 
@@ -153,6 +159,7 @@ class TestSine:
         assert_almost_equal(x, multi_x)
 
 
+@pytest.mark.slow
 def test_signal_example(monkeypatch):
     # Test executability of the demonstrate_signal example.
     # With this expression we override the matplotlib.pyplot.show method with a
