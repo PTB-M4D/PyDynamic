@@ -102,7 +102,7 @@ pip install --user PyDynamic
 
 This will download the latest version from the Python package repository
 and copy it into your local folder of third-party libraries. Note that
-PyDynamic runs with **Python versions 3.6 to 3.8**. Usage in any Python
+PyDynamic runs with **Python versions 3.6 to 3.9**. Usage in any Python
 environment on your computer is then possible by
 
 ```python
@@ -202,7 +202,7 @@ Collecting pip-tools
 [...]
 Successfully installed pip-tools-5.2.1
 (PyDynamic_venv) $ python --version
-Python 3.8.3
+Python 3.8.8
 (PyDynamic_venv) $ pip-sync requirements/dev-requirements-py38.txt requirements/requirements-py38.txt
 Collecting [...]
 [...]
