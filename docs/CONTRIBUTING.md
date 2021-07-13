@@ -41,7 +41,7 @@ version. To find it, activate the desired virtual environment and execute:
 
 ```shell
 (PyDynamic_venv) $ python --version
-Python 3.8.3
+Python 3.8.8
 ```
 
 Then upgrade/install _pip_ and _pip-tools_ which we use to pin our dependencies to
@@ -54,11 +54,10 @@ specific versions:
 You can then initially install or at any later time update
 all dependencies to the versions we use. From the repository root run _pip-tools_'
 command [`sync`](https://pypi.org/project/pip-tools/#example-usage-for-pip-sync)
-e.g., for Python 3.8:
+e.g., for Python 3.9:
 
 ```shell
-(PyDynamic_venv) $ python -m piptools sync requirements/dev-requirements-py38.txt 
-requirements/requirements-py38.txt
+(PyDynamic_venv) $ python -m piptools sync requirements/dev-requirements-py39.txt requirements/requirements-py39.txt
 ```
 
 ### Advised toolset
