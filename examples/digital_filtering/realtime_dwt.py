@@ -4,7 +4,6 @@
     
     The script runs infinitely and can be stopped by pressing "Ctrl + c".
 """
-import itertools
 import random
 import time as tm
 
