@@ -86,16 +86,20 @@ def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1
     # init states if not given
     if not states:
         states = {
-            "low": IIR_get_initial_state(lowpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
-            "high": IIR_get_initial_state(highpass, [1.0], Uab=None, x0=x[0], U0=Ux[0]),
+            "low": IIR_get_initial_state(
+                lowpass, np.ones(1), Uab=None, x0=x[0], U0=Ux[0]
+            ),
+            "high": IIR_get_initial_state(
+                highpass, np.ones(1), Uab=None, x0=x[0], U0=Ux[0]
+            ),
         }
 
     # propagate uncertainty through FIR-filter
     c_approx, U_approx, states["low"] = IIRuncFilter(
-        x, Ux, lowpass, [1.0], Uab=None, kind="diag", state=states["low"]
+        x, Ux, lowpass, np.ones(1), Uab=None, kind="diag", state=states["low"]
     )
     c_detail, U_detail, states["high"] = IIRuncFilter(
-        x, Ux, highpass, [1.0], Uab=None, kind="diag", state=states["high"]
+        x, Ux, highpass, np.ones(1), Uab=None, kind="diag", state=states["high"]
     )
 
     # subsample to half the length
@@ -168,17 +172,30 @@ def inv_dwt(
     if not states:
         states = {
             "low": IIR_get_initial_state(
-                lowpass, [1.0], Uab=None, x0=0, U0=0
-            ),  # the value before the first entry is a zero, if the upsampling would continue into the past
-            "high": IIR_get_initial_state(highpass, [1.0], Uab=None, x0=0, U0=0),
+                lowpass, np.ones(1), Uab=None, x0=0, U0=0
+            ),  # the value before the first entry is a zero, if the upsampling would
+            # continue into the past
+            "high": IIR_get_initial_state(highpass, np.ones(1), Uab=None, x0=0, U0=0),
         }
 
     # propagate uncertainty through FIR-filter
     x_approx, Ux_approx, states["low"] = IIRuncFilter(
-        c_approx, U_approx, lowpass, [1.0], Uab=None, kind="diag", state=states["low"]
+        c_approx,
+        U_approx,
+        lowpass,
+        np.ones(1),
+        Uab=None,
+        kind="diag",
+        state=states["low"],
     )
     x_detail, Ux_detail, states["high"] = IIRuncFilter(
-        c_detail, U_detail, highpass, [1.0], Uab=None, kind="diag", state=states["high"]
+        c_detail,
+        U_detail,
+        highpass,
+        np.ones(1),
+        Uab=None,
+        kind="diag",
+        state=states["high"],
     )
 
     # add both parts
