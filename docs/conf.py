@@ -46,7 +46,7 @@ extensions = [
 # https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
 html_theme_options = {
     # True hides the + signs to expand the menu entries in the sidebar.
-    'collapse_navigation': False,
+    "collapse_navigation": False,
 }
 
 # This should make SciPy documentation available inside our docs.
@@ -61,7 +61,7 @@ intersphinx_mapping = {
         None,
     ),
     "Python": ("https://docs.python.org/3", None),
-
+    "pywt": (" https://pywavelets.readthedocs.io/en/latest/", None),
 }
 
 nbsphinx_allow_errors = True

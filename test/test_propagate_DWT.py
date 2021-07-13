@@ -39,7 +39,7 @@ def test_dwt():
             x = np.random.randn(nx)
             Ux = 0.1 * (1 + np.random.random(nx))
 
-            ld, hd, lr, hr = filter_design(filter_name)
+            ld, hd, _, _ = filter_design(filter_name)
 
             # execute single level DWT
             y1, Uy1, y2, Uy2, _ = dwt(x, Ux, ld, hd)
@@ -88,7 +88,7 @@ def test_inv_dwt():
             assert np.allclose(x, r)
 
 
-def test_identity_single(make_plots=False):
+def test_identity_single():
     """Test that x = inv_dwt(dwt(x)) for a single level DWT"""
 
     for filter_name in ["db3", "db4"]:
@@ -132,7 +132,7 @@ def test_wave_dec():
 
             ld, hd, lr, hr = filter_design(filter_name)
 
-            coeffs, Ucoeffs, ol = wave_dec(x, Ux, ld, hd)
+            coeffs, _, _ = wave_dec(x, Ux, ld, hd)
 
             # compare to the output of PyWavelet
             result_pywt = pywt.wavedec(x, filter_name, mode="constant")
@@ -148,7 +148,7 @@ def test_wave_dec():
 
 def test_decomposition_realtime():
     """Check if repetitive calls to :func:`wave_dec_realtime` yield the same
-    result as a single call to the same function. (Because of different treatment 
+    result as a single call to the same function. (Because of different treatment
     of initial conditions, this can't be directly compared to :func:`wave_dec`.)
     """
     for filter_name in ["db2", "db3"]:
@@ -158,10 +158,10 @@ def test_decomposition_realtime():
             x = np.random.randn(nx)
             Ux = 0.1 * (1 + np.random.random(nx))
 
-            ld, hd, lr, hr = filter_design(filter_name)
+            ld, hd, _, _ = filter_design(filter_name)
 
             # run x all at once
-            coeffs_a, Ucoeffs_a, ol_a, z_a = wave_dec_realtime(x, Ux, ld, hd, n=2)
+            coeffs_a, Ucoeffs_a, _, _ = wave_dec_realtime(x, Ux, ld, hd, n=2)
 
             # slice x into smaller chunks and process them in batches
             # this tests the internal state options
@@ -172,7 +172,7 @@ def test_decomposition_realtime():
             for x_batch, Ux_batch in zip(
                 np.array_split(x, n_splits), np.array_split(Ux, n_splits)
             ):
-                coeffs_b, Ucoeffs_b, ol_b, z_b = wave_dec_realtime(
+                coeffs_b, Ucoeffs_b, _, z_b = wave_dec_realtime(
                     x_batch, Ux_batch, ld, hd, n=2, level_states=z_b
                 )
                 coeffs_list.append(coeffs_b)
@@ -219,9 +219,9 @@ def test_wave_rec():
                 Ucoeffs.append(np.random.random(i))
 
             # define a filter
-            ld, hd, lr, hr = filter_design(filter_name)
+            _, _, lr, hr = filter_design(filter_name)
 
-            x, Ux = wave_rec(coeffs, Ucoeffs, lr, hr)
+            x, _ = wave_rec(coeffs, Ucoeffs, lr, hr)
 
             # compare to the output of PyWavelet
             result_pywt = pywt.waverec(coeffs, filter_name, mode="constant")
@@ -238,7 +238,7 @@ def test_identity_multi():
         for nx in [20, 21, 203]:
 
             x = np.linspace(1, nx, nx)
-            Ux = np.ones((nx))
+            Ux = np.ones(nx)
             Ux[nx // 2 :] = 2
             Ux = 0.1 * Ux
 

@@ -309,7 +309,7 @@ def FIRuncFilter(
     ## Computation is then based on eq. 33 [Elster2008]_ - which is substantially
     ## faster (typically by orders of magnitude) when compared to the full covariance
     ## calculation.
-    ## Check this example: <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
+    ## Check this example: <examples\digital_filtering\FIRuncFilter_runtime_comparison.py>
 
     # note to user
     if not return_full_covariance:
@@ -457,7 +457,7 @@ def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
         (first-order Taylor series of the) GUM, whereas FIRuncFilter takes full
         variance information into account (which leads to an additional term).
         This is documented in the description of formula (33) of [Elster2008]_ .
-        The difference can be visualized by running `PyDynamic/examples/Digital filtering/validate_FIR_IIR_MC.py`
+        The difference can be visualized by running `PyDynamic/examples/digital_filtering/validate_FIR_IIR_MC.py`
 
     References
     ----------
