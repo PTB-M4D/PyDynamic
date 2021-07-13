@@ -31,7 +31,7 @@ certifi==2021.5.30
     # via requests
 cffi==1.14.6
     # via cryptography
-chardet==4.0.0
+charset-normalizer==2.0.0
     # via requests
 click==8.0.1
     # via
@@ -73,7 +73,7 @@ gitpython==3.1.18
     # via python-semantic-release
 hypothesis==6.14.2
     # via -r requirements/dev-requirements.in
-idna==2.10
+idna==3.2
     # via requests
 imagesize==1.2.0
     # via sphinx
@@ -200,7 +200,7 @@ recommonmark==0.7.1
     # via -r requirements/dev-requirements.in
 regex==2021.7.6
     # via black
-requests==2.25.1
+requests==2.26.0
     # via
     #   python-gitlab
     #   python-semantic-release
