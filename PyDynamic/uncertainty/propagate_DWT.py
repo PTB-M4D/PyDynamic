@@ -364,7 +364,7 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
     level_states : dict
         last internal state
     """
-    if level_states == None:
+    if level_states is None:
         level_states = {level: None for level in range(n)}
         level_states["counter"] = 0
 
