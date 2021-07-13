@@ -42,9 +42,9 @@ six==1.16.0
     # via
     #   cycler
     #   python-dateutil
-sympy==1.7.1
+sympy==1.8
     # via PyDynamic (setup.py)
 time-series-buffer==0.1.4b0
     # via PyDynamic (setup.py)
-uncertainties==3.1.5
+uncertainties==3.1.6
     # via time-series-buffer
