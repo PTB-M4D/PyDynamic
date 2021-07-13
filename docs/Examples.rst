@@ -2,7 +2,7 @@ Examples
 ========
 
 On the project website in the *examples* and *tutorials* subfolders and the separate
-`PyDynamic_tutorials <https://github.com/PTB-PSt1/PyDynamic_tutorials>`_
+`PyDynamic_tutorials <https://github.com/PTB-M4D/PyDynamic_tutorials>`_
 repository you can find various examples illustrating the application of PyDynamic.
 Here is just a short list to get you started.
 
