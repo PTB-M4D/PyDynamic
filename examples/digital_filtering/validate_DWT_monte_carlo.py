@@ -1,11 +1,8 @@
-"""
-    Small script to validate DWT methdos with Monte-Carlo simulations.
-"""
+"""Small script to validate DWT methods with Monte-Carlo simulations"""
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pywt
-import scipy.signal as scs
 
 from PyDynamic.uncertainty.propagate_DWT import dwt, filter_design, inv_dwt
 
@@ -18,7 +15,7 @@ for filter_name in ["db9"]:
 
         # define input signal and uncertainty of input signal
         x = np.clip(np.linspace(1, nx, nx), -10, 30)
-        Ux = np.ones((nx))
+        Ux = np.ones(nx)
         Ux[nx // 2 :] = 2
         Ux = 1.0 * Ux
 
@@ -57,30 +54,30 @@ for filter_name in ["db9"]:
         fig, ax = plt.subplots(nrows=2, ncols=1)
 
         # plot coefficients
-        ## plot pydynamic dwt results
+        # plot pydynamic dwt results
         ax[0].plot(c_approx, color="r", label="cA")
         ax[0].plot(c_approx + U_approx, color="r", linestyle=":", label="cA + unc")
         ax[0].plot(c_approx - U_approx, color="r", linestyle=":", label="cA - unc")
-        ## plot monte carlo results
+        # plot monte carlo results
         ax[0].plot(c_mc_mean, color="k", label="cA_mc mean")
         ax[0].plot(c_mc_mean + c_mc_std, color="k", linestyle=":", label="cA_mc + std")
         ax[0].plot(c_mc_mean - c_mc_std, color="k", linestyle=":", label="cA_mc - std")
 
         # plot time series
-        ## plot input
+        # plot input
         ax[1].plot(x, color="c", label="x")
         ax[1].plot(x + Ux, color="c", linestyle=":", label="x + Ux")
         ax[1].plot(x - Ux, color="c", linestyle=":", label="x - Ux")
-        ## plot pydynamic restoration
+        # plot pydynamic restoration
         ax[1].plot(xr, color="r", label="xr")
         ax[1].plot(xr + Uxr, color="r", linestyle=":", label="xr + Uxr")
         ax[1].plot(xr - Uxr, color="r", linestyle=":", label="xr - Uxr")
-        ## plot monte carlo results
+        # plot monte carlo results
         ax[1].plot(xr_mc_mean, color="k", label="x_mc_mean")
         ax[1].plot(xr_mc_mean + xr_mc_std, color="k", linestyle=":", label="x_mc + std")
         ax[1].plot(xr_mc_mean - xr_mc_std, color="k", linestyle=":", label="x_mc - std")
 
-        ## show plot
+        # show plot
         ax[0].legend()
         ax[1].legend()
         plt.show()

@@ -1,26 +1,19 @@
 """
     Example how the discrete wavelet transformation can run continuously,
     by repetitive calls of :func:`wave_dec_realtime`.
-    
+
     The script runs infinitely and can be stopped by pressing "Ctrl + c".
 """
-import itertools
 import random
-import time as tm
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.signal as scs
-from matplotlib import rc
-from matplotlib.patches import Circle
 from time_series_buffer import TimeSeriesBuffer as Buffer
 
 import PyDynamic.uncertainty.propagate_DWT as wavelet
-from PyDynamic.misc.testsignals import rect
 
 
 def main():
-
     # basics
     buffer_length = 120
     signal = Buffer(maxlen=buffer_length, return_type="arrays")
@@ -30,7 +23,7 @@ def main():
     cycle_counter = 0
 
     # init wavelet stuff
-    ld, hd, lr, hr = wavelet.filter_design("db2")
+    ld, hd, _, _ = wavelet.filter_design("db2")
     dwt_length = 21
 
     # init multi level wavelet stuff
@@ -42,7 +35,8 @@ def main():
         buffer_length // 2 ** level for level in output_multi_level
     ]
     output_multi = [
-        Buffer(maxlen=maxlen, return_type="arrays") for maxlen in output_multi_buffer_maxlen
+        Buffer(maxlen=maxlen, return_type="arrays")
+        for maxlen in output_multi_buffer_maxlen
     ]  # list of buffer (different lengths to approximately cover the same timespan)
     level_states = None
 
@@ -90,7 +84,7 @@ def main():
             t, _, v, u = signal.show(dwt_length)
 
             # multi level dwt with uncertainty
-            coeffs, Ucoeffs, ol, level_states = wavelet.wave_dec_realtime(
+            coeffs, Ucoeffs, _, level_states = wavelet.wave_dec_realtime(
                 v, u, ld, hd, n=n_levels, level_states=level_states
             )
 
@@ -103,7 +97,9 @@ def main():
                 coeffs, Ucoeffs, output_multi, output_multi_level
             ):
                 time_indices_level = (time_indices + 1) % 2 ** level == 0
-                if time_indices_level.sum() > 0: # otherwise error from time-series-buffer
+                if (
+                    time_indices_level.sum() > 0
+                ):  # otherwise error from time-series-buffer
                     buffer.add(time=t[time_indices_level], val=c, val_unc=u)
 
             dwt_counter = 0
@@ -121,10 +117,10 @@ def main():
         ):  # skip plotting at startup, when buffer is still not fully filled
             # update plot
 
-            ## get data to plot
+            # get data to plot
             t_signal, _, v_signal, u_signal = signal.show(-1)
 
-            ## update signal lines
+            # update signal lines
             sm.set_xdata(t_signal)
             su.set_xdata(t_signal)
             sl.set_xdata(t_signal)
@@ -135,7 +131,7 @@ def main():
 
             # update dwt lines
             for buffer, _ax, c_line in zip(output_multi[::-1], ax[1:], c_lines):
-                if len(buffer) > 0: # otherwise error from time-series-buffer
+                if len(buffer) > 0:  # otherwise error from time-series-buffer
                     t_coeff, _, v_coeff, u_coeff = buffer.show(-1)
 
                     # change the scatter
@@ -162,7 +158,6 @@ def main():
                         lim = [np.min(lower_unc), np.max(upper_unc)]
                         _ax.set_ylim(lim)
 
-
             # finally update the plot itself
             fig.tight_layout()
             fig.align_ylabels(ax)
@@ -171,7 +166,6 @@ def main():
 
             # reset plot counter
             plot_counter = 0
-
 
 
 if __name__ == "__main__":

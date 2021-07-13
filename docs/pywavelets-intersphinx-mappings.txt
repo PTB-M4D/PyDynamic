@@ -1,0 +1,230 @@
+py:attribute
+	pywt.ContinuousWavelet.bandwidth_frequency ref/wavelets.html#pywt.ContinuousWavelet.bandwidth_frequency
+	pywt.ContinuousWavelet.biorthogonal      ref/wavelets.html#pywt.ContinuousWavelet.biorthogonal
+	pywt.ContinuousWavelet.center_frequency  ref/wavelets.html#pywt.ContinuousWavelet.center_frequency
+	pywt.ContinuousWavelet.complex_cwt       ref/wavelets.html#pywt.ContinuousWavelet.complex_cwt
+	pywt.ContinuousWavelet.family_name       ref/wavelets.html#pywt.ContinuousWavelet.family_name
+	pywt.ContinuousWavelet.fbsp_order        ref/wavelets.html#pywt.ContinuousWavelet.fbsp_order
+	pywt.ContinuousWavelet.lower_bound       ref/wavelets.html#pywt.ContinuousWavelet.lower_bound
+	pywt.ContinuousWavelet.name              ref/wavelets.html#pywt.ContinuousWavelet.name
+	pywt.ContinuousWavelet.orthogonal        ref/wavelets.html#pywt.ContinuousWavelet.orthogonal
+	pywt.ContinuousWavelet.short_family_name ref/wavelets.html#pywt.ContinuousWavelet.short_family_name
+	pywt.ContinuousWavelet.symmetry          ref/wavelets.html#pywt.ContinuousWavelet.symmetry
+	pywt.ContinuousWavelet.upper_bound       ref/wavelets.html#pywt.ContinuousWavelet.upper_bound
+	pywt.Wavelet.biorthogonal                ref/wavelets.html#pywt.Wavelet.biorthogonal
+	pywt.Wavelet.dec_hi                      ref/wavelets.html#pywt.Wavelet.dec_hi
+	pywt.Wavelet.dec_len                     ref/wavelets.html#pywt.Wavelet.dec_len
+	pywt.Wavelet.dec_lo                      ref/wavelets.html#pywt.Wavelet.dec_lo
+	pywt.Wavelet.family_name                 ref/wavelets.html#pywt.Wavelet.family_name
+	pywt.Wavelet.filter_bank                 ref/wavelets.html#pywt.Wavelet.filter_bank
+	pywt.Wavelet.inverse_filter_bank         ref/wavelets.html#pywt.Wavelet.inverse_filter_bank
+	pywt.Wavelet.name                        ref/wavelets.html#pywt.Wavelet.name
+	pywt.Wavelet.orthogonal                  ref/wavelets.html#pywt.Wavelet.orthogonal
+	pywt.Wavelet.rec_hi                      ref/wavelets.html#pywt.Wavelet.rec_hi
+	pywt.Wavelet.rec_len                     ref/wavelets.html#pywt.Wavelet.rec_len
+	pywt.Wavelet.rec_lo                      ref/wavelets.html#pywt.Wavelet.rec_lo
+	pywt.Wavelet.short_family_name           ref/wavelets.html#pywt.Wavelet.short_family_name
+	pywt.Wavelet.short_name                  ref/wavelets.html#pywt.Wavelet.short_name
+	pywt.Wavelet.symmetry                    ref/wavelets.html#pywt.Wavelet.symmetry
+	pywt.Wavelet.vanishing_moments_phi       ref/wavelets.html#pywt.Wavelet.vanishing_moments_phi
+	pywt.Wavelet.vanishing_moments_psi       ref/wavelets.html#pywt.Wavelet.vanishing_moments_psi
+	pywt.WaveletPacket.node_name             ref/wavelet-packets.html#pywt.WaveletPacket.node_name
+	pywt.WaveletPacket2D.data                ref/wavelet-packets.html#pywt.WaveletPacket2D.data
+	pywt.WaveletPacket2D.has_any_subnode     ref/wavelet-packets.html#pywt.WaveletPacket2D.has_any_subnode
+	pywt.WaveletPacket2D.is_empty            ref/wavelet-packets.html#pywt.WaveletPacket2D.is_empty
+	pywt.WaveletPacket2D.level               ref/wavelet-packets.html#pywt.WaveletPacket2D.level
+	pywt.WaveletPacket2D.maxlevel            ref/wavelet-packets.html#pywt.WaveletPacket2D.maxlevel
+	pywt.WaveletPacket2D.mode                ref/wavelet-packets.html#pywt.WaveletPacket2D.mode
+	pywt.WaveletPacket2D.node_name           ref/wavelet-packets.html#pywt.WaveletPacket2D.node_name
+	pywt.WaveletPacket2D.parent              ref/wavelet-packets.html#pywt.WaveletPacket2D.parent
+	pywt.WaveletPacket2D.path                ref/wavelet-packets.html#pywt.WaveletPacket2D.path
+	pywt.WaveletPacket2D.wavelet             ref/wavelet-packets.html#pywt.WaveletPacket2D.wavelet
+py:class
+	pywt.BaseNode                            ref/wavelet-packets.html#pywt.BaseNode
+	pywt.ContinuousWavelet                   ref/wavelets.html#pywt.ContinuousWavelet
+	pywt.FswavedecnResult                    ref/nd-dwt-and-idwt.html#pywt.FswavedecnResult
+	pywt.Node                                ref/wavelet-packets.html#pywt.Node
+	pywt.Node2D                              ref/wavelet-packets.html#pywt.Node2D
+	pywt.Wavelet                             ref/wavelets.html#pywt.Wavelet
+	pywt.WaveletPacket                       ref/wavelet-packets.html#pywt.WaveletPacket
+	pywt.WaveletPacket2D                     ref/wavelet-packets.html#pywt.WaveletPacket2D
+py:function
+	pywt.array_to_coeffs                     ref/dwt-coefficient-handling.html#pywt.array_to_coeffs
+	pywt.central_frequency                   ref/other-functions.html#pywt.central_frequency
+	pywt.coeffs_to_array                     ref/dwt-coefficient-handling.html#pywt.coeffs_to_array
+	pywt.cwt                                 ref/cwt.html#pywt.cwt
+	pywt.data.demo_signal                    ref/other-functions.html#pywt.data.demo_signal
+	pywt.downcoef                            ref/dwt-discrete-wavelet-transform.html#pywt.downcoef
+	pywt.dwt                                 ref/dwt-discrete-wavelet-transform.html#pywt.dwt
+	pywt.dwt2                                ref/2d-dwt-and-idwt.html#pywt.dwt2
+	pywt.dwt_coeff_len                       ref/dwt-discrete-wavelet-transform.html#pywt.dwt_coeff_len
+	pywt.dwt_max_level                       ref/dwt-discrete-wavelet-transform.html#pywt.dwt_max_level
+	pywt.dwtn                                ref/nd-dwt-and-idwt.html#pywt.dwtn
+	pywt.dwtn_max_level                      ref/dwt-discrete-wavelet-transform.html#pywt.dwtn_max_level
+	pywt.families                            ref/wavelets.html#pywt.families
+	pywt.fswavedecn                          ref/nd-dwt-and-idwt.html#pywt.fswavedecn
+	pywt.fswaverecn                          ref/nd-dwt-and-idwt.html#pywt.fswaverecn
+	pywt.idwt                                ref/idwt-inverse-discrete-wavelet-transform.html#pywt.idwt
+	pywt.idwt2                               ref/2d-dwt-and-idwt.html#pywt.idwt2
+	pywt.idwtn                               ref/nd-dwt-and-idwt.html#pywt.idwtn
+	pywt.integrate_wavelet                   ref/other-functions.html#pywt.integrate_wavelet
+	pywt.iswt                                ref/iswt-inverse-stationary-wavelet-transform.html#pywt.iswt
+	pywt.iswt2                               ref/iswt-inverse-stationary-wavelet-transform.html#pywt.iswt2
+	pywt.iswtn                               ref/iswt-inverse-stationary-wavelet-transform.html#pywt.iswtn
+	pywt.orthogonal_filter_bank              ref/other-functions.html#pywt.orthogonal_filter_bank
+	pywt.pad                                 ref/signal-extension-modes.html#pywt.pad
+	pywt.qmf                                 ref/other-functions.html#pywt.qmf
+	pywt.ravel_coeffs                        ref/dwt-coefficient-handling.html#pywt.ravel_coeffs
+	pywt.scale2frequency                     ref/other-functions.html#pywt.scale2frequency
+	pywt.swt                                 ref/swt-stationary-wavelet-transform.html#pywt.swt
+	pywt.swt2                                ref/swt-stationary-wavelet-transform.html#pywt.swt2
+	pywt.swt_max_level                       ref/swt-stationary-wavelet-transform.html#pywt.swt_max_level
+	pywt.swtn                                ref/swt-stationary-wavelet-transform.html#pywt.swtn
+	pywt.threshold                           ref/thresholding-functions.html#pywt.threshold
+	pywt.threshold_firm                      ref/thresholding-functions.html#pywt.threshold_firm
+	pywt.unravel_coeffs                      ref/dwt-coefficient-handling.html#pywt.unravel_coeffs
+	pywt.upcoef                              ref/idwt-inverse-discrete-wavelet-transform.html#pywt.upcoef
+	pywt.wavedec                             ref/dwt-discrete-wavelet-transform.html#pywt.wavedec
+	pywt.wavedec2                            ref/2d-dwt-and-idwt.html#pywt.wavedec2
+	pywt.wavedecn                            ref/nd-dwt-and-idwt.html#pywt.wavedecn
+	pywt.wavedecn_shapes                     ref/dwt-coefficient-handling.html#pywt.wavedecn_shapes
+	pywt.wavedecn_size                       ref/dwt-coefficient-handling.html#pywt.wavedecn_size
+	pywt.wavelist                            ref/wavelets.html#pywt.wavelist
+	pywt.waverec                             ref/idwt-inverse-discrete-wavelet-transform.html#pywt.waverec
+	pywt.waverec2                            ref/2d-dwt-and-idwt.html#pywt.waverec2
+	pywt.waverecn                            ref/nd-dwt-and-idwt.html#pywt.waverecn
+py:method
+	pywt.ContinuousWavelet.wavefun           ref/wavelets.html#pywt.ContinuousWavelet.wavefun
+	pywt.DiscreteContinuousWavelet           ref/wavelets.html#pywt.DiscreteContinuousWavelet
+	pywt.Wavelet.wavefun                     ref/wavelets.html#pywt.Wavelet.wavefun
+	pywt.WaveletPacket.__init__              ref/wavelet-packets.html#pywt.WaveletPacket.__init__
+	pywt.WaveletPacket.decompose             ref/wavelet-packets.html#pywt.WaveletPacket.decompose
+	pywt.WaveletPacket.get_level             ref/wavelet-packets.html#pywt.WaveletPacket.get_level
+	pywt.WaveletPacket2D.__delitem__         ref/wavelet-packets.html#pywt.WaveletPacket2D.__delitem__
+	pywt.WaveletPacket2D.__getitem__         ref/wavelet-packets.html#pywt.WaveletPacket2D.__getitem__
+	pywt.WaveletPacket2D.__init__            ref/wavelet-packets.html#pywt.WaveletPacket2D.__init__
+	pywt.WaveletPacket2D.__setitem__         ref/wavelet-packets.html#pywt.WaveletPacket2D.__setitem__
+	pywt.WaveletPacket2D.decompose           ref/wavelet-packets.html#pywt.WaveletPacket2D.decompose
+	pywt.WaveletPacket2D.get_leaf_nodes      ref/wavelet-packets.html#pywt.WaveletPacket2D.get_leaf_nodes
+	pywt.WaveletPacket2D.get_level           ref/wavelet-packets.html#pywt.WaveletPacket2D.get_level
+	pywt.WaveletPacket2D.get_subnode         ref/wavelet-packets.html#pywt.WaveletPacket2D.get_subnode
+	pywt.WaveletPacket2D.reconstruct         ref/wavelet-packets.html#pywt.WaveletPacket2D.reconstruct
+	pywt.WaveletPacket2D.walk                ref/wavelet-packets.html#pywt.WaveletPacket2D.walk
+	pywt.WaveletPacket2D.walk_depth          ref/wavelet-packets.html#pywt.WaveletPacket2D.walk_depth
+std:doc
+	common_refs                              <no title>                              : common_refs.html
+	contributing                             Contributing                            : contributing.html
+	dev/building_extension                   Building and installing PyWavelets      : dev/building_extension.html
+	dev/conduct/code_of_conduct              PyWavelets Code of Conduct              : dev/conduct/code_of_conduct.html
+	dev/conduct/report_handling_manual       PyWavelets Code of Conduct - How to follow up on a report: dev/conduct/report_handling_manual.html
+	dev/how_to_release                       Guidelines for Releasing PyWavelets     : dev/how_to_release.html
+	dev/index                                Development guide                       : dev/index.html
+	dev/installing_build_dependencies        Installing build dependencies           : dev/installing_build_dependencies.html
+	dev/preparing_linux_build_environment    Preparing Linux build environment       : dev/preparing_linux_build_environment.html
+	dev/preparing_windows_build_environment  Preparing Windows build environment     : dev/preparing_windows_build_environment.html
+	dev/testing                              Testing                                 : dev/testing.html
+	index                                    PyWavelets - Wavelet Transforms in Python: index.html
+	install                                  Installing                              : install.html
+	ref/2d-decompositions-overview           Overview of multilevel wavelet decompositions: ref/2d-decompositions-overview.html
+	ref/2d-dwt-and-idwt                      2D Forward and Inverse Discrete Wavelet Transform: ref/2d-dwt-and-idwt.html
+	ref/cwt                                  Continuous Wavelet Transform (CWT)      : ref/cwt.html
+	ref/dwt-coefficient-handling             Handling DWT Coefficients               : ref/dwt-coefficient-handling.html
+	ref/dwt-discrete-wavelet-transform       Discrete Wavelet Transform (DWT)        : ref/dwt-discrete-wavelet-transform.html
+	ref/idwt-inverse-discrete-wavelet-transform Inverse Discrete Wavelet Transform (IDWT): ref/idwt-inverse-discrete-wavelet-transform.html
+	ref/index                                API Reference                           : ref/index.html
+	ref/iswt-inverse-stationary-wavelet-transform Inverse Stationary Wavelet Transform    : ref/iswt-inverse-stationary-wavelet-transform.html
+	ref/nd-dwt-and-idwt                      nD Forward and Inverse Discrete Wavelet Transform: ref/nd-dwt-and-idwt.html
+	ref/other-functions                      Other functions                         : ref/other-functions.html
+	ref/signal-extension-modes               Signal extension modes                  : ref/signal-extension-modes.html
+	ref/swt-stationary-wavelet-transform     Stationary Wavelet Transform            : ref/swt-stationary-wavelet-transform.html
+	ref/thresholding-functions               Thresholding functions                  : ref/thresholding-functions.html
+	ref/wavelet-packets                      Wavelet Packets                         : ref/wavelet-packets.html
+	ref/wavelets                             Wavelets                                : ref/wavelets.html
+	regression/dwt-idwt                      DWT and IDWT                            : regression/dwt-idwt.html
+	regression/gotchas                       Gotchas                                 : regression/gotchas.html
+	regression/index                         Usage examples                          : regression/index.html
+	regression/modes                         Signal Extension Modes                  : regression/modes.html
+	regression/multilevel                    Multilevel DWT, IDWT and SWT            : regression/multilevel.html
+	regression/wavelet                       The Wavelet object                      : regression/wavelet.html
+	regression/wp                            Wavelet Packets                         : regression/wp.html
+	regression/wp2d                          2D Wavelet Packets                      : regression/wp2d.html
+	release.0.3.0                            PyWavelets 0.3.0 Release Notes          : release.0.3.0.html
+	release.0.4.0                            PyWavelets 0.4.0 Release Notes          : release.0.4.0.html
+	release.0.5.0                            PyWavelets 0.5.0 Release Notes          : release.0.5.0.html
+	release.0.5.1                            PyWavelets 0.5.1 Release Notes          : release.0.5.1.html
+	release.0.5.2                            PyWavelets 0.5.2 Release Notes          : release.0.5.2.html
+	release.1.0.0                            PyWavelets 1.0.0 Release Notes          : release.1.0.0.html
+	release.1.0.1                            PyWavelets 1.0.1 Release Notes          : release.1.0.1.html
+	release.1.0.2                            PyWavelets 1.0.2 Release Notes          : release.1.0.2.html
+	release.1.0.3                            PyWavelets 1.0.3 Release Notes          : release.1.0.3.html
+	release.1.1.0                            PyWavelets 1.1.0 Release Notes          : release.1.1.0.html
+	release.1.1.1                            PyWavelets 1.1.1 Release Notes          : release.1.1.1.html
+	releasenotes                             Release Notes                           : releasenotes.html
+std:label
+	coc                                      PyWavelets Code of Conduct              : dev/conduct/code_of_conduct.html#coc
+	coc_reporting_manual                     PyWavelets Code of Conduct - How to follow up on a report: dev/conduct/report_handling_manual.html#coc-reporting-manual
+	coc_resolutions                          Resolutions                             : dev/conduct/report_handling_manual.html#coc-resolutions
+	custom-wavelets                          Using custom wavelets                   : ref/wavelets.html#custom-wavelets
+	dev-building-extension                   Building and installing PyWavelets      : dev/building_extension.html#dev-building-extension
+	dev-building-on-windows                  Preparing Windows build environment     : dev/preparing_windows_build_environment.html#dev-building-on-windows
+	dev-index                                Development guide                       : dev/index.html#dev-index
+	dev-installing-build-dependencies        Installing build dependencies           : dev/installing_build_dependencies.html#dev-installing-build-dependencies
+	dev-preparing-linux-build-environment    Preparing Linux build environment       : dev/preparing_linux_build_environment.html#dev-preparing-linux-build-environment
+	dev-testing                              Testing                                 : dev/testing.html#dev-testing
+	dwt_coeff_len                            Result coefficients length - dwt_coeff_len: ref/dwt-discrete-wavelet-transform.html#dwt-coeff-len
+	genindex                                 Index                                   : genindex.html
+	mall89                                   ref/2d-decompositions-overview.html#mall89
+	modes                                    ref/signal-extension-modes.html#modes
+	modes.antireflect                        ref/signal-extension-modes.html#modes-antireflect
+	modes.antisymmetric                      ref/signal-extension-modes.html#modes-antisymmetric
+	modes.constant                           ref/signal-extension-modes.html#modes-constant
+	modes.periodic                           ref/signal-extension-modes.html#modes-periodic
+	modes.periodization                      ref/signal-extension-modes.html#modes-periodization
+	modes.reflect                            ref/signal-extension-modes.html#modes-reflect
+	modes.smooth                             ref/signal-extension-modes.html#modes-smooth
+	modes.symmetric                          ref/signal-extension-modes.html#modes-symmetric
+	modes.zero                               ref/signal-extension-modes.html#modes-zero
+	modindex                                 Module Index                            : py-modindex.html
+	periodic-padding                         ref/signal-extension-modes.html#periodic-padding
+	periodization                            ref/signal-extension-modes.html#periodization
+	r0ef95468c9df-1                          ref/swt-stationary-wavelet-transform.html#r0ef95468c9df-1
+	r18d2df5b2ad9-1                          ref/thresholding-functions.html#r18d2df5b2ad9-1
+	r18d2df5b2ad9-2                          ref/thresholding-functions.html#r18d2df5b2ad9-2
+	r64df664ad9bd-1                          ref/nd-dwt-and-idwt.html#r64df664ad9bd-1
+	r64df664ad9bd-2                          ref/nd-dwt-and-idwt.html#r64df664ad9bd-2
+	r64df664ad9bd-3                          ref/nd-dwt-and-idwt.html#r64df664ad9bd-3
+	r64df664ad9bd-4                          ref/nd-dwt-and-idwt.html#r64df664ad9bd-4
+	r94bc4984de23-1                          ref/thresholding-functions.html#r94bc4984de23-1
+	r94bc4984de23-2                          ref/thresholding-functions.html#r94bc4984de23-2
+	r94bc4984de23-3                          ref/thresholding-functions.html#r94bc4984de23-3
+	ra31994bc9c8f-1                          ref/nd-dwt-and-idwt.html#ra31994bc9c8f-1
+	ra31994bc9c8f-2                          ref/nd-dwt-and-idwt.html#ra31994bc9c8f-2
+	ra31994bc9c8f-3                          ref/nd-dwt-and-idwt.html#ra31994bc9c8f-3
+	ra31994bc9c8f-4                          ref/nd-dwt-and-idwt.html#ra31994bc9c8f-4
+	re2ac4194fcbd-1                          ref/other-functions.html#re2ac4194fcbd-1
+	re2ac4194fcbd-2                          ref/other-functions.html#re2ac4194fcbd-2
+	ref-cwt                                  Continuous Wavelet Transform (CWT)      : ref/cwt.html#ref-cwt
+	ref-dwt                                  Discrete Wavelet Transform (DWT)        : ref/dwt-discrete-wavelet-transform.html#ref-dwt
+	ref-dwt-coef                             Handling DWT Coefficients               : ref/dwt-coefficient-handling.html#ref-dwt-coef
+	ref-dwt2                                 2D Forward and Inverse Discrete Wavelet Transform: ref/2d-dwt-and-idwt.html#ref-dwt2
+	ref-dwtn                                 nD Forward and Inverse Discrete Wavelet Transform: ref/nd-dwt-and-idwt.html#ref-dwtn
+	ref-idwt                                 Inverse Discrete Wavelet Transform (IDWT): ref/idwt-inverse-discrete-wavelet-transform.html#ref-idwt
+	ref-index                                API Reference                           : ref/index.html#ref-index
+	ref-iswt                                 Inverse Stationary Wavelet Transform    : ref/iswt-inverse-stationary-wavelet-transform.html#ref-iswt
+	ref-modes                                Signal extension modes                  : ref/signal-extension-modes.html#ref-modes
+	ref-other                                Other functions                         : ref/other-functions.html#ref-other
+	ref-swt                                  Stationary Wavelet Transform            : ref/swt-stationary-wavelet-transform.html#ref-swt
+	ref-thresholding                         Thresholding functions                  : ref/thresholding-functions.html#ref-thresholding
+	ref-wavelets                             Wavelets                                : ref/wavelets.html#ref-wavelets
+	ref-wp                                   Wavelet Packets                         : ref/wavelet-packets.html#ref-wp
+	reg-dwt-idwt                             DWT and IDWT                            : regression/dwt-idwt.html#reg-dwt-idwt
+	reg-gotchas                              Gotchas                                 : regression/gotchas.html#reg-gotchas
+	reg-index                                Usage examples                          : regression/index.html#reg-index
+	reg-modes                                Signal Extension Modes                  : regression/modes.html#reg-modes
+	reg-multilevel                           Multilevel DWT, IDWT and SWT            : regression/multilevel.html#reg-multilevel
+	reg-wavelet                              The Wavelet object                      : regression/wavelet.html#reg-wavelet
+	reg-wp                                   regression/wp.html#reg-wp
+	reg-wp2d                                 2D Wavelet Packets                      : regression/wp2d.html#reg-wp2d
+	search                                   Search Page                             : search.html
+	using-custom-wavelets                    Using custom wavelets                   : ref/wavelets.html#using-custom-wavelets
+	wick94                                   ref/2d-decompositions-overview.html#wick94
