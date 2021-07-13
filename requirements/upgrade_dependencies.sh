@@ -10,9 +10,10 @@
 # setup.py and the development dependencies into the various dev-requirements.in-files.
 # For execution the script needs virtual environments, one for each of the upstream
 # supported Python versions, with pip-tools installed. Those environments need to be
-# placed at ../envs/PyDynamic-PYTHONVERSION relative to the project root. The proper
-# naming for the versions you find in the line starting with 'for PYVENV in ' in this
-# script. If you want to execute this script on Windows you should adapt line 33
+# placed at ../envs/PyDynamic-PYTHONVERSION relative to the project root.
+# 'PYTHONVERSION' takes the value 'py3X', where X is one of the numbers in the line
+# starting with 'for PYVENV in ' in this script, prescribing the supported Python
+# versions. If you want to execute this script on Windows you should adapt line 33
 # appropriately.
 # The script starts with navigating to the project root, if it was called from
 # the subfolder ./requirements/.
@@ -24,7 +25,7 @@ fi
 # environments and update the corresponding two requirements files by issuing the
 # appropriate pip-tools command pip-compile from within the specific environments.
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-for PYVENV in "6" "7" "8"
+for PYVENV in "6" "7" "8" "9"
 do
     echo "
 Compile dependencies for Python3.$PYVENV
