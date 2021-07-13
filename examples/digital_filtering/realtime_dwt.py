@@ -1,7 +1,7 @@
 """
     Example how the discrete wavelet transformation can run continuously,
     by repetitive calls of :func:`wave_dec_realtime`.
-    
+
     The script runs infinitely and can be stopped by pressing "Ctrl + c".
 """
 import random
@@ -23,7 +23,7 @@ def main():
     cycle_counter = 0
 
     # init wavelet stuff
-    ld, hd, lr, hr = wavelet.filter_design("db2")
+    ld, hd, _, _ = wavelet.filter_design("db2")
     dwt_length = 21
 
     # init multi level wavelet stuff
@@ -84,7 +84,7 @@ def main():
             t, _, v, u = signal.show(dwt_length)
 
             # multi level dwt with uncertainty
-            coeffs, Ucoeffs, ol, level_states = wavelet.wave_dec_realtime(
+            coeffs, Ucoeffs, _, level_states = wavelet.wave_dec_realtime(
                 v, u, ld, hd, n=n_levels, level_states=level_states
             )
 
