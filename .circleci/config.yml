@@ -141,6 +141,11 @@ workflows:
           tag: "3.8"
           pyenv: "py38"
           posargs: "-- ''"
+      - test:
+          name: "nightly_test_python_py39"
+          tag: "3.9"
+          pyenv: "py39"
+          posargs: "-- ''"
       - test_conda_py38:
           name: "nightly_test_conda_py38"
           posargs: "-- ''"
@@ -162,6 +167,10 @@ workflows:
           name: "test_python_py38"
           tag: "3.8"
           pyenv: "py38"
+      - test:
+          name: "test_python_py39"
+          tag: "3.9"
+          pyenv: "py39"
       - test_conda_py38
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
@@ -170,6 +179,7 @@ workflows:
             - test_python_py36
             - test_python_py37
             - test_python_py38
+            - test_python_py39
             - test_conda_py38
       - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
