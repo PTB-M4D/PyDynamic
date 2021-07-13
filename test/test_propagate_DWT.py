@@ -132,7 +132,7 @@ def test_wave_dec():
 
             ld, hd, lr, hr = filter_design(filter_name)
 
-            coeffs, _, ol = wave_dec(x, Ux, ld, hd)
+            coeffs, _, _ = wave_dec(x, Ux, ld, hd)
 
             # compare to the output of PyWavelet
             result_pywt = pywt.wavedec(x, filter_name, mode="constant")
