@@ -23,8 +23,8 @@ setup(
     description="A software package for the analysis of dynamic measurements",
     long_description=get_readme(),
     long_description_content_type="text/markdown",
-    url="https://ptb-pst1.github.io/PyDynamic/",
-    download_url="https://github.com/PTB-PSt1/PyDynamic/releases/download/v{0}/"
+    url="https://ptb-m4d.github.io/PyDynamic/",
+    download_url="https://github.com/PTB-M4D/PyDynamic/releases/download/v{0}/"
     "PyDynamic-{0}.tar.gz".format(VERSION),
     author=u"Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
     "Martin Weber",
@@ -33,8 +33,8 @@ setup(
     packages=find_packages(exclude=["test"]),
     project_urls={
         "Documentation": "https://pydynamic.readthedocs.io/en/v{}/".format(VERSION),
-        "Source": "https://github.com/PTB-PSt1/PyDynamic/tree/v{}/".format(VERSION),
-        "Tracker": "https://github.com/PTB-PSt1/PyDynamic/issues",
+        "Source": "https://github.com/PTB-M4D/PyDynamic/tree/v{}/".format(VERSION),
+        "Tracker": "https://github.com/PTB-M4D/PyDynamic/issues",
     },
     install_requires=[
         "matplotlib",
@@ -62,6 +62,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Operating System :: OS Independent",
         "Typing :: Typed",
     ],

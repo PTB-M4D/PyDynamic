@@ -9,7 +9,7 @@ with associated uncertainties.
    - `initial project website <https://www.euramet.org/research-innovation/search
      -research-projects/details/project/standards-and-software-to-maximise-end-user
      -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
-   - `GitHub website <https://www.github.com/PTB-PSt1/PyDynamic>`_
+   - `GitHub website <https://www.github.com/PTB-M4D/PyDynamic>`_
 """
 
 from .fit_filter import (LSFIR, LSIIR, invLSFIR, invLSFIR_unc, invLSFIR_uncMC,

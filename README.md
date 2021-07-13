@@ -1,23 +1,52 @@
-# PyDynamic
+<p align="center">
+  <!-- CircleCI Tests -->
+  <a href="https://circleci.com/gh/PTB-M4D/PyDynamic"><img alt="CircleCI pipeline status badge" src="https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield"></a>
+  <!-- ReadTheDocs Documentation -->
+  <a href="https://readthedocs.org/projects/pydynamic/badge/?version=latest/">
+    <img src="https://readthedocs.org/projects/pydynamic/badge/?version=latest">
+  </a>
+  <!-- CodeCov(erage) -->
+  <a href="https://codecov.io/gh/PTB-M4D/PyDynamic">
+    <img src="https://codecov.io/gh/PTB-M4D/PyDynamic/branch/master/graph/badge.svg"/>
+  </a>
+  <!-- Codacy -->
+  <a href="https://www.codacy.com/gh/PTB-M4D/PyDynamic/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PTB-M4D/PyDynamic&amp;utm_campaign=Badge_Grade">
+    <img src="https://app.codacy.com/project/badge/Grade/db86b58d6fa5446e8408644c8196f5e2"/>
+  </a>
+  <!-- PyPI Version -->
+  <a href="https://pypi.org/project/pydynamic">
+    <img src="https://img.shields.io/pypi/v/pydynamic.svg?label=release&color=blue&style=flat-square" alt="pypi">
+  </a>
+  <!-- PyPI License -->
+  <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html">
+    <img alt="PyPI - license badge" src="https://img.shields.io/pypi/l/pydynamic?color=bright">
+  </a>
+  <!-- Zenodo DOI -->
+  <a href="https://doi.org/10.5281/zenodo.4748367">
+    <img src="https://zenodo.org/badge/34848642.svg" alt="DOI"></a>
+</p>
 
-[![CircleCI](https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield)](https://circleci.com/gh/PTB-M4D/PyDynamic)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/db86b58d6fa5446e8408644c8196f5e2)](https://www.codacy.com/gh/PTB-M4D/PyDynamic/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PTB-M4D/PyDynamic&amp;utm_campaign=Badge_Grade)
-[![Documentation Status](https://readthedocs.org/projects/pydynamic/badge/?version=latest)](https://pydynamic.readthedocs.io/?badge=latest)
-[![Codecov Badge](https://codecov.io/gh/PTB-M4D/PyDynamic/branch/master/graph/badge.svg)](https://codecov.io/gh/PTB-M4D/PyDynamic)
-[![DOI](https://zenodo.org/badge/34848642.svg)](https://zenodo.org/badge/latestdoi/34848642)
+<h1 align="center">
+PyDynamic – Python package for the analysis of dynamic measurements
+</h1>
 
-## Python package for the analysis of dynamic measurements
-
+<p align="justify">
 The goal of this package is to provide a starting point for users in metrology and
-related areas who deal with time-dependent, i.e. *dynamic*, measurements. The
+related areas who deal with time-dependent i.e., <i>dynamic</i>, measurements. The
 initial version of this software was developed as part of a joint research project of
-the national metrology institutes from Germany and the UK, i.e. [Physikalisch
--Technische Bundesanstalt](http://www.ptb.de/cms/en.html) and the [National Physical
- Laboratory](http://www.npl.co.uk).
+the national metrology institutes from Germany and the UK, i.e.
+<a href="https://www.ptb.de/cms/en.html">Physikalisch-Technische Bundesanstalt</a> 
+and the <a href="https://www.npl.co.uk">National Physical Laboratory</a>.
+</p>
 
+<p align="justify">
 Further development and explicit use of PyDynamic is part of the European research
-project [EMPIR 17IND12 Met4FoF](http://met4fof.eu) and the German research project
-[FAMOUS](https://famous-project.eu).
+project <a href="https://www.ptb.de/empir2018/met4fof/home/">EMPIR 17IND12 
+Met4FoF</a> and the German research project <a href="https://famous-project.
+eu">FAMOUS</a>.
+</p>
+
+## Features
 
 PyDynamic offers propagation of *uncertainties* for
 
@@ -58,14 +87,14 @@ from PyDynamic import make_equidistant
 
 ## Installation
 
-There is a [quick way](#quick-setup-not-recommended) to get started but we advise to
-setup a virtual environment and guide through the process in the section
+There is a [quick way](#quick-setup-not-recommended) to get started, but we advise
+setting up a virtual environment and guide through the process in the section
 [Proper Python setup with virtual environment](#proper-python-setup-with-virtual-environment-recommended)
 
 ### Quick setup (**not recommended**)
 
-If you just want to use the software, the easiest way is to run from your
-system's command line
+If you just want to use the software as quick as possible, run from your system's 
+command line
 
 ```shell
 pip install --user PyDynamic
@@ -73,7 +102,7 @@ pip install --user PyDynamic
 
 This will download the latest version from the Python package repository
 and copy it into your local folder of third-party libraries. Note that
-PyDynamic runs with **Python versions 3.6 to 3.8**. Usage in any Python
+PyDynamic runs with **Python versions 3.6 to 3.9**. Usage in any Python
 environment on your computer is then possible by
 
 ```python
@@ -98,10 +127,9 @@ pip install --user --upgrade PyDynamic
 ### Proper Python setup with virtual environment (**recommended**)
 
 The setup described above allows the quick and easy use of PyDynamic, but it also has
-its downsides. When working with Python we should rather always work in so-called
-virtual environments, in which our project specific dependencies are satisfied
-without polluting or breaking other projects' dependencies and to avoid breaking all
-our dependencies in case of an update of our Python distribution.
+its downsides. When working with Python, we should rather always work in so-called
+virtual environments. These allow to satisfy project specific dependencies without 
+polluting or breaking other projects' dependencies.
 
 If you are not familiar with [Python virtual environments
 ](https://docs.python.org/3/glossary.html#term-virtual-environment) you can get the
@@ -148,10 +176,10 @@ via:
 
 ### Optional Jupyter Notebook dependencies
 
-If you are familiar with Jupyter Notebooks, you find some examples in the _examples_ and
-the _tutorials_ subfolders of the source code repository. To execute these you need
-additional dependencies which you get by appending `[examples]` to PyDynamic in all
-of the above, e.g.
+If you are familiar with Jupyter Notebooks, you find some examples in the _examples_,
+and the _tutorials_ subfolders of the source code repository. To execute these you need
+additional dependencies which you get by appending `[examples]` to PyDynamic in all 
+the above, e.g.
 
 ```shell
 (PyDynamic_venv) $ pip install PyDynamic[examples]
@@ -163,10 +191,10 @@ In case errors arise within PyDynamic, the first thing you can try is installing
 known to work configuration of dependencies against which we run our test suite. This
 you can easily achieve with our version specific requirements files. First you need
 to install our dependency management package _pip-tools_, then find the Python
-version you are using with PyDynamic and finally install the provided dependency
+version you are using with PyDynamic. Finally, you install the provided dependency
 versions for your specific Python version. This is all done with the following
 sequence of commands after activating. Change the suffix `-py38` according to the
- Python version you find after executing `(PyDynamic_venv) $ python --version`:
+Python version you find after executing `(PyDynamic_venv) $ python --version`:
 
 ```shell
 (PyDynamic_venv) $ pip install --upgrade pip-tools
@@ -174,7 +202,7 @@ Collecting pip-tools
 [...]
 Successfully installed pip-tools-5.2.1
 (PyDynamic_venv) $ python --version
-Python 3.8.3
+Python 3.8.8
 (PyDynamic_venv) $ pip-sync requirements/dev-requirements-py38.txt requirements/requirements-py38.txt
 Collecting [...]
 [...]
@@ -187,7 +215,7 @@ Successfully installed [...]
 If you want to contribute code to the project you find additional set up and related
 information in our [Contribution advices and tips](docs/CONTRIBUTING.md).
 
-If you have a feature request please take a look at the roadmap and the links
+If you have a feature request please take a look at the roadmap, and the links
 provided there to find out more about planned and ongoing developments. If you
 have the feeling, something is missing, let us know by opening an issue.
 
@@ -232,7 +260,7 @@ X, UX = GUM_DFT(x, ux)
 Sequential application of the Monte Carlo method for uncertainty propagation
 for the case of filtering a time domain signal _x_ with an IIR filter _b_, _a_
 with uncertainty associated with the filter coefficients _Uab_ and signal
-noise standard deviation _sigma_. The filter output is the signal _y_ and the
+noise standard deviation _sigma_. The filter output is the signal _y_, and the
 Monte Carlo method calculates point-wise uncertainties _uy_ and coverage
 intervals _Py_ corresponding to the specified percentiles.
 
@@ -288,6 +316,5 @@ consequential damage arising in connection with the use of this software.
 
 ## License
 
-PyDynamic is distributed under the LGPLv3 license with the exception of the
-module `impinvar.py` in the package `misc`, which is distributed under the
-GPLv3 license.
+PyDynamic is distributed under the LGPLv3 license except for the module `impinvar.
+py` in the package `misc`, which is distributed under the GPLv3 license.

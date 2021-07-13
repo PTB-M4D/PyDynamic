@@ -310,7 +310,7 @@ def legacy_FIRuncFilter(
     #       for `theta` and `Utheta` but ascending for `Ulow`.)
     #
     #       Further details and illustrations showing the effect of not-flipping
-    #       can be found at https://github.com/PTB-PSt1/PyDynamic/issues/183
+    #       can be found at https://github.com/PTB-M4D/PyDynamic/issues/183
 
     # handle diag-case, where Ulow needs to be sliced from V
     if kind == "diag":
