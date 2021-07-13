@@ -171,7 +171,9 @@ workflows:
           name: "test_python_py39"
           tag: "3.9"
           pyenv: "py39"
-      - test_conda_py38
+      - test_conda_py38:
+          requires:
+            - test_python_py38
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
