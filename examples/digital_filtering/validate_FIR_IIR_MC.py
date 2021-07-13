@@ -3,13 +3,14 @@ import numpy as np
 import scipy.signal as scs
 
 import PyDynamic.uncertainty.propagate_filter as pf
-from PyDynamic.misc.testsignals import rect, sine
+from PyDynamic.misc.testsignals import rect
 
 # define filter
 wp = 0.2
 ws = 0.3
 gpass = 0.1
 gstop = 40
+# noinspection PyTupleAssignmentBalance
 b, a = scs.iirdesign(wp, ws, gpass, gstop)
 a = np.array([1.0])
 
@@ -48,30 +49,30 @@ y_mc_std = np.std(tmp_y, axis=0)
 # visualize
 fig, (ax1, ax2, ax3, ax4) = plt.subplots(nrows=4, ncols=1)
 
-## plot input
+# plot input
 ax1.plot(x, color="g", label="x")
 ax1.plot(x + Ux, color="g", linestyle=":")
 ax1.plot(x - Ux, color="g", linestyle=":")
 
-## plot iir results
+# plot iir results
 ax2.plot(y, color="r", label="iir: y")
 ax2.plot(y + Uy, color="r", linestyle=":")
 ax2.plot(y - Uy, color="r", linestyle=":")
-## plot fir results
+# plot fir results
 ax2.plot(y_fir, color="b", label="fir: y")
 ax2.plot(y_fir + Uy_fir, color="b", linestyle=":")
 ax2.plot(y_fir - Uy_fir, color="b", linestyle=":")
-## plot monte carlo results
+# plot monte carlo results
 ax2.plot(y_mc_mean, color="k", label="mc: y")
 ax2.plot(y_mc_mean + y_mc_std, color="k", linestyle=":")
 ax2.plot(y_mc_mean - y_mc_std, color="k", linestyle=":")
 
-## plot only uncertainties
+# plot only uncertainties
 ax3.plot(Uy, color="r", label="iir: unc")
 ax3.plot(Uy_fir, color="b", label="fir: unc")
 ax3.plot(y_mc_std, color="k", label="mc: unc")
 
-## plot differences between all three
+# plot differences between all three
 ax4.plot(np.abs(Uy - Uy_fir), color="c", label="iir - fir: unc")
 ax4.plot(np.abs(Uy_fir - y_mc_std), color="y", label="fir - mc: unc")
 ax4.plot(np.abs(y_mc_std - Uy), color="g", label="mc - iir: unc")
@@ -83,5 +84,5 @@ ax3.legend()
 ax4.legend()
 ax4.set_yscale("log")
 
-## show plot
+# show plot
 plt.show()
