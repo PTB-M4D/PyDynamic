@@ -4,10 +4,8 @@ from collections import namedtuple
 from typing import Dict
 
 import numpy as np
-
-# import scipy.signal as dsp
 import pytest
-from hypothesis import assume, given, strategies as hst
+from hypothesis import assume, given, settings, strategies as hst
 from numpy.testing import assert_almost_equal
 
 from PyDynamic import grpdelay, isstable, mapinside, sos_FreqResp
