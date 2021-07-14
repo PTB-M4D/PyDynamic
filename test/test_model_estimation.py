@@ -278,6 +278,7 @@ def former_LSIIR():
     return _former_LSIIR
 
 
+@settings(deadline=timedelta(milliseconds=400))
 @given(LSIIR_parameters())
 def test_LSIIR_outputs_format(parameters):
     """This checks against expected formats of the outputs."""
