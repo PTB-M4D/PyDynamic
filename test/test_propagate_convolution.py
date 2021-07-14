@@ -6,6 +6,7 @@ import scipy.ndimage as sn
 from hypothesis import assume, given, strategies as hst
 
 from PyDynamic.uncertainty.propagate_convolution import convolve_unc
+from test.conftest import random_covariance_matrix
 
 
 def random_array(length):
