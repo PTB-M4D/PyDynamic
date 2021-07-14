@@ -22,6 +22,7 @@ from PyDynamic.uncertainty.interpolation import interp1d_unc
         identification.fit_sos,
     ],
 )
+@pytest.mark.slow
 def test_deprecated_call(function):
     module = inspect.getmodule(function)
     with pytest.raises(DeprecationWarning):

@@ -74,6 +74,7 @@ class TestDFT:
         assert_almost_equal(np.max(np.abs(x - xh)), 0)
         assert_almost_equal(np.max(np.sqrt(ux) - np.sqrt(np.diag(uxh))), 0)
 
+    @pytest.mark.slow
     def test_DFT_iDFT_fullcov(self, multisine_testsignal, create_corrmatrix):
         """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
         x, ux = multisine_testsignal
