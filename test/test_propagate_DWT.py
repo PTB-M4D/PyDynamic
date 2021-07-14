@@ -72,7 +72,7 @@ def test_inv_dwt():
             c_detail = np.random.randn(nc)
             Uc_detail = 0.1 * (1 + np.random.random(nc))
 
-            ld, hd, lr, hr = filter_design(filter_name)
+            _, _, lr, hr = filter_design(filter_name)
 
             # execute single level DWT
             x, Ux, _ = inv_dwt(c_approx, Uc_approx, c_detail, Uc_detail, lr, hr)
