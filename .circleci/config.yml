@@ -183,6 +183,9 @@ workflows:
             - test_python_py38
             - test_python_py39
             - test_conda_py38
+          filters:
+            branches:
+              ignore: /.*dev$/
       - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
