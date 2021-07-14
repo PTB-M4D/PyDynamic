@@ -277,7 +277,7 @@ def former_LSIIR():
     return _former_LSIIR
 
 
-@settings(deadline=timedelta(milliseconds=400))
+@settings(deadline=None)
 @given(LSIIR_parameters())
 def test_LSIIR_outputs_format(parameters):
     """This checks against expected formats of the outputs."""
@@ -305,6 +305,7 @@ def test_isstable_results_against_former_implementations(
     ) == isstable(fitted_filter.b, fitted_filter.a, ftype="digital")
 
 
+@settings(deadline=timedelta(milliseconds=400))
 @given(
     lsiir_base_params=LSIIR_parameters(),
     tau=hst.integers(min_value=0, max_value=100),
