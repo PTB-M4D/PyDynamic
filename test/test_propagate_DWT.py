@@ -130,7 +130,7 @@ def test_wave_dec():
             x = np.random.randn(nx)
             Ux = 0.1 * (1 + np.random.random(nx))
 
-            ld, hd, lr, hr = filter_design(filter_name)
+            ld, hd, _, _ = filter_design(filter_name)
 
             coeffs, _, _ = wave_dec(x, Ux, ld, hd)
 
