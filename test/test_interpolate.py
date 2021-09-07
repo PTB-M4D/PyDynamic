@@ -3,6 +3,7 @@ from typing import Dict, Optional, Tuple, Union
 import hypothesis.extra.numpy as hnp
 import hypothesis.strategies as st
 import numpy as np
+import pytest
 from hypothesis import assume, given
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose
@@ -14,9 +15,15 @@ from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
 @composite
 def timestamps_values_uncertainties_kind(
     draw,
-    min_count: Optional[int] = 2,
+    min_count: Optional[int] = 4,
     max_count: Optional[int] = None,
-    kind_tuple: Optional[Tuple[str]] = ("linear", "previous", "next", "nearest"),
+    kind_tuple: Optional[Tuple[str]] = (
+        "linear",
+        "previous",
+        "next",
+        "nearest",
+        "cubic",
+    ),
     sorted_timestamps: Optional[bool] = True,
     extrapolate: Optional[Union[bool, str]] = False,
     restrict_fill_value: Optional[str] = None,
@@ -43,7 +50,7 @@ def timestamps_values_uncertainties_kind(
             the tuple of strings out of "linear", "previous", "next", "nearest",
             "spline", "least-squares" from which the strategy for the
             kind randomly chooses. Defaults to the valid options "linear",
-            "previous", "next", "nearest"
+            "previous", "next", "nearest", "cubic"
         sorted_timestamps : bool, optional
             if True (default) the timestamps (or frequencies) are guaranteed to be in
             ascending order, if False they still might be by coincidence or not
@@ -169,7 +176,9 @@ def timestamps_values_uncertainties_kind(
                 min_value=t_min, max_value=t_max, **float_generic_params
             )
             fill_value = fill_unc = np.nan
-            bounds_error = True
+            # Switch between default value None and intentionally setting to True,
+            # which should behave identically.
+            bounds_error = draw(st.one_of(st.just(True), st.none()))
         else:
             # In case we want to extrapolate, draw some fill values for the
             # out-of-bounds range. Those will be either single floats or a 2-tuple of
@@ -215,6 +224,7 @@ def test_usual_call_interp1d_unc(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.slow
 def test_wrong_input_length_y_call_interp1d_unc(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     interp_inputs["y"] = np.tile(interp_inputs["y"], 2)
@@ -223,6 +233,7 @@ def test_wrong_input_length_y_call_interp1d_unc(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.slow
 def test_wrong_input_length_uy_call_interp1d_unc(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     interp_inputs["uy"] = np.tile(interp_inputs["uy"], 2)
@@ -231,6 +242,7 @@ def test_wrong_input_length_uy_call_interp1d_unc(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=("previous", "next", "nearest")))
+@pytest.mark.slow
 def test_trivial_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
@@ -239,6 +251,7 @@ def test_trivial_in_interp1d_unc(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=["linear"]))
+@pytest.mark.slow
 def test_linear_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
@@ -247,6 +260,7 @@ def test_linear_in_interp1d_unc(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(extrapolate=True))
+@pytest.mark.slow
 def test_extrapolate_interp1d_unc(interp_inputs):
     # Check that extrapolation is executable in general.
     assert interp1d_unc(**interp_inputs)
@@ -257,6 +271,7 @@ def test_extrapolate_interp1d_unc(interp_inputs):
         sorted_timestamps=True, extrapolate="below", restrict_fill_value="str"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_below_without_fill_value_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_value=="extrapolate", which means constant extrapolation from the boundaries.
@@ -274,6 +289,7 @@ def test_extrapolate_below_without_fill_value_interp1d_unc(interp_inputs):
         extrapolate="below", restrict_fill_value="float"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_below_with_fill_value_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_value is a float, which means constant extrapolation with this value.
@@ -290,6 +306,7 @@ def test_extrapolate_below_with_fill_value_interp1d_unc(interp_inputs):
         extrapolate="below", restrict_fill_value="tuple"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_below_with_fill_values_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_value is a tuple, which means constant extrapolation with its first
@@ -307,6 +324,7 @@ def test_extrapolate_below_with_fill_values_interp1d_unc(interp_inputs):
         sorted_timestamps=True, extrapolate="above", restrict_fill_value="str"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_above_without_fill_value_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is above the maximum of t and
     # fill_value=="extrapolate", which means constant extrapolation from the boundaries.
@@ -324,6 +342,7 @@ def test_extrapolate_above_without_fill_value_interp1d_unc(interp_inputs):
         extrapolate="above", restrict_fill_value="float"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_above_with_fill_value_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is above the maximum of t and
     # fill_value is a float, which means constant extrapolation with this value.
@@ -340,6 +359,7 @@ def test_extrapolate_above_with_fill_value_interp1d_unc(interp_inputs):
         extrapolate="above", restrict_fill_value="tuple"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_above_with_fill_values_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is above the maximum of t and
     # fill_value is a tuple, which means constant extrapolation with its second element.
@@ -356,6 +376,7 @@ def test_extrapolate_above_with_fill_values_interp1d_unc(interp_inputs):
         sorted_timestamps=True, extrapolate="below", restrict_fill_unc="str"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_below_without_fill_unc_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
@@ -371,6 +392,7 @@ def test_extrapolate_below_without_fill_unc_interp1d_unc(interp_inputs):
 @given(
     timestamps_values_uncertainties_kind(extrapolate="below", restrict_fill_unc="float")
 )
+@pytest.mark.slow
 def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_unc is a float, which means constant extrapolation with this value.
@@ -385,6 +407,7 @@ def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
 @given(
     timestamps_values_uncertainties_kind(extrapolate="below", restrict_fill_unc="tuple")
 )
+@pytest.mark.slow
 def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is below the minimum of t and
     # fill_unc is a tuple, which means constant extrapolation with its first element.
@@ -401,6 +424,7 @@ def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
         sorted_timestamps=True, extrapolate="above", restrict_fill_unc="str"
     )
 )
+@pytest.mark.slow
 def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is above the maximum of t and
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
@@ -416,6 +440,7 @@ def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
 @given(
     timestamps_values_uncertainties_kind(extrapolate="above", restrict_fill_unc="float")
 )
+@pytest.mark.slow
 def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is above the maximum of t and
     # fill_unc is a float, which means constant extrapolation with this value.
@@ -430,6 +455,7 @@ def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
 @given(
     timestamps_values_uncertainties_kind(extrapolate="above", restrict_fill_unc="tuple")
 )
+@pytest.mark.slow
 def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
     # Deal with those cases where at least one of t_new is above the maximum of t and
     # fill_unc is a tuple, which means constant extrapolation with its second element.
@@ -442,6 +468,7 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(returnC=True, kind_tuple=("linear",)))
+@pytest.mark.slow
 def test_compare_returnc_interp1d_unc(interp_inputs):
     # Compare the uncertainties computed from the sensitivities inside the
     # interpolation range and directly.
@@ -457,6 +484,7 @@ def test_compare_returnc_interp1d_unc(interp_inputs):
         returnC=True, extrapolate=True, kind_tuple=("linear",)
     )
 )
+@pytest.mark.slow
 def test_failing_returnc_with_extrapolation_interp1d_unc(interp_inputs):
     # Since we have not implemented these cases, for now we
     # check for exception being thrown.
@@ -467,9 +495,13 @@ def test_failing_returnc_with_extrapolation_interp1d_unc(interp_inputs):
 
 @given(
     timestamps_values_uncertainties_kind(
-        returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str"
+        returnC=True,
+        extrapolate=True,
+        kind_tuple=("linear", "cubic"),
+        restrict_fill_unc="str",
     )
 )
+@pytest.mark.slow
 def test_returnc_with_extrapolation_interp1d_unc(interp_inputs):
     # Check if extrapolation with constant values outside interpolation range and
     # returning of sensitivities is callable.
@@ -480,11 +512,12 @@ def test_returnc_with_extrapolation_interp1d_unc(interp_inputs):
     timestamps_values_uncertainties_kind(
         returnC=True,
         extrapolate=True,
-        kind_tuple=("linear",),
+        kind_tuple=("linear", "cubic"),
         restrict_fill_unc="str",
         sorted_timestamps=True,
     )
 )
+@pytest.mark.slow
 def test_returnc_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs):
     # Check if extrapolation with constant values outside interpolation range and
     # returning sensitivities work as expected regarding extrapolation values
@@ -500,11 +533,12 @@ def test_returnc_with_extrapolation_check_below_bound_interp1d_unc(interp_inputs
     timestamps_values_uncertainties_kind(
         returnC=True,
         extrapolate=True,
-        kind_tuple=("linear",),
+        kind_tuple=("linear", "cubic"),
         restrict_fill_unc="str",
         sorted_timestamps=True,
     )
 )
+@pytest.mark.slow
 def test_returnc_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
     interp_inputs,
 ):
@@ -520,10 +554,16 @@ def test_returnc_with_extrapolation_check_uy_new_above_bound_interp1d_unc(
 
 @given(
     timestamps_values_uncertainties_kind(
-        returnC=True, extrapolate=True, kind_tuple=("linear",), restrict_fill_unc="str",
+        returnC=True,
+        extrapolate=True,
+        kind_tuple=("linear",),
+        restrict_fill_unc="str",
     )
 )
-def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
+@pytest.mark.slow
+def test_returnc_with_extrapolation_check_c_interp1d_unc(
+    interp_inputs,
+):
     # Check if sensitivity computation parallel to linear interpolation and
     # extrapolation with constant values works as expected regarding the shape and
     # content of the sensitivity matrix.
@@ -561,9 +601,15 @@ def test_returnc_with_extrapolation_check_c_interp1d_unc(interp_inputs,):
 
 @given(
     timestamps_values_uncertainties_kind(
-        returnC=True, kind_tuple=("previous", "next", "nearest",)
+        returnC=True,
+        kind_tuple=(
+            "previous",
+            "next",
+            "nearest",
+        ),
     )
 )
+@pytest.mark.slow
 def test_value_error_for_returnc_interp1d_unc(interp_inputs):
     # Check erroneous calls with returnC and wrong kind.
     with raises(NotImplementedError):
@@ -571,7 +617,9 @@ def test_value_error_for_returnc_interp1d_unc(interp_inputs):
 
 
 @given(st.integers(min_value=3, max_value=1000))
-def test_linear_uy_in_interp1d_unc(n,):
+def test_linear_uy_in_interp1d_unc(
+    n,
+):
     # Check for given input, if interpolated uncertainties equal 1 and
     # :math:`sqrt(2) / 2`.
     dt_unit = 2
@@ -586,6 +634,7 @@ def test_linear_uy_in_interp1d_unc(n,):
 
 
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.slow
 def test_wrong_input_lengths_call_interp1d(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
@@ -594,6 +643,7 @@ def test_wrong_input_lengths_call_interp1d(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(kind_tuple=("spline", "least-squares")))
+@pytest.mark.slow
 def test_raise_not_implemented_yet_interp1d(interp_inputs):
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):
@@ -601,6 +651,7 @@ def test_raise_not_implemented_yet_interp1d(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(extrapolate=True))
+@pytest.mark.slow
 def test_raise_value_error_interp1d_unc(interp_inputs):
     # Check that interpolation with points outside the original domain raises
     # exception if requested.
@@ -611,6 +662,7 @@ def test_raise_value_error_interp1d_unc(interp_inputs):
 
 # noinspection PyArgumentList
 @given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@pytest.mark.slow
 def test_too_short_call_make_equidistant(interp_inputs):
     # Check erroneous calls with too few inputs.
     with raises(TypeError):
@@ -619,6 +671,7 @@ def test_too_short_call_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@pytest.mark.slow
 def test_full_call_make_equidistant(interp_inputs):
     t_new, y_new, uy_new = make_equidistant(**interp_inputs)
     # Check the equal dimensions of the minimum calls output.
@@ -626,6 +679,7 @@ def test_full_call_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@pytest.mark.slow
 def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
@@ -635,6 +689,7 @@ def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
 
 
 @given(timestamps_values_uncertainties_kind(for_make_equidistant=True))
+@pytest.mark.slow
 def test_t_new_to_dt_make_equidistant(interp_inputs):
     t_new = make_equidistant(**interp_inputs)[0]
     delta_t_new = np.diff(t_new)
@@ -647,6 +702,7 @@ def test_t_new_to_dt_make_equidistant(interp_inputs):
         kind_tuple=("previous", "next", "nearest"), for_make_equidistant=True
     )
 )
+@pytest.mark.slow
 def test_prev_in_make_equidistant(interp_inputs):
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all 'interpolated' values are present in the actual values.
@@ -659,6 +715,7 @@ def test_prev_in_make_equidistant(interp_inputs):
         kind_tuple=["linear"], for_make_equidistant=True
     )
 )
+@pytest.mark.slow
 def test_linear_in_make_equidistant(interp_inputs):
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
@@ -667,6 +724,7 @@ def test_linear_in_make_equidistant(interp_inputs):
 
 
 @given(st.integers(min_value=3, max_value=1000))
+@pytest.mark.slow
 def test_linear_uy_in_make_equidistant(n):
     # Check for given input, if interpolated uncertainties equal 1 and
     # :math:`sqrt(2) / 2`.
@@ -685,6 +743,7 @@ def test_linear_uy_in_make_equidistant(n):
         kind_tuple=("spline", "least-squares"), for_make_equidistant=True
     )
 )
+@pytest.mark.slow
 def test_raise_not_implemented_yet_make_equidistant(interp_inputs):
     # Check that not implemented versions raise exceptions.
     with raises(NotImplementedError):

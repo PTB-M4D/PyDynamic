@@ -3,10 +3,14 @@
 The :doc:`PyDynamic.deconvolution` package implements methods for the design of
 digital deconvolution filters by least-squares fitting to the reciprocal of a given
 frequency response with associated uncertainties.
-"""
 
-# See https://mathmet.org/projects/14SIP08 and
-# https://www.github.com/PTB-PSt1/PyDynamic
+.. seealso::
+
+   - `initial project website <https://www.euramet.org/research-innovation/search
+     -research-projects/details/project/standards-and-software-to-maximise-end-user
+     -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
+   - `GitHub website <https://www.github.com/PTB-M4D/PyDynamic>`_
+"""
 
 from .fit_filter import (
     LSFIR,

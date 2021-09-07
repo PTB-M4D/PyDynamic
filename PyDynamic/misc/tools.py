@@ -16,8 +16,8 @@ This module contains the following functions:
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 * :func:`progress_bar`: A simple and reusable progress-bar
 """
-
 import sys
+from typing import Optional
 
 import numpy as np
 from scipy.sparse import eye, issparse
@@ -31,11 +31,68 @@ __all__ = [
     "make_equidistant",
     "trimOrPad",
     "progress_bar",
+    "shift_uncertainty"
 ]
 
+def shift_uncertainty(x, ux, shift):
+    """Shift the elements in the vector x (and associated uncertainty ux) by shift elements.
+        This method uses :class:`numpy.roll` to shift the elements in x and ux. See documentation of np.roll for details.
+
+    Parameters
+    ----------
+        x: (N,) array_like
+            vector of estimates
+        ux: float, np.ndarray of shape (N,) or of shape (N,N)
+            uncertainty associated with the vector of estimates
+        shift: int
+            amount of shift
+
+    Returns
+    -------
+        xs: (N,) array
+            shifted vector of estimates
+        uxs: float, np.ndarray of shape (N,) or of shape (N,N)
+            uncertainty associated with the shifted vector of estimates
+    """
+
+    assert(isinstance(shift, int))
+    # application of shift to the vector of estimates
+    xs = np.roll(x, shift)
+
+    if isinstance(ux, float):       # no shift necessary for ux
+        return xs, ux
+    if isinstance(ux, np.ndarray):
+        if len(ux.shape) == 1:      # uncertainties given as vector
+            return xs, np.roll(ux, shift)
+        elif len(ux.shape) == 2:      # full covariance matrix
+            assert(ux.shape[0]==ux.shape[1])
+            uxs = np.roll(ux, (shift, shift), axis=(0,1))
+            return xs, uxs
+        else:
+            raise TypeError("Input uncertainty has incompatible shape")
+    else:
+        raise TypeError("Input uncertainty has incompatible type")
 
 def trimOrPad(array, length, mode="constant"):
-    """Trim or pad (with zeros) a vector to desired length"""
+    """Trim or pad (with zeros) a vector to the desired length
+
+    Parameters
+    ----------
+    array : list, 1D np.ndarray
+        original data
+    length : int
+        length of output
+    mode : str, optional
+        handed over to np.pad, default "constant"
+
+    Returns
+    -------
+    array_modified : np.ndarray of shape (length,)
+        An array that is either trimmed or zero-padded to achieve
+        the required `length`. Both actions are applied to the
+        right side of the array
+    """
+    
     if len(array) < length:  # pad zeros to the right if too short
         return np.pad(array, (0, length - len(array)), mode=mode)
     else:  # trim to given length otherwise
@@ -107,24 +164,35 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
         print(s)
 
 
-def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
+def make_semiposdef(
+    matrix: np.ndarray,
+    maxiter: Optional[int] = 10,
+    tol: Optional[float] = 1e-12,
+    verbose: Optional[bool] = False,
+) -> np.ndarray:
     """Make quadratic matrix positive semi-definite by increasing its eigenvalues
 
     Parameters
     ----------
-        matrix : (N,N) array_like
-            the matrix to process
-        maxiter : int
-            the maximum number of iterations for increasing the eigenvalues
-        tol : float
-            tolerance for deciding if pos. semi-def.
-        verbose : bool
-            If `True` print smallest eigenvalue of the resulting matrix
+    matrix : array_like of shape (N,N)
+        the matrix to process
+    maxiter : int, optional
+        the maximum number of iterations for increasing the eigenvalues, defaults to 10
+    tol : float, optional
+        tolerance for deciding if pos. semi-def., defaults to 1e-12
+    verbose : bool, optional
+        If True print smallest eigenvalue of the resulting matrix, if False (default)
+        be quiet
 
     Returns
     -------
-        (N,N) array_like
-            quadratic positive semi-definite matrix
+    (N,N) array_like
+        quadratic positive semi-definite matrix
+
+    Raises
+    ------
+    ValueError
+        If matrix is not square.
     """
     n, m = matrix.shape
     if n != m:

@@ -10,37 +10,34 @@
 # setup.py and the development dependencies into the various dev-requirements.in-files.
 # For execution the script needs virtual environments, one for each of the upstream
 # supported Python versions, with pip-tools installed. Those environments need to be
-# placed at ../envs/PyDynamic-PYTHONVERSION relative to the project root. The proper
-# naming for the versions you find in the line starting with 'for PYVENV in ' in this
-# script.
-# Since pip-tools did not work as convenient for Python 3.5 and there were
-# conflicts for some of the newer package versions this case is handled separately.
+# placed at ../envs/PyDynamic-PYTHONVERSION relative to the project root.
+# 'PYTHONVERSION' takes the value 'py3X', where X is one of the numbers in the line
+# starting with 'for PYVENV in ' in this script, prescribing the supported Python
+# versions. If you want to execute this script on Windows you should adapt line 33
+# appropriately.
 # The script starts with navigating to the project root, if it was called from
 # the subfolder ./requirements/.
 if [ -f requirements.txt ] && [ -d ../PyDynamic/ ] && [ -d ../requirements/ ]; then
     cd ..
 fi
 
-# Handle Python 3.5 via requirements.in.
-# Activate according Python environment.
-source ../../envs/PyDynamic-py35/bin/activate && \
-# Create requirements.txt from requirements.in.
-pip-compile --upgrade requirements/requirements.in --output-file requirements/requirements-py35.txt && \
-# Create dev-requirements...txt from dev-requirements...in.
-pip-compile --upgrade requirements/dev-requirements-py35.in --output-file requirements/dev-requirements-py35.txt && \
-deactivate
-
-# Handle all other Python versions via setup.py by cycling through the different Python
-# environments and update the according two requirements files by issuing the
-# according pip-tools command pip-compile from within the specific environments.
+# Handle all Python versions via setup.py by cycling through the different Python
+# environments and update the corresponding two requirements files by issuing the
+# appropriate pip-tools command pip-compile from within the specific environments.
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-for PYVENV in "py36" "py37" "py38"
+for PYVENV in "6" "7" "8" "9"
 do
+    echo "
+Compile dependencies for Python3.$PYVENV
+==================================
+    "
     # Activate according Python environment.
-    source ../../envs/PyDynamic-$PYVENV/bin/activate && \
-    # Create requirements.txt from requirements.in.
-    pip-compile --upgrade --output-file requirements/requirements-$PYVENV.txt && \
+    source ../envs/PyDynamic-py3$PYVENV/bin/activate && \
+    # Upgrade pip and pip-tools.
+    python -m pip install --upgrade pip pip-tools && \
+    # Create requirements...txt from setup.py.
+    python -m piptools compile --upgrade --output-file requirements/requirements-py3$PYVENV.txt && \
     # Create dev-requirements...txt from dev-requirements...in.
-    pip-compile --upgrade requirements/dev-requirements-$PYVENV.in --output-file requirements/dev-requirements-$PYVENV.txt && \
+    python -m piptools compile --upgrade requirements/dev-requirements-py3$PYVENV.in --output-file requirements/dev-requirements-py3$PYVENV.txt && \
     deactivate
 done

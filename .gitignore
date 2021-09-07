@@ -19,6 +19,10 @@ pytest.xml
 ##############################
 .ipynb_checkpoints/
 
+# Environment artifacts #
+#########################
+.idea/
+
 # Local Artifacts #
 ########################
 versuch.txt

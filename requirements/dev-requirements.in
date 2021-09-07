@@ -8,3 +8,5 @@ rope
 sphinx
 sphinx-rtd-theme
 recommonmark
+black
+nbsphinx
