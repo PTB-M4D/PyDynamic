@@ -79,7 +79,7 @@ auth.set_access_token(os.getenv('private_key'),
                       os.getenv('private_token'))
 
 api = tweepy.API(
-    auth)  # , proxy='https://webproxy.bs.ptb.de:8080') #use when tweeting from inside
+    auth)  # , proxy='https://webproxy.bs.ptb.de:8080') use when tweeting from inside
 # PTB Network
 print(format_md_to_unicode(remove_commit_hash(read_from_file())))
 api.update_status(generate_tweet())
