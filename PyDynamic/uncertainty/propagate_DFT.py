@@ -887,10 +887,6 @@ def AmpPhase2Time(
     return x, Ux / N ** 2
 
 
-# for backward compatibility
-GUMdeconv = lambda H, Y, UH, UY: DFT_deconv(H, Y, UH, UY)
-
-
 def DFT_transferfunction(X, Y, UX, UY):
     """Calculation of the transfer function H = Y/X in the frequency domain
 
@@ -1028,6 +1024,10 @@ def DFT_deconv(
         # type: Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray]
 
     return X, UX
+
+
+# for backward compatibility
+GUMdeconv = DFT_deconv
 
 
 def DFT_multiply(
