@@ -1,22 +1,30 @@
 # -*- coding: utf-8 -*-
 """ Perform tests on methods to handle DFT and inverse DFT."""
 
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pytest
 from hypothesis import assume, given, strategies as hst
-from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from PyDynamic.misc.testsignals import multi_sine
+
+# noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_DFT import (
     _apply_window,
+    _prod,
     AmpPhase2Time,
     GUM_DFT,
     GUM_iDFT,
     Time2AmpPhase,
+)
+from .conftest import (
+    random_float_square_matrix_strategy,
+    random_float_vector,
+    random_not_negative_float_strategy,
+    VectorAndCompatibleMatrix,
 )
 
 
@@ -42,7 +50,7 @@ def multisine_testsignal() -> Tuple[np.ndarray, float]:
 @pytest.fixture(scope="module")
 def create_corrmatrix():
     def _create_corrmatrix(rho, Nx, nu=0.5, phi=0.3):
-        """ Additional helper function to create a correlation matrix"""
+        """Additional helper function to create a correlation matrix"""
         corrmat = np.zeros((Nx, Nx))
         if rho > 1:
             raise ValueError("Correlation scalar should be less than one.")
@@ -53,45 +61,8 @@ def create_corrmatrix():
         corrmat += np.eye(Nx)
 
         return corrmat
+
     return _create_corrmatrix
-
-
-class TestDFT:
-    def test_DFT_iDFT(self, multisine_testsignal):
-        """Test GUM_DFT and GUM_iDFT with noise variance as uncertainty"""
-        x, ux = multisine_testsignal
-        X, UX = GUM_DFT(x, ux ** 2)
-        xh, uxh = GUM_iDFT(X, UX)
-        assert_almost_equal(np.max(np.abs(x - xh)), 0)
-        assert_almost_equal(np.max(ux - np.sqrt(np.diag(uxh))), 0)
-
-    def test_DFT_iDFT_vector(self, multisine_testsignal):
-        """Test GUM_DFT and GUM_iDFT with uncertainty vector"""
-        x, ux = multisine_testsignal
-        ux = (0.1 * x) ** 2
-        X, UX = GUM_DFT(x, ux)
-        xh, uxh = GUM_iDFT(X, UX)
-        assert_almost_equal(np.max(np.abs(x - xh)), 0)
-        assert_almost_equal(np.max(np.sqrt(ux) - np.sqrt(np.diag(uxh))), 0)
-
-    def test_DFT_iDFT_fullcov(self, multisine_testsignal, create_corrmatrix):
-        """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
-        x, ux = multisine_testsignal
-        ux = np.ones_like(x) * 0.01 ** 2
-        cx = create_corrmatrix(0.95, len(x))
-        Ux = np.diag(ux)
-        Ux = Ux.dot(cx.dot(Ux))
-        X, UX = GUM_DFT(x, Ux)
-        xh, Uxh = GUM_iDFT(X, UX)
-        assert_almost_equal(np.max(np.abs(x - xh)), 0)
-        assert_almost_equal(np.max(Ux - Uxh), 0)
-
-    def test_AmpPhasePropagation(self, multisine_testsignal):
-        """Test Time2AmpPhase and AmpPhase2Time with noise variance as uncertainty"""
-        testsignal, noise_std = multisine_testsignal
-        A, P, UAP = Time2AmpPhase(testsignal, noise_std ** 2)
-        x, ux = AmpPhase2Time(A, P, UAP)
-        assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
 
 
 @pytest.fixture
@@ -178,6 +149,53 @@ def x_Ux_and_window(draw: Callable, ux_type: Optional[Union[np.ndarray, float]] 
     return {"x": x, "Ux": Ux, "window": window}
 
 
+@composite
+def random_vector_and_matching_random_square_matrix(
+    draw: Callable,
+) -> VectorAndCompatibleMatrix:
+    x = draw(random_float_vector())
+    A = draw(random_float_square_matrix_strategy(len(x)))
+    return VectorAndCompatibleMatrix(vector=x, matrix=A)
+
+
+class TestDFT:
+    def test_DFT_iDFT(self, multisine_testsignal):
+        """Test GUM_DFT and GUM_iDFT with noise variance as uncertainty"""
+        x, ux = multisine_testsignal
+        X, UX = GUM_DFT(x, ux ** 2)
+        xh, uxh = GUM_iDFT(X, UX)
+        assert_almost_equal(np.max(np.abs(x - xh)), 0)
+        assert_almost_equal(np.max(ux - np.sqrt(np.diag(uxh))), 0)
+
+    def test_DFT_iDFT_vector(self, multisine_testsignal):
+        """Test GUM_DFT and GUM_iDFT with uncertainty vector"""
+        x, ux = multisine_testsignal
+        ux = (0.1 * x) ** 2
+        X, UX = GUM_DFT(x, ux)
+        xh, uxh = GUM_iDFT(X, UX)
+        assert_almost_equal(np.max(np.abs(x - xh)), 0)
+        assert_almost_equal(np.max(np.sqrt(ux) - np.sqrt(np.diag(uxh))), 0)
+
+    def test_DFT_iDFT_fullcov(self, multisine_testsignal, create_corrmatrix):
+        """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
+        x, ux = multisine_testsignal
+        ux = np.ones_like(x) * 0.01 ** 2
+        cx = create_corrmatrix(0.95, len(x))
+        Ux = np.diag(ux)
+        Ux = Ux.dot(cx.dot(Ux))
+        X, UX = GUM_DFT(x, Ux)
+        xh, Uxh = GUM_iDFT(X, UX)
+        assert_almost_equal(np.max(np.abs(x - xh)), 0)
+        assert_almost_equal(np.max(Ux - Uxh), 0)
+
+    def test_AmpPhasePropagation(self, multisine_testsignal):
+        """Test Time2AmpPhase and AmpPhase2Time with noise variance as uncertainty"""
+        testsignal, noise_std = multisine_testsignal
+        A, P, UAP = Time2AmpPhase(testsignal, noise_std ** 2)
+        x, ux = AmpPhase2Time(A, P, UAP)
+        assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
+
+
 @given(x_Ux_and_window())
 def test_apply_window(params):
     """Check if application of window to random sample signal works"""
@@ -236,4 +254,61 @@ def test_apply_window_with_known_result(known_inputs_and_outputs_for_apply_windo
     assert_allclose(
         actual=_apply_window(**known_inputs_and_outputs_for_apply_window["inputs"]),
         desired=known_inputs_and_outputs_for_apply_window["outputs"],
+    )
+
+
+@given(random_vector_and_matching_random_square_matrix())
+def test__prod(random_vector_and_matching_dimension_matrix):
+    product = _prod(
+        a=random_vector_and_matching_dimension_matrix.vector,
+        b=random_vector_and_matching_dimension_matrix.matrix,
+    )
+
+    assert isinstance(product, np.ndarray)
+    assert product.shape == random_vector_and_matching_dimension_matrix.matrix.shape
+    assert len(product) == len(random_vector_and_matching_dimension_matrix.vector)
+
+
+@given(random_vector_and_matching_random_square_matrix())
+def test__prod_against_original_implementation(
+    random_vector_and_matching_dimension_matrix,
+):
+    C = np.zeros_like(random_vector_and_matching_dimension_matrix.matrix)
+    for k in range(C.shape[0]):
+        C[k, :] = (
+            random_vector_and_matching_dimension_matrix.vector[k]
+            * random_vector_and_matching_dimension_matrix.matrix[k, :]
+        )
+    product = _prod(
+        random_vector_and_matching_dimension_matrix.vector,
+        random_vector_and_matching_dimension_matrix.matrix,
+    )
+    assert_almost_equal(
+        C,
+        product,
+    )
+
+
+@given(random_vector_and_matching_random_square_matrix())
+def test__prod_against_wrong_input_dimensions(
+    random_vector_and_matching_dimension_matrix,
+):
+    assume(len(random_vector_and_matching_dimension_matrix.matrix) > 1)
+    not_so_square_matrix = random_vector_and_matching_dimension_matrix.matrix[1:]
+    with pytest.raises(AssertionError):
+        _prod(
+            random_vector_and_matching_dimension_matrix.vector,
+            not_so_square_matrix,
+        )
+
+
+def test__prod_against_known_result():
+    vector = np.arange(3)
+    matrix = np.arange(9).reshape((3, 3))
+    assert_almost_equal(
+        _prod(
+            vector,
+            matrix,
+        ),
+        np.array([[0, 0, 0], [3, 4, 5], [12, 14, 16]]),
     )
