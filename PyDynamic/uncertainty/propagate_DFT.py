@@ -325,9 +325,7 @@ def GUM_DFT(
                 (np.hstack((UFCC, UFCS)), np.hstack((UFCS.T, UFSS)))
             )  # type: Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray]
         except MemoryError:
-            print(
-                "Could not put covariance matrix together due to memory constraints."
-            )
+            print("Could not put covariance matrix together due to memory constraints.")
             print(
                 "Returning the three blocks (A,B,C) such that U = [[A,B],"
                 "[B.T,C]] instead."
