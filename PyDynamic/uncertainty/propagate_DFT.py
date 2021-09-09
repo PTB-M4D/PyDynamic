@@ -90,40 +90,37 @@ def _apply_window(
     return xw, Uxw
 
 
-def _prod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
-    """Calculate the product of a matrix' diagonal and a vector
+def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    r"""Calculate the product of a matrix with a diagonal matrix of a vector
 
-    Calculate the product that corresponds to diag(A)*B or A*diag(B),
-    respectively; depending on which of A,B is the matrix and which the vector.
+    Calculate the product that corresponds to :math:`diag(a) \cdot b` if :math:`a`
+    is the vector or :math:`a \cdot diag(b)` else.
 
     Parameters
     ----------
-    A, B : np.ndarray of shape (N, )
-        one is a vector and the other a matrix of which we want to multipy the diagonal
-        with the vector
+    a, b : np.ndarray of shape (N,) and np.ndarray of shape (N,N)
+        one is a vector from which the diagonal matrix is build and the other a matrix
 
     Returns
     -------
     np.ndarray
-        The product of the matrix' diagonal and the vector
+        The product of the matrices
 
     Raises
     ------
-    ValueError
-        If the dimensions of A and B do not match.
+    AssertionError
+        If the dimensions of a and b do not match.
     """
-    if len(A.shape) == 1 and len(B.shape) == 2:  # A is the vector and B the matrix
-        C = np.zeros_like(B)
-        for k in range(C.shape[0]):
-            C[k, :] = A[k] * B[k, :]
-        return C
-    elif len(A.shape) == 2 and len(B.shape) == 1:  # A is the matrix and B the vector
-        C = np.zeros_like(A)
-        for k in range(C.shape[1]):
-            C[:, k] = A[:, k] * B[k]
-        return C
-    else:
-        raise ValueError("_prod: Wrong dimension of inputs")
+    assert (
+        len(a.shape) == 1 and len(b.shape) == 2 and len(a) == b.shape[0] == b.shape[1]
+    ) or (
+        len(a.shape) == 2 and len(b.shape) == 1 and len(b) == a.shape[0] == a.shape[1]
+    ), (
+        "_prod: Wrong dimension of inputs. Expected a square matrix with "
+        "the same number of rows as the vector. The shape of a is "
+        f"{a.shape} and of b is {b.shape}."
+    )
+    return np.array([a_k * b_k for a_k, b_k in zip(a, b)])
 
 
 def _matprod(
