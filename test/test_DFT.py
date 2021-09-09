@@ -115,8 +115,10 @@ def known_inputs_and_outputs_for_apply_window():
 
 
 @composite
-def x_Ux_and_window(draw: Callable, ux_type: Optional[Union[np.ndarray, float]] = None):
-    """Provide sample x, associated uncertainties and a random window
+def x_Ux_and_window(
+    draw: Callable, ux_type: Optional[Union[np.ndarray, float]] = None
+) -> Dict[str, Union[np.ndarray, float]]:
+    """Provide random inputs for calling _apply_window
 
     Parameters
     ----------
@@ -130,13 +132,12 @@ def x_Ux_and_window(draw: Callable, ux_type: Optional[Union[np.ndarray, float]] 
     -------
     Dictionary to hand over to apply_window(**x_Ux_and_window([...])).
     """
-    # Draw dimension of x, window and of Ux in case it is a matrix.
-    dim = draw(hst.integers(min_value=1, max_value=20))
+    x = draw(random_float_vector())
 
-    x = draw(hnp.arrays(dtype=float, shape=dim))
+    dim = len(x)
     # Prepare drawing Ux as matrix if requested or either as float or matrix else.
-    full_ux_strategy = hnp.arrays(dtype=float, shape=(dim, dim))
-    float_ux_strategy = hst.floats(min_value=0)
+    full_ux_strategy = random_float_square_matrix_strategy(number_of_rows=dim)
+    float_ux_strategy = random_not_negative_float_strategy()
     if ux_type == np.ndarray:
         uncertainty_strategy = full_ux_strategy
     elif ux_type == float:
@@ -144,7 +145,7 @@ def x_Ux_and_window(draw: Callable, ux_type: Optional[Union[np.ndarray, float]] 
     else:
         uncertainty_strategy = hst.one_of(float_ux_strategy, full_ux_strategy)
     Ux = draw(uncertainty_strategy)
-    window = draw(hnp.arrays(dtype=float, shape=dim))
+    window = draw(random_float_vector(length=dim))
 
     return {"x": x, "Ux": Ux, "window": window}
 
@@ -244,7 +245,7 @@ def test_wrong_dimension_ux_apply_window(params):
 
 
 @given(x_Ux_and_window(ux_type=float))
-def test_apply_window(params):
+def test_apply_window_with_scalar_uncertainty(params):
     """Check if application of window to random sample with scalar uncertainty works"""
     assert _apply_window(**params)
 
