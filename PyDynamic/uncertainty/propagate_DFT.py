@@ -981,7 +981,7 @@ def DFT_deconv(
     IY = np.r_[-iH / norm, rH / norm]
     RH = np.r_[
         (-rY * rH ** 2 + rY * iH ** 2 - 2 * iY * iH * rH) / norm ** 2,
-        (iY * rH ** 2 - iH * iH ** 2 - 2 * rY * rH * iH) / norm ** 2,
+        (iY * rH ** 2 - iY * iH ** 2 - 2 * rY * rH * iH) / norm ** 2,
     ]
     IH = np.r_[
         (-iY * rH ** 2 + iY * iH ** 2 + 2 * rY * iH * rH) / norm ** 2,
