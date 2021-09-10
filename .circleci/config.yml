@@ -256,6 +256,7 @@ jobs:
       - install_development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
+          no_output_timeout: 30m
           pyenv: << parameters.pyenv >>
           posargs: << parameters.posargs >>
       - store_results
@@ -336,6 +337,7 @@ jobs:
 
       # Run tests! We use pytest's test-runner.
       - run:
+          no_output_timeout: 30m
           name: Run tests
           command: |
             source $HOME/conda/etc/profile.d/conda.sh
