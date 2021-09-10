@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 import numpy as np
 from hypothesis import HealthCheck, settings, strategies as hst
@@ -18,16 +18,54 @@ if "CIRCLECI" in os.environ:
     settings.load_profile("ci")
 
 
+def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
+    no_nans_and_infs = [np.all(np.isfinite(ndarray)) for ndarray in args]
+    return np.all(no_nans_and_infs)
+
+
 @dataclass
 class VectorAndCompatibleMatrix:
     vector: np.ndarray
     matrix: np.ndarray
 
 
+def random_dimension_strategy():
+    return hst.integers(min_value=1, max_value=20)
+
+
 def random_float_square_matrix_strategy(
     number_of_rows: int,
 ) -> SearchStrategy:
-    return hnp.arrays(dtype=float, shape=(number_of_rows, number_of_rows))
+    return random_float_matrix_strategy(number_of_rows, number_of_rows)
+
+
+def random_float_matrix_strategy(
+    number_of_rows: int, number_of_cols: int
+) -> SearchStrategy:
+    return hnp.arrays(dtype=float, shape=(number_of_rows, number_of_cols))
+
+
+@composite
+def random_float_matrix(
+    draw: Callable,
+    number_of_rows: Optional[int] = None,
+    number_of_cols: Optional[int] = None,
+) -> np.ndarray:
+    number_of_rows = (
+        number_of_rows
+        if number_of_rows is not None
+        else draw(random_dimension_strategy())
+    )
+    number_of_cols = (
+        number_of_cols
+        if number_of_cols is not None
+        else draw(random_dimension_strategy())
+    )
+    return draw(
+        random_float_matrix_strategy(
+            number_of_rows=number_of_rows, number_of_cols=number_of_cols
+        )
+    )
 
 
 @composite

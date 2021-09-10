@@ -98,8 +98,9 @@ def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    a, b : np.ndarray of shape (N,) and np.ndarray of shape (N,N)
-        one is a vector from which the diagonal matrix is build and the other a matrix
+    a, b : np.ndarray of shape (N,M) and np.ndarray of shape (N,) of shape  (M,)
+        one is a vector from which the diagonal matrix is build and the other a
+        matrix where the order does not matter
 
     Returns
     -------
@@ -109,18 +110,62 @@ def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     Raises
     ------
     AssertionError
-        If the dimensions of a and b do not match.
+        If the dimensions of a and b do not match
     """
-    assert (
-        len(a.shape) == 1 and len(b.shape) == 2 and len(a) == b.shape[0] == b.shape[1]
-    ) or (
-        len(a.shape) == 2 and len(b.shape) == 1 and len(b) == a.shape[0] == a.shape[1]
-    ), (
-        "_prod: Wrong dimension of inputs. Expected a square matrix with "
-        "the same number of rows as the vector. The shape of a is "
-        f"{a.shape} and of b is {b.shape}."
+    assert _check_matrix_vector_dimension_match(a=a, b=b), (
+        "_prod: Wrong dimension of inputs. Expected 'b' to be matrix with "
+        "the same number of columns as the vector 'a' or 'a' to be a matrix with "
+        "the same number of rows as the vector 'b'. The shape of 'a' is "
+        f"{a.shape} and of 'b' is {b.shape}."
     )
-    return np.array([a_k * b_k for a_k, b_k in zip(a, b)])
+    if _is_vector(ndarray=a):
+        return _multiply_diagonal_matrix_from_vector_with_matrix_from_left(
+            matrix=b, vector=a
+        )
+    else:
+        return _multiply_diagonal_matrix_from_vector_with_matrix_from_right(
+            matrix=a, vector=b
+        )
+
+
+def _check_matrix_vector_dimension_match(a: np.ndarray, b: np.ndarray) -> bool:
+    return (
+        _is_vector(a)
+        and _is_2d_matrix(b)
+        and _number_of_rows_equals_vector_dim(vector=a, matrix=b)
+    ) or (
+        _is_vector(b)
+        and _is_2d_matrix(a)
+        and _number_of_cols_equals_vector_dim(vector=b, matrix=a)
+    )
+
+
+def _is_vector(ndarray: np.ndarray) -> bool:
+    return len(ndarray.shape) == 1
+
+
+def _is_2d_matrix(ndarray: np.ndarray) -> bool:
+    return len(ndarray.shape) == 2
+
+
+def _number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
+    return len(vector) == matrix.shape[0]
+
+
+def _number_of_cols_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
+    return len(vector) == matrix.shape[1]
+
+
+def _multiply_diagonal_matrix_from_vector_with_matrix_from_right(
+    matrix: np.ndarray, vector: np.ndarray
+) -> np.ndarray:
+    return matrix @ np.diag(v=vector)
+
+
+def _multiply_diagonal_matrix_from_vector_with_matrix_from_left(
+    matrix: np.ndarray, vector: np.ndarray
+) -> np.ndarray:
+    return np.diag(v=vector) @ matrix
 
 
 def _matprod(

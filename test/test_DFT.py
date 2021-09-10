@@ -21,6 +21,8 @@ from PyDynamic.uncertainty.propagate_DFT import (
     Time2AmpPhase,
 )
 from .conftest import (
+    check_no_nans_and_infs,
+    random_float_matrix,
     random_float_square_matrix_strategy,
     random_float_vector,
     random_not_negative_float_strategy,
@@ -159,6 +161,24 @@ def random_vector_and_matching_random_square_matrix(
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
 
+@composite
+def random_vector_and_matrix_with_matching_number_of_rows(
+    draw: Callable,
+) -> VectorAndCompatibleMatrix:
+    x = draw(random_float_vector())
+    A = draw(random_float_matrix(number_of_rows=len(x)))
+    return VectorAndCompatibleMatrix(vector=x, matrix=A)
+
+
+@composite
+def random_vector_and_matrix_with_matching_number_of_columns(
+    draw: Callable,
+) -> VectorAndCompatibleMatrix:
+    x = draw(random_float_vector())
+    A = draw(random_float_matrix(number_of_cols=len(x)))
+    return VectorAndCompatibleMatrix(vector=x, matrix=A)
+
+
 class TestDFT:
     def test_DFT_iDFT(self, multisine_testsignal):
         """Test GUM_DFT and GUM_iDFT with noise variance as uncertainty"""
@@ -270,23 +290,33 @@ def test__prod(random_vector_and_matching_dimension_matrix):
     assert len(product) == len(random_vector_and_matching_dimension_matrix.vector)
 
 
-@given(random_vector_and_matching_random_square_matrix())
-def test__prod_against_original_implementation(
-    random_vector_and_matching_dimension_matrix,
+@given(random_vector_and_matrix_with_matching_number_of_rows())
+def test__prod_against_original_implementation_with_diagonal_from_left(
+    params,
 ):
-    C = np.zeros_like(random_vector_and_matching_dimension_matrix.matrix)
-    for k in range(C.shape[0]):
-        C[k, :] = (
-            random_vector_and_matching_dimension_matrix.vector[k]
-            * random_vector_and_matching_dimension_matrix.matrix[k, :]
-        )
-    product = _prod(
-        random_vector_and_matching_dimension_matrix.vector,
-        random_vector_and_matching_dimension_matrix.matrix,
-    )
+    assume(check_no_nans_and_infs(params.matrix, params.vector))
+    manual_matrix_vector_product = np.empty_like(params.matrix)
+    for k in range(manual_matrix_vector_product.shape[0]):
+        manual_matrix_vector_product[k, ...] = params.vector[k] * params.matrix[k, ...]
+    matrix_vector_product = _prod(a=params.vector, b=params.matrix)
     assert_almost_equal(
-        C,
-        product,
+        manual_matrix_vector_product,
+        matrix_vector_product,
+    )
+
+
+@given(random_vector_and_matrix_with_matching_number_of_columns())
+def test__prod_against_original_implementation_with_diagonal_from_right(
+    params,
+):
+    assume(check_no_nans_and_infs(params.matrix, params.vector))
+    manual_matrix_vector_product = np.empty_like(params.matrix)
+    for k in range(manual_matrix_vector_product.shape[1]):
+        manual_matrix_vector_product[..., k] = params.matrix[..., k] * params.vector[k]
+    matrix_vector_product = _prod(a=params.matrix, b=params.vector)
+    assert_almost_equal(
+        manual_matrix_vector_product,
+        matrix_vector_product,
     )
 
 
@@ -303,13 +333,25 @@ def test__prod_against_wrong_input_dimensions(
         )
 
 
-def test__prod_against_known_result():
+def test__prod_against_known_result_for_vector_a():
     vector = np.arange(3)
-    matrix = np.arange(9).reshape((3, 3))
+    matrix = np.arange(12).reshape((3, 4))
     assert_almost_equal(
         _prod(
             vector,
             matrix,
         ),
-        np.array([[0, 0, 0], [3, 4, 5], [12, 14, 16]]),
+        np.array([[0, 0, 0, 0], [4, 5, 6, 7], [16, 18, 20, 22]]),
+    )
+
+
+def test__prod_against_known_result_for_vector_b():
+    vector = np.arange(4)
+    matrix = np.arange(12).reshape((3, 4))
+    assert_almost_equal(
+        _prod(
+            matrix,
+            vector,
+        ),
+        np.array([[0, 1, 4, 9], [0, 5, 12, 21], [0, 9, 20, 33]]),
     )
