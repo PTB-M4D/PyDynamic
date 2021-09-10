@@ -49,24 +49,6 @@ def multisine_testsignal() -> Tuple[np.ndarray, float]:
     return testsignal, sigma_noise
 
 
-@pytest.fixture(scope="module")
-def create_corrmatrix():
-    def _create_corrmatrix(rho, Nx, nu=0.5, phi=0.3):
-        """Additional helper function to create a correlation matrix"""
-        corrmat = np.zeros((Nx, Nx))
-        if rho > 1:
-            raise ValueError("Correlation scalar should be less than one.")
-
-        for k in range(1, Nx):
-            corrmat += np.diag(np.ones(Nx - k) * rho ** (phi * k ** nu), k)
-        corrmat += corrmat.T
-        corrmat += np.eye(Nx)
-
-        return corrmat
-
-    return _create_corrmatrix
-
-
 @pytest.fixture
 def known_inputs_and_outputs_for_apply_window():
     x = np.array(
