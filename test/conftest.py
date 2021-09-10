@@ -87,7 +87,7 @@ def random_float_square_matrix(
 @composite
 def random_complex_vector(draw: Callable, length: Optional[int] = None) -> np.ndarray:
     number_of_elements = (
-        length if length is not None else draw(hst.integers(min_value=1, max_value=20))
+        length if length is not None else draw(reasonable_random_dimension_strategy())
     )
     return draw(
         hnp.arrays(
@@ -100,7 +100,7 @@ def random_complex_vector(draw: Callable, length: Optional[int] = None) -> np.nd
 @composite
 def random_float_vector(draw: Callable, length: Optional[int] = None) -> np.ndarray:
     number_of_elements = (
-        length if length is not None else draw(hst.integers(min_value=1, max_value=20))
+        length if length is not None else draw(reasonable_random_dimension_strategy())
     )
     return draw(
         hnp.arrays(
