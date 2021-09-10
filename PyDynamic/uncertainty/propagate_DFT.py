@@ -752,7 +752,7 @@ def AmpPhase2DFT(
 
 
 def Time2AmpPhase(
-    x: np.ndarray, Ux: np.ndarray
+    x: np.ndarray, Ux: Union[np.ndarray, float]
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Transformation from time domain to amplitude and phase via DFT
 
@@ -760,8 +760,9 @@ def Time2AmpPhase(
     ----------
     x : np.ndarray of shape (N,)
         time domain signal
-    Ux : np.ndarray of shape (N,N)
-        squared uncertainty associated with x
+    Ux : np.ndarray of shape (N,) or of shape (N,N) or float
+        covariance matrix associated with x, or vector of squared standard
+        uncertainties, or noise variance as float
 
     Returns
     -------
