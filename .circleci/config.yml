@@ -104,7 +104,6 @@ commands:
 
     # Perform tox testing.
     - run:
-        no_output_timeout: 60m
         name: Perform tox testing
         command: |
           source venv/bin/activate
@@ -337,7 +336,6 @@ jobs:
 
       # Run tests! We use pytest's test-runner.
       - run:
-          no_output_timeout: 60m
           name: Run tests
           command: |
             source $HOME/conda/etc/profile.d/conda.sh
