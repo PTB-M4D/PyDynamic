@@ -104,7 +104,6 @@ commands:
 
     # Perform tox testing.
     - run:
-        no_output_timeout: 30m
         name: Perform tox testing
         command: |
           source venv/bin/activate
@@ -257,6 +256,7 @@ jobs:
       - install_development_deps:
           pyenv: << parameters.pyenv >>
       - tox:
+          no_output_timeout: 30m
           pyenv: << parameters.pyenv >>
           posargs: << parameters.posargs >>
       - store_results
