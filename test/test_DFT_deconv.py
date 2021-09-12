@@ -25,8 +25,8 @@ def test_dft_deconv(
     n_monte_carlo_runs = 40000
     y_mc = stats.multivariate_normal.rvs(mean=y, cov=uy, size=n_monte_carlo_runs)
     h_mc = stats.multivariate_normal.rvs(mean=h, cov=uh, size=n_monte_carlo_runs)
-    mean_tolerance = 7e-3
-    cov_tolerance = 2016
+    mean_tolerance = 1e-2
+    cov_tolerance = 2561
     assert_allclose(actual=np.mean(y_mc, axis=0), desired=y, rtol=mean_tolerance)
     assert_allclose(actual=np.cov(y_mc, rowvar=False), desired=uy, rtol=cov_tolerance)
     assert_allclose(actual=np.mean(h_mc, axis=0), desired=h, rtol=mean_tolerance)
