@@ -4,7 +4,7 @@ from typing import Callable, Optional, Tuple
 
 import numpy as np
 import pytest
-from hypothesis import HealthCheck, settings, strategies as hst
+from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
 
@@ -12,6 +12,8 @@ from hypothesis.strategies import composite, SearchStrategy
 # disables the 'too_slow' health check. See
 # https://hypothesis.readthedocs.io/en/latest/healthchecks.html#hypothesis.HealthCheck
 # for some details.
+from PyDynamic import make_semiposdef
+
 settings.register_profile(
     name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
 )
@@ -85,16 +87,27 @@ def random_float_square_matrix(
 
 
 @composite
-def random_complex_vector(draw: Callable, length: Optional[int] = None) -> np.ndarray:
+def nonzero_complex_vector(draw: Callable, length: Optional[int] = None) -> np.ndarray:
     number_of_elements = (
         length if length is not None else draw(reasonable_random_dimension_strategy())
     )
-    return draw(
+    complex_vector = draw(
         hnp.arrays(
             dtype=complex,
             shape=number_of_elements,
+            elements=hst.complex_numbers(allow_infinity=False, allow_nan=False),
         )
     )
+    assume(np.all(complex_vector != 0))
+    return complex_vector
+
+
+@pytest.fixture
+def random_complex_vector() -> Callable:
+    def create_random_complex_vector(length: int) -> np.ndarray:
+        return np.random.random(length) + 1j * np.random.random(length)
+
+    return create_random_complex_vector
 
 
 @composite
@@ -127,10 +140,27 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
     # has one eigenvalue close to numerical zero (rank n-1).
     # This leads to a singular matrix, which is badly suited to be used as valid
     # covariance matrix. To circumvent this:
-    cov = np.cov(np.random.random((length + 1, length + 1)))
-    u, s, vh = np.linalg.svd(cov, full_matrices=False, hermitian=True)
+    rng = np.random.default_rng()
+    cov = np.cov(rng.random(size=(length + 1, length + 1)))
+    cov_after_discarding_smallest_singular_value = discard_smallest_singular_value(cov)
+    return cov_after_discarding_smallest_singular_value
+
+
+def discard_smallest_singular_value(matrix: np.ndarray):
+    u, s, vh = np.linalg.svd(matrix, full_matrices=False, hermitian=True)
     cov_after_discarding_smallest_singular_value = (u[:-1, :-1] * s[:-1]) @ vh[:-1, :-1]
     return cov_after_discarding_smallest_singular_value
+
+
+@pytest.fixture
+def random_covariance_matrix_for_complex_vectors() -> Callable:
+    def create_random_covariance_matrix_for_complex_vectors(length: int) -> np.ndarray:
+        uy_rr = make_semiposdef(random_covariance_matrix(length=length), maxiter=100)
+        uy_ii = make_semiposdef(random_covariance_matrix(length=length), maxiter=100)
+        uy_ri = make_semiposdef(random_covariance_matrix(length=length), maxiter=100)
+        return np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
+
+    return create_random_covariance_matrix_for_complex_vectors
 
 
 @composite
