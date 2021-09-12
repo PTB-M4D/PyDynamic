@@ -43,11 +43,15 @@ def test_dft_deconv(
         h_mc[..., :real_complex_divider_index]
         + 1j * h_mc[..., real_complex_divider_index:]
     )
-    y_divided_by_h_mc_complex = y_mcs / h_mcs
-    y_divided_by_h_mc = np.concatenate(
-        (np.real(y_divided_by_h_mc_complex), np.imag(y_divided_by_h_mc_complex)), axis=1
+    y_mcs_divided_by_h_mcs_complex = y_mcs / h_mcs
+    y_mcs_divided_by_h_mcs = np.concatenate(
+        (
+            np.real(y_mcs_divided_by_h_mcs_complex),
+            np.imag(y_mcs_divided_by_h_mcs_complex),
+        ),
+        axis=1,
     )
-    y_divided_by_h_mc_mean = np.mean(y_divided_by_h_mc, axis=0)
-    y_divided_by_h_mc_cov = np.cov(y_divided_by_h_mc, rowvar=False)
-    assert_allclose(x_deconv, y_divided_by_h_mc_mean, rtol=24e-3, atol=2e-2)
-    assert_allclose(u_deconv, y_divided_by_h_mc_cov, rtol=1224, atol=2e-2)
+    y_divided_by_h_mc_mean = np.mean(y_mcs_divided_by_h_mcs, axis=0)
+    y_divided_by_h_mc_cov = np.cov(y_mcs_divided_by_h_mcs, rowvar=False)
+    assert_allclose(x_deconv + 1, y_divided_by_h_mc_mean + 1, atol=4e-7)
+    assert_allclose(u_deconv + 1, y_divided_by_h_mc_cov + 1)
