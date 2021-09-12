@@ -34,27 +34,6 @@ def test_dft_deconv(
     n_monte_carlo_runs = 40000
     y_mc = stats.multivariate_normal.rvs(mean=y, cov=uy, size=n_monte_carlo_runs)
     h_mc = stats.multivariate_normal.rvs(mean=h, cov=uh, size=n_monte_carlo_runs)
-    allowed_difference_to_zero = 5e-8
-    assert_allclose(
-        actual=np.mean(y_mc, axis=0),
-        desired=y,
-        atol=allowed_difference_to_zero,
-    )
-    assert_allclose(
-        actual=np.cov(y_mc, rowvar=False),
-        desired=uy,
-        atol=allowed_difference_to_zero,
-    )
-    assert_allclose(
-        actual=np.mean(h_mc, axis=0),
-        desired=h,
-        atol=allowed_difference_to_zero,
-    )
-    assert_allclose(
-        actual=np.cov(h_mc, rowvar=False),
-        desired=uh,
-        atol=allowed_difference_to_zero,
-    )
     real_complex_divider_index = 2 * n // 2
     y_mcs = (
         y_mc[..., :real_complex_divider_index]
