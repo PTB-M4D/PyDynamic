@@ -179,11 +179,11 @@ class TestDFT:
         assert_almost_equal(np.max(np.abs(x - xh)), 0)
         assert_almost_equal(np.max(np.sqrt(ux) - np.sqrt(np.diag(uxh))), 0)
 
-    def test_DFT_iDFT_fullcov(self, multisine_testsignal, create_corrmatrix):
+    def test_DFT_iDFT_fullcov(self, multisine_testsignal, corrmatrix):
         """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
         x, ux = multisine_testsignal
         ux = np.ones_like(x) * 0.01 ** 2
-        cx = create_corrmatrix(0.95, len(x))
+        cx = corrmatrix(0.95, len(x))
         Ux = np.diag(ux)
         Ux = Ux.dot(cx.dot(Ux))
         X, UX = GUM_DFT(x, Ux)
