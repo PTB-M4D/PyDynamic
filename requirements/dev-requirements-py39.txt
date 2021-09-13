@@ -69,7 +69,7 @@ gitdb==4.0.7
     # via gitpython
 gitpython==3.1.18
     # via python-semantic-release
-hypothesis==6.20.0
+hypothesis==6.21.1
     # via -r requirements/dev-requirements.in
 idna==3.2
     # via requests
@@ -107,7 +107,7 @@ jupyter-core==4.7.1
     #   nbformat
 jupyterlab-pygments==0.1.2
     # via nbconvert
-keyring==23.1.0
+keyring==23.2.1
     # via twine
 lazy-object-proxy==1.6.0
     # via astroid
@@ -221,7 +221,7 @@ secretstorage==3.3.1
     # via keyring
 semver==2.13.0
     # via python-semantic-release
-setuptools-scm==6.3.1
+setuptools-scm==6.3.2
     # via dotty-dict
 six==1.16.0
     # via
@@ -238,7 +238,7 @@ snowballstemmer==2.1.0
     # via sphinx
 sortedcontainers==2.4.0
     # via hypothesis
-sphinx==4.1.2
+sphinx==4.2.0
     # via
     #   -r requirements/dev-requirements.in
     #   nbsphinx
