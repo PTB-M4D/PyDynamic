@@ -179,24 +179,25 @@ class TestDFT:
         assert_almost_equal(np.max(np.abs(x - xh)), 0)
         assert_almost_equal(np.max(np.sqrt(ux) - np.sqrt(np.diag(uxh))), 0)
 
-    def test_DFT_iDFT_fullcov(self, multisine_testsignal, corrmatrix):
-        """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
-        x, ux = multisine_testsignal
-        ux = np.ones_like(x) * 0.01 ** 2
-        cx = corrmatrix(0.95, len(x))
-        Ux = np.diag(ux)
-        Ux = Ux.dot(cx.dot(Ux))
-        X, UX = GUM_DFT(x, Ux)
-        xh, Uxh = GUM_iDFT(X, UX)
-        assert_almost_equal(np.max(np.abs(x - xh)), 0)
-        assert_almost_equal(np.max(Ux - Uxh), 0)
-
     def test_AmpPhasePropagation(self, multisine_testsignal):
         """Test Time2AmpPhase and AmpPhase2Time with noise variance as uncertainty"""
         testsignal, noise_std = multisine_testsignal
         A, P, UAP = Time2AmpPhase(testsignal, noise_std ** 2)
         x, ux = AmpPhase2Time(A, P, UAP)
         assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
+
+
+def test_compose_DFT_and_iDFT_with_full_covariance(multisine_testsignal, corrmatrix):
+    """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
+    x, ux = multisine_testsignal
+    ux = np.ones_like(x) * 0.01 ** 2
+    cx = corrmatrix(0.95, len(x))
+    Ux = np.diag(ux)
+    Ux = Ux.dot(cx.dot(Ux))
+    X, UX = GUM_DFT(x, Ux)
+    xh, Uxh = GUM_iDFT(X, UX)
+    assert_almost_equal(np.max(np.abs(x - xh)), 0)
+    assert_almost_equal(np.max(Ux - Uxh), 0)
 
 
 @given(x_Ux_and_window())
