@@ -13,6 +13,7 @@ This module contains the following functions:
 * :func:`squarepulse`: Generates a series of rect functions to represent a square
   pulse signal
 * :func:`sine`: Generate a sine signal
+* :func:`multi_sine`: Generate a multi-sine signal as summation of single sine signals
 """
 
 import itertools
