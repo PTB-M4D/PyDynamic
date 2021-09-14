@@ -82,7 +82,7 @@ def test_reveal_bug_in_dft_deconv_up_to_1_9(
         ),
     ]
     uh = np.eye(N=n * 2)
-    x_deconv, u_deconv = DFT_deconv(H=h, Y=y, UH=uh, UY=uy)
+    u_deconv = DFT_deconv(H=h, Y=y, UH=uh, UY=uy)[1]
     n_monte_carlo_runs = 2000
     y_mc = stats.multivariate_normal.rvs(mean=y, cov=uy, size=n_monte_carlo_runs)
     h_mc = stats.multivariate_normal.rvs(mean=h, cov=uh, size=n_monte_carlo_runs)
