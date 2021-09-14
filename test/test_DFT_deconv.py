@@ -1,5 +1,6 @@
 """Test PyDynamic.uncertainty.propagate_DFT.DFT_deconv"""
 import numpy as np
+import pytest
 import scipy.stats as stats
 from hypothesis import given, settings
 from hypothesis.strategies import data
@@ -14,6 +15,7 @@ from .conftest import (
 )
 
 
+@pytest.mark.slow
 @given(data(), two_to_the_k(min_k=2, max_k=4))
 @settings(deadline=None)
 def test_dft_deconv(
