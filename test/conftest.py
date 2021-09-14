@@ -118,10 +118,15 @@ def random_complex_vector() -> Callable:
 @composite
 def hypothesis_float_vector(
     draw: Callable,
-    length: int = None,
+    length: Optional[int] = None,
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
 ) -> np.ndarray:
+    number_of_elements = (
+        length
+        if length is not None
+        else draw(reasonable_random_dimension_strategy())
+    )
     return draw(
         hnp.arrays(
             dtype=float,
@@ -131,7 +136,7 @@ def hypothesis_float_vector(
                 allow_infinity=False,
                 allow_nan=False,
             ),
-            shape=length,
+            shape=number_of_elements,
         )
     )
 
