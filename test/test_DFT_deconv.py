@@ -8,8 +8,8 @@ from numpy.testing import assert_allclose
 from PyDynamic.uncertainty.propagate_DFT import DFT_deconv
 from .conftest import (
     hypothesis_covariance_matrix_for_complex_vectors,
+    hypothesis_float_vector,
     nonzero_complex_vector,
-    nonzero_float_vector,
     two_to_the_k,
 )
 
@@ -64,18 +64,24 @@ def test_reveal_bug_in_dft_deconv_up_to_1_9(
     hypothesis,
     n,
 ):
-    covariance_scale_minimizer = 1e-3
-    y = np.r_[hypothesis.draw(nonzero_float_vector(length=n)), np.zeros(n)]
-    uy = covariance_scale_minimizer * hypothesis.draw(
-        hypothesis_covariance_matrix_for_complex_vectors(n)
-    )
-    h_complex = hypothesis.draw(nonzero_complex_vector(length=n))
-    h = np.r_[h_complex.real, 1e4 * h_complex.imag]
-    uh = covariance_scale_minimizer * hypothesis.draw(
-        hypothesis_covariance_matrix_for_complex_vectors(n)
-    )
+    y = np.r_[
+        hypothesis.draw(
+            hypothesis_float_vector(length=n, min_value=0.5, max_value=1.0)
+        ),
+        np.zeros(n),
+    ]
+    uy = np.eye(N=n * 2)
+    h = np.r_[
+        hypothesis.draw(
+            hypothesis_float_vector(length=n, min_value=0.5, max_value=1.0)
+        ),
+        hypothesis.draw(
+            hypothesis_float_vector(length=n, min_value=1000.0, max_value=1001.0)
+        ),
+    ]
+    uh = np.eye(N=n * 2)
     x_deconv, u_deconv = DFT_deconv(H=h, Y=y, UH=uh, UY=uy)
-    n_monte_carlo_runs = 40000
+    n_monte_carlo_runs = 2000
     y_mc = stats.multivariate_normal.rvs(mean=y, cov=uy, size=n_monte_carlo_runs)
     h_mc = stats.multivariate_normal.rvs(mean=h, cov=uh, size=n_monte_carlo_runs)
     real_complex_divider_index = 2 * n // 2
@@ -95,7 +101,5 @@ def test_reveal_bug_in_dft_deconv_up_to_1_9(
         ),
         axis=1,
     )
-    y_divided_by_h_mc_mean = np.mean(y_mcs_divided_by_h_mcs, axis=0)
     y_divided_by_h_mc_cov = np.cov(y_mcs_divided_by_h_mcs, rowvar=False)
-    assert_allclose(x_deconv + 1, y_divided_by_h_mc_mean + 1, rtol=3e-4, atol=4e-7)
-    assert_allclose(u_deconv + 1, y_divided_by_h_mc_cov + 1, atol=2e-7)
+    assert_allclose(u_deconv + 1, y_divided_by_h_mc_cov + 1)
