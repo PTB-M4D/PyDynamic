@@ -22,9 +22,9 @@ from PyDynamic.uncertainty.propagate_DFT import (
 )
 from .conftest import (
     check_no_nans_and_infs,
+    hypothesis_float_vector,
     random_float_matrix,
     random_float_square_matrix_strategy,
-    random_float_vector,
     random_not_negative_float_strategy,
     VectorAndCompatibleMatrix,
 )
@@ -116,7 +116,7 @@ def x_Ux_and_window(
     -------
     Dictionary to hand over to apply_window(**x_Ux_and_window([...])).
     """
-    x = draw(random_float_vector())
+    x = draw(hypothesis_float_vector())
 
     dim = len(x)
     # Prepare drawing Ux as matrix if requested or either as float or matrix else.
@@ -129,7 +129,7 @@ def x_Ux_and_window(
     else:
         uncertainty_strategy = hst.one_of(float_ux_strategy, full_ux_strategy)
     Ux = draw(uncertainty_strategy)
-    window = draw(random_float_vector(length=dim))
+    window = draw(hypothesis_float_vector(length=dim))
 
     return {"x": x, "Ux": Ux, "window": window}
 
@@ -138,7 +138,7 @@ def x_Ux_and_window(
 def random_vector_and_matching_random_square_matrix(
     draw: Callable,
 ) -> VectorAndCompatibleMatrix:
-    x = draw(random_float_vector())
+    x = draw(hypothesis_float_vector())
     A = draw(random_float_square_matrix_strategy(len(x)))
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
@@ -147,7 +147,7 @@ def random_vector_and_matching_random_square_matrix(
 def random_vector_and_matrix_with_matching_number_of_rows(
     draw: Callable,
 ) -> VectorAndCompatibleMatrix:
-    x = draw(random_float_vector())
+    x = draw(hypothesis_float_vector())
     A = draw(random_float_matrix(number_of_rows=len(x)))
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
@@ -156,7 +156,7 @@ def random_vector_and_matrix_with_matching_number_of_rows(
 def random_vector_and_matrix_with_matching_number_of_columns(
     draw: Callable,
 ) -> VectorAndCompatibleMatrix:
-    x = draw(random_float_vector())
+    x = draw(hypothesis_float_vector())
     A = draw(random_float_matrix(number_of_cols=len(x)))
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
