@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.9.1 (2021-09-15)
+### Fix
+* **DFT_deconv:** Replace the imaginary part of H by Y's imaginary part in one of the equations ([`a4252dd`](https://github.com/PTB-M4D/PyDynamic/commit/a4252ddd850908467933d7de41f1da99d57d3ea1))
+
+### Documentation
+* Introduce Python 3.9 to the docs and actually provide requirements*.txt files ([`19dcef2`](https://github.com/PTB-M4D/PyDynamic/commit/19dcef2f5b1d0516dc9ebf462d5115a5554c8cec))
+
 ## v1.9.0 (2021-05-11)
 ### Feature
 * **interp1d_unc:** Add cubic bspline interpolation-kind ([`f0c6d19`](https://github.com/PTB-PSt1/PyDynamic/commit/f0c6d19bad71816f5c6d95803f734e77567931ea))
