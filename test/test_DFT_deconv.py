@@ -65,6 +65,9 @@ def test_reveal_bug_in_dft_deconv_up_to_1_9(
     hypothesis,
     n,
 ):
+    # Fix a bug discovered by partners of Volker Wilkens. The bug and the process of
+    # fixing it was processed and thus is documented in PR #220:
+    # https://github.com/PTB-M4D/PyDynamic/pull/220
     y = np.r_[
         hypothesis.draw(
             hypothesis_float_vector(length=n, min_value=0.5, max_value=1.0)
