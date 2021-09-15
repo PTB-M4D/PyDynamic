@@ -1,5 +1,5 @@
 """Test PyDynamic.uncertainty.propagate_convolve"""
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 import numpy as np
 import pytest
@@ -7,6 +7,7 @@ import scipy.ndimage as sn
 from hypothesis import assume, given, strategies as hst
 
 from PyDynamic.uncertainty.propagate_convolution import convolve_unc
+from .conftest import random_covariance_matrix
 
 
 def random_array(length):
@@ -14,42 +15,22 @@ def random_array(length):
     return array
 
 
-def random_covariance_matrix(length):
-    """construct a valid (but random) covariance matrix with good condition number"""
+def valid_inputs(reduced_set: bool = False) -> List[List[np.ndarray]]:
 
-    # because np.cov estimates the mean from data, the returned covariance matrix
-    # has one eigenvalue close to numerical zero (rank n-1).
-    # This leads to a singular matrix, which is badly suited to be used as valid
-    # covariance matrix. To circumvent this:
-
-    ## draw random (n+1, n+1) matrix
-    cov = np.cov(np.random.random((length + 1, length + 1)))
-
-    ## calculate SVD
-    u, s, vh = np.linalg.svd(cov, full_matrices=False, hermitian=True)
-
-    ## reassemble a covariance of size (n, n) by discarding the smallest singular value
-    cov_adjusted = (u[:-1, :-1] * s[:-1]) @ vh[:-1, :-1]
-
-    return cov_adjusted
-
-
-def valid_inputs(reduced_set=False):
-
-    valid_inputs = []
+    list_of_valid_inputs = []
 
     for n in [10, 15, 20]:
         x_signal = random_array(n)
         u_signal = random_covariance_matrix(n)
 
         if reduced_set:
-            valid_inputs.append([x_signal, u_signal])
+            list_of_valid_inputs.append([x_signal, u_signal])
         else:
-            valid_inputs.append([x_signal, None])
-            valid_inputs.append([x_signal, np.diag(np.diag(u_signal))])
-            valid_inputs.append([x_signal, u_signal])
+            list_of_valid_inputs.append([x_signal, None])
+            list_of_valid_inputs.append([x_signal, np.diag(np.diag(u_signal))])
+            list_of_valid_inputs.append([x_signal, u_signal])
 
-    return valid_inputs
+    return list_of_valid_inputs
 
 
 def valid_modes(restrict_kind_to: Optional[str] = None) -> Set[str]:
