@@ -1,5 +1,5 @@
 """Test PyDynamic.uncertainty.propagate_convolve"""
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 import numpy as np
 import pytest
@@ -7,7 +7,7 @@ import scipy.ndimage as sn
 from hypothesis import assume, given, strategies as hst
 
 from PyDynamic.uncertainty.propagate_convolution import convolve_unc
-from test.conftest import random_covariance_matrix
+from .conftest import random_covariance_matrix
 
 
 def random_array(length):
@@ -15,22 +15,22 @@ def random_array(length):
     return array
 
 
-def valid_inputs(reduced_set=False):
+def valid_inputs(reduced_set: bool = False) -> List[List[np.ndarray]]:
 
-    valid_inputs_list = []
+    list_of_valid_inputs = []
 
     for n in [10, 15, 20]:
         x_signal = random_array(n)
         u_signal = random_covariance_matrix(n)
 
         if reduced_set:
-            valid_inputs_list.append([x_signal, u_signal])
+            list_of_valid_inputs.append([x_signal, u_signal])
         else:
-            valid_inputs_list.append([x_signal, None])
-            valid_inputs_list.append([x_signal, np.diag(np.diag(u_signal))])
-            valid_inputs_list.append([x_signal, u_signal])
+            list_of_valid_inputs.append([x_signal, None])
+            list_of_valid_inputs.append([x_signal, np.diag(np.diag(u_signal))])
+            list_of_valid_inputs.append([x_signal, u_signal])
 
-    return valid_inputs_list
+    return list_of_valid_inputs
 
 
 def valid_modes(restrict_kind_to: Optional[str] = None) -> Set[str]:
