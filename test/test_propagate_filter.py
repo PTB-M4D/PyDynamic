@@ -19,7 +19,7 @@ from PyDynamic.uncertainty.propagate_filter import (
     IIRuncFilter,
 )
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-from test.conftest import random_covariance_matrix
+from .conftest import random_covariance_matrix
 
 
 def random_array(length):
