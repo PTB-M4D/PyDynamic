@@ -15,12 +15,13 @@ from .conftest import hypothesis_bounded_float
 def test_demonstrate_second_order_model_fitting(monkeypatch):
     # With this expression we override the matplotlib.pyplot.show method with a
     # lambda expression returning None but only for this one test.
+    # guarantee this
     monkeypatch.setattr(plt, "show", lambda: None, raising=True)
     demonstrate_second_order_model_fitting()
 
 
 @composite
-def random_input_to_fit_som(draw):
+def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
     rng = default_rng()
     # sensor/measurement system
     S0 = draw(hypothesis_bounded_float(min_value=0.124, max_value=0.124))
@@ -34,17 +35,18 @@ def random_input_to_fit_som(draw):
     MCruns = draw(hst.sampled_from((10, 20, 40)))
     white_nois_S0s = rng.normal(loc=S0, scale=uS0, size=MCruns)
     white_noise_deltas = rng.normal(loc=delta, scale=udelta, size=MCruns)
-    white_nois_f0s = rng.normal(loc=f0, scale=uf0, size=MCruns)
+    white_noise_f0s = rng.normal(loc=f0, scale=uf0, size=MCruns)
     frequencies = np.linspace(0, 1.2 * f0, 30)
 
-    HMC = sos_FreqResp(white_nois_S0s, white_noise_deltas, white_nois_f0s, frequencies)
+    HMC = sos_FreqResp(white_nois_S0s, white_noise_deltas, white_noise_f0s, frequencies)
 
     H_complex = np.mean(HMC, dtype=complex, axis=1)
     H = np.r_[np.real(H_complex), np.imag(H_complex)]
     UH = make_semiposdef(
         np.cov(np.r_[np.real(HMC), np.imag(HMC)], rowvar=True), maxiter=1000
     )
-    UH = draw(hst.sampled_from((UH, np.diag(UH))))
+    if not guarantee_UH_as_matrix:
+        UH = draw(hst.sampled_from((UH, np.diag(UH), None)))
 
     return {"f": frequencies, "H": H, "UH": UH, "MCruns": MCruns, "scaling": 1}
 
@@ -81,7 +83,7 @@ def test_fit_som_with_too_short_UH(params):
         fit_som(**params)
 
 
-@given(random_input_to_fit_som())
+@given(random_input_to_fit_som(guarantee_UH_as_matrix=True))
 def test_fit_som_with_unsquare_UH(params):
     params["UH"] = params["UH"][:, 1:]
     with pytest.raises(ValueError):
