@@ -2,7 +2,7 @@ import hypothesis.strategies as hst
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from hypothesis import given, settings, Verbosity
+from hypothesis import given, HealthCheck, settings, Verbosity
 from hypothesis.strategies import composite
 from numpy.random import default_rng
 
@@ -49,9 +49,14 @@ def random_input_to_fit_som(draw):
 
 
 @given(random_input_to_fit_som())
-@settings(deadline=None, verbosity=Verbosity.verbose)
-def test_usual_calls_fit_som(params):
-    assert fit_som(**params)
+@settings(
+    deadline=None,
+    verbosity=Verbosity.verbose,
+    suppress_health_check=(HealthCheck.function_scoped_fixture,),
+)
+def test_usual_calls_fit_som(capsys, params):
+    with capsys.disabled():
+        assert fit_som(**params)
 
 
 @given(random_input_to_fit_som())
