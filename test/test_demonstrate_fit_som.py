@@ -44,6 +44,7 @@ def random_input_to_fit_som(draw):
     UH = make_semiposdef(
         np.cov(np.r_[np.real(HMC), np.imag(HMC)], rowvar=True), maxiter=1000
     )
+    UH = draw(hst.sampled_from((UH, np.diag(UH))))
 
     return {"f": frequencies, "H": H, "UH": UH, "MCruns": MCruns, "scaling": 1}
 
