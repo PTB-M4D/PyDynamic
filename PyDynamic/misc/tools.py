@@ -15,6 +15,9 @@ This module contains the following functions:
 * :func:`make_equidistant`: Interpolate non-equidistant time series to equidistant
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 * :func:`progress_bar`: A simple and reusable progress-bar
+* :func:`is_vector`: Check if a np.ndarray is a vector
+* :func:`is_2d_matrix`: Check if a np.ndarray is a matrix
+* :func:`number_of_rows_equals_vector_dim`: Check if a matrix and a vector match in size
 """
 import sys
 from typing import Optional
@@ -31,7 +34,10 @@ __all__ = [
     "make_equidistant",
     "trimOrPad",
     "progress_bar",
-    "shift_uncertainty"
+    "shift_uncertainty",
+    "is_vector",
+    "is_2d_matrix",
+    "number_of_rows_equals_vector_dim",
 ]
 
 def shift_uncertainty(x, ux, shift):
@@ -331,3 +337,53 @@ def progress_bar(
     )
 
     fout.write(progressString)
+
+
+def is_vector(ndarray: np.ndarray) -> bool:
+    """Check if a np.ndarray is a vector, i.e. it expands over one dimension only
+
+    Parameters
+    ----------
+    ndarray : np.ndarray
+        the array to check
+
+    Returns
+    -------
+    bool
+        True, if the array expands over one dimension only, False otherwise
+    """
+    return len(ndarray.shape) == 1
+
+
+def is_2d_matrix(ndarray: np.ndarray) -> bool:
+    """Check if a np.ndarray is a matrix, i.e. it expands over exactly two dimensions
+
+    Parameters
+    ----------
+    ndarray : np.ndarray
+        the array to check
+
+    Returns
+    -------
+    bool
+        True, if the array expands over exactly two dimensions, False otherwise
+    """
+    return len(ndarray.shape) == 2
+
+
+def number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
+    """Check if a matrix has the same number of rows as a vector
+
+    Parameters
+    ----------
+    matrix : np.ndarray
+        the matrix, that is supposed to have the same number of rows
+    vector : np.ndarray
+        the vector, that is supposed to have the same number of elements
+
+    Returns
+    -------
+    bool
+        True, if the number of rows coincide, False otherwise
+    """
+    return len(vector) == matrix.shape[0]
