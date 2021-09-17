@@ -2,6 +2,8 @@
 
 * :func:`fit_som`: Fit second-order model to complex-valued frequency response
 """
+from typing import Optional
+
 import numpy as np
 
 from PyDynamic.misc.tools import (
@@ -21,6 +23,7 @@ def fit_som(
     weighting=None,
     MCruns: int = 10000,
     scaling=1e-3,
+    verbose: Optional[bool] = False,
 ):
     """Fit second-order model to complex-valued frequency response
 
@@ -54,7 +57,9 @@ def fit_som(
     scaling : float, optional
         scaling of least-squares design matrix for improved fit quality, defaults to
         1e-3
-
+    verbose : bool, optional
+        if True a progressbar will be printed to console during the Monte Carlo
+        simulations, if False nothing will be printed out, defaults to False
     Returns
     -------
     p : np.ndarray
@@ -142,11 +147,12 @@ def fit_som(
 
                 MU[i_monte_carlo_run, :] = np.linalg.solve(XVX, XVy)
 
-                progress_bar(
-                    i_monte_carlo_run,
-                    MCruns,
-                    prefix="Monte Carlo for test_dft_deconv() running:",
-                )
+                if verbose:
+                    progress_bar(
+                        i_monte_carlo_run,
+                        MCruns,
+                        prefix="Monte Carlo for test_dft_deconv() running:",
+                    )
             MU[:, 1] *= scaling
             MU[:, 2] *= scaling ** 2
 
