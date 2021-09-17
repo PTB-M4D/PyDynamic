@@ -4,6 +4,12 @@
 """
 import numpy as np
 
+from PyDynamic.misc.tools import (
+    is_2d_matrix,
+    is_vector,
+    number_of_rows_equals_vector_dim,
+)
+
 __all__ = ["fit_som"]
 
 
@@ -55,43 +61,48 @@ def fit_som(
     Up : np.ndarray
         covariance associated with parameter estimate
     """
-    m = len(f)
-    two_m = len(H)
-    if 2 * m != two_m:
+    n = len(f)
+    two_n = len(H)
+    if 2 * n != two_n:
         raise ValueError(
             "fit_som: vector H of real and imaginary parts is expected to "
             "contain exactly twice as many elements as frequency "
-            f"response vector f. Please adjust f, which has {m} "
-            f"elements or H, which has {two_m} elements."
+            f"response vector f. Please adjust f, which has {n} "
+            f"elements or H, which has {two_n} elements."
         )
-    h_real = H[: m]
-    h_imaginary = H[m :]
+    h_real = H[:n]
+    h_imaginary = H[n:]
 
     if UH is not None and not isinstance(UH, np.ndarray):
         raise ValueError(
             "fit_som: if UH is provided, it is expected to be of type np.ndarray, "
             f"but UH is of type {type(UH)}."
         )
+    if not number_of_rows_equals_vector_dim(matrix=UH, vector=H):
+        raise ValueError(
+            "fit_som: number of rows of UH and number of elements of H are expected to "
+            f"match. But H has {len(H)} elements and UH is of shape {UH.shape}."
+        )
 
-    assert UH.shape[0] == two_m
-
-    if len(UH.shape) == 2:
-        assert UH.shape[0] == UH.shape[1]
-
-    # propagate to real and imaginary parts of reciprocal using Monte Carlo
+    if is_2d_matrix(UH) and not _is_2d_square_matrix(UH):
+        raise ValueError(
+            "fit_som: if UH is a matrix, it is expected to be square but UH is of "
+            f"shape {UH.shape}."
+        )
     if not isinstance(MCruns, int):
         raise ValueError(
             f"fit_som: MCruns is expected to be of type int, but MCruns is of type"
             f" {type(MCruns)}."
         )
 
-    if len(UH.shape) == 1:
+    # propagate to real and imaginary parts of reciprocal using Monte Carlo
+    if is_vector(UH):
         HR = np.tile(h_real, (MCruns, 1)) + np.random.randn(MCruns, len(f)) * np.tile(
             UH[: len(f)], (MCruns, 1)
         )
-        HI = np.tile(h_imaginary, (MCruns, 1)) + np.random.randn(MCruns, len(f)) * np.tile(
-            UH[len(f) :], (MCruns, 1)
-        )
+        HI = np.tile(h_imaginary, (MCruns, 1)) + np.random.randn(
+            MCruns, len(f)
+        ) * np.tile(UH[len(f) :], (MCruns, 1))
         HMC = HR + 1j * HI
     else:
         HRI = np.random.multivariate_normal(H, UH, MCruns)
@@ -122,7 +133,6 @@ def fit_som(
             MU = np.zeros((MCruns, 3))
             for k in range(MCruns):
                 iri = iRI[k, :]
-                n = len(f)
                 om = 2 * np.pi * f * scaling
                 E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
                 X = np.r_[np.real(E), np.imag(E)]
@@ -149,7 +159,6 @@ def fit_som(
                 np.abs(Hc) > 0
             ), "Frequency response cannot be equal to zero for inversion."
             iri = np.r_[np.real(1 / Hc), np.imag(1 / Hc)]
-            n = len(f)
             om = 2 * np.pi * f
             E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
             X = np.r_[np.real(E), np.imag(E)]
@@ -209,3 +218,7 @@ def fit_som(
             np.sqrt(np.abs(mu[0] / mu[2])) / 2 / np.pi,
         ]
         return pars
+
+
+def _is_2d_square_matrix(ndarray: np.ndarray) -> bool:
+    return is_2d_matrix(ndarray) and ndarray.shape[0] == ndarray.shape[1]

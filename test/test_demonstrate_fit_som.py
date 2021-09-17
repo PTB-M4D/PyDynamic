@@ -52,3 +52,38 @@ def random_input_to_fit_som(draw):
 @settings(deadline=None)
 def test_usual_calls_fit_som(params):
     assert fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_too_short_f(params):
+    params["f"] = params["f"][1:]
+    with pytest.raises(ValueError):
+        fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_too_short_H(params):
+    params["H"] = params["H"][1:]
+    with pytest.raises(ValueError):
+        fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_too_short_UH(params):
+    params["UH"] = params["UH"][1:]
+    with pytest.raises(ValueError):
+        fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_unsquare_UH(params):
+    params["UH"] = params["UH"][:,1:]
+    with pytest.raises(ValueError):
+        fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_nonint_MCruns(params):
+    params["MCruns"] = float(params["MCruns"])
+    with pytest.raises(ValueError):
+        fit_som(**params)
