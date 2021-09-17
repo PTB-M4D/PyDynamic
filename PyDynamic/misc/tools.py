@@ -306,26 +306,25 @@ def progress_bar(
     todo_indicator: Optional[str] = ".",
     fout: Optional = None,
 ):
-    """
-    A simple and reusable progress-bar
+    """A simple and reusable progress-bar
 
     Parameters
     ----------
-        count: int
-            current status of iterations, assumed to be zero-based
-        count_max: int
-            total number of iterations
-        width: int, optional
-            width of the actual progressbar (actual printed line will be wider)
-        prefix: str, optional
-            some text that will be printed in front of the bar (i.e.
-            "Progress of ABC:")
-        done_indicator: str, optional
-            what character is used as "already-done"-indicator
-        todo_indicator: str, optional
-            what character is used as "not-done-yet"-indicator
-        fout: file-object, optional
-            where the progress-bar should be written/printed to
+    count : int
+        current status of iterations, assumed to be zero-based
+    count_max : int
+        total number of iterations
+    width : int, optional
+        width of the actual progressbar (actual printed line will be wider)
+    prefix : str, optional
+        some text that will be printed in front of the bar (i.e.
+        "Progress of ABC:")
+    done_indicator : str, optional
+        what character is used as "already-done"-indicator
+    todo_indicator : str, optional
+        what character is used as "not-done-yet"-indicator
+    fout : file-object, optional
+        where the progress-bar should be written/printed to
     """
     x = int(width * (count + 1) / count_max)
     progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
