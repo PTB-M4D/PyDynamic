@@ -1,18 +1,20 @@
-# -*- coding: utf-8 -*-
-"""The module :mod:`PyDynamic.model_estimation.fit_transfer` contains a function
-for the identification of transfer function models.
-
-This module contains the following function:
+"""This module contains a function for the identification of transfer function models:
 
 * :func:`fit_som`: Fit second-order model to complex-valued frequency response
-
 """
 import numpy as np
 
 __all__ = ["fit_som"]
 
 
-def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
+def fit_som(
+    f: np.ndarray,
+    H: np.ndarray,
+    UH=None,
+    weighting=None,
+    MCruns: int = 10000,
+    scaling=1e-3,
+):
     """Fit second-order model to complex-valued frequency response
 
     Fit second-order model (spring-damper model) with parameters
@@ -25,33 +27,33 @@ def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
 
     Parameters
     ----------
-        f: np.ndarray of shape (M,)
-            vector of frequencies
-        H: np.ndarray of shape (2M,)
-            real and imaginary parts of measured frequency response values at
-            frequencies f
-        UH: np.ndarray of shape (2M,) or (2M,2M)
-            uncertainties associated with real and imaginary parts
-            When UH is one-dimensional, it is assumed to contain standard
-            uncertainties; otherwise it
-            is taken as covariance matrix. When UH is not specified no
-            uncertainties assoc. with the fit are calculated.
-        weighting: str or array
-            Type of weighting (None, 'diag', 'cov') or array of weights (
-            length two times of f)
-        MCruns: int, optional
-            Number of Monte Carlo trials for propagation of uncertainties.
-            When MCruns is 'None', matrix multiplication
-            is used for the propagation of uncertainties. However, in some
-            cases this can cause trouble.
-        scaling: float
-            scaling of least-squares design matrix for improved fit quality
+    f : (M,) np.ndarray
+        vector of frequencies
+    H : (2M,) np.ndarray
+        real and imaginary parts of measured frequency response values at
+        frequencies f
+    UH : (2M,) or (2M,2M) np.ndarray, optional
+        uncertainties associated with real and imaginary parts
+        When UH is one-dimensional, it is assumed to contain standard
+        uncertainties; otherwise it is taken as covariance matrix. When UH is not
+        specified no uncertainties assoc. with the fit are calculated, which is the
+        default behaviour.
+    weighting : str or (2M,) np.ndarray, optional
+        Type of weighting (None, 'diag', 'cov') or array of weights, defaults to None
+    MCruns : int, optional
+        Number of Monte Carlo trials for propagation of uncertainties, defaults to
+        10000. When MCruns is 'None', matrix multiplication is used for the
+        propagation of uncertainties. However, in some cases this can cause trouble.
+    scaling : float, optional
+        scaling of least-squares design matrix for improved fit quality, defaults to
+        1e-3
+
     Returns
     -------
-        p: np.ndarray
-            vector of estimated model parameters [S0, delta, f0]
-        Up: np.ndarray
-            covariance associated with parameter estimate
+    p : np.ndarray
+        vector of estimated model parameters [S0, delta, f0]
+    Up : np.ndarray
+        covariance associated with parameter estimate
     """
     assert 2 * len(f) == len(H)
     Hr = H[: len(f)]
