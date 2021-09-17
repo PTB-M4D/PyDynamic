@@ -55,35 +55,50 @@ def fit_som(
     Up : np.ndarray
         covariance associated with parameter estimate
     """
-    assert 2 * len(f) == len(H)
-    Hr = H[: len(f)]
-    Hi = H[len(f) :]
+    m = len(f)
+    two_m = len(H)
+    if 2 * m != two_m:
+        raise ValueError(
+            "fit_som: vector H of real and imaginary parts is expected to "
+            "contain exactly twice as many elements as frequency "
+            f"response vector f. Please adjust f, which has {m} "
+            f"elements or H, which has {two_m} elements."
+        )
+    h_real = H[: m]
+    h_imaginary = H[m :]
 
-    if isinstance(UH, np.ndarray):
-        assert UH.shape[0] == 2 * len(f)
-        if len(UH.shape) == 2:
-            assert UH.shape[0] == UH.shape[1]
+    if UH is not None and not isinstance(UH, np.ndarray):
+        raise ValueError(
+            "fit_som: if UH is provided, it is expected to be of type np.ndarray, "
+            f"but UH is of type {type(UH)}."
+        )
 
-        # propagate to real and imaginary parts of reciprocal using Monte Carlo
+    assert UH.shape[0] == two_m
 
-        if isinstance(MCruns, int) or isinstance(MCruns, float):
-            runs = int(MCruns)
-        else:
-            runs = 10000
-        if len(UH.shape) == 1:
-            HR = np.tile(Hr, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile(
-                UH[: len(f)], (runs, 1)
-            )
-            HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile(
-                UH[len(f) :], (runs, 1)
-            )
-            HMC = HR + 1j * HI
-        else:
-            HRI = np.random.multivariate_normal(H, UH, runs)
-            HMC = HRI[:, : len(f)] + 1j * HRI[:, len(f) :]
+    if len(UH.shape) == 2:
+        assert UH.shape[0] == UH.shape[1]
 
-        iRI = np.c_[np.real(1 / HMC), np.imag(1 / HMC)]
-        iURI = np.cov(iRI, rowvar=False)
+    # propagate to real and imaginary parts of reciprocal using Monte Carlo
+    if not isinstance(MCruns, int):
+        raise ValueError(
+            f"fit_som: MCruns is expected to be of type int, but MCruns is of type"
+            f" {type(MCruns)}."
+        )
+
+    if len(UH.shape) == 1:
+        HR = np.tile(h_real, (MCruns, 1)) + np.random.randn(MCruns, len(f)) * np.tile(
+            UH[: len(f)], (MCruns, 1)
+        )
+        HI = np.tile(h_imaginary, (MCruns, 1)) + np.random.randn(MCruns, len(f)) * np.tile(
+            UH[len(f) :], (MCruns, 1)
+        )
+        HMC = HR + 1j * HI
+    else:
+        HRI = np.random.multivariate_normal(H, UH, MCruns)
+        HMC = HRI[:, : len(f)] + 1j * HRI[:, len(f) :]
+
+    iRI = np.c_[np.real(1 / HMC), np.imag(1 / HMC)]
+    iURI = np.cov(iRI, rowvar=False)
 
     if isinstance(weighting, str):
         if weighting == "diag":
@@ -103,9 +118,9 @@ def fit_som(
         # Apply GUM S2
         if isinstance(MCruns, int) or isinstance(MCruns, float):
             # Monte Carlo
-            runs = int(MCruns)
-            MU = np.zeros((runs, 3))
-            for k in range(runs):
+            MCruns = int(MCruns)
+            MU = np.zeros((MCruns, 3))
+            for k in range(MCruns):
                 iri = iRI[k, :]
                 n = len(f)
                 om = 2 * np.pi * f * scaling
@@ -129,7 +144,7 @@ def fit_som(
             pars = PARS.mean(axis=0)
             Upars = np.cov(PARS, rowvar=False)
         else:  # apply GUM S2 linear propagation
-            Hc = Hr + 1j * Hi
+            Hc = h_real + 1j * h_imaginary
             assert np.min(
                 np.abs(Hc) > 0
             ), "Frequency response cannot be equal to zero for inversion."
@@ -172,7 +187,7 @@ def fit_som(
 
         return pars, Upars
     else:
-        Hc = Hr + 1j * Hi
+        Hc = h_real + 1j * h_imaginary
         assert (
             np.min(np.abs(Hc)) > 0
         ), "Frequency response cannot be equal to zero for inversion."
