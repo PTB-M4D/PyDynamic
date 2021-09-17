@@ -2,7 +2,7 @@ import hypothesis.strategies as hst
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import given, settings, Verbosity
 from hypothesis.strategies import composite
 from numpy.random import default_rng
 
@@ -49,7 +49,7 @@ def random_input_to_fit_som(draw):
 
 
 @given(random_input_to_fit_som())
-@settings(deadline=None)
+@settings(deadline=None, verbosity=Verbosity.verbose)
 def test_usual_calls_fit_som(params):
     assert fit_som(**params)
 
@@ -77,7 +77,7 @@ def test_fit_som_with_too_short_UH(params):
 
 @given(random_input_to_fit_som())
 def test_fit_som_with_unsquare_UH(params):
-    params["UH"] = params["UH"][:,1:]
+    params["UH"] = params["UH"][:, 1:]
     with pytest.raises(ValueError):
         fit_som(**params)
 
