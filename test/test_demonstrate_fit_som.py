@@ -56,7 +56,7 @@ def random_input_to_fit_som(draw):
 )
 def test_usual_calls_fit_som(capsys, params):
     with capsys.disabled():
-        assert fit_som(**params)
+        assert fit_som(verbose=True, **params)
 
 
 @given(random_input_to_fit_som())
