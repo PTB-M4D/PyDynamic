@@ -123,9 +123,7 @@ def hypothesis_float_vector(
     max_value: Optional[float] = None,
 ) -> np.ndarray:
     number_of_elements = (
-        length
-        if length is not None
-        else draw(reasonable_random_dimension_strategy())
+        length if length is not None else draw(reasonable_random_dimension_strategy())
     )
     return draw(
         hnp.arrays(
@@ -145,9 +143,33 @@ def random_not_negative_float_strategy() -> SearchStrategy:
     return hst.floats(min_value=0)
 
 
+def hypothesis_bounded_float_strategy(
+    min_value: Optional[float] = None,
+    max_value: Optional[float] = None,
+) -> SearchStrategy:
+    return hst.floats(
+        min_value=min_value,
+        max_value=max_value,
+    )
+
+
 @composite
 def random_not_negative_float(draw: Callable) -> float:
     return draw(random_not_negative_float_strategy)
+
+
+@composite
+def hypothesis_bounded_float(
+    draw: Callable,
+    min_value: Optional[float] = None,
+    max_value: Optional[float] = None,
+) -> float:
+    return draw(
+        hypothesis_bounded_float_strategy(
+            min_value=min_value,
+            max_value=max_value,
+        )
+    )
 
 
 @composite
