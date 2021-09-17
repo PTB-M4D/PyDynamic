@@ -300,11 +300,11 @@ def make_equidistant(*args, **kwargs):
 def progress_bar(
     count,
     count_max,
-    width=30,
-    prefix="",
-    done_indicator="#",
-    todo_indicator=".",
-    fout=sys.stdout,
+    width: Optional[int] = 30,
+    prefix: Optional[str] = "",
+    done_indicator: Optional[str] = "#",
+    todo_indicator: Optional[str] = ".",
+    fout: Optional = None,
 ):
     """
     A simple and reusable progress-bar
@@ -335,9 +335,10 @@ def progress_bar(
         COUNT=count + 1,
         COUNTMAX=count_max,
     )
-
-    fout.write(progressString)
-
+    if fout is not None:
+        fout.write(progressString)
+    else:
+        print(progressString)
 
 def is_vector(ndarray: np.ndarray) -> bool:
     """Check if a np.ndarray is a vector, i.e. it expands over one dimension only
