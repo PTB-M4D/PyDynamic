@@ -8,6 +8,7 @@ from PyDynamic.misc.tools import (
     is_2d_matrix,
     is_vector,
     number_of_rows_equals_vector_dim,
+    progress_bar,
 )
 
 __all__ = ["fit_som"]
@@ -127,12 +128,11 @@ def fit_som(
 
     if isinstance(UH, np.ndarray):
         # Apply GUM S2
-        if isinstance(MCruns, int) or isinstance(MCruns, float):
+        if isinstance(MCruns, int):
             # Monte Carlo
-            MCruns = int(MCruns)
             MU = np.zeros((MCruns, 3))
-            for k in range(MCruns):
-                iri = iRI[k, :]
+            for i_monte_carlo_run in range(MCruns):
+                iri = iRI[i_monte_carlo_run, :]
                 om = 2 * np.pi * f * scaling
                 E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
                 X = np.r_[np.real(E), np.imag(E)]
@@ -140,7 +140,13 @@ def fit_som(
                 XVX = X.T.dot(np.linalg.solve(W, X))
                 XVy = X.T.dot(np.linalg.solve(W, iri))
 
-                MU[k, :] = np.linalg.solve(XVX, XVy)
+                MU[i_monte_carlo_run, :] = np.linalg.solve(XVX, XVy)
+
+                progress_bar(
+                    i_monte_carlo_run,
+                    MCruns,
+                    prefix="Monte Carlo for test_dft_deconv() running:",
+                )
             MU[:, 1] *= scaling
             MU[:, 2] *= scaling ** 2
 
@@ -195,29 +201,29 @@ def fit_som(
             Upars = C.dot(Umu.dot(C.T))
 
         return pars, Upars
-    else:
-        Hc = h_real + 1j * h_imaginary
-        assert (
-            np.min(np.abs(Hc)) > 0
-        ), "Frequency response cannot be equal to zero for inversion."
-        iri = np.r_[np.real(1 / Hc), np.imag(1 / Hc)]
-        n = len(f)
-        om = 2 * np.pi * f * scaling
-        E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
-        X = np.r_[np.real(E), np.imag(E)]
 
-        XVX = X.T.dot(np.linalg.solve(W, X))
-        XVy = X.T.dot(np.linalg.solve(W, iri))
+    Hc = h_real + 1j * h_imaginary
+    assert (
+        np.min(np.abs(Hc)) > 0
+    ), "Frequency response cannot be equal to zero for inversion."
+    iri = np.r_[np.real(1 / Hc), np.imag(1 / Hc)]
+    n = len(f)
+    om = 2 * np.pi * f * scaling
+    E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
+    X = np.r_[np.real(E), np.imag(E)]
 
-        mu = np.linalg.solve(XVX, XVy)
-        mu[1] *= scaling
-        mu[2] *= scaling ** 2
-        pars = np.r_[
-            1 / mu[0],
-            mu[1] / np.sqrt(np.abs(mu[0] * mu[2])),
-            np.sqrt(np.abs(mu[0] / mu[2])) / 2 / np.pi,
-        ]
-        return pars
+    XVX = X.T.dot(np.linalg.solve(W, X))
+    XVy = X.T.dot(np.linalg.solve(W, iri))
+
+    mu = np.linalg.solve(XVX, XVy)
+    mu[1] *= scaling
+    mu[2] *= scaling ** 2
+    pars = np.r_[
+        1 / mu[0],
+        mu[1] / np.sqrt(np.abs(mu[0] * mu[2])),
+        np.sqrt(np.abs(mu[0] / mu[2])) / 2 / np.pi,
+    ]
+    return pars
 
 
 def _is_2d_square_matrix(ndarray: np.ndarray) -> bool:
