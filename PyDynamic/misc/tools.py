@@ -19,7 +19,6 @@ This module contains the following functions:
 * :func:`is_2d_matrix`: Check if a np.ndarray is a matrix
 * :func:`number_of_rows_equals_vector_dim`: Check if a matrix and a vector match in size
 """
-import sys
 from typing import Optional
 
 import numpy as np
