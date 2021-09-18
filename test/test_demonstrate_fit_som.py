@@ -2,7 +2,7 @@ import hypothesis.strategies as hst
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from hypothesis import given, HealthCheck, settings, Verbosity
+from hypothesis import assume, given, HealthCheck, settings, Verbosity
 from hypothesis.strategies import composite
 from numpy.random import default_rng
 
@@ -32,12 +32,14 @@ def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
 
     # Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]
     MCruns = draw(hst.sampled_from((10, 20, 40)))
-    white_nois_S0s = rng.normal(loc=S0, scale=uS0, size=MCruns)
+    white_noise_S0s = rng.normal(loc=S0, scale=uS0, size=MCruns)
     white_noise_deltas = rng.normal(loc=delta, scale=udelta, size=MCruns)
     white_noise_f0s = rng.normal(loc=f0, scale=uf0, size=MCruns)
     frequencies = np.linspace(0, 1.2 * f0, 30)
 
-    HMC = sos_FreqResp(white_nois_S0s, white_noise_deltas, white_noise_f0s, frequencies)
+    HMC = sos_FreqResp(
+        white_noise_S0s, white_noise_deltas, white_noise_f0s, frequencies
+    )
 
     H_complex = np.mean(HMC, dtype=complex, axis=1)
     H = np.r_[np.real(H_complex), np.imag(H_complex)]
@@ -104,12 +106,36 @@ def test_fit_som_with_unsquare_UH(params):
 @given(random_input_to_fit_som())
 def test_fit_som_with_nonint_MCruns(params):
     params["MCruns"] = float(params["MCruns"])
+    assume(params["UH"] is not None)
     with pytest.raises(ValueError):
         fit_som(**params)
 
 
 @given(random_input_to_fit_som())
-def test_fit_som_with_invalid_string(params):
+def test_fit_som_with_invalid_weighting_string(params):
     params["weighting"] = "something unexpected"
+    with pytest.raises(ValueError):
+        fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_too_short_weighting_vector(params):
+    params["weighting"] = params["H"][1:]
+    with pytest.raises(ValueError):
+        fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_zero_frequency_response(params):
+    params["H"][0] = 0.0
+    assume(params["MCruns"] is None or params["UH"] is None)
+    with pytest.raises(ValueError):
+        fit_som(**params)
+
+
+@given(random_input_to_fit_som())
+def test_fit_som_with_zero_frequency_response_but_without_monte_carlo(params):
+    params["H"][0] = 0.0
+    params["MCruns"] = None
     with pytest.raises(ValueError):
         fit_som(**params)
