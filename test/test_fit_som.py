@@ -64,6 +64,7 @@ def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
     }
 
 
+@pytest.mark.slow
 @given(random_input_to_fit_som())
 @settings(
     deadline=None,
