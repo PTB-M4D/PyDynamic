@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.random import default_rng
 
-from PyDynamic.model_estimation.fit_transfer import fit_som
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
 from PyDynamic.misc.tools import make_semiposdef
+from PyDynamic.model_estimation.fit_transfer import fit_som
 
 
-def demonstrate_second_order_model_fitting():
+def demonstrate_second_order_model_fitting(runs: int = 10000):
     rng = default_rng(1)
 
     # sensor/measurement system
@@ -24,7 +24,6 @@ def demonstrate_second_order_model_fitting():
     uf0 = 0.5
 
     # Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]
-    runs = 10000
     MCS0 = rng.normal(loc=S0, scale=uS0, size=runs)
     MCd = rng.normal(loc=delta, scale=udelta, size=runs)
     MCf0 = rng.normal(loc=f0, scale=uf0, size=runs)
@@ -37,7 +36,7 @@ def demonstrate_second_order_model_fitting():
     UH = np.cov(np.r_[np.real(HMC), np.imag(HMC)], rowvar=True)
     UH = make_semiposdef(UH)
 
-    p, Up = fit_som(f, H, UH, scaling=1, MCruns=runs)
+    p, Up = fit_som(f, H, UH, scaling=1, MCruns=runs, verbose=True)
 
     plt.figure(1)
     plt.errorbar(
