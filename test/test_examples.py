@@ -1,8 +1,10 @@
+import pytest
 from matplotlib import pyplot
 
 from examples.uncertainty_for_dft.deconv_DFT import DftDeconvolutionExample
 
 
+@pytest.mark.slow
 def test_deconvolution_example(monkeypatch):
     # Test executability of the deconvolution example.
     # With this expression we override the matplotlib.pyplot.show method with a
