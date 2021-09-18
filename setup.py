@@ -23,24 +23,20 @@ setup(
     url="https://ptb-m4d.github.io/PyDynamic/",
     download_url="https://github.com/PTB-M4D/PyDynamic/releases/download/v{0}/"
     "PyDynamic-{0}.tar.gz".format(current_release_version),
-    author=u"Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
+    author="Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
     "Martin Weber",
     author_email="sascha.eichstaedt@ptb.de",
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(where="src"),
-    package_dir={'': 'src'},
+    package_dir={"": "src"},
     project_urls={
-        "Documentation": "https://pydynamic.readthedocs.io/en/v{}/".format(
-            current_release_version
-        ),
-        "Source": "https://github.com/PTB-M4D/PyDynamic/tree/v{}/".format(
-            current_release_version
-        ),
+        "Documentation": f"https://pydynamic.readthedocs.io/en/"
+        f"v{current_release_version}/",
+        "Source": f"https://github.com/PTB-M4D/PyDynamic/tree/"
+        f"v{current_release_version}/",
         "Tracker": "https://github.com/PTB-M4D/PyDynamic/issues",
     },
     install_requires=["matplotlib", "numpy", "pandas", "scipy"],
-    # This allow to do "pip install PyDynamic[examples]" and get the dependencies to
-    # execute the Jupyter Notebook examples.
     extras_require={
         "examples": ["notebook"],
     },
