@@ -2,7 +2,7 @@
 
 * :func:`fit_som`: Fit second-order model to complex-valued frequency response
 """
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 
@@ -18,10 +18,10 @@ __all__ = ["fit_som"]
 def fit_som(
     f: np.ndarray,
     H: np.ndarray,
-    UH=None,
-    weighting=None,
-    MCruns: int = 10000,
-    scaling=1e-3,
+    UH: Optional[np.ndarray] = None,
+    weighting: Optional[np.ndarray] = None,
+    MCruns: Optional[Union[int, None]] = 10000,
+    scaling: Optional[float] = 1e-3,
     verbose: Optional[bool] = False,
 ):
     """Fit second-order model to complex-valued frequency response
