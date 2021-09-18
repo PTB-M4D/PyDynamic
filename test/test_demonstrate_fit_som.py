@@ -11,7 +11,6 @@ from PyDynamic import fit_som, make_semiposdef, sos_FreqResp
 from .conftest import hypothesis_bounded_float, hypothesis_float_vector
 
 
-@pytest.mark.slow
 def test_demonstrate_second_order_model_fitting(monkeypatch):
     # With this expression we override the matplotlib.pyplot.show method with a
     # lambda expression returning None but only for this one test.
