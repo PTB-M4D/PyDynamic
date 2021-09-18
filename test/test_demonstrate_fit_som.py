@@ -16,7 +16,7 @@ def test_demonstrate_second_order_model_fitting(monkeypatch):
     # lambda expression returning None but only for this one test.
     # guarantee this
     monkeypatch.setattr(plt, "show", lambda: None, raising=True)
-    demonstrate_second_order_model_fitting()
+    demonstrate_second_order_model_fitting(runs=100)
 
 
 @composite
