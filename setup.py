@@ -27,7 +27,8 @@ setup(
     "Martin Weber",
     author_email="sascha.eichstaedt@ptb.de",
     keywords="uncertainty dynamic deconvolution metrology",
-    packages=find_packages(exclude=["test"]),
+    packages=find_packages(where="src"),
+    package_dir={'': 'src'},
     project_urls={
         "Documentation": "https://pydynamic.readthedocs.io/en/v{}/".format(
             current_release_version
