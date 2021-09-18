@@ -29,7 +29,6 @@ t0 = N / 2 * Ts
 
 
 def test_shocklikeGaussian():
-    np.random.seed(123)
     m0 = 1 + np.random.rand() * 0.2
     sigma = 50 * Ts
     # zero noise
@@ -43,7 +42,6 @@ def test_shocklikeGaussian():
 
 
 def test_GaussianPulse():
-    np.random.seed(64)
     m0 = 1 + np.random.rand() * 0.2
     sigma = 50 * Ts
     # zero noise
@@ -58,7 +56,6 @@ def test_GaussianPulse():
 
 
 def test_rect():
-    np.random.seed(165)
     width = N // 4 * Ts
     height = 1 + np.random.rand() * 0.2
     x = rect(time, t0, t0 + width, height, noise=0.0)
@@ -72,7 +69,6 @@ def test_rect():
 
 
 def test_squarepulse():
-    np.random.seed(101)
     height = 1 + np.random.rand() * 0.2
     numpulses = 5
     x = squarepulse(time, height, numpulses, noise=0.0)
