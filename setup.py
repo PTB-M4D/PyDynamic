@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 """Install PyDynamic in Python path and provide all packaging metadata."""
-
 from os import path
 
 from setuptools import find_packages, setup
@@ -42,7 +40,9 @@ setup(
     install_requires=["matplotlib", "numpy", "pandas", "scipy"],
     # This allow to do "pip install PyDynamic[examples]" and get the dependencies to
     # execute the Jupyter Notebook examples.
-    extras_require={"examples": ["notebook"],},
+    extras_require={
+        "examples": ["notebook"],
+    },
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 4 - Beta",
