@@ -26,11 +26,12 @@ from .propagate_DFT import (
 
 from .propagate_filter import FIRuncFilter, IIRuncFilter
 
-from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
+from .propagate_MonteCarlo import ARMA, MC, SMC, UMC, UMC_generic
 
 from .interpolation import interp1d_unc
 
 __all__ = [
+    "ARMA",
     "GUM_DFT",
     "GUM_iDFT",
     "DFT_deconv",
