@@ -10,8 +10,7 @@ import pytest
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
-# from PyDynamic.misc.noise import power_law_acf, power_law_noise, white_gaussian, ARMA
-from PyDynamic.uncertainty.propagate_MonteCarlo import ARMA, MC, UMC, UMC_generic
+from PyDynamic.uncertainty.propagate_MonteCarlo import ARMA, MC, SMC, UMC, UMC_generic
 
 ##### some definitions for all tests
 
