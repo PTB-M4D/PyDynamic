@@ -1,11 +1,10 @@
 """
-import misc
-import identification
-import deconvolution
-import uncertainty
+.. seealso::
 
-# See http://mathmet.org/projects/14SIP08 and
-# https://www.github.com/eichstaedtPTB/PyDynamic
+   - `initial project website <https://www.euramet.org/research-innovation/search
+     -research-projects/details/project/standards-and-software-to-maximise-end-user
+     -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
+   - `GitHub website <https://www.github.com/PTB-M4D/PyDynamic>`_
 """
 
 from .deconvolution.fit_filter import LSFIR_unc, LSFIR_uncMC, LSIIR_unc
@@ -15,7 +14,7 @@ from .misc import *
 from .model_estimation import *
 from .uncertainty import *
 
-__version__ = "1.6.1"
+__version__ = "1.9.1"
 
 __all__ = [
     "invLSFIR",

@@ -16,8 +16,8 @@ This module contains the following functions:
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 * :func:`progress_bar`: A simple and reusable progress-bar
 """
-
 import sys
+from typing import Optional
 
 import numpy as np
 from scipy.sparse import eye, issparse
@@ -92,7 +92,7 @@ def trimOrPad(array, length, mode="constant"):
         the required `length`. Both actions are applied to the
         right side of the array
     """
-    
+
     if len(array) < length:  # pad zeros to the right if too short
         return np.pad(array, (0, length - len(array)), mode=mode)
     else:  # trim to given length otherwise
@@ -164,24 +164,35 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
         print(s)
 
 
-def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
+def make_semiposdef(
+    matrix: np.ndarray,
+    maxiter: Optional[int] = 10,
+    tol: Optional[float] = 1e-12,
+    verbose: Optional[bool] = False,
+) -> np.ndarray:
     """Make quadratic matrix positive semi-definite by increasing its eigenvalues
 
     Parameters
     ----------
-        matrix : (N,N) array_like
-            the matrix to process
-        maxiter : int
-            the maximum number of iterations for increasing the eigenvalues
-        tol : float
-            tolerance for deciding if pos. semi-def.
-        verbose : bool
-            If `True` print smallest eigenvalue of the resulting matrix
+    matrix : array_like of shape (N,N)
+        the matrix to process
+    maxiter : int, optional
+        the maximum number of iterations for increasing the eigenvalues, defaults to 10
+    tol : float, optional
+        tolerance for deciding if pos. semi-def., defaults to 1e-12
+    verbose : bool, optional
+        If True print smallest eigenvalue of the resulting matrix, if False (default)
+        be quiet
 
     Returns
     -------
-        (N,N) array_like
-            quadratic positive semi-definite matrix
+    (N,N) array_like
+        quadratic positive semi-definite matrix
+
+    Raises
+    ------
+    ValueError
+        If matrix is not square.
     """
     n, m = matrix.shape
     if n != m:
@@ -213,31 +224,31 @@ def make_semiposdef(matrix, maxiter=10, tol=1e-12, verbose=False):
     return matrix
 
 
-def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
-    """ Calculate real and imaginary parts from frequency response
+def FreqResp2RealImag(
+    Abs: np.ndarray, Phase: np.ndarray, Unc: np.ndarray, MCruns: Optional[int] = 1000
+):
+    """Calculate real and imaginary parts from frequency response
 
     Calculate real and imaginary parts from amplitude and phase with
     associated uncertainties.
 
     Parameters
     ----------
-
-        Abs: (N,) array_like
-            amplitude values
-        Phase: (N,) array_like
-            phase values in rad
-        Unc: (2N, 2N) or (2N,) array_like
-            uncertainties
-        MCruns: bool
-            Iterations for Monte Carlo simulation
+    Abs : (N,) array_like
+        amplitude values
+    Phase : (N,) array_like
+        phase values in rad
+    Unc : (2N, 2N) or (2N,) array_like
+        uncertainties either as full covariance matrix or as its main diagonal
+    MCruns : int, optional
+        number of iterations for Monte Carlo simulation, defaults to 1000
 
     Returns
     -------
-
-        Re, Im: (N,) array_like
-            real and imaginary parts (best estimate)
-        URI: (2N, 2N) array_like
-            uncertainties assoc. with Re and Im
+    Re, Im : (N,) array_like
+        best estimate of real and imaginary parts
+    URI : (2N, 2N) array_like
+        uncertainties assoc. with Re and Im
     """
 
     if len(Abs) != len(Phase) or 2 * len(Abs) != len(Unc):
