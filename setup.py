@@ -5,8 +5,7 @@ from os import path
 
 from setuptools import find_packages, setup
 
-# Get release version from PyDynamic __init__.py
-from PyDynamic import __version__ as VERSION
+current_release_version = "1.9.1"
 
 
 def get_readme():
@@ -19,21 +18,25 @@ def get_readme():
 setup(
     metadata_version="2.1",
     name="PyDynamic",
-    version=VERSION,
+    version=current_release_version,
     description="A software package for the analysis of dynamic measurements",
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     url="https://ptb-m4d.github.io/PyDynamic/",
     download_url="https://github.com/PTB-M4D/PyDynamic/releases/download/v{0}/"
-    "PyDynamic-{0}.tar.gz".format(VERSION),
+    "PyDynamic-{0}.tar.gz".format(current_release_version),
     author=u"Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
     "Martin Weber",
     author_email="sascha.eichstaedt@ptb.de",
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(exclude=["test"]),
     project_urls={
-        "Documentation": "https://pydynamic.readthedocs.io/en/v{}/".format(VERSION),
-        "Source": "https://github.com/PTB-M4D/PyDynamic/tree/v{}/".format(VERSION),
+        "Documentation": "https://pydynamic.readthedocs.io/en/v{}/".format(
+            current_release_version
+        ),
+        "Source": "https://github.com/PTB-M4D/PyDynamic/tree/v{}/".format(
+            current_release_version
+        ),
         "Tracker": "https://github.com/PTB-M4D/PyDynamic/issues",
     },
     install_requires=["matplotlib", "numpy", "pandas", "scipy"],
