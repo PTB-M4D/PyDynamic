@@ -84,6 +84,7 @@ def test_fit_som_with_too_short_f(params):
 
 
 @given(random_input_to_fit_som())
+@pytest.mark.slow
 def test_fit_som_with_too_short_H(params):
     params["H"] = params["H"][1:]
     with pytest.raises(ValueError):

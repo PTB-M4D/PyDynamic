@@ -115,6 +115,7 @@ def test_convolution_monte_carlo(input_1, input_2, mode):
 @pytest.mark.parametrize("input_1", valid_inputs(reduced_set=True))
 @pytest.mark.parametrize("input_2", valid_inputs(reduced_set=True))
 @given(hst.text())
+@pytest.mark.slow
 def test_convolution_invalid_mode(input_1, input_2, mode):
     set_of_valid_modes = set(valid_modes())
     assume(mode not in set_of_valid_modes)
