@@ -251,9 +251,7 @@ jobs:
     steps:
       - create_folders
       - create_venv
-      - install_production_deps:
-          pyenv: << parameters.pyenv >>
-      - install_development_deps:
+      - install_tox:
           pyenv: << parameters.pyenv >>
       - tox:
           pyenv: << parameters.pyenv >>
