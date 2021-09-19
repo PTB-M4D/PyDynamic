@@ -15,7 +15,11 @@ from hypothesis.strategies import composite, SearchStrategy
 from PyDynamic import make_semiposdef
 
 settings.register_profile(
-    name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
+    "ci",
+    settings(
+        suppress_health_check=[HealthCheck.too_slow],
+        deadline=None,
+    ),
 )
 if "CIRCLECI" in os.environ:
     settings.load_profile("ci")
@@ -174,7 +178,7 @@ def hypothesis_bounded_float(
 
 @composite
 def hypothesis_covariance_matrix(
-    draw: Callable, number_of_rows: Optional[int]
+    draw: Callable, number_of_rows: Optional[int] = None
 ) -> np.ndarray:
     number_of_rows_and_columns = (
         number_of_rows
