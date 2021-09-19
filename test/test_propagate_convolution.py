@@ -1,4 +1,5 @@
 """Test PyDynamic.uncertainty.propagate_convolve"""
+from typing import List, Optional, Set
 
 import numpy as np
 import pytest
@@ -6,6 +7,7 @@ import scipy.ndimage as sn
 from hypothesis import assume, given, strategies as hst
 
 from PyDynamic.uncertainty.propagate_convolution import convolve_unc
+from .conftest import random_covariance_matrix
 
 
 def random_array(length):
@@ -13,56 +15,34 @@ def random_array(length):
     return array
 
 
-def random_covariance_matrix(length):
-    """construct a valid (but random) covariance matrix with good condition number"""
+def valid_inputs(reduced_set: bool = False) -> List[List[np.ndarray]]:
 
-    # because np.cov estimates the mean from data, the returned covariance matrix
-    # has one eigenvalue close to numerical zero (rank n-1).
-    # This leads to a singular matrix, which is badly suited to be used as valid
-    # covariance matrix. To circumvent this:
-
-    ## draw random (n+1, n+1) matrix
-    cov = np.cov(np.random.random((length + 1, length + 1)))
-
-    ## calculate SVD
-    u, s, vh = np.linalg.svd(cov, full_matrices=False, hermitian=True)
-
-    ## reassemble a covariance of size (n, n) by discarding the smallest singular value
-    cov_adjusted = (u[:-1, :-1] * s[:-1]) @ vh[:-1, :-1]
-
-    return cov_adjusted
-
-
-def valid_inputs(reduced_set=False):
-
-    valid_inputs = []
+    list_of_valid_inputs = []
 
     for n in [10, 15, 20]:
         x_signal = random_array(n)
         u_signal = random_covariance_matrix(n)
 
         if reduced_set:
-            valid_inputs.append([x_signal, u_signal])
+            list_of_valid_inputs.append([x_signal, u_signal])
         else:
-            valid_inputs.append([x_signal, None])
-            valid_inputs.append([x_signal, np.diag(np.diag(u_signal))])
-            valid_inputs.append([x_signal, u_signal])
+            list_of_valid_inputs.append([x_signal, None])
+            list_of_valid_inputs.append([x_signal, np.diag(np.diag(u_signal))])
+            list_of_valid_inputs.append([x_signal, u_signal])
 
-    return valid_inputs
+    return list_of_valid_inputs
 
 
-def valid_modes(kind="all"):
+def valid_modes(restrict_kind_to: Optional[str] = None) -> Set[str]:
     scipy_modes = {"nearest", "reflect", "mirror"}
     numpy_modes = {"full", "valid", "same"}
 
-    if kind == "all":
-        return numpy_modes.union(scipy_modes)
-    elif kind == "scipy":
+    if restrict_kind_to == "scipy":
         return scipy_modes
-    elif kind == "numpy":
+    elif restrict_kind_to == "numpy":
         return numpy_modes
     else:
-        return set()
+        return numpy_modes.union(scipy_modes)
 
 
 @pytest.mark.parametrize("input_1", valid_inputs())
@@ -70,16 +50,12 @@ def valid_modes(kind="all"):
 @pytest.mark.parametrize("mode", valid_modes())
 @pytest.mark.slow
 def test_convolution(input_1, input_2, mode):
-
-    scipy_modes = valid_modes("scipy")
-    numpy_modes = valid_modes("numpy")
-
     # calculate the convolution of x1 and x2
     y, Uy = convolve_unc(*input_1, *input_2, mode)
 
-    if mode in numpy_modes:
+    if mode in valid_modes("numpy"):
         y_ref = np.convolve(input_1[0], input_2[0], mode=mode)
-    elif mode in scipy_modes:
+    else:  # mode in valid_modes("scipy"):
         y_ref = sn.convolve1d(input_1[0], input_2[0], mode=mode)
 
     # compare results
@@ -100,25 +76,16 @@ def test_convolution_common_call():
 @pytest.mark.parametrize("mode", valid_modes())
 @pytest.mark.slow
 def test_convolution_monte_carlo(input_1, input_2, mode):
-
-    scipy_modes = valid_modes("scipy")
-    numpy_modes = valid_modes("numpy")
-
-    # pydynamic calculation
     y, Uy = convolve_unc(*input_1, *input_2, mode)
 
-    # Monte Carlo simulation
-    mc_results = []
-    n_runs = 20000
+    n_runs = 40000
     XX1 = np.random.multivariate_normal(*input_1, size=n_runs)
     XX2 = np.random.multivariate_normal(*input_2, size=n_runs)
-    for x1, x2 in zip(XX1, XX2):
-        if mode in numpy_modes:
-            conv = np.convolve(x1, x2, mode=mode)
-        elif mode in scipy_modes:
-            conv = sn.convolve1d(x1, x2, mode=mode)
-        mc_results.append(conv)
-
+    if mode in valid_modes("numpy"):
+        convolve = np.convolve
+    else:  # mode in valid_modes("scipy"):
+        convolve = sn.convolve1d
+    mc_results = [convolve(x1, x2, mode=mode) for x1, x2 in zip(XX1, XX2)]
     y_mc = np.mean(mc_results, axis=0)
     Uy_mc = np.cov(mc_results, rowvar=False)
 

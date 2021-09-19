@@ -192,9 +192,9 @@ workflows:
           tag: "3.9"
           pyenv: "py39"
           posargs: "-- ''"
-      - test_conda_py38:
-          name: "nightly_test_conda_py38"
-          posargs: "-- ''"
+      - test_conda_py39:
+          name: "nightly_test_conda_py39"
+          is_nightly_run: True
 
   # Create workflow for testing and deploying PyDynamic.
   test_and_deploy:
@@ -217,9 +217,10 @@ workflows:
           name: "test_python_py39"
           tag: "3.9"
           pyenv: "py39"
-      - test_conda_py38:
+      - test_conda_py39:
+          is_nightly_run: False
           requires:
-            - test_python_py38
+            - test_python_py39
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
@@ -228,7 +229,7 @@ workflows:
             - test_python_py37
             - test_python_py38
             - test_python_py39
-            - test_conda_py38
+            - test_conda_py39
           filters:
             branches:
               ignore: /.*dev$/
@@ -341,15 +342,12 @@ jobs:
 
   # Define one 'test' job to run the test suite against the
   # installed dependencies from the environment.yml.
-  test_conda_py38:
-    # Define all parameters, where 'posargs' will be handed over to the commands of
-    # the tox step. We use this to extend the default test suite execution from only
-    # those tests not marked with 'slow' to all tests during the nightly scheduled
-    # pipeline runs.
+  test_conda_py39:
     parameters:
-      posargs:
-        type: string
-        default: ""
+      is_nightly_run:
+        description: execute only some tests during push-triggered runs
+        type: boolean
+        default: False
 
     executor: conda_tester
 
@@ -372,9 +370,9 @@ jobs:
       - restore_cache:
           keys:
             # Specify the unique identifier for the cache.
-            - v1-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
+            - v2-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
-            - v1-conda-dependencies-
+            - v2-conda-dependencies-
 
       # Create environment and install extra_requires dependencies manually.
       - run:
@@ -393,15 +391,26 @@ jobs:
           paths:
             - /home/circleci/conda/envs/
           key: >-
-            v1-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
+            v2-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
 
-      # Run tests! We use pytest's test-runner.
-      - run:
-          name: Run tests
-          command: |
-            source $HOME/conda/etc/profile.d/conda.sh
-            conda activate PyDynamic_conda_env
-            tox << parameters.posargs >>
+      - when:
+          condition: << parameters.is_nightly_run >>
+          steps:
+            - run:
+                name: Run tests
+                command: |
+                  source $HOME/conda/etc/profile.d/conda.sh
+                  conda activate PyDynamic_conda_env
+                  pytest -v --cov=. --junitxml=test-results/pytest.xml .
+      - unless:
+          condition: << parameters.is_nightly_run >>
+          steps:
+            - run:
+                name: Run tests
+                command: |
+                  source $HOME/conda/etc/profile.d/conda.sh
+                  conda activate PyDynamic_conda_env
+                  pytest -m "not slow" -v --cov=. --junitxml=test-results/pytest.xml .
 
       - store_results
 

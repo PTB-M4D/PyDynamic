@@ -55,137 +55,6 @@ __all__ = [
 ]
 
 
-def _apply_window(
-    x: np.ndarray, Ux: Union[np.ndarray, float], window: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Apply time domain window to signal x of equal length and propagate uncertainties
-
-    Parameters
-    ----------
-    x : np.ndarray of shape (N, )
-        vector of time domain signal values
-    Ux : np.ndarray of shape (N, N) or float
-        covariance matrix associated with x or noise variance as float
-    window : np.ndarray of shape (N, )
-        vector of time domain window (same length as x)
-
-    Returns
-    -------
-    xw, Uxw : np.ndarray of shape (N, ) and (N, N)
-        transformed signal and associated uncertainties
-
-    Raises
-    ------
-    AssertionError
-        If the dimensions of x, Ux and window do not match or Ux is not square.
-    """
-    assert len(x) == len(window)
-    if not isinstance(Ux, float):
-        assert Ux.shape[0] == Ux.shape[1] and Ux.shape[0] == len(x)
-    xw = x.copy() * window
-    if isinstance(Ux, float):
-        Uxw = Ux * window ** 2
-    else:
-        Uxw = _prod(window, _prod(Ux, window))
-    return xw, Uxw
-
-
-def _prod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
-    """Calculate the product of a matrix' diagonal and a vector
-
-    Calculate the product that corresponds to diag(A)*B or A*diag(B),
-    respectively; depending on which of A,B is the matrix and which the vector.
-
-    Parameters
-    ----------
-    A, B : np.ndarray of shape (N, )
-        one is a vector and the other a matrix of which we want to multipy the diagonal
-        with the vector
-
-    Returns
-    -------
-    np.ndarray
-        The product of the matrix' diagonal and the vector
-
-    Raises
-    ------
-    ValueError
-        If the dimensions of A and B do not match.
-    """
-    if len(A.shape) == 1 and len(B.shape) == 2:  # A is the vector and B the matrix
-        C = np.zeros_like(B)
-        for k in range(C.shape[0]):
-            C[k, :] = A[k] * B[k, :]
-        return C
-    elif len(A.shape) == 2 and len(B.shape) == 1:  # A is the matrix and B the vector
-        C = np.zeros_like(A)
-        for k in range(C.shape[1]):
-            C[:, k] = A[:, k] * B[k]
-        return C
-    else:
-        raise ValueError("_prod: Wrong dimension of inputs")
-
-
-def _matprod(
-    M: np.ndarray, V: np.ndarray, W: np.ndarray, return_as_matrix: Optional[bool] = True
-) -> np.ndarray:
-    """Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2)
-
-    Calculate the product for V=(V1,V2) and W=(W1,W2).
-
-    Parameters
-    ----------
-    M : np.ndarray
-        M can be sparse, one-dimensional or a full (quadratic) matrix.
-    V, W : np.ndarray
-        V=(V1,V2) and W=(W1,W2)
-
-    Returns
-    -------
-    np.ndarray
-        matrix product (V1,V2)M(W1,W2)
-
-    Raises
-    ------
-    AssertionError
-        If the dimensions of M, V and W do not match or M is a non-square matrix.
-    """
-    if len(M.shape) == 2:
-        assert M.shape[0] == M.shape[1]
-    assert M.shape[0] == V.shape[0]
-    assert V.shape == W.shape
-    N = V.shape[0] // 2
-    v1 = V[:N]
-    v2 = V[N:]
-    w1 = W[:N]
-    w2 = W[N:]
-    if isinstance(M, sparse.dia_matrix):
-        nrows = M.shape[0]
-        offset = M.offsets
-        diags = M.data
-        A = diags[0][:N]
-        B = diags[1][offset[1] : nrows + offset[1]]
-        D = diags[0][N:]
-        return np.diag(v1 * A * w1 + v2 * B * w1 + v1 * B * w2 + v2 * D * w2)
-    elif len(M.shape) == 1:
-        A = M[:N]
-        D = M[N:]
-        if return_as_matrix:
-            return np.diag(v1 * A * w1 + v2 * D * w2)
-        else:
-            return np.r_[v1 * A * w1 + v2 * D * w2]
-    else:
-        A = M[:N, :N]
-        B = M[:N, N:]
-        D = M[N:, N:]
-        return (
-            _prod(v1, _prod(A, w1))
-            + _prod(v2, _prod(B.T, w1))
-            + _prod(v1, _prod(B, w2))
-            + _prod(v2, _prod(D, w2))
-        )
-
-
 def GUM_DFT(
     x: np.ndarray,
     Ux: Union[np.ndarray, float],
@@ -328,9 +197,7 @@ def GUM_DFT(
                 (np.hstack((UFCC, UFCS)), np.hstack((UFCS.T, UFSS)))
             )  # type: Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray]
         except MemoryError:
-            print(
-                "Could not put covariance matrix together due to memory constraints."
-            )
+            print("Could not put covariance matrix together due to memory constraints.")
             print(
                 "Returning the three blocks (A,B,C) such that U = [[A,B],"
                 "[B.T,C]] instead."
@@ -344,6 +211,119 @@ def GUM_DFT(
         return F, UF, {"CxCos": CxCos, "CxSin": CxSin}
     else:
         return F, UF
+
+
+def _apply_window(
+    x: np.ndarray, Ux: Union[np.ndarray, float], window: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Apply time domain window to signal x of equal length and propagate uncertainties
+
+    Parameters
+    ----------
+    x : np.ndarray of shape (N, )
+        vector of time domain signal values
+    Ux : np.ndarray of shape (N, N) or float
+        covariance matrix associated with x or noise variance as float
+    window : np.ndarray of shape (N, )
+        vector of time domain window (same length as x)
+
+    Returns
+    -------
+    xw, Uxw : np.ndarray of shape (N, ) and (N, N)
+        transformed signal and associated uncertainties
+
+    Raises
+    ------
+    AssertionError
+        If the dimensions of x, Ux and window do not match or Ux is not square.
+    """
+    assert len(x) == len(window)
+    if not isinstance(Ux, float):
+        assert Ux.shape[0] == Ux.shape[1] and Ux.shape[0] == len(x)
+    xw = x.copy() * window
+    if isinstance(Ux, float):
+        Uxw = Ux * window ** 2
+    else:
+        Uxw = _prod(window, _prod(Ux, window))
+    return xw, Uxw
+
+
+def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    r"""Calculate the product of a matrix with a diagonal matrix of a vector
+
+    Calculate the product that corresponds to :math:`diag(a) \cdot b` if :math:`a`
+    is the vector or :math:`a \cdot diag(b)` else.
+
+    Parameters
+    ----------
+    a, b : np.ndarray of shape (N,M) and np.ndarray of shape (N,) on of shape  (M,)
+        one is a vector from which the diagonal matrix is build and the other a
+        matrix where the order does not matter
+
+    Returns
+    -------
+    np.ndarray
+        The product of the matrices
+
+    Raises
+    ------
+    AssertionError
+        If the dimensions of a and b do not match
+    """
+    assert _check_matrix_vector_dimension_match(a=a, b=b), (
+        "_prod: Wrong dimension of inputs. Expected 'b' to be matrix with "
+        "the same number of columns as the vector 'a' or 'a' to be a matrix with "
+        "the same number of rows as the vector 'b'. The shape of 'a' is "
+        f"{a.shape} and of 'b' is {b.shape}."
+    )
+    if _is_vector(ndarray=a):
+        return _multiply_diagonal_matrix_from_vector_with_matrix_from_left(
+            matrix=b, vector=a
+        )
+    else:
+        return _multiply_diagonal_matrix_from_vector_with_matrix_from_right(
+            matrix=a, vector=b
+        )
+
+
+def _check_matrix_vector_dimension_match(a: np.ndarray, b: np.ndarray) -> bool:
+    return (
+        _is_vector(a)
+        and _is_2d_matrix(b)
+        and _number_of_rows_equals_vector_dim(vector=a, matrix=b)
+    ) or (
+        _is_vector(b)
+        and _is_2d_matrix(a)
+        and _number_of_cols_equals_vector_dim(vector=b, matrix=a)
+    )
+
+
+def _is_vector(ndarray: np.ndarray) -> bool:
+    return len(ndarray.shape) == 1
+
+
+def _is_2d_matrix(ndarray: np.ndarray) -> bool:
+    return len(ndarray.shape) == 2
+
+
+def _number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
+    return len(vector) == matrix.shape[0]
+
+
+def _number_of_cols_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
+    return len(vector) == matrix.shape[1]
+
+
+def _multiply_diagonal_matrix_from_vector_with_matrix_from_right(
+    matrix: np.ndarray, vector: np.ndarray
+) -> np.ndarray:
+    return matrix @ np.diag(v=vector)
+
+
+def _multiply_diagonal_matrix_from_vector_with_matrix_from_left(
+    matrix: np.ndarray, vector: np.ndarray
+) -> np.ndarray:
+    return np.diag(v=vector) @ matrix
 
 
 def GUM_iDFT(
@@ -712,7 +692,7 @@ def AmpPhase2DFT(
 
 
 def Time2AmpPhase(
-    x: np.ndarray, Ux: np.ndarray
+    x: np.ndarray, Ux: Union[np.ndarray, float]
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Transformation from time domain to amplitude and phase via DFT
 
@@ -720,8 +700,9 @@ def Time2AmpPhase(
     ----------
     x : np.ndarray of shape (N,)
         time domain signal
-    Ux : np.ndarray of shape (N,N)
-        squared uncertainty associated with x
+    Ux : np.ndarray of shape (N,) or of shape (N,N) or float
+        covariance matrix associated with x, or vector of squared standard
+        uncertainties, or noise variance as float
 
     Returns
     -------
@@ -887,10 +868,6 @@ def AmpPhase2Time(
     return x, Ux / N ** 2
 
 
-# for backward compatibility
-GUMdeconv = lambda H, Y, UH, UY: DFT_deconv(H, Y, UH, UY)
-
-
 def DFT_transferfunction(X, Y, UX, UY):
     """Calculation of the transfer function H = Y/X in the frequency domain
 
@@ -1004,7 +981,7 @@ def DFT_deconv(
     IY = np.r_[-iH / norm, rH / norm]
     RH = np.r_[
         (-rY * rH ** 2 + rY * iH ** 2 - 2 * iY * iH * rH) / norm ** 2,
-        (iY * rH ** 2 - iH * iH ** 2 - 2 * rY * rH * iH) / norm ** 2,
+        (iY * rH ** 2 - iY * iH ** 2 - 2 * rY * rH * iH) / norm ** 2,
     ]
     IH = np.r_[
         (-iY * rH ** 2 + iY * iH ** 2 + 2 * rY * iH * rH) / norm ** 2,
@@ -1028,6 +1005,70 @@ def DFT_deconv(
         # type: Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray]
 
     return X, UX
+
+
+def _matprod(
+    M: np.ndarray, V: np.ndarray, W: np.ndarray, return_as_matrix: Optional[bool] = True
+) -> np.ndarray:
+    """Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2)
+
+    Calculate the product for V=(V1,V2) and W=(W1,W2).
+
+    Parameters
+    ----------
+    M : np.ndarray
+        M can be sparse, one-dimensional or a full (quadratic) matrix.
+    V, W : np.ndarray
+        V=(V1,V2) and W=(W1,W2)
+
+    Returns
+    -------
+    np.ndarray
+        matrix product (V1,V2)M(W1,W2)
+
+    Raises
+    ------
+    AssertionError
+        If the dimensions of M, V and W do not match or M is a non-square matrix.
+    """
+    if len(M.shape) == 2:
+        assert M.shape[0] == M.shape[1]
+    assert M.shape[0] == V.shape[0]
+    assert V.shape == W.shape
+    N = V.shape[0] // 2
+    v1 = V[:N]
+    v2 = V[N:]
+    w1 = W[:N]
+    w2 = W[N:]
+    if isinstance(M, sparse.dia_matrix):
+        nrows = M.shape[0]
+        offset = M.offsets
+        diags = M.data
+        A = diags[0][:N]
+        B = diags[1][offset[1] : nrows + offset[1]]
+        D = diags[0][N:]
+        return np.diag(v1 * A * w1 + v2 * B * w1 + v1 * B * w2 + v2 * D * w2)
+    elif len(M.shape) == 1:
+        A = M[:N]
+        D = M[N:]
+        if return_as_matrix:
+            return np.diag(v1 * A * w1 + v2 * D * w2)
+        else:
+            return np.r_[v1 * A * w1 + v2 * D * w2]
+    else:
+        A = M[:N, :N]
+        B = M[:N, N:]
+        D = M[N:, N:]
+        return (
+            _prod(v1, _prod(A, w1))
+            + _prod(v2, _prod(B.T, w1))
+            + _prod(v1, _prod(B, w2))
+            + _prod(v2, _prod(D, w2))
+        )
+
+
+# for backward compatibility
+GUMdeconv = DFT_deconv
 
 
 def DFT_multiply(
