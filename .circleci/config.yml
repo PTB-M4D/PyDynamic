@@ -154,61 +154,60 @@ workflows:
   test_and_deploy:
     jobs:
       # Create 'test' job to test and install PyDynamic for every commit.
-#      - test:
-#          name: "test_python_py36"
-#          tag: "3.6"
-#          pyenv: "py36"
-#      - test:
-#          name: "test_python_py37"
-#          tag: "3.7"
-#          pyenv: "py37"
-#          send_cov: true
-#      - test:
-#          name: "test_python_py38"
-#          tag: "3.8"
-#          pyenv: "py38"
+      - test:
+          name: "test_python_py36"
+          tag: "3.6"
+          pyenv: "py36"
+      - test:
+          name: "test_python_py37"
+          tag: "3.7"
+          pyenv: "py37"
+          send_cov: true
+      - test:
+          name: "test_python_py38"
+          tag: "3.8"
+          pyenv: "py38"
       - test:
           name: "test_python_py39"
           tag: "3.9"
           pyenv: "py39"
-          posargs: "-- ''"
-#      - test_conda_py39:
-#          is_nightly_run: False
-#          requires:
-#            - test_python_py39
-#      - preview_release:
-#          # Test the 'release' job to avoid trouble when Pull Requests get merged and
-#          # to preview publishing actions and the new changelog.
-#          requires:
-#            - test_python_py36
-#            - test_python_py37
-#            - test_python_py38
-#            - test_python_py39
-#            - test_conda_py39
-#          filters:
-#            branches:
-#              ignore: /.*dev$/
-#      - confirm_previewed_release_actions:
-#          # This job allows for checking that the release we will create in the
-#          # next step actually is the desired release, by observing the result of
-#          # preview_release.
-#          type: approval
-#          requires:
-#            - preview_release
-#          filters:
-#            branches:
-#              # This assures the job only being triggered on branch master.
-#              only: /master/
-#      - release:
-#          # Job to potentially create a release based on python-semantic-release's
-#          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
-#          # approval in the previous step, which is only triggered on branch master,
-#          # thus this job here is triggered only on master as well.
-#          context:
-#            - pypi.org publishing for PyDynamic
-#            - GitHub pushes to BjoernLudwigPTB's public_repos
-#          requires:
-#            - confirm_previewed_release_actions
+      - test_conda_py39:
+          is_nightly_run: False
+          requires:
+            - test_python_py39
+      - preview_release:
+          # Test the 'release' job to avoid trouble when Pull Requests get merged and
+          # to preview publishing actions and the new changelog.
+          requires:
+            - test_python_py36
+            - test_python_py37
+            - test_python_py38
+            - test_python_py39
+            - test_conda_py39
+          filters:
+            branches:
+              ignore: /.*dev$/
+      - confirm_previewed_release_actions:
+          # This job allows for checking that the release we will create in the
+          # next step actually is the desired release, by observing the result of
+          # preview_release.
+          type: approval
+          requires:
+            - preview_release
+          filters:
+            branches:
+              # This assures the job only being triggered on branch master.
+              only: /master/
+      - release:
+          # Job to potentially create a release based on python-semantic-release's
+          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
+          # approval in the previous step, which is only triggered on branch master,
+          # thus this job here is triggered only on master as well.
+          context:
+            - pypi.org publishing for PyDynamic
+            - GitHub pushes to BjoernLudwigPTB's public_repos
+          requires:
+            - confirm_previewed_release_actions
 
 jobs:
 
