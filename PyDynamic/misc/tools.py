@@ -92,7 +92,7 @@ def trimOrPad(array, length, mode="constant"):
         the required `length`. Both actions are applied to the
         right side of the array
     """
-    
+
     if len(array) < length:  # pad zeros to the right if too short
         return np.pad(array, (0, length - len(array)), mode=mode)
     else:  # trim to given length otherwise
@@ -224,31 +224,31 @@ def make_semiposdef(
     return matrix
 
 
-def FreqResp2RealImag(Abs, Phase, Unc, MCruns=1e4):
-    """ Calculate real and imaginary parts from frequency response
+def FreqResp2RealImag(
+    Abs: np.ndarray, Phase: np.ndarray, Unc: np.ndarray, MCruns: Optional[int] = 1000
+):
+    """Calculate real and imaginary parts from frequency response
 
     Calculate real and imaginary parts from amplitude and phase with
     associated uncertainties.
 
     Parameters
     ----------
-
-        Abs: (N,) array_like
-            amplitude values
-        Phase: (N,) array_like
-            phase values in rad
-        Unc: (2N, 2N) or (2N,) array_like
-            uncertainties
-        MCruns: bool
-            Iterations for Monte Carlo simulation
+    Abs : (N,) array_like
+        amplitude values
+    Phase : (N,) array_like
+        phase values in rad
+    Unc : (2N, 2N) or (2N,) array_like
+        uncertainties either as full covariance matrix or as its main diagonal
+    MCruns : int, optional
+        number of iterations for Monte Carlo simulation, defaults to 1000
 
     Returns
     -------
-
-        Re, Im: (N,) array_like
-            real and imaginary parts (best estimate)
-        URI: (2N, 2N) array_like
-            uncertainties assoc. with Re and Im
+    Re, Im : (N,) array_like
+        best estimate of real and imaginary parts
+    URI : (2N, 2N) array_like
+        uncertainties assoc. with Re and Im
     """
 
     if len(Abs) != len(Phase) or 2 * len(Abs) != len(Unc):
