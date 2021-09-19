@@ -15,8 +15,8 @@ from hypothesis.strategies import composite, SearchStrategy
 from PyDynamic import make_semiposdef
 
 settings.register_profile(
-    name="ci",
-    parent=settings(
+    "ci",
+    settings(
         suppress_health_check=(HealthCheck.too_slow,),
         deadline=None,
     ),
