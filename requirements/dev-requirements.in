@@ -1,0 +1,12 @@
+pytest
+pytest-cov
+python-semantic-release
+tox
+hypothesis
+pylint
+rope
+sphinx
+sphinx-rtd-theme
+recommonmark
+black
+nbsphinx

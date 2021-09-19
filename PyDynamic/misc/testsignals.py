@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
-"""Collection of test signals which can be used to simulate dynamic measurements
-and test methods.
+"""
+The :mod:`PyDynamic.misc.testsignals` module is a collection of test signals
+which can be used to simulate dynamic measurements and test methods.
 
 This module contains the following functions:
 
-* *shocklikeGaussian*: signal that resembles a shock excitation as a Gaussian
+* :func:`shocklikeGaussian`: signal that resembles a shock excitation as a Gaussian
   followed by a smaller Gaussian of opposite sign
-* *GaussianPulse*: Generates a Gaussian pulse at :math:`t_0` with height
+* :func:`GaussianPulse`: Generates a Gaussian pulse at :math:`t_0` with height
   :math:`m_0` and std :math:`sigma`
-* *rect*: Rectangular signal of given height and width :math:`t_1 - t_0`
-* *squarepulse*: Generates a series of rect functions to represent a square
+* :func:`rect`: Rectangular signal of given height and width :math:`t_1 - t_0`
+* :func:`squarepulse`: Generates a series of rect functions to represent a square
   pulse signal
-* *sine*: Generate a sine signal
+* :func:`sine`: Generate a sine signal
+* :func:`multi_sine`: Generate a multi-sine signal as summation of single sine signals
 """
 
 import itertools
@@ -21,8 +23,15 @@ from numpy import diff, sqrt, sum, array, corrcoef
 from scipy.signal import periodogram
 from scipy.special import comb
 
-__all__ = ['shocklikeGaussian', 'GaussianPulse', 'rect', 'squarepulse',
-           'corr_noise', 'sine']
+__all__ = [
+    "shocklikeGaussian",
+    "GaussianPulse",
+    "rect",
+    "squarepulse",
+    "corr_noise",
+    "sine",
+    "multi_sine",
+]
 
 
 def shocklikeGaussian(time, t0, m0, sigma, noise=0.0):
@@ -78,7 +87,7 @@ def GaussianPulse(time, t0, m0, sigma, noise=0.0):
             signal amplitudes at time instants
     """
 
-    x = m0 * np.exp(-(time - t0) ** 2 / (2 * sigma ** 2))
+    x = m0 * np.exp(-((time - t0) ** 2) / (2 * sigma ** 2))
     if noise > 0:
         x = x + np.random.randn(len(time)) * noise
     return x
@@ -97,8 +106,9 @@ def rect(time, t0, t1, height=1, noise=0.0):
             time instant of rect rhs
         height : float
             signal maximum
-        noise :float, optional
-            std of simulated signal noise
+        noise :float or numpy.ndarray of shape (N,), optional
+            float: standard deviation of additive white gaussian noise
+            ndarray: user-defined additive noise
 
     Returns
     -------
@@ -110,8 +120,20 @@ def rect(time, t0, t1, height=1, noise=0.0):
     x[np.nonzero(time > t0)] = height
     x[np.nonzero(time > t1)] = 0.0
 
-    if noise > 0:
-        x = x + np.random.randn(len(time)) * noise
+    # add the noise
+    if isinstance(noise, float):
+        if noise > 0:
+            x = x + np.random.randn(len(time)) * noise
+    elif isinstance(noise, np.ndarray):
+        if x.size == noise.size:
+            x = x + noise
+        else:
+            raise ValueError("Mismatching sizes of x and noise.")
+    else:
+        raise NotImplementedError(
+            "The given noise is neither of type float nor numpy.ndarray. "
+        )
+
     return x
 
 
@@ -134,8 +156,7 @@ def squarepulse(time, height, numpulse=4, noise=0.0):
         x : np.ndarray of shape (N,)
             signal amplitude at time instants
     """
-    width = (time[-1] - time[0]) / (
-            2 * numpulse + 1)  # width of each individual rect
+    width = (time[-1] - time[0]) / (2 * numpulse + 1)  # width of each individual rect
     x = np.zeros_like(time)
     for k in range(numpulse):
         x += rect(time, (2 * k + 1) * width, (2 * k + 2) * width, height)
@@ -154,7 +175,7 @@ def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
         amp : float, optional
              amplitude of the sine (default = 1.0)
         freq : float, optional
-             frequency of the sine in seconds (default = :math:`2 * \pi`)
+             frequency of the sine in Hz (default = :math:`2 * \pi`)
         noise : float, optional
             std of simulated signal noise (default = 0.0)
 
@@ -169,6 +190,33 @@ def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
     return x
 
 
+def multi_sine(time, amps, freqs, noise=0.0):
+    r"""Generate a multi-sine signal as summation of single sine signals
+
+    Parameters
+    ----------
+        time: np.ndarray of shape (N,)
+            time instants
+        amps: list or np.ndarray of floating point values
+            amplitudes of the sine signals
+        freqs: list or np.ndarray of floating point values
+            frequencies of the sine signals in Hz
+        noise: float, optional
+            std of simulated signal noise (default = 0.0)
+
+    Returns
+    -------
+        x: np.ndarray of shape (N,)
+            signal amplitude at time instants
+    """
+
+    x = np.zeros_like(time)
+    for amp, freq in zip(amps, freqs):
+        x += amp * np.sin(freq * time)
+    x += np.random.randn(len(x)) * noise ** 2
+    return x
+
+
 class corr_noise(object):
     """Base class for generation of a correlated noise process."""
 
@@ -179,11 +227,17 @@ class corr_noise(object):
 
     def calc_noise(self, N=100):
         z = self.rst.randn(N + 4)
-        noise = diff(diff(
-            diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3) + 6 * z[2:] *
-            self.w ** 2) - 4 * z[3:] * self.w) + z[4:]
-        self.Cw = sqrt(
-            sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
+        noise = (
+            diff(
+                diff(
+                    diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3)
+                    + 6 * z[2:] * self.w ** 2
+                )
+                - 4 * z[3:] * self.w
+            )
+            + z[4:]
+        )
+        self.Cw = sqrt(sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
         self.noise = noise * self.sigma / self.Cw
         return self.noise
 
@@ -203,14 +257,14 @@ class corr_noise(object):
             STD[:-1] = STD[:-1] + self.w * STDtmp[1:]
         NT = NT / np.linalg.norm(STD)
         self.noise = NT[:N]
-        self.Cw = sqrt(
-            sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
+        self.Cw = sqrt(sum([comb(4, l) ** 2 * self.w ** (2 * l) for l in range(5)]))
         return self.noise
 
     def calc_autocorr(self, lag=10):
         return array(
-            [1] + [corrcoef(self.noise[:-i], self.noise[i:])[0, 1] for i in
-                   range(1, lag)])
+            [1]
+            + [corrcoef(self.noise[:-i], self.noise[i:])[0, 1] for i in range(1, lag)]
+        )
 
     def calc_cov(self):
         def cw(k):

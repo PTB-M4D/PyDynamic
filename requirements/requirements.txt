@@ -1,0 +1,2 @@
+# Reference the current default requirements file.
+-r requirements-py38.txt

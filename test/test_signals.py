@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 """ Perform tests on methods to create testsignals."""
-
+import matplotlib
 import numpy as np
+import pytest
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
-from PyDynamic.misc.testsignals import shocklikeGaussian, GaussianPulse, rect, \
-    squarepulse, sine
+from examples.working_with_signals import demonstrate_signal
+from PyDynamic.misc.testsignals import (
+    GaussianPulse,
+    rect,
+    shocklikeGaussian,
+    sine,
+    squarepulse,
+)
 
 N = 2048
 Ts = 0.01
@@ -27,12 +34,11 @@ def test_shocklikeGaussian():
     # zero noise
     x = shocklikeGaussian(time, t0, m0, sigma, noise=0.0)
     assert_almost_equal(np.max(x), m0)
-    assert np.std(x[:N // 10]) < 1e-10
+    assert np.std(x[: N // 10]) < 1e-10
     # noisy signal
     nstd = 1e-2
     x = shocklikeGaussian(time, t0, m0, sigma, noise=nstd)
-    assert_almost_equal(
-        np.round(np.std(x[:N // 10]) * 100) / 100, nstd)
+    assert_almost_equal(np.round(np.std(x[: N // 10]) * 100) / 100, nstd)
 
 
 def test_GaussianPulse():
@@ -42,12 +48,11 @@ def test_GaussianPulse():
     x = GaussianPulse(time, t0, m0, sigma, noise=0.0)
     assert_almost_equal(np.max(x), m0)
     assert_almost_equal(time[x.argmax()], t0)
-    assert np.std(x[:N // 10]) < 1e-10
+    assert np.std(x[: N // 10]) < 1e-10
     # noisy signal
     nstd = 1e-2
     x = GaussianPulse(time, t0, m0, sigma, noise=nstd)
-    assert_almost_equal(
-        np.round(np.std(x[:N // 10]) * 100) / 100, nstd)
+    assert_almost_equal(np.round(np.std(x[: N // 10]) * 100) / 100, nstd)
 
 
 def test_rect():
@@ -74,12 +79,14 @@ class TestSine:
     # Test the sine signal.
     hi_res_time = get_timestamps(0, 2 * np.pi, 1e-5)
 
+    @pytest.mark.slow
     def test_minimal_call_max_sine(self):
         x = sine(time)
         # Check for minimal callability and that maximum amplitude at
         # timestamps is below default.
         assert np.max(np.abs(x)) <= 1.0
 
+    @pytest.mark.slow
     def test_minimal_call_hi_res_max_sine(self):
         x = sine(self.hi_res_time)
         # Check for minimal callability with high resolution time vector and
@@ -87,6 +94,7 @@ class TestSine:
         assert_almost_equal(np.max(x), 1.0)
         assert_almost_equal(np.min(x), -1.0)
 
+    @pytest.mark.slow
     def test_medium_call_freq_multiples_sine(self):
         # Initialize fixed frequency and number of repetitions.
         np.random.seed(130)
@@ -99,6 +107,7 @@ class TestSine:
         for i_x in x:
             assert_almost_equal(i_x, 0)
 
+    @pytest.mark.slow
     def test_medium_call_max_sine(self):
         # Initialize fixed amplitude.
         np.random.seed(11201)
@@ -108,6 +117,7 @@ class TestSine:
         # timestamps is below default.
         assert np.max(np.abs(x)) <= amp
 
+    @pytest.mark.slow
     def test_medium_call_hi_res_max_sine(self):
         # Initialize fixed amplitude.
         np.random.seed(1101)
@@ -136,3 +146,11 @@ class TestSine:
         sine(time, amp, freq=freq, noise=noise)
         sine(time, freq=freq, noise=noise)
         sine(time, amp=amp, freq=freq, noise=noise)
+
+
+@pytest.mark.slow
+def test_signal_example(monkeypatch):
+    # With this expression we override the matplotlib.pyplot.show method with a
+    # lambda expression returning None but only for this one test.
+    monkeypatch.setattr(matplotlib.pyplot, "show", lambda: None, raising=True)
+    demonstrate_signal()

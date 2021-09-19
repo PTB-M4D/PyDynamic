@@ -1,0 +1,9 @@
+name: PyDynamic_conda_env
+channels:
+    - defaults
+dependencies:
+    - python = 3.9
+    - pip
+    # pip dependencies have to be provided in `requirements.txt` syntax
+    - pip:
+        - -r requirements.txt
