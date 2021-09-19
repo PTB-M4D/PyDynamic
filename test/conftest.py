@@ -15,7 +15,11 @@ from hypothesis.strategies import composite, SearchStrategy
 from PyDynamic import make_semiposdef
 
 settings.register_profile(
-    name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
+    name="ci",
+    parent=settings(
+        suppress_health_check=(HealthCheck.too_slow,),
+        deadline=None,
+    ),
 )
 if "CIRCLECI" in os.environ:
     settings.load_profile("ci")
