@@ -123,9 +123,7 @@ def hypothesis_float_vector(
     max_value: Optional[float] = None,
 ) -> np.ndarray:
     number_of_elements = (
-        length
-        if length is not None
-        else draw(reasonable_random_dimension_strategy())
+        length if length is not None else draw(reasonable_random_dimension_strategy())
     )
     return draw(
         hnp.arrays(
@@ -152,7 +150,7 @@ def random_not_negative_float(draw: Callable) -> float:
 
 @composite
 def hypothesis_covariance_matrix(
-    draw: Callable, number_of_rows: Optional[int]
+    draw: Callable, number_of_rows: Optional[int] = None
 ) -> np.ndarray:
     number_of_rows_and_columns = (
         number_of_rows
