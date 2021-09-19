@@ -17,7 +17,7 @@ from PyDynamic import make_semiposdef
 settings.register_profile(
     "ci",
     settings(
-        suppress_health_check=(HealthCheck.too_slow,),
+        suppress_health_check=[HealthCheck.too_slow],
         deadline=None,
     ),
 )
@@ -127,9 +127,7 @@ def hypothesis_float_vector(
     max_value: Optional[float] = None,
 ) -> np.ndarray:
     number_of_elements = (
-        length
-        if length is not None
-        else draw(reasonable_random_dimension_strategy())
+        length if length is not None else draw(reasonable_random_dimension_strategy())
     )
     return draw(
         hnp.arrays(
