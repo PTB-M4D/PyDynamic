@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
-from examples.working_with_signals import demonstrate_signal
+from PyDynamic.examples.working_with_signals import demonstrate_signal
 from PyDynamic.misc.testsignals import (
     GaussianPulse,
     rect,
