@@ -57,11 +57,10 @@ commands:
         command: |
           python3 -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip setuptools
+          pip install --upgrade pip
 
-  # Reusable command to install production dependencies.
-  install_production_deps:
-    description: "Install production dependencies."
+  install_tox:
+    description: "Install tox."
     parameters:
       pyenv:
         type: string
@@ -70,10 +69,10 @@ commands:
 
     # Install dependencies.
     - run:
-        name: Install production dependencies
+        name: Install tox
         command: |
           source venv/bin/activate
-          pip install -r requirements/requirements-<< parameters.pyenv >>.txt
+          pip install tox
 
   # Reusable command to install development dependencies.
   install_development_deps:
@@ -258,9 +257,7 @@ jobs:
     steps:
       - create_folders
       - create_venv
-      - install_production_deps:
-          pyenv: << parameters.pyenv >>
-      - install_development_deps:
+      - install_tox:
           pyenv: << parameters.pyenv >>
       - tox:
           pyenv: << parameters.pyenv >>
@@ -315,9 +312,9 @@ jobs:
       - restore_cache:
           keys:
             # Specify the unique identifier for the cache.
-            - v2-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
+            - v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
             # Fallback to using the latest cache if no exact match is found.
-            - v2-conda-dependencies-
+            - v3-conda-dependencies-
 
       # Create environment and install extra_requires dependencies manually.
       - run:
@@ -330,13 +327,13 @@ jobs:
             fi
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
-            pip install -r requirements/dev-requirements.txt
+            conda install pytest pytest-cov hypothesis
 
       - save_cache:
           paths:
             - /home/circleci/conda/envs/
           key: >-
-            v2-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}-{{ checksum "requirements/dev-requirements.txt" }}
+            v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
 
       - when:
           condition: << parameters.is_nightly_run >>
@@ -366,8 +363,6 @@ jobs:
     steps:
       - create_folders
       - create_venv
-      - install_production_deps:
-          pyenv: ${PYENV}
       - install_development_deps:
           pyenv: ${PYENV}
 
@@ -387,8 +382,6 @@ jobs:
     steps:
       - create_folders
       - create_venv
-      - install_production_deps:
-          pyenv: ${PYENV}
       - install_development_deps:
           pyenv: ${PYENV}
 
