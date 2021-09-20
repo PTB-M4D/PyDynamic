@@ -106,7 +106,7 @@ commands:
         name: Perform tox testing
         command: |
           source venv/bin/activate
-          tox -e << parameters.pyenv >> << parameters.posargs >>
+          tox << parameters.posargs >>
 
   # Reusable command to store the previously generated test results.
   store_results:
