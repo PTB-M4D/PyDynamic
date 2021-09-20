@@ -1,6 +1,6 @@
 from matplotlib import pyplot
 
-from examples.uncertainty_for_dft.deconv_DFT import DftDeconvolutionExample
+from PyDynamic.examples.uncertainty_for_dft.deconv_DFT import DftDeconvolutionExample
 
 
 def test_deconvolution_example(monkeypatch):
