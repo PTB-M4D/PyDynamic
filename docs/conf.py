@@ -83,7 +83,7 @@ master_doc = "index"
 # General information about the project.
 project = "PyDynamic"
 copyright = (
-    "2020, S. Eichstädt (PTB), M. Gruber (PTB), B. Ludwig (PTB), "
+    "2021, S. Eichstädt (PTB), M. Gruber (PTB), B. Ludwig (PTB), "
     "T. Bruns (PTB), I. Smith (NPL)"
 )
 author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
