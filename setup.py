@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 """Install PyDynamic in Python path and provide all packaging metadata."""
-
 from os import path
 
 from setuptools import find_packages, setup
 
-# Get release version from PyDynamic __init__.py
-from PyDynamic import __version__ as VERSION
+current_release_version = "1.9.1"
 
 
 def get_readme():
@@ -19,21 +16,25 @@ def get_readme():
 setup(
     metadata_version="2.1",
     name="PyDynamic",
-    version=VERSION,
+    version=current_release_version,
     description="A software package for the analysis of dynamic measurements",
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     url="https://ptb-m4d.github.io/PyDynamic/",
     download_url="https://github.com/PTB-M4D/PyDynamic/releases/download/v{0}/"
-    "PyDynamic-{0}.tar.gz".format(VERSION),
-    author=u"Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
+    "PyDynamic-{0}.tar.gz".format(current_release_version),
+    author="Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
     "Martin Weber",
     author_email="sascha.eichstaedt@ptb.de",
     keywords="uncertainty dynamic deconvolution metrology",
-    packages=find_packages(exclude=["test"]),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
+    include_package_data=True,
     project_urls={
-        "Documentation": "https://pydynamic.readthedocs.io/en/v{}/".format(VERSION),
-        "Source": "https://github.com/PTB-M4D/PyDynamic/tree/v{}/".format(VERSION),
+        "Documentation": f"https://pydynamic.readthedocs.io/en/"
+        f"v{current_release_version}/",
+        "Source": f"https://github.com/PTB-M4D/PyDynamic/tree/"
+        f"v{current_release_version}/",
         "Tracker": "https://github.com/PTB-M4D/PyDynamic/issues",
     },
     install_requires=[
@@ -45,9 +46,9 @@ setup(
         "PyWavelets",
         "time-series-buffer",
     ],
-    # This allow to do "pip install PyDynamic[examples]" and get the dependencies to
-    # execute the Jupyter Notebook examples.
-    extras_require={"examples": ["notebook"],},
+    extras_require={
+        "examples": ["notebook"],
+    },
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 4 - Beta",
