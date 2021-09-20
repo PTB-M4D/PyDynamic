@@ -6,8 +6,10 @@ from hypothesis import assume, given, HealthCheck, settings, Verbosity
 from hypothesis.strategies import composite
 from numpy.random import default_rng
 
-from examples.demonstrate_fit_som import demonstrate_second_order_model_fitting
 from PyDynamic import fit_som, make_semiposdef, sos_FreqResp
+from PyDynamic.examples.demonstrate_fit_som import (
+    demonstrate_second_order_model_fitting,
+)
 from .conftest import hypothesis_bounded_float, hypothesis_float_vector
 
 
