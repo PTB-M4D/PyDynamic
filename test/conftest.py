@@ -8,18 +8,14 @@ from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
 
+from PyDynamic import make_semiposdef
+
 # This will check, if the testrun is executed in the ci environment and if so,
 # disables the 'too_slow' health check. See
 # https://hypothesis.readthedocs.io/en/latest/healthchecks.html#hypothesis.HealthCheck
 # for some details.
-from PyDynamic import make_semiposdef
-
 settings.register_profile(
-    "ci",
-    settings(
-        suppress_health_check=[HealthCheck.too_slow],
-        deadline=None,
-    ),
+    name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
 )
 if "CIRCLECI" in os.environ:
     settings.load_profile("ci")
@@ -107,7 +103,7 @@ def nonzero_complex_vector(draw: Callable, length: Optional[int] = None) -> np.n
             ),
         )
     )
-    assume(np.all(complex_vector != 0))
+    assume(np.all(np.real(complex_vector) != 0))
     return complex_vector
 
 
@@ -180,6 +176,7 @@ def hypothesis_covariance_matrix(
         )
     )
     cov_after_discarding_smallest_singular_value = discard_smallest_singular_value(cov)
+    assume(np.all(np.linalg.eigvals(cov_after_discarding_smallest_singular_value) >= 0))
     return cov_after_discarding_smallest_singular_value
 
 
@@ -192,7 +189,9 @@ def hypothesis_covariance_matrix_for_complex_vectors(
     uy_rr = draw(hypothesis_covariance_matrix(number_of_rows=length))
     uy_ii = draw(hypothesis_covariance_matrix(number_of_rows=length))
     uy_ri = draw(hypothesis_covariance_matrix(number_of_rows=length))
-    return np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
+    uy = np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
+    assume(np.all(np.linalg.eigvals(uy) >= 0))
+    return uy
 
 
 def random_covariance_matrix(length: Optional[int]) -> np.ndarray:

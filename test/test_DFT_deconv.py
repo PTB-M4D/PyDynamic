@@ -37,14 +37,8 @@ def test_dft_deconv(
     n_monte_carlo_runs = 40000
     y_mc = stats.multivariate_normal.rvs(mean=y, cov=uy, size=n_monte_carlo_runs)
     h_mc = stats.multivariate_normal.rvs(mean=h, cov=uh, size=n_monte_carlo_runs)
-    y_mcs = (
-        y_mc[..., :n]
-        + 1j * y_mc[..., n:]
-    )
-    h_mcs = (
-        h_mc[..., :n]
-        + 1j * h_mc[..., n:]
-    )
+    y_mcs = y_mc[..., :n] + 1j * y_mc[..., n:]
+    h_mcs = h_mc[..., :n] + 1j * h_mc[..., n:]
     y_mcs_divided_by_h_mcs_complex = y_mcs / h_mcs
     y_mcs_divided_by_h_mcs = np.concatenate(
         (
@@ -88,14 +82,8 @@ def test_reveal_bug_in_dft_deconv_up_to_1_9(
     n_monte_carlo_runs = 2000
     y_mc = stats.multivariate_normal.rvs(mean=y, cov=uy, size=n_monte_carlo_runs)
     h_mc = stats.multivariate_normal.rvs(mean=h, cov=uh, size=n_monte_carlo_runs)
-    y_mcs = (
-        y_mc[..., :n]
-        + 1j * y_mc[..., n:]
-    )
-    h_mcs = (
-        h_mc[..., :n]
-        + 1j * h_mc[..., n:]
-    )
+    y_mcs = y_mc[..., :n] + 1j * y_mc[..., n:]
+    h_mcs = h_mc[..., :n] + 1j * h_mc[..., n:]
     y_mcs_divided_by_h_mcs_complex = y_mcs / h_mcs
     y_mcs_divided_by_h_mcs = np.concatenate(
         (

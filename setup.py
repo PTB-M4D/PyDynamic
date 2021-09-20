@@ -29,6 +29,7 @@ setup(
     keywords="uncertainty dynamic deconvolution metrology",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
+    include_package_data=True,
     project_urls={
         "Documentation": f"https://pydynamic.readthedocs.io/en/"
         f"v{current_release_version}/",
