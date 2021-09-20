@@ -50,7 +50,7 @@ def test_dft_deconv(
     y_divided_by_h_mc_mean = np.mean(y_mcs_divided_by_h_mcs, axis=0)
     y_divided_by_h_mc_cov = np.cov(y_mcs_divided_by_h_mcs, rowvar=False)
     assert_allclose(x_deconv + 1, y_divided_by_h_mc_mean + 1, rtol=3e-4, atol=4e-7)
-    assert_allclose(u_deconv + 1, y_divided_by_h_mc_cov + 1, atol=2e-7)
+    assert_allclose(u_deconv + 1, y_divided_by_h_mc_cov + 1, atol=4e-7)
 
 
 @given(data(), two_to_the_k(min_k=2, max_k=4))
