@@ -1,6 +1,5 @@
 import os
-from dataclasses import dataclass
-from typing import Callable, Optional, Tuple
+from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
 import pytest
@@ -26,8 +25,7 @@ def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
     return np.all(no_nans_and_infs)
 
 
-@dataclass
-class VectorAndCompatibleMatrix:
+class VectorAndCompatibleMatrix(NamedTuple):
     vector: np.ndarray
     matrix: np.ndarray
 
