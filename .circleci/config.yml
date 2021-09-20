@@ -175,6 +175,12 @@ workflows:
 #          is_nightly_run: False
 #          requires:
 #            - test_python_py39
+#      - test:
+#          name: "test_python_py39_with_coverage_for_all_tests"
+#          tag: "3.9"
+#          pyenv: "py39"
+#          send_cov: true
+#          posargs: "-- ''"
 #      - preview_release:
 #          # Test the 'release' job to avoid trouble when Pull Requests get merged and
 #          # to preview publishing actions and the new changelog.
