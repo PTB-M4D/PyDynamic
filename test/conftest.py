@@ -19,10 +19,6 @@ settings.register_profile(
 )
 if "CIRCLECI" in os.environ:
     settings.load_profile("ci")
-    print(
-        "\nPytest recognized CI environment and loaded the following hypothesis "
-        f"settings:\n{settings.get_profile('ci')}\n"
-    )
 
 
 def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
