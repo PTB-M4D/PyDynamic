@@ -169,10 +169,43 @@ workflows:
           name: "test_python_py39"
           tag: "3.9"
           pyenv: "py39"
+      - test:
+          name: "test_python_py36_slow_tests"
+          tag: "3.6"
+          pyenv: "py36"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py36
+      - test:
+          name: "test_python_py37_slow_tests"
+          tag: "3.7"
+          pyenv: "py37"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py37
+      - test:
+          name: "test_python_py38_slow_tests"
+          tag: "3.8"
+          pyenv: "py38"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py38
+      - test:
+          name: "test_python_py39_slow_tests"
+          tag: "3.9"
+          pyenv: "py39"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py39
       - test_conda_py39:
           is_nightly_run: False
           requires:
             - test_python_py39
+      - test_conda_py39:
+          name: "test_conda_py39_with_all_tests"
+          is_nightly_run: True
+          requires:
+            - test_conda_py39
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
