@@ -348,6 +348,8 @@ jobs:
                     shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
                   done
                   chmod u+x codecov
+                  source $HOME/conda/etc/profile.d/conda.sh
+                  conda activate PyDynamic_conda_env
                   ./codecov
 
       - unless:
