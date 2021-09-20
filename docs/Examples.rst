@@ -46,7 +46,7 @@ Detailed examples
 
 More comprehensive examples you can find in provided Jupyter notebooks, which require
 additional dependencies to be installed. This can be achieved by appending
-:code:`[examples]` to PyDynamic in all of the above, e.g.
+:code:`[examples]` to PyDynamic in the install command, e.g.
 
 .. code-block:: shell
 
