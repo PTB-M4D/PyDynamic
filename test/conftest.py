@@ -169,6 +169,15 @@ def hypothesis_covariance_matrix(
 
 
 @composite
+def hypothesis_covariance_matrix_with_zero_correlation(
+    draw: Callable, number_of_rows: Optional[int] = None
+) -> np.ndarray:
+    cov = np.diag(np.diag(draw(hypothesis_covariance_matrix(number_of_rows))))
+    assume(np.all(np.linalg.eigvals(cov) >= 0))
+    return cov
+
+
+@composite
 def hypothesis_dimension(draw: Callable, dimension: Optional[int] = None) -> int:
     return (
         dimension
