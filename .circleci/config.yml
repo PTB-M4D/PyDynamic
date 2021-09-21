@@ -184,9 +184,10 @@ workflows:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
           requires:
-            - test_python_py36
-            - test_python_py37
-            - test_python_py38
+            - test_python_py36_slow_tests
+            - test_python_py37_slow_tests
+            - test_python_py38_slow_tests
+            - test_python_py39_slow_tests
             - test_conda_py39_with_all_tests
           filters:
             branches:
