@@ -17,7 +17,7 @@ from .conftest import (
 
 @pytest.mark.slow
 @given(data(), two_to_the_k(min_k=2, max_k=4))
-@settings(deadline=None)
+@settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
 def test_dft_deconv(
     hypothesis,
     n,
