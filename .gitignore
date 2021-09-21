@@ -3,7 +3,7 @@
 build/
 dist/
 PyDynamic.egg-info/
-doc/_build
+docs/_build
 
 # Testing artifacts #
 #####################
@@ -14,3 +14,11 @@ __pycache__/
 pytest.xml
 .hypothesis
 .tox
+
+# Jupyter Notebook artifacts #
+##############################
+.ipynb_checkpoints/
+
+# Environment artifacts #
+#########################
+.idea/

@@ -1,7 +1,0 @@
--c requirements-py35.txt
-
-pytest
-pytest-cov
-python-semantic-release
-tox
-hypothesis
