@@ -6,7 +6,6 @@ import pytest
 from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
-
 from PyDynamic import make_semiposdef
 
 # This will check, if the testrun is executed in the ci environment and if so,
@@ -85,7 +84,12 @@ def random_float_square_matrix(
 
 
 @composite
-def nonzero_complex_vector(draw: Callable, length: Optional[int] = None) -> np.ndarray:
+def nonzero_complex_vector(
+    draw: Callable,
+    length: Optional[int] = None,
+    min_magnitude: Optional[float] = 1e-4,
+    max_magnitude: Optional[float] = 1e4,
+) -> np.ndarray:
     number_of_elements = (
         length if length is not None else draw(reasonable_random_dimension_strategy())
     )
@@ -94,8 +98,8 @@ def nonzero_complex_vector(draw: Callable, length: Optional[int] = None) -> np.n
             dtype=complex,
             shape=number_of_elements,
             elements=hst.complex_numbers(
-                min_magnitude=1e-4,
-                max_magnitude=1e4,
+                min_magnitude=min_magnitude,
+                max_magnitude=max_magnitude,
                 allow_infinity=False,
                 allow_nan=False,
             ),
