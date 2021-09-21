@@ -30,8 +30,10 @@ class VectorAndCompatibleMatrix(NamedTuple):
 
 
 @composite
-def reasonable_random_dimension_strategy(draw: Callable):
-    return draw(hst.integers(min_value=1, max_value=20))
+def reasonable_random_dimension_strategy(
+    draw: Callable, min_value: Optional[int] = 1, max_value: Optional[int] = 20
+):
+    return draw(hst.integers(min_value=min_value, max_value=max_value))
 
 
 def random_float_square_matrix_strategy(
@@ -152,7 +154,7 @@ def random_not_negative_float(draw: Callable) -> float:
 
 @composite
 def hypothesis_covariance_matrix(
-    draw: Callable, number_of_rows: Optional[int] = None
+    draw: Callable, number_of_rows: Optional[int] = None, max_value: Optional[float] = 1
 ) -> np.ndarray:
     number_of_rows_and_columns = (
         number_of_rows
@@ -165,7 +167,7 @@ def hypothesis_covariance_matrix(
                 dtype=float,
                 elements=hst.floats(
                     min_value=0,
-                    max_value=1,
+                    max_value=max_value,
                     exclude_max=True,
                     allow_infinity=False,
                     allow_nan=False,
