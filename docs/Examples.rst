@@ -2,7 +2,7 @@ Examples
 ========
 
 On the project website in the *examples* and *tutorials* subfolders and the separate
-`PyDynamic_tutorials <https://github.com/PTB-PSt1/PyDynamic_tutorials>`_
+`PyDynamic_tutorials <https://github.com/PTB-M4D/PyDynamic_tutorials>`_
 repository you can find various examples illustrating the application of PyDynamic.
 Here is just a short list to get you started.
 
@@ -46,7 +46,7 @@ Detailed examples
 
 More comprehensive examples you can find in provided Jupyter notebooks, which require
 additional dependencies to be installed. This can be achieved by appending
-:code:`[examples]` to PyDynamic in all of the above, e.g.
+:code:`[examples]` to PyDynamic in the install command, e.g.
 
 .. code-block:: shell
 

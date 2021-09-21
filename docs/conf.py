@@ -39,10 +39,32 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.intersphinx",
     "recommonmark",
+    "nbsphinx",
 ]
 
+# ReadTheDocs Sphinx theme option taken from
+# https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
+html_theme_options = {
+    # True hides the + signs to expand the menu entries in the sidebar.
+    "collapse_navigation": False,
+}
+
 # This should make SciPy documentation available inside our docs.
-intersphinx_mapping = {"python": ("https://docs.scipy.org/doc/scipy/reference", None)}
+intersphinx_mapping = {
+    "SciPy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "PyDynamic_tutorials": (
+        "https://pydynamic-tutorials.readthedocs.io/en/latest/",
+        None,
+    ),
+    "np": (
+        "http://docs.scipy.org/doc/numpy/",
+        None,
+    ),
+    "Python": ("https://docs.python.org/3", None),
+    "pywt": (" https://pywavelets.readthedocs.io/en/latest/", None),
+}
+
+nbsphinx_allow_errors = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -61,17 +83,17 @@ master_doc = "index"
 # General information about the project.
 project = "PyDynamic"
 copyright = (
-    "2020, S. Eichstädt (PTB), M. Gruber (PTB), B. Ludwig (PTB), "
+    "2021, S. Eichstädt (PTB), M. Gruber (PTB), B. Ludwig (PTB), "
     "T. Bruns (PTB), I. Smith (NPL)"
 )
 author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
-# built documents.
+# built documents.K
 #
 # The short X.Y version.
-version = "1.3"
+version = "1.9.2"
 # The full version, including alpha/beta/rc tags.
 # release = "1.3.1"
 
