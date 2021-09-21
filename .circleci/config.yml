@@ -12,7 +12,7 @@ executors:
     parameters:
       tag:
         type: string
-        default: "3.8"
+        default: "3.9"
     docker:
       - image: circleci/python:<< parameters.tag >>
   conda_tester:
@@ -22,17 +22,10 @@ executors:
   # Define the executor for the Python semantic release.
   publisher:
     working_directory: ~/repo
-    parameters:
-      tag:
-        type: string
-        default: "3.8"
-      pyenv:
-        type: string
-        default: "py38"
     docker:
-      - image: circleci/python:<< parameters.tag >>
+      - image: circleci/python:3.9
     environment:
-      PYENV: << parameters.pyenv >>
+      PYENV: "py39"
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -59,21 +52,6 @@ commands:
           source venv/bin/activate
           pip install --upgrade pip
 
-  install_tox:
-    description: "Install tox."
-    parameters:
-      pyenv:
-        type: string
-        default: "py38"
-    steps:
-
-    # Install dependencies.
-    - run:
-        name: Install tox
-        command: |
-          source venv/bin/activate
-          pip install tox
-
   # Reusable command to install development dependencies.
   install_development_deps:
     description: "Install development dependencies."
@@ -94,8 +72,9 @@ commands:
   tox:
     description: "Perform tox testing."
     parameters:
-      pyenv:
+      toxenvs:
         type: string
+        default: ""
       posargs:
         type: string
         default: ""
@@ -106,7 +85,7 @@ commands:
         name: Perform tox testing
         command: |
           source venv/bin/activate
-          tox << parameters.posargs >>
+          tox << parameters.toxenvs >> << parameters.posargs >>
 
   # Reusable command to store the previously generated test results.
   store_results:
@@ -128,93 +107,88 @@ workflows:
       - test:
           name: "nightly_test_python_py36"
           tag: "3.6"
-          pyenv: "py36"
+          toxenvs: "-e py36 -e py36-without_requirements"
           posargs: "-- ''"
       - test:
           name: "nightly_test_python_py37"
           tag: "3.7"
-          pyenv: "py37"
+          toxenvs: "-e py37 -e py37-without_requirements"
           posargs: "-- ''"
       - test:
           name: "nightly_test_python_py38"
           tag: "3.8"
-          pyenv: "py38"
+          toxenvs: "-e py38 -e py38-without_requirements"
           posargs: "-- ''"
       - test:
           name: "nightly_test_python_py39"
           tag: "3.9"
-          pyenv: "py39"
+          toxenvs: "-e py39 -e py39-without_requirements"
           posargs: "-- ''"
       - test_conda_py39:
           name: "nightly_test_conda_py39"
           is_nightly_run: True
 
-  # Create workflow for testing and deploying PyDynamic.
-  test_and_deploy:
+  quick_test:
     jobs:
-      # Create 'test' job to test and install PyDynamic for every commit.
-      - test:
-          name: "test_python_py36"
-          tag: "3.6"
-          pyenv: "py36"
-      - test:
-          name: "test_python_py37"
-          tag: "3.7"
-          pyenv: "py37"
-      - test:
-          name: "test_python_py38"
-          tag: "3.8"
-          pyenv: "py38"
       - test:
           name: "test_python_py39"
           tag: "3.9"
-          pyenv: "py39"
+          toxenvs: "-e py39-without_requirements"
+      - test_conda_py39:
+          is_nightly_run: False
+
+  test_and_deploy:
+    jobs:
+      - test:
+          name: "test_python_py36"
+          tag: "3.6"
+          toxenvs: "-e py36-without_requirements"
       - test:
           name: "test_python_py36_slow_tests"
           tag: "3.6"
-          pyenv: "py36"
+          toxenvs: "-e py36-without_requirements"
           posargs: "-- -m 'slow'"
           requires:
             - test_python_py36
       - test:
+          name: "test_python_py37"
+          tag: "3.7"
+          toxenvs: "-e py37-without_requirements"
+      - test:
           name: "test_python_py37_slow_tests"
           tag: "3.7"
-          pyenv: "py37"
+          toxenvs: "-e py37-without_requirements"
           posargs: "-- -m 'slow'"
           requires:
             - test_python_py37
       - test:
+          name: "test_python_py38"
+          tag: "3.8"
+          toxenvs: "-e py38-without_requirements"
+      - test:
           name: "test_python_py38_slow_tests"
           tag: "3.8"
-          pyenv: "py38"
+          toxenvs: "-e py38-without_requirements"
           posargs: "-- -m 'slow'"
           requires:
             - test_python_py38
       - test:
           name: "test_python_py39_slow_tests"
           tag: "3.9"
-          pyenv: "py39"
+          toxenvs: "-e py39-without_requirements"
           posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py39
-      - test_conda_py39:
-          is_nightly_run: False
-          requires:
-            - test_python_py39
       - test_conda_py39:
           name: "test_conda_py39_with_all_tests"
           is_nightly_run: True
-          requires:
-            - test_conda_py39
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
           requires:
-            - test_python_py36
-            - test_python_py37
-            - test_python_py38
-            - test_python_py39
-            - test_conda_py39
+            - test_python_py36_slow_tests
+            - test_python_py37_slow_tests
+            - test_python_py38_slow_tests
+            - test_python_py39_slow_tests
+            - test_conda_py39_with_all_tests
           filters:
             branches:
               ignore: /.*dev$/
@@ -252,24 +226,18 @@ jobs:
   # Additionally we want to create one coverage report during all these tests (which are
   # of course the same for all versions).
   test:
-    # Define all parameters, where 'tag' is used for the docker image and 'pyenv' is
-    # the string which is used in tox to identify the current Python version. We reuse
-    # this variable basically everywhere we deal with the virtual environment.
-    # 'send_cov' is the conditional for either sending the produced coverage report
-    # to codecov or not. 'posargs' will be handed over to the commands of
-    # tox step. We use this to extend the default test suite execution from only
-    # those tests not marked with 'slow' to all tests during the nightly scheduled
-    # pipeline runs.
+    # Define all parameters, where 'tag' is used for the docker image and 'toxenvs' is
+    # the string which is used in tox to identify the desired entries of envlist.
+    # 'posargs' will be handed over to the commands of tox step. We use this to
+    # extend the default test suite execution from only those tests not marked with
+    # 'slow' to all tests during the nightly scheduled pipeline runs.
     parameters:
       tag:
         type: string
-        default: "3.8"
-      pyenv:
+        default: "3.9"
+      toxenvs:
         type: string
-        default: "py38"
-      send_cov:
-        type: boolean
-        default: false
+        default: ""
       posargs:
         type: string
         default: ""
@@ -283,30 +251,15 @@ jobs:
     steps:
       - create_folders
       - create_venv
-      - install_tox:
-          pyenv: << parameters.pyenv >>
+      - run:
+          name: Install tox
+          command: |
+            source venv/bin/activate
+            pip install tox
       - tox:
-          pyenv: << parameters.pyenv >>
+          toxenvs: << parameters.toxenvs >>
           posargs: << parameters.posargs >>
       - store_results
-
-      # Upload coverage report if the according parameter is set to `true`.
-      - when:
-          condition: << parameters.send_cov >>
-          steps:
-            - run:
-                name: Upload coverage report
-                command: |
-                  source venv/bin/activate
-                  curl -s https://codecov.io/bash > codecov;
-                  VERSION=$(grep -o 'VERSION=\"[0-9\.]*\"' codecov | cut -d'"' -f2);
-                  for i in 1 256 512
-                  do
-                    shasum -a $i -c --ignore-missing <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM") ||
-                    shasum -a $i -c <(curl -s "https://raw.githubusercontent.com/codecov/codecov-bash/${VERSION}/SHA${i}SUM")
-                  done
-                  chmod u+x codecov
-                  ./codecov
 
   # Define one 'test' job to run the test suite against the
   # installed dependencies from the environment.yml.
