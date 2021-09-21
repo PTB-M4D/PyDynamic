@@ -187,7 +187,7 @@ workflows:
             - test_python_py36
             - test_python_py37
             - test_python_py38
-            - test_conda_py39
+            - test_conda_py39_with_all_tests
           filters:
             branches:
               ignore: /.*dev$/
