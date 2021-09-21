@@ -30,8 +30,10 @@ class VectorAndCompatibleMatrix(NamedTuple):
 
 
 @composite
-def reasonable_random_dimension_strategy(draw: Callable):
-    return draw(hst.integers(min_value=1, max_value=20))
+def reasonable_random_dimension_strategy(
+    draw: Callable, min_value: Optional[int] = 1, max_value: Optional[int] = 20
+):
+    return draw(hst.integers(min_value=min_value, max_value=max_value))
 
 
 def random_float_square_matrix_strategy(
@@ -52,16 +54,8 @@ def random_float_matrix(
     number_of_rows: Optional[int] = None,
     number_of_cols: Optional[int] = None,
 ) -> np.ndarray:
-    number_of_rows = (
-        number_of_rows
-        if number_of_rows is not None
-        else draw(reasonable_random_dimension_strategy())
-    )
-    number_of_cols = (
-        number_of_cols
-        if number_of_cols is not None
-        else draw(reasonable_random_dimension_strategy())
-    )
+    number_of_rows = draw(hypothesis_dimension(number_of_rows))
+    number_of_cols = draw(hypothesis_dimension(number_of_cols))
     return draw(
         random_float_matrix_strategy(
             number_of_rows=number_of_rows, number_of_cols=number_of_cols
@@ -90,9 +84,7 @@ def nonzero_complex_vector(
     min_magnitude: Optional[float] = 1e-4,
     max_magnitude: Optional[float] = 1e4,
 ) -> np.ndarray:
-    number_of_elements = (
-        length if length is not None else draw(reasonable_random_dimension_strategy())
-    )
+    number_of_elements = draw(hypothesis_dimension(length))
     complex_vector = draw(
         hnp.arrays(
             dtype=complex,
@@ -124,9 +116,7 @@ def hypothesis_float_vector(
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
 ) -> np.ndarray:
-    number_of_elements = (
-        length if length is not None else draw(reasonable_random_dimension_strategy())
-    )
+    number_of_elements = draw(hypothesis_dimension(length))
     return draw(
         hnp.arrays(
             dtype=float,
@@ -152,20 +142,16 @@ def random_not_negative_float(draw: Callable) -> float:
 
 @composite
 def hypothesis_covariance_matrix(
-    draw: Callable, number_of_rows: Optional[int] = None
+    draw: Callable, number_of_rows: Optional[int] = None, max_value: Optional[float] = 1
 ) -> np.ndarray:
-    number_of_rows_and_columns = (
-        number_of_rows
-        if number_of_rows is not None
-        else draw(reasonable_random_dimension_strategy())
-    )
+    number_of_rows_and_columns = draw(hypothesis_dimension(number_of_rows))
     cov = np.cov(
         draw(
             hnp.arrays(
                 dtype=float,
                 elements=hst.floats(
                     min_value=0,
-                    max_value=1,
+                    max_value=max_value,
                     exclude_max=True,
                     allow_infinity=False,
                     allow_nan=False,
@@ -180,6 +166,24 @@ def hypothesis_covariance_matrix(
     cov_after_discarding_smallest_singular_value = discard_smallest_singular_value(cov)
     assume(np.all(np.linalg.eigvals(cov_after_discarding_smallest_singular_value) >= 0))
     return cov_after_discarding_smallest_singular_value
+
+
+@composite
+def hypothesis_covariance_matrix_with_zero_correlation(
+    draw: Callable, number_of_rows: Optional[int] = None
+) -> np.ndarray:
+    cov = np.diag(np.diag(draw(hypothesis_covariance_matrix(number_of_rows))))
+    assume(np.all(np.linalg.eigvals(cov) >= 0))
+    return cov
+
+
+@composite
+def hypothesis_dimension(draw: Callable, dimension: Optional[int] = None) -> int:
+    return (
+        dimension
+        if dimension is not None
+        else draw(reasonable_random_dimension_strategy())
+    )
 
 
 @composite
