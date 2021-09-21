@@ -12,7 +12,7 @@ executors:
     parameters:
       tag:
         type: string
-        default: "3.8"
+        default: "3.9"
     docker:
       - image: circleci/python:<< parameters.tag >>
   conda_tester:
@@ -23,9 +23,9 @@ executors:
   publisher:
     working_directory: ~/repo
     docker:
-      - image: circleci/python:3.8
+      - image: circleci/python:3.9
     environment:
-      PYENV: "py38"
+      PYENV: "py39"
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -128,10 +128,17 @@ workflows:
           name: "nightly_test_conda_py39"
           is_nightly_run: True
 
-  # Create workflow for testing and deploying PyDynamic.
+  quick_test:
+    jobs:
+      - test:
+          name: "test_python_py39"
+          tag: "3.9"
+          toxenvs: "-e py39-without_requirements"
+      - test_conda_py39:
+          is_nightly_run: False
+
   test_and_deploy:
     jobs:
-      # Create 'test' job to test and install PyDynamic for every commit.
       - test:
           name: "test_python_py36"
           tag: "3.6"
@@ -177,14 +184,10 @@ workflows:
           requires:
             - test_python_py39
       - test_conda_py39:
-          is_nightly_run: False
-          requires:
-            - test_python_py39
-      - test_conda_py39:
           name: "test_conda_py39_with_all_tests"
           is_nightly_run: True
           requires:
-            - test_conda_py39
+            - test_python_py39
       - preview_release:
           # Test the 'release' job to avoid trouble when Pull Requests get merged and
           # to preview publishing actions and the new changelog.
@@ -193,7 +196,6 @@ workflows:
             - test_python_py37
             - test_python_py38
             - test_python_py39
-            - test_conda_py39
           filters:
             branches:
               ignore: /.*dev$/
