@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.9.2 (2021-09-21)
+### Fix
+* **PyPI package:** Include examples in packag and make sure all tests pass with delivered version ([`f8326d5`](https://github.com/PTB-M4D/PyDynamic/commit/f8326d52d9dc289b506999365850067001320a3e))
+
 ## v1.9.1 (2021-09-15)
 ### Fix
 * **DFT_deconv:** Replace the imaginary part of H by Y's imaginary part in one of the equations ([`a4252dd`](https://github.com/PTB-M4D/PyDynamic/commit/a4252ddd850908467933d7de41f1da99d57d3ea1))

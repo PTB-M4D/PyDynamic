@@ -5,8 +5,8 @@ import scipy.stats as stats
 from hypothesis import given, settings
 from hypothesis.strategies import data
 from numpy.testing import assert_allclose
-
 from PyDynamic.uncertainty.propagate_DFT import DFT_deconv
+
 from .conftest import (
     hypothesis_covariance_matrix_for_complex_vectors,
     hypothesis_float_vector,
@@ -28,7 +28,7 @@ def test_dft_deconv(
     uy = covariance_scale_minimizer * hypothesis.draw(
         hypothesis_covariance_matrix_for_complex_vectors(n)
     )
-    h_complex = hypothesis.draw(nonzero_complex_vector(length=n))
+    h_complex = hypothesis.draw(nonzero_complex_vector(length=n, min_magnitude=1e-1))
     h = np.r_[h_complex.real, h_complex.imag]
     uh = covariance_scale_minimizer * hypothesis.draw(
         hypothesis_covariance_matrix_for_complex_vectors(n)
