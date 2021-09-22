@@ -374,7 +374,9 @@ def LSIIR(
         # an initial delay of the previous maximum delay.
         if not isstable(b=b_res, a=a_res, ftype="digital"):
             final_tau = tau_max
-            b_res, a_res = _fitIIR(Hvals, final_tau, w, E, Na, Nb, inv=inv, bounds=bounds)
+            b_res, a_res = _fitIIR(
+                Hvals, final_tau, w, E, Na, Nb, inv=inv, bounds=bounds
+            )
             final_stab_iter += 1
 
         final_stable = isstable(b=b_res, a=a_res, ftype="digital")
