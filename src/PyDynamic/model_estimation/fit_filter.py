@@ -39,7 +39,7 @@ def _fitIIR(
     Na: int,
     Nb: int,
     inv: bool = False,
-    bounds: Optional[Tuple[np.ndarray, np.ndarray]] = None,
+    bounds: Optional[Tuple[Union[np.ndarray, float], Union[np.ndarray, float]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     r"""The actual fitting routing for the least-squares IIR filter.
 
@@ -110,7 +110,7 @@ def _iterate_stabilization(
     Na: int,
     Fs: float,
     inv: Optional[bool] = False,
-    bounds: Optional[Tuple[np.ndarray, np.ndarray]] = None,
+    bounds: Optional[Tuple[Union[np.ndarray, float], Union[np.ndarray, float]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray, float, bool]:
     r"""Conduct one iteration of the stabilization via time delay
 
@@ -176,7 +176,7 @@ def LSIIR(
     inv: Optional[bool] = False,
     UHvals: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = 1000,
-    bounds: Union[np.ndarray, str] = None,
+    bounds: Optional[Tuple[Union[np.ndarray, float], Union[np.ndarray, float]]] = None,
 ) -> Union[
     Tuple[np.ndarray, np.ndarray, int], Tuple[np.ndarray, np.ndarray, int, np.ndarray]
 ]:
