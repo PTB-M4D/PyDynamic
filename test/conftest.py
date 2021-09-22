@@ -212,13 +212,18 @@ def hypothesis_dimension(draw: Callable, dimension: Optional[int] = None) -> int
 
 @composite
 def hypothesis_covariance_matrix_for_complex_vectors(
-    draw: Callable,
-    length: int,
+    draw: Callable, length: int, max_value: Optional[float] = 1.0
 ) -> np.ndarray:
 
-    uy_rr = draw(hypothesis_covariance_matrix(number_of_rows=length))
-    uy_ii = draw(hypothesis_covariance_matrix(number_of_rows=length))
-    uy_ri = draw(hypothesis_covariance_matrix(number_of_rows=length))
+    uy_rr = draw(
+        hypothesis_covariance_matrix(number_of_rows=length, max_value=max_value)
+    )
+    uy_ii = draw(
+        hypothesis_covariance_matrix(number_of_rows=length, max_value=max_value)
+    )
+    uy_ri = draw(
+        hypothesis_covariance_matrix(number_of_rows=length, max_value=max_value)
+    )
     uy = np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
     assume(np.all(np.linalg.eigvals(uy) >= 0))
     return uy
