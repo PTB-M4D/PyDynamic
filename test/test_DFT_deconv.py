@@ -51,7 +51,13 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
 
 
 @given(deconvolution_input())
-@settings(deadline=None, suppress_health_check=(HealthCheck.filter_too_much,))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.filter_too_much,
+    ],
+)
 @pytest.mark.slow
 def test_dft_deconv(
     multivariate_complex_monte_carlo, complex_deconvolution_on_sets, DFT_deconv_input
