@@ -130,16 +130,8 @@ def test_fit_som_with_too_short_weighting_vector(params):
 
 
 @given(random_input_to_fit_som())
-def test_fit_som_with_zero_frequency_response(params):
+def test_fit_som_with_zero_frequency_response_but_without_MCruns_or_UH(params):
     params["H"][0] = 0.0
     assume(params["MCruns"] is None or params["UH"] is None)
-    with pytest.raises(ValueError):
-        fit_som(**params)
-
-
-@given(random_input_to_fit_som())
-def test_fit_som_with_zero_frequency_response_but_without_monte_carlo(params):
-    params["H"][0] = 0.0
-    params["MCruns"] = None
     with pytest.raises(ValueError):
         fit_som(**params)
