@@ -32,19 +32,19 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
         ]
         uh = np.eye(N=n * 2)
     else:
-        covariance_scale_minimizer = 1e-3
+        covariance_bounds = {"min_value": 1e-10, "max_value": 1e-3}
         y_complex = draw(nonzero_complex_vector(length=n))
         y = np.r_[y_complex.real, y_complex.imag]
         uy = draw(
             hypothesis_covariance_matrix_for_complex_vectors(
-                length=n, max_value=covariance_scale_minimizer
+                length=n, **covariance_bounds
             )
         )
         h_complex = draw(nonzero_complex_vector(length=n, min_magnitude=1e-1))
         h = np.r_[h_complex.real, h_complex.imag]
         uh = draw(
             hypothesis_covariance_matrix_for_complex_vectors(
-                length=n, max_value=covariance_scale_minimizer
+                length=n, **covariance_bounds
             ),
         )
     return {"Y": y, "UY": uy, "H": h, "UH": uh}
