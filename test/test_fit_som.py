@@ -25,12 +25,12 @@ def test_demonstrate_second_order_model_fitting(monkeypatch):
 def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
     rng = default_rng()
     # sensor/measurement system
-    S0 = draw(hypothesis_bounded_float(min_value=0.124, max_value=0.124))
-    uS0 = draw(hypothesis_bounded_float(min_value=1e-4, max_value=1e-4))
-    delta = draw(hypothesis_bounded_float(min_value=1e-2, max_value=1e-2))
-    udelta = draw(hypothesis_bounded_float(min_value=1e-3, max_value=1e-3))
-    f0 = draw(hst.integers(min_value=36, max_value=36))
-    uf0 = draw(hypothesis_bounded_float(min_value=0.5, max_value=0.5))
+    S0 = 0.124
+    uS0 = 1e-4
+    delta = 1e-2
+    udelta = 1e-3
+    f0 = 36
+    uf0 = 0.5
 
     # Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]
     MCruns = draw(hst.sampled_from((10, 20, 40)))
