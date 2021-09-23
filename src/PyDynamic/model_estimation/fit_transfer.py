@@ -226,7 +226,6 @@ def fit_som(
         return pars, Upars
     # UH is None, so apply GUM S2 linear propagation
     iri = np.r_[np.real(1 / h_complex), np.imag(1 / h_complex)]
-    n = len(f)
     om = 2 * np.pi * f * scaling
     E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
     X = np.r_[np.real(E), np.imag(E)]
