@@ -340,8 +340,9 @@ def progress_bar(
     else:
         print(progressString)
 
+
 def is_vector(ndarray: np.ndarray) -> bool:
-    """Check if a np.ndarray is a vector, i.e. it expands over one dimension only
+    """Check if a np.ndarray is a vector, i.e. is of shape (n,)
 
     Parameters
     ----------
