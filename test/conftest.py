@@ -6,6 +6,7 @@ import pytest
 from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
+
 from PyDynamic import make_semiposdef
 
 # This will check, if the testrun is executed in the ci environment and if so,
@@ -142,7 +143,10 @@ def random_not_negative_float(draw: Callable) -> float:
 
 @composite
 def hypothesis_covariance_matrix(
-    draw: Callable, number_of_rows: Optional[int] = None, max_value: Optional[float] = 1
+    draw: Callable,
+    number_of_rows: Optional[int] = None,
+    min_value: Optional[float] = 0,
+    max_value: Optional[float] = 1,
 ) -> np.ndarray:
     number_of_rows_and_columns = draw(hypothesis_dimension(number_of_rows))
     cov = np.cov(
@@ -150,7 +154,7 @@ def hypothesis_covariance_matrix(
             hnp.arrays(
                 dtype=float,
                 elements=hst.floats(
-                    min_value=0,
+                    min_value=min_value,
                     max_value=max_value,
                     exclude_max=True,
                     allow_infinity=False,
@@ -188,17 +192,26 @@ def hypothesis_dimension(draw: Callable, dimension: Optional[int] = None) -> int
 
 @composite
 def hypothesis_covariance_matrix_for_complex_vectors(
-    draw: Callable, length: int, max_value: Optional[float] = 1.0
+    draw: Callable,
+    length: int,
+    min_value: Optional[float] = 0.0,
+    max_value: Optional[float] = 1.0,
 ) -> np.ndarray:
 
     uy_rr = draw(
-        hypothesis_covariance_matrix(number_of_rows=length, max_value=max_value)
+        hypothesis_covariance_matrix(
+            number_of_rows=length, min_value=min_value, max_value=max_value
+        )
     )
     uy_ii = draw(
-        hypothesis_covariance_matrix(number_of_rows=length, max_value=max_value)
+        hypothesis_covariance_matrix(
+            number_of_rows=length, min_value=min_value, max_value=max_value
+        )
     )
     uy_ri = draw(
-        hypothesis_covariance_matrix(number_of_rows=length, max_value=max_value)
+        hypothesis_covariance_matrix(
+            number_of_rows=length, min_value=min_value, max_value=max_value
+        )
     )
     uy = np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
     assume(np.all(np.linalg.eigvals(uy) >= 0))
