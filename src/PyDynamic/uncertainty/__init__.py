@@ -26,7 +26,8 @@ from .propagate_DFT import (
 
 from .propagate_filter import FIRuncFilter, IIRuncFilter
 
-from .propagate_MonteCarlo import ARMA, MC, SMC, UMC, UMC_generic
+from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
+from ..misc.noise import ARMA
 
 from .interpolation import interp1d_unc
 
