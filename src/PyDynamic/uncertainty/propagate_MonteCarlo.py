@@ -360,7 +360,7 @@ def SMC(
                 (X.dot(blow.T) - Xl[:, : len(alow)].dot(alow[1:]), Xl[:, :-1])
             )
         elif isinstance(blow, np.ndarray):
-            X = np.hstack((x[index[0]] + E, X[:, :-1]))
+            X = np.hstack((xi + E, X[:, :-1]))
             Xl = X.dot(blow)
         else:
             Xl = x[index[0]] + E
