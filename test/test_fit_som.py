@@ -10,7 +10,6 @@ from PyDynamic import fit_som, make_semiposdef, sos_FreqResp
 from PyDynamic.examples.demonstrate_fit_som import (
     demonstrate_second_order_model_fitting,
 )
-
 from .conftest import hypothesis_float_vector
 
 
