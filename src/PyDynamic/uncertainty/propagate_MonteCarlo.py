@@ -355,7 +355,7 @@ def SMC(
             E = w
 
         if isinstance(alow, np.ndarray):  # apply low-pass filter
-            X = np.hstack((x[index[0]] + E, X[:, :-1]))
+            X = np.hstack((xi + E, X[:, :-1]))
             Xl = np.hstack(
                 (X.dot(blow.T) - Xl[:, : len(alow)].dot(alow[1:]), Xl[:, :-1])
             )
