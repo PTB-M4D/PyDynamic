@@ -74,6 +74,7 @@ def test_SMC():
     assert Uy.shape == y.shape
 
 
+@pytest.mark.slow
 def test_UMC(visualizeOutput=False):
     # run method
     y, Uy, p025, p975, happr = UMC(

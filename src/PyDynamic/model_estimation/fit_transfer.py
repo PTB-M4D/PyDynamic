@@ -1,18 +1,29 @@
-# -*- coding: utf-8 -*-
-"""The module :mod:`PyDynamic.model_estimation.fit_transfer` contains a function
-for the identification of transfer function models.
-
-This module contains the following function:
+"""This module contains a function for the identification of transfer function models:
 
 * :func:`fit_som`: Fit second-order model to complex-valued frequency response
-
 """
+from typing import Optional, Union
+
 import numpy as np
+
+from PyDynamic.misc.tools import (
+    is_2d_matrix,
+    number_of_rows_equals_vector_dim,
+    progress_bar,
+)
 
 __all__ = ["fit_som"]
 
 
-def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
+def fit_som(
+    f: np.ndarray,
+    H: np.ndarray,
+    UH: Optional[np.ndarray] = None,
+    weighting: Optional[np.ndarray] = None,
+    MCruns: Optional[Union[int, None]] = 10000,
+    scaling: Optional[float] = 1e-3,
+    verbose: Optional[bool] = False,
+):
     """Fit second-order model to complex-valued frequency response
 
     Fit second-order model (spring-damper model) with parameters
@@ -25,87 +36,126 @@ def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
 
     Parameters
     ----------
-        f: np.ndarray of shape (M,)
-            vector of frequencies
-        H: np.ndarray of shape (2M,)
-            real and imaginary parts of measured frequency response values at
-            frequencies f
-        UH: np.ndarray of shape (2M,) or (2M,2M)
-            uncertainties associated with real and imaginary parts
-            When UH is one-dimensional, it is assumed to contain standard
-            uncertainties; otherwise it
-            is taken as covariance matrix. When UH is not specified no
-            uncertainties assoc. with the fit are calculated.
-        weighting: str or array
-            Type of weighting (None, 'diag', 'cov') or array of weights (
-            length two times of f)
-        MCruns: int, optional
-            Number of Monte Carlo trials for propagation of uncertainties.
-            When MCruns is 'None', matrix multiplication
-            is used for the propagation of uncertainties. However, in some
-            cases this can cause trouble.
-        scaling: float
-            scaling of least-squares design matrix for improved fit quality
+    f : (M,) np.ndarray
+        vector of frequencies
+    H : (2M,) np.ndarray
+        real and imaginary parts of measured frequency response values at
+        frequencies f
+    UH : (2M,) or (2M,2M) np.ndarray, optional
+        uncertainties associated with real and imaginary parts
+        When UH is one-dimensional, it is assumed to contain standard
+        uncertainties; otherwise it is taken as covariance matrix. When UH is not
+        specified no uncertainties assoc. with the fit are calculated, which is the
+        default behaviour.
+    weighting : str or (2M,) np.ndarray, optional
+        Type of weighting associated with frequency responses, can be ('diag',
+        'cov') if UH is given, or Numpy array of weights, defaults to None,
+        which means all values are considered equally important
+    MCruns : int, optional
+        Number of Monte Carlo trials for propagation of uncertainties, defaults to
+        10000. When MCruns is set to 'None', matrix multiplication is used for the
+        propagation of uncertainties. However, in some cases this can cause trouble.
+    scaling : float, optional
+        scaling of least-squares design matrix for improved fit quality, defaults to
+        1e-3
+    verbose : bool, optional
+        if True a progressbar will be printed to console during the Monte Carlo
+        simulations, if False nothing will be printed out, defaults to False
     Returns
     -------
-        p: np.ndarray
-            vector of estimated model parameters [S0, delta, f0]
-        Up: np.ndarray
-            covariance associated with parameter estimate
+    p : np.ndarray
+        vector of estimated model parameters [S0, delta, f0]
+    Up : np.ndarray
+        covariance associated with parameter estimate
     """
-    assert 2 * len(f) == len(H)
-    Hr = H[: len(f)]
-    Hi = H[len(f) :]
-
-    if isinstance(UH, np.ndarray):
-        assert UH.shape[0] == 2 * len(f)
-        if len(UH.shape) == 2:
-            assert UH.shape[0] == UH.shape[1]
-
-        # propagate to real and imaginary parts of reciprocal using Monte Carlo
-
-        if isinstance(MCruns, int) or isinstance(MCruns, float):
-            runs = int(MCruns)
-        else:
-            runs = 10000
-        if len(UH.shape) == 1:
-            HR = np.tile(Hr, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile(
-                UH[: len(f)], (runs, 1)
+    n = len(f)
+    two_n = len(H)
+    if 2 * n != two_n:
+        raise ValueError(
+            "fit_som: vector H of real and imaginary parts of frequency "
+            "responses is expected to contain exactly twice as many elements as "
+            f"vector f of frequencies. Please adjust f, which has {n} "
+            f"elements or H, which has {two_n} elements."
+        )
+    h_real = H[:n]
+    h_imag = H[n:]
+    h_complex = h_real + 1j * h_imag
+    if MCruns is None or UH is None:
+        if np.any(h_complex == 0):
+            raise ValueError(
+                "fit_som: if MCruns is None or UH is None, uncertainty "
+                "propagation is done via matrix multiplication as proposed in "
+                "GUM S2, so frequency responses must not be zero anywhere but H "
+                f"equals {H}."
             )
-            HI = np.tile(Hi, (runs, 1)) + np.random.randn(runs, len(f)) * np.tile(
-                UH[len(f) :], (runs, 1)
+    elif not isinstance(MCruns, int):
+        raise ValueError(
+            f"fit_som: MCruns is expected to be None or of type int, but MCruns is of "
+            f"type {type(MCruns)}."
+        )
+
+    if isinstance(weighting, np.ndarray):
+        if len(weighting) != two_n:
+            raise ValueError(
+                "fit_som: if weighting is provided as a vector, its number of elements "
+                "is expected to match the number of elements in H but weighting has "
+                f"{len(weighting)} elements and H has {two_n} elements."
             )
-            HMC = HR + 1j * HI
-        else:
-            HRI = np.random.multivariate_normal(H, UH, runs)
-            HMC = HRI[:, : len(f)] + 1j * HRI[:, len(f) :]
-
-        iRI = np.c_[np.real(1 / HMC), np.imag(1 / HMC)]
-        iURI = np.cov(iRI, rowvar=False)
-
-    if isinstance(weighting, str):
-        if weighting == "diag":
-            W = np.diag(np.diag(iURI))
-        elif weighting == "cov":
-            W = iURI
-        else:
-            print("Warning: Specified wrong type of weighting.")
-            W = np.eye(2 * len(f))
-    elif isinstance(weighting, np.ndarray):
-        assert len(weighting) == 2 * len(f)
         W = np.diag(weighting)
+    elif isinstance(weighting, str) and weighting not in {"diag", "cov"}:
+        raise ValueError(
+            "fit_som: if weighting is provided as string, it is expected to be either"
+            f"'diag' or 'cov', but '{weighting}' was given."
+        )
     else:
-        W = np.eye(2 * len(f))
+        W = np.eye(two_n)
 
-    if isinstance(UH, np.ndarray):
+    if UH is not None:
+        if not isinstance(UH, np.ndarray):
+            raise ValueError(
+                "fit_som: if UH is provided, it is expected to be of type np.ndarray, "
+                f"but UH is of type {type(UH)}."
+            )
+        if not number_of_rows_equals_vector_dim(matrix=UH, vector=H):
+            raise ValueError(
+                "fit_som: number of rows of UH and number of elements of H are "
+                f"expected to match. But H has {len(H)} elements and UH is of shape "
+                f"{UH.shape}."
+            )
+        if is_2d_matrix(UH):
+            if not _is_2d_square_matrix(UH):
+                raise ValueError(
+                    "fit_som: if UH is a matrix, it is expected to be square but UH "
+                    f"is of shape {UH.shape}."
+                )
+            # propagate to real and imaginary parts of reciprocal using Monte Carlo
+            h_mc = np.random.multivariate_normal(H, UH, MCruns)
+            h_mc_complex = h_mc[:, :n] + 1j * h_mc[:, n:]
+
+        else:  # is_vector(UH)
+            h_mc_real = np.tile(h_real, (MCruns, 1)) + np.random.randn(
+                MCruns, n
+            ) * np.tile(UH[:n], (MCruns, 1))
+            h_mc_imag = np.tile(h_imag, (MCruns, 1)) + np.random.randn(
+                MCruns, n
+            ) * np.tile(UH[n:], (MCruns, 1))
+            h_mc_complex = h_mc_real + 1j * h_mc_imag
+
+        inverted_h_mc = np.c_[np.real(1 / h_mc_complex), np.imag(1 / h_mc_complex)]
+        covariance_inverted_h_mc = np.cov(inverted_h_mc, rowvar=False)
+
+        if isinstance(weighting, str):
+            if weighting == "diag":
+                W = np.diag(np.diag(covariance_inverted_h_mc))
+            else:  # weighting == "cov"
+                W = covariance_inverted_h_mc
+
         # Apply GUM S2
-        if isinstance(MCruns, int) or isinstance(MCruns, float):
+        if MCruns is not None:
             # Monte Carlo
-            runs = int(MCruns)
-            MU = np.zeros((runs, 3))
-            for k in range(runs):
-                iri = iRI[k, :]
-                n = len(f)
+            MU = np.zeros((MCruns, 3))
+            for i_monte_carlo_run in range(MCruns):
+                iri = inverted_h_mc[i_monte_carlo_run, :]
                 om = 2 * np.pi * f * scaling
                 E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
                 X = np.r_[np.real(E), np.imag(E)]
@@ -113,7 +163,14 @@ def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
                 XVX = X.T.dot(np.linalg.solve(W, X))
                 XVy = X.T.dot(np.linalg.solve(W, iri))
 
-                MU[k, :] = np.linalg.solve(XVX, XVy)
+                MU[i_monte_carlo_run, :] = np.linalg.solve(XVX, XVy)
+
+                if verbose:
+                    progress_bar(
+                        i_monte_carlo_run,
+                        MCruns,
+                        prefix="Monte Carlo for fit_som() running:",
+                    )
             MU[:, 1] *= scaling
             MU[:, 2] *= scaling ** 2
 
@@ -126,13 +183,8 @@ def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
 
             pars = PARS.mean(axis=0)
             Upars = np.cov(PARS, rowvar=False)
-        else:  # apply GUM S2 linear propagation
-            Hc = Hr + 1j * Hi
-            assert np.min(
-                np.abs(Hc) > 0
-            ), "Frequency response cannot be equal to zero for inversion."
-            iri = np.r_[np.real(1 / Hc), np.imag(1 / Hc)]
-            n = len(f)
+        else:  # MCruns == None, so apply GUM S2 linear propagation
+            iri = np.r_[np.real(1 / h_complex), np.imag(1 / h_complex)]
             om = 2 * np.pi * f
             E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
             X = np.r_[np.real(E), np.imag(E)]
@@ -142,7 +194,10 @@ def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
 
             mu = np.linalg.solve(XVX, XVy)
             iXVX = np.linalg.inv(XVX)
-            XVUVX = np.dot(X.T.dot(np.linalg.solve(W, iURI)), np.linalg.solve(W, X))
+            XVUVX = np.dot(
+                X.T.dot(np.linalg.solve(W, covariance_inverted_h_mc)),
+                np.linalg.solve(W, X),
+            )
             Umu = iXVX.dot(XVUVX).dot(iXVX)
 
             pars = np.r_[
@@ -169,26 +224,25 @@ def fit_som(f, H, UH=None, weighting=None, MCruns=None, scaling=1e-3):
             Upars = C.dot(Umu.dot(C.T))
 
         return pars, Upars
-    else:
-        Hc = Hr + 1j * Hi
-        assert (
-            np.min(np.abs(Hc)) > 0
-        ), "Frequency response cannot be equal to zero for inversion."
-        iri = np.r_[np.real(1 / Hc), np.imag(1 / Hc)]
-        n = len(f)
-        om = 2 * np.pi * f * scaling
-        E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
-        X = np.r_[np.real(E), np.imag(E)]
+    # UH is None, so apply GUM S2 linear propagation
+    iri = np.r_[np.real(1 / h_complex), np.imag(1 / h_complex)]
+    om = 2 * np.pi * f * scaling
+    E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
+    X = np.r_[np.real(E), np.imag(E)]
 
-        XVX = X.T.dot(np.linalg.solve(W, X))
-        XVy = X.T.dot(np.linalg.solve(W, iri))
+    XVX = X.T.dot(np.linalg.solve(W, X))
+    XVy = X.T.dot(np.linalg.solve(W, iri))
 
-        mu = np.linalg.solve(XVX, XVy)
-        mu[1] *= scaling
-        mu[2] *= scaling ** 2
-        pars = np.r_[
-            1 / mu[0],
-            mu[1] / np.sqrt(np.abs(mu[0] * mu[2])),
-            np.sqrt(np.abs(mu[0] / mu[2])) / 2 / np.pi,
-        ]
-        return pars
+    mu = np.linalg.solve(XVX, XVy)
+    mu[1] *= scaling
+    mu[2] *= scaling ** 2
+    pars = np.r_[
+        1 / mu[0],
+        mu[1] / np.sqrt(np.abs(mu[0] * mu[2])),
+        np.sqrt(np.abs(mu[0] / mu[2])) / 2 / np.pi,
+    ]
+    return pars
+
+
+def _is_2d_square_matrix(ndarray: np.ndarray) -> bool:
+    return is_2d_matrix(ndarray) and ndarray.shape[0] == ndarray.shape[1]

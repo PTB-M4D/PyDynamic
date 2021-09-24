@@ -10,7 +10,6 @@ from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from PyDynamic.misc.testsignals import multi_sine
-
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_DFT import (
     _apply_window,
@@ -201,12 +200,14 @@ def test_compose_DFT_and_iDFT_with_full_covariance(multisine_testsignal, corrmat
 
 
 @given(x_Ux_and_window())
+@pytest.mark.slow
 def test_apply_window(params):
     """Check if application of window to random sample signal works"""
     assert _apply_window(**params)
 
 
 @given(x_Ux_and_window())
+@pytest.mark.slow
 def test_wrong_dimension_x_apply_window(params):
     """Check that wrong dimension of x causes exception"""
     # Make sure x contains more than one value and then break it.
@@ -218,6 +219,7 @@ def test_wrong_dimension_x_apply_window(params):
 
 
 @given(x_Ux_and_window())
+@pytest.mark.slow
 def test_wrong_dimension_window_apply_window(params):
     """Check that wrong dimension of x causes exception"""
     # Make sure x contains more than one value and then break it.
@@ -229,6 +231,7 @@ def test_wrong_dimension_window_apply_window(params):
 
 
 @given(x_Ux_and_window(ux_type=np.ndarray))
+@pytest.mark.slow
 def test_wrong_dimension_ux_apply_window(params):
     """Check that wrong dimension of x causes exception"""
     # Make sure Ux is at least 2x2 and then break it.
@@ -248,6 +251,7 @@ def test_wrong_dimension_ux_apply_window(params):
 
 
 @given(x_Ux_and_window(ux_type=float))
+@pytest.mark.slow
 def test_apply_window_with_scalar_uncertainty(params):
     """Check if application of window to random sample with scalar uncertainty works"""
     assert _apply_window(**params)
@@ -262,6 +266,7 @@ def test_apply_window_with_known_result(known_inputs_and_outputs_for_apply_windo
 
 
 @given(random_vector_and_matching_random_square_matrix())
+@pytest.mark.slow
 def test__prod(random_vector_and_matching_dimension_matrix):
     product = _prod(
         a=random_vector_and_matching_dimension_matrix.vector,
@@ -274,6 +279,7 @@ def test__prod(random_vector_and_matching_dimension_matrix):
 
 
 @given(random_vector_and_matrix_with_matching_number_of_rows())
+@pytest.mark.slow
 def test__prod_against_original_implementation_with_diagonal_from_left(
     params,
 ):
@@ -289,6 +295,7 @@ def test__prod_against_original_implementation_with_diagonal_from_left(
 
 
 @given(random_vector_and_matrix_with_matching_number_of_columns())
+@pytest.mark.slow
 def test__prod_against_original_implementation_with_diagonal_from_right(
     params,
 ):
@@ -304,6 +311,7 @@ def test__prod_against_original_implementation_with_diagonal_from_right(
 
 
 @given(random_vector_and_matching_random_square_matrix())
+@pytest.mark.slow
 def test__prod_against_wrong_input_dimensions(
     random_vector_and_matching_dimension_matrix,
 ):

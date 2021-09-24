@@ -117,6 +117,7 @@ def test_convolution_monte_carlo(input_1, input_2, mode):
 
 
 @given(x_and_Ux(reduced_set=True), x_and_Ux(reduced_set=True), hst.text())
+@pytest.mark.slow
 def test_convolution_invalid_mode(input_1, input_2, mode):
     assume(mode not in numpy_modes and mode not in scipy_modes)
     with pytest.raises(ValueError):
