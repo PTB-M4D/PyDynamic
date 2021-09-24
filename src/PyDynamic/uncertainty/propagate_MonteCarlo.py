@@ -33,7 +33,7 @@ from ..misc.filterstuff import isstable
 from ..misc.tools import progress_bar
 from ..misc.noise import ARMA
 
-__all__ = ["ARMA", "MC", "SMC", "UMC", "UMC_generic"]
+__all__ = ["MC", "SMC", "UMC", "UMC_generic"]
 
 
 class Normal_ZeroCorr:
