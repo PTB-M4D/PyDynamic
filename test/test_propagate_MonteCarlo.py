@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Perform tests on the method *uncertainty.propagate_MonteCarlo*"""
 
 import functools
@@ -8,9 +7,10 @@ import numpy as np
 import pytest
 
 from PyDynamic.misc.filterstuff import kaiser_lowpass
+from PyDynamic.misc.noise import ARMA
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import make_semiposdef
-from PyDynamic.uncertainty.propagate_MonteCarlo import ARMA, MC, SMC, UMC, UMC_generic
+from PyDynamic.uncertainty.propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
 
 # parameters of simulated measurement
 Fs = 100e3  # sampling frequency (in Hz)
