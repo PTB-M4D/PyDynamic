@@ -363,7 +363,7 @@ def SMC(
             X = np.hstack((xi + E, X[:, :-1]))
             Xl = X.dot(blow)
         else:
-            Xl = x[index[0]] + E
+            Xl = xi + E
 
         # Prepare for easier calculations.
         if len(Xl.shape) == 1:
