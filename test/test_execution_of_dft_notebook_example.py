@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Test the DFT example *examples/DFT and iDFT with PyDynamic...ipynb*."""
 
 import numpy as np
