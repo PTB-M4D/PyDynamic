@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
+""""Monte Carlo methods for the propagation of uncertainties for digital filtering
+
 The propagation of uncertainties via the FIR and IIR formulae alone does not
 enable the derivation of credible intervals, because the underlying
 distribution remains unknown. The GUM-S2 Monte Carlo method provides a
 reference method for the calculation of uncertainties for such cases.
-
-This module implements Monte Carlo methods for the propagation of
-uncertainties for digital filtering.
 
 This module contains the following functions:
 
@@ -30,8 +27,8 @@ from scipy.interpolate import interp1d
 from scipy.signal import lfilter
 
 from ..misc.filterstuff import isstable
-from ..misc.tools import progress_bar
 from ..misc.noise import ARMA
+from ..misc.tools import progress_bar
 
 __all__ = ["MC", "SMC", "UMC", "UMC_generic"]
 
