@@ -71,7 +71,10 @@ def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
 @settings(
     deadline=None,
     verbosity=Verbosity.verbose,
-    suppress_health_check=(HealthCheck.function_scoped_fixture,),
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
 )
 def test_usual_calls_fit_som(capsys, params):
     with capsys.disabled():
