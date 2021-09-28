@@ -56,7 +56,7 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
-        HealthCheck.filter_too_much,
+        HealthCheck.too_slow,
     ],
 )
 @pytest.mark.slow
