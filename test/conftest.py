@@ -116,6 +116,8 @@ def hypothesis_float_vector(
     length: Optional[int] = None,
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
+    exclude_min: Optional[bool] = False,
+    exclude_max: Optional[bool] = False,
 ) -> np.ndarray:
     number_of_elements = draw(hypothesis_dimension(length))
     return draw(
@@ -124,6 +126,8 @@ def hypothesis_float_vector(
             elements=hst.floats(
                 min_value=min_value,
                 max_value=max_value,
+                exclude_min=exclude_min,
+                exclude_max=exclude_max,
                 allow_infinity=False,
                 allow_nan=False,
             ),
@@ -139,10 +143,16 @@ def random_not_negative_float_strategy() -> SearchStrategy:
 def hypothesis_bounded_float_strategy(
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
+    exclude_min: Optional[bool] = False,
+    exclude_max: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
 ) -> SearchStrategy:
     return hst.floats(
         min_value=min_value,
         max_value=max_value,
+        include_min=exclude_min,
+        include_max=exclude_max,
+        allow_infinity=allow_infinity,
     )
 
 
@@ -156,11 +166,17 @@ def hypothesis_bounded_float(
     draw: Callable,
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
+    exclude_min: Optional[bool] = False,
+    exclude_max: Optional[bool] = False,
+    allow_infinity: Optional[float] = False,
 ) -> float:
     return draw(
         hypothesis_bounded_float_strategy(
             min_value=min_value,
             max_value=max_value,
+            exclude_min=exclude_min,
+            exclude_max=exclude_max,
+            allow_infinity=allow_infinity,
         )
     )
 
@@ -192,8 +208,38 @@ def hypothesis_covariance_matrix(
         )
     )
     cov_after_discarding_smallest_singular_value = discard_smallest_singular_value(cov)
-    assume(np.all(np.linalg.eigvals(cov_after_discarding_smallest_singular_value) >= 0))
-    return cov_after_discarding_smallest_singular_value
+    nonzero_diagonal_cov = draw(
+        ensure_hypothesis_nonzero_diagonal(cov_after_discarding_smallest_singular_value)
+    )
+    scaled_cov = _scale_matrix_or_vector_to_range(
+        nonzero_diagonal_cov, range_min=min_value, range_max=max_value
+    )
+    assume(np.all(np.linalg.eigvals(scaled_cov) >= 0))
+    return scaled_cov
+
+
+@composite
+def ensure_hypothesis_nonzero_diagonal(
+    draw: Callable, square_matrix: np.ndarray
+) -> np.ndarray:
+    return square_matrix + np.diag(
+        draw(
+            hypothesis_float_vector(
+                length=len(square_matrix), min_value=0, exclude_min=True
+            )
+        )
+    )
+
+
+def _scale_matrix_or_vector_to_range(
+    array: np.ndarray, range_min: Optional[float] = 0, range_max: Optional[float] = 1
+) -> np.ndarray:
+    return _normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
+
+
+def _normalize_vector_or_matrix(array: np.ndarray) -> np.ndarray:
+    array_min = array.min()
+    return (array - array_min) / (array.max() - array_min)
 
 
 @composite
@@ -238,8 +284,9 @@ def hypothesis_covariance_matrix_for_complex_vectors(
         )
     )
     uy = np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
-    assume(np.all(np.linalg.eigvals(uy) >= 0))
-    return uy
+    uy_positive_semi_definite = make_semiposdef(uy)
+    assume(np.all(np.linalg.eigvals(uy_positive_semi_definite) >= 0))
+    return uy_positive_semi_definite
 
 
 def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
@@ -255,7 +302,7 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
     return cov_after_discarding_smallest_singular_value
 
 
-def discard_smallest_singular_value(matrix: np.ndarray):
+def discard_smallest_singular_value(matrix: np.ndarray) -> np.ndarray:
     u, s, vh = np.linalg.svd(matrix, full_matrices=False, hermitian=True)
     cov_after_discarding_smallest_singular_value = (u[:-1, :-1] * s[:-1]) @ vh[:-1, :-1]
     return cov_after_discarding_smallest_singular_value
