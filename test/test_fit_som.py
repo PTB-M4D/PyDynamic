@@ -33,7 +33,7 @@ def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
     uf0 = 0.5
 
     # Monte Carlo for calculation of unc. assoc. with [real(H),imag(H)]
-    MCruns = draw(hst.sampled_from((10, 20, 40)))
+    MCruns = draw(hst.integers(min_value=2, max_value=10))
     white_noise_S0s = rng.normal(loc=S0, scale=uS0, size=MCruns)
     white_noise_deltas = rng.normal(loc=delta, scale=udelta, size=MCruns)
     white_noise_f0s = rng.normal(loc=f0, scale=uf0, size=MCruns)
