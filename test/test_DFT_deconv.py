@@ -32,7 +32,7 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
         ]
         uh = np.eye(N=n * 2)
     else:
-        covariance_bounds = {"min_value": 1e-100, "max_value": 1e-11}
+        covariance_bounds = {"min_value": 1e-20, "max_value": 1e-11}
         vector_magnitude_bounds = {"min_magnitude": 1e-3, "max_magnitude": 1e3}
         y_complex = draw(nonzero_complex_vector(length=n, **vector_magnitude_bounds))
         y = np.r_[y_complex.real, y_complex.imag]
