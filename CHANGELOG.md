@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.10.0 (2021-09-28)
+### Feature
+* **propagate_DFT:** Make some helpers to check for shapes of inputs publicly available ([`dc97b3f`](https://github.com/PTB-M4D/PyDynamic/commit/dc97b3faddcb854670a9a5f9dcd4ff38efb575d9))
+
+### Fix
+* **fit_som:** Apply minor changes to fit_som example to make it executable again ([`0157fc7`](https://github.com/PTB-M4D/PyDynamic/commit/0157fc7f775851359efc6d1a97ca87c9325108be))
+
 ## v1.9.2 (2021-09-21)
 ### Fix
 * **PyPI package:** Include examples in packag and make sure all tests pass with delivered version ([`f8326d5`](https://github.com/PTB-M4D/PyDynamic/commit/f8326d52d9dc289b506999365850067001320a3e))
