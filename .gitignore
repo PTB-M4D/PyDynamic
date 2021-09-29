@@ -12,7 +12,6 @@ __pycache__/
 .coverage
 .coverage.*
 pytest.xml
-.hypothesis
 .tox
 
 # Jupyter Notebook artifacts #
