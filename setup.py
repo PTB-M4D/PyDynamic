@@ -3,7 +3,7 @@ from os import path
 
 from setuptools import find_packages, setup
 
-current_release_version = "1.9.2"
+current_release_version = "1.10.0"
 
 
 def get_readme():
