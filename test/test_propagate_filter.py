@@ -110,6 +110,7 @@ def equal_signals():
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals())
 @pytest.mark.parametrize("lowpasses", valid_lows())
+@pytest.mark.slow
 def test_FIRuncFilter(filters, signals, lowpasses):
     # Check expected output for thinkable permutations of input parameters.
     y, Uy = FIRuncFilter(**filters, **signals, **lowpasses)

@@ -93,7 +93,7 @@ author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
 # built documents.
 #
 # The short X.Y version.
-version = "1.9.2"
+version = "1.10.0"
 # The full version, including alpha/beta/rc tags.
 # release = "1.3.1"
 
