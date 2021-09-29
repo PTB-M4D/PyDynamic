@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Perform tests on identification sub-packages.
-
-"""
+""" Perform tests on identification sub-packages."""
 
 import numpy as np
 

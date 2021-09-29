@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
+""""Monte Carlo methods for the propagation of uncertainties for digital filtering
+
 The propagation of uncertainties via the FIR and IIR formulae alone does not
 enable the derivation of credible intervals, because the underlying
 distribution remains unknown. The GUM-S2 Monte Carlo method provides a
 reference method for the calculation of uncertainties for such cases.
-
-This module implements Monte Carlo methods for the propagation of
-uncertainties for digital filtering.
 
 This module contains the following functions:
 
@@ -30,8 +27,8 @@ from scipy.interpolate import interp1d
 from scipy.signal import lfilter
 
 from ..misc.filterstuff import isstable
-from ..misc.tools import progress_bar
 from ..misc.noise import ARMA
+from ..misc.tools import progress_bar
 
 __all__ = ["MC", "SMC", "UMC", "UMC_generic"]
 
@@ -339,7 +336,7 @@ def SMC(
     # Start of the actual MC part.
     print("Sequential Monte Carlo progress", end="")
 
-    for index in np.ndenumerate(x):
+    for index, xi in np.ndenumerate(x):
 
         w = np.random.randn(runs) * noise_std  # noise process draw
         if AR and MA:
@@ -355,15 +352,15 @@ def SMC(
             E = w
 
         if isinstance(alow, np.ndarray):  # apply low-pass filter
-            X = np.hstack((x[index] + E, X[:, :-1]))
+            X = np.hstack((xi + E, X[:, :-1]))
             Xl = np.hstack(
                 (X.dot(blow.T) - Xl[:, : len(alow)].dot(alow[1:]), Xl[:, :-1])
             )
         elif isinstance(blow, np.ndarray):
-            X = np.hstack((x[index] + E, X[:, :-1]))
+            X = np.hstack((xi + E, X[:, :-1]))
             Xl = X.dot(blow)
         else:
-            Xl = x[index] + E
+            Xl = xi + E
 
         # Prepare for easier calculations.
         if len(Xl.shape) == 1:
@@ -380,13 +377,13 @@ def SMC(
         # Store state updates and remove old ones.
         States = np.hstack((Z[:, np.newaxis], States[:, :-1]))
 
-        y[index] = np.mean(Y)  # point-wise best estimate
-        Uy[index] = np.std(Y)  # point-wise standard uncertainties
+        y[index[0]] = np.mean(Y)  # point-wise best estimate
+        Uy[index[0]] = np.std(Y)  # point-wise standard uncertainties
         if calcP:
-            P[:, index] = sp.stats.mstats.mquantiles(np.asarray(Y), prob=Perc)
+            P[:, index[0]] = sp.stats.mstats.mquantiles(np.asarray(Y), prob=Perc)
 
-        if np.mod(index, np.round(0.1 * len(x))) == 0:
-            print(" %d%%" % (np.round(100.0 * index / len(x))), end="")
+        if np.mod(index[0], np.round(0.1 * len(x))) == 0:
+            print(" %d%%" % (np.round(100.0 * index[0] / len(x))), end="")
 
     print(" 100%")
 

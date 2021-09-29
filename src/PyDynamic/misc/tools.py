@@ -15,8 +15,10 @@ This module contains the following functions:
 * :func:`make_equidistant`: Interpolate non-equidistant time series to equidistant
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 * :func:`progress_bar`: A simple and reusable progress-bar
+* :func:`is_vector`: Check if a np.ndarray is a vector
+* :func:`is_2d_matrix`: Check if a np.ndarray is a matrix
+* :func:`number_of_rows_equals_vector_dim`: Check if a matrix and a vector match in size
 """
-import sys
 from typing import Optional
 
 import numpy as np
@@ -31,7 +33,10 @@ __all__ = [
     "make_equidistant",
     "trimOrPad",
     "progress_bar",
-    "shift_uncertainty"
+    "shift_uncertainty",
+    "is_vector",
+    "is_2d_matrix",
+    "number_of_rows_equals_vector_dim",
 ]
 
 def shift_uncertainty(x, ux, shift):
@@ -294,32 +299,33 @@ def make_equidistant(*args, **kwargs):
 def progress_bar(
     count,
     count_max,
-    width=30,
-    prefix="",
-    done_indicator="#",
-    todo_indicator=".",
-    fout=sys.stdout,
+    width: Optional[int] = 30,
+    prefix: Optional[str] = "",
+    done_indicator: Optional[str] = "#",
+    todo_indicator: Optional[str] = ".",
+    fout: Optional = None,
 ):
-    """
-    A simple and reusable progress-bar
+    """A simple and reusable progress-bar
 
     Parameters
     ----------
-        count: int
-            current status of iterations, assumed to be zero-based
-        count_max: int
-            total number of iterations
-        width: int, optional
-            width of the actual progressbar (actual printed line will be wider)
-        prefix: str, optional
-            some text that will be printed in front of the bar (i.e.
-            "Progress of ABC:")
-        done_indicator: str, optional
-            what character is used as "already-done"-indicator
-        todo_indicator: str, optional
-            what character is used as "not-done-yet"-indicator
-        fout: file-object, optional
-            where the progress-bar should be written/printed to
+    count : int
+        current status of iterations, assumed to be zero-based
+    count_max : int
+        total number of iterations
+    width : int, optional
+        width of the actual progressbar (actual printed line will be wider), default to
+        30
+    prefix : str, optional
+        some text that will be printed in front of the bar (i.e.
+        "Progress of ABC:"), if not given only progressbar itself will be printed
+    done_indicator : str, optional
+        what character is used as "already-done"-indicator, defaults to "#"
+    todo_indicator : str, optional
+        what character is used as "not-done-yet"-indicator, defaults to "."
+    fout : file-object, optional
+        where the progress-bar should be written/printed to, defaults to direct print
+        to stdout
     """
     x = int(width * (count + 1) / count_max)
     progressString = "{PREFIX}[{DONE}{NOTDONE}] {COUNT}/{COUNTMAX}\r".format(
@@ -329,5 +335,57 @@ def progress_bar(
         COUNT=count + 1,
         COUNTMAX=count_max,
     )
+    if fout is not None:
+        fout.write(progressString)
+    else:
+        print(progressString)
 
-    fout.write(progressString)
+
+def is_vector(ndarray: np.ndarray) -> bool:
+    """Check if a np.ndarray is a vector, i.e. is of shape (n,)
+
+    Parameters
+    ----------
+    ndarray : np.ndarray
+        the array to check
+
+    Returns
+    -------
+    bool
+        True, if the array expands over one dimension only, False otherwise
+    """
+    return len(ndarray.shape) == 1
+
+
+def is_2d_matrix(ndarray: np.ndarray) -> bool:
+    """Check if a np.ndarray is a matrix, i.e. it expands over exactly two dimensions
+
+    Parameters
+    ----------
+    ndarray : np.ndarray
+        the array to check
+
+    Returns
+    -------
+    bool
+        True, if the array expands over exactly two dimensions, False otherwise
+    """
+    return len(ndarray.shape) == 2
+
+
+def number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
+    """Check if a matrix has the same number of rows as a vector
+
+    Parameters
+    ----------
+    matrix : np.ndarray
+        the matrix, that is supposed to have the same number of rows
+    vector : np.ndarray
+        the vector, that is supposed to have the same number of elements
+
+    Returns
+    -------
+    bool
+        True, if the number of rows coincide, False otherwise
+    """
+    return len(vector) == matrix.shape[0]
