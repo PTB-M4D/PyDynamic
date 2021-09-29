@@ -13,7 +13,7 @@ from .conftest import (
     hypothesis_covariance_matrix,
     hypothesis_covariance_matrix_with_zero_correlation,
     hypothesis_float_vector,
-    reasonable_random_dimension_strategy,
+    hypothesis_reasonable_dimension_strategy,
 )
 
 
@@ -21,9 +21,8 @@ from .conftest import (
 def x_and_Ux(
     draw: Callable, reduced_set: bool = False
 ) -> Tuple[np.ndarray, np.ndarray]:
-    dim = reasonable_random_dimension_strategy(min_value=4, max_value=6)
+    dim = draw(hypothesis_reasonable_dimension_strategy(min_value=4, max_value=6))
     x = draw(hypothesis_float_vector(length=dim, min_value=-10, max_value=10))
-    dim = len(x)
     if reduced_set:
         ux_strategies = hypothesis_covariance_matrix(number_of_rows=dim, max_value=1e-3)
     else:
