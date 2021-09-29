@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-""" Perform tests on methods to create testsignals."""
-import matplotlib
+""" Perform tests on methods to create test signals."""
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
@@ -152,5 +151,5 @@ class TestSine:
 def test_signal_example(monkeypatch):
     # With this expression we override the matplotlib.pyplot.show method with a
     # lambda expression returning None but only for this one test.
-    monkeypatch.setattr(matplotlib.pyplot, "show", lambda: None, raising=True)
+    monkeypatch.setattr(plt, "show", lambda: None, raising=True)
     demonstrate_signal()

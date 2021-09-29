@@ -12,14 +12,14 @@ from PyDynamic.uncertainty.propagate_DFT import DFT_deconv
 from .conftest import (
     hypothesis_covariance_matrix_for_complex_vectors,
     hypothesis_float_vector,
-    nonzero_complex_vector,
-    two_to_the_k,
+    hypothesis_nonzero_complex_vector,
+    hypothesis_two_to_the_k,
 )
 
 
 @composite
 def deconvolution_input(draw: Callable, reveal_bug: bool = False):
-    n = draw(two_to_the_k(min_k=2, max_k=4))
+    n = draw(hypothesis_two_to_the_k(min_k=2, max_k=4))
     if reveal_bug:
         y = np.r_[
             draw(hypothesis_float_vector(length=n, min_value=0.5, max_value=1.0)),
@@ -32,16 +32,20 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
         ]
         uh = np.eye(N=n * 2)
     else:
-        covariance_bounds = {"min_value": 1e-10, "max_value": 1e-3}
-        vector_magnitude_bounds = {"min_magnitude": 1e-3, "max_magnitude": 1e3}
-        y_complex = draw(nonzero_complex_vector(length=n, **vector_magnitude_bounds))
+        covariance_bounds = {"min_value": 1e-17, "max_value": 1e-11}
+        vector_magnitude_bounds = {"min_magnitude": 1e-2, "max_magnitude": 1e2}
+        y_complex = draw(
+            hypothesis_nonzero_complex_vector(length=n, **vector_magnitude_bounds)
+        )
         y = np.r_[y_complex.real, y_complex.imag]
         uy = draw(
             hypothesis_covariance_matrix_for_complex_vectors(
                 length=n, **covariance_bounds
             )
         )
-        h_complex = draw(nonzero_complex_vector(length=n, **vector_magnitude_bounds))
+        h_complex = draw(
+            hypothesis_nonzero_complex_vector(length=n, **vector_magnitude_bounds)
+        )
         h = np.r_[h_complex.real, h_complex.imag]
         uh = draw(
             hypothesis_covariance_matrix_for_complex_vectors(
@@ -56,7 +60,7 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
-        HealthCheck.filter_too_much,
+        HealthCheck.too_slow,
     ],
 )
 @pytest.mark.slow
@@ -71,8 +75,18 @@ def test_dft_deconv(
         n_monte_carlo_runs=n_monte_carlo_runs,
         operator=complex_deconvolution_on_sets,
     )
-    assert_allclose(x_deconv + 1, monte_carlo_mean + 1, rtol=3e-4, atol=4e-7)
-    assert_allclose(u_deconv + 1, monte_carlo_cov + 1, atol=5e-7)
+    x_deconv_shift_away_from_zero = 1 - x_deconv.min()
+    u_deconv_shift_away_from_zero = 1 - u_deconv.min()
+    assert_allclose(
+        x_deconv + x_deconv_shift_away_from_zero,
+        monte_carlo_mean + x_deconv_shift_away_from_zero,
+        rtol=2e-4,
+    )
+    assert_allclose(
+        u_deconv + u_deconv_shift_away_from_zero,
+        monte_carlo_cov + u_deconv_shift_away_from_zero,
+        rtol=5e-6,
+    )
 
 
 @pytest.fixture(scope="module")

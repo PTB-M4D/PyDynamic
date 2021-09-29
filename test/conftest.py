@@ -31,26 +31,26 @@ class VectorAndCompatibleMatrix(NamedTuple):
 
 
 @composite
-def reasonable_random_dimension_strategy(
+def hypothesis_reasonable_dimension_strategy(
     draw: Callable, min_value: Optional[int] = 1, max_value: Optional[int] = 20
 ):
     return draw(hst.integers(min_value=min_value, max_value=max_value))
 
 
-def random_float_square_matrix_strategy(
+def hypothesis_float_square_matrix_strategy(
     number_of_rows: int,
 ) -> SearchStrategy:
-    return random_float_matrix_strategy(number_of_rows, number_of_rows)
+    return hypothesis_float_matrix_strategy(number_of_rows, number_of_rows)
 
 
-def random_float_matrix_strategy(
+def hypothesis_float_matrix_strategy(
     number_of_rows: int, number_of_cols: int
 ) -> SearchStrategy:
     return hnp.arrays(dtype=float, shape=(number_of_rows, number_of_cols))
 
 
 @composite
-def random_float_matrix(
+def hypothesis_float_matrix(
     draw: Callable,
     number_of_rows: Optional[int] = None,
     number_of_cols: Optional[int] = None,
@@ -58,14 +58,14 @@ def random_float_matrix(
     number_of_rows = draw(hypothesis_dimension(number_of_rows))
     number_of_cols = draw(hypothesis_dimension(number_of_cols))
     return draw(
-        random_float_matrix_strategy(
+        hypothesis_float_matrix_strategy(
             number_of_rows=number_of_rows, number_of_cols=number_of_cols
         )
     )
 
 
 @composite
-def random_float_square_matrix(
+def hypothesis_float_square_matrix(
     draw: Callable, number_of_rows: Optional[int] = None
 ) -> np.ndarray:
     number_of_rows_and_columns = (
@@ -74,12 +74,12 @@ def random_float_square_matrix(
         else draw(hst.integers(min_value=1, max_value=20))
     )
     return draw(
-        random_float_square_matrix_strategy(number_of_rows=number_of_rows_and_columns)
+        hypothesis_float_square_matrix_strategy(number_of_rows=number_of_rows_and_columns)
     )
 
 
 @composite
-def nonzero_complex_vector(
+def hypothesis_nonzero_complex_vector(
     draw: Callable,
     length: Optional[int] = None,
     min_magnitude: Optional[float] = 1e-4,
@@ -116,6 +116,8 @@ def hypothesis_float_vector(
     length: Optional[int] = None,
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
+    exclude_min: Optional[bool] = False,
+    exclude_max: Optional[bool] = False,
 ) -> np.ndarray:
     number_of_elements = draw(hypothesis_dimension(length))
     return draw(
@@ -124,6 +126,8 @@ def hypothesis_float_vector(
             elements=hst.floats(
                 min_value=min_value,
                 max_value=max_value,
+                exclude_min=exclude_min,
+                exclude_max=exclude_max,
                 allow_infinity=False,
                 allow_nan=False,
             ),
@@ -132,13 +136,49 @@ def hypothesis_float_vector(
     )
 
 
-def random_not_negative_float_strategy() -> SearchStrategy:
+def hypothesis_not_negative_float_strategy() -> SearchStrategy:
     return hst.floats(min_value=0)
 
 
+def hypothesis_bounded_float_strategy(
+    min_value: Optional[float] = None,
+    max_value: Optional[float] = None,
+    exclude_min: Optional[bool] = False,
+    exclude_max: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
+) -> SearchStrategy:
+    return hst.floats(
+        min_value=min_value,
+        max_value=max_value,
+        include_min=exclude_min,
+        include_max=exclude_max,
+        allow_infinity=allow_infinity,
+    )
+
+
 @composite
-def random_not_negative_float(draw: Callable) -> float:
-    return draw(random_not_negative_float_strategy)
+def hypothesis_not_negative_float(draw: Callable) -> float:
+    return draw(hypothesis_not_negative_float_strategy)
+
+
+@composite
+def hypothesis_bounded_float(
+    draw: Callable,
+    min_value: Optional[float] = None,
+    max_value: Optional[float] = None,
+    exclude_min: Optional[bool] = False,
+    exclude_max: Optional[bool] = False,
+    allow_infinity: Optional[float] = False,
+) -> float:
+    return draw(
+        hypothesis_bounded_float_strategy(
+            min_value=min_value,
+            max_value=max_value,
+            exclude_min=exclude_min,
+            exclude_max=exclude_max,
+            allow_infinity=allow_infinity,
+        )
+    )
 
 
 @composite
@@ -167,9 +207,39 @@ def hypothesis_covariance_matrix(
             )
         )
     )
-    cov_after_discarding_smallest_singular_value = discard_smallest_singular_value(cov)
-    assume(np.all(np.linalg.eigvals(cov_after_discarding_smallest_singular_value) >= 0))
-    return cov_after_discarding_smallest_singular_value
+    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(cov)
+    nonzero_diagonal_cov = draw(
+        ensure_hypothesis_nonzero_diagonal(cov_after_discarding_smallest_singular_value)
+    )
+    scaled_cov = _scale_matrix_or_vector_to_range(
+        nonzero_diagonal_cov, range_min=min_value, range_max=max_value
+    )
+    assume(np.all(np.linalg.eigvals(scaled_cov) >= 0))
+    return scaled_cov
+
+
+@composite
+def ensure_hypothesis_nonzero_diagonal(
+    draw: Callable, square_matrix: np.ndarray
+) -> np.ndarray:
+    return square_matrix + np.diag(
+        draw(
+            hypothesis_float_vector(
+                length=len(square_matrix), min_value=0, exclude_min=True
+            )
+        )
+    )
+
+
+def _scale_matrix_or_vector_to_range(
+    array: np.ndarray, range_min: Optional[float] = 0, range_max: Optional[float] = 1
+) -> np.ndarray:
+    return _normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
+
+
+def _normalize_vector_or_matrix(array: np.ndarray) -> np.ndarray:
+    array_min = array.min()
+    return (array - array_min) / (array.max() - array_min)
 
 
 @composite
@@ -186,7 +256,7 @@ def hypothesis_dimension(draw: Callable, dimension: Optional[int] = None) -> int
     return (
         dimension
         if dimension is not None
-        else draw(reasonable_random_dimension_strategy())
+        else draw(hypothesis_reasonable_dimension_strategy())
     )
 
 
@@ -214,8 +284,9 @@ def hypothesis_covariance_matrix_for_complex_vectors(
         )
     )
     uy = np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
-    assume(np.all(np.linalg.eigvals(uy) >= 0))
-    return uy
+    uy_positive_semi_definite = make_semiposdef(uy)
+    assume(np.all(np.linalg.eigvals(uy_positive_semi_definite) >= 0))
+    return uy_positive_semi_definite
 
 
 def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
@@ -227,11 +298,11 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
     # covariance matrix. To circumvent this:
     rng = np.random.default_rng()
     cov = np.cov(rng.random(size=(length + 1, length + 1)))
-    cov_after_discarding_smallest_singular_value = discard_smallest_singular_value(cov)
+    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(cov)
     return cov_after_discarding_smallest_singular_value
 
 
-def discard_smallest_singular_value(matrix: np.ndarray):
+def _discard_smallest_singular_value(matrix: np.ndarray) -> np.ndarray:
     u, s, vh = np.linalg.svd(matrix, full_matrices=False, hermitian=True)
     cov_after_discarding_smallest_singular_value = (u[:-1, :-1] * s[:-1]) @ vh[:-1, :-1]
     return cov_after_discarding_smallest_singular_value
@@ -249,7 +320,7 @@ def random_covariance_matrix_for_complex_vectors() -> Callable:
 
 
 @composite
-def two_to_the_k(
+def hypothesis_two_to_the_k(
     draw: Callable, min_k: Optional[int] = None, max_k: Optional[int] = None
 ) -> int:
     k = draw(hst.integers(min_value=min_k, max_value=max_k))

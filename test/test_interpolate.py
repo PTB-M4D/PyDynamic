@@ -217,6 +217,7 @@ def timestamps_values_uncertainties_kind(
 
 
 @given(timestamps_values_uncertainties_kind())
+@pytest.mark.slow
 def test_usual_call_interp1d_unc(interp_inputs):
     t_new, y_new, uy_new = interp1d_unc(**interp_inputs)[:]
     # Check the equal dimensions of the minimum calls output.
