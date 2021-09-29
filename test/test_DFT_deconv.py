@@ -71,8 +71,18 @@ def test_dft_deconv(
         n_monte_carlo_runs=n_monte_carlo_runs,
         operator=complex_deconvolution_on_sets,
     )
-    assert_allclose(x_deconv + 1, monte_carlo_mean + 1, rtol=3e-4, atol=4e-7)
-    assert_allclose(u_deconv + 1, monte_carlo_cov + 1, atol=5e-7)
+    x_deconv_shift_away_from_zero = 1 - x_deconv.min()
+    u_deconv_shift_away_from_zero = 1 - u_deconv.min()
+    assert_allclose(
+        x_deconv + x_deconv_shift_away_from_zero,
+        monte_carlo_mean + x_deconv_shift_away_from_zero,
+        rtol=7e-5,
+    )
+    assert_allclose(
+        u_deconv + u_deconv_shift_away_from_zero,
+        monte_carlo_cov + u_deconv_shift_away_from_zero,
+        rtol=2e-6,
+    )
 
 
 @pytest.fixture(scope="module")
