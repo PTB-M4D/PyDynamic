@@ -54,6 +54,12 @@ __all__ = [
     "Time2AmpPhase_multi",
 ]
 
+from PyDynamic.misc.tools import (
+    is_2d_matrix,
+    is_vector,
+    number_of_rows_equals_vector_dim,
+)
+
 
 def GUM_DFT(
     x: np.ndarray,
@@ -276,7 +282,7 @@ def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
         "the same number of rows as the vector 'b'. The shape of 'a' is "
         f"{a.shape} and of 'b' is {b.shape}."
     )
-    if _is_vector(ndarray=a):
+    if is_vector(ndarray=a):
         return _multiply_diagonal_matrix_from_vector_with_matrix_from_left(
             matrix=b, vector=a
         )
@@ -288,26 +294,14 @@ def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 def _check_matrix_vector_dimension_match(a: np.ndarray, b: np.ndarray) -> bool:
     return (
-        _is_vector(a)
-        and _is_2d_matrix(b)
-        and _number_of_rows_equals_vector_dim(vector=a, matrix=b)
+                   is_vector(a)
+                   and is_2d_matrix(b)
+                   and number_of_rows_equals_vector_dim(vector=a, matrix=b)
     ) or (
-        _is_vector(b)
-        and _is_2d_matrix(a)
-        and _number_of_cols_equals_vector_dim(vector=b, matrix=a)
+                   is_vector(b)
+                   and is_2d_matrix(a)
+                   and _number_of_cols_equals_vector_dim(vector=b, matrix=a)
     )
-
-
-def _is_vector(ndarray: np.ndarray) -> bool:
-    return len(ndarray.shape) == 1
-
-
-def _is_2d_matrix(ndarray: np.ndarray) -> bool:
-    return len(ndarray.shape) == 2
-
-
-def _number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
-    return len(vector) == matrix.shape[0]
 
 
 def _number_of_cols_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
