@@ -22,9 +22,9 @@ from PyDynamic.uncertainty.propagate_DFT import (
 from .conftest import (
     check_no_nans_and_infs,
     hypothesis_float_vector,
-    random_float_matrix,
-    random_float_square_matrix_strategy,
-    random_not_negative_float_strategy,
+    hypothesis_float_matrix,
+    hypothesis_float_square_matrix_strategy,
+    hypothesis_not_negative_float_strategy,
     VectorAndCompatibleMatrix,
 )
 
@@ -119,8 +119,8 @@ def x_Ux_and_window(
 
     dim = len(x)
     # Prepare drawing Ux as matrix if requested or either as float or matrix else.
-    full_ux_strategy = random_float_square_matrix_strategy(number_of_rows=dim)
-    float_ux_strategy = random_not_negative_float_strategy()
+    full_ux_strategy = hypothesis_float_square_matrix_strategy(number_of_rows=dim)
+    float_ux_strategy = hypothesis_not_negative_float_strategy()
     if ux_type == np.ndarray:
         uncertainty_strategy = full_ux_strategy
     elif ux_type == float:
@@ -138,7 +138,7 @@ def random_vector_and_matching_random_square_matrix(
     draw: Callable,
 ) -> VectorAndCompatibleMatrix:
     x = draw(hypothesis_float_vector())
-    A = draw(random_float_square_matrix_strategy(len(x)))
+    A = draw(hypothesis_float_square_matrix_strategy(len(x)))
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
 
@@ -147,7 +147,7 @@ def random_vector_and_matrix_with_matching_number_of_rows(
     draw: Callable,
 ) -> VectorAndCompatibleMatrix:
     x = draw(hypothesis_float_vector())
-    A = draw(random_float_matrix(number_of_rows=len(x)))
+    A = draw(hypothesis_float_matrix(number_of_rows=len(x)))
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
 
@@ -156,7 +156,7 @@ def random_vector_and_matrix_with_matching_number_of_columns(
     draw: Callable,
 ) -> VectorAndCompatibleMatrix:
     x = draw(hypothesis_float_vector())
-    A = draw(random_float_matrix(number_of_cols=len(x)))
+    A = draw(hypothesis_float_matrix(number_of_cols=len(x)))
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
 

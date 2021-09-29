@@ -12,14 +12,14 @@ from PyDynamic.uncertainty.propagate_DFT import DFT_deconv
 from .conftest import (
     hypothesis_covariance_matrix_for_complex_vectors,
     hypothesis_float_vector,
-    nonzero_complex_vector,
-    two_to_the_k,
+    hypothesis_nonzero_complex_vector,
+    hypothesis_two_to_the_k,
 )
 
 
 @composite
 def deconvolution_input(draw: Callable, reveal_bug: bool = False):
-    n = draw(two_to_the_k(min_k=2, max_k=4))
+    n = draw(hypothesis_two_to_the_k(min_k=2, max_k=4))
     if reveal_bug:
         y = np.r_[
             draw(hypothesis_float_vector(length=n, min_value=0.5, max_value=1.0)),
@@ -34,14 +34,18 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
     else:
         covariance_bounds = {"min_value": 1e-17, "max_value": 1e-11}
         vector_magnitude_bounds = {"min_magnitude": 1e-2, "max_magnitude": 1e2}
-        y_complex = draw(nonzero_complex_vector(length=n, **vector_magnitude_bounds))
+        y_complex = draw(
+            hypothesis_nonzero_complex_vector(length=n, **vector_magnitude_bounds)
+        )
         y = np.r_[y_complex.real, y_complex.imag]
         uy = draw(
             hypothesis_covariance_matrix_for_complex_vectors(
                 length=n, **covariance_bounds
             )
         )
-        h_complex = draw(nonzero_complex_vector(length=n, **vector_magnitude_bounds))
+        h_complex = draw(
+            hypothesis_nonzero_complex_vector(length=n, **vector_magnitude_bounds)
+        )
         h = np.r_[h_complex.real, h_complex.imag]
         uh = draw(
             hypothesis_covariance_matrix_for_complex_vectors(
