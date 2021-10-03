@@ -4,9 +4,8 @@ from typing import Callable, Tuple
 import numpy as np
 import pytest
 import scipy.stats as stats
-from hypothesis import example, given, HealthCheck, settings
+from hypothesis import given, HealthCheck, settings
 from hypothesis.strategies import composite
-from numpy import array
 from numpy.testing import assert_allclose
 
 from PyDynamic.uncertainty.propagate_DFT import DFT_deconv
@@ -65,44 +64,6 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
     ],
 )
 @pytest.mark.slow
-@example(
-    {
-        'H': array([0.01, 0.01, 0.01, 0.01, 0., 0., 0., 0.]),
-        'UH': array([[1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17,
-                      1.0e-11],
-                     [1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17,
-                      1.7e-11]]),
-        'UY': array([[1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17, 1.0e-17,
-                      1.0e-11],
-                     [1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11, 1.0e-17,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17, 1.7e-11,
-                      1.0e-17],
-                     [1.0e-17, 1.0e-17, 1.0e-17, 1.0e-11, 1.0e-17, 1.0e-17, 1.0e-17,
-                      1.7e-11]]),
-        'Y': array([-0.4493142, -0.4493142, -0.4493142, -0.4493142, 0.,
-                    0., 0., 0.])
-    })
 def test_dft_deconv(
     multivariate_complex_monte_carlo, complex_deconvolution_on_sets, DFT_deconv_input
 ):
