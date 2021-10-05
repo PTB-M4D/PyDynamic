@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-The module :mod:`PyDynamic.model_estimation.fit_filter` contains several functions to
-carry out a least-squares fit to a given complex frequency response and the design of
-digital deconvolution filters by least-squares fitting to the reciprocal of a given
-frequency response each with associated uncertainties.
+"""This module contains several functions to carry out a least-squares fits
+
+It is possible to carry out a least-squares fit of IIR and FIR filters to a given
+complex frequency response and the design of digital deconvolution filters by
+least-squares fitting to the reciprocal of a given frequency response each with
+associated uncertainties.
 
 This module contains the following functions:
 
