@@ -136,16 +136,75 @@ def _iterate_stabilization(
     stable : bool
         True if the delayed filter is stable and False if not.
     """
-    # Compute appropriate time delay for the stabilization of the filter.
+    tau += _compute_filter_stabilization_time_delay(b=b, a=a, Fs=Fs)
+
+    b, a = _stabilize_filter_through_time_delay(
+        Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv
+    )
+
+    return b, a, tau, isstable(b=b, a=a, ftype="digital")
+
+
+def _compute_filter_stabilization_time_delay(
+    b: np.ndarray,
+    a: np.ndarray,
+    Fs: float,
+) -> int:
+    r"""Compute new time delay for  stabilizing the filter characterized by a and b
+
+    b : np.ndarray
+        The initial IIR filter numerator coefficient vector in a 1-D sequence.
+    a : np.ndarray
+        The initial IIR filter denominator coefficient vector in a 1-D sequence.
+    Fs : float
+        Sampling frequency for digital IIR filter.
+
+    Returns
+    -------
+    tau : int
+        Filter time delay (in samples).
+    """
     a_stab = mapinside(a)
     g_1 = grpdelay(b, a, Fs)[0]
     g_2 = grpdelay(b, a_stab, Fs)[0]
-    tau += np.ceil(np.median(g_2 - g_1))
+    return np.ceil(np.median(g_2 - g_1))
 
-    # Conduct stabilization step through time delay.
-    b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
 
-    return b, a, tau, isstable(b=b, a=a, ftype="digital")
+def _stabilize_filter_through_time_delay(
+    Hvals: np.ndarray,
+    tau: int,
+    w: np.ndarray,
+    E: np.ndarray,
+    Nb: int,
+    Na: int,
+    inv: Optional[bool] = False,
+):
+    r"""Conduct one iteration of the stabilization via time delay
+
+    tau : int
+        Initial estimate of time delay for filter stabilization.
+    w : np.ndarray
+        :math:`2 * \pi * f / Fs`
+    E : np.ndarray
+        :math:`exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
+    Hvals : np.ndarray of shape (M,)
+        (complex) frequency response values
+    Nb : int
+        numerator polynomial order
+    Na : int
+        denominator polynomial order
+    inv : bool, optional
+        If True the least-squares fitting is performed for the reciprocal, if False
+        (default) for the actual frequency response
+
+    Returns
+    -------
+    b : np.ndarray
+        The IIR filter numerator coefficient vector in a 1-D sequence.
+    a : np.ndarray
+        The IIR filter denominator coefficient vector in a 1-D sequence.
+    """
+    return _fitIIR(Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv)
 
 
 def LSIIR(
