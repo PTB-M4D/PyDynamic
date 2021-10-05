@@ -229,46 +229,18 @@ us know. You may, for instance, drop an email to one of the [authors
 ## Examples
 
 We have collected extended material for an easier introduction to PyDynamic in the
-package _examples_. In various Jupyter Notebooks and scripts we demonstrate the use of
+package _examples_. Detailed assistance on getting started you can find in the
+corresponding sections of the docs:
+
+* [examples](https://pydynamic.readthedocs.io/en/latest/Examples.html)
+* [tutorials](https://pydynamic.readthedocs.io/en/latest/Tutorials.html)
+
+In various Jupyter Notebooks and scripts we demonstrate the use of
 the provided methods to aid the first steps in PyDynamic. New features are introduced
 with an example from the beginning if feasible. We are currently moving this supporting
 collection to an external repository on GitHub. They will be available at
 [github.com/PTB-M4D/PyDynamic_tutorials](https://github.com/PTB-M4D/PyDynamic_tutorials) 
 in the near future.
-
-Uncertainty propagation for the application of a FIR filter with coefficients *b* with
-which an uncertainty *ub* is associated. The filter input signal is *x* with known noise
-standard deviation *sigma*. The filter output signal is *y* with associated uncertainty
-*uy*.
-
-```python
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
-y, uy = FIRuncFilter(x, sigma, b, ub)
-```
-
-Uncertainty propagation through the application of the discrete Fourier
-transform (DFT). The time domain signal is *x* with associated squared
-uncertainty *ux*. The result of the DFT is the vector *X* of real and
-imaginary parts of the DFT applied to *x* and the associated uncertainty *UX*.
-
-```python
-from PyDynamic.uncertainty.propagate_DFT import GUM_DFT
-X, UX = GUM_DFT(x, ux)
-```
-
-Sequential application of the Monte Carlo method for uncertainty propagation
-for the case of filtering a time domain signal _x_ with an IIR filter _b_, _a_
-with uncertainty associated with the filter coefficients _Uab_ and signal
-noise standard deviation _sigma_. The filter output is the signal _y_, and the
-Monte Carlo method calculates point-wise uncertainties _uy_ and coverage
-intervals _Py_ corresponding to the specified percentiles.
-
-```python
-from PyDynamic.uncertainty.propagate_MonteCarlo import SMC
-y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
-```
-
-![PyDynamic Workflow Deconvolution](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/Deconvolution.png)
 
 ## Roadmap
 
