@@ -176,9 +176,9 @@ via:
 
 ### Optional Jupyter Notebook dependencies
 
-If you are familiar with Jupyter Notebooks, you find some examples in the _examples_,
-and the _tutorials_ subfolders of the source code repository. To execute these you need
-additional dependencies which you get by appending `[examples]` to PyDynamic in all 
+If you are familiar with Jupyter Notebooks, you find some examples in the _examples_
+subfolder of the source code repository. To execute these you need additional 
+dependencies which you get by appending `[examples]` to PyDynamic in all 
 the above, e.g.
 
 ```shell
@@ -228,13 +228,12 @@ us know. You may, for instance, drop an email to one of the [authors
 
 ## Examples
 
-We have collected extended material for an easier introduction to PyDynamic in the two
-subfolders _examples_ and _tutorials_. In various Jupyter Notebooks and scripts we
-demonstrate the use of the provided methods to aid the first steps in PyDynamic. New
-features are introduced with an example from the beginning if feasible. We are currently
-moving this supporting collection to an external repository on GitHub. They will be
-available at
-[github.com/PTB-M4D/PyDynamic_tutorials](https://github.com/PTB-M4D/PyDynamic_tutorials)
+We have collected extended material for an easier introduction to PyDynamic in the
+package _examples_. In various Jupyter Notebooks and scripts we demonstrate the use of
+the provided methods to aid the first steps in PyDynamic. New features are introduced
+with an example from the beginning if feasible. We are currently moving this supporting
+collection to an external repository on GitHub. They will be available at
+[github.com/PTB-M4D/PyDynamic_tutorials](https://github.com/PTB-M4D/PyDynamic_tutorials) 
 in the near future.
 
 Uncertainty propagation for the application of a FIR filter with coefficients *b* with
