@@ -21,23 +21,23 @@ it is tested to work with Python 3.6 to 3.9.
    :maxdepth: 1
    :caption: Getting started:
 
-   Getting started.md
-   Examples.rst
-   CONTRIBUTING.md
+   Getting started
+   Examples
+   CONTRIBUTING
 
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
 
-   PyDynamic.uncertainty.rst
-   PyDynamic.model_estimation.rst
-   PyDynamic.misc.rst
+   PyDynamic.uncertainty
+   PyDynamic.model_estimation
+   PyDynamic.misc
 
 .. toctree::
    :maxdepth: 2
    :caption: Tutorials:
 
-   Tutorials.rst
+   Tutorials
 
 Indices and tables
 ==================
