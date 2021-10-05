@@ -1,10 +1,10 @@
 Examples
 ========
 
-On the project website in the *examples* and *tutorials* subfolders and the separate
+On the project website in the *examples* subfolder and the separate
 `PyDynamic_tutorials <https://github.com/PTB-M4D/PyDynamic_tutorials>`_
 repository you can find various examples illustrating the application of PyDynamic.
-Here is just a short list to get you started.
+Here we provide only a quick starter.
 
 Quick Examples
 --------------
@@ -40,6 +40,8 @@ intervals *Py* corresponding to the specified percentiles.
 
     from PyDynamic.uncertainty.propagate_MonteCarlo import SMC
     y, uy, Py = SMC(x, sigma, b, a, Uab, runs=1000, Perc=[0.025,0.975])
+
+.. image:: Deconvolution.png
 
 Detailed examples
 -----------------
