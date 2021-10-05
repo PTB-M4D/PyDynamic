@@ -2,7 +2,7 @@
   <!-- CircleCI Tests -->
   <a href="https://circleci.com/gh/PTB-M4D/PyDynamic"><img alt="CircleCI pipeline status badge" src="https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield"></a>
   <!-- ReadTheDocs Documentation -->
-  <a href="https://readthedocs.org/projects/pydynamic/badge/?version=latest/">
+  <a href="https://pydynamic.readthedocs.io/en/latest/index.html">
     <img src="https://readthedocs.org/projects/pydynamic/badge/?version=latest">
   </a>
   <!-- CodeCov(erage) -->
