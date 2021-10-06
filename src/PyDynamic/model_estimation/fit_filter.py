@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-The module :mod:`PyDynamic.model_estimation.fit_filter` contains several functions to
-carry out a least-squares fit to a given complex frequency response and the design of
-digital deconvolution filters by least-squares fitting to the reciprocal of a given
-frequency response each with associated uncertainties.
+"""This module contains several functions to carry out a least-squares fits
+
+It is possible to carry out a least-squares fit of IIR and FIR filters to a given
+complex frequency response and the design of digital deconvolution filters by
+least-squares fitting to the reciprocal of a given frequency response each with
+associated uncertainties.
 
 This module contains the following functions:
 
@@ -31,7 +31,7 @@ from ..misc.filterstuff import grpdelay, isstable, mapinside
 __all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
 
 
-def _fitIIR(
+def _fit_iir_via_least_squares(
     Hvals: np.ndarray,
     tau: int,
     w: np.ndarray,
@@ -152,16 +152,78 @@ def _iterate_stabilization(
     stable : bool
         True if the delayed filter is stable and False if not.
     """
-    # Compute appropriate time delay for the stabilization of the filter.
+    tau += _compute_filter_stabilization_time_delay(b=b, a=a, Fs=Fs)
+
+    b, a = _stabilize_filter_through_time_delay(
+        Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv
+    )
+
+    return b, a, tau, isstable(b=b, a=a, ftype="digital")
+
+
+def _compute_filter_stabilization_time_delay(
+    b: np.ndarray,
+    a: np.ndarray,
+    Fs: float,
+) -> int:
+    r"""Compute new time delay for  stabilizing the filter characterized by a and b
+
+    b : np.ndarray
+        The initial IIR filter numerator coefficient vector in a 1-D sequence.
+    a : np.ndarray
+        The initial IIR filter denominator coefficient vector in a 1-D sequence.
+    Fs : float
+        Sampling frequency for digital IIR filter.
+
+    Returns
+    -------
+    tau : int
+        Filter time delay (in samples).
+    """
     a_stab = mapinside(a)
     g_1 = grpdelay(b, a, Fs)[0]
     g_2 = grpdelay(b, a_stab, Fs)[0]
-    tau += np.ceil(np.median(g_2 - g_1))
+    return np.ceil(np.median(g_2 - g_1))
 
-    # Conduct stabilization step through time delay.
-    b, a = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv, bounds=bounds)
 
-    return b, a, tau, isstable(b=b, a=a, ftype="digital")
+def _stabilize_filter_through_time_delay(
+    Hvals: np.ndarray,
+    tau: int,
+    w: np.ndarray,
+    E: np.ndarray,
+    Nb: int,
+    Na: int,
+    inv: bool,
+    bounds: Tuple[Union[np.ndarray, float], Union[np.ndarray, float]] = None,
+):
+    r"""Conduct one iteration of the stabilization via time delay
+
+    tau : int
+        Initial estimate of time delay for filter stabilization.
+    w : np.ndarray
+        :math:`2 * \pi * f / Fs`
+    E : np.ndarray
+        :math:`exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
+    Hvals : np.ndarray of shape (M,)
+        (complex) frequency response values
+    Nb : int
+        numerator polynomial order
+    Na : int
+        denominator polynomial order
+    inv : bool, optional
+        If True the least-squares fitting is performed for the reciprocal, if False
+        (default) for the actual frequency response
+
+    Returns
+    -------
+    b : np.ndarray
+        The IIR filter numerator coefficient vector in a 1-D sequence.
+    a : np.ndarray
+        The IIR filter denominator coefficient vector in a 1-D sequence.
+    """
+    return _fit_iir_via_least_squares(
+        Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv, bounds=bounds,
+    )
 
 
 def LSIIR(
@@ -198,7 +260,7 @@ def LSIIR(
     Na : int
         Order of IIR denominator polynomial.
     f : array_like of shape (M,)
-        Frequencies at which `Hvals` is given.
+        Frequencies at which ``Hvals`` is given.
     Fs : float
         Sampling frequency for digital IIR filter.
     tau : int, optional
@@ -283,46 +345,52 @@ def LSIIR(
     tau_max = tau
     stab_iters = np.zeros((mc_runs,), dtype=int)
     if tau == 0 and max_stab_iter == 0:
-        relevant_filters = np.ones((mc_runs,), dtype=bool)
+        relevant_filters_mask = np.ones((mc_runs,), dtype=bool)
     else:
-        relevant_filters = np.zeros((mc_runs,), dtype=bool)
+        relevant_filters_mask = np.zeros((mc_runs,), dtype=bool)
 
     # Conduct the Monte Carlo runs or in case we did not have uncertainties execute
     # just once the actual algorithm.
     for mc_run in range(mc_runs):
         # Conduct actual fit.
-        b_i, a_i = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv, bounds=bounds)
+        b_i, a_i = _fit_iir_via_least_squares(
+            Hvals, tau, w, E, Na, Nb, inv=inv, bounds=bounds
+        )
 
         # Initialize counter which we use to report about required iteration count.
         current_stab_iter = 1
 
         # Determine if the computed filter already is stable.
         if isstable(b=b_i, a=a_i, ftype="digital"):
-            relevant_filters[mc_run] = True
+            relevant_filters_mask[mc_run] = True
             taus[mc_run] = tau
         else:
             # If the filter by now is unstable we already tried once to stabilize with
             # initial estimate of time delay and we should iterate at least once. So now
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
-                b_i, a_i = _fitIIR(Hvals, tau_max, w, E, Na, Nb, inv=inv, bounds=bounds)
+                b_i, a_i = _fit_iir_via_least_squares(
+                    Hvals, tau_max, w, E, Na, Nb, inv=inv, bounds=bounds
+                )
                 current_stab_iter += 1
 
             if isstable(b=b_i, a=a_i, ftype="digital"):
-                relevant_filters[mc_run] = True
+                relevant_filters_mask[mc_run] = True
 
             # Set the either needed delay for reaching stability or the initial
             # delay to start iterations.
             taus[mc_run] = tau_max
 
             # Stabilize filter coefficients with a maximum number of iterations.
-            while not relevant_filters[mc_run] and current_stab_iter < max_stab_iter:
+            while (
+                not relevant_filters_mask[mc_run] and current_stab_iter < max_stab_iter
+            ):
                 # Compute appropriate time delay for the stabilization of the filter.
                 (
                     b_i,
                     a_i,
                     taus[mc_run],
-                    relevant_filters[mc_run],
+                    relevant_filters_mask[mc_run],
                 ) = _iterate_stabilization(
                     b=b_i,
                     a=a_i,
@@ -348,7 +416,7 @@ def LSIIR(
                         f"{'' if UHvals is None else f'for MC run {mc_run} '}"
                         f"finished. Conducted {current_stab_iter} attempts to "
                         f"stabilize filter. "
-                        f"{'' if relevant_filters[mc_run] else warning_unstable} "
+                        f"{'' if relevant_filters_mask[mc_run] else warning_unstable} "
                         f"Final sum of squares = {sos}"
                     )
 
@@ -360,13 +428,13 @@ def LSIIR(
     if mc_runs > 1:
         # If we did not find any stable filter, calculate the final result from all
         # filters.
-        if not np.any(relevant_filters):
-            relevant_filters = np.ones_like(relevant_filters)
-        b_res = np.mean(as_and_bs[relevant_filters, Na:], axis=0)
+        if not np.any(relevant_filters_mask):
+            relevant_filters_mask = np.ones_like(relevant_filters_mask)
+        b_res = np.mean(as_and_bs[relevant_filters_mask, Na:], axis=0)
         a_res = np.hstack(
-            (np.array([1.0]), np.mean(as_and_bs[relevant_filters, :Na], axis=0))
+            (np.array([1.0]), np.mean(as_and_bs[relevant_filters_mask, :Na], axis=0))
         )
-        stab_iter_mean = np.mean(stab_iters[relevant_filters])
+        stab_iter_mean = np.mean(stab_iters[relevant_filters_mask])
 
         final_stab_iter = 1
 
@@ -374,7 +442,7 @@ def LSIIR(
         # an initial delay of the previous maximum delay.
         if not isstable(b=b_res, a=a_res, ftype="digital"):
             final_tau = tau_max
-            b_res, a_res = _fitIIR(
+            b_res, a_res = _fit_iir_via_least_squares(
                 Hvals, final_tau, w, E, Na, Nb, inv=inv, bounds=bounds
             )
             final_stab_iter += 1
@@ -404,7 +472,7 @@ def LSIIR(
         b_res = b_i
         a_res = a_i
         stab_iter_mean = final_stab_iter = current_stab_iter
-        final_stable = relevant_filters[0]
+        final_stable = relevant_filters_mask[0]
         final_tau = taus[0]
 
     if verbose:

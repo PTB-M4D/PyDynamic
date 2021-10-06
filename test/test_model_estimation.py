@@ -117,7 +117,7 @@ def provide_fitted_filter():
         """This provides a IIR least-squares filter fit to a frequency response"""
         Filter = namedtuple("Filter", ["b", "a"])
 
-        b, a = fit_filter._fitIIR(
+        b, a = fit_filter._fit_iir_via_least_squares(
             Hvals=ls_base_parameters["Hvals"],
             tau=0,
             **compute_fitting_parameters(ls_base_parameters),
@@ -331,7 +331,7 @@ def test_fitIIR_results_against_former_implementations(
     }
 
     # Compute solution of current version.
-    b_current, a_current = fit_filter._fitIIR(**fit_params)
+    b_current, a_current = fit_filter._fit_iir_via_least_squares(**fit_params)
 
     # Rename parameter dict keys to the same name with leading underscore for the old
     # version.
@@ -364,10 +364,10 @@ def test_LSIIR_results_against_former_implementations(
 def test_fitIIR_exception(
     lsiir_base_params, provide_fitted_filter, compute_fitting_parameters
 ):
-    """This checks if _fitIIR raises the expected exception in case of zero division"""
+    """This checks if _fit_iir_via_least_squares raises an expected exception"""
     assume(np.all(lsiir_base_params["Hvals"] == 0))
     with pytest.raises(ValueError):
-        fit_filter._fitIIR(
+        fit_filter._fit_iir_via_least_squares(
             Hvals=lsiir_base_params["Hvals"],
             tau=0,
             **compute_fitting_parameters(lsiir_base_params),
