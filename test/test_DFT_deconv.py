@@ -80,12 +80,12 @@ def test_dft_deconv(
     assert_allclose(
         x_deconv + x_deconv_shift_away_from_zero,
         monte_carlo_mean + x_deconv_shift_away_from_zero,
-        rtol=3.3e-4,
+        rtol=1.8e-3,
     )
     assert_allclose(
         u_deconv + u_deconv_shift_away_from_zero,
         monte_carlo_cov + u_deconv_shift_away_from_zero,
-        rtol=4.7e-5,
+        rtol=3.2e-4,
     )
 
 
