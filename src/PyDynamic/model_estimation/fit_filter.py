@@ -240,7 +240,7 @@ def LSIIR(
     Na : int
         Order of IIR denominator polynomial.
     f : array_like of shape (M,)
-        Frequencies at which `Hvals` is given.
+        Frequencies at which ``Hvals`` is given.
     Fs : float
         Sampling frequency for digital IIR filter.
     tau : int, optional
