@@ -30,7 +30,7 @@ from ..misc.filterstuff import grpdelay, isstable, mapinside
 __all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
 
 
-def _fitIIR(
+def _fit_iir_via_least_squares(
     Hvals: np.ndarray,
     tau: int,
     w: np.ndarray,
@@ -204,7 +204,9 @@ def _stabilize_filter_through_time_delay(
     a : np.ndarray
         The IIR filter denominator coefficient vector in a 1-D sequence.
     """
-    return _fitIIR(Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv)
+    return _fit_iir_via_least_squares(
+        Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv
+    )
 
 
 def LSIIR(
@@ -328,7 +330,7 @@ def LSIIR(
     # just once the actual algorithm.
     for mc_run in range(mc_runs):
         # Conduct actual fit.
-        b_i, a_i = _fitIIR(Hvals, tau, w, E, Na, Nb, inv=inv)
+        b_i, a_i = _fit_iir_via_least_squares(Hvals, tau, w, E, Na, Nb, inv=inv)
 
         # Initialize counter which we use to report about required iteration count.
         current_stab_iter = 1
@@ -342,7 +344,9 @@ def LSIIR(
             # initial estimate of time delay and we should iterate at least once. So now
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
-                b_i, a_i = _fitIIR(Hvals, tau_max, w, E, Na, Nb, inv=inv)
+                b_i, a_i = _fit_iir_via_least_squares(
+                    Hvals, tau_max, w, E, Na, Nb, inv=inv
+                )
                 current_stab_iter += 1
 
             if isstable(b=b_i, a=a_i, ftype="digital"):
@@ -412,7 +416,9 @@ def LSIIR(
         # an initial delay of the previous maximum delay.
         if not isstable(b=b_res, a=a_res, ftype="digital"):
             final_tau = tau_max
-            b_res, a_res = _fitIIR(Hvals, final_tau, w, E, Na, Nb, inv=inv)
+            b_res, a_res = _fit_iir_via_least_squares(
+                Hvals, final_tau, w, E, Na, Nb, inv=inv
+            )
             final_stab_iter += 1
 
         final_stable = isstable(b=b_res, a=a_res, ftype="digital")
