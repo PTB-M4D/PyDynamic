@@ -452,8 +452,8 @@ def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
     assert current_Uy.shape == (len(signals["y"]),)
 
     # check value identity
-    assert np.allclose(y, y2)
-    assert np.allclose(Uy, Uy2)
+    assert_allclose(legacy_y, current_y)
+    assert_allclose(legacy_Uy, current_Uy)
 
 
 @pytest.mark.slow
