@@ -191,7 +191,7 @@ def hypothesis_covariance_matrix(
     max_value: Optional[float] = 1,
 ) -> np.ndarray:
     number_of_rows_and_columns = draw(hypothesis_dimension(number_of_rows))
-    cov = np.cov(
+    cov_with_one_eigenvalue_close_to_zero = np.cov(
         draw(
             hnp.arrays(
                 dtype=float,
@@ -209,7 +209,9 @@ def hypothesis_covariance_matrix(
             )
         )
     )
-    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(cov)
+    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(
+        cov_with_one_eigenvalue_close_to_zero
+    )
     nonzero_diagonal_cov = draw(
         ensure_hypothesis_nonzero_diagonal(cov_after_discarding_smallest_singular_value)
     )
