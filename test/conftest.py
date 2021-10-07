@@ -301,9 +301,16 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
     # This leads to a singular matrix, which is badly suited to be used as valid
     # covariance matrix. To circumvent this:
     rng = np.random.default_rng()
-    cov = np.cov(rng.random(size=(length + 1, length + 1)))
-    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(cov)
-    return cov_after_discarding_smallest_singular_value
+    cov_with_one_eigenvalue_close_to_zero = np.cov(
+        rng.random(size=(length + 1, length + 1))
+    )
+    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(
+        cov_with_one_eigenvalue_close_to_zero
+    )
+    cov_positive_semi_definite = cov_after_discarding_smallest_singular_value
+    while np.any(np.linalg.eigvals(cov_positive_semi_definite) < 0):
+        cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
+    return cov_positive_semi_definite
 
 
 def _discard_smallest_singular_value(matrix: np.ndarray) -> np.ndarray:
