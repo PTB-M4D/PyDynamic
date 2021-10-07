@@ -74,7 +74,9 @@ def hypothesis_float_square_matrix(
         else draw(hst.integers(min_value=1, max_value=20))
     )
     return draw(
-        hypothesis_float_square_matrix_strategy(number_of_rows=number_of_rows_and_columns)
+        hypothesis_float_square_matrix_strategy(
+            number_of_rows=number_of_rows_and_columns
+        )
     )
 
 
