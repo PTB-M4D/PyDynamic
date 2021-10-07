@@ -471,23 +471,35 @@ def LSIIR(
         return b_res, a_res, final_tau
 
 
-def LSFIR(H, N, tau, f, Fs, Wt=None):
-    """
-    Least-squares fit of a digital FIR filter to a given frequency response.
+def LSFIR(
+    H: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    Wt: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    """Least-squares (time-discrete) digital FIR filter fit to freq. resp.reciprocal
 
     Parameters
     ----------
-        H : (complex) frequency response values of shape (M,)
-        N : FIR filter order
-        tau : delay of filter
-        f : frequencies of shape (M,)
-        Fs : sampling frequency of digital filter
-        Wt : (optional) vector of weights of shape (M,) or shape (M,M)
+    H : array_like of shape (M,)
+        (Complex) frequency response values
+    N : int
+        FIR filter order
+    tau : int
+        delay of filter
+    f : array_like of shape (M,)
+        Frequencies at which ``H`` is given
+    Fs : float
+        sampling frequency of digital FIR filter.
+    Wt : array_like of shape (M,) or shape (M,M), optional
+        vector of weights
 
     Returns
     -------
-        filter coefficients bFIR (ndarray) of shape (N+1,)
-
+    b : np.ndarray of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
     """
 
     print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
