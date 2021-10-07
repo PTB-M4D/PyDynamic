@@ -74,7 +74,9 @@ def hypothesis_float_square_matrix(
         else draw(hst.integers(min_value=1, max_value=20))
     )
     return draw(
-        hypothesis_float_square_matrix_strategy(number_of_rows=number_of_rows_and_columns)
+        hypothesis_float_square_matrix_strategy(
+            number_of_rows=number_of_rows_and_columns
+        )
     )
 
 
@@ -189,7 +191,7 @@ def hypothesis_covariance_matrix(
     max_value: Optional[float] = 1,
 ) -> np.ndarray:
     number_of_rows_and_columns = draw(hypothesis_dimension(number_of_rows))
-    cov = np.cov(
+    cov_with_one_eigenvalue_close_to_zero = np.cov(
         draw(
             hnp.arrays(
                 dtype=float,
@@ -207,7 +209,9 @@ def hypothesis_covariance_matrix(
             )
         )
     )
-    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(cov)
+    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(
+        cov_with_one_eigenvalue_close_to_zero
+    )
     nonzero_diagonal_cov = draw(
         ensure_hypothesis_nonzero_diagonal(cov_after_discarding_smallest_singular_value)
     )
@@ -297,9 +301,16 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
     # This leads to a singular matrix, which is badly suited to be used as valid
     # covariance matrix. To circumvent this:
     rng = np.random.default_rng()
-    cov = np.cov(rng.random(size=(length + 1, length + 1)))
-    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(cov)
-    return cov_after_discarding_smallest_singular_value
+    cov_with_one_eigenvalue_close_to_zero = np.cov(
+        rng.random(size=(length + 1, length + 1))
+    )
+    cov_after_discarding_smallest_singular_value = _discard_smallest_singular_value(
+        cov_with_one_eigenvalue_close_to_zero
+    )
+    cov_positive_semi_definite = cov_after_discarding_smallest_singular_value
+    while np.any(np.linalg.eigvals(cov_positive_semi_definite) < 0):
+        cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
+    return cov_positive_semi_definite
 
 
 def _discard_smallest_singular_value(matrix: np.ndarray) -> np.ndarray:
