@@ -4,6 +4,7 @@ import itertools
 import numpy as np
 import pytest
 import scipy
+from numpy.testing import assert_allclose
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
 
@@ -443,16 +444,16 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
 @pytest.mark.slow
 def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
     # Compare output of both functions for thinkable permutations of input parameters.
-    y, Uy = legacy_FIRuncFilter(**filters, **signals, **lowpasses)
-    y2, Uy2 = FIRuncFilter(**filters, **signals, **lowpasses)
+    legacy_y, legacy_Uy = legacy_FIRuncFilter(**filters, **signals, **lowpasses)
+    current_y, current_Uy = FIRuncFilter(**filters, **signals, **lowpasses)
 
     # check output dimensions
-    assert len(y2) == len(signals["y"])
-    assert Uy2.shape == (len(signals["y"]),)
+    assert len(current_y) == len(signals["y"])
+    assert current_Uy.shape == (len(signals["y"]),)
 
     # check value identity
-    assert np.allclose(y, y2)
-    assert np.allclose(Uy, Uy2)
+    assert_allclose(legacy_y, current_y)
+    assert_allclose(legacy_Uy, current_Uy)
 
 
 @pytest.mark.slow
