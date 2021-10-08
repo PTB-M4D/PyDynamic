@@ -454,12 +454,12 @@ def test_reveal_difference_between_current_and_former_FIRuncFilter(
     fir_low_pass,
 ):
     xhat, Uxhat = FIRuncFilter(
-        simulated_measurement_input_and_output["yn"],
-        simulated_measurement_input_and_output["noise"],
-        invLSFIR_unc_filter_fit["bF"],
-        invLSFIR_unc_filter_fit["UbF"],
-        shift,
-        fir_low_pass["blow"],
+        y=simulated_measurement_input_and_output["yn"],
+        sigma_noise=simulated_measurement_input_and_output["noise"],
+        theta=invLSFIR_unc_filter_fit["bF"],
+        Utheta=invLSFIR_unc_filter_fit["UbF"],
+        shift=shift,
+        blow=fir_low_pass["blow"],
     )
     xhat_legacy, Uxhat_legacy = legacy_FIRuncFilter(
         y=simulated_measurement_input_and_output["yn"],
@@ -488,7 +488,7 @@ def test_reveal_difference_between_current_and_former_FIRuncFilter(
         simulated_measurement_input_and_output["time"] * 1e3,
         Uxhat_legacy,
     )
-    # plt.show()  # show comparison plot of former and current implementation
+    plt.show()  # show comparison plot of former and current implementation
 
     assert_allclose(xhat_legacy, xhat)
     assert_allclose(Uxhat_legacy, Uxhat)
