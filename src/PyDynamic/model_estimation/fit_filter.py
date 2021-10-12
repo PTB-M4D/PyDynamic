@@ -732,7 +732,12 @@ def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None
     if verbose:
         Hd = dsp.freqz(bFIR, 1, 2 * np.pi * f / Fs)[1]
         Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
-        res = np.hstack((np.real(Hd) - np.real(H), np.imag(Hd) - np.imag(H)))
+        res = np.hstack(
+            (
+                np.real(Hd) - np.real(np.reciprocal(H_complex)),
+                np.imag(Hd) - np.imag(np.reciprocal(H_complex)),
+            )
+        )
         rms = np.sqrt(np.sum(res ** 2) / len(f))
         print("Final rms error = %e \n\n" % rms)
 
