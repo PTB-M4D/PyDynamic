@@ -539,9 +539,15 @@ def LSFIR(
     return np.reshape(bFIR, (N + 1,))
 
 
-def invLSFIR(H, N, tau, f, Fs, Wt=None):
-    """Least-squares fit of a digital FIR filter to the reciprocal of a given
-    frequency response.
+def invLSFIR(
+    H: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    Wt: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    """Least-squares (time-discrete) digital FIR filter fit to freq. resp. reciprocal
 
     Parameters
     ----------
