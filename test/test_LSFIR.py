@@ -4,14 +4,16 @@ import pathlib
 import numpy as np
 import pytest
 import scipy.signal as dsp
+from hypothesis import given, HealthCheck, settings
 from matplotlib import pyplot as plt
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.tools import make_semiposdef
-from PyDynamic.model_estimation.fit_filter import invLSFIR_unc
+from PyDynamic.model_estimation.fit_filter import invLSFIR, invLSFIR_unc, LSFIR
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from .conftest import hypothesis_dimension
 from .test_propagate_filter import legacy_FIRuncFilter
 
 
@@ -224,7 +226,7 @@ def invLSFIR_unc_filter_fit(monte_carlo, frequencies, sampling_frequency):
         )["UbF"],
         rtol=3e-1,
     )
-    return {"bF": bF, "UbF": UbF}
+    return {"bF": bF, "UbF": UbF, "N": N, "tau": tau}
 
 
 @pytest.fixture(scope="module")
@@ -492,3 +494,53 @@ def test_reveal_difference_between_current_and_former_FIRuncFilter(
 
     assert_allclose(xhat_legacy, xhat)
     assert_allclose(Uxhat_legacy, Uxhat)
+
+
+@given(hypothesis_dimension())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+def test_compare_invLSFIR_unc_to_invLSFIR(
+    monte_carlo, frequencies, sampling_frequency, N
+):
+    bF_unc, _ = invLSFIR_unc(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    bF = invLSFIR(
+        H=monte_carlo["H"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    assert_allclose(
+        bF_unc,
+        bF,
+    )
+
+
+@given(hypothesis_dimension())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, N):
+    LSFIR(
+        H=monte_carlo["H"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
