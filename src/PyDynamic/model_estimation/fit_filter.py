@@ -551,27 +551,27 @@ def invLSFIR(
 
     Parameters
     ----------
-        H: np.ndarray of shape (M,) and dtype complex
-            frequency response values
-        N: int
-            FIR filter order
-        tau: float
-            delay of filter
-        f: np.ndarray of shape (M,)
-            frequencies
-        Fs: float
-            sampling frequency of digital filter
-        Wt: np.ndarray of shape (M,) - optional
-            vector of weights
+    H : array_like of shape (M,)
+        (Complex) frequency response values
+    N : int
+        FIR filter order
+    tau : int
+        delay of filter
+    f : array_like of shape (M,)
+        Frequencies at which ``H`` is given
+    Fs : float
+        sampling frequency of digital FIR filter.
+    Wt : array_like of shape (M,) or shape (M,M), optional
+        vector of weights
 
     Returns
     -------
-        bFIR: np.ndarray of shape (N,)
-            filter coefficients
+    b : np.ndarray of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
 
     References
     ----------
-        * Elster and Link [Elster2008]_
+    * Elster and Link [Elster2008]_
 
     .. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
 
