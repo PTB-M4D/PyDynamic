@@ -480,7 +480,7 @@ def LSFIR(
     Fs: float,
     Wt: Optional[np.ndarray] = None,
 ) -> np.ndarray:
-    """Least-squares (time-discrete) digital FIR filter fit to freq. resp.reciprocal
+    """Least-squares (time-discrete) digital FIR filter fit to frequency response
 
     Parameters
     ----------
