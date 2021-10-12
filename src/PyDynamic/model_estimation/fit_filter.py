@@ -582,6 +582,10 @@ def invLSFIR(
     .. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
 
     """
+    print(
+        f"\ninvLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
+        f"frequency response H given by {len(H)} values.\n"
+    )
 
     frequencies = f.copy()
     sampling_frequency = Fs
