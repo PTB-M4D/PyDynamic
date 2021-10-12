@@ -25,6 +25,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import scipy.signal as dsp
 
+from .. import is_2d_matrix
 from ..misc.filterstuff import grpdelay, isstable, mapinside
 
 __all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
@@ -584,7 +585,7 @@ def invLSFIR(H, N, tau, f, Fs, Wt=None):
     E = np.exp(-1j * np.dot(w, ords))
 
     if Wt is not None:  # set up weighted design matrix if necessary
-        if len(np.shape(Wt)) == 2:  # is matrix
+        if is_2d_matrix(Wt):
             weights = np.diag(Wt)
         else:
             weights = np.eye(len(f)) * Wt
