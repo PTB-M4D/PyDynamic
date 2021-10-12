@@ -503,8 +503,10 @@ def LSFIR(
         The FIR filter coefficient vector in a 1-D sequence
     """
 
-    print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
-    print("reciprocal of a frequency response given by %d values.\n" % len(H))
+    print(
+        f"\nLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
+        f"frequency response H given by {len(H)} values.\n"
+    )
 
     frequencies = f.copy()
     sampling_frequency = Fs
@@ -536,8 +538,8 @@ def LSFIR(
 
     if not isinstance(res, np.ndarray):
         print(
-            "Calculation of FIR filter coefficients finished with residual "
-            "norm %e" % res
+            "LSFIR: Calculation of FIR filter coefficients finished with residual "
+            f"norm {res}."
         )
 
     return bFIR.flatten()
