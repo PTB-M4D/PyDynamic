@@ -60,6 +60,16 @@ e.g., for Python 3.9:
 (PyDynamic_venv) $ python -m piptools sync requirements/dev-requirements-py39.txt requirements/requirements-py39.txt
 ```
 
+Afterwards you should always install PyDynamic itself in
+["development mode"](https://packaging.python.org/tutorials/installing-packages/#installing-from-a-local-src-tree)
+into your virtual environment to be able to properly test against the shipped version:
+
+```shell
+(PyDynamic_venv) $ python -m pip install -e .
+```
+
+For the testing refer to [the according testing section in this guide](#Testing).
+
 ### Advised toolset
 
 We use [_black_](https://pypi.org/project/black/) to implement our coding style,
@@ -144,7 +154,7 @@ with MAJOR in semantic versioning). This has to be marked by putting _BREAKING
 
 #### Examples
 
-For examples please checkout the
+For examples please check out the
 [Git Log](https://github.com/PTB-M4D/PyDynamic/commits/master).
 
 
@@ -158,6 +168,15 @@ It is usually sufficient to create
 [appropriately named](https://docs.pytest.org/en/latest/goodpractices.html#conventions-for-python-test-discovery)
 methods in one of the existing modules in the subfolder test. If necessary, add
 a new module that is appropriately named.
+
+To execute the whole of the PyDynamic test suite simply run:
+
+```shell
+(PyDynamic_venv) $ python -m pytest
+```
+
+Further details, e.g. to execute only one specific test, can be found in
+[the official pytest docs](https://docs.pytest.org/en/latest/how-to/usage.html).
 
 ## Workflow for adding completely new functionality
 
