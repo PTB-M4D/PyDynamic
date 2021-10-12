@@ -404,7 +404,7 @@ def FIRuncFilter(
         # shift result
         if shift != 0:
             x = np.roll(x, -int(shift))
-            Ux = np.roll(Ux, (-int(shift), -int(shift)))
+            Ux = np.roll(Ux, (-int(shift), -int(shift)), axis=(0, 1))
 
         if return_full_covariance:
             return x, Ux
