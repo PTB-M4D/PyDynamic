@@ -4,13 +4,13 @@ import itertools
 import numpy as np
 import pytest
 import scipy
+from hypothesis import given
 from numpy.testing import assert_allclose
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import trimOrPad
-
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
     _fir_filter,
@@ -20,7 +20,10 @@ from PyDynamic.uncertainty.propagate_filter import (
     IIRuncFilter,
 )
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-from .conftest import random_covariance_matrix
+from .conftest import (
+    hypothesis_bounded_float,
+    random_covariance_matrix,
+)
 
 
 def random_array(length):
@@ -441,11 +444,14 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
 @pytest.mark.parametrize("filters", valid_filters())
 @pytest.mark.parametrize("signals", valid_signals())
 @pytest.mark.parametrize("lowpasses", valid_lows())
+@given(hypothesis_bounded_float(min_value=0.0, max_value=100.0))
 @pytest.mark.slow
-def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
+def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses, shift):
     # Compare output of both functions for thinkable permutations of input parameters.
-    legacy_y, legacy_Uy = legacy_FIRuncFilter(**filters, **signals, **lowpasses)
-    current_y, current_Uy = FIRuncFilter(**filters, **signals, **lowpasses)
+    legacy_y, legacy_Uy = legacy_FIRuncFilter(
+        **filters, **signals, **lowpasses, shift=shift
+    )
+    current_y, current_Uy = FIRuncFilter(**filters, **signals, **lowpasses, shift=shift)
 
     # check output dimensions
     assert len(current_y) == len(signals["y"])
