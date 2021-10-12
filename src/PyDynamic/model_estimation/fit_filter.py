@@ -621,7 +621,7 @@ def invLSFIR(
 
     bFIR, res = np.linalg.lstsq(X, iRI)[:2]  # the actual fitting
 
-    if (not isinstance(res, np.ndarray)) or (len(res) == 1):  # summarise results
+    if len(res) == 1:  # summarise results
         print(
             "invLSFIR: Calculation of FIR filter coefficients finished with residual "
             f"norm {res}."
