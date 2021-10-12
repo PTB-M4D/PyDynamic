@@ -506,27 +506,31 @@ def LSFIR(
     print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
     print("reciprocal of a frequency response given by %d values.\n" % len(H))
 
-    H = H[:, np.newaxis]
+    frequencies = f.copy()
+    sampling_frequency = Fs
 
-    w = 2 * np.pi * f / Fs
-    w = w[:, np.newaxis]
+    n_frequencies = len(frequencies)
+    h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
 
-    ords = np.arange(N + 1)[:, np.newaxis]
-    ords = ords.T
+    omega = 2 * np.pi * frequencies / sampling_frequency
+    omega = omega[:, np.newaxis]
 
-    E = np.exp(-1j * np.dot(w, ords))
+    ords = np.arange(N + 1)[:, np.newaxis].T
+
+    E = np.exp(-1j * np.dot(omega, ords))
 
     if Wt is not None:
         if len(np.shape(Wt)) == 2:  # is matrix
             weights = np.diag(Wt)
         else:
-            weights = np.eye(len(f)) * Wt
-        X = np.vstack([np.real(np.dot(weights, E)), np.imag(np.dot(weights, E))])
+            weights = np.eye(n_frequencies) * Wt
+        weighted_E = np.dot(weights, E)
+        X = np.vstack([np.real(weighted_E), np.imag(weighted_E)])
     else:
         X = np.vstack([np.real(E), np.imag(E)])
 
-    H = H * np.exp(1j * w * tau)
-    iRI = np.vstack([np.real(1.0 / H), np.imag(1.0 / H)])
+    delayed_h_complex = h_complex * np.exp(1j * omega.flatten() * tau)
+    iRI = np.hstack([np.real(delayed_h_complex), np.imag(delayed_h_complex)])
 
     bFIR, res = np.linalg.lstsq(X, iRI)[:2]
 
@@ -536,7 +540,7 @@ def LSFIR(
             "norm %e" % res
         )
 
-    return np.reshape(bFIR, (N + 1,))
+    return bFIR.flatten()
 
 
 def invLSFIR(
@@ -577,43 +581,55 @@ def invLSFIR(
 
     """
 
-    print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
-    print("reciprocal of a frequency response given by %d values.\n" % len(H))
+    frequencies = f.copy()
+    sampling_frequency = Fs
 
-    H = H[:, np.newaxis]  # extend to matrix-like for simplified algebra
+    n_frequencies = len(frequencies)
+    h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+    h_complex_reciprocal = np.reciprocal(h_complex)
 
-    w = 2 * np.pi * f / Fs  # set up radial frequencies
-    w = w[:, np.newaxis]
+    omega = (2 * np.pi * frequencies / sampling_frequency)[
+        :, np.newaxis
+    ]  # set up radial frequencies
 
-    ords = np.arange(N + 1)[:, np.newaxis]  # set up design matrix
-    ords = ords.T
+    ords = np.arange(N + 1)[:, np.newaxis].T  # set up design matrix
 
-    E = np.exp(-1j * np.dot(w, ords))
+    E = np.exp(-1j * np.dot(omega, ords))
 
     if Wt is not None:  # set up weighted design matrix if necessary
         if is_2d_matrix(Wt):
             weights = np.diag(Wt)
         else:
-            weights = np.eye(len(f)) * Wt
-        X = np.vstack([np.real(np.dot(weights, E)), np.imag(np.dot(weights, E))])
+            weights = np.eye(n_frequencies) * Wt
+        weighted_E = np.dot(weights, E)
+        X = np.vstack([np.real(weighted_E), np.imag(weighted_E)])
     else:
         X = np.vstack([np.real(E), np.imag(E)])
 
-    Hs = H * np.exp(1j * w * tau)  # apply time delay for improved fit quality
-    iRI = np.vstack([np.real(1.0 / Hs), np.imag(1.0 / Hs)])
+    delayed_h_complex_reciprocal = np.reciprocal(
+        h_complex * np.exp(1j * omega.flatten() * tau)
+    )  # apply time delay for improved fit quality
+    iRI = np.hstack(
+        [np.real(delayed_h_complex_reciprocal), np.imag(delayed_h_complex_reciprocal)]
+    )
 
     bFIR, res = np.linalg.lstsq(X, iRI)[:2]  # the actual fitting
 
     if (not isinstance(res, np.ndarray)) or (len(res) == 1):  # summarise results
         print(
-            "Calculation of FIR filter coefficients finished with residual "
-            "norm %e" % res
+            "invLSFIR: Calculation of FIR filter coefficients finished with residual "
+            f"norm {res}."
         )
-        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * f / Fs)[1]
-        Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
-        res = np.hstack((np.real(Hd) - np.real(H), np.imag(Hd) - np.imag(H)))
-        rms = np.sqrt(np.sum(res ** 2) / len(f))
-        print("Final rms error = %e \n\n" % rms)
+        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * frequencies / sampling_frequency)[1]
+        Hd = Hd * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
+        res = np.hstack(
+            (
+                np.real(Hd) - np.real(h_complex_reciprocal),
+                np.imag(Hd) - np.imag(h_complex_reciprocal),
+            )
+        )
+        rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
+        print(f"invLSFIR: Final rms error = {rms}\n\n")
 
     return bFIR.flatten()
 
@@ -678,7 +694,7 @@ def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None
         RI = np.hstack((np.real(H), np.imag(H)))
     else:
         RI = H.copy()
-        H = H[:Nf] + 1j * H[Nf:]
+        H_complex = H[:Nf] + 1j * H[Nf:]
     HRI = np.random.multivariate_normal(RI, UH, runs)  # random draws of real,imag of
     # freq response values
     omtau = 2 * np.pi * f / Fs * tau
@@ -720,7 +736,7 @@ def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None
     )
     X = np.vstack((np.real(E), np.imag(E)))
     X = np.dot(np.diag(wt), X)
-    Hm = H * np.exp(1j * 2 * np.pi * f / Fs * tau)
+    Hm = H_complex * np.exp(1j * omtau)
     Hri = np.hstack((np.real(1.0 / Hm), np.imag(1.0 / Hm)))
 
     u, s, v = np.linalg.svd(X, full_matrices=False)
