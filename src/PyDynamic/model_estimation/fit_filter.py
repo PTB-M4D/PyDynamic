@@ -520,7 +520,7 @@ def LSFIR(
     E = np.exp(-1j * np.dot(omega, ords))
 
     if Wt is not None:
-        if len(np.shape(Wt)) == 2:  # is matrix
+        if is_2d_matrix(Wt):
             weights = np.diag(Wt)
         else:
             weights = np.eye(n_frequencies) * Wt
