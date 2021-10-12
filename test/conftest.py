@@ -152,15 +152,15 @@ def hypothesis_bounded_float_strategy(
     return hst.floats(
         min_value=min_value,
         max_value=max_value,
-        include_min=exclude_min,
-        include_max=exclude_max,
+        exclude_min=exclude_min,
+        exclude_max=exclude_max,
         allow_infinity=allow_infinity,
     )
 
 
 @composite
 def hypothesis_not_negative_float(draw: Callable) -> float:
-    return draw(hypothesis_not_negative_float_strategy)
+    return draw(hypothesis_not_negative_float_strategy())
 
 
 @composite
