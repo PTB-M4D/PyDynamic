@@ -37,7 +37,7 @@ def FIRuncFilter_input(
     draw: Callable, exclude_corr_kind: bool = False
 ) -> Dict[str, Any]:
     filter_length = draw(
-        hst.integers(min_value=2, max_value=1e2)
+        hst.integers(min_value=2, max_value=100)
     )  # scipy.linalg.companion requires N >= 2
     filter_theta = draw(
         hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e3)
@@ -147,11 +147,11 @@ def equal_signals():
 @given(FIRuncFilter_input())
 @settings(deadline=None)
 @pytest.mark.slow
-def test_FIRuncFilter(FIRuncFilter_input):
+def test_FIRuncFilter(fir_unc_filter_input):
     # Check expected output for thinkable permutations of input parameters.
-    y, Uy = FIRuncFilter(**FIRuncFilter_input)
-    assert len(y) == len(FIRuncFilter_input["y"])
-    assert len(Uy) == len(FIRuncFilter_input["y"])
+    y, Uy = FIRuncFilter(**fir_unc_filter_input)
+    assert len(y) == len(fir_unc_filter_input["y"])
+    assert len(Uy) == len(fir_unc_filter_input["y"])
 
     # note: a direct comparison against scipy.signal.lfilter is not needed,
     #       as y is already computed using this method
@@ -410,26 +410,26 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
 @given(FIRuncFilter_input(exclude_corr_kind=True))
 @settings(deadline=None)
 @pytest.mark.slow
-def test_FIRuncFilter_MC_uncertainty_comparison(FIRuncFilter_input):
+def test_FIRuncFilter_MC_uncertainty_comparison(fir_unc_filter_input):
     # Check output for thinkable permutations of input parameters against a Monte Carlo
     # approach.
 
     # run method
-    y_fir, Uy_fir = FIRuncFilter(**FIRuncFilter_input, return_full_covariance=True)
+    y_fir, Uy_fir = FIRuncFilter(**fir_unc_filter_input, return_full_covariance=True)
 
     # run Monte Carlo simulation of an FIR
     # adjust input to match conventions of MC
-    x = FIRuncFilter_input["y"]
-    ux = FIRuncFilter_input["sigma_noise"]
+    x = fir_unc_filter_input["y"]
+    ux = fir_unc_filter_input["sigma_noise"]
 
-    b = FIRuncFilter_input["theta"]
-    a = [1.0]
-    if isinstance(FIRuncFilter_input["Utheta"], np.ndarray):
-        Uab = FIRuncFilter_input["Utheta"]
+    b = fir_unc_filter_input["theta"]
+    a = np.ones(1)
+    if isinstance(fir_unc_filter_input["Utheta"], np.ndarray):
+        Uab = fir_unc_filter_input["Utheta"]
     else:  # Utheta == None
         Uab = np.zeros((len(b), len(b)))  # MC-method cant deal with Utheta = None
 
-    blow = FIRuncFilter_input["blow"]
+    blow = fir_unc_filter_input["blow"]
     if isinstance(blow, np.ndarray):
         n_blow = len(blow)
     else:
@@ -472,14 +472,14 @@ def test_FIRuncFilter_MC_uncertainty_comparison(FIRuncFilter_input):
 @given(FIRuncFilter_input())
 @settings(deadline=None)
 @pytest.mark.slow
-def test_FIRuncFilter_legacy_comparison(FIRuncFilter_input):
+def test_FIRuncFilter_legacy_comparison(fir_unc_filter_input):
     # Compare output of both functions for thinkable permutations of input parameters.
-    legacy_y, legacy_Uy = legacy_FIRuncFilter(**FIRuncFilter_input)
-    current_y, current_Uy = FIRuncFilter(**FIRuncFilter_input)
+    legacy_y, legacy_Uy = legacy_FIRuncFilter(**fir_unc_filter_input)
+    current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
 
     # check output dimensions
-    assert len(current_y) == len(FIRuncFilter_input["y"])
-    assert current_Uy.shape == (len(FIRuncFilter_input["y"]),)
+    assert len(current_y) == len(fir_unc_filter_input["y"])
+    assert current_Uy.shape == (len(fir_unc_filter_input["y"]),)
 
     # check value identity
     assert_allclose(
@@ -509,7 +509,7 @@ def test_fir_filter_MC_comparison():
     y_fir, Uy_fir = _fir_filter(x, theta, Ux, Utheta, initial_conditions="zero")
 
     # run FIR with MC and extract diagonal of returned covariance
-    y_mc, Uy_mc = MC(x, Ux, theta, [1.0], Utheta, blow=None, runs=10000)
+    y_mc, Uy_mc = MC(x, Ux, theta, np.ones(1), Utheta, blow=None, runs=10000)
 
     # HACK: for visualization during debugging
     # import matplotlib.pyplot as plt
