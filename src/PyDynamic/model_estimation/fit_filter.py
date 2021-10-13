@@ -839,39 +839,57 @@ def invLSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
     """
 
     if verbose:
-        print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
-        print("reciprocal of a frequency response given by %d values" % len(H))
-        print("and propagation of associated uncertainties.")
+        print(
+            f"\ninvLSFIR_uncMC: Least-squares fit of an order {N} digital FIR filter "
+            f"to the reciprocal of a frequency response given by {len(H)} values "
+            f"and propagation of associated uncertainties."
+        )
+
+    frequencies = f.copy()
+    sampling_frequency = Fs
+    n_frequencies = len(frequencies)
+
+    if not len(H) == UH.shape[0]:
+        # Assume that H is given as complex valued frequency response.
+        RI = np.hstack((np.real(H), np.imag(H)))
+        h_complex = H.copy()
+    else:
+        RI = H.copy()
+        h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+
+    h_complex_reciprocal = np.reciprocal(h_complex)
 
     # Step 1: Propagation of uncertainties to reciprocal of frequency response
     runs = 10000
-    HRI = np.random.multivariate_normal(np.hstack((np.real(H), np.imag(H))), UH, runs)
+    HRI = np.random.multivariate_normal(RI, UH, runs)
 
     # Step 2: Fitting the filter coefficients
-    Nf = len(f)
     if isinstance(wt, np.ndarray):
-        if wt.shape != 2 * Nf:
+        if wt.shape != 2 * n_frequencies:
             raise ValueError(
                 "invLSFIR_uncMC: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
-                f"{2 * Nf} but is of length {wt.shape}."
+                f"{2 * n_frequencies} but is of length {wt.shape}."
             )
     else:
-        wt = np.ones(2 * Nf)
+        wt = np.ones(2 * n_frequencies)
 
     E = np.exp(
         -1j
         * 2
         * np.pi
-        * np.dot(f[:, np.newaxis] / Fs, np.arange(N + 1)[:, np.newaxis].T)
+        * np.dot(
+            frequencies[:, np.newaxis] / sampling_frequency,
+            np.arange(N + 1)[:, np.newaxis].T,
+        )
     )
     X = np.vstack((np.real(E), np.imag(E)))
     X = np.dot(np.diag(wt), X)
     bF = np.zeros((N + 1, runs))
     resn = np.zeros((runs,))
     for k in range(runs):
-        Hk = HRI[k, :Nf] + 1j * HRI[k, Nf:]
-        Hkt = Hk * np.exp(1j * 2 * np.pi * f / Fs * tau)
+        Hk = HRI[k, :n_frequencies] + 1j * HRI[k, n_frequencies:]
+        Hkt = Hk * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
         iRI = np.hstack([np.real(1.0 / Hkt), np.imag(1.0 / Hkt)])
         bF[:, k], res = np.linalg.lstsq(X, iRI)[:2]
         resn[k] = np.linalg.norm(res)
