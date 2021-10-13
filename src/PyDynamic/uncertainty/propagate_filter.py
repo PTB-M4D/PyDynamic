@@ -43,12 +43,12 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="constant"):
         covariance matrix associated with x
         if the signal is fully certain, use `Ux = None` (default) to make use of more efficient calculations.
     Utheta : np.ndarray, optional
-        covariance matrix associated with theta
-        if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
+        covariance matrix associated with theta. If the filter is fully certain,
+        do not provide Utheta to make use of more efficient calculations.
         see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
     initial_conditions : str, optional
-        constant: assume signal + uncertainty are constant before t=0 (default)
-        zero: assume signal + uncertainty are zero before t=0
+        - "constant": assume signal + uncertainty are constant before t=0 (default)
+        - "zero": assume signal + uncertainty are zero before t=0
 
 
     Returns
@@ -110,20 +110,31 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="constant"):
             )
 
         # calc subterm theta^T * Ux * theta
-        Uy += convolve(np.outer(theta, theta), Ux_extended, mode="valid")
+        Uy += _clip_main_diagonal_to_zero_from_below(
+            convolve(np.outer(theta, theta), Ux_extended, mode="valid")
+        )
 
     if Utheta is not None:
         ## extend signal Ntheta steps into the past
         x_extended = np.r_[np.full((Ntheta - 1), x0), x]
 
         # calc subterm x^T * Utheta * x
-        Uy += convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
+        Uy += _clip_main_diagonal_to_zero_from_below(
+            convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
+        )
 
     if (Ux is not None) and (Utheta is not None):
         # calc subterm Tr(Ux * Utheta)
-        Uy += convolve(Ux_extended, Utheta.T, mode="valid")
+        Uy += _clip_main_diagonal_to_zero_from_below(
+            convolve(Ux_extended, Utheta.T, mode="valid")
+        )
 
     return y, Uy
+
+
+def _clip_main_diagonal_to_zero_from_below(matrix: np.ndarray) -> np.ndarray:
+    np.fill_diagonal(matrix, matrix.diagonal().clip(min=0))
+    return matrix
 
 
 def _fir_filter_diag(
@@ -206,24 +217,28 @@ def _fir_filter_diag(
         Ux_diag_extended = np.r_[np.full((Ntheta - 1), Ux0), Ux_diag]
 
         # calc subterm theta^T * Ux * theta
-        Uy_diag += convolve(np.square(theta), Ux_diag_extended, mode="valid")
+        Uy_diag += convolve(np.square(theta), Ux_diag_extended, mode="valid").clip(
+            min=0
+        )
 
     if Utheta_diag is not None:
         ## extend signal Ntheta steps into the past
         x_extended = np.r_[np.full((Ntheta - 1), x0), x]
 
         # calc subterm x^T * Utheta * x
-        Uy_diag += convolve(np.square(x_extended), Utheta_diag, mode="valid")
+        Uy_diag += convolve(np.square(x_extended), Utheta_diag, mode="valid").clip(
+            min=0
+        )
 
     if (Ux_diag is not None) and (Utheta_diag is not None):
         # calc subterm Tr(Ux * Utheta)
-        Uy_diag += convolve(Ux_diag_extended, Utheta_diag, mode="valid")
+        Uy_diag += convolve(Ux_diag_extended, Utheta_diag, mode="valid").clip(min=0)
 
     return y, Uy_diag
 
 
 def _stationary_prepend_covariance(U, n):
-    """ Prepend covariance matrix U by n steps into the past"""
+    """Prepend covariance matrix U by n steps into the past"""
 
     c = np.r_[U[:, 0], np.zeros(n)]
     r = np.r_[U[0, :], np.zeros(n)]
@@ -257,25 +272,28 @@ def FIRuncFilter(
     y : np.ndarray
         filter input signal
     sigma_noise : float or np.ndarray
-        float:    standard deviation of white noise in y
-        1D-array: interpretation depends on kind
-        2D-array: full covariance of input
+        - float: standard deviation of white noise in y
+        - 1D-array: interpretation depends on kind
+        - 2D-array: full covariance of input
+
     theta : np.ndarray
         FIR filter coefficients
     Utheta : np.ndarray, optional
-        1D-array: coefficient-wise standard uncertainties of filter
-        2D-array: covariance matrix associated with theta
+        - 1D-array: coefficient-wise standard uncertainties of filter
+        - 2D-array: covariance matrix associated with theta
+
         if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
         see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
     shift : int, optional
         time delay of filter output signal (in samples) (defaults to 0)
     blow : np.ndarray, optional
         optional FIR low-pass filter
-    kind : string
+    kind : string, optional
         only meaningful in combination with sigma_noise a 1D numpy array
-        "diag": point-wise standard uncertainties of non-stationary white noise
-        "corr": single sided autocovariance of stationary (colored/correlated)
-        noise (default)
+
+        - "diag": point-wise standard uncertainties of non-stationary white noise
+        - "corr": single sided autocovariance of stationary colored noise (default)
+
     return_full_covariance : bool, optional
         whether or not to return a full covariance of the output, defaults to False
 
@@ -284,9 +302,10 @@ def FIRuncFilter(
     x : np.ndarray
         FIR filter output signal
     Ux : np.ndarray
-        return_full_covariance == False : point-wise standard uncertainties associated with x (default)
-        return_full_covariance == True : covariance matrix containing uncertainties associated with x
-
+        - return_full_covariance == False : point-wise standard uncertainties
+          associated with x (default)
+        - return_full_covariance == True : covariance matrix containing uncertainties
+          associated with x
 
     References
     ----------
@@ -356,7 +375,15 @@ def FIRuncFilter(
         x, Ux_diag = _fir_filter_diag(
             y, theta, Uy_diag, Utheta_diag, initial_conditions="constant"
         )
-        return x, np.sqrt(np.abs(Ux_diag))
+
+        Ux_diag = np.sqrt(np.abs(Ux_diag))
+
+        # shift result
+        if shift != 0:
+            x = np.roll(x, -int(shift))
+            Ux_diag = np.roll(Ux_diag, -int(shift))
+
+        return x, Ux_diag
 
     # otherwise, the method computes full covariance information
     else:
@@ -404,7 +431,7 @@ def FIRuncFilter(
         # shift result
         if shift != 0:
             x = np.roll(x, -int(shift))
-            Ux = np.roll(Ux, (-int(shift), -int(shift)))
+            Ux = np.roll(Ux, (-int(shift), -int(shift)), axis=(0, 1))
 
         if return_full_covariance:
             return x, Ux

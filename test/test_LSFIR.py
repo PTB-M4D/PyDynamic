@@ -4,15 +4,21 @@ import pathlib
 import numpy as np
 import pytest
 import scipy.signal as dsp
+from hypothesis import given, HealthCheck, settings
 from matplotlib import pyplot as plt
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.tools import make_semiposdef
-from PyDynamic.model_estimation.fit_filter import invLSFIR_unc
+from PyDynamic.model_estimation.fit_filter import (
+    invLSFIR,
+    invLSFIR_unc,
+    invLSFIR_uncMC,
+    LSFIR,
+)
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
-from .test_propagate_filter import legacy_FIRuncFilter
+from .conftest import hypothesis_dimension
 
 
 @pytest.fixture(scope="module")
@@ -224,7 +230,7 @@ def invLSFIR_unc_filter_fit(monte_carlo, frequencies, sampling_frequency):
         )["UbF"],
         rtol=3e-1,
     )
-    return {"bF": bF, "UbF": UbF}
+    return {"bF": bF, "UbF": UbF, "N": N, "tau": tau}
 
 
 @pytest.fixture(scope="module")
@@ -446,49 +452,84 @@ def test_digital_deconvolution_FIR_example_figure_7(
     plt.xlim(1.9, 2.4)
 
 
-def test_reveal_difference_between_current_and_former_FIRuncFilter(
-    shift,
-    simulated_measurement_input_and_output,
-    fir_unc_filter,
-    invLSFIR_unc_filter_fit,
-    fir_low_pass,
+@given(hypothesis_dimension())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_unc_to_invLSFIR(
+    monte_carlo, frequencies, sampling_frequency, N
 ):
-    xhat, Uxhat = FIRuncFilter(
-        y=simulated_measurement_input_and_output["yn"],
-        sigma_noise=simulated_measurement_input_and_output["noise"],
-        theta=invLSFIR_unc_filter_fit["bF"],
-        Utheta=invLSFIR_unc_filter_fit["UbF"],
-        shift=shift,
-        blow=fir_low_pass["blow"],
+    bF_unc, _ = invLSFIR_unc(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
     )
-    xhat_legacy, Uxhat_legacy = legacy_FIRuncFilter(
-        y=simulated_measurement_input_and_output["yn"],
-        sigma_noise=simulated_measurement_input_and_output["noise"],
-        theta=invLSFIR_unc_filter_fit["bF"],
-        Utheta=invLSFIR_unc_filter_fit["UbF"],
-        shift=shift,
-        blow=fir_low_pass["blow"],
+    bF = invLSFIR(
+        H=monte_carlo["H"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
     )
-    fig, axs = plt.subplots(2)
-    fig.suptitle("Current vs. legacy FIRuncFilter")
-    ax1 = plt.subplot(1, 2, 1)
-    ax1.set_title("Current FIRuncFilter uncertainties")
-    ax1.plot(
-        simulated_measurement_input_and_output["time"] * 1e3,
-        fir_unc_filter["Uxhat"],
+    assert_allclose(
+        bF_unc,
+        bF,
     )
-    ax1.set_xlim(1.9, 2.4)
-    ax1.set_xlabel("time / ms")
-    ax1.set_ylabel("signal uncertainty / au")
-    ax2 = plt.subplot(1, 2, 2, sharey=ax1, sharex=ax1)
-    ax2.set_title("Legacy FIRuncFilter uncertainties")
-    ax2.set_xlabel("time / ms")
-    ax2.set_ylabel("signal uncertainty / au")
-    ax2.plot(
-        simulated_measurement_input_and_output["time"] * 1e3,
-        Uxhat_legacy,
-    )
-    plt.show()  # show comparison plot of former and current implementation
 
-    assert_allclose(xhat_legacy, xhat)
-    assert_allclose(Uxhat_legacy, Uxhat)
+
+@given(hypothesis_dimension())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, N):
+    LSFIR(
+        H=monte_carlo["H"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+
+
+@given(hypothesis_dimension())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
+    monte_carlo, frequencies, sampling_frequency, N
+):
+    b, ub = invLSFIR_unc(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    b_mc, ub_mc = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    assert_allclose(b, b_mc, rtol=4e-3)
+    assert_allclose(ub, ub_mc, rtol=1e-1)

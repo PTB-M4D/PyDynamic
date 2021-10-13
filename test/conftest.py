@@ -138,8 +138,17 @@ def hypothesis_float_vector(
     )
 
 
-def hypothesis_not_negative_float_strategy() -> SearchStrategy:
-    return hst.floats(min_value=0)
+def hypothesis_not_negative_float_strategy(
+    max_value: Optional[float] = None,
+    allow_nan: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
+) -> SearchStrategy:
+    return hst.floats(
+        min_value=0,
+        max_value=max_value,
+        allow_nan=allow_nan,
+        allow_infinity=allow_infinity,
+    )
 
 
 def hypothesis_bounded_float_strategy(
@@ -152,15 +161,24 @@ def hypothesis_bounded_float_strategy(
     return hst.floats(
         min_value=min_value,
         max_value=max_value,
-        include_min=exclude_min,
-        include_max=exclude_max,
+        exclude_min=exclude_min,
+        exclude_max=exclude_max,
         allow_infinity=allow_infinity,
     )
 
 
 @composite
-def hypothesis_not_negative_float(draw: Callable) -> float:
-    return draw(hypothesis_not_negative_float_strategy)
+def hypothesis_not_negative_float(
+    draw: Callable,
+    max_value: Optional[float] = None,
+    allow_nan: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
+) -> float:
+    return draw(
+        hypothesis_not_negative_float_strategy(
+            max_value=max_value, allow_nan=allow_nan, allow_infinity=allow_infinity
+        )
+    )
 
 
 @composite
@@ -215,7 +233,7 @@ def hypothesis_covariance_matrix(
     nonzero_diagonal_cov = draw(
         ensure_hypothesis_nonzero_diagonal(cov_after_discarding_smallest_singular_value)
     )
-    scaled_cov = _scale_matrix_or_vector_to_range(
+    scaled_cov = scale_matrix_or_vector_to_range(
         nonzero_diagonal_cov, range_min=min_value, range_max=max_value
     )
     assume(np.all(np.linalg.eigvals(scaled_cov) >= 0))
@@ -235,15 +253,15 @@ def ensure_hypothesis_nonzero_diagonal(
     )
 
 
-def _scale_matrix_or_vector_to_range(
+def scale_matrix_or_vector_to_range(
     array: np.ndarray, range_min: Optional[float] = 0, range_max: Optional[float] = 1
 ) -> np.ndarray:
     return _normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
 
 
 def _normalize_vector_or_matrix(array: np.ndarray) -> np.ndarray:
-    array_min = array.min()
-    return (array - array_min) / (array.max() - array_min)
+    array_min = np.min(array)
+    return (array - array_min) / (np.max(array) - array_min)
 
 
 @composite

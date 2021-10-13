@@ -361,11 +361,13 @@ def test_LSIIR_results_against_former_implementations(
 
 
 @given(lsiir_base_params=LSIIR_parameters())
-def test_fitIIR_exception(
+def test_fit_iir_via_least_squares_exception(
     lsiir_base_params, provide_fitted_filter, compute_fitting_parameters
 ):
-    """This checks if _fit_iir_via_least_squares raises an expected exception"""
-    assume(np.all(lsiir_base_params["Hvals"] == 0))
+    if np.any(lsiir_base_params["Hvals"] != 0):
+        lsiir_base_params["Hvals"] = np.zeros_like(
+            lsiir_base_params["Hvals"], dtype=complex
+        )
     with pytest.raises(ValueError):
         fit_filter._fit_iir_via_least_squares(
             Hvals=lsiir_base_params["Hvals"],

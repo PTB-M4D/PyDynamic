@@ -80,12 +80,12 @@ def test_dft_deconv(
     assert_allclose(
         x_deconv + x_deconv_shift_away_from_zero,
         monte_carlo_mean + x_deconv_shift_away_from_zero,
-        rtol=3.6e-3,
+        rtol=1.8e-2,
     )
     assert_allclose(
         u_deconv + u_deconv_shift_away_from_zero,
         monte_carlo_cov + u_deconv_shift_away_from_zero,
-        rtol=9.7e-4,
+        rtol=2.5e-2,
     )
 
 
@@ -189,6 +189,7 @@ def _covariance_of_multivariate_monte_carlo_samples():
 
 @given(deconvolution_input(reveal_bug=True))
 @settings(deadline=None)
+@pytest.mark.slow
 def test_reveal_bug_in_dft_deconv_up_to_1_9(
     multivariate_complex_monte_carlo, complex_deconvolution_on_sets, DFT_deconv_input
 ):
