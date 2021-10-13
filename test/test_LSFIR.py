@@ -456,6 +456,7 @@ def test_digital_deconvolution_FIR_example_figure_7(
         HealthCheck.too_slow,
     ],
 )
+@pytest.mark.slow
 def test_compare_invLSFIR_unc_to_invLSFIR(
     monte_carlo, frequencies, sampling_frequency, N
 ):
