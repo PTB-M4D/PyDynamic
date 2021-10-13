@@ -585,7 +585,7 @@ def invLSFIR(
     """
     print(
         f"\ninvLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
-        f"frequency response H given by {len(H)} values.\n"
+        f"reciprocal of a frequency response H given by {len(H)} values.\n"
     )
 
     frequencies = f.copy()
