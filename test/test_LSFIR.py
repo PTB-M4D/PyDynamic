@@ -490,7 +490,7 @@ def test_reveal_difference_between_current_and_former_FIRuncFilter(
         simulated_measurement_input_and_output["time"] * 1e3,
         Uxhat_legacy,
     )
-    plt.show()  # show comparison plot of former and current implementation
+    # plt.show()  # show comparison plot of former and current implementation
 
     assert_allclose(xhat_legacy, xhat)
     assert_allclose(Uxhat_legacy, Uxhat)
