@@ -641,9 +641,18 @@ def invLSFIR(
     return bFIR.flatten()
 
 
-def invLSFIR_unc(H, UH, N, tau, f, Fs, wt=None, verbose=True, trunc_svd_tol=None):
-    """Design of FIR filter as fit to reciprocal of frequency response values
-    with uncertainty
+def invLSFIR_unc(
+    H: np.ndarray,
+    UH: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    wt: Optional[np.ndarray] = None,
+    verbose: Optional[bool] = True,
+    trunc_svd_tol: Optional[bool] = None,
+):
+    """Design of FIR filter as fit to reciprocal of freq. resp. with uncertainty
 
 
     Least-squares fit of a digital FIR filter to the reciprocal of a
