@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import pytest
 import scipy
-from hypothesis import given
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
@@ -445,6 +445,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
 @pytest.mark.parametrize("signals", valid_signals())
 @pytest.mark.parametrize("lowpasses", valid_lows())
 @given(hypothesis_bounded_float(min_value=0.0, max_value=100.0))
+@settings(deadline=None)
 @pytest.mark.slow
 def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses, shift):
     # Compare output of both functions for thinkable permutations of input parameters.
