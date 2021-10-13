@@ -233,7 +233,7 @@ def hypothesis_covariance_matrix(
     nonzero_diagonal_cov = draw(
         ensure_hypothesis_nonzero_diagonal(cov_after_discarding_smallest_singular_value)
     )
-    scaled_cov = _scale_matrix_or_vector_to_range(
+    scaled_cov = scale_matrix_or_vector_to_range(
         nonzero_diagonal_cov, range_min=min_value, range_max=max_value
     )
     assume(np.all(np.linalg.eigvals(scaled_cov) >= 0))
@@ -253,7 +253,7 @@ def ensure_hypothesis_nonzero_diagonal(
     )
 
 
-def _scale_matrix_or_vector_to_range(
+def scale_matrix_or_vector_to_range(
     array: np.ndarray, range_min: Optional[float] = 0, range_max: Optional[float] = 1
 ) -> np.ndarray:
     return _normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
