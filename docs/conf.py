@@ -57,7 +57,7 @@ intersphinx_mapping = {
         None,
     ),
     "np": (
-        "http://docs.scipy.org/doc/numpy/",
+        "https://docs.scipy.org/doc/numpy/",
         None,
     ),
     "Python": ("https://docs.python.org/3", None),
