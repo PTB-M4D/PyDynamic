@@ -19,6 +19,9 @@ This module contains the following functions:
   response values with uncertainty via Monte Carlo
 
 """
+
+__all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
+
 import inspect
 from enum import Enum
 from os import path
@@ -30,9 +33,6 @@ from scipy.stats import multivariate_normal
 
 from .. import is_2d_matrix, number_of_rows_equals_vector_dim
 from ..misc.filterstuff import grpdelay, isstable, mapinside
-
-__all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
-
 from ..misc.tools import is_2d_square_matrix
 
 
