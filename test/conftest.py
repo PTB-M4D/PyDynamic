@@ -260,8 +260,8 @@ def scale_matrix_or_vector_to_range(
 
 
 def _normalize_vector_or_matrix(array: np.ndarray) -> np.ndarray:
-    array_min = array.min()
-    return (array - array_min) / (array.max() - array_min)
+    array_min = np.min(array)
+    return (array - array_min) / (np.max(array) - array_min)
 
 
 @composite
