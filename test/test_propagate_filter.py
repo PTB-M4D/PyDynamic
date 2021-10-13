@@ -482,8 +482,17 @@ def test_FIRuncFilter_legacy_comparison(FIRuncFilter_input):
     assert current_Uy.shape == (len(FIRuncFilter_input["y"]),)
 
     # check value identity
-    assert_allclose(legacy_y, current_y)
-    assert_allclose(legacy_Uy, current_Uy)
+    assert_allclose(
+        legacy_y,
+        current_y,
+        atol=1e-15,
+    )
+    assert_allclose(
+        legacy_Uy,
+        current_Uy,
+        atol=1e-15,
+        rtol=4e-7,
+    )
 
 
 @pytest.mark.slow
