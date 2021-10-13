@@ -110,10 +110,9 @@ def test_fit_som_with_nonsquare_UH(params):
         fit_som(**params)
 
 
-@given(random_input_to_fit_som())
+@given(random_input_to_fit_som(guarantee_UH_as_matrix=True))
 def test_fit_som_with_nonint_MCruns(params):
     params["MCruns"] = float(params["MCruns"])
-    assume(params["UH"] is not None)
     with pytest.raises(ValueError):
         fit_som(**params)
 
