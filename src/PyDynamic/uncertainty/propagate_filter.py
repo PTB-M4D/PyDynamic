@@ -257,25 +257,28 @@ def FIRuncFilter(
     y : np.ndarray
         filter input signal
     sigma_noise : float or np.ndarray
-        float:    standard deviation of white noise in y
-        1D-array: interpretation depends on kind
-        2D-array: full covariance of input
+        - float: standard deviation of white noise in y
+        - 1D-array: interpretation depends on kind
+        - 2D-array: full covariance of input
+
     theta : np.ndarray
         FIR filter coefficients
     Utheta : np.ndarray, optional
-        1D-array: coefficient-wise standard uncertainties of filter
-        2D-array: covariance matrix associated with theta
+        - 1D-array: coefficient-wise standard uncertainties of filter
+        - 2D-array: covariance matrix associated with theta
+
         if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
         see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
     shift : int, optional
         time delay of filter output signal (in samples) (defaults to 0)
     blow : np.ndarray, optional
         optional FIR low-pass filter
-    kind : string
+    kind : string, optional
         only meaningful in combination with sigma_noise a 1D numpy array
-        "diag": point-wise standard uncertainties of non-stationary white noise
-        "corr": single sided autocovariance of stationary (colored/correlated)
-        noise (default)
+
+        - "diag": point-wise standard uncertainties of non-stationary white noise
+        - "corr": single sided autocovariance of stationary colored noise (default)
+
     return_full_covariance : bool, optional
         whether or not to return a full covariance of the output, defaults to False
 
@@ -284,9 +287,10 @@ def FIRuncFilter(
     x : np.ndarray
         FIR filter output signal
     Ux : np.ndarray
-        return_full_covariance == False : point-wise standard uncertainties associated with x (default)
-        return_full_covariance == True : covariance matrix containing uncertainties associated with x
-
+        - return_full_covariance == False : point-wise standard uncertainties
+          associated with x (default)
+        - return_full_covariance == True : covariance matrix containing uncertainties
+          associated with x
 
     References
     ----------
