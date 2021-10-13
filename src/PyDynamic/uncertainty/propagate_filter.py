@@ -110,18 +110,20 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="constant"):
             )
 
         # calc subterm theta^T * Ux * theta
-        Uy += convolve(np.outer(theta, theta), Ux_extended, mode="valid")
+        Uy += convolve(np.outer(theta, theta), Ux_extended, mode="valid").clip(min=0)
 
     if Utheta is not None:
         ## extend signal Ntheta steps into the past
         x_extended = np.r_[np.full((Ntheta - 1), x0), x]
 
         # calc subterm x^T * Utheta * x
-        Uy += convolve(np.outer(x_extended, x_extended), Utheta, mode="valid")
+        Uy += convolve(np.outer(x_extended, x_extended), Utheta, mode="valid").clip(
+            min=0
+        )
 
     if (Ux is not None) and (Utheta is not None):
         # calc subterm Tr(Ux * Utheta)
-        Uy += convolve(Ux_extended, Utheta.T, mode="valid")
+        Uy += convolve(Ux_extended, Utheta.T, mode="valid").clip(min=0)
 
     return y, Uy
 
@@ -206,18 +208,22 @@ def _fir_filter_diag(
         Ux_diag_extended = np.r_[np.full((Ntheta - 1), Ux0), Ux_diag]
 
         # calc subterm theta^T * Ux * theta
-        Uy_diag += convolve(np.square(theta), Ux_diag_extended, mode="valid")
+        Uy_diag += convolve(np.square(theta), Ux_diag_extended, mode="valid").clip(
+            min=0
+        )
 
     if Utheta_diag is not None:
         ## extend signal Ntheta steps into the past
         x_extended = np.r_[np.full((Ntheta - 1), x0), x]
 
         # calc subterm x^T * Utheta * x
-        Uy_diag += convolve(np.square(x_extended), Utheta_diag, mode="valid")
+        Uy_diag += convolve(np.square(x_extended), Utheta_diag, mode="valid").clip(
+            min=0
+        )
 
     if (Ux_diag is not None) and (Utheta_diag is not None):
         # calc subterm Tr(Ux * Utheta)
-        Uy_diag += convolve(Ux_diag_extended, Utheta_diag, mode="valid")
+        Uy_diag += convolve(Ux_diag_extended, Utheta_diag, mode="valid").clip(min=0)
 
     return y, Uy_diag
 
