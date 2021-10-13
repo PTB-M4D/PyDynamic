@@ -104,7 +104,7 @@ def test_fit_som_with_too_short_UH(params):
 
 
 @given(random_input_to_fit_som(guarantee_UH_as_matrix=True))
-def test_fit_som_with_unsquare_UH(params):
+def test_fit_som_with_nonsquare_UH(params):
     params["UH"] = params["UH"][:, 1:]
     with pytest.raises(ValueError):
         fit_som(**params)
