@@ -462,7 +462,9 @@ def test_FIRuncFilter_MC_uncertainty_comparison(FIRuncFilter_input):
     assert_allclose(
         Uy_fir[len(b) + n_blow :, len(b) + n_blow :],
         Uy_mc[len(b) + n_blow :, len(b) + n_blow :],
-        atol=2e-1 * Uy_fir.max(),  # very broad check, increase runs for better fit
+        atol=np.max(
+            (2e-1 * Uy_fir.max(), 1e-7)
+        ),  # very broad check, increase runs for better fit
         rtol=1e-1,
     )
 
