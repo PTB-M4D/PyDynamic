@@ -564,11 +564,12 @@ def invLSFIR(
     tau : int
         delay of filter
     f : array_like of shape (M,)
-        Frequencies at which ``H`` is given
+        frequencies at which ``H`` is given
     Fs : float
-        sampling frequency of digital FIR filter.
+        sampling frequency of digital FIR filter
     Wt : array_like of shape (M,) or shape (M,M), optional
-        vector of weights
+        vector of weights for a weighted least-squares method (default results in no
+        weighting)
 
     Returns
     -------
