@@ -471,7 +471,7 @@ def test_reveal_difference_between_current_and_former_FIRuncFilter(
         shift=shift,
         blow=fir_low_pass["blow"],
     )
-    fig, axs = plt.subplots(2)
+    fig, _ = plt.subplots(2)
     fig.suptitle("Current vs. legacy FIRuncFilter")
     ax1 = plt.subplot(1, 2, 1)
     ax1.set_title("Current FIRuncFilter uncertainties")
