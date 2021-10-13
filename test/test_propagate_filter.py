@@ -396,10 +396,10 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
 
     # check that all have the same output, as they are supposed to represent equal cases
     for a, b in itertools.combinations(all_y, 2):
-        assert np.allclose(a, b)
+        assert_allclose(a, b)
 
     for a, b in itertools.combinations(all_uy, 2):
-        assert np.allclose(a, b)
+        assert_allclose(a, b)
 
 
 # in the following test, we exclude the case of a valid signal with uncertainty given as
@@ -459,7 +459,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(FIRuncFilter_input):
 
     # approximate comparison after swing-in of MC-result (which is after the combined
     # length of blow and b)
-    assert np.allclose(
+    assert_allclose(
         Uy_fir[len(b) + n_blow :, len(b) + n_blow :],
         Uy_mc[len(b) + n_blow :, len(b) + n_blow :],
         atol=2e-1 * Uy_fir.max(),  # very broad check, increase runs for better fit
@@ -518,7 +518,7 @@ def test_fir_filter_MC_comparison():
     assert np.all(np.diag(Uy_fir) >= 0)
     assert np.all(np.diag(Uy_mc) >= 0)
     assert Uy_fir.shape == Uy_mc.shape
-    assert np.allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
+    assert_allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
 
 
 def test_IIRuncFilter():
@@ -625,8 +625,8 @@ def test_IIRuncFilter_identity_nonchunk_chunk(
     y2, Uy2 = run_IIRuncFilter_in_chunks
 
     # check if both ways of calling IIRuncFilter yield the same result
-    assert np.allclose(y1, y2)
-    assert np.allclose(Uy1, Uy2)
+    assert_allclose(y1, y2)
+    assert_allclose(Uy1, Uy2)
 
 
 @pytest.mark.parametrize("kind", ["diag", "corr"])
@@ -641,8 +641,8 @@ def test_FIR_IIR_identity(kind, fir_filter, input_signal):
         kind=kind,
     )
 
-    assert np.allclose(y_fir, y_iir)
-    assert np.allclose(Uy_fir, Uy_iir)
+    assert_allclose(y_fir, y_iir)
+    assert_allclose(Uy_fir, Uy_iir)
 
 
 def test_tf2ss(iir_filter):
@@ -652,10 +652,10 @@ def test_tf2ss(iir_filter):
     A1, B1, C1, D1 = _tf2ss(b, a)
     A2, B2, C2, D2 = scipy.signal.tf2ss(b, a)
 
-    assert np.allclose(A1, A2[::-1, ::-1])
-    assert np.allclose(B1, B2[::-1, ::-1])
-    assert np.allclose(C1, C2[::-1, ::-1])
-    assert np.allclose(D1, D2[::-1, ::-1])
+    assert_allclose(A1, A2[::-1, ::-1])
+    assert_allclose(B1, B2[::-1, ::-1])
+    assert_allclose(C1, C2[::-1, ::-1])
+    assert_allclose(D1, D2[::-1, ::-1])
 
 
 def test_get_derivative_A():
@@ -668,4 +668,4 @@ def test_get_derivative_A():
 
     sliced_diagonal = np.full(p, -1.0)
 
-    assert np.allclose(dA[index1, index2, index3], sliced_diagonal)
+    assert_allclose(dA[index1, index2, index3], sliced_diagonal)
