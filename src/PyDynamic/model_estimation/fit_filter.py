@@ -793,9 +793,17 @@ def invLSFIR_unc(
     return bFIR, UbFIR
 
 
-def invLSFIR_uncMC(H, UH, N, tau, f, Fs, wt=None, verbose=True):
-    """Design of FIR filter as fit to reciprocal of frequency response values
-    with uncertainty
+def invLSFIR_uncMC(
+    H: np.ndarray,
+    UH: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    wt: Optional[np.ndarray] = None,
+    verbose: Optional[bool] = True,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Design of FIR filter as fit to reciprocal of freq. resp. with uncertainty
 
     Least-squares fit of a FIR filter to the reciprocal of a frequency response
     for which associated uncertainties are given for its real and imaginary
