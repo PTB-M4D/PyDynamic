@@ -43,12 +43,12 @@ def _fir_filter(x, theta, Ux=None, Utheta=None, initial_conditions="constant"):
         covariance matrix associated with x
         if the signal is fully certain, use `Ux = None` (default) to make use of more efficient calculations.
     Utheta : np.ndarray, optional
-        covariance matrix associated with theta
-        if the filter is fully certain, use `Utheta = None` (default) to make use of more efficient calculations.
+        covariance matrix associated with theta. If the filter is fully certain,
+        do not provide Utheta to make use of more efficient calculations.
         see also the comparison given in <examples\Digital filtering\FIRuncFilter_runtime_comparison.py>
     initial_conditions : str, optional
-        constant: assume signal + uncertainty are constant before t=0 (default)
-        zero: assume signal + uncertainty are zero before t=0
+        - "constant": assume signal + uncertainty are constant before t=0 (default)
+        - "zero": assume signal + uncertainty are zero before t=0
 
 
     Returns
