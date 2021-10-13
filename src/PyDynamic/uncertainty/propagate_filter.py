@@ -217,8 +217,8 @@ def _fir_filter_diag(
         Ux_diag_extended = np.r_[np.full((Ntheta - 1), Ux0), Ux_diag]
 
         # calc subterm theta^T * Ux * theta
-        Uy_diag += _clip_main_diagonal_to_zero_from_below(
-            convolve(np.square(theta), Ux_diag_extended, mode="valid")
+        Uy_diag += convolve(np.square(theta), Ux_diag_extended, mode="valid").clip(
+            min=0
         )
 
     if Utheta_diag is not None:
@@ -226,15 +226,13 @@ def _fir_filter_diag(
         x_extended = np.r_[np.full((Ntheta - 1), x0), x]
 
         # calc subterm x^T * Utheta * x
-        Uy_diag += _clip_main_diagonal_to_zero_from_below(
-            convolve(np.square(x_extended), Utheta_diag, mode="valid")
+        Uy_diag += convolve(np.square(x_extended), Utheta_diag, mode="valid").clip(
+            min=0
         )
 
     if (Ux_diag is not None) and (Utheta_diag is not None):
         # calc subterm Tr(Ux * Utheta)
-        Uy_diag += _clip_main_diagonal_to_zero_from_below(
-            convolve(Ux_diag_extended, Utheta_diag, mode="valid")
-        )
+        Uy_diag += convolve(Ux_diag_extended, Utheta_diag, mode="valid").clip(min=0)
 
     return y, Uy_diag
 
