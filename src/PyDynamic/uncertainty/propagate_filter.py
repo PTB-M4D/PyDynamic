@@ -223,7 +223,7 @@ def _fir_filter_diag(
 
 
 def _stationary_prepend_covariance(U, n):
-    """ Prepend covariance matrix U by n steps into the past"""
+    """Prepend covariance matrix U by n steps into the past"""
 
     c = np.r_[U[:, 0], np.zeros(n)]
     r = np.r_[U[0, :], np.zeros(n)]
@@ -356,7 +356,15 @@ def FIRuncFilter(
         x, Ux_diag = _fir_filter_diag(
             y, theta, Uy_diag, Utheta_diag, initial_conditions="constant"
         )
-        return x, np.sqrt(np.abs(Ux_diag))
+
+        Ux_diag = np.sqrt(np.abs(Ux_diag))
+
+        # shift result
+        if shift != 0:
+            x = np.roll(x, -int(shift))
+            Ux_diag = np.roll(Ux_diag, -int(shift))
+
+        return x, Ux_diag
 
     # otherwise, the method computes full covariance information
     else:
