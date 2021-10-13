@@ -448,54 +448,6 @@ def test_digital_deconvolution_FIR_example_figure_7(
     plt.xlim(1.9, 2.4)
 
 
-def test_reveal_difference_between_current_and_former_FIRuncFilter(
-    shift,
-    simulated_measurement_input_and_output,
-    fir_unc_filter,
-    invLSFIR_unc_filter_fit,
-    fir_low_pass,
-):
-    xhat, Uxhat = FIRuncFilter(
-        y=simulated_measurement_input_and_output["yn"],
-        sigma_noise=simulated_measurement_input_and_output["noise"],
-        theta=invLSFIR_unc_filter_fit["bF"],
-        Utheta=invLSFIR_unc_filter_fit["UbF"],
-        shift=shift,
-        blow=fir_low_pass["blow"],
-    )
-    xhat_legacy, Uxhat_legacy = legacy_FIRuncFilter(
-        y=simulated_measurement_input_and_output["yn"],
-        sigma_noise=simulated_measurement_input_and_output["noise"],
-        theta=invLSFIR_unc_filter_fit["bF"],
-        Utheta=invLSFIR_unc_filter_fit["UbF"],
-        shift=shift,
-        blow=fir_low_pass["blow"],
-    )
-    fig, _ = plt.subplots(2)
-    fig.suptitle("Current vs. legacy FIRuncFilter")
-    ax1 = plt.subplot(1, 2, 1)
-    ax1.set_title("Current FIRuncFilter uncertainties")
-    ax1.plot(
-        simulated_measurement_input_and_output["time"] * 1e3,
-        fir_unc_filter["Uxhat"],
-    )
-    ax1.set_xlim(1.9, 2.4)
-    ax1.set_xlabel("time / ms")
-    ax1.set_ylabel("signal uncertainty / au")
-    ax2 = plt.subplot(1, 2, 2, sharey=ax1, sharex=ax1)
-    ax2.set_title("Legacy FIRuncFilter uncertainties")
-    ax2.set_xlabel("time / ms")
-    ax2.set_ylabel("signal uncertainty / au")
-    ax2.plot(
-        simulated_measurement_input_and_output["time"] * 1e3,
-        Uxhat_legacy,
-    )
-    # plt.show()  # show comparison plot of former and current implementation
-
-    assert_allclose(xhat_legacy, xhat)
-    assert_allclose(Uxhat_legacy, Uxhat)
-
-
 @given(hypothesis_dimension())
 @settings(
     deadline=None,
