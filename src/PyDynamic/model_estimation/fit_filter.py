@@ -695,38 +695,45 @@ def invLSFIR_unc(
 
     .. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
     """
-
     if verbose:
-        print("\nLeast-squares fit of an order %d digital FIR filter to the" % N)
-        print("reciprocal of a frequency response given by %d values" % len(H))
-        print("and propagation of associated uncertainties.")
+        print(
+            f"\ninvLSFIR_unc: Least-squares fit of an order {N} digital FIR filter "
+            f"to the reciprocal of a frequency response H given by {len(H)} values "
+            f"and propagation of associated uncertainties."
+        )
+
+    frequencies = f.copy()
+    sampling_frequency = Fs
+    n_frequencies = len(frequencies)
 
     # Step 1: Propagation of uncertainties to reciprocal of frequency response
     runs = 10000
-    Nf = len(f)
 
     if not len(H) == UH.shape[0]:
         # Assume that H is given as complex valued frequency response.
         RI = np.hstack((np.real(H), np.imag(H)))
+        h_complex = H.copy()
     else:
         RI = H.copy()
-        H_complex = H[:Nf] + 1j * H[Nf:]
+        h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+
+    h_complex_reciprocal = np.reciprocal(h_complex)
     HRI = np.random.multivariate_normal(RI, UH, runs)  # random draws of real,imag of
     # freq response values
-    omtau = 2 * np.pi * f / Fs * tau
+    omtau = 2 * np.pi * frequencies / sampling_frequency * tau
 
     # Vectorized Monte Carlo for propagation to inverse
-    absHMC = HRI[:, :Nf] ** 2 + HRI[:, Nf:] ** 2
+    absHMC = HRI[:, :n_frequencies] ** 2 + HRI[:, n_frequencies:] ** 2
     HiMC = np.hstack(
         (
             (
-                HRI[:, :Nf] * np.tile(np.cos(omtau), (runs, 1))
-                + HRI[:, Nf:] * np.tile(np.sin(omtau), (runs, 1))
+                HRI[:, :n_frequencies] * np.tile(np.cos(omtau), (runs, 1))
+                + HRI[:, n_frequencies:] * np.tile(np.sin(omtau), (runs, 1))
             )
             / absHMC,
             (
-                HRI[:, Nf:] * np.tile(np.cos(omtau), (runs, 1))
-                - HRI[:, :Nf] * np.tile(np.sin(omtau), (runs, 1))
+                HRI[:, n_frequencies:] * np.tile(np.cos(omtau), (runs, 1))
+                - HRI[:, :n_frequencies] * np.tile(np.sin(omtau), (runs, 1))
             )
             / absHMC,
         )
@@ -739,20 +746,23 @@ def invLSFIR_unc(
             raise ValueError(
                 "invLSFIR_unc: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
-                f"{2 * Nf} but is of length {wt.shape}."
+                f"{2 * n_frequencies} but is of length {wt.shape}."
             )
     else:
-        wt = np.ones(2 * Nf)
+        wt = np.ones(2 * n_frequencies)
 
     E = np.exp(
         -1j
         * 2
         * np.pi
-        * np.dot(f[:, np.newaxis] / Fs, np.arange(N + 1)[:, np.newaxis].T)
+        * np.dot(
+            frequencies[:, np.newaxis] / sampling_frequency,
+            np.arange(N + 1)[:, np.newaxis].T,
+        )
     )
     X = np.vstack((np.real(E), np.imag(E)))
     X = np.dot(np.diag(wt), X)
-    Hm = H_complex * np.exp(1j * omtau)
+    Hm = h_complex * np.exp(1j * omtau)
     Hri = np.hstack((np.real(1.0 / Hm), np.imag(1.0 / Hm)))
 
     u, s, v = np.linalg.svd(X, full_matrices=False)
@@ -769,16 +779,16 @@ def invLSFIR_unc(
     bFIR = bFIR.flatten()
 
     if verbose:
-        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * f / Fs)[1]
-        Hd = Hd * np.exp(1j * 2 * np.pi * f / Fs * tau)
+        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * frequencies / sampling_frequency)[1]
+        Hd = Hd * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
         res = np.hstack(
             (
-                np.real(Hd) - np.real(np.reciprocal(H_complex)),
-                np.imag(Hd) - np.imag(np.reciprocal(H_complex)),
+                np.real(Hd) - np.real(np.reciprocal(h_complex_reciprocal)),
+                np.imag(Hd) - np.imag(np.reciprocal(h_complex_reciprocal)),
             )
         )
-        rms = np.sqrt(np.sum(res ** 2) / len(f))
-        print("Final rms error = %e \n\n" % rms)
+        rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
+        print(f"invLSFIR_unc: Final rms error = {rms}\n\n")
 
     return bFIR, UbFIR
 
