@@ -805,34 +805,33 @@ def invLSFIR_uncMC(
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Design of FIR filter as fit to reciprocal of freq. resp. with uncertainty
 
-    Least-squares fit of a FIR filter to the reciprocal of a frequency response
-    for which associated uncertainties are given for its real and imaginary
-    parts.
-    Uncertainties are propagated using a Monte Carlo method. This method may
-    help in cases where
-    the weighting matrix or the Jacobian are ill-conditioned, resulting in
-    false uncertainties
-    associated with the filter coefficients.
+    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
+    given frequency response for which associated uncertainties are given for its
+    real and imaginary part. Uncertainties are propagated using a Monte Carlo method.
+    This method may help in cases where the weighting matrix or the Jacobian are
+    ill-conditioned, resulting in false uncertainties associated with the filter
+    coefficients.
 
     Parameters
     ----------
-        H: np.ndarray of shape (M,) and dtype complex
-            frequency response values
-        UH: np.ndarray of shape (2M,2M)
-            uncertainties associated with the real and imaginary part of H
-        N: int
-            FIR filter order
-        tau: int
-            time delay of filter in samples
-        f: np.ndarray of shape (M,)
-            frequencies corresponding to H
-        Fs: float
-            sampling frequency of digital filter
-        wt: np.ndarray of shape (2M,) - optional
-            array of weights for a weighted least-squares method (default = None
-            results in no weighting)
-        verbose: bool, optional
-            whether to print statements to the command line (default = True)
+    H : array_like of shape (M,) or (2M,)
+        (Complex) frequency response values in dtype complex or as a vector first
+        containing the real followed by the imaginary parts
+    UH : array_like of shape (2M,2M)
+        uncertainties associated with the real and imaginary part of H
+    N: int
+        FIR filter order
+    tau: int
+        time delay of filter in samples
+    f : array_like of shape (M,)
+        frequencies at which H is given
+    Fs : float
+        sampling frequency of digital FIR filter
+    wt: array_like of shape (2M,), optional
+        vector of weights for a weighted least-squares method (default results in no
+        weighting)
+    verbose: bool, optional
+        whether to print statements to the command line (default = True)
 
     Returns
     -------
@@ -843,7 +842,8 @@ def invLSFIR_uncMC(
 
     References
     ----------
-        * Elster and Link [Elster2008]_
+    * Elster and Link [Elster2008]_
+
     """
 
     if verbose:
