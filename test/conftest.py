@@ -138,8 +138,17 @@ def hypothesis_float_vector(
     )
 
 
-def hypothesis_not_negative_float_strategy() -> SearchStrategy:
-    return hst.floats(min_value=0)
+def hypothesis_not_negative_float_strategy(
+    max_value: Optional[float] = None,
+    allow_nan: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
+) -> SearchStrategy:
+    return hst.floats(
+        min_value=0,
+        max_value=max_value,
+        allow_nan=allow_nan,
+        allow_infinity=allow_infinity,
+    )
 
 
 def hypothesis_bounded_float_strategy(
@@ -159,8 +168,17 @@ def hypothesis_bounded_float_strategy(
 
 
 @composite
-def hypothesis_not_negative_float(draw: Callable) -> float:
-    return draw(hypothesis_not_negative_float_strategy())
+def hypothesis_not_negative_float(
+    draw: Callable,
+    max_value: Optional[float] = None,
+    allow_nan: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
+) -> float:
+    return draw(
+        hypothesis_not_negative_float_strategy(
+            max_value=max_value, allow_nan=allow_nan, allow_infinity=allow_infinity
+        )
+    )
 
 
 @composite
