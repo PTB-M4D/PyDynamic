@@ -11,10 +11,14 @@ from numpy.testing import assert_allclose, assert_almost_equal
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.tools import make_semiposdef
-from PyDynamic.model_estimation.fit_filter import invLSFIR, invLSFIR_unc, LSFIR
+from PyDynamic.model_estimation.fit_filter import (
+    invLSFIR,
+    invLSFIR_unc,
+    invLSFIR_uncMC,
+    LSFIR,
+)
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 from .conftest import hypothesis_dimension
-from .test_propagate_filter import legacy_FIRuncFilter
 
 
 @pytest.fixture(scope="module")
@@ -497,3 +501,35 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, N):
         f=frequencies,
         Fs=sampling_frequency,
     )
+
+
+@given(hypothesis_dimension())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
+    monte_carlo, frequencies, sampling_frequency, N
+):
+    b, ub = invLSFIR_unc(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    b_mc, ub_mc = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=N,
+        tau=N // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    assert_allclose(b, b_mc, rtol=4e-3)
+    assert_allclose(ub, ub_mc, rtol=1e-1)
