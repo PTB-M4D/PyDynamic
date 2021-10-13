@@ -654,46 +654,46 @@ def invLSFIR_unc(
 ):
     """Design of FIR filter as fit to reciprocal of freq. resp. with uncertainty
 
-
-    Least-squares fit of a digital FIR filter to the reciprocal of a
-    frequency response
-    for which associated uncertainties are given for its real and imaginary
-    part.
-    Uncertainties are propagated using a truncated svd and linear matrix
-    propagation.
+    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
+    given frequency response for which associated uncertainties are given for its
+    real and imaginary part. Uncertainties are propagated using a truncated svd
+    and linear matrix propagation.
 
     Parameters
     ----------
-        H: np.ndarray of shape (M,)
-            frequency response values
-        UH: np.ndarray of shape (2M,2M)
-            uncertainties associated with the real and imaginary part
-        N: int
-            FIR filter order
-        tau: float
-            delay of filter
-        f: np.ndarray of shape (M,)
-            frequencies
-        Fs: float
-            sampling frequency of digital filter
-        wt: np.ndarray of shape (2M,) - optional
-            array of weights for a weighted least-squares method (default = None
-            results in no weighting)
-        verbose: bool, optional
-            whether to print statements to the command line (default = True)
-        trunc_svd_tol: float, optional
-            lower bound for singular values to be considered for pseudo-inverse
+    H : array_like of shape (M,) or (2M,)
+        (Complex) frequency response values in dtype complex or as a vector first
+        containing the real followed by the imaginary parts
+    UH : array_like of shape (2M,2M)
+        uncertainties associated with the real and imaginary part of H
+    N : int
+        FIR filter order
+    tau : int
+        time delay of filter in samples
+    f : array_like of shape (M,)
+        frequencies at which H is given
+    Fs : float
+        sampling frequency of digital FIR filter
+    wt : array_like of shape (2M,), optional
+        vector of weights for a weighted least-squares method (default results in no
+        weighting)
+    verbose : bool, optional
+        whether to print statements to the command line (default = True)
+    trunc_svd_tol : float, optional
+        lower bound for singular values to be considered for pseudo-inverse
 
     Returns
     -------
-        b: np.ndarray of shape (N+1,)
-            filter coefficients of shape
-        Ub: np.ndarray of shape (N+1,N+1)
-            uncertainties associated with b
+    b : array_like of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
+    Ub : array_like of shape (N+1,N+1)
+        uncertainties associated with b
 
     References
     ----------
-        * Elster and Link [Elster2008]_
+    * Elster and Link [Elster2008]_
+
+    .. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
     """
 
     if verbose:
