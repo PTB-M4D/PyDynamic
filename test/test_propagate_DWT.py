@@ -57,8 +57,8 @@ def test_dwt():
             ca, cd = pywt.dwt(x, filter_name, mode="constant")
             assert ca.size == y1.size
             assert cd.size == y2.size
-            assert_allclose(ca, y1)
-            assert_allclose(cd, y2)
+            assert_allclose(ca, y1, atol=1e-15)
+            assert_allclose(cd, y2, atol=1e-15)
 
 
 def test_inv_dwt():
@@ -144,7 +144,7 @@ def test_wave_dec():
             # compare output in detail
             for a, b in zip(result_pywt, coeffs):
                 assert len(a) == len(b)
-                assert_allclose(a, b)
+                assert_allclose(a, b, atol=1e-15)
 
 
 def test_decomposition_realtime():
