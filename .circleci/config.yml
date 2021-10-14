@@ -326,7 +326,7 @@ jobs:
             - run:
                 name: Upload coverage report
                 command: |
-                  curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --import)
+                  curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --import
                   curl -Os https://uploader.codecov.io/latest/linux/codecov
                   curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
                   curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
