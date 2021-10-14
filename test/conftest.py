@@ -282,15 +282,17 @@ def hypothesis_covariance_matrix_with_zero_correlation(
 @composite
 def hypothesis_dimension(
     draw: Callable,
-    min_value: Optional[int] = 1,
-    max_value: Optional[int] = 20,
+    min_value: Optional[int] = None,
+    max_value: Optional[int] = None,
 ) -> int:
+    minimum_dimension = min_value if min_value is not None else 1
+    maximum_dimension = max_value if max_value is not None else 20
     return (
-        min_value
-        if min_value == max_value
+        minimum_dimension
+        if minimum_dimension is not None and minimum_dimension == maximum_dimension
         else draw(
             hypothesis_reasonable_dimension_strategy(
-                min_value=min_value, max_value=max_value
+                min_value=minimum_dimension, max_value=maximum_dimension
             )
         )
     )
