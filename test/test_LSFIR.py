@@ -503,7 +503,7 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_o
     )
 
 
-@given(hypothesis_dimension())
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
