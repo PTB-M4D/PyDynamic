@@ -55,8 +55,12 @@ def hypothesis_float_matrix(
     number_of_rows: Optional[int] = None,
     number_of_cols: Optional[int] = None,
 ) -> np.ndarray:
-    number_of_rows = draw(hypothesis_dimension(number_of_rows))
-    number_of_cols = draw(hypothesis_dimension(number_of_cols))
+    number_of_rows = draw(
+        hypothesis_dimension(min_value=number_of_rows, max_value=number_of_rows)
+    )
+    number_of_cols = draw(
+        hypothesis_dimension(min_value=number_of_cols, max_value=number_of_cols)
+    )
     return draw(
         hypothesis_float_matrix_strategy(
             number_of_rows=number_of_rows, number_of_cols=number_of_cols
@@ -87,7 +91,7 @@ def hypothesis_nonzero_complex_vector(
     min_magnitude: Optional[float] = 1e-4,
     max_magnitude: Optional[float] = 1e4,
 ) -> np.ndarray:
-    number_of_elements = draw(hypothesis_dimension(length))
+    number_of_elements = draw(hypothesis_dimension(min_value=length, max_value=length))
     complex_vector = draw(
         hnp.arrays(
             dtype=complex,
@@ -121,7 +125,7 @@ def hypothesis_float_vector(
     exclude_min: Optional[bool] = False,
     exclude_max: Optional[bool] = False,
 ) -> np.ndarray:
-    number_of_elements = draw(hypothesis_dimension(length))
+    number_of_elements = draw(hypothesis_dimension(min_value=length, max_value=length))
     return draw(
         hnp.arrays(
             dtype=float,
@@ -208,7 +212,9 @@ def hypothesis_covariance_matrix(
     min_value: Optional[float] = 0,
     max_value: Optional[float] = 1,
 ) -> np.ndarray:
-    number_of_rows_and_columns = draw(hypothesis_dimension(number_of_rows))
+    number_of_rows_and_columns = draw(
+        hypothesis_dimension(min_value=number_of_rows, max_value=number_of_rows)
+    )
     cov_with_one_eigenvalue_close_to_zero = np.cov(
         draw(
             hnp.arrays(
@@ -274,11 +280,19 @@ def hypothesis_covariance_matrix_with_zero_correlation(
 
 
 @composite
-def hypothesis_dimension(draw: Callable, dimension: Optional[int] = None) -> int:
+def hypothesis_dimension(
+    draw: Callable,
+    min_value: Optional[int] = 1,
+    max_value: Optional[int] = None,
+) -> int:
     return (
-        dimension
-        if dimension is not None
-        else draw(hypothesis_reasonable_dimension_strategy())
+        min_value
+        if min_value == max_value
+        else draw(
+            hypothesis_reasonable_dimension_strategy(
+                min_value=min_value, max_value=max_value
+            )
+        )
     )
 
 
