@@ -1,9 +1,8 @@
 """Install PyDynamic in Python path and provide all packaging metadata."""
+import codecs
 from os import path
 
 from setuptools import find_packages, setup
-
-current_release_version = "1.10.0"
 
 
 def get_readme():
@@ -12,6 +11,23 @@ def get_readme():
     with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
         return f.read()
 
+
+def read(rel_path):
+    here = path.abspath(path.dirname(__file__))
+    with codecs.open(path.join(here, rel_path), "r") as fp:
+        return fp.read()
+
+
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith("__version__"):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
+
+
+current_release_version = get_version("src/PyDynamic/__init__.py")
 
 setup(
     metadata_version="2.1",
