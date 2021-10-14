@@ -462,20 +462,20 @@ def test_digital_deconvolution_FIR_example_figure_7(
 )
 @pytest.mark.slow
 def test_compare_invLSFIR_unc_to_invLSFIR(
-    monte_carlo, frequencies, sampling_frequency, N
+    monte_carlo, frequencies, sampling_frequency, filter_order
 ):
     bF_unc, _ = invLSFIR_unc(
         H=monte_carlo["H"],
         UH=np.zeros_like(monte_carlo["UH"]),
-        N=N,
-        tau=N // 2,
+        N=filter_order,
+        tau=filter_order // 2,
         f=frequencies,
         Fs=sampling_frequency,
     )
     bF = invLSFIR(
         H=monte_carlo["H"],
-        N=N,
-        tau=N // 2,
+        N=filter_order,
+        tau=filter_order // 2,
         f=frequencies,
         Fs=sampling_frequency,
     )
@@ -493,11 +493,11 @@ def test_compare_invLSFIR_unc_to_invLSFIR(
         HealthCheck.too_slow,
     ],
 )
-def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, N):
+def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_order):
     LSFIR(
         H=monte_carlo["H"],
-        N=N,
-        tau=N // 2,
+        N=filter_order,
+        tau=filter_order // 2,
         f=frequencies,
         Fs=sampling_frequency,
     )
@@ -513,21 +513,21 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, N):
 )
 @pytest.mark.slow
 def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
-    monte_carlo, frequencies, sampling_frequency, N
+    monte_carlo, frequencies, sampling_frequency, filter_order
 ):
     b, ub = invLSFIR_unc(
         H=monte_carlo["H"],
         UH=monte_carlo["UH"],
-        N=N,
-        tau=N // 2,
+        N=filter_order,
+        tau=filter_order // 2,
         f=frequencies,
         Fs=sampling_frequency,
     )
     b_mc, ub_mc = invLSFIR_uncMC(
         H=monte_carlo["H"],
         UH=monte_carlo["UH"],
-        N=N,
-        tau=N // 2,
+        N=filter_order,
+        tau=filter_order // 2,
         f=frequencies,
         Fs=sampling_frequency,
     )
