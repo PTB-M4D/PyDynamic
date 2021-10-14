@@ -283,7 +283,7 @@ def hypothesis_covariance_matrix_with_zero_correlation(
 def hypothesis_dimension(
     draw: Callable,
     min_value: Optional[int] = 1,
-    max_value: Optional[int] = None,
+    max_value: Optional[int] = 20,
 ) -> int:
     return (
         min_value
