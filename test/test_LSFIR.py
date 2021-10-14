@@ -485,7 +485,7 @@ def test_compare_invLSFIR_unc_to_invLSFIR(
     )
 
 
-@given(hypothesis_dimension())
+@given(hypothesis_dimension(min_value=2, max_value=12))
 @settings(
     deadline=None,
     suppress_health_check=[
