@@ -7,6 +7,7 @@ from typing import Optional, Union
 import numpy as np
 
 from PyDynamic.misc.tools import (
+    is_2d_square_matrix,
     is_2d_matrix,
     number_of_rows_equals_vector_dim,
     progress_bar,
@@ -123,7 +124,7 @@ def fit_som(
                 f"{UH.shape}."
             )
         if is_2d_matrix(UH):
-            if not _is_2d_square_matrix(UH):
+            if not is_2d_square_matrix(UH):
                 raise ValueError(
                     "fit_som: if UH is a matrix, it is expected to be square but UH "
                     f"is of shape {UH.shape}."
@@ -242,7 +243,3 @@ def fit_som(
         np.sqrt(np.abs(mu[0] / mu[2])) / 2 / np.pi,
     ]
     return pars
-
-
-def _is_2d_square_matrix(ndarray: np.ndarray) -> bool:
-    return is_2d_matrix(ndarray) and ndarray.shape[0] == ndarray.shape[1]
