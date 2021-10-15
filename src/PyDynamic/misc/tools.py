@@ -358,7 +358,7 @@ def is_vector(ndarray: np.ndarray) -> bool:
 
 
 def is_2d_matrix(ndarray: np.ndarray) -> bool:
-    """Check if a np.ndarray is a matrix, i.e. it expands over exactly two dimensions
+    """Check if a np.ndarray is a matrix, i.e. is of shape (n,m)
 
     Parameters
     ----------
