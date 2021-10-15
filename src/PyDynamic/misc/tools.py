@@ -220,23 +220,23 @@ def make_semiposdef(
         # enforce symmetric matrix
         matrix = 0.5 * (matrix + matrix.T)
         # calculate smallest eigenvalue
-        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
+        e = np.min(np.real(eigs(matrix, which="SR", return_eigenvectors=False)))
         count = 0
         # increase the eigenvalues until matrix is positive semi-definite
         while e < tol and count < maxiter:
             matrix += (np.absolute(e) + tol) * eye(n, format=matrix.format)
-            e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
+            e = np.min(np.real(eigs(matrix, which="SR", return_eigenvectors=False)))
             count += 1
-        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
+        e = np.min(np.real(eigs(matrix, which="SR", return_eigenvectors=False)))
     # same procedure for non-sparse matrices
     else:
         matrix = 0.5 * (matrix + matrix.T)
         count = 0
-        e = np.real(np.linalg.eigvals(matrix)).min()
+        e = np.min(np.real(np.linalg.eigvals(matrix)))
         while e < tol and count < maxiter:
-            e = np.real(np.linalg.eigvals(matrix)).min()
+            e = np.min(np.real(np.linalg.eigvals(matrix)))
             matrix += (np.absolute(e) + tol) * np.eye(n)
-        e = np.real(np.linalg.eigvals(matrix)).min()
+        e = np.min(np.real(np.linalg.eigvals(matrix)))
     if verbose:
         print("Final result of make_semiposdef: smallest eigenvalue is %e" % e)
     return matrix
