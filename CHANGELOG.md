@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v1.11.0 (2021-10-15)
+### Feature
+* **plot_vectors_and_covariances_comparison:** Introduce function to conveniently compare vectors ([`e2b3b0c`](https://github.com/PTB-M4D/PyDynamic/commit/e2b3b0c530fe3970919beeec14c96587a86653af))
+* **normalize_vector_or_matrix:** Make normalize_vector_or_matrix() publicly available ([`52b1256`](https://github.com/PTB-M4D/PyDynamic/commit/52b125679472b227612951e869958e1e695dbcfe))
+* **is_2d_square_matrix:** Make is_2d_square_matrix() publicly available ([`e303e6b`](https://github.com/PTB-M4D/PyDynamic/commit/e303e6b920c96010e417dec9013e3b6f639466c8))
+
+### Fix
+* **__version__:** Reintroduce __version__ variable into PyDynamic/__init__.py ([`0349b09`](https://github.com/PTB-M4D/PyDynamic/commit/0349b09eeff34a2144a8dc86a9bccc6aed0387cd))
+
+### Documentation
+* **CONTRIBUTING:** Mention necessity of installing PyDynamic itself for testing ([`1571585`](https://github.com/PTB-M4D/PyDynamic/commit/157158536c1ed7f57f34ba33578ee1cb60716b21))
+
 ## v1.10.0 (2021-09-28)
 ### Feature
 * **propagate_DFT:** Make some helpers to check for shapes of inputs publicly available ([`dc97b3f`](https://github.com/PTB-M4D/PyDynamic/commit/dc97b3faddcb854670a9a5f9dcd4ff38efb575d9))
