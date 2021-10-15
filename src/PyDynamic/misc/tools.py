@@ -68,30 +68,17 @@ def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
         If shift, x or ux are of unexpected type, dimensions of x and ux do not fit
         or ux is of unexpected shape
     """
-    shift = _cast_shift_to_int(shift=shift)
-    if not isinstance(x, np.ndarray):
-        raise ValueError(
-            "shift_uncertainty: x is expected to be of type np.ndarray but is of type "
-            f"{type(x)}."
-        )
-    if not number_of_rows_equals_vector_dim(matrix=ux, vector=x):
-        raise ValueError(
-            "shift_uncertainty: number of rows of ux and number of elements of x are "
-            f"expected to match. But x has {len(x)} elements and ux is of shape "
-            f"{ux.shape}."
-        )
+    shifted_x = _shift_vector(vector=x, shift=shift)
 
-    xs = np.roll(x, shift)
+    if isinstance(ux, float):
+        return shifted_x, ux
 
-    if isinstance(ux, float):       # no shift necessary for ux
-        return xs, ux
     if isinstance(ux, np.ndarray):
-        if len(ux.shape) == 1:      # uncertainties given as vector
-            return xs, np.roll(ux, shift)
-        elif len(ux.shape) == 2:      # full covariance matrix
-            assert(ux.shape[0]==ux.shape[1])
-            uxs = np.roll(ux, (shift, shift), axis=(0,1))
-            return xs, uxs
+        if is_vector(ux):
+            return shifted_x, _shift_vector(vector=ux, shift=shift)
+        elif is_2d_square_matrix(ux):
+            shifted_ux = _shift_2d_matrix(ux, shift)
+            return shifted_x, shifted_ux
         raise ValueError(
             "shift_uncertainty: input uncertainty ux is expected to be a vector or "
             f"two-dimensional, square matrix but is of shape {ux.shape}."
@@ -112,6 +99,14 @@ def _cast_shift_to_int(shift: Any) -> int:
             f"cast-able to int, but is {shift} of type {type(shift)}. Please provide "
             "a valid value."
         )
+
+
+def _shift_vector(vector: np.ndarray, shift: int) -> np.ndarray:
+    return np.roll(vector, shift)
+
+
+def _shift_2d_matrix(matrix: np.ndarray, shift: int) -> np.ndarray:
+    return np.roll(matrix, (shift, shift), axis=(0, 1))
 
 
 def trimOrPad(array, length, mode="constant"):
