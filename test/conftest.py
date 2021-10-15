@@ -241,9 +241,11 @@ def _scale_matrix_or_vector_to_range(
     return _normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
 
 
-def _normalize_vector_or_matrix(array: np.ndarray) -> np.ndarray:
-    array_min = array.min()
-    return (array - array_min) / (array.max() - array_min)
+def _normalize_vector_or_matrix(numbers: np.ndarray) -> np.ndarray:
+    minimum = translator = np.min(numbers)
+    array_span = np.max(numbers) - minimum
+    normalizer = array_span or 1.0
+    return (numbers - translator) / normalizer
 
 
 @composite
