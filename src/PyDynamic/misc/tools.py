@@ -5,19 +5,25 @@ functions.
 
 This module contains the following functions:
 
-* :func:`print_vec`: Print vector (1D array) to the console or return as formatted
-  string
-* :func:`print_mat`: Print matrix (2D array) to the console or return as formatted
-  string
-* :func:`make_semiposdef`: Make quadratic matrix positive semi-definite
 * :func:`FreqResp2RealImag`: Calculate real and imaginary parts from frequency
   response
-* :func:`make_equidistant`: Interpolate non-equidistant time series to equidistant
-* :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
-* :func:`progress_bar`: A simple and reusable progress-bar
-* :func:`is_vector`: Check if a np.ndarray is a vector
 * :func:`is_2d_matrix`: Check if a np.ndarray is a matrix
+* :func:`is_2d_square_matrix`: Check if a np.ndarray is a two-dimensional square matrix
+* :func:`is_vector`: Check if a np.ndarray is a vector
+* :func:`make_semiposdef`: Make quadratic matrix positive semi-definite
+* :func:`normalize_vector_or_matrix`: Scale an array of numbers to the interval between
+  zero and one
 * :func:`number_of_rows_equals_vector_dim`: Check if a matrix and a vector match in size
+* :func:`plot_vectors_and_covariances_comparison`: Plot two vectors and their
+  covariances side-by-side for visual comparison
+* :func:`print_mat`: Print matrix (2D array) to the console or return as formatted
+  string
+* :func:`print_vec`: Print vector (1D array) to the console or return as formatted
+  string
+* :func:`progress_bar`: A simple and reusable progress-bar
+* :func:`shift_uncertainty`: Shift the elements in the vector x and associated
+  uncertainties ux
+* :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 """
 from typing import Any, Optional
 
@@ -39,6 +45,9 @@ __all__ = [
     "is_vector",
     "is_2d_matrix",
     "number_of_rows_equals_vector_dim",
+    "plot_vectors_and_covariances_comparison",
+    "is_2d_square_matrix",
+    "normalize_vector_or_matrix",
 ]
 
 
