@@ -40,24 +40,26 @@ __all__ = [
 ]
 
 def shift_uncertainty(x, ux, shift):
-    """Shift the elements in the vector x (and associated uncertainty ux) by shift elements.
-        This method uses :class:`numpy.roll` to shift the elements in x and ux. See documentation of np.roll for details.
+    """Shift the elements in the vector x and associated uncertainties ux
+
+    This function uses :func:`numpy.roll` to shift the elements in x
+    and ux. See the linked official documentation for details.
 
     Parameters
     ----------
-        x: (N,) array_like
-            vector of estimates
-        ux: float, np.ndarray of shape (N,) or of shape (N,N)
-            uncertainty associated with the vector of estimates
-        shift: int
-            amount of shift
+    x : np.ndarray of shape (N,)
+        vector of estimates
+    ux : float, np.ndarray of shape (N,) or of shape (N,N)
+        uncertainty associated with the vector of estimates
+    shift : int
+        amount of shift
 
     Returns
     -------
-        xs: (N,) array
-            shifted vector of estimates
-        uxs: float, np.ndarray of shape (N,) or of shape (N,N)
-            uncertainty associated with the shifted vector of estimates
+    shifted_x : (N,) np.ndarray
+        shifted vector of estimates
+    shifted_ux : float, np.ndarray of shape (N,) or of shape (N,N)
+        uncertainty associated with the shifted vector of estimates
     """
 
     assert(isinstance(shift, int))
