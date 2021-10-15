@@ -104,8 +104,7 @@ def FIRuncFilter_input(
 
 
 def random_array(length):
-    array = np.random.randn(length)
-    return array
+    return np.random.randn(length)
 
 
 @pytest.fixture
