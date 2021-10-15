@@ -67,6 +67,11 @@ def test_MC(visualizeOutput=False):
         plt.show()
 
 
+def test_MC_non_negative_main_diagonal_covariance():
+    _, Uy = MC(x, sigma_noise, b1, np.ones(1), Ub, runs=runs, blow=b2)
+    assert np.all(np.diag(Uy) >= 0)
+
+
 def test_SMC():
     # run method
     y, Uy = SMC(x, sigma_noise, b1, np.ones(1), Ub, runs=runs)

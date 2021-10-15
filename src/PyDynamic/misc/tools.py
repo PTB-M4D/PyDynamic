@@ -1,27 +1,34 @@
-# -*- coding: utf-8 -*-
 """
 The :mod:`PyDynamic.misc.tools` module is a collection of miscellaneous helper
 functions.
 
 This module contains the following functions:
 
-* :func:`print_vec`: Print vector (1D array) to the console or return as formatted
-  string
-* :func:`print_mat`: Print matrix (2D array) to the console or return as formatted
-  string
-* :func:`make_semiposdef`: Make quadratic matrix positive semi-definite
 * :func:`FreqResp2RealImag`: Calculate real and imaginary parts from frequency
   response
-* :func:`make_equidistant`: Interpolate non-equidistant time series to equidistant
-* :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
-* :func:`progress_bar`: A simple and reusable progress-bar
-* :func:`is_vector`: Check if a np.ndarray is a vector
 * :func:`is_2d_matrix`: Check if a np.ndarray is a matrix
+* :func:`is_2d_square_matrix`: Check if a np.ndarray is a two-dimensional square matrix
+* :func:`is_vector`: Check if a np.ndarray is a vector
+* :func:`make_semiposdef`: Make quadratic matrix positive semi-definite
+* :func:`normalize_vector_or_matrix`: Scale an array of numbers to the interval between
+  zero and one
 * :func:`number_of_rows_equals_vector_dim`: Check if a matrix and a vector match in size
+* :func:`plot_vectors_and_covariances_comparison`: Plot two vectors and their
+  covariances side-by-side for visual comparison
+* :func:`print_mat`: Print matrix (2D array) to the console or return as formatted
+  string
+* :func:`print_vec`: Print vector (1D array) to the console or return as formatted
+  string
+* :func:`progress_bar`: A simple and reusable progress-bar
+* :func:`shift_uncertainty`: Shift the elements in the vector x and associated
+  uncertainties ux
+* :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 """
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.colors import Normalize
 from scipy.sparse import eye, issparse
 from scipy.sparse.linalg.eigen.arpack import eigs
 
@@ -37,46 +44,80 @@ __all__ = [
     "is_vector",
     "is_2d_matrix",
     "number_of_rows_equals_vector_dim",
+    "plot_vectors_and_covariances_comparison",
+    "is_2d_square_matrix",
+    "normalize_vector_or_matrix",
 ]
 
-def shift_uncertainty(x, ux, shift):
-    """Shift the elements in the vector x (and associated uncertainty ux) by shift elements.
-        This method uses :class:`numpy.roll` to shift the elements in x and ux. See documentation of np.roll for details.
+
+def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
+    """Shift the elements in the vector x and associated uncertainties ux
+
+    This function uses :func:`numpy.roll` to shift the elements in x
+    and ux. See the linked official documentation for details.
 
     Parameters
     ----------
-        x: (N,) array_like
-            vector of estimates
-        ux: float, np.ndarray of shape (N,) or of shape (N,N)
-            uncertainty associated with the vector of estimates
-        shift: int
-            amount of shift
+    x : np.ndarray of shape (N,)
+        vector of estimates
+    ux : float, np.ndarray of shape (N,) or of shape (N,N)
+        uncertainty associated with the vector of estimates
+    shift : int
+        amount of shift
 
     Returns
     -------
-        xs: (N,) array
-            shifted vector of estimates
-        uxs: float, np.ndarray of shape (N,) or of shape (N,N)
-            uncertainty associated with the shifted vector of estimates
+    shifted_x : (N,) np.ndarray
+        shifted vector of estimates
+    shifted_ux : float, np.ndarray of shape (N,) or of shape (N,N)
+        uncertainty associated with the shifted vector of estimates
+
+    Raises
+    ------
+    ValueError
+        If shift, x or ux are of unexpected type, dimensions of x and ux do not fit
+        or ux is of unexpected shape
     """
+    shifted_x = _shift_vector(vector=x, shift=shift)
 
-    assert(isinstance(shift, int))
-    # application of shift to the vector of estimates
-    xs = np.roll(x, shift)
+    if isinstance(ux, float):
+        return shifted_x, ux
 
-    if isinstance(ux, float):       # no shift necessary for ux
-        return xs, ux
     if isinstance(ux, np.ndarray):
-        if len(ux.shape) == 1:      # uncertainties given as vector
-            return xs, np.roll(ux, shift)
-        elif len(ux.shape) == 2:      # full covariance matrix
-            assert(ux.shape[0]==ux.shape[1])
-            uxs = np.roll(ux, (shift, shift), axis=(0,1))
-            return xs, uxs
-        else:
-            raise TypeError("Input uncertainty has incompatible shape")
-    else:
-        raise TypeError("Input uncertainty has incompatible type")
+        if is_vector(ux):
+            return shifted_x, _shift_vector(vector=ux, shift=shift)
+        elif is_2d_square_matrix(ux):
+            shifted_ux = _shift_2d_matrix(ux, shift)
+            return shifted_x, shifted_ux
+        raise ValueError(
+            "shift_uncertainty: input uncertainty ux is expected to be a vector or "
+            f"two-dimensional, square matrix but is of shape {ux.shape}."
+        )
+
+    raise ValueError(
+        "shift_uncertainty: input uncertainty ux is expected to be a float or a "
+        f"numpy.ndarray but is of type {type(ux)}."
+    )
+
+
+def _cast_shift_to_int(shift: Any) -> int:
+    try:
+        return int(shift)
+    except ValueError:
+        raise ValueError(
+            "shift_uncertainty: shift is expected to be type int or at least "
+            f"cast-able to int, but is {shift} of type {type(shift)}. Please provide "
+            "a valid value."
+        )
+
+
+def _shift_vector(vector: np.ndarray, shift: int) -> np.ndarray:
+    return np.roll(vector, shift)
+
+
+def _shift_2d_matrix(matrix: np.ndarray, shift: int) -> np.ndarray:
+    return np.roll(matrix, (shift, shift), axis=(0, 1))
+
 
 def trimOrPad(array, length, mode="constant"):
     """Trim or pad (with zeros) a vector to the desired length
@@ -105,22 +146,22 @@ def trimOrPad(array, length, mode="constant"):
 
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
-    """ Print vector (1D array) to the console or return as formatted string
+    """Print vector (1D array) to the console or return as formatted string
 
     Parameters
     ----------
-        vector : (M,) array_like
-        prec : int
-            the precision of the output
-        vertical : bool
-            print out vertical or not
-        retS : bool
-            print or return string
+    vector : (M,) array_like
+    prec : int
+        the precision of the output
+    vertical : bool
+        print out vertical or not
+    retS : bool
+        print or return string
 
     Returns
     -------
-        s : str
-            if retS is True
+    s : str
+        if retS is True
 
     """
     if vertical:
@@ -135,22 +176,22 @@ def print_vec(vector, prec=5, retS=False, vertical=False):
 
 
 def print_mat(matrix, prec=5, vertical=False, retS=False):
-    """ Print matrix (2D array) to the console or return as formatted string
+    """Print matrix (2D array) to the console or return as formatted string
 
     Parameters
     ----------
-        matrix : (M,N) array_like
-        prec : int
-            the precision of the output
-        vertical : bool
-            print out vertical or not
-        retS : bool
-            print or return string
+    matrix : (M,N) array_like
+    prec : int
+        the precision of the output
+    vertical : bool
+        print out vertical or not
+    retS : bool
+        print or return string
 
     Returns
     -------
-        s : str
-            if retS is True
+    s : str
+        if retS is True
 
     """
     if vertical:
@@ -207,23 +248,23 @@ def make_semiposdef(
         # enforce symmetric matrix
         matrix = 0.5 * (matrix + matrix.T)
         # calculate smallest eigenvalue
-        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
+        e = np.min(np.real(eigs(matrix, which="SR", return_eigenvectors=False)))
         count = 0
         # increase the eigenvalues until matrix is positive semi-definite
         while e < tol and count < maxiter:
             matrix += (np.absolute(e) + tol) * eye(n, format=matrix.format)
-            e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
+            e = np.min(np.real(eigs(matrix, which="SR", return_eigenvectors=False)))
             count += 1
-        e = np.real(eigs(matrix, which="SR", return_eigenvectors=False)).min()
+        e = np.min(np.real(eigs(matrix, which="SR", return_eigenvectors=False)))
     # same procedure for non-sparse matrices
     else:
         matrix = 0.5 * (matrix + matrix.T)
         count = 0
-        e = np.real(np.linalg.eigvals(matrix)).min()
+        e = np.min(np.real(np.linalg.eigvals(matrix)))
         while e < tol and count < maxiter:
-            e = np.real(np.linalg.eigvals(matrix)).min()
+            e = np.min(np.real(np.linalg.eigvals(matrix)))
             matrix += (np.absolute(e) + tol) * np.eye(n)
-        e = np.real(np.linalg.eigvals(matrix)).min()
+        e = np.min(np.real(np.linalg.eigvals(matrix)))
     if verbose:
         print("Final result of make_semiposdef: smallest eigenvalue is %e" % e)
     return matrix
@@ -358,7 +399,7 @@ def is_vector(ndarray: np.ndarray) -> bool:
 
 
 def is_2d_matrix(ndarray: np.ndarray) -> bool:
-    """Check if a np.ndarray is a matrix, i.e. it expands over exactly two dimensions
+    """Check if a np.ndarray is a matrix, i.e. is of shape (n,m)
 
     Parameters
     ----------
@@ -389,3 +430,88 @@ def number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> 
         True, if the number of rows coincide, False otherwise
     """
     return len(vector) == matrix.shape[0]
+
+
+def plot_vectors_and_covariances_comparison(
+    vector_1: np.ndarray,
+    vector_2: np.ndarray,
+    covariance_1: np.ndarray,
+    covariance_2: np.ndarray,
+    title: Optional[str] = "Comparison between two vectors and corresponding "
+    "uncertainties",
+    label_1: Optional[str] = "vector_1",
+    label_2: Optional[str] = "vector_2",
+):
+    """Plot two vectors and their covariances side-by-side for visual comparison
+
+    Parameters
+    ----------
+    vector_1 : np.ndarray
+        the first vector to compare
+    vector_2 : np.ndarray
+        the second vector to compare
+    covariance_1 : np.ndarray
+        the first covariance matrix to compare
+    covariance_2 : np.ndarray
+        the second covariance matrix to compare
+    title : str, optional
+        the title for the comparison plot, defaults to `"Comparison between two vectors
+        and corresponding uncertainties"`
+    label_1 : str, optional
+        the label for the first vector in the legend and title for the first
+        covariance plot, defaults to "vector_1"
+    label_2 : str, optional
+        the label for the second vector in the legend and title for the second
+        covariance plot, defaults to "vector_2"
+    """
+    fig, ax = plt.subplots(nrows=2, ncols=2)
+    fig.suptitle(title)
+    ax[0][0].imshow(covariance_1)
+    ax[0][0].set_title(label_1 + " uncertainties")
+    ax[0][1].imshow(covariance_2)
+    ax[0][1].set_title(label_2 + " uncertainties")
+    ax[1][0].plot(vector_1, label=label_1)
+    ax[1][0].plot(vector_2, label=label_2)
+    ax[1][0].legend()
+    ax[1][0].set_title(label_1 + " and " + label_2)
+    ax[1][1].imshow(covariance_2 - covariance_1, norm=Normalize())
+    ax[1][1].set_title("Relative difference of uncertainties")
+    plt.show()
+
+
+def is_2d_square_matrix(ndarray: np.ndarray) -> bool:
+    """Check if a np.ndarray is a two-dimensional square matrix, i.e. is of shape (n,n)
+
+    Parameters
+    ----------
+    ndarray : np.ndarray
+        the array to check
+
+    Returns
+    -------
+    bool
+        True, if the array expands over exactly two dimensions of similar size,
+        False otherwise
+    """
+    return is_2d_matrix(ndarray) and ndarray.shape[0] == ndarray.shape[1]
+
+
+def normalize_vector_or_matrix(numbers: np.ndarray) -> np.ndarray:
+    """Scale an array of numbers to the interval between zero and one
+
+    If all values in the array are the same, the output array will be constant zero.
+
+    Parameters
+    ----------
+    numbers : np.ndarray
+        the :class:`numpy.ndarray` to normalize
+
+    Returns
+    -------
+    np.ndarray
+        the normalized array
+    """
+    minimum = translator = np.min(numbers)
+    array_span = np.max(numbers) - minimum
+    normalizer = array_span or 1.0
+    return (numbers - translator) / normalizer
