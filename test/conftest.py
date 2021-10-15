@@ -8,11 +8,13 @@ from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
 
 from PyDynamic import make_semiposdef
+from PyDynamic.misc.tools import normalize_vector_or_matrix
 
 # This will check, if the testrun is executed in the ci environment and if so,
 # disables the 'too_slow' health check. See
 # https://hypothesis.readthedocs.io/en/latest/healthchecks.html#hypothesis.HealthCheck
 # for some details.
+
 settings.register_profile(
     name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
 )
@@ -262,12 +264,7 @@ def ensure_hypothesis_nonzero_diagonal(
 def scale_matrix_or_vector_to_range(
     array: np.ndarray, range_min: Optional[float] = 0, range_max: Optional[float] = 1
 ) -> np.ndarray:
-    return _normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
-
-
-def _normalize_vector_or_matrix(array: np.ndarray) -> np.ndarray:
-    array_min = np.min(array)
-    return (array - array_min) / (np.max(array) - array_min)
+    return normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
 
 
 @composite
