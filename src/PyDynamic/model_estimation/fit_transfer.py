@@ -7,8 +7,8 @@ from typing import Optional, Union
 import numpy as np
 
 from PyDynamic.misc.tools import (
-    is_2d_square_matrix,
     is_2d_matrix,
+    is_2d_square_matrix,
     number_of_rows_equals_vector_dim,
     progress_bar,
 )
