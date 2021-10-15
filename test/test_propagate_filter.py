@@ -13,6 +13,7 @@ from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import trimOrPad
+
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
     _fir_filter,
@@ -582,7 +583,12 @@ def fir_filter():
 
 
 @pytest.fixture(scope="module")
-def input_signal():
+def sigma_noise():
+    return 1e-2  # std for input signal
+
+
+@pytest.fixture(scope="module")
+def input_signal(sigma_noise):
 
     # simulate input and output signals
     Fs = 100e3  # sampling frequency (in Hz)
@@ -591,7 +597,6 @@ def input_signal():
     time = np.arange(nx) * Ts  # time values
 
     # input signal + run methods
-    sigma_noise = 1e-2  # std for input signal
     x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)  # generate input signal
     Ux = sigma_noise * np.ones_like(x)  # uncertainty of input signal
 
@@ -699,3 +704,11 @@ def test_get_derivative_A():
     sliced_diagonal = np.full(p, -1.0)
 
     assert_allclose(dA[index1, index2, index3], sliced_diagonal)
+
+
+def test_IIRuncFilter_raises_warning_for_kind_not_diag_with_scalar_covariance(
+    sigma_noise, iir_filter, input_signal
+):
+    input_signal["Ux"] = sigma_noise
+    with pytest.warns(UserWarning):
+        IIRuncFilter(**input_signal, **iir_filter, kind="corr")
