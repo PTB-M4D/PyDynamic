@@ -39,7 +39,8 @@ __all__ = [
     "number_of_rows_equals_vector_dim",
 ]
 
-def shift_uncertainty(x, ux, shift):
+
+def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
     """Shift the elements in the vector x and associated uncertainties ux
 
     This function uses :func:`numpy.roll` to shift the elements in x
