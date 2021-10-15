@@ -419,3 +419,24 @@ def is_2d_square_matrix(ndarray: np.ndarray) -> bool:
         False otherwise
     """
     return is_2d_matrix(ndarray) and ndarray.shape[0] == ndarray.shape[1]
+
+
+def normalize_vector_or_matrix(numbers: np.ndarray) -> np.ndarray:
+    """Scale an array of numbers to the interval between zero and one
+
+    If all values in the array are the same, the output array will be constant zero.
+
+    Parameters
+    ----------
+    numbers : np.ndarray
+        the :class:`numpy.ndarray` to normalize
+
+    Returns
+    -------
+    np.ndarray
+        the normalized array
+    """
+    minimum = translator = np.min(numbers)
+    array_span = np.max(numbers) - minimum
+    normalizer = array_span or 1.0
+    return (numbers - translator) / normalizer
