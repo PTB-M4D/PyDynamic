@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict
 import numpy as np
 import pytest
 import scipy
-from hypothesis import given, settings, strategies as hst
+from hypothesis import given, HealthCheck, settings, strategies as hst
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_equal
 from scipy.linalg import toeplitz
@@ -438,9 +438,15 @@ def test_FIRuncFilter_for_correct_dimension_of_y(fir_unc_filter_input):
 # the
 # Monte-Carlo method in that case.
 @given(FIRuncFilter_input(exclude_corr_kind=True))
-@settings(deadline=None)
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
 @pytest.mark.slow
-def test_FIRuncFilter_MC_uncertainty_comparison(fir_unc_filter_input):
+def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     # Check output for thinkable permutations of input parameters against a Monte Carlo
     # approach.
 
@@ -466,7 +472,8 @@ def test_FIRuncFilter_MC_uncertainty_comparison(fir_unc_filter_input):
         n_blow = 0
 
     # run FIR with MC and extract diagonal of returned covariance
-    y_mc, Uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000)
+    with capsys.disabled():
+        y_mc, Uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000, verbose=True)
 
     # HACK for visualization during debugging
     # from PyDynamic.misc.tools import plot_vectors_and_covariances_comparison
