@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The :mod:`PyDynamic.misc.tools` module is a collection of miscellaneous helper
 functions.
