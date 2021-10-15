@@ -438,17 +438,16 @@ def test_FIRuncFilter_MC_uncertainty_comparison(fir_unc_filter_input):
     y_mc, Uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000)
 
     # HACK for visualization during debugging
-    # import matplotlib.pyplot as plt
-    # fig, ax = plt.subplots(nrows=1, ncols=3)
-    # ax[0].plot(y_fir, label="fir")
-    # ax[0].plot(y_mc, label="mc")
-    # ax[0].set_title("filter: {0}, signal: {1}".format(len(b), len(x)))
-    # ax[0].legend()
-    # ax[1].imshow(Uy_fir)
-    # ax[1].set_title("FIR")
-    # ax[2].imshow(Uy_mc)
-    # ax[2].set_title("MC")
-    # plt.show()
+    # from PyDynamic.misc.tools import plot_vectors_and_covariances_comparison
+    # plot_vectors_and_covariances_comparison(
+    #     vector_1=y_fir,
+    #     vector_2=y_mc,
+    #     covariance_1=Uy_fir,
+    #     covariance_2=Uy_mc,
+    #     label_1="fir",
+    #     label_2="mc",
+    #     title=f"filter: {len(b)}, signal: {len(x)}",
+    # )
     # /HACK
 
     # check basic properties
@@ -511,17 +510,16 @@ def test_fir_filter_MC_comparison():
     y_mc, Uy_mc = MC(x, Ux, theta, np.ones(1), Utheta, blow=None, runs=10000)
 
     # HACK: for visualization during debugging
-    # import matplotlib.pyplot as plt
-    # fig, ax = plt.subplots(nrows=1, ncols=3)
-    # ax[0].plot(y_fir, label="fir")
-    # ax[0].plot(y_mc, label="mc")
-    # ax[0].set_title("filter: {0}, signal: {1}".format(len(theta), len(x)))
-    # ax[0].legend()
-    # ax[1].imshow(Uy_fir)
-    # ax[1].set_title("FIR")
-    # ax[2].imshow(Uy_mc)
-    # ax[2].set_title("MC")
-    # plt.show()
+    # from PyDynamic.misc.tools import plot_vectors_and_covariances_comparison
+    # plot_vectors_and_covariances_comparison(
+    #     vector_1=y_fir,
+    #     vector_2=y_mc,
+    #     covariance_1=Uy_fir,
+    #     covariance_2=Uy_mc,
+    #     label_1="fir",
+    #     label_2="mc",
+    #     title=f"filter: {len(theta)}, signal: {len(x)}",
+    # )
     # /HACK
 
     # approximate comparison
