@@ -7,13 +7,12 @@ import pytest
 import scipy
 from hypothesis import given, settings, strategies as hst
 from hypothesis.strategies import composite
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_equal
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import trimOrPad
-
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
     _fir_filter,
@@ -401,10 +400,41 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
         assert_allclose(a, b)
 
 
-# in the following test, we exclude the case of a valid signal with uncertainty given as
+@given(FIRuncFilter_input())
+@settings(deadline=None)
+@pytest.mark.slow
+def test_FIRuncFilter_for_correct_output_dimensions_for_full_covariance(
+    fir_unc_filter_input,
+):
+    y_fir, Uy_fir = FIRuncFilter(**fir_unc_filter_input, return_full_covariance=True)
+    assert_equal(len(fir_unc_filter_input["y"]), len(y_fir))
+    assert_equal(Uy_fir.shape, (len(y_fir), len(y_fir)))
+
+
+@given(FIRuncFilter_input())
+@settings(deadline=None)
+@pytest.mark.slow
+def test_FIRuncFilter_for_correct_output_dimensions_for_vector_covariance(
+    fir_unc_filter_input,
+):
+    _, Uy = FIRuncFilter(**fir_unc_filter_input)
+    assert_equal(Uy.shape, (len(fir_unc_filter_input["y"]),))
+
+
+@given(FIRuncFilter_input())
+@settings(deadline=None)
+@pytest.mark.slow
+def test_FIRuncFilter_for_correct_dimension_of_y(fir_unc_filter_input):
+    y_fir, Uy_fir = FIRuncFilter(**fir_unc_filter_input)
+    assert_equal(len(fir_unc_filter_input["y"]), len(y_fir))
+
+
+# in the following test, we exclude the case of a valid signal with uncertainty
+# given as
 # the right-sided auto-covariance (acf). This is done, because we currently do not
 # ensure, that the random-drawn acf generates a positive-semidefinite
-# Toeplitz-matrix. Therefore we cannot construct a valid and equivalent input for the
+# Toeplitz-matrix. Therefore we cannot construct a valid and equivalent input for
+# the
 # Monte-Carlo method in that case.
 @given(FIRuncFilter_input(exclude_corr_kind=True))
 @settings(deadline=None)
@@ -450,11 +480,6 @@ def test_FIRuncFilter_MC_uncertainty_comparison(fir_unc_filter_input):
     # )
     # /HACK
 
-    # check basic properties
-    assert np.all(np.diag(Uy_fir) >= 0)
-    assert np.all(np.diag(Uy_mc) >= 0)
-    assert Uy_fir.shape == Uy_mc.shape
-
     # approximate comparison after swing-in of MC-result (which is after the combined
     # length of blow and b)
     assert_allclose(
@@ -470,16 +495,18 @@ def test_FIRuncFilter_MC_uncertainty_comparison(fir_unc_filter_input):
 @given(FIRuncFilter_input())
 @settings(deadline=None)
 @pytest.mark.slow
+def test_FIRuncFilter_non_negative_main_diagonal_covariance(fir_unc_filter_input):
+    _, Uy_fir = FIRuncFilter(**fir_unc_filter_input, return_full_covariance=True)
+    assert np.all(np.diag(Uy_fir) >= 0)
+
+
+@given(FIRuncFilter_input())
+@settings(deadline=None)
+@pytest.mark.slow
 def test_FIRuncFilter_legacy_comparison(fir_unc_filter_input):
-    # Compare output of both functions for thinkable permutations of input parameters.
     legacy_y, legacy_Uy = legacy_FIRuncFilter(**fir_unc_filter_input)
     current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
 
-    # check output dimensions
-    assert len(current_y) == len(fir_unc_filter_input["y"])
-    assert current_Uy.shape == (len(fir_unc_filter_input["y"]),)
-
-    # check value identity
     assert_allclose(
         legacy_y,
         current_y,
@@ -521,11 +548,6 @@ def test_fir_filter_MC_comparison():
     #     title=f"filter: {len(theta)}, signal: {len(x)}",
     # )
     # /HACK
-
-    # approximate comparison
-    assert np.all(np.diag(Uy_fir) >= 0)
-    assert np.all(np.diag(Uy_mc) >= 0)
-    assert Uy_fir.shape == Uy_mc.shape
     assert_allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
 
 
