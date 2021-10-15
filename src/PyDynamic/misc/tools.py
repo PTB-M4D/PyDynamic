@@ -19,9 +19,11 @@ This module contains the following functions:
 * :func:`is_2d_matrix`: Check if a np.ndarray is a matrix
 * :func:`number_of_rows_equals_vector_dim`: Check if a matrix and a vector match in size
 """
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.colors import Normalize
 from scipy.sparse import eye, issparse
 from scipy.sparse.linalg.eigen.arpack import eigs
 
