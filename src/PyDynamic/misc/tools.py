@@ -61,8 +61,26 @@ def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
         shifted vector of estimates
     shifted_ux : float, np.ndarray of shape (N,) or of shape (N,N)
         uncertainty associated with the shifted vector of estimates
+
+    Raises
+    ------
+    ValueError
+        If shift, x or ux are of unexpected type, dimensions of x and ux do not fit
+        or ux is of unexpected shape
     """
     shift = _cast_shift_to_int(shift=shift)
+    if not isinstance(x, np.ndarray):
+        raise ValueError(
+            "shift_uncertainty: x is expected to be of type np.ndarray but is of type "
+            f"{type(x)}."
+        )
+    if not number_of_rows_equals_vector_dim(matrix=ux, vector=x):
+        raise ValueError(
+            "shift_uncertainty: number of rows of ux and number of elements of x are "
+            f"expected to match. But x has {len(x)} elements and ux is of shape "
+            f"{ux.shape}."
+        )
+
     xs = np.roll(x, shift)
 
     if isinstance(ux, float):       # no shift necessary for ux
@@ -74,10 +92,15 @@ def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
             assert(ux.shape[0]==ux.shape[1])
             uxs = np.roll(ux, (shift, shift), axis=(0,1))
             return xs, uxs
-        else:
-            raise TypeError("Input uncertainty has incompatible shape")
-    else:
-        raise TypeError("Input uncertainty has incompatible type")
+        raise ValueError(
+            "shift_uncertainty: input uncertainty ux is expected to be a vector or "
+            f"two-dimensional, square matrix but is of shape {ux.shape}."
+        )
+
+    raise ValueError(
+        "shift_uncertainty: input uncertainty ux is expected to be a float or a "
+        f"numpy.ndarray but is of type {type(ux)}."
+    )
 
 
 def _cast_shift_to_int(shift: Any) -> int:
