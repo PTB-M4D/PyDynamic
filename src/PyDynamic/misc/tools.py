@@ -105,22 +105,22 @@ def trimOrPad(array, length, mode="constant"):
 
 
 def print_vec(vector, prec=5, retS=False, vertical=False):
-    """ Print vector (1D array) to the console or return as formatted string
+    """Print vector (1D array) to the console or return as formatted string
 
     Parameters
     ----------
-        vector : (M,) array_like
-        prec : int
-            the precision of the output
-        vertical : bool
-            print out vertical or not
-        retS : bool
-            print or return string
+    vector : (M,) array_like
+    prec : int
+        the precision of the output
+    vertical : bool
+        print out vertical or not
+    retS : bool
+        print or return string
 
     Returns
     -------
-        s : str
-            if retS is True
+    s : str
+        if retS is True
 
     """
     if vertical:
