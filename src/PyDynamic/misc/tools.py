@@ -402,3 +402,20 @@ def number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> 
         True, if the number of rows coincide, False otherwise
     """
     return len(vector) == matrix.shape[0]
+
+
+def is_2d_square_matrix(ndarray: np.ndarray) -> bool:
+    """Check if a np.ndarray is a two-dimensional square matrix, i.e. is of shape (n,n)
+
+    Parameters
+    ----------
+    ndarray : np.ndarray
+        the array to check
+
+    Returns
+    -------
+    bool
+        True, if the array expands over exactly two dimensions of similar size,
+        False otherwise
+    """
+    return is_2d_matrix(ndarray) and ndarray.shape[0] == ndarray.shape[1]
