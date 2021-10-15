@@ -16,6 +16,7 @@ This modules contains the following functions:
           is known and that noise is stationary!
 
 """
+import warnings
 
 import numpy as np
 from scipy.linalg import solve, solve_discrete_lyapunov, toeplitz
@@ -504,7 +505,7 @@ def IIRuncFilter(x, Ux, b, a, Uab=None, state=None, kind="corr"):
     if not isinstance(Ux, np.ndarray):
         Ux = np.full(x.shape, Ux)  # translate iid noise to vector
 
-        if kind is not "diag":
+        if kind != "diag":
             kind = "diag"
             raise UserWarning(
                 "Ux of type float and `kind='{KIND}'` was given. To ensure the behavior "
