@@ -62,9 +62,7 @@ def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
     shifted_ux : float, np.ndarray of shape (N,) or of shape (N,N)
         uncertainty associated with the shifted vector of estimates
     """
-
-    assert(isinstance(shift, int))
-    # application of shift to the vector of estimates
+    shift = _cast_shift_to_int(shift=shift)
     xs = np.roll(x, shift)
 
     if isinstance(ux, float):       # no shift necessary for ux
@@ -80,6 +78,18 @@ def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
             raise TypeError("Input uncertainty has incompatible shape")
     else:
         raise TypeError("Input uncertainty has incompatible type")
+
+
+def _cast_shift_to_int(shift: Any) -> int:
+    try:
+        return int(shift)
+    except ValueError:
+        raise ValueError(
+            "shift_uncertainty: shift is expected to be type int or at least "
+            f"cast-able to int, but is {shift} of type {type(shift)}. Please provide "
+            "a valid value."
+        )
+
 
 def trimOrPad(array, length, mode="constant"):
     """Trim or pad (with zeros) a vector to the desired length
