@@ -404,6 +404,53 @@ def number_of_rows_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> 
     return len(vector) == matrix.shape[0]
 
 
+def plot_vectors_and_covariances_comparison(
+    vector_1: np.ndarray,
+    vector_2: np.ndarray,
+    covariance_1: np.ndarray,
+    covariance_2: np.ndarray,
+    title: Optional[str] = "Comparison between two vectors and corresponding "
+    "uncertainties",
+    label_1: Optional[str] = "vector_1",
+    label_2: Optional[str] = "vector_2",
+):
+    """Plot two vectors and their covariances side-by-side for visual comparison
+
+    Parameters
+    ----------
+    vector_1 : np.ndarray
+        the first vector to compare
+    vector_2 : np.ndarray
+        the second vector to compare
+    covariance_1 : np.ndarray
+        the first covariance matrix to compare
+    covariance_2 : np.ndarray
+        the second covariance matrix to compare
+    title : str, optional
+        the title for the comparison plot, defaults to `"Comparison between two vectors
+        and corresponding uncertainties"`
+    label_1 : str, optional
+        the label for the first vector in the legend and title for the first
+        covariance plot, defaults to "vector_1"
+    label_2 : str, optional
+        the label for the second vector in the legend and title for the second
+        covariance plot, defaults to "vector_2"
+    """
+    fig, ax = plt.subplots(nrows=2, ncols=2)
+    fig.suptitle(title)
+    ax[0][0].imshow(covariance_1)
+    ax[0][0].set_title(label_1 + " uncertainties")
+    ax[0][1].imshow(covariance_2)
+    ax[0][1].set_title(label_2 + " uncertainties")
+    ax[1][0].plot(vector_1, label=label_1)
+    ax[1][0].plot(vector_2, label=label_2)
+    ax[1][0].legend()
+    ax[1][0].set_title(label_1 + " and " + label_2)
+    ax[1][1].imshow(covariance_2 - covariance_1, norm=Normalize())
+    ax[1][1].set_title("Relative difference of uncertainties")
+    plt.show()
+
+
 def is_2d_square_matrix(ndarray: np.ndarray) -> bool:
     """Check if a np.ndarray is a two-dimensional square matrix, i.e. is of shape (n,n)
 
