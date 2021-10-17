@@ -523,7 +523,7 @@ def test_FIRuncFilter_legacy_comparison(fir_unc_filter_input):
     assert_allclose(
         legacy_Uy,
         current_Uy,
-        atol=1e-12,
+        atol=1e-11,
         rtol=4e-7,
     )
 
