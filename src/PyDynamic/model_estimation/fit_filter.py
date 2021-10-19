@@ -25,10 +25,12 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import scipy.signal as dsp
 
-from .. import is_2d_matrix
+from .. import is_2d_matrix, number_of_rows_equals_vector_dim
 from ..misc.filterstuff import grpdelay, isstable, mapinside
 
 __all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
+
+from ..misc.tools import is_2d_square_matrix
 
 
 def _fit_iir_via_least_squares(
@@ -795,81 +797,105 @@ def invLSFIR_unc(
 
 def invLSFIR_uncMC(
     H: np.ndarray,
-    UH: np.ndarray,
     N: int,
-    tau: int,
     f: np.ndarray,
     Fs: float,
-    wt: Optional[np.ndarray] = None,
+    tau: int,
+    weights: Optional[np.ndarray] = None,
     verbose: Optional[bool] = True,
+    inv: Optional[bool] = False,
+    UH: Optional[np.ndarray] = None,
+    mc_runs: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Design of FIR filter as fit to reciprocal of freq. resp. with uncertainty
+    """Design of FIR filter as fit to freq. resp. or its reciprocal with uncertainties
 
-    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
-    given frequency response for which associated uncertainties are given for its
-    real and imaginary part. Uncertainties are propagated using a Monte Carlo method.
-    This method may help in cases where the weighting matrix or the Jacobian are
-    ill-conditioned, resulting in false uncertainties associated with the filter
-    coefficients.
+    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of the
+    frequency response values or directly to the frequency response values for which
+    associated uncertainties are given for its real and imaginary part. Uncertainties
+    are propagated either using a Monte Carlo method if mc_runs is provided as
+    positive integer or otherwise using a truncated singular-value decomposition and
+    linear matrix propagation. The Monte Carlo approach may help in cases where the
+    weighting matrix or the Jacobian are ill-conditioned, resulting in false
+    uncertainties associated with the filter coefficients.
 
     Parameters
     ----------
     H : array_like of shape (M,) or (2M,)
         (Complex) frequency response values in dtype complex or as a vector first
         containing the real followed by the imaginary parts
-    UH : array_like of shape (2M,2M)
-        uncertainties associated with the real and imaginary part of H
-    N: int
+    N : int
         FIR filter order
-    tau: int
-        time delay of filter in samples
     f : array_like of shape (M,)
         frequencies at which H is given
     Fs : float
         sampling frequency of digital FIR filter
-    wt: array_like of shape (2M,), optional
+    tau : int
+        time delay of filter in samples
+    weights : array_like of shape (2M,), optional
         vector of weights for a weighted least-squares method (default results in no
         weighting)
     verbose: bool, optional
         whether to print statements to the command line (default = True)
+    inv : bool, optional
+        If False (default) apply the fit to the frequency response values directly,
+        otherwise fit to the reciprocal of the frequency response values
+    UH : array_like of shape (2M,2M)
+        uncertainties associated with the real and imaginary part of H
+    mc_runs : int, optional
+        Number of Monte Carlo runs. Defaults to zero. If uncertainties UH are
+        provided the propagation is done via
 
     Returns
     -------
-        b: np.ndarray of shape (N+1,)
-            filter coefficients of shape
-        Ub: np.ndarray of shape (N+1, N+1)
-            uncertainties associated with b
+    b : array_like of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
+    Ub : array_like of shape (N+1,N+1)
+        Uncertainties associated with b. Will only be returned if UH was provided
 
     References
     ----------
     * Elster and Link [Elster2008]_
 
     """
-
     if verbose:
         print(
             f"\ninvLSFIR_uncMC: Least-squares fit of an order {N} digital FIR filter "
             f"to the reciprocal of a frequency response given by {len(H)} values "
             f"and propagation of associated uncertainties."
         )
-
     frequencies = f.copy()
     sampling_frequency = Fs
     n_frequencies = len(frequencies)
-
-    if not len(H) == UH.shape[0]:
-        # Assume that H is given as complex valued frequency response.
-        RI = np.hstack((np.real(H), np.imag(H)))
+    if _is_dtype_complex(H):
+        if not len(H) == n_frequencies:
+            raise ValueError(
+                "invLSFIR_uncMC: vector H of complex frequency responses is expected "
+                "to contain exactly as many elements as vector f of frequencies. "
+                f"Please adjust f, which has {n_frequencies} elements or H, which has"
+                f"{len(H)} elements."
+            )
+        h_real_imaginary = np.hstack((np.real(H), np.imag(H)))
         h_complex = H.copy()
-    else:
-        RI = H.copy()
+    elif len(H) == 2 * n_frequencies:
+        h_real_imaginary = H.copy()
         h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+    else:  # H contains floats but is of wrong length
+        raise ValueError(
+            "invLSFIR_uncMC: vector H is expected to either contain floating point "
+            "real and imaginary parts of frequency response and thus contain twice as "
+            "many elements as f or be of any complex NumPy dtype and contain just as "
+            f"many. Please adjust f, which has {n_frequencies} elements or H, "
+            f"which has {len(H)} elements."
+        )
+
+    if UH is not None:
+        _validate_vector_and_uncertainties(vector=h_real_imaginary, uncertainties=UH)
 
     h_complex_reciprocal = np.reciprocal(h_complex)
 
     # Step 1: Propagation of uncertainties to reciprocal of frequency response
-    runs = 10000
-    HRI = np.random.multivariate_normal(RI, UH, runs)
+    runs = mc_runs
+    HRI = np.random.multivariate_normal(h_real_imaginary, UH, runs)
 
     # Step 2: Fitting the filter coefficients
     if weights is not None:
@@ -883,10 +909,10 @@ def invLSFIR_uncMC(
             raise ValueError(
                 "invLSFIR_uncMC: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
-                f"{2 * n_frequencies} but is of length {wt.shape}."
+                f"{2 * n_frequencies} but is of length {len(weights)}."
             )
     else:
-        wt = np.ones(2 * n_frequencies)
+        weights = np.ones(2 * n_frequencies)
 
     E = np.exp(
         -1j
@@ -898,20 +924,47 @@ def invLSFIR_uncMC(
         )
     )
     X = np.vstack((np.real(E), np.imag(E)))
-    X = np.dot(np.diag(wt), X)
+    X = np.dot(np.diag(weights), X)
     bF = np.zeros((N + 1, runs))
     resn = np.zeros((runs,))
     for k in range(runs):
         Hk = HRI[k, :n_frequencies] + 1j * HRI[k, n_frequencies:]
         Hkt = Hk * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
         iRI = np.hstack([np.real(1.0 / Hkt), np.imag(1.0 / Hkt)])
-        bF[:, k], res = np.linalg.lstsq(X, iRI)[:2]
+        bF[:, k], res = np.linalg.lstsq(X, iRI, rcond=None)[:2]
         resn[k] = np.linalg.norm(res)
 
     bFIR = np.mean(bF, axis=1)
     UbFIR = np.cov(bF, rowvar=True)
 
     return bFIR, UbFIR
+
+
+def _is_dtype_complex(array: np.ndarray) -> bool:
+    return array.dtype == np.complexfloating
+
+
+def _validate_vector_and_uncertainties(
+    vector: np.ndarray, uncertainties: Union[np.ndarray]
+):
+    if not isinstance(uncertainties, np.ndarray):
+        raise ValueError(
+            f"{inspect.stack()[1].function}: if uncertainties are provided, "
+            f"they are expected to be of type np.ndarray, but uncertainties are of type"
+            f" {type(uncertainties)}."
+        )
+    if not number_of_rows_equals_vector_dim(matrix=uncertainties, vector=vector):
+        raise ValueError(
+            f"{inspect.stack()[1].function}: number of rows of uncertainties and "
+            f"number of elements of values are expected to match. But {len(vector)} "
+            f"values and {uncertainties.shape} uncertainties were provided. Please "
+            f"adjust either the values or their corresponding uncertainties."
+        )
+    if not is_2d_square_matrix(uncertainties):
+        raise ValueError(
+            f"{inspect.stack()[1].function}: uncertainties are expected to be "
+            f"provided in a square matrix shape but are of shape {uncertainties.shape}."
+        )
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
