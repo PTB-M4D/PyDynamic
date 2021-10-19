@@ -872,8 +872,14 @@ def invLSFIR_uncMC(
     HRI = np.random.multivariate_normal(RI, UH, runs)
 
     # Step 2: Fitting the filter coefficients
-    if isinstance(wt, np.ndarray):
-        if wt.shape != 2 * n_frequencies:
+    if weights is not None:
+        if not isinstance(weights, np.ndarray):
+            raise ValueError(
+                "invLSFIR_uncMC: User-defined weighting has wrong "
+                "type. wt is expected to be a NumPy ndarray but is of type "
+                f"{type(weights)}. Thus we disable weighting.",
+            )
+        if len(weights) != 2 * n_frequencies:
             raise ValueError(
                 "invLSFIR_uncMC: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
