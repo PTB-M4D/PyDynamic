@@ -13,12 +13,13 @@ from PyDynamic.examples.demonstrate_fit_som import (
 from .conftest import hypothesis_float_vector
 
 
-def test_demonstrate_second_order_model_fitting(monkeypatch):
+def test_demonstrate_second_order_model_fitting(capsys, monkeypatch):
     # With this expression we override the matplotlib.pyplot.show method with a
     # lambda expression returning None but only for this one test.
     # guarantee this
     monkeypatch.setattr(plt, "show", lambda: None, raising=True)
-    demonstrate_second_order_model_fitting(runs=100)
+    with capsys.disabled():
+        demonstrate_second_order_model_fitting(runs=100)
 
 
 @composite
