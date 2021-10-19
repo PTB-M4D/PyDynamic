@@ -452,7 +452,7 @@ def test_digital_deconvolution_FIR_example_figure_7(
     plt.xlim(1.9, 2.4)
 
 
-@given(hypothesis_dimension())
+@given(hypothesis_dimension(min_value=2, max_value=12))
 @settings(
     deadline=None,
     suppress_health_check=[
