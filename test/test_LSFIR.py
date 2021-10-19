@@ -1,10 +1,13 @@
 import os
 import pathlib
+from typing import Callable, Union
 
+import hypothesis.strategies as hst
 import numpy as np
 import pytest
 import scipy.signal as dsp
 from hypothesis import given, HealthCheck, settings
+from hypothesis.strategies import composite
 from matplotlib import pyplot as plt
 from numpy.testing import assert_allclose, assert_almost_equal
 
@@ -18,7 +21,11 @@ from PyDynamic.model_estimation.fit_filter import (
     LSFIR,
 )
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
-from .conftest import hypothesis_dimension
+from .conftest import (
+    hypothesis_dimension,
+    hypothesis_float_vector,
+    scale_matrix_or_vector_to_convex_combination,
+)
 
 
 @pytest.fixture(scope="module")
@@ -32,6 +39,21 @@ def measurement_system():
     S0 = 0.4
     delta = 0.01
     return {"f0": f0, "S0": S0, "delta": delta}
+
+
+@composite
+def weights(draw: Callable) -> Union[np.ndarray, None]:
+
+    unscaled_weights = draw(
+        hst.one_of(
+            hst.just(None),
+            hypothesis_float_vector(min_value=0, max_value=1, length=400),
+        )
+    )
+    if unscaled_weights is not None:
+        if np.any(unscaled_weights):
+            return scale_matrix_or_vector_to_convex_combination(unscaled_weights)
+        return np.ones_like(unscaled_weights)
 
 
 @pytest.fixture(scope="module")
@@ -122,6 +144,15 @@ def monte_carlo(
         atol=1,
     )
     return {"H": H, "uAbs": uAbs, "uPhas": uPhas, "UH": UH}
+
+
+@pytest.fixture(scope="module")
+def complex_H_with_UH(monte_carlo):
+    n_frequencies = len(monte_carlo["H"]) // 2
+    return {
+        "H": monte_carlo["H"][:n_frequencies] + 1j * monte_carlo["H"][n_frequencies:],
+        "UH": monte_carlo["UH"],
+    }
 
 
 @pytest.fixture(scope="module")
@@ -503,33 +534,181 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_o
     )
 
 
+@given(weights(), hypothesis_dimension(min_value=4, max_value=8))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
+    ],
+    max_examples=10,
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
+    capsys, monte_carlo, frequencies, sampling_frequency, weight_vector, filter_order
+):
+    with capsys.disabled():
+        b, ub = invLSFIR_unc(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=frequencies,
+            Fs=sampling_frequency,
+            wt=weight_vector,
+            verbose=True,
+        )
+        b_mc, ub_mc = invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            weights=weight_vector,
+            inv=True,
+            UH=monte_carlo["UH"],
+            mc_runs=10000,
+            verbose=True,
+        )
+    assert_allclose(b, b_mc, rtol=4e-2)
+    assert_allclose(ub, ub_mc, rtol=6e-1)
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(deadline=None)
+def test_invLSFIR_uncMC_with_too_short_H(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    monte_carlo["H"] = monte_carlo["H"][1:]
+    with pytest.raises(ValueError):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            UH=monte_carlo["UH"],
+            mc_runs=2,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(deadline=None)
+def test_invLSFIR_uncMC_with_complex_but_too_short_H(
+    complex_H_with_UH, frequencies, sampling_frequency, filter_order
+):
+    complex_h_but_too_short = complex_H_with_UH["H"][1:]
+    with pytest.raises(ValueError):
+        invLSFIR_uncMC(
+            H=complex_h_but_too_short,
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            UH=complex_H_with_UH["UH"],
+            mc_runs=2,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(deadline=None)
+def test_invLSFIR_uncMC_with_too_short_f(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    frequencies = frequencies[1:]
+    with pytest.raises(ValueError):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            UH=monte_carlo["UH"],
+            mc_runs=2,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
+def test_invLSFIR_uncMC_with_too_short_UH(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    with pytest.raises(ValueError):
+        too_few_rows_UH = monte_carlo["UH"][1:]
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            UH=too_few_rows_UH,
+            mc_runs=2,
+        )
+    with pytest.raises(ValueError):
+        too_few_columns_UH = monte_carlo["UH"][:, 1:]
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            UH=too_few_columns_UH,
+            mc_runs=2,
+        )
+
+
 @given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow
-def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
-    monte_carlo, frequencies, sampling_frequency, filter_order
+def test_compare_different_dtypes_invLSFIR_uncMC(
+    capsys,
+    monte_carlo,
+    complex_H_with_UH,
+    frequencies,
+    sampling_frequency,
+    filter_order,
 ):
-    b, ub = invLSFIR_unc(
-        H=monte_carlo["H"],
-        UH=monte_carlo["UH"],
-        N=filter_order,
-        tau=filter_order // 2,
-        f=frequencies,
-        Fs=sampling_frequency,
-    )
-    b_mc, ub_mc = invLSFIR_uncMC(
-        H=monte_carlo["H"],
-        UH=monte_carlo["UH"],
-        N=filter_order,
-        tau=filter_order // 2,
-        f=frequencies,
-        Fs=sampling_frequency,
-    )
-    assert_allclose(b, b_mc, rtol=4e-2)
-    assert_allclose(ub, ub_mc, rtol=6e-1)
+    with capsys.disabled():
+        b_real_imaginary, ub_real_imaginary = invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            verbose=True,
+            UH=monte_carlo["UH"],
+            mc_runs=10000,
+        )
+        b_complex, ub_complex = invLSFIR_uncMC(
+            H=complex_H_with_UH["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            verbose=True,
+            UH=monte_carlo["UH"],
+            mc_runs=10000,
+        )
+    assert_allclose(b_real_imaginary, b_complex, rtol=4e-2)
+    assert_allclose(ub_real_imaginary, ub_complex, rtol=6e-1)
