@@ -742,7 +742,7 @@ def invLSFIR_unc(
 
     # Step 2: Fit filter coefficients and evaluate uncertainties
     if isinstance(wt, np.ndarray):
-        if wt.shape != np.diag(UiH).shape[0]:
+        if len(wt) != np.diag(UiH).shape[0]:
             raise ValueError(
                 "invLSFIR_unc: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
