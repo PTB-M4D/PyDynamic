@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 import hypothesis.strategies as hst
 import numpy as np
@@ -42,14 +42,18 @@ def measurement_system():
 
 
 @composite
-def weights(draw: Callable) -> Union[np.ndarray, None]:
-
-    unscaled_weights = draw(
-        hst.one_of(
-            hst.just(None),
-            hypothesis_float_vector(min_value=0, max_value=1, length=400),
-        )
+def weights(
+    draw: Callable, guarantee_vector: Optional[bool] = False
+) -> Union[np.ndarray, None]:
+    valid_vector_strategy = hypothesis_float_vector(
+        min_value=0, max_value=1, length=400
     )
+    valid_weight_strategies = (
+        valid_vector_strategy
+        if guarantee_vector
+        else (valid_vector_strategy, hst.just(None))
+    )
+    unscaled_weights = draw(hst.one_of(valid_weight_strategies))
     if unscaled_weights is not None:
         if np.any(unscaled_weights):
             return scale_matrix_or_vector_to_convex_combination(unscaled_weights)
