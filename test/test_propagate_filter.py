@@ -530,7 +530,7 @@ def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
     assert_allclose(
         legacy_Uy,
         current_Uy,
-        atol=1e-9,
+        atol=1e-8,
         rtol=2e-6,
     )
 
