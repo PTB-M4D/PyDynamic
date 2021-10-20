@@ -930,6 +930,27 @@ def invLSFIR_uncMC(
     bFIR = np.mean(bF, axis=1)
     UbFIR = np.cov(bF, rowvar=True)
 
+    if verbose:
+        h_complex = (
+            h_real_imaginary[:n_frequencies] + 1j * h_real_imaginary[n_frequencies:]
+        )
+        original_values = np.reciprocal(h_complex) if inv else h_complex
+        filters_frequency_response = dsp.freqz(bFIR, 1, omega)[1]
+        delayed_filters_frequency_response = filters_frequency_response * np.exp(
+            1j * omega * tau
+        )
+        residuals = np.hstack(
+            (
+                np.real(delayed_filters_frequency_response) - np.real(original_values),
+                np.imag(delayed_filters_frequency_response) - np.imag(original_values),
+            )
+        )
+        rms = np.sqrt(np.sum(residuals ** 2) / n_frequencies)
+        print(
+            "invLSFIR_uncMC: Calculation of FIR filter coefficients finished. "
+            f"Final rms error = {rms}"
+        )
+
     return bFIR, UbFIR
 
 
