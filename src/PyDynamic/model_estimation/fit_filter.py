@@ -887,13 +887,11 @@ def invLSFIR_uncMC(
             vector=h_real_imag, uncertainties=UH
         )
 
-    # Step 1: Propagation of uncertainties to reciprocal of frequency response
     runs = mc_runs
     mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
         h_real_imag, UH, runs
     )
 
-    # Step 2: Fitting the filter coefficients
     if weights is not None:
         if not isinstance(weights, np.ndarray):
             raise ValueError(
