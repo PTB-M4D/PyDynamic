@@ -567,7 +567,7 @@ def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
     assert_allclose(
         legacy_Uy,
         current_Uy,
-        atol=1e-7,
+        atol=np.max((current_Uy.max() * 1e-7, 1e-7)),
         rtol=3e-6,
     )
 
