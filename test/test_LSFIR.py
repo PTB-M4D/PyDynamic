@@ -772,6 +772,7 @@ def test_invLSFIR_uncMC_with_wrong_type_weights(
         HealthCheck.function_scoped_fixture,
     ],
 )
+@pytest.mark.slow
 def test_invLSFIR_uncMC_with_wrong_len_weights(
     capsys, monte_carlo, frequencies, sampling_frequency, weight_vector, filter_order
 ):
