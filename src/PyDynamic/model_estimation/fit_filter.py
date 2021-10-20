@@ -875,26 +875,11 @@ def invLSFIR_uncMC(
     sampling_frequency = Fs
     n_frequencies = len(frequencies)
     if _is_dtype_complex(H):
-        if not len(H) == n_frequencies:
-            raise ValueError(
-                "invLSFIR_uncMC: vector H of complex frequency responses is expected "
-                "to contain exactly as many elements as vector f of frequencies. "
-                f"Please adjust f, which has {n_frequencies} elements or H, which has"
-                f"{len(H)} elements."
-            )
+        _validate_length_of_h(frequency_response=H, expected_number=n_frequencies)
         h_real_imaginary = np.hstack((np.real(H), np.imag(H)))
-        h_complex = H.copy()
-    elif len(H) == 2 * n_frequencies:
+    else:
+        _validate_length_of_h(frequency_response=H, expected_number=2 * n_frequencies)
         h_real_imaginary = H.copy()
-        h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
-    else:  # H contains floats but is of wrong length
-        raise ValueError(
-            "invLSFIR_uncMC: vector H is expected to either contain floating point "
-            "real and imaginary parts of frequency response and thus contain twice as "
-            "many elements as f or be of any complex NumPy dtype and contain just as "
-            f"many. Please adjust f, which has {n_frequencies} elements or H, "
-            f"which has {len(H)} elements."
-        )
 
     if UH is not None:
         _validate_vector_and_corresponding_uncertainties_dimensions(
@@ -972,6 +957,16 @@ def _validate_vector_and_corresponding_uncertainties_dimensions(
         raise ValueError(
             f"{inspect.stack()[1].function}: uncertainties are expected to be "
             f"provided in a square matrix shape but are of shape {uncertainties.shape}."
+        )
+
+
+def _validate_length_of_h(frequency_response: np.ndarray, expected_number: int):
+    if not len(frequency_response) == expected_number:
+        raise ValueError(
+            f"{inspect.stack()[1].function}: vector of complex frequency responses "
+            f"is expected to contain {expected_number} of elements. Please adjust "
+            f"frequency responses, which currently contain {len(frequency_response)} "
+            f"elements."
         )
 
 
