@@ -536,7 +536,7 @@ def LSFIR(
     delayed_h_complex = h_complex * np.exp(1j * omega.flatten() * tau)
     iRI = np.hstack([np.real(delayed_h_complex), np.imag(delayed_h_complex)])
 
-    bFIR, res = np.linalg.lstsq(X, iRI)[:2]
+    bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]
 
     if not isinstance(res, np.ndarray):
         print(
@@ -622,7 +622,7 @@ def invLSFIR(
         [np.real(delayed_h_complex_reciprocal), np.imag(delayed_h_complex_reciprocal)]
     )
 
-    bFIR, res = np.linalg.lstsq(X, iRI)[:2]  # the actual fitting
+    bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]  # the actual fitting
 
     if len(res) == 1:  # summarise results
         print(
