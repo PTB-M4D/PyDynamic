@@ -889,9 +889,9 @@ def invLSFIR_uncMC(
         )
 
     if UH is not None:
-        _validate_vector_and_uncertainties(vector=h_real_imaginary, uncertainties=UH)
-
-    h_complex_reciprocal = np.reciprocal(h_complex)
+        _validate_vector_and_corresponding_uncertainties_dimensions(
+            vector=h_real_imaginary, uncertainties=UH
+        )
 
     # Step 1: Propagation of uncertainties to reciprocal of frequency response
     runs = mc_runs
@@ -944,7 +944,7 @@ def _is_dtype_complex(array: np.ndarray) -> bool:
     return array.dtype == np.complexfloating
 
 
-def _validate_vector_and_uncertainties(
+def _validate_vector_and_corresponding_uncertainties_dimensions(
     vector: np.ndarray, uncertainties: Union[np.ndarray]
 ):
     if not isinstance(uncertainties, np.ndarray):
