@@ -875,22 +875,6 @@ def invLSFIR_uncMC(
     n_freqs = len(freqs)
     two_n_freqs = 2 * n_freqs
     sampling_freq = Fs
-    if _is_dtype_complex(H):
-        _validate_length_of_h(freq_resp=H, expected_number=n_freqs)
-        h_real_imag = np.hstack((np.real(H), np.imag(H)))
-    else:
-        _validate_length_of_h(freq_resp=H, expected_number=two_n_freqs)
-        h_real_imag = H.copy()
-
-    if UH is not None:
-        _validate_vector_and_corresponding_uncertainties_dims(
-            vector=h_real_imag, uncertainties=UH
-        )
-
-    runs = mc_runs
-    mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
-        h_real_imag, UH, runs
-    )
 
     if weights is not None:
         if not isinstance(weights, np.ndarray):
@@ -907,6 +891,23 @@ def invLSFIR_uncMC(
             )
     else:
         weights = np.ones(two_n_freqs)
+
+    if _is_dtype_complex(H):
+        _validate_length_of_h(freq_resp=H, expected_number=n_freqs)
+        h_real_imag = np.hstack((np.real(H), np.imag(H)))
+    else:
+        _validate_length_of_h(freq_resp=H, expected_number=two_n_freqs)
+        h_real_imag = H.copy()
+
+    if UH is not None:
+        _validate_vector_and_corresponding_uncertainties_dims(
+            vector=h_real_imag, uncertainties=UH
+        )
+
+    runs = mc_runs
+    mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
+        h_real_imag, UH, runs
+    )
 
     X = _compute_x(
         filter_order=N,
