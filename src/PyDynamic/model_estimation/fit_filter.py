@@ -317,9 +317,13 @@ def LSIIR(
     warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # Prepare frequencies, fitting and stabilization parameters.
-    w = 2 * np.pi * f / Fs
+    omega = (
+        _compute_omega_equals_two_pi_times_frequencies_divided_by_sampling_frequency(
+            sampling_frequency=Fs, frequencies=f
+        )
+    )
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
-    E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
+    E = np.exp(-1j * np.dot(omega[:, np.newaxis], Ns.T))
     as_and_bs = np.empty((mc_runs, Nb + Na + 1))
     taus = np.empty((mc_runs,), dtype=int)
     tau_max = tau
@@ -333,7 +337,7 @@ def LSIIR(
     # just once the actual algorithm.
     for mc_run in range(mc_runs):
         # Conduct actual fit.
-        b_i, a_i = _fit_iir_via_least_squares(Hvals, tau, w, E, Na, Nb, inv=inv)
+        b_i, a_i = _fit_iir_via_least_squares(Hvals, tau, omega, E, Na, Nb, inv=inv)
 
         # Initialize counter which we use to report about required iteration count.
         current_stab_iter = 1
@@ -348,7 +352,7 @@ def LSIIR(
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
                 b_i, a_i = _fit_iir_via_least_squares(
-                    Hvals, tau_max, w, E, Na, Nb, inv=inv
+                    Hvals, tau_max, omega, E, Na, Nb, inv=inv
                 )
                 current_stab_iter += 1
 
@@ -373,7 +377,7 @@ def LSIIR(
                     b=b_i,
                     a=a_i,
                     tau=taus[mc_run],
-                    w=w,
+                    w=omega,
                     E=E,
                     Hvals=Hvals,
                     Nb=Nb,
@@ -387,7 +391,7 @@ def LSIIR(
                 if taus[mc_run] > tau_max:
                     tau_max = taus[mc_run]
                 if verbose:
-                    sos = np.sum(np.abs((dsp.freqz(b_i, a_i, w)[1] - Hvals) ** 2))
+                    sos = np.sum(np.abs((dsp.freqz(b_i, a_i, omega)[1] - Hvals) ** 2))
                     print(
                         f"LSIIR: Fitting "
                         f"{'' if UHvals is None else f'for MC run {mc_run} '}"
@@ -420,7 +424,7 @@ def LSIIR(
         if not isstable(b=b_res, a=a_res, ftype="digital"):
             final_tau = tau_max
             b_res, a_res = _fit_iir_via_least_squares(
-                Hvals, final_tau, w, E, Na, Nb, inv=inv
+                Hvals, final_tau, omega, E, Na, Nb, inv=inv
             )
             final_stab_iter += 1
 
@@ -433,7 +437,7 @@ def LSIIR(
                 b=b_res,
                 a=a_res,
                 tau=final_tau,
-                w=w,
+                w=omega,
                 E=E,
                 Hvals=Hvals,
                 Nb=Nb,
@@ -462,7 +466,7 @@ def LSIIR(
                 f"(final tau = {final_tau})."
             )
 
-        Hd = dsp.freqz(b_res, a_res, w)[1] * np.exp(1j * w * tau)
+        Hd = dsp.freqz(b_res, a_res, omega)[1] * np.exp(1j * omega * tau)
         res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
         rms = np.sqrt(np.sum(res ** 2) / len(f))
         print(f"LSIIR: Final rms error = {rms}.\n\n")
@@ -472,6 +476,12 @@ def LSIIR(
         return b_res, a_res, final_tau, Uab
     else:
         return b_res, a_res, final_tau
+
+
+def _compute_omega_equals_two_pi_times_frequencies_divided_by_sampling_frequency(
+    sampling_frequency: float, frequencies: np.ndarray
+):
+    return 2 * np.pi * frequencies / sampling_frequency
 
 
 def LSFIR(
@@ -927,9 +937,14 @@ def invLSFIR_uncMC(
     X = np.dot(np.diag(weights), X)
     bF = np.zeros((N + 1, runs))
     resn = np.zeros((runs,))
+    omega = (
+        _compute_omega_equals_two_pi_times_frequencies_divided_by_sampling_frequency(
+            sampling_frequency=sampling_frequency, frequencies=frequencies
+        )
+    )
     for k in range(runs):
         Hk = HRI[k, :n_frequencies] + 1j * HRI[k, n_frequencies:]
-        Hkt = Hk * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
+        Hkt = Hk * np.exp(1j * omega * tau)
         iRI = np.hstack([np.real(1.0 / Hkt), np.imag(1.0 / Hkt)])
         bF[:, k], res = np.linalg.lstsq(X, iRI, rcond=None)[:2]
         resn[k] = np.linalg.norm(res)
