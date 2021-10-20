@@ -546,6 +546,7 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_o
         HealthCheck.function_scoped_fixture,
     ],
 )
+@pytest.mark.slow
 def test_usual_call_invLSFIR_uncMC(
     capsys, monte_carlo, frequencies, sampling_frequency, filter_order, verbose
 ):
