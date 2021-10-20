@@ -741,3 +741,43 @@ def test_compare_different_dtypes_invLSFIR_uncMC(
         )
     assert_allclose(b_real_imaginary, b_complex, rtol=4e-2)
     assert_allclose(ub_real_imaginary, ub_complex, rtol=6e-1)
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(deadline=None)
+def test_invLSFIR_uncMC_with_wrong_type_weights(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    weight_list = [1] * 2 * len(frequencies)
+    with pytest.raises(ValueError):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            weights=weight_list,
+            inv=True,
+            UH=monte_carlo["UH"],
+            mc_runs=2,
+        )
+
+
+@given(weights(guarantee_vector=True), hypothesis_dimension(min_value=2, max_value=12))
+@settings(deadline=None)
+def test_invLSFIR_uncMC_with_wrong_len_weights(
+    monte_carlo, frequencies, sampling_frequency, weight_vector, filter_order
+):
+    weight_vector = weight_vector[1:]
+    with pytest.raises(ValueError):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            weights=weight_vector,
+            inv=True,
+            UH=monte_carlo["UH"],
+            mc_runs=2,
+        )
