@@ -580,10 +580,10 @@ def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
 def test_invLSFIR_uncMC_with_too_short_H(
     monte_carlo, frequencies, sampling_frequency, filter_order
 ):
-    monte_carlo["H"] = monte_carlo["H"][1:]
+    too_short_H = monte_carlo["H"][1:]
     with pytest.raises(ValueError):
         invLSFIR_uncMC(
-            H=monte_carlo["H"],
+            H=too_short_H,
             N=filter_order,
             f=frequencies,
             Fs=sampling_frequency,
@@ -618,12 +618,12 @@ def test_invLSFIR_uncMC_with_complex_but_too_short_H(
 def test_invLSFIR_uncMC_with_too_short_f(
     monte_carlo, frequencies, sampling_frequency, filter_order
 ):
-    frequencies = frequencies[1:]
+    too_short_f = frequencies[1:]
     with pytest.raises(ValueError):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
-            f=frequencies,
+            f=too_short_f,
             Fs=sampling_frequency,
             tau=filter_order // 2,
             inv=True,
@@ -643,8 +643,8 @@ def test_invLSFIR_uncMC_with_too_short_f(
 def test_invLSFIR_uncMC_with_too_short_UH(
     monte_carlo, frequencies, sampling_frequency, filter_order
 ):
+    too_few_rows_UH = monte_carlo["UH"][1:]
     with pytest.raises(ValueError):
-        too_few_rows_UH = monte_carlo["UH"][1:]
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
@@ -655,8 +655,8 @@ def test_invLSFIR_uncMC_with_too_short_UH(
             UH=too_few_rows_UH,
             mc_runs=2,
         )
+    too_few_columns_UH = monte_carlo["UH"][:, 1:]
     with pytest.raises(ValueError):
-        too_few_columns_UH = monte_carlo["UH"][:, 1:]
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
