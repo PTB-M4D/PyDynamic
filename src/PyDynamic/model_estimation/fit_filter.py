@@ -924,8 +924,8 @@ def invLSFIR_uncMC(
         Hk = HRI[k, :n_frequencies] + 1j * HRI[k, n_frequencies:]
         Hkt = Hk * np.exp(1j * omega * tau)
         iRI = np.hstack([np.real(1.0 / Hkt), np.imag(1.0 / Hkt)])
-        bF[:, k], res = np.linalg.lstsq(X, iRI, rcond=None)[:2]
-        resn[k] = np.linalg.norm(res)
+        bF[:, k], residuals = np.linalg.lstsq(X, iRI, rcond=None)[:2]
+        resn[k] = np.linalg.norm(residuals)
 
     bFIR = np.mean(bF, axis=1)
     UbFIR = np.cov(bF, rowvar=True)
