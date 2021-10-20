@@ -317,10 +317,8 @@ def LSIIR(
     warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # Prepare frequencies, fitting and stabilization parameters.
-    omega = (
-        _compute_omega_equals_two_pi_times_frequencies_divided_by_sampling_frequency(
-            sampling_frequency=Fs, frequencies=f
-        )
+    omega = _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
+        sampling_frequency=Fs, frequencies=f
     )
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(omega[:, np.newaxis], Ns.T))
@@ -466,7 +464,9 @@ def LSIIR(
                 f"(final tau = {final_tau})."
             )
 
-        Hd = dsp.freqz(b_res, a_res, omega)[1] * np.exp(1j * omega * tau)
+        Hd = dsp.freqz(b_res, a_res, omega)[1] * _compute_e_to_the_one_j_omega_tau(
+            omega, tau
+        )
         res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
         rms = np.sqrt(np.sum(res ** 2) / len(f))
         print(f"LSIIR: Final rms error = {rms}.\n\n")
@@ -478,7 +478,7 @@ def LSIIR(
         return b_res, a_res, final_tau
 
 
-def _compute_omega_equals_two_pi_times_frequencies_divided_by_sampling_frequency(
+def _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
     sampling_frequency: float, frequencies: np.ndarray
 ):
     return 2 * np.pi * frequencies / sampling_frequency
@@ -989,6 +989,10 @@ def _validate_length_of_h(frequency_response: np.ndarray, expected_number: int):
             f"frequency responses, which currently contain {len(frequency_response)} "
             f"elements."
         )
+
+
+def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
+    return np.exp(1j * omega * tau)
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
