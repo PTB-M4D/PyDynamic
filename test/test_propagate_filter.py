@@ -509,11 +509,18 @@ def test_FIRuncFilter_non_negative_main_diagonal_covariance(fir_unc_filter_input
 
 
 @given(FIRuncFilter_input())
-@settings(deadline=None)
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
 @pytest.mark.slow
-def test_FIRuncFilter_legacy_comparison(fir_unc_filter_input):
+def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
     legacy_y, legacy_Uy = legacy_FIRuncFilter(**fir_unc_filter_input)
-    current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
+    with capsys.disabled():
+        current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
 
     assert_allclose(
         legacy_y,
