@@ -537,19 +537,20 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_o
 @given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
 @settings(deadline=None)
 def test_usual_call_invLSFIR_uncMC(
-    monte_carlo, frequencies, sampling_frequency, filter_order, verbose
+    capsys, monte_carlo, frequencies, sampling_frequency, filter_order, verbose
 ):
-    invLSFIR_uncMC(
-        H=monte_carlo["H"],
-        N=filter_order,
-        f=frequencies,
-        Fs=sampling_frequency,
-        tau=filter_order // 2,
-        inv=True,
-        verbose=verbose,
-        UH=monte_carlo["UH"],
-        mc_runs=2,
-    )
+    with capsys.disabled():
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            verbose=verbose,
+            UH=monte_carlo["UH"],
+            mc_runs=2,
+        )
 
 
 @given(weights(), hypothesis_dimension(min_value=4, max_value=8))
