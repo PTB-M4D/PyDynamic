@@ -546,6 +546,7 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_o
         HealthCheck.function_scoped_fixture,
     ],
 )
+@pytest.mark.slow
 def test_usual_call_invLSFIR_uncMC(
     capsys, monte_carlo, frequencies, sampling_frequency, filter_order, verbose
 ):
@@ -764,12 +765,19 @@ def test_invLSFIR_uncMC_with_wrong_type_weights(
 
 
 @given(weights(guarantee_vector=True), hypothesis_dimension(min_value=2, max_value=12))
-@settings(deadline=None)
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
+@pytest.mark.slow
 def test_invLSFIR_uncMC_with_wrong_len_weights(
-    monte_carlo, frequencies, sampling_frequency, weight_vector, filter_order
+    capsys, monte_carlo, frequencies, sampling_frequency, weight_vector, filter_order
 ):
     weight_vector = weight_vector[1:]
-    with pytest.raises(ValueError):
+    with capsys.disabled(), pytest.raises(ValueError):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,

@@ -133,6 +133,7 @@ def test_fit_som_with_too_short_weighting_vector(params):
 
 
 @given(random_input_to_fit_som())
+@pytest.mark.slow
 def test_fit_som_with_zero_frequency_response_but_without_MCruns_or_UH(params):
     params["H"][0] = 0.0
     assume(params["MCruns"] is None or params["UH"] is None)
