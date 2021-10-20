@@ -605,7 +605,6 @@ def invLSFIR(
 
     n_frequencies = len(frequencies)
     h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
-    h_complex_reciprocal = np.reciprocal(h_complex)
 
     omega = (2 * np.pi * frequencies / sampling_frequency)[
         :, np.newaxis
@@ -633,22 +632,6 @@ def invLSFIR(
     )
 
     bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]  # the actual fitting
-
-    if len(res) == 1:  # summarise results
-        print(
-            "invLSFIR: Calculation of FIR filter coefficients finished with residual "
-            f"norm {res}."
-        )
-        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * frequencies / sampling_frequency)[1]
-        Hd = Hd * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
-        res = np.hstack(
-            (
-                np.real(Hd) - np.real(h_complex_reciprocal),
-                np.imag(Hd) - np.imag(h_complex_reciprocal),
-            )
-        )
-        rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
-        print(f"invLSFIR: Final rms error = {rms}\n\n")
 
     return bFIR.flatten()
 
