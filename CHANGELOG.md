@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.11.1 (2021-10-20)
+### Fix
+* **IIRuncFilter:** Introduce a missing import of scipy.signal.tf2ss ([`17fe115`](https://github.com/PTB-M4D/PyDynamic/commit/17fe115301e048d68a9fd27087cf9739fd3b5bd1))
+
 ## v1.11.0 (2021-10-15)
 ### Feature
 * **plot_vectors_and_covariances_comparison:** Introduce function to conveniently compare vectors ([`e2b3b0c`](https://github.com/PTB-M4D/PyDynamic/commit/e2b3b0c530fe3970919beeec14c96587a86653af))
