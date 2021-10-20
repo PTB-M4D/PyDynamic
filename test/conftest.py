@@ -267,6 +267,10 @@ def scale_matrix_or_vector_to_range(
     return normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
 
 
+def scale_matrix_or_vector_to_convex_combination(array: np.ndarray) -> np.ndarray:
+    return array / np.sum(array)
+
+
 @composite
 def hypothesis_covariance_matrix_with_zero_correlation(
     draw: Callable, number_of_rows: Optional[int] = None

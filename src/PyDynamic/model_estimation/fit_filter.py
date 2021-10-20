@@ -26,10 +26,12 @@ import numpy as np
 import scipy.signal as dsp
 from scipy.optimize import lsq_linear
 
-from .. import is_2d_matrix
+from .. import is_2d_matrix, number_of_rows_equals_vector_dim
 from ..misc.filterstuff import grpdelay, isstable, mapinside
 
 __all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
+
+from ..misc.tools import is_2d_square_matrix
 
 
 def _fit_iir_via_least_squares(
@@ -338,9 +340,11 @@ def LSIIR(
     warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # Prepare frequencies, fitting and stabilization parameters.
-    w = 2 * np.pi * f / Fs
+    omega = _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
+        sampling_frequency=Fs, frequencies=f
+    )
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
-    E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
+    E = np.exp(-1j * np.dot(omega[:, np.newaxis], Ns.T))
     as_and_bs = np.empty((mc_runs, Nb + Na + 1))
     taus = np.empty((mc_runs,), dtype=int)
     tau_max = tau
@@ -355,7 +359,7 @@ def LSIIR(
     for mc_run in range(mc_runs):
         # Conduct actual fit.
         b_i, a_i = _fit_iir_via_least_squares(
-            Hvals, tau, w, E, Na, Nb, inv=inv, bounds=bounds
+            Hvals, tau, omega, E, Na, Nb, inv=inv, bounds=bounds
         )
 
         # Initialize counter which we use to report about required iteration count.
@@ -371,7 +375,7 @@ def LSIIR(
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
                 b_i, a_i = _fit_iir_via_least_squares(
-                    Hvals, tau_max, w, E, Na, Nb, inv=inv, bounds=bounds
+                    Hvals, tau_max, omega, E, Na, Nb, inv=inv, bounds=bounds
                 )
                 current_stab_iter += 1
 
@@ -396,7 +400,7 @@ def LSIIR(
                     b=b_i,
                     a=a_i,
                     tau=taus[mc_run],
-                    w=w,
+                    w=omega,
                     E=E,
                     Hvals=Hvals,
                     Nb=Nb,
@@ -411,7 +415,7 @@ def LSIIR(
                 if taus[mc_run] > tau_max:
                     tau_max = taus[mc_run]
                 if verbose:
-                    sos = np.sum(np.abs((dsp.freqz(b_i, a_i, w)[1] - Hvals) ** 2))
+                    sos = np.sum(np.abs((dsp.freqz(b_i, a_i, omega)[1] - Hvals) ** 2))
                     print(
                         f"LSIIR: Fitting "
                         f"{'' if UHvals is None else f'for MC run {mc_run} '}"
@@ -444,7 +448,7 @@ def LSIIR(
         if not isstable(b=b_res, a=a_res, ftype="digital"):
             final_tau = tau_max
             b_res, a_res = _fit_iir_via_least_squares(
-                Hvals, final_tau, w, E, Na, Nb, inv=inv, bounds=bounds
+                Hvals, final_tau, omega, E, Na, Nb, inv=inv, bounds=bounds
             )
             final_stab_iter += 1
 
@@ -457,7 +461,7 @@ def LSIIR(
                 b=b_res,
                 a=a_res,
                 tau=final_tau,
-                w=w,
+                w=omega,
                 E=E,
                 Hvals=Hvals,
                 Nb=Nb,
@@ -487,7 +491,9 @@ def LSIIR(
                 f"(final tau = {final_tau})."
             )
 
-        Hd = dsp.freqz(b_res, a_res, w)[1] * np.exp(1j * w * tau)
+        Hd = dsp.freqz(b_res, a_res, omega)[1] * _compute_e_to_the_one_j_omega_tau(
+            omega, tau
+        )
         res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
         rms = np.sqrt(np.sum(res ** 2) / len(f))
         print(f"LSIIR: Final rms error = {rms}.\n\n")
@@ -497,6 +503,12 @@ def LSIIR(
         return b_res, a_res, final_tau, Uab
     else:
         return b_res, a_res, final_tau
+
+
+def _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
+    sampling_frequency: float, frequencies: np.ndarray
+):
+    return 2 * np.pi * frequencies / sampling_frequency
 
 
 def LSFIR(
@@ -561,7 +573,7 @@ def LSFIR(
     delayed_h_complex = h_complex * np.exp(1j * omega.flatten() * tau)
     iRI = np.hstack([np.real(delayed_h_complex), np.imag(delayed_h_complex)])
 
-    bFIR, res = np.linalg.lstsq(X, iRI)[:2]
+    bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]
 
     if not isinstance(res, np.ndarray):
         print(
@@ -620,7 +632,6 @@ def invLSFIR(
 
     n_frequencies = len(frequencies)
     h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
-    h_complex_reciprocal = np.reciprocal(h_complex)
 
     omega = (2 * np.pi * frequencies / sampling_frequency)[
         :, np.newaxis
@@ -647,23 +658,7 @@ def invLSFIR(
         [np.real(delayed_h_complex_reciprocal), np.imag(delayed_h_complex_reciprocal)]
     )
 
-    bFIR, res = np.linalg.lstsq(X, iRI)[:2]  # the actual fitting
-
-    if len(res) == 1:  # summarise results
-        print(
-            "invLSFIR: Calculation of FIR filter coefficients finished with residual "
-            f"norm {res}."
-        )
-        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * frequencies / sampling_frequency)[1]
-        Hd = Hd * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
-        res = np.hstack(
-            (
-                np.real(Hd) - np.real(h_complex_reciprocal),
-                np.imag(Hd) - np.imag(h_complex_reciprocal),
-            )
-        )
-        rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
-        print(f"invLSFIR: Final rms error = {rms}\n\n")
+    bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]  # the actual fitting
 
     return bFIR.flatten()
 
@@ -769,7 +764,7 @@ def invLSFIR_unc(
 
     # Step 2: Fit filter coefficients and evaluate uncertainties
     if isinstance(wt, np.ndarray):
-        if wt.shape != np.diag(UiH).shape[0]:
+        if len(wt) != np.diag(UiH).shape[0]:
             raise ValueError(
                 "invLSFIR_unc: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
@@ -778,17 +773,12 @@ def invLSFIR_unc(
     else:
         wt = np.ones(2 * n_frequencies)
 
-    E = np.exp(
-        -1j
-        * 2
-        * np.pi
-        * np.dot(
-            frequencies[:, np.newaxis] / sampling_frequency,
-            np.arange(N + 1)[:, np.newaxis].T,
-        )
+    X = _compute_x(
+        filter_order=N,
+        frequencies=frequencies,
+        sampling_frequency=sampling_frequency,
+        weights=wt,
     )
-    X = np.vstack((np.real(E), np.imag(E)))
-    X = np.dot(np.diag(wt), X)
     Hm = h_complex * np.exp(1j * omtau)
     Hri = np.hstack((np.real(1.0 / Hm), np.imag(1.0 / Hm)))
 
@@ -820,119 +810,228 @@ def invLSFIR_unc(
     return bFIR, UbFIR
 
 
+def _compute_x(
+    filter_order: int,
+    frequencies: np.ndarray,
+    sampling_frequency: float,
+    weights: np.ndarray,
+):
+    e = np.exp(
+        -1j
+        * 2
+        * np.pi
+        * np.dot(
+            frequencies[:, np.newaxis] / sampling_frequency,
+            np.arange(filter_order + 1)[:, np.newaxis].T,
+        )
+    )
+    x = np.vstack((np.real(e), np.imag(e)))
+    x = np.dot(np.diag(weights), x)
+    return x
+
+
 def invLSFIR_uncMC(
     H: np.ndarray,
-    UH: np.ndarray,
     N: int,
-    tau: int,
     f: np.ndarray,
     Fs: float,
-    wt: Optional[np.ndarray] = None,
+    tau: int,
+    weights: Optional[np.ndarray] = None,
     verbose: Optional[bool] = True,
+    inv: Optional[bool] = False,
+    UH: Optional[np.ndarray] = None,
+    mc_runs: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Design of FIR filter as fit to reciprocal of freq. resp. with uncertainty
+    """Design of FIR filter as fit to freq. resp. or its reciprocal with uncertainties
 
-    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
-    given frequency response for which associated uncertainties are given for its
-    real and imaginary part. Uncertainties are propagated using a Monte Carlo method.
-    This method may help in cases where the weighting matrix or the Jacobian are
-    ill-conditioned, resulting in false uncertainties associated with the filter
-    coefficients.
+    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of the
+    frequency response values or directly to the frequency response values for which
+    associated uncertainties are given for its real and imaginary part. Uncertainties
+    are propagated either using a Monte Carlo method if mc_runs is provided as
+    positive integer or otherwise using a truncated singular-value decomposition and
+    linear matrix propagation. The Monte Carlo approach may help in cases where the
+    weighting matrix or the Jacobian are ill-conditioned, resulting in false
+    uncertainties associated with the filter coefficients.
 
     Parameters
     ----------
     H : array_like of shape (M,) or (2M,)
         (Complex) frequency response values in dtype complex or as a vector first
         containing the real followed by the imaginary parts
-    UH : array_like of shape (2M,2M)
-        uncertainties associated with the real and imaginary part of H
-    N: int
+    N : int
         FIR filter order
-    tau: int
-        time delay of filter in samples
     f : array_like of shape (M,)
         frequencies at which H is given
     Fs : float
         sampling frequency of digital FIR filter
-    wt: array_like of shape (2M,), optional
+    tau : int
+        time delay of filter in samples
+    weights : array_like of shape (2M,), optional
         vector of weights for a weighted least-squares method (default results in no
         weighting)
     verbose: bool, optional
         whether to print statements to the command line (default = True)
+    inv : bool, optional
+        If False (default) apply the fit to the frequency response values directly,
+        otherwise fit to the reciprocal of the frequency response values
+    UH : array_like of shape (2M,2M)
+        uncertainties associated with the real and imaginary part of H
+    mc_runs : int, optional
+        Number of Monte Carlo runs. Defaults to zero. If uncertainties UH are
+        provided the propagation is done via
 
     Returns
     -------
-        b: np.ndarray of shape (N+1,)
-            filter coefficients of shape
-        Ub: np.ndarray of shape (N+1, N+1)
-            uncertainties associated with b
+    b : array_like of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
+    Ub : array_like of shape (N+1,N+1)
+        Uncertainties associated with b. Will only be returned if UH was provided
 
     References
     ----------
     * Elster and Link [Elster2008]_
 
     """
-
     if verbose:
         print(
             f"\ninvLSFIR_uncMC: Least-squares fit of an order {N} digital FIR filter "
             f"to the reciprocal of a frequency response given by {len(H)} values "
             f"and propagation of associated uncertainties."
         )
-
-    frequencies = f.copy()
-    sampling_frequency = Fs
-    n_frequencies = len(frequencies)
-
-    if not len(H) == UH.shape[0]:
-        # Assume that H is given as complex valued frequency response.
-        RI = np.hstack((np.real(H), np.imag(H)))
-        h_complex = H.copy()
+    freqs = f.copy()
+    n_freqs = len(freqs)
+    two_n_freqs = 2 * n_freqs
+    sampling_freq = Fs
+    if _is_dtype_complex(H):
+        _validate_length_of_h(freq_resp=H, expected_number=n_freqs)
+        h_real_imag = np.hstack((np.real(H), np.imag(H)))
     else:
-        RI = H.copy()
-        h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+        _validate_length_of_h(freq_resp=H, expected_number=two_n_freqs)
+        h_real_imag = H.copy()
 
-    h_complex_reciprocal = np.reciprocal(h_complex)
+    if UH is not None:
+        _validate_vector_and_corresponding_uncertainties_dims(
+            vector=h_real_imag, uncertainties=UH
+        )
 
-    # Step 1: Propagation of uncertainties to reciprocal of frequency response
-    runs = 10000
-    HRI = np.random.multivariate_normal(RI, UH, runs)
+    runs = mc_runs
+    mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
+        h_real_imag, UH, runs
+    )
 
-    # Step 2: Fitting the filter coefficients
-    if isinstance(wt, np.ndarray):
-        if wt.shape != 2 * n_frequencies:
+    if weights is not None:
+        if not isinstance(weights, np.ndarray):
+            raise ValueError(
+                "invLSFIR_uncMC: User-defined weighting has wrong "
+                "type. wt is expected to be a NumPy ndarray but is of type "
+                f"{type(weights)}.",
+            )
+        if len(weights) != two_n_freqs:
             raise ValueError(
                 "invLSFIR_uncMC: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
-                f"{2 * n_frequencies} but is of length {wt.shape}."
+                f"{two_n_freqs} but is of length {len(weights)}."
             )
     else:
-        wt = np.ones(2 * n_frequencies)
+        weights = np.ones(two_n_freqs)
 
-    E = np.exp(
-        -1j
-        * 2
-        * np.pi
-        * np.dot(
-            frequencies[:, np.newaxis] / sampling_frequency,
-            np.arange(N + 1)[:, np.newaxis].T,
-        )
+    X = _compute_x(
+        filter_order=N,
+        frequencies=freqs,
+        sampling_frequency=sampling_freq,
+        weights=weights,
     )
-    X = np.vstack((np.real(E), np.imag(E)))
-    X = np.dot(np.diag(wt), X)
-    bF = np.zeros((N + 1, runs))
-    resn = np.zeros((runs,))
-    for k in range(runs):
-        Hk = HRI[k, :n_frequencies] + 1j * HRI[k, n_frequencies:]
-        Hkt = Hk * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
-        iRI = np.hstack([np.real(1.0 / Hkt), np.imag(1.0 / Hkt)])
-        bF[:, k], res = np.linalg.lstsq(X, iRI)[:2]
-        resn[k] = np.linalg.norm(res)
+    omega = _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
+        sampling_frequency=sampling_freq, frequencies=freqs
+    )
+    e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+    mc_complex_freq_resps_with_white_noise = (
+        mc_freq_resps_with_white_noise_real_imag[:, :n_freqs]
+        + 1j * mc_freq_resps_with_white_noise_real_imag[:, n_freqs:]
+    )
+    mc_delayed_complex_freq_resps_with_white_noise = (
+        mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
+    )
+    mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise = np.reciprocal(
+        mc_delayed_complex_freq_resps_with_white_noise
+    )
+    mc_reciprocal_of_delayed_freq_resp_with_white_noise_real_imag = np.hstack(
+        [
+            np.real(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
+            np.imag(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
+        ]
+    )
+    mc_filter_coeffs = np.array(
+        [
+            np.linalg.lstsq(
+                a=X,
+                b=mc_reciprocal_of_delayed_freq_resp_with_white_noise_real_imag[k],
+                rcond=None,
+            )[0]
+            for k in range(runs)
+        ]
+    ).T
 
-    bFIR = np.mean(bF, axis=1)
-    UbFIR = np.cov(bF, rowvar=True)
+    filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
+    filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
 
-    return bFIR, UbFIR
+    if verbose:
+        h_complex = h_real_imag[:n_freqs] + 1j * h_real_imag[n_freqs:]
+        original_values = np.reciprocal(h_complex) if inv else h_complex
+        filters_freq_resp = dsp.freqz(filter_coeffs, 1, omega)[1]
+        delayed_filters_freq_resp = filters_freq_resp * e_to_the_one_j_omega_tau
+        complex_residuals = delayed_filters_freq_resp - original_values
+        residuals_real_imag = np.hstack(
+            (np.real(complex_residuals), np.imag(complex_residuals))
+        )
+        rms = np.sqrt(np.sum(residuals_real_imag ** 2) / n_freqs)
+        print(
+            "invLSFIR_uncMC: Calculation of FIR filter coefficients finished. "
+            f"Final rms error = {rms}"
+        )
+
+    return filter_coeffs, filter_coeffs_uncertainties
+
+
+def _is_dtype_complex(array: np.ndarray) -> bool:
+    return array.dtype == np.complexfloating
+
+
+def _validate_vector_and_corresponding_uncertainties_dims(
+    vector: np.ndarray, uncertainties: Union[np.ndarray]
+):
+    if not isinstance(uncertainties, np.ndarray):
+        raise ValueError(
+            f"{inspect.stack()[1].function}: if uncertainties are provided, "
+            f"they are expected to be of type np.ndarray, but uncertainties are of type"
+            f" {type(uncertainties)}."
+        )
+    if not number_of_rows_equals_vector_dim(matrix=uncertainties, vector=vector):
+        raise ValueError(
+            f"{inspect.stack()[1].function}: number of rows of uncertainties and "
+            f"number of elements of values are expected to match. But {len(vector)} "
+            f"values and {uncertainties.shape} uncertainties were provided. Please "
+            f"adjust either the values or their corresponding uncertainties."
+        )
+    if not is_2d_square_matrix(uncertainties):
+        raise ValueError(
+            f"{inspect.stack()[1].function}: uncertainties are expected to be "
+            f"provided in a square matrix shape but are of shape {uncertainties.shape}."
+        )
+
+
+def _validate_length_of_h(freq_resp: np.ndarray, expected_number: int):
+    if not len(freq_resp) == expected_number:
+        raise ValueError(
+            f"{inspect.stack()[1].function}: vector of complex frequency responses "
+            f"is expected to contain {expected_number} of elements. Please adjust "
+            f"frequency responses, which currently contain {len(freq_resp)} "
+            f"elements."
+        )
+
+
+def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
+    return np.exp(1j * omega * tau)
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
