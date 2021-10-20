@@ -48,7 +48,7 @@ def FIRuncFilter_input(
         )
     )
 
-    signal_length = draw(hst.integers(min_value=100, max_value=1000))
+    signal_length = draw(hst.integers(min_value=200, max_value=1000))
     signal = draw(
         hypothesis_float_vector(length=signal_length, min_value=1e-2, max_value=1e3)
     )
@@ -443,6 +443,7 @@ def test_FIRuncFilter_for_correct_dimension_of_y(fir_unc_filter_input):
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.function_scoped_fixture,
+        HealthCheck.too_slow,
     ],
 )
 @pytest.mark.slow
@@ -473,31 +474,67 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
 
     # run FIR with MC and extract diagonal of returned covariance
     with capsys.disabled():
-        y_mc, Uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000, verbose=True)
+        y_mc, Uy_mc = MC(
+            x,
+            ux,
+            b,
+            a,
+            Uab,
+            blow=blow,
+            runs=2000,
+            shift=-fir_unc_filter_input["shift"],
+            verbose=True,
+        )
+
+    swing_in_length = len(b) + n_blow
+    relevant_Uy_fir = _set_irrelevant_uncertainties_to_zero(
+        uncertainties=Uy_fir,
+        swing_in_length=swing_in_length,
+        shift=fir_unc_filter_input["shift"],
+    )
+    relevant_Uy_mc = _set_irrelevant_uncertainties_to_zero(
+        uncertainties=Uy_mc,
+        swing_in_length=swing_in_length,
+        shift=fir_unc_filter_input["shift"],
+    )
 
     # HACK for visualization during debugging
     # from PyDynamic.misc.tools import plot_vectors_and_covariances_comparison
+    #
     # plot_vectors_and_covariances_comparison(
     #     vector_1=y_fir,
     #     vector_2=y_mc,
-    #     covariance_1=Uy_fir,
-    #     covariance_2=Uy_mc,
+    #     covariance_1=relevant_Uy_fir,
+    #     covariance_2=relevant_Uy_mc,
     #     label_1="fir",
     #     label_2="mc",
-    #     title=f"filter: {len(b)}, signal: {len(x)}",
+    #     title=f"filter length: {len(b)}, signal length: {len(x)}, blow: "
+    #     f"{fir_unc_filter_input['blow']}",
     # )
     # /HACK
 
     # approximate comparison after swing-in of MC-result (which is after the combined
     # length of blow and b)
     assert_allclose(
-        Uy_fir[len(b) + n_blow :, len(b) + n_blow :],
-        Uy_mc[len(b) + n_blow :, len(b) + n_blow :],
-        atol=np.max(
-            (Uy_fir.max(), 1e-5)
-        ),  # very broad check, increase runs for better fit
-        rtol=1e-1,
+        relevant_Uy_fir,
+        relevant_Uy_mc,
+        atol=np.max((Uy_fir.max(), 1e-7)),
     )
+
+
+def _set_irrelevant_uncertainties_to_zero(
+    uncertainties: np.ndarray, swing_in_length: int, shift: float
+):
+    relevant_comparison_range_after_swing_in = np.zeros_like(uncertainties, dtype=bool)
+    relevant_comparison_range_after_swing_in[swing_in_length:, swing_in_length:] = 1
+    shifted_relevant_comparison_range_after_swing_in = np.roll(
+        relevant_comparison_range_after_swing_in,
+        (-int(shift), -int(shift)),
+        axis=(0, 1),
+    )
+
+    uncertainties[np.logical_not(shifted_relevant_comparison_range_after_swing_in)] = 0
+    return uncertainties
 
 
 @given(FIRuncFilter_input())
