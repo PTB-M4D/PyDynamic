@@ -871,24 +871,27 @@ def invLSFIR_uncMC(
             f"to the reciprocal of a frequency response given by {len(H)} values "
             f"and propagation of associated uncertainties."
         )
-    frequencies = f.copy()
-    sampling_frequency = Fs
-    n_frequencies = len(frequencies)
+    freqs = f.copy()
+    n_freqs = len(freqs)
+    two_n_freqs = 2 * n_freqs
+    sampling_freq = Fs
     if _is_dtype_complex(H):
-        _validate_length_of_h(frequency_response=H, expected_number=n_frequencies)
-        h_real_imaginary = np.hstack((np.real(H), np.imag(H)))
+        _validate_length_of_h(freq_resp=H, expected_number=n_freqs)
+        h_real_imag = np.hstack((np.real(H), np.imag(H)))
     else:
-        _validate_length_of_h(frequency_response=H, expected_number=2 * n_frequencies)
-        h_real_imaginary = H.copy()
+        _validate_length_of_h(freq_resp=H, expected_number=two_n_freqs)
+        h_real_imag = H.copy()
 
     if UH is not None:
-        _validate_vector_and_corresponding_uncertainties_dimensions(
-            vector=h_real_imaginary, uncertainties=UH
+        _validate_vector_and_corresponding_uncertainties_dims(
+            vector=h_real_imag, uncertainties=UH
         )
 
     # Step 1: Propagation of uncertainties to reciprocal of frequency response
     runs = mc_runs
-    HRI = np.random.multivariate_normal(h_real_imaginary, UH, runs)
+    mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
+        h_real_imag, UH, runs
+    )
 
     # Step 2: Fitting the filter coefficients
     if weights is not None:
@@ -898,67 +901,78 @@ def invLSFIR_uncMC(
                 "type. wt is expected to be a NumPy ndarray but is of type "
                 f"{type(weights)}. Thus we disable weighting.",
             )
-        if len(weights) != 2 * n_frequencies:
+        if len(weights) != two_n_freqs:
             raise ValueError(
                 "invLSFIR_uncMC: User-defined weighting has wrong "
                 "dimension. wt is expected to be of length "
-                f"{2 * n_frequencies} but is of length {len(weights)}."
+                f"{two_n_freqs} but is of length {len(weights)}."
             )
     else:
-        weights = np.ones(2 * n_frequencies)
+        weights = np.ones(two_n_freqs)
 
     X = _compute_x(
         filter_order=N,
-        frequencies=frequencies,
-        sampling_frequency=sampling_frequency,
+        frequencies=freqs,
+        sampling_frequency=sampling_freq,
         weights=weights,
     )
-    bF = np.zeros((N + 1, runs))
-    resn = np.zeros((runs,))
-    omega = (
-        _compute_omega_equals_two_pi_times_frequencies_divided_by_sampling_frequency(
-            sampling_frequency=sampling_frequency, frequencies=frequencies
-        )
+    omega = _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
+        sampling_frequency=sampling_freq, frequencies=freqs
     )
-    for k in range(runs):
-        Hk = HRI[k, :n_frequencies] + 1j * HRI[k, n_frequencies:]
-        Hkt = Hk * np.exp(1j * omega * tau)
-        iRI = np.hstack([np.real(1.0 / Hkt), np.imag(1.0 / Hkt)])
-        bF[:, k], residuals = np.linalg.lstsq(X, iRI, rcond=None)[:2]
-        resn[k] = np.linalg.norm(residuals)
+    e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+    mc_complex_freq_resps_with_white_noise = (
+        mc_freq_resps_with_white_noise_real_imag[:, :n_freqs]
+        + 1j * mc_freq_resps_with_white_noise_real_imag[:, n_freqs:]
+    )
+    mc_delayed_complex_freq_resps_with_white_noise = (
+        mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
+    )
+    mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise = np.reciprocal(
+        mc_delayed_complex_freq_resps_with_white_noise
+    )
+    mc_reciprocal_of_delayed_freq_resp_with_white_noise_real_imag = np.hstack(
+        [
+            np.real(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
+            np.imag(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
+        ]
+    )
+    mc_filter_coeffs = np.array(
+        [
+            np.linalg.lstsq(
+                a=X,
+                b=mc_reciprocal_of_delayed_freq_resp_with_white_noise_real_imag[k],
+                rcond=None,
+            )[0]
+            for k in range(runs)
+        ]
+    ).T
 
-    bFIR = np.mean(bF, axis=1)
-    UbFIR = np.cov(bF, rowvar=True)
+    filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
+    filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
 
     if verbose:
-        h_complex = (
-            h_real_imaginary[:n_frequencies] + 1j * h_real_imaginary[n_frequencies:]
-        )
+        h_complex = h_real_imag[:n_freqs] + 1j * h_real_imag[n_freqs:]
         original_values = np.reciprocal(h_complex) if inv else h_complex
-        filters_frequency_response = dsp.freqz(bFIR, 1, omega)[1]
-        delayed_filters_frequency_response = filters_frequency_response * np.exp(
-            1j * omega * tau
+        filters_freq_resp = dsp.freqz(filter_coeffs, 1, omega)[1]
+        delayed_filters_freq_resp = filters_freq_resp * e_to_the_one_j_omega_tau
+        complex_residuals = delayed_filters_freq_resp - original_values
+        residuals_real_imag = np.hstack(
+            (np.real(complex_residuals), np.imag(complex_residuals))
         )
-        residuals = np.hstack(
-            (
-                np.real(delayed_filters_frequency_response) - np.real(original_values),
-                np.imag(delayed_filters_frequency_response) - np.imag(original_values),
-            )
-        )
-        rms = np.sqrt(np.sum(residuals ** 2) / n_frequencies)
+        rms = np.sqrt(np.sum(residuals_real_imag ** 2) / n_freqs)
         print(
             "invLSFIR_uncMC: Calculation of FIR filter coefficients finished. "
             f"Final rms error = {rms}"
         )
 
-    return bFIR, UbFIR
+    return filter_coeffs, filter_coeffs_uncertainties
 
 
 def _is_dtype_complex(array: np.ndarray) -> bool:
     return array.dtype == np.complexfloating
 
 
-def _validate_vector_and_corresponding_uncertainties_dimensions(
+def _validate_vector_and_corresponding_uncertainties_dims(
     vector: np.ndarray, uncertainties: Union[np.ndarray]
 ):
     if not isinstance(uncertainties, np.ndarray):
@@ -981,12 +995,12 @@ def _validate_vector_and_corresponding_uncertainties_dimensions(
         )
 
 
-def _validate_length_of_h(frequency_response: np.ndarray, expected_number: int):
-    if not len(frequency_response) == expected_number:
+def _validate_length_of_h(freq_resp: np.ndarray, expected_number: int):
+    if not len(freq_resp) == expected_number:
         raise ValueError(
             f"{inspect.stack()[1].function}: vector of complex frequency responses "
             f"is expected to contain {expected_number} of elements. Please adjust "
-            f"frequency responses, which currently contain {len(frequency_response)} "
+            f"frequency responses, which currently contain {len(freq_resp)} "
             f"elements."
         )
 
