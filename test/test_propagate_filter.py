@@ -531,7 +531,7 @@ def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
         legacy_Uy,
         current_Uy,
         atol=1e-8,
-        rtol=2e-6,
+        rtol=3e-6,
     )
 
 
