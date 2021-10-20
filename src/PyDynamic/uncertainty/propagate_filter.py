@@ -17,7 +17,7 @@ This modules contains the following functions:
 
 import numpy as np
 from scipy.linalg import toeplitz
-from scipy.signal import lfilter, lfilter_zi, dimpulse
+from scipy.signal import lfilter, lfilter_zi, dimpulse, tf2ss
 from scipy.signal import convolve
 from ..misc.tools import trimOrPad
 
