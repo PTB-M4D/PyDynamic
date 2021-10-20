@@ -746,17 +746,12 @@ def invLSFIR_unc(
     else:
         wt = np.ones(2 * n_frequencies)
 
-    E = np.exp(
-        -1j
-        * 2
-        * np.pi
-        * np.dot(
-            frequencies[:, np.newaxis] / sampling_frequency,
-            np.arange(N + 1)[:, np.newaxis].T,
-        )
+    X = _compute_x(
+        filter_order=N,
+        frequencies=frequencies,
+        sampling_frequency=sampling_frequency,
+        weights=wt,
     )
-    X = np.vstack((np.real(E), np.imag(E)))
-    X = np.dot(np.diag(wt), X)
     Hm = h_complex * np.exp(1j * omtau)
     Hri = np.hstack((np.real(1.0 / Hm), np.imag(1.0 / Hm)))
 
@@ -786,6 +781,26 @@ def invLSFIR_unc(
         print(f"invLSFIR_unc: Final rms error = {rms}\n\n")
 
     return bFIR, UbFIR
+
+
+def _compute_x(
+    filter_order: int,
+    frequencies: np.ndarray,
+    sampling_frequency: float,
+    weights: np.ndarray,
+):
+    e = np.exp(
+        -1j
+        * 2
+        * np.pi
+        * np.dot(
+            frequencies[:, np.newaxis] / sampling_frequency,
+            np.arange(filter_order + 1)[:, np.newaxis].T,
+        )
+    )
+    x = np.vstack((np.real(e), np.imag(e)))
+    x = np.dot(np.diag(weights), x)
+    return x
 
 
 def invLSFIR_uncMC(
@@ -907,17 +922,12 @@ def invLSFIR_uncMC(
     else:
         weights = np.ones(2 * n_frequencies)
 
-    E = np.exp(
-        -1j
-        * 2
-        * np.pi
-        * np.dot(
-            frequencies[:, np.newaxis] / sampling_frequency,
-            np.arange(N + 1)[:, np.newaxis].T,
-        )
+    X = _compute_x(
+        filter_order=N,
+        frequencies=frequencies,
+        sampling_frequency=sampling_frequency,
+        weights=weights,
     )
-    X = np.vstack((np.real(E), np.imag(E)))
-    X = np.dot(np.diag(weights), X)
     bF = np.zeros((N + 1, runs))
     resn = np.zeros((runs,))
     omega = (
