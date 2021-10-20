@@ -535,7 +535,13 @@ def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_o
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
-@settings(deadline=None)
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
 def test_usual_call_invLSFIR_uncMC(
     capsys, monte_carlo, frequencies, sampling_frequency, filter_order, verbose
 ):
