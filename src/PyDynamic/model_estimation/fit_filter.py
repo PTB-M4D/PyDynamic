@@ -899,7 +899,7 @@ def invLSFIR_uncMC(
             raise ValueError(
                 "invLSFIR_uncMC: User-defined weighting has wrong "
                 "type. wt is expected to be a NumPy ndarray but is of type "
-                f"{type(weights)}. Thus we disable weighting.",
+                f"{type(weights)}.",
             )
         if len(weights) != two_n_freqs:
             raise ValueError(
