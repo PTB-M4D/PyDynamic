@@ -791,7 +791,10 @@ def invLSFIR_unc(
             )
         )
         rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
-        print(f"invLSFIR_unc: Final rms error = {rms}\n\n")
+        print(
+            f"invLSFIR_unc: Calculation of FIR filter coefficients finished. "
+            f"Final rms error = {rms}"
+        )
 
     return bFIR, UbFIR
 
