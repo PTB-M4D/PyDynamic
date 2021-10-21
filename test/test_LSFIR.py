@@ -514,10 +514,37 @@ def test_compare_invLSFIR_unc_to_invLSFIR(
         f=frequencies,
         Fs=sampling_frequency,
     )
-    assert_allclose(
-        bF_unc,
-        bF,
+    assert_allclose(bF_unc, bF)
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+def test_compare_invLSFIR_uncMC_to_invLSFIR(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+        mc_runs=1,
     )
+    filter_coeffs = invLSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    assert_allclose(filter_coeffs_mc, filter_coeffs)
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12))
