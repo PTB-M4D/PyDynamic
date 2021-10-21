@@ -859,7 +859,7 @@ def test_invLSFIR_uncMC_with_wrong_type_UH(
             Fs=sampling_freq,
             tau=filter_order // 2,
             inv=True,
-            UH=uh_list,
+            UH=cast(np.ndarray, uh_list),
             mc_runs=2,
         )
 
@@ -924,7 +924,7 @@ def test_invLSFIR_uncMC_with_wrong_type_weights(
             f=freqs,
             Fs=sampling_freq,
             tau=filter_order // 2,
-            weights=weight_list,
+            weights=cast(np.ndarray, weight_list),
             inv=True,
             UH=monte_carlo["UH"],
             mc_runs=2,
