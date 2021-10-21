@@ -317,8 +317,8 @@ def LSIIR(
     warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # Prepare frequencies, fitting and stabilization parameters.
-    omega = _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
-        sampling_frequency=Fs, frequencies=f
+    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=Fs, freqs=f
     )
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(omega[:, np.newaxis], Ns.T))
@@ -478,10 +478,10 @@ def LSIIR(
         return b_res, a_res, final_tau
 
 
-def _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
-    sampling_frequency: float, frequencies: np.ndarray
+def _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    sampling_freq: float, freqs: np.ndarray
 ):
-    return 2 * np.pi * frequencies / sampling_frequency
+    return 2 * np.pi * freqs / sampling_freq
 
 
 def LSFIR(
@@ -748,8 +748,8 @@ def invLSFIR_unc(
 
     X = _compute_x(
         filter_order=N,
-        frequencies=frequencies,
-        sampling_frequency=sampling_frequency,
+        freqs=frequencies,
+        sampling_freq=sampling_frequency,
         weights=wt,
     )
     Hm = h_complex * np.exp(1j * omtau)
@@ -785,8 +785,8 @@ def invLSFIR_unc(
 
 def _compute_x(
     filter_order: int,
-    frequencies: np.ndarray,
-    sampling_frequency: float,
+    freqs: np.ndarray,
+    sampling_freq: float,
     weights: np.ndarray,
 ):
     e = np.exp(
@@ -794,7 +794,7 @@ def _compute_x(
         * 2
         * np.pi
         * np.dot(
-            frequencies[:, np.newaxis] / sampling_frequency,
+            freqs[:, np.newaxis] / sampling_freq,
             np.arange(filter_order + 1)[:, np.newaxis].T,
         )
     )
@@ -909,14 +909,11 @@ def invLSFIR_uncMC(
         h_real_imag, UH, runs
     )
 
-    X = _compute_x(
-        filter_order=N,
-        frequencies=freqs,
-        sampling_frequency=sampling_freq,
-        weights=weights,
+    x = _compute_x(
+        filter_order=N, freqs=freqs, sampling_freq=sampling_freq, weights=weights
     )
-    omega = _compute_omega_equals_two_pi_times_freqs_divided_by_sampling_freq(
-        sampling_frequency=sampling_freq, frequencies=freqs
+    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_freq, freqs=freqs
     )
     e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
     mc_complex_freq_resps_with_white_noise = (
@@ -950,8 +947,8 @@ def invLSFIR_uncMC(
     filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
 
     if verbose:
-        h_complex = h_real_imag[:n_freqs] + 1j * h_real_imag[n_freqs:]
-        original_values = np.reciprocal(h_complex) if inv else h_complex
+        complex_h = freq_resps_real_imag[:n_freqs] + 1j * freq_resps_real_imag[n_freqs:]
+        original_values = np.reciprocal(complex_h) if inv else complex_h
         filters_freq_resp = dsp.freqz(filter_coeffs, 1, omega)[1]
         delayed_filters_freq_resp = filters_freq_resp * e_to_the_one_j_omega_tau
         complex_residuals = delayed_filters_freq_resp - original_values
