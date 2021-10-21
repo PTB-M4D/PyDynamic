@@ -611,7 +611,11 @@ def test_invLSFIR_uncMC_with_too_short_H(
     monte_carlo, frequencies, sampling_frequency, filter_order
 ):
     too_short_H = monte_carlo["H"][1:]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: vector of complex frequency responses is expected to "
+        r"contain [0-9]+ elements, corresponding to the number of frequencies.*",
+    ):
         invLSFIR_uncMC(
             H=too_short_H,
             N=filter_order,
@@ -630,7 +634,11 @@ def test_invLSFIR_uncMC_with_complex_but_too_short_H(
     complex_H_with_UH, frequencies, sampling_frequency, filter_order
 ):
     complex_h_but_too_short = complex_H_with_UH["H"][1:]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: vector of complex frequency responses is expected to "
+        r"contain [0-9]+ elements, corresponding to the number of frequencies.*",
+    ):
         invLSFIR_uncMC(
             H=complex_h_but_too_short,
             N=filter_order,
@@ -649,7 +657,11 @@ def test_invLSFIR_uncMC_with_too_short_f(
     monte_carlo, frequencies, sampling_frequency, filter_order
 ):
     too_short_f = frequencies[1:]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: vector of complex frequency responses is expected to "
+        r"contain [0-9]+ elements, corresponding to the number of frequencies.*",
+    ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
@@ -674,7 +686,11 @@ def test_invLSFIR_uncMC_with_too_short_UH(
     monte_carlo, frequencies, sampling_frequency, filter_order
 ):
     too_few_rows_UH = monte_carlo["UH"][1:]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: number of rows of uncertainties and number of "
+        r"elements of values are expected to match\..*",
+    ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
@@ -750,7 +766,9 @@ def test_invLSFIR_uncMC_with_wrong_type_weights(
     monte_carlo, frequencies, sampling_frequency, filter_order
 ):
     weight_list = [1] * 2 * len(frequencies)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match=r"invLSFIR_uncMC: User-defined weighting has wrong type.*"
+    ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
@@ -777,7 +795,10 @@ def test_invLSFIR_uncMC_with_wrong_len_weights(
     capsys, monte_carlo, frequencies, sampling_frequency, weight_vector, filter_order
 ):
     weight_vector = weight_vector[1:]
-    with capsys.disabled(), pytest.raises(ValueError):
+    with capsys.disabled(), pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: User-defined weighting has wrong dimension.*",
+    ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
