@@ -646,9 +646,10 @@ def invLSFIR_unc(
     Fs: float,
     wt: Optional[np.ndarray] = None,
     verbose: Optional[bool] = True,
-    trunc_svd_tol: Optional[bool] = None,
+    inv: Optional[bool] = True,
+    trunc_svd_tol: Optional[float] = None,
 ):
-    """Design of FIR filter as fit to reciprocal of freq. resp. with uncertainty
+    """Design of FIR filter as fit to freq. resp. or its reciprocal with uncertainties
 
     Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
     given frequency response for which associated uncertainties are given for its
@@ -675,6 +676,9 @@ def invLSFIR_unc(
         weighting)
     verbose : bool, optional
         whether to print statements to the command line (default = True)
+    inv : bool, optional
+        If False (default) apply the fit to the frequency response values directly,
+        otherwise fit to the reciprocal of the frequency response values
     trunc_svd_tol : float, optional
         lower bound for singular values to be considered for pseudo-inverse
 
@@ -691,6 +695,14 @@ def invLSFIR_unc(
 
     .. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
     """
+    if not inv:
+        raise NotImplementedError(
+            f"\ninvLSFIR_unc: The least-squares fitting of an order{N} digital FIR "
+            f" filter to a frequency response H given by {len(H)} values with "
+            f"propagation of associated uncertainties is not yet implemented. "
+            f"Let us know, if this feature is of interest to you."
+        )
+
     if verbose:
         print(
             f"\ninvLSFIR_unc: Least-squares fit of an order {N} digital FIR filter "
