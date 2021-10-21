@@ -20,6 +20,7 @@ This module contains the following functions:
 
 """
 import inspect
+from os import path
 from typing import Optional, Tuple, Union
 
 import numpy as np
@@ -73,7 +74,7 @@ def _fit_iir_via_least_squares(
     """
     if inv and np.all(Hvals == 0):
         raise ValueError(
-            f"{inspect.stack()[1].function}: It is not possible to compute the "
+            f"{_get_first_public_caller()}: It is not possible to compute the "
             f"reciprocal of zero but the provided frequency "
             f"response{'s are constant ' if len(Hvals) > 1 else 'is '} zero. Please "
             f"provide other frequency responses 'Hvals'."
@@ -875,36 +876,18 @@ def invLSFIR_uncMC(
     n_freqs = len(freqs)
     two_n_freqs = 2 * n_freqs
     sampling_freq = Fs
-
-    if weights is not None:
-        if not isinstance(weights, np.ndarray):
-            raise ValueError(
-                "invLSFIR_uncMC: User-defined weighting has wrong "
-                "type. wt is expected to be a NumPy ndarray but is of type "
-                f"{type(weights)}.",
-            )
-        if len(weights) != two_n_freqs:
-            raise ValueError(
-                "invLSFIR_uncMC: User-defined weighting has wrong "
-                "dimension. wt is expected to be of length "
-                f"{two_n_freqs} but is of length {len(weights)}."
-            )
-    else:
-        weights = np.ones(two_n_freqs)
-
-    if _is_dtype_complex(H):
-        _validate_length_of_h(freq_resp=H, expected_number=n_freqs)
-        h_real_imag = np.hstack((np.real(H), np.imag(H)))
-    else:
-        _validate_length_of_h(freq_resp=H, expected_number=two_n_freqs)
-        h_real_imag = H.copy()
-
-    if UH is not None:
-        _validate_vector_and_corresponding_uncertainties_dims(
-            vector=h_real_imag, uncertainties=UH
-        )
-
     runs = mc_runs
+
+    weights = _validate_weights(weights=weights, expected_len=two_n_freqs)
+
+    freq_resps_real_imag = _validate_and_assemble_freq_resps(
+        freq_resps=H,
+        expected_len_when_complex=n_freqs,
+        expected_len_when_real_imag=two_n_freqs,
+    )
+
+    _validate_uncertainties(vector=freq_resps_real_imag, covariance_matrix=UH)
+
     mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
         h_real_imag, UH, runs
     )
@@ -964,6 +947,51 @@ def invLSFIR_uncMC(
     return filter_coeffs, filter_coeffs_uncertainties
 
 
+def _validate_uncertainties(vector, covariance_matrix):
+    if covariance_matrix is not None:
+        _validate_vector_and_corresponding_uncertainties_dims(
+            vector=vector, uncertainties=covariance_matrix
+        )
+
+
+def _validate_weights(
+    weights: np.ndarray, expected_len: int
+) -> Union[np.ndarray, None]:
+    if weights is not None:
+        if not isinstance(weights, np.ndarray):
+            raise ValueError(
+                f"{_get_first_public_caller()}: User-defined weighting has wrong "
+                "type. wt is expected to be a NumPy ndarray but is of type "
+                f"{type(weights)}.",
+            )
+        if len(weights) != expected_len:
+            raise ValueError(
+                f"{_get_first_public_caller()}: User-defined weighting has wrong "
+                "dimension. wt is expected to be of length "
+                f"{expected_len} but is of length {len(weights)}."
+            )
+        return weights
+    return np.ones(expected_len)
+
+
+def _validate_and_assemble_freq_resps(
+    freq_resps: np.ndarray,
+    expected_len_when_complex: int,
+    expected_len_when_real_imag: int,
+) -> np.ndarray:
+    if _is_dtype_complex(freq_resps):
+        _validate_length_of_h(
+            freq_resp=freq_resps, expected_length=expected_len_when_complex
+        )
+        h_real_imag = np.hstack((np.real(freq_resps), np.imag(freq_resps)))
+    else:
+        _validate_length_of_h(
+            freq_resp=freq_resps, expected_length=expected_len_when_real_imag
+        )
+        h_real_imag = freq_resps.copy()
+    return h_real_imag
+
+
 def _is_dtype_complex(array: np.ndarray) -> bool:
     return array.dtype == np.complexfloating
 
@@ -973,32 +1001,39 @@ def _validate_vector_and_corresponding_uncertainties_dims(
 ):
     if not isinstance(uncertainties, np.ndarray):
         raise ValueError(
-            f"{inspect.stack()[1].function}: if uncertainties are provided, "
+            f"{_get_first_public_caller()}: if uncertainties are provided, "
             f"they are expected to be of type np.ndarray, but uncertainties are of type"
             f" {type(uncertainties)}."
         )
     if not number_of_rows_equals_vector_dim(matrix=uncertainties, vector=vector):
         raise ValueError(
-            f"{inspect.stack()[1].function}: number of rows of uncertainties and "
+            f"{_get_first_public_caller()}: number of rows of uncertainties and "
             f"number of elements of values are expected to match. But {len(vector)} "
             f"values and {uncertainties.shape} uncertainties were provided. Please "
             f"adjust either the values or their corresponding uncertainties."
         )
     if not is_2d_square_matrix(uncertainties):
         raise ValueError(
-            f"{inspect.stack()[1].function}: uncertainties are expected to be "
+            f"{_get_first_public_caller()}: uncertainties are expected to be "
             f"provided in a square matrix shape but are of shape {uncertainties.shape}."
         )
 
 
-def _validate_length_of_h(freq_resp: np.ndarray, expected_number: int):
-    if not len(freq_resp) == expected_number:
+def _validate_length_of_h(freq_resp: np.ndarray, expected_length: int):
+    if not len(freq_resp) == expected_length:
         raise ValueError(
-            f"{inspect.stack()[1].function}: vector of complex frequency responses "
-            f"is expected to contain {expected_number} of elements. Please adjust "
-            f"frequency responses, which currently contain {len(freq_resp)} "
-            f"elements."
+            f"{_get_first_public_caller()}: vector of complex frequency responses "
+            f"is expected to contain {expected_length} elements, corresponding to the "
+            f"number of frequencies, but actually contains {len(freq_resp)} "
+            f"elements. Please adjust either of the two inputs."
         )
+
+
+def _get_first_public_caller():
+    for caller in inspect.stack():
+        if path.join("PyDynamic") in caller.filename and caller.function[0] != "_":
+            return caller.function
+    return inspect.stack()[1].function
 
 
 def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
