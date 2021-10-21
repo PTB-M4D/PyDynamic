@@ -827,7 +827,7 @@ def invLSFIR_uncMC(
     tau: int,
     weights: Optional[np.ndarray] = None,
     verbose: Optional[bool] = True,
-    inv: Optional[bool] = False,
+    inv: Optional[bool] = True,
     UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
