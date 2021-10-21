@@ -904,7 +904,7 @@ def invLSFIR_uncMC(
     _validate_uncertainties(vector=freq_resps_real_imag, covariance_matrix=UH)
 
     mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
-        h_real_imag, UH, runs
+        freq_resps_real_imag, UH, runs
     )
 
     x = _compute_x(
@@ -921,23 +921,31 @@ def invLSFIR_uncMC(
     mc_delayed_complex_freq_resps_with_white_noise = (
         mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
     )
-    mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise = np.reciprocal(
-        mc_delayed_complex_freq_resps_with_white_noise
-    )
-    mc_reciprocal_of_delayed_freq_resp_with_white_noise_real_imag = np.hstack(
-        [
-            np.real(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
-            np.imag(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
-        ]
-    )
+    if inv:
+        mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise = np.reciprocal(
+            mc_delayed_complex_freq_resps_with_white_noise
+        )
+        mc_preprocessed_freq_resps = np.hstack(
+            [
+                np.real(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
+                np.imag(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
+            ]
+        )
+    else:
+        mc_preprocessed_freq_resps = np.hstack(
+            [
+                np.real(mc_delayed_complex_freq_resps_with_white_noise),
+                np.imag(mc_delayed_complex_freq_resps_with_white_noise),
+            ]
+        )
     mc_filter_coeffs = np.array(
         [
             np.linalg.lstsq(
-                a=X,
-                b=mc_reciprocal_of_delayed_freq_resp_with_white_noise_real_imag[k],
+                a=x,
+                b=mc_freq_resp,
                 rcond=None,
             )[0]
-            for k in range(runs)
+            for mc_freq_resp in mc_preprocessed_freq_resps
         ]
     ).T
 
