@@ -528,6 +528,57 @@ def test_compare_invLSFIR_unc_to_invLSFIR(
         HealthCheck.too_slow,
     ],
 )
+@pytest.mark.slow
+def test_usual_call_invLSFIR_unc(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    invLSFIR_unc(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+        inv=True,
+    )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_not_implemented_invLSFIR_unc(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    with pytest.raises(
+        NotImplementedError,
+        match=r"invLSFIR_unc: The least-squares fitting of an .* is not "
+        r"yet implemented.*",
+    ):
+        invLSFIR_unc(
+            H=monte_carlo["H"],
+            UH=np.zeros_like(monte_carlo["UH"]),
+            N=filter_order,
+            tau=filter_order // 2,
+            f=frequencies,
+            Fs=sampling_frequency,
+            inv=False,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
 def test_usual_call_LSFIR(monte_carlo, frequencies, sampling_frequency, filter_order):
     LSFIR(
         H=monte_carlo["H"],
@@ -576,7 +627,12 @@ def test_usual_call_invLSFIR_uncMC(
 )
 @pytest.mark.slow
 def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
-    capsys, monte_carlo, frequencies, sampling_frequency, weight_vector, filter_order
+    capsys,
+    monte_carlo,
+    frequencies,
+    sampling_frequency,
+    weight_vector,
+    filter_order,
 ):
     with capsys.disabled():
         b, ub = invLSFIR_unc(
@@ -588,6 +644,7 @@ def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
             Fs=sampling_frequency,
             wt=weight_vector,
             verbose=True,
+            inv=True,
         )
         b_mc, ub_mc = invLSFIR_uncMC(
             H=monte_carlo["H"],
@@ -701,8 +758,25 @@ def test_invLSFIR_uncMC_with_too_short_UH(
             UH=too_few_rows_UH,
             mc_runs=2,
         )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
+def test_invLSFIR_uncMC_with_nonsquare_UH(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
     too_few_columns_UH = monte_carlo["UH"][:, 1:]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: uncertainties are expected to be "
+        r"provided in a square matrix shape.*",
+    ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
             N=filter_order,
@@ -711,6 +785,35 @@ def test_invLSFIR_uncMC_with_too_short_UH(
             tau=filter_order // 2,
             inv=True,
             UH=too_few_columns_UH,
+            mc_runs=2,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
+def test_invLSFIR_uncMC_with_wrong_type_UH(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    uh_list = monte_carlo["UH"].tolist()
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: if uncertainties are provided, "
+        r"they are expected to be of type np\.ndarray.*",
+    ):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=frequencies,
+            Fs=sampling_frequency,
+            tau=filter_order // 2,
+            inv=True,
+            UH=uh_list,
             mc_runs=2,
         )
 
