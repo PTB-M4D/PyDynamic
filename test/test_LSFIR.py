@@ -555,6 +555,37 @@ def test_compare_invLSFIR_uncMC_to_invLSFIR(
         HealthCheck.too_slow,
     ],
 )
+def test_compare_invLSFIR_uncMC_to_LSFIR(
+    monte_carlo, frequencies, sampling_frequency, filter_order
+):
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+        inv=False,
+        mc_runs=1,
+    )
+    filter_coeffs = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=frequencies,
+        Fs=sampling_frequency,
+    )
+    assert_allclose(filter_coeffs_mc, filter_coeffs)
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
 @pytest.mark.slow
 def test_usual_call_invLSFIR_unc(
     monte_carlo, frequencies, sampling_frequency, filter_order
