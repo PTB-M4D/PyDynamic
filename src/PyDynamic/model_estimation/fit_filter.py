@@ -890,8 +890,8 @@ def invLSFIR_uncMC(
     if verbose:
         print(
             f"\ninvLSFIR_uncMC: Least-squares fit of an order {N} digital FIR filter "
-            f"to the reciprocal of a frequency response given by {len(H)} values "
-            f"and propagation of associated uncertainties."
+            f"to {' the reciprocal of' if inv else ''} a frequency response given by "
+            f"{len(H)} values and propagation of associated uncertainties."
         )
     freqs = f.copy()
     n_freqs = len(freqs)
