@@ -717,7 +717,7 @@ def test_invLSFIR_uncMC_with_too_short_H(
     with pytest.raises(
         ValueError,
         match=r"invLSFIR_uncMC: vector of complex frequency responses is expected to "
-        r"contain [0-9]+ elements, corresponding to the number of freqs.*",
+        r"contain [0-9]+ elements, corresponding to the number of frequencies.*",
     ):
         invLSFIR_uncMC(
             H=too_short_H,
@@ -740,7 +740,7 @@ def test_invLSFIR_uncMC_with_complex_but_too_short_H(
     with pytest.raises(
         ValueError,
         match=r"invLSFIR_uncMC: vector of complex frequency responses is expected to "
-        r"contain [0-9]+ elements, corresponding to the number of freqs.*",
+        r"contain [0-9]+ elements, corresponding to the number of frequencies.*",
     ):
         invLSFIR_uncMC(
             H=complex_h_but_too_short,
@@ -763,7 +763,7 @@ def test_invLSFIR_uncMC_with_too_short_f(
     with pytest.raises(
         ValueError,
         match=r"invLSFIR_uncMC: vector of complex frequency responses is expected to "
-        r"contain [0-9]+ elements, corresponding to the number of freqs.*",
+        r"contain [0-9]+ elements, corresponding to the number of frequencies.*",
     ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
