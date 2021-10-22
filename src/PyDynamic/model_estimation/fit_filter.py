@@ -864,7 +864,7 @@ def invLSFIR_uncMC(
     inv : bool, optional
         If False (default) apply the fit to the frequency response values directly,
         otherwise fit to the reciprocal of the frequency response values
-    UH : array_like of shape (2M,2M)
+    UH : array_like of shape (2M,2M), optional
         uncertainties associated with the real and imaginary part of H
     mc_runs : int, optional
         Number of Monte Carlo runs. Only used, if uncertainties associated with the
