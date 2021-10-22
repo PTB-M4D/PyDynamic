@@ -608,7 +608,7 @@ def test_not_implemented_invLSFIR_unc(monte_carlo, freqs, sampling_freq, filter_
     ):
         invLSFIR_unc(
             H=monte_carlo["H"],
-            UH=np.zeros_like(monte_carlo["UH"]),
+            UH=monte_carlo["UH"],
             N=filter_order,
             tau=filter_order // 2,
             f=freqs,
