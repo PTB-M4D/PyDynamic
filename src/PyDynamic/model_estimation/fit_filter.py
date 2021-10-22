@@ -697,8 +697,8 @@ def invLSFIR_unc(
     """
     if not inv:
         raise NotImplementedError(
-            f"\ninvLSFIR_unc: The least-squares fitting of an order{N} digital FIR "
-            f" filter to a frequency response H given by {len(H)} values with "
+            f"\ninvLSFIR_unc: The least-squares fitting of an order {N} digital FIR "
+            f"filter to a frequency response H given by {len(H)} values with "
             f"propagation of associated uncertainties is not yet implemented. "
             f"Let us know, if this feature is of interest to you."
         )
