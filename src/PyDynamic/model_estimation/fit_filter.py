@@ -908,6 +908,10 @@ def invLSFIR_uncMC(
 
     _validate_uncertainties(vector=freq_resps_real_imag, covariance_matrix=UH)
 
+    _validate_uncertainty_propagation_method_related_inputs(
+        covariance_matrix=UH, inv=inv, mc_runs=mc_runs, trunc_svd_tol=trunc_svd_tol
+    )
+
     mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
         freq_resps_real_imag, UH, mc_runs
     )
@@ -1062,6 +1066,49 @@ def _get_first_public_caller():
         if path.join("PyDynamic") in caller.filename and caller.function[0] != "_":
             return caller.function
     return inspect.stack()[1].function
+
+
+def _validate_uncertainty_propagation_method_related_inputs(
+    covariance_matrix: Union[np.ndarray, None],
+    inv: bool,
+    mc_runs: Union[int, None],
+    trunc_svd_tol: Union[float, None],
+):
+    if covariance_matrix is None:
+        if mc_runs:
+            raise ValueError(
+                "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+                "to a frequency response H with propagation of associated "
+                f"uncertainties via the Monte Carlo method requires that uncertainties "
+                f"are provided via input parameter UH. No uncertainties were given "
+                f"but number of Monte Carlo runs set to {mc_runs}. Either remove "
+                f"mc_runs or provide uncertainties."
+            )
+        if trunc_svd_tol is not None:
+            raise ValueError(
+                "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+                "to a frequency response H with propagation of associated "
+                "uncertainties via a truncated singular-value decomposition and linear "
+                "matrix propagation requires that uncertainties are provided via "
+                "input parameter UH. No uncertainties were given but lower bound for "
+                f"singular values trunc_svd_tol={trunc_svd_tol}. Either remove "
+                "trunc_svd_tol or provide uncertainties."
+            )
+
+    if trunc_svd_tol is not None and mc_runs:
+        raise ValueError(
+            "\ninvLSFIR_uncMC: Only one of mc_runs and trunc_svd_tol can be "
+            f"provided but mc_runs={mc_runs} and trunc_svd_tol={trunc_svd_tol}."
+        )
+    if (trunc_svd_tol is not None or mc_runs is None) and not inv:
+        raise NotImplementedError(
+            f"\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter to "
+            f"a frequency response H values with propagation of associated "
+            f"uncertainties using a truncated singular-value decomposition and "
+            f"linear matrix propagation is not yet implemented. Alternatively specify "
+            f"the number mc_runs of runs to propagate the uncertainties via the Monte "
+            f"Carlo method."
+        )
 
 
 def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
