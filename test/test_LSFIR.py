@@ -959,3 +959,136 @@ def test_invLSFIR_uncMC_with_wrong_len_weights(
             UH=monte_carlo["UH"],
             mc_runs=2,
         )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_not_implemented_invLSFIR_uncMC(
+    monte_carlo, freqs, sampling_freq, filter_order
+):
+    with pytest.raises(
+        NotImplementedError,
+        match=r"invLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+        r".*truncated singular-value decomposition and linear matrix "
+        r"propagation.*is not yet implemented.*",
+    ):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=False,
+        )
+    with pytest.raises(
+        NotImplementedError,
+        match=r"invLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+        r".*truncated singular-value decomposition and linear matrix "
+        r"propagation.*is not yet implemented.*",
+    ):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=False,
+            trunc_svd_tol=0.0,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_missing_mc_uncertainties_invLSFIR_uncMC(
+    monte_carlo, freqs, sampling_freq, filter_order
+):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+        r".*Monte Carlo.*requires that uncertainties are provided via input "
+        r"parameter UH.*",
+    ):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=False,
+            mc_runs=1,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_missing_svd_uncertainties_invLSFIR_uncMC(
+    monte_carlo, freqs, sampling_freq, filter_order
+):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+        r".*singular-value decomposition and linear matrix propagation.*requires that "
+        r"uncertainties are provided via input parameter UH.*",
+    ):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=True,
+            trunc_svd_tol=0.0,
+        )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_both_propagation_methods_simultaneously_requested_uncertainties_invLSFIR_uncMC(
+    monte_carlo, freqs, sampling_freq, filter_order
+):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: Only one of mc_runs and trunc_svd_tol can be "
+        r"provided but.*",
+    ):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=False,
+            mc_runs=1,
+            trunc_svd_tol=0.0,
+        )
