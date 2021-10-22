@@ -830,6 +830,7 @@ def invLSFIR_uncMC(
     inv: Optional[bool] = True,
     UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = None,
+    trunc_svd_tol: Optional[float] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Design of FIR filter as fit to freq. resp. or its reciprocal with uncertainties
 
@@ -866,8 +867,13 @@ def invLSFIR_uncMC(
     UH : array_like of shape (2M,2M)
         uncertainties associated with the real and imaginary part of H
     mc_runs : int, optional
-        Number of Monte Carlo runs. Defaults to zero. If uncertainties UH are
-        provided the propagation is done via
+        Number of Monte Carlo runs. Only used, if uncertainties associated with the
+        real and imaginary part of H are provided. Only one of mc_runs and
+        trunc_svd_tol can be provided.
+    trunc_svd_tol : float, optional
+        Lower bound for singular values to be considered for pseudo-inverse. Values
+        smaller than this threshold are considered zero. Defaults to zero. Only one of
+        mc_runs and trunc_svd_tol can be provided.
 
     Returns
     -------
