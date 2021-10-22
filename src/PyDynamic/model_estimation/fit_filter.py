@@ -897,7 +897,6 @@ def invLSFIR_uncMC(
     n_freqs = len(freqs)
     two_n_freqs = 2 * n_freqs
     sampling_freq = Fs
-    runs = mc_runs
 
     weights = _validate_weights(weights=weights, expected_len=two_n_freqs)
 
@@ -910,7 +909,7 @@ def invLSFIR_uncMC(
     _validate_uncertainties(vector=freq_resps_real_imag, covariance_matrix=UH)
 
     mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
-        freq_resps_real_imag, UH, runs
+        freq_resps_real_imag, UH, mc_runs
     )
 
     x = _compute_x(
