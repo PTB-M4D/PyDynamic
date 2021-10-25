@@ -1,6 +1,6 @@
 """Perform test for uncertainty.propagate_filter"""
 import itertools
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Tuple
 
 import numpy as np
 import pytest
@@ -12,7 +12,7 @@ from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.testsignals import rect
-from PyDynamic.misc.tools import trimOrPad
+from PyDynamic.misc.tools import shift_uncertainty, trimOrPad
 
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
@@ -486,13 +486,17 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
             verbose=True,
         )
 
+    # approximate comparison after swing-in of MC-result (which is after the combined
+    # length of blow and b)
     swing_in_length = len(b) + n_blow
-    relevant_Uy_fir = _set_irrelevant_uncertainties_to_zero(
+    relevant_y_fir, relevant_Uy_fir = _set_irrelevant_ranges_to_zero(
+        signal=y_fir,
         uncertainties=Uy_fir,
         swing_in_length=swing_in_length,
         shift=fir_unc_filter_input["shift"],
     )
-    relevant_Uy_mc = _set_irrelevant_uncertainties_to_zero(
+    relevant_y_mc, relevant_Uy_mc = _set_irrelevant_ranges_to_zero(
+        signal=y_mc,
         uncertainties=Uy_mc,
         swing_in_length=swing_in_length,
         shift=fir_unc_filter_input["shift"],
@@ -502,8 +506,8 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     # from PyDynamic.misc.tools import plot_vectors_and_covariances_comparison
     #
     # plot_vectors_and_covariances_comparison(
-    #     vector_1=y_fir,
-    #     vector_2=y_mc,
+    #     vector_1=relevant_y_fir,
+    #     vector_2=relevant_y_mc,
     #     covariance_1=relevant_Uy_fir,
     #     covariance_2=relevant_Uy_mc,
     #     label_1="fir",
@@ -512,29 +516,42 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     #     f"{fir_unc_filter_input['blow']}",
     # )
     # /HACK
-
-    # approximate comparison after swing-in of MC-result (which is after the combined
-    # length of blow and b)
+    assert_allclose(
+        relevant_y_fir,
+        relevant_y_mc,
+        atol=np.max((np.max(y_fir), 1e-4)),
+    )
     assert_allclose(
         relevant_Uy_fir,
         relevant_Uy_mc,
-        atol=np.max((Uy_fir.max(), 1e-7)),
+        atol=np.max((np.max(Uy_fir), 1e-7)),
     )
 
 
-def _set_irrelevant_uncertainties_to_zero(
-    uncertainties: np.ndarray, swing_in_length: int, shift: float
-):
-    relevant_comparison_range_after_swing_in = np.zeros_like(uncertainties, dtype=bool)
-    relevant_comparison_range_after_swing_in[swing_in_length:, swing_in_length:] = 1
-    shifted_relevant_comparison_range_after_swing_in = np.roll(
-        relevant_comparison_range_after_swing_in,
-        (-int(shift), -int(shift)),
-        axis=(0, 1),
+def _set_irrelevant_ranges_to_zero(
+    signal: np.ndarray, uncertainties: np.ndarray, swing_in_length: int, shift: float
+) -> Tuple[np.ndarray, np.ndarray]:
+    relevant_signal_comparison_range_after_swing_in = np.zeros_like(signal, dtype=bool)
+    relevant_uncertainty_comparison_range_after_swing_in = np.zeros_like(
+        uncertainties, dtype=bool
     )
-
-    uncertainties[np.logical_not(shifted_relevant_comparison_range_after_swing_in)] = 0
-    return uncertainties
+    relevant_signal_comparison_range_after_swing_in[swing_in_length:] = 1
+    relevant_uncertainty_comparison_range_after_swing_in[
+        swing_in_length:, swing_in_length:
+    ] = 1
+    (
+        shifted_relevant_signal_comparison_range_after_swing_in,
+        shifted_relevant_uncertainty_comparison_range_after_swing_in,
+    ) = shift_uncertainty(
+        relevant_signal_comparison_range_after_swing_in,
+        relevant_uncertainty_comparison_range_after_swing_in,
+        -int(shift),
+    )
+    signal[np.logical_not(shifted_relevant_signal_comparison_range_after_swing_in)] = 0
+    uncertainties[
+        np.logical_not(shifted_relevant_uncertainty_comparison_range_after_swing_in)
+    ] = 0
+    return signal, uncertainties
 
 
 @given(FIRuncFilter_input())
@@ -600,6 +617,7 @@ def test_fir_filter_MC_comparison():
     #     title=f"filter: {len(theta)}, signal: {len(x)}",
     # )
     # /HACK
+    assert_allclose(y_fir, y_mc, atol=1e-1, rtol=1e-1)
     assert_allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
 
 
