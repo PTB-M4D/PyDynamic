@@ -973,11 +973,14 @@ def test_invLSFIR_uncMC_with_wrong_len_weights(
 def test_not_implemented_invLSFIR_uncMC(
     monte_carlo, freqs, sampling_freq, filter_order
 ):
+    expected_error_msg_regex = (
+        r"invLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+        r".*truncated singular-value decomposition and linear matrix propagation.*is "
+        r"not yet implemented.*"
+    )
     with pytest.raises(
         NotImplementedError,
-        match=r"invLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
-        r".*truncated singular-value decomposition and linear matrix "
-        r"propagation.*is not yet implemented.*",
+        match=expected_error_msg_regex,
     ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
@@ -990,9 +993,7 @@ def test_not_implemented_invLSFIR_uncMC(
         )
     with pytest.raises(
         NotImplementedError,
-        match=r"invLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
-        r".*truncated singular-value decomposition and linear matrix "
-        r"propagation.*is not yet implemented.*",
+        match=expected_error_msg_regex,
     ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],
