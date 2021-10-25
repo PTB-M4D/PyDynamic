@@ -491,14 +491,14 @@ def test_digital_deconvolution_FIR_example_figure_7(
 def test_compare_invLSFIR_unc_to_invLSFIR(
     monte_carlo, freqs, sampling_freq, filter_order
 ):
-    bF_unc, _ = invLSFIR_unc(
+    bF_unc = invLSFIR_unc(
         H=monte_carlo["H"],
         UH=np.zeros_like(monte_carlo["UH"]),
         N=filter_order,
         tau=filter_order // 2,
         f=freqs,
         Fs=sampling_freq,
-    )
+    )[0]
     bF = invLSFIR(
         H=monte_carlo["H"],
         N=filter_order,

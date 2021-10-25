@@ -659,7 +659,7 @@ def invLSFIR(
         [np.real(delayed_h_complex_reciprocal), np.imag(delayed_h_complex_reciprocal)]
     )
 
-    bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]  # the actual fitting
+    bFIR = np.linalg.lstsq(X, iRI, rcond=None)[0]  # the actual fitting
 
     return bFIR.flatten()
 
