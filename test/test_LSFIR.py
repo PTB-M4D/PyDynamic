@@ -539,7 +539,7 @@ def test_compare_invLSFIR_uncMC_to_invLSFIR(
     assert_allclose(filter_coeffs_mc, filter_coeffs)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(weights(), hypothesis_dimension(min_value=2, max_value=12))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -547,8 +547,8 @@ def test_compare_invLSFIR_uncMC_to_invLSFIR(
         HealthCheck.too_slow,
     ],
 )
-def test_compare_invLSFIR_uncMC_to_LSFIR(
-    monte_carlo, freqs, sampling_freq, filter_order
+def test_compare_invLSFIR_uncMC_with_zero_uncertainties_to_LSFIR(
+    monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
     filter_coeffs_mc, _ = invLSFIR_uncMC(
         H=monte_carlo["H"],
@@ -558,7 +558,8 @@ def test_compare_invLSFIR_uncMC_to_LSFIR(
         f=freqs,
         Fs=sampling_freq,
         inv=False,
-        mc_runs=1,
+        mc_runs=2,
+        weights=weight_vector,
     )
     filter_coeffs = LSFIR(
         H=monte_carlo["H"],
@@ -566,6 +567,7 @@ def test_compare_invLSFIR_uncMC_to_LSFIR(
         tau=filter_order // 2,
         f=freqs,
         Fs=sampling_freq,
+        Wt=weight_vector,
     )
     assert_allclose(filter_coeffs_mc, filter_coeffs)
 
