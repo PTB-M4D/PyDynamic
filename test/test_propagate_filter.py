@@ -445,6 +445,7 @@ def test_FIRuncFilter_for_correct_dimension_of_y(fir_unc_filter_input):
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
