@@ -1095,3 +1095,129 @@ def test_both_propagation_methods_simultaneously_requested_uncertainties_invLSFI
             mc_runs=1,
             trunc_svd_tol=0.0,
         )
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_too_small_number_of_monte_carlo_runs_invLSFIR_uncMC(
+    monte_carlo, freqs, sampling_freq, filter_order, inv
+):
+    with pytest.raises(
+        ValueError,
+        match=r"invLSFIR_uncMC: Number of Monte Carlo runs is expected to be greater "
+        r"than 1.*",
+    ):
+        invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=inv,
+            mc_runs=1,
+        )
+
+
+@given(weights(), hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+def test_compare_invLSFIR_uncMC_to_invLSFIR(
+    monte_carlo, freqs, sampling_freq, weight_vector, filter_order
+):
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=None,
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+        weights=weight_vector,
+    )
+    filter_coeffs = invLSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        Wt=weight_vector,
+    )
+    assert_allclose(filter_coeffs_mc, filter_coeffs)
+
+
+@given(weights(), hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+def test_compare_invLSFIR_uncMC_without_uncertainties_to_LSFIR(
+    monte_carlo, freqs, sampling_freq, weight_vector, filter_order
+):
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=None,
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=False,
+        weights=weight_vector,
+    )
+    filter_coeffs = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        Wt=weight_vector,
+    )
+    assert_allclose(filter_coeffs_mc, filter_coeffs)
+
+
+@given(weights(), hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+def test_compare_invLSFIR_uncMC_with_zero_uncertainty_and_without(
+    monte_carlo, freqs, sampling_freq, weight_vector, filter_order
+):
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=None,
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        weights=weight_vector,
+    )
+    filter_coeffs, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        weights=weight_vector,
+        mc_runs=2,
+    )
+    assert_allclose(filter_coeffs_mc, filter_coeffs)
