@@ -13,6 +13,7 @@ from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import shift_uncertainty, trimOrPad
+
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
     _fir_filter,
@@ -488,13 +489,13 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     # approximate comparison after swing-in of MC-result (which is after the combined
     # length of blow and b)
     swing_in_length = len(b) + n_blow
-    _, relevant_Uy_fir = _set_irrelevant_ranges_to_zero(
+    relevant_y_fir, relevant_Uy_fir = _set_irrelevant_ranges_to_zero(
         signal=y_fir,
         uncertainties=Uy_fir,
         swing_in_length=swing_in_length,
         shift=fir_unc_filter_input["shift"],
     )
-    _, relevant_Uy_mc = _set_irrelevant_ranges_to_zero(
+    relevant_y_mc, relevant_Uy_mc = _set_irrelevant_ranges_to_zero(
         signal=y_mc,
         uncertainties=Uy_mc,
         swing_in_length=swing_in_length,
@@ -515,6 +516,11 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     #     f"{fir_unc_filter_input['blow']}",
     # )
     # /HACK
+    assert_allclose(
+        relevant_y_fir,
+        relevant_y_mc,
+        atol=np.max((np.max(y_fir), 1e-4)),
+    )
     assert_allclose(
         relevant_Uy_fir,
         relevant_Uy_mc,
