@@ -517,6 +517,7 @@ def test_compare_invLSFIR_unc_to_invLSFIR(
         HealthCheck.too_slow,
     ],
 )
+@pytest.mark.slow
 def test_compare_invLSFIR_uncMC_to_invLSFIR(
     monte_carlo, freqs, sampling_freq, filter_order
 ):
@@ -547,6 +548,7 @@ def test_compare_invLSFIR_uncMC_to_invLSFIR(
         HealthCheck.too_slow,
     ],
 )
+@pytest.mark.slow
 def test_compare_invLSFIR_uncMC_with_zero_uncertainties_to_LSFIR(
     monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
@@ -1134,6 +1136,7 @@ def test_too_small_number_of_monte_carlo_runs_invLSFIR_uncMC(
         HealthCheck.too_slow,
     ],
 )
+@pytest.mark.slow
 def test_compare_invLSFIR_uncMC_to_invLSFIR(
     monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
@@ -1166,6 +1169,7 @@ def test_compare_invLSFIR_uncMC_to_invLSFIR(
         HealthCheck.too_slow,
     ],
 )
+@pytest.mark.slow
 def test_compare_invLSFIR_uncMC_without_uncertainties_to_LSFIR(
     monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
@@ -1198,6 +1202,7 @@ def test_compare_invLSFIR_uncMC_without_uncertainties_to_LSFIR(
         HealthCheck.too_slow,
     ],
 )
+@pytest.mark.slow
 def test_compare_invLSFIR_uncMC_with_zero_uncertainty_and_without(
     monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
