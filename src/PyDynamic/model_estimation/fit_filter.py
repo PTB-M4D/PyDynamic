@@ -611,32 +611,25 @@ def invLSFIR(
     n_frequencies = len(frequencies)
     h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = (2 * np.pi * frequencies / sampling_frequency)[
-        :, np.newaxis
-    ]  # set up radial frequencies
+    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_frequency, freqs=frequencies
+    )  # set up radial frequencies
 
-    ords = np.arange(N + 1)[:, np.newaxis].T  # set up design matrix
+    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
 
-    E = np.exp(-1j * np.dot(omega, ords))
-
-    if Wt is not None:  # set up weighted design matrix if necessary
-        if is_2d_matrix(Wt):
-            weights = np.diag(Wt)
-        else:
-            weights = np.eye(n_frequencies) * Wt
-        weighted_E = np.dot(weights, E)
-        X = np.vstack([np.real(weighted_E), np.imag(weighted_E)])
-    else:
-        X = np.vstack([np.real(E), np.imag(E)])
+    x = _compute_x(
+        filter_order=N,
+        freqs=frequencies,
+        sampling_freq=sampling_frequency,
+        weights=weights,
+    )
 
     delayed_h_complex_reciprocal = np.reciprocal(
-        h_complex * np.exp(1j * omega.flatten() * tau)
+        h_complex * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
     )  # apply time delay for improved fit quality
     iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_reciprocal)
 
-    bFIR = np.linalg.lstsq(X, iRI, rcond=None)[0]  # the actual fitting
-
-    return bFIR.flatten()
+    return np.linalg.lstsq(x, iRI, rcond=None)[0]  # the actual fitting
 
 
 def invLSFIR_unc(
