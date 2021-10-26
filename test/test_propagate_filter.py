@@ -519,7 +519,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     assert_allclose(
         relevant_y_fir,
         relevant_y_mc,
-        atol=np.max((np.max(y_fir), 1e-4)),
+        atol=np.max((np.max(y_fir), 1e-3)),
     )
     assert_allclose(
         relevant_Uy_fir,
