@@ -914,8 +914,8 @@ def invLSFIR_uncMC(
         covariance_matrix=UH, inv=inv, mc_runs=mc_runs, trunc_svd_tol=trunc_svd_tol
     )
 
-    mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
-        freq_resps_real_imag, UH, mc_runs
+    propagation_method = _determine_propagation_method(
+        covariance_matrix=UH, mc_runs=mc_runs
     )
 
     x = _compute_x(
@@ -1070,14 +1070,32 @@ def _get_first_public_caller():
     return inspect.stack()[1].function
 
 
+class _PropagationMethod(Enum):
+    NONE = 0
+    MC = 1
+    SVD = 2
+
+
 def _validate_uncertainty_propagation_method_related_inputs(
     covariance_matrix: Union[np.ndarray, None],
     inv: bool,
     mc_runs: Union[int, None],
     trunc_svd_tol: Union[float, None],
 ):
-    if covariance_matrix is None:
-        if mc_runs:
+    def _no_uncertainties_were_provided() -> bool:
+        return covariance_matrix is None
+
+    def _number_of_monte_carlo_runs_was_provided() -> bool:
+        return bool(mc_runs)
+
+    def _input_for_svd_was_provided() -> bool:
+        return trunc_svd_tol is not None
+
+    def _supposed_to_apply_method_on_freq_resp_directly() -> bool:
+        return not inv
+
+    if _no_uncertainties_were_provided():
+        if _number_of_monte_carlo_runs_was_provided():
             raise ValueError(
                 "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
                 "to a frequency response H with propagation of associated "
@@ -1086,7 +1104,7 @@ def _validate_uncertainty_propagation_method_related_inputs(
                 f"but number of Monte Carlo runs set to {mc_runs}. Either remove "
                 f"mc_runs or provide uncertainties."
             )
-        if trunc_svd_tol is not None:
+        if _input_for_svd_was_provided():
             raise ValueError(
                 "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
                 "to a frequency response H with propagation of associated "
@@ -1096,21 +1114,43 @@ def _validate_uncertainty_propagation_method_related_inputs(
                 f"singular values trunc_svd_tol={trunc_svd_tol}. Either remove "
                 "trunc_svd_tol or provide uncertainties."
             )
-
-    if trunc_svd_tol is not None and mc_runs:
+    elif _input_for_svd_was_provided() and _number_of_monte_carlo_runs_was_provided():
         raise ValueError(
             "\ninvLSFIR_uncMC: Only one of mc_runs and trunc_svd_tol can be "
             f"provided but mc_runs={mc_runs} and trunc_svd_tol={trunc_svd_tol}."
         )
-    if (trunc_svd_tol is not None or mc_runs is None) and not inv:
+    elif (
+        _input_for_svd_was_provided() or not _number_of_monte_carlo_runs_was_provided()
+    ) and _supposed_to_apply_method_on_freq_resp_directly():
         raise NotImplementedError(
-            f"\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter to "
+            f"\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+            f"to "
             f"a frequency response H values with propagation of associated "
             f"uncertainties using a truncated singular-value decomposition and "
-            f"linear matrix propagation is not yet implemented. Alternatively specify "
-            f"the number mc_runs of runs to propagate the uncertainties via the Monte "
+            f"linear matrix propagation is not yet implemented. Alternatively "
+            f"specify "
+            f"the number mc_runs of runs to propagate the uncertainties via the "
+            f"Monte "
             f"Carlo method."
         )
+    elif mc_runs == 1:
+        raise ValueError(
+            f"\ninvLSFIR_uncMC: Number of Monte Carlo runs is expected to be greater "
+            f"than 1 but mc_runs={mc_runs}. Please provide a greater "
+            f"number of runs or switch to propagation of uncertainties "
+            f"via singular-value decomposition by leaving out mc_runs."
+        )
+
+
+def _determine_propagation_method(
+    covariance_matrix: Union[np.ndarray, None],
+    mc_runs: Union[int, None],
+):
+    if covariance_matrix is None:
+        return _PropagationMethod.NONE
+    if mc_runs:
+        return _PropagationMethod.MC
+    return _PropagationMethod.SVD
 
 
 def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
