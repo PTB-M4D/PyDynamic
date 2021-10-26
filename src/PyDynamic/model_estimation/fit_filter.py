@@ -979,9 +979,7 @@ def invLSFIR_uncMC(
 
     if verbose:
         complex_h = freq_resps_real_imag[:n_freqs] + 1j * freq_resps_real_imag[n_freqs:]
-        original_values = (
-            np.reciprocal(complex_h) if inv else complex_h
-        ) * e_to_the_one_j_omega_tau
+        original_values = np.reciprocal(complex_h) if inv else complex_h
         filters_freq_resp = dsp.freqz(filter_coeffs, 1, omega)[1]
         delayed_filters_freq_resp = filters_freq_resp * e_to_the_one_j_omega_tau
         complex_residuals = delayed_filters_freq_resp - original_values
