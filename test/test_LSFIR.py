@@ -546,23 +546,25 @@ def test_compare_invLSFIR_uncMC_to_invLSFIR(
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow
 def test_compare_invLSFIR_uncMC_with_zero_uncertainties_to_LSFIR(
-    monte_carlo, freqs, sampling_freq, weight_vector, filter_order
+    capsys, monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
-    filter_coeffs_mc, _ = invLSFIR_uncMC(
-        H=monte_carlo["H"],
-        UH=np.zeros_like(monte_carlo["UH"]),
-        N=filter_order,
-        tau=filter_order // 2,
-        f=freqs,
-        Fs=sampling_freq,
-        inv=False,
-        mc_runs=2,
-        weights=weight_vector,
-    )
+    with capsys.disabled():
+        filter_coeffs_mc, _ = invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=np.zeros_like(monte_carlo["UH"]),
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=False,
+            mc_runs=2,
+            weights=weight_vector,
+        )
     filter_coeffs = LSFIR(
         H=monte_carlo["H"],
         N=filter_order,
@@ -1226,3 +1228,95 @@ def test_compare_invLSFIR_uncMC_with_zero_uncertainty_and_without(
         mc_runs=2,
     )
     assert_allclose(filter_coeffs, filter_coeffs_mc)
+
+
+@given(weights(), hypothesis_dimension(min_value=4, max_value=8))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
+    ],
+    max_examples=10,
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_uncMC_with_svd_and_with_mc(
+    capsys, monte_carlo, freqs, sampling_freq, weight_vector, filter_order
+):
+    with capsys.disabled():
+        filter_coeffs_svd, filter_coeffs_uncertainty_svd = invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=True,
+            weights=weight_vector,
+            verbose=True,
+            trunc_svd_tol=0.0,
+        )
+        filter_coeffs_mc, filter_coeffs_uncertainty_mc = invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            inv=True,
+            weights=weight_vector,
+            mc_runs=10000,
+            verbose=True,
+        )
+    assert_allclose(filter_coeffs_mc, filter_coeffs_svd, rtol=4e-2)
+    assert_allclose(
+        filter_coeffs_uncertainty_mc,
+        filter_coeffs_uncertainty_svd,
+        atol=6e-1,
+        rtol=6e-1,
+    )
+
+
+@given(weights(), hypothesis_dimension(min_value=4, max_value=8))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
+    ],
+    max_examples=10,
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_uncMC_with_svd_and_invLSFIR_unc(
+    capsys, monte_carlo, freqs, sampling_freq, weight_vector, filter_order
+):
+    with capsys.disabled():
+        filter_coeffs, filter_coeffs_uncertainty = invLSFIR_unc(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            wt=weight_vector,
+            verbose=True,
+            inv=True,
+        )
+        filter_coeffs_svd, filter_coeffs_uncertainty_svd = invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=freqs,
+            Fs=sampling_freq,
+            tau=filter_order // 2,
+            weights=weight_vector,
+            inv=True,
+            UH=monte_carlo["UH"],
+            trunc_svd_tol=0.0,
+            verbose=True,
+        )
+    assert_allclose(filter_coeffs, filter_coeffs_svd, rtol=4e-2)
+    assert_allclose(
+        filter_coeffs_uncertainty, filter_coeffs_uncertainty_svd, atol=6e-1, rtol=6e-1
+    )
