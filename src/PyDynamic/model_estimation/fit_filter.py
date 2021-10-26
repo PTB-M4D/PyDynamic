@@ -20,11 +20,13 @@ This module contains the following functions:
 
 """
 import inspect
+from enum import Enum
 from os import path
 from typing import Optional, Tuple, Union
 
 import numpy as np
 import scipy.signal as dsp
+from scipy.stats import multivariate_normal
 
 from .. import is_2d_matrix, number_of_rows_equals_vector_dim
 from ..misc.filterstuff import grpdelay, isstable, mapinside
@@ -917,7 +919,6 @@ def invLSFIR_uncMC(
     propagation_method = _determine_propagation_method(
         covariance_matrix=UH, mc_runs=mc_runs
     )
-
     x = _compute_x(
         filter_order=N, freqs=freqs, sampling_freq=sampling_freq, weights=weights
     )
@@ -925,43 +926,79 @@ def invLSFIR_uncMC(
         sampling_freq=sampling_freq, freqs=freqs
     )
     e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
-    mc_complex_freq_resps_with_white_noise = (
-        mc_freq_resps_with_white_noise_real_imag[:, :n_freqs]
-        + 1j * mc_freq_resps_with_white_noise_real_imag[:, n_freqs:]
-    )
-    mc_delayed_complex_freq_resps_with_white_noise = (
-        mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
-    )
-    if inv:
-        mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise = np.reciprocal(
-            mc_delayed_complex_freq_resps_with_white_noise
-        )
-        mc_preprocessed_freq_resps = np.hstack(
-            [
-                np.real(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
-                np.imag(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
-            ]
-        )
-    else:
-        mc_preprocessed_freq_resps = np.hstack(
-            [
-                np.real(mc_delayed_complex_freq_resps_with_white_noise),
-                np.imag(mc_delayed_complex_freq_resps_with_white_noise),
-            ]
-        )
-    mc_filter_coeffs = np.array(
-        [
-            np.linalg.lstsq(
-                a=x,
-                b=mc_freq_resp,
-                rcond=None,
-            )[0]
-            for mc_freq_resp in mc_preprocessed_freq_resps
-        ]
-    ).T
 
-    filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
-    filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
+    if propagation_method == _PropagationMethod.NONE:
+        complex_freq_resp = _assemble_complex_from_real_imag(array=H)
+
+        delayed_complex_freq_resp = (
+            complex_freq_resp * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+        )
+        if inv:
+            reciprocal_of_delayed_complex_freq_resp = np.reciprocal(
+                delayed_complex_freq_resp
+            )
+            preprocessed_freq_resp = _assemble_real_imag_from_complex(
+                reciprocal_of_delayed_complex_freq_resp
+            )
+        else:
+            preprocessed_freq_resp = _assemble_real_imag_from_complex(
+                delayed_complex_freq_resp
+            )
+        filter_coeffs = np.linalg.lstsq(x, preprocessed_freq_resp, rcond=None)[0]
+        filter_coeffs_uncertainties = None
+    else:
+        mc_freq_resps_with_white_noise_real_imag = _draw_monte_carlo_samples(
+            vector=freq_resps_real_imag, covariance_matrix=UH, mc_runs=mc_runs
+        )
+        mc_complex_freq_resps_with_white_noise = _assemble_complex_from_real_imag(
+            mc_freq_resps_with_white_noise_real_imag
+        )
+        mc_delayed_complex_freq_resps_with_white_noise = (
+            mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
+        )
+        if inv:
+            mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise = (
+                np.reciprocal(mc_delayed_complex_freq_resps_with_white_noise)
+            )
+            mc_preprocessed_freq_resps = _assemble_real_imag_from_complex(
+                mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise
+            )
+        else:
+            mc_preprocessed_freq_resps = _assemble_real_imag_from_complex(
+                mc_delayed_complex_freq_resps_with_white_noise
+            )
+
+        if propagation_method == _PropagationMethod.MC:
+            mc_filter_coeffs = np.array(
+                [
+                    np.linalg.lstsq(
+                        a=x,
+                        b=mc_freq_resp,
+                        rcond=None,
+                    )[0]
+                    for mc_freq_resp in mc_preprocessed_freq_resps
+                ]
+            ).T
+
+            filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
+            filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
+        else:  # propagation_method == _PropagationMethod.SVD:
+            u, s, v = np.linalg.svd(x, full_matrices=False)
+            if isinstance(trunc_svd_tol, float):
+                s[s < trunc_svd_tol] = 0.0
+            StSInv = np.zeros_like(s)
+            StSInv[s > 0] = s[s > 0] ** (-2)
+
+            M = np.dot(np.dot(np.dot(v.T, np.diag(StSInv)), np.diag(s)), u.T)
+
+            bFIR = np.dot(
+                M, mc_preprocessed_freq_resps[:, np.newaxis]
+            )  # actual fitting
+            filter_coeffs_uncertainties = np.dot(
+                np.dot(M, UiH), M.T
+            )  # evaluation of uncertainties
+
+            filter_coeffs = bFIR.flatten()
 
     if verbose:
         complex_h = freq_resps_real_imag[:n_freqs] + 1j * freq_resps_real_imag[n_freqs:]
@@ -979,6 +1016,26 @@ def invLSFIR_uncMC(
         )
 
     return filter_coeffs, filter_coeffs_uncertainties
+
+
+def _assemble_complex_from_real_imag(array: np.ndarray) -> np.ndarray:
+    if is_2d_matrix(array):
+        array_split_in_two_half = (
+            _split_array_of_monte_carlo_samples_of_real_and_imag_parts(array)
+        )
+    else:
+        array_split_in_two_half = _split_vector_of_real_and_imag_parts(array)
+    return array_split_in_two_half[0] + 1j * array_split_in_two_half[1]
+
+
+def _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
+    array: np.ndarray,
+) -> np.ndarray:
+    return np.split(ary=array, indices_or_sections=2, axis=1)
+
+
+def _split_vector_of_real_and_imag_parts(vector: np.ndarray) -> np.ndarray:
+    return np.split(ary=vector, indices_or_sections=2)
 
 
 def _validate_uncertainties(vector, covariance_matrix):
@@ -1155,6 +1212,12 @@ def _determine_propagation_method(
 
 def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
     return np.exp(1j * omega * tau)
+
+
+def _draw_monte_carlo_samples(
+    vector: np.ndarray, covariance_matrix: np.ndarray, mc_runs: int
+) -> np.ndarray:
+    return multivariate_normal.rvs(mean=vector, cov=covariance_matrix, size=mc_runs)
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
