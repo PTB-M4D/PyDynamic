@@ -527,7 +527,7 @@ def test_compare_invLSFIR_uncMC_to_invLSFIR(
         tau=filter_order // 2,
         f=freqs,
         Fs=sampling_freq,
-        mc_runs=1,
+        mc_runs=2,
     )
     filter_coeffs = invLSFIR(
         H=monte_carlo["H"],
