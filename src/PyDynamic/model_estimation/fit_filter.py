@@ -20,12 +20,14 @@ This module contains the following functions:
 
 """
 import inspect
+from enum import Enum
 from os import path
 from typing import Optional, Tuple, Union
 
 import numpy as np
 import scipy.signal as dsp
 from scipy.optimize import lsq_linear
+from scipy.stats import multivariate_normal
 
 from .. import is_2d_matrix, number_of_rows_equals_vector_dim
 from ..misc.filterstuff import grpdelay, isstable, mapinside
@@ -552,29 +554,27 @@ def LSFIR(
     sampling_frequency = Fs
 
     n_frequencies = len(frequencies)
-    h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+    h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = 2 * np.pi * frequencies / sampling_frequency
-    omega = omega[:, np.newaxis]
+    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_frequency, freqs=frequencies
+    )
 
-    ords = np.arange(N + 1)[:, np.newaxis].T
+    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
 
-    E = np.exp(-1j * np.dot(omega, ords))
+    x = _compute_x(
+        filter_order=N,
+        freqs=frequencies,
+        sampling_freq=sampling_frequency,
+        weights=weights,
+    )
 
-    if Wt is not None:
-        if is_2d_matrix(Wt):
-            weights = np.diag(Wt)
-        else:
-            weights = np.eye(n_frequencies) * Wt
-        weighted_E = np.dot(weights, E)
-        X = np.vstack([np.real(weighted_E), np.imag(weighted_E)])
-    else:
-        X = np.vstack([np.real(E), np.imag(E)])
+    delayed_h_complex = h_complex * _compute_e_to_the_one_j_omega_tau(
+        omega=omega, tau=tau
+    )
+    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex)
 
-    delayed_h_complex = h_complex * np.exp(1j * omega.flatten() * tau)
-    iRI = np.hstack([np.real(delayed_h_complex), np.imag(delayed_h_complex)])
-
-    bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]
+    bFIR, res = np.linalg.lstsq(x, iRI, rcond=None)[:2]
 
     if not isinstance(res, np.ndarray):
         print(
@@ -582,7 +582,11 @@ def LSFIR(
             f"norm {res}."
         )
 
-    return bFIR.flatten()
+    return bFIR
+
+
+def _assemble_real_imag_from_complex(array: np.ndarray) -> np.ndarray:
+    return np.hstack((np.real(array), np.imag(array)))
 
 
 def invLSFIR(
@@ -632,36 +636,27 @@ def invLSFIR(
     sampling_frequency = Fs
 
     n_frequencies = len(frequencies)
-    h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+    h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = (2 * np.pi * frequencies / sampling_frequency)[
-        :, np.newaxis
-    ]  # set up radial frequencies
+    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_frequency, freqs=frequencies
+    )  # set up radial frequencies
 
-    ords = np.arange(N + 1)[:, np.newaxis].T  # set up design matrix
+    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
 
-    E = np.exp(-1j * np.dot(omega, ords))
-
-    if Wt is not None:  # set up weighted design matrix if necessary
-        if is_2d_matrix(Wt):
-            weights = np.diag(Wt)
-        else:
-            weights = np.eye(n_frequencies) * Wt
-        weighted_E = np.dot(weights, E)
-        X = np.vstack([np.real(weighted_E), np.imag(weighted_E)])
-    else:
-        X = np.vstack([np.real(E), np.imag(E)])
-
-    delayed_h_complex_reciprocal = np.reciprocal(
-        h_complex * np.exp(1j * omega.flatten() * tau)
-    )  # apply time delay for improved fit quality
-    iRI = np.hstack(
-        [np.real(delayed_h_complex_reciprocal), np.imag(delayed_h_complex_reciprocal)]
+    x = _compute_x(
+        filter_order=N,
+        freqs=frequencies,
+        sampling_freq=sampling_frequency,
+        weights=weights,
     )
 
-    bFIR = np.linalg.lstsq(X, iRI, rcond=None)[0]  # the actual fitting
+    delayed_h_complex_reciprocal = np.reciprocal(
+        h_complex * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+    )  # apply time delay for improved fit quality
+    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_reciprocal)
 
-    return bFIR.flatten()
+    return np.linalg.lstsq(x, iRI, rcond=None)[0]  # the actual fitting
 
 
 def invLSFIR_unc(
@@ -939,10 +934,9 @@ def invLSFIR_uncMC(
         covariance_matrix=UH, inv=inv, mc_runs=mc_runs, trunc_svd_tol=trunc_svd_tol
     )
 
-    mc_freq_resps_with_white_noise_real_imag = np.random.multivariate_normal(
-        freq_resps_real_imag, UH, mc_runs
+    propagation_method, mc_runs = _determine_propagation_method(
+        covariance_matrix=UH, mc_runs=mc_runs
     )
-
     x = _compute_x(
         filter_order=N, freqs=freqs, sampling_freq=sampling_freq, weights=weights
     )
@@ -950,43 +944,65 @@ def invLSFIR_uncMC(
         sampling_freq=sampling_freq, freqs=freqs
     )
     e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
-    mc_complex_freq_resps_with_white_noise = (
-        mc_freq_resps_with_white_noise_real_imag[:, :n_freqs]
-        + 1j * mc_freq_resps_with_white_noise_real_imag[:, n_freqs:]
-    )
-    mc_delayed_complex_freq_resps_with_white_noise = (
-        mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
+
+    complex_freq_resp = _assemble_complex_from_real_imag(array=freq_resps_real_imag)
+
+    delayed_complex_freq_resp = complex_freq_resp * _compute_e_to_the_one_j_omega_tau(
+        omega=omega, tau=tau
     )
     if inv:
-        mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise = np.reciprocal(
-            mc_delayed_complex_freq_resps_with_white_noise
+        reciprocal_of_delayed_complex_freq_resp = np.reciprocal(
+            delayed_complex_freq_resp
         )
-        mc_preprocessed_freq_resps = np.hstack(
-            [
-                np.real(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
-                np.imag(mc_reciprocal_of_delayed_complex_freq_resps_with_white_noise),
-            ]
+        preprocessed_freq_resp = _assemble_real_imag_from_complex(
+            reciprocal_of_delayed_complex_freq_resp
         )
     else:
-        mc_preprocessed_freq_resps = np.hstack(
-            [
-                np.real(mc_delayed_complex_freq_resps_with_white_noise),
-                np.imag(mc_delayed_complex_freq_resps_with_white_noise),
-            ]
+        preprocessed_freq_resp = _assemble_real_imag_from_complex(
+            delayed_complex_freq_resp
         )
-    mc_filter_coeffs = np.array(
-        [
-            np.linalg.lstsq(
-                a=x,
-                b=mc_freq_resp,
-                rcond=None,
-            )[0]
-            for mc_freq_resp in mc_preprocessed_freq_resps
-        ]
-    ).T
-
-    filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
-    filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
+    if propagation_method == _PropagationMethod.NONE:
+        filter_coeffs = np.linalg.lstsq(x, preprocessed_freq_resp, rcond=None)[0]
+        filter_coeffs_uncertainties = None
+    else:
+        mc_freq_resps_with_white_noise_real_imag = _draw_monte_carlo_samples(
+            vector=freq_resps_real_imag, covariance_matrix=UH, mc_runs=mc_runs
+        )
+        if propagation_method == _PropagationMethod.MC:
+            mc_complex_freq_resps_with_white_noise = _assemble_complex_from_real_imag(
+                mc_freq_resps_with_white_noise_real_imag
+            )
+            mc_delayed_complex_freq_resps_with_white_noise = (
+                mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
+            )
+            mc_preprocessed_freq_resps_real_imag = (
+                _assemble_real_imag_from_complex(
+                    np.reciprocal(mc_delayed_complex_freq_resps_with_white_noise)
+                )
+                if inv
+                else _assemble_real_imag_from_complex(
+                    mc_delayed_complex_freq_resps_with_white_noise
+                )
+            )
+            (
+                filter_coeffs,
+                filter_coeffs_uncertainties,
+            ) = _conduct_uncertainty_propagation_via_mc(
+                mc_freq_resps_real_imag=mc_preprocessed_freq_resps_real_imag, x=x
+            )
+        else:  # propagation_method == _PropagationMethod.SVD:
+            (
+                filter_coeffs,
+                filter_coeffs_uncertainties,
+            ) = _conduct_uncertainty_propagation_via_svd(
+                mc_freq_resps_real_imag=mc_freq_resps_with_white_noise_real_imag,
+                mc_runs=mc_runs,
+                omega=omega,
+                preprocessed_freq_resp=preprocessed_freq_resp,
+                tau=tau,
+                trunc_svd_tol=trunc_svd_tol,
+                x=x,
+            )
 
     if verbose:
         complex_h = freq_resps_real_imag[:n_freqs] + 1j * freq_resps_real_imag[n_freqs:]
@@ -1004,6 +1020,26 @@ def invLSFIR_uncMC(
         )
 
     return filter_coeffs, filter_coeffs_uncertainties
+
+
+def _assemble_complex_from_real_imag(array: np.ndarray) -> np.ndarray:
+    if is_2d_matrix(array):
+        array_split_in_two_half = (
+            _split_array_of_monte_carlo_samples_of_real_and_imag_parts(array)
+        )
+    else:
+        array_split_in_two_half = _split_vector_of_real_and_imag_parts(array)
+    return array_split_in_two_half[0] + 1j * array_split_in_two_half[1]
+
+
+def _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
+    array: np.ndarray,
+) -> np.ndarray:
+    return np.split(ary=array, indices_or_sections=2, axis=1)
+
+
+def _split_vector_of_real_and_imag_parts(vector: np.ndarray) -> np.ndarray:
+    return np.split(ary=vector, indices_or_sections=2)
 
 
 def _validate_uncertainties(vector, covariance_matrix):
@@ -1095,14 +1131,32 @@ def _get_first_public_caller():
     return inspect.stack()[1].function
 
 
+class _PropagationMethod(Enum):
+    NONE = 0
+    MC = 1
+    SVD = 2
+
+
 def _validate_uncertainty_propagation_method_related_inputs(
     covariance_matrix: Union[np.ndarray, None],
     inv: bool,
     mc_runs: Union[int, None],
     trunc_svd_tol: Union[float, None],
 ):
-    if covariance_matrix is None:
-        if mc_runs:
+    def _no_uncertainties_were_provided() -> bool:
+        return covariance_matrix is None
+
+    def _number_of_monte_carlo_runs_was_provided() -> bool:
+        return bool(mc_runs)
+
+    def _input_for_svd_was_provided() -> bool:
+        return trunc_svd_tol is not None
+
+    def _supposed_to_apply_method_on_freq_resp_directly() -> bool:
+        return not inv
+
+    if _no_uncertainties_were_provided():
+        if _number_of_monte_carlo_runs_was_provided():
             raise ValueError(
                 "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
                 "to a frequency response H with propagation of associated "
@@ -1111,7 +1165,7 @@ def _validate_uncertainty_propagation_method_related_inputs(
                 f"but number of Monte Carlo runs set to {mc_runs}. Either remove "
                 f"mc_runs or provide uncertainties."
             )
-        if trunc_svd_tol is not None:
+        if _input_for_svd_was_provided():
             raise ValueError(
                 "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
                 "to a frequency response H with propagation of associated "
@@ -1121,25 +1175,126 @@ def _validate_uncertainty_propagation_method_related_inputs(
                 f"singular values trunc_svd_tol={trunc_svd_tol}. Either remove "
                 "trunc_svd_tol or provide uncertainties."
             )
-
-    if trunc_svd_tol is not None and mc_runs:
+    elif _input_for_svd_was_provided() and _number_of_monte_carlo_runs_was_provided():
         raise ValueError(
             "\ninvLSFIR_uncMC: Only one of mc_runs and trunc_svd_tol can be "
             f"provided but mc_runs={mc_runs} and trunc_svd_tol={trunc_svd_tol}."
         )
-    if (trunc_svd_tol is not None or mc_runs is None) and not inv:
+    elif (
+        _input_for_svd_was_provided() or not _number_of_monte_carlo_runs_was_provided()
+    ) and _supposed_to_apply_method_on_freq_resp_directly():
         raise NotImplementedError(
-            f"\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter to "
+            f"\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+            f"to "
             f"a frequency response H values with propagation of associated "
             f"uncertainties using a truncated singular-value decomposition and "
-            f"linear matrix propagation is not yet implemented. Alternatively specify "
-            f"the number mc_runs of runs to propagate the uncertainties via the Monte "
+            f"linear matrix propagation is not yet implemented. Alternatively "
+            f"specify "
+            f"the number mc_runs of runs to propagate the uncertainties via the "
+            f"Monte "
             f"Carlo method."
         )
+    elif mc_runs == 1:
+        raise ValueError(
+            f"\ninvLSFIR_uncMC: Number of Monte Carlo runs is expected to be greater "
+            f"than 1 but mc_runs={mc_runs}. Please provide a greater "
+            f"number of runs or switch to propagation of uncertainties "
+            f"via singular-value decomposition by leaving out mc_runs."
+        )
+
+
+def _determine_propagation_method(
+    covariance_matrix: Union[np.ndarray, None],
+    mc_runs: Union[int, None],
+):
+    if covariance_matrix is None:
+        return _PropagationMethod.NONE, None
+    if mc_runs:
+        return _PropagationMethod.MC, mc_runs
+    return _PropagationMethod.SVD, 10000
 
 
 def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
     return np.exp(1j * omega * tau)
+
+
+def _draw_monte_carlo_samples(
+    vector: np.ndarray, covariance_matrix: np.ndarray, mc_runs: int
+) -> np.ndarray:
+    return multivariate_normal.rvs(mean=vector, cov=covariance_matrix, size=mc_runs)
+
+
+def _conduct_uncertainty_propagation_via_mc(
+    mc_freq_resps_real_imag: np.ndarray, x: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    mc_filter_coeffs = np.array(
+        [
+            np.linalg.lstsq(
+                a=x,
+                b=mc_freq_resp,
+                rcond=None,
+            )[0]
+            for mc_freq_resp in mc_freq_resps_real_imag
+        ]
+    ).T
+    filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
+    filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
+    return filter_coeffs, filter_coeffs_uncertainties
+
+
+def _conduct_uncertainty_propagation_via_svd(
+    mc_freq_resps_real_imag: np.ndarray,
+    mc_runs: int,
+    omega,
+    preprocessed_freq_resp,
+    tau,
+    trunc_svd_tol,
+    x,
+) -> Tuple[np.ndarray, np.ndarray]:
+    list_of_mc_freq_resps_with_white_noise_real_and_imag = (
+        _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
+            mc_freq_resps_real_imag
+        )
+    )
+    mc_freq_resps_with_white_noise_real = (
+        list_of_mc_freq_resps_with_white_noise_real_and_imag[0]
+    )
+    mc_freq_resps_with_white_noise_imag = (
+        list_of_mc_freq_resps_with_white_noise_real_and_imag[1]
+    )
+    reciprocal_of_abs_of_mc_freq_resps_with_white_noise = np.reciprocal(
+        mc_freq_resps_with_white_noise_real ** 2
+        + mc_freq_resps_with_white_noise_imag ** 2
+    )
+    omega_tau = omega * tau
+    cos_omega_tau = np.tile(np.cos(omega_tau), (mc_runs, 1))
+    sin_omega_tau = np.tile(np.sin(omega_tau), (mc_runs, 1))
+    UiH = np.cov(
+        np.hstack(
+            (
+                (
+                    mc_freq_resps_with_white_noise_real * cos_omega_tau
+                    + mc_freq_resps_with_white_noise_imag * sin_omega_tau
+                )
+                * reciprocal_of_abs_of_mc_freq_resps_with_white_noise,
+                (
+                    mc_freq_resps_with_white_noise_imag * cos_omega_tau
+                    - mc_freq_resps_with_white_noise_real * sin_omega_tau
+                )
+                * reciprocal_of_abs_of_mc_freq_resps_with_white_noise,
+            )
+        ),
+        rowvar=False,
+    )
+    u, s, v = np.linalg.svd(x, full_matrices=False)
+    if isinstance(trunc_svd_tol, float):
+        s[s < trunc_svd_tol] = 0.0
+    StSInv = np.zeros_like(s)
+    StSInv[s > 0] = s[s > 0] ** (-2)
+    M = np.dot(np.dot(np.dot(v.T, np.diag(StSInv)), np.diag(s)), u.T)
+    filter_coeffs = np.dot(M, preprocessed_freq_resp[:, np.newaxis]).flatten()
+    filter_coeffs_uncertainties = np.dot(np.dot(M, UiH), M.T)
+    return filter_coeffs, filter_coeffs_uncertainties
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
