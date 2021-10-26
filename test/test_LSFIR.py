@@ -518,7 +518,7 @@ def test_compare_invLSFIR_unc_to_invLSFIR(
     ],
 )
 @pytest.mark.slow
-def test_compare_invLSFIR_uncMC_to_invLSFIR(
+def test_compare_invLSFIR_uncMC_with_zero_uncertainty_to_invLSFIR(
     monte_carlo, freqs, sampling_freq, filter_order
 ):
     filter_coeffs_mc, _ = invLSFIR_uncMC(
@@ -1139,7 +1139,7 @@ def test_too_small_number_of_monte_carlo_runs_invLSFIR_uncMC(
     ],
 )
 @pytest.mark.slow
-def test_compare_invLSFIR_uncMC_to_invLSFIR(
+def test_compare_invLSFIR_uncMC_with_no_uncertainty_to_invLSFIR(
     monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
     filter_coeffs_mc, _ = invLSFIR_uncMC(
