@@ -529,27 +529,25 @@ def LSFIR(
     n_frequencies = len(frequencies)
     h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = 2 * np.pi * frequencies / sampling_frequency
-    omega = omega[:, np.newaxis]
+    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_frequency, freqs=frequencies
+    )
 
-    ords = np.arange(N + 1)[:, np.newaxis].T
+    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
 
-    E = np.exp(-1j * np.dot(omega, ords))
+    x = _compute_x(
+        filter_order=N,
+        freqs=frequencies,
+        sampling_freq=sampling_frequency,
+        weights=weights,
+    )
 
-    if Wt is not None:
-        if is_2d_matrix(Wt):
-            weights = np.diag(Wt)
-        else:
-            weights = np.eye(n_frequencies) * Wt
-        weighted_E = np.dot(weights, E)
-        X = np.vstack([np.real(weighted_E), np.imag(weighted_E)])
-    else:
-        X = np.vstack([np.real(E), np.imag(E)])
+    delayed_h_complex = h_complex * _compute_e_to_the_one_j_omega_tau(
+        omega=omega, tau=tau
+    )
+    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex)
 
-    delayed_h_complex = h_complex * np.exp(1j * omega.flatten() * tau)
-    iRI = np.hstack([np.real(delayed_h_complex), np.imag(delayed_h_complex)])
-
-    bFIR, res = np.linalg.lstsq(X, iRI, rcond=None)[:2]
+    bFIR, res = np.linalg.lstsq(x, iRI, rcond=None)[:2]
 
     if not isinstance(res, np.ndarray):
         print(
