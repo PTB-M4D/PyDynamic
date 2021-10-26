@@ -525,7 +525,7 @@ def LSFIR(
     sampling_frequency = Fs
 
     n_frequencies = len(frequencies)
-    h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+    h_complex = _assemble_complex_from_real_imag(array=H)
 
     omega = 2 * np.pi * frequencies / sampling_frequency
     omega = omega[:, np.newaxis]
@@ -555,7 +555,11 @@ def LSFIR(
             f"norm {res}."
         )
 
-    return bFIR.flatten()
+    return bFIR
+
+
+def _assemble_real_imag_from_complex(array: np.ndarray) -> np.ndarray:
+    return np.hstack((np.real(array), np.imag(array)))
 
 
 def invLSFIR(
@@ -605,7 +609,7 @@ def invLSFIR(
     sampling_frequency = Fs
 
     n_frequencies = len(frequencies)
-    h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+    h_complex = _assemble_complex_from_real_imag(array=H)
 
     omega = (2 * np.pi * frequencies / sampling_frequency)[
         :, np.newaxis
@@ -628,9 +632,7 @@ def invLSFIR(
     delayed_h_complex_reciprocal = np.reciprocal(
         h_complex * np.exp(1j * omega.flatten() * tau)
     )  # apply time delay for improved fit quality
-    iRI = np.hstack(
-        [np.real(delayed_h_complex_reciprocal), np.imag(delayed_h_complex_reciprocal)]
-    )
+    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_reciprocal)
 
     bFIR = np.linalg.lstsq(X, iRI, rcond=None)[0]  # the actual fitting
 
