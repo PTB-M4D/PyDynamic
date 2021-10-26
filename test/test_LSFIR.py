@@ -1206,7 +1206,7 @@ def test_compare_invLSFIR_uncMC_without_uncertainties_to_LSFIR(
 def test_compare_invLSFIR_uncMC_with_zero_uncertainty_and_without(
     monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
-    filter_coeffs_mc, _ = invLSFIR_uncMC(
+    filter_coeffs, _ = invLSFIR_uncMC(
         H=monte_carlo["H"],
         UH=None,
         N=filter_order,
@@ -1215,7 +1215,7 @@ def test_compare_invLSFIR_uncMC_with_zero_uncertainty_and_without(
         Fs=sampling_freq,
         weights=weight_vector,
     )
-    filter_coeffs, _ = invLSFIR_uncMC(
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
         H=monte_carlo["H"],
         UH=np.zeros_like(monte_carlo["UH"]),
         N=filter_order,
@@ -1225,4 +1225,4 @@ def test_compare_invLSFIR_uncMC_with_zero_uncertainty_and_without(
         weights=weight_vector,
         mc_runs=2,
     )
-    assert_allclose(filter_coeffs_mc, filter_coeffs)
+    assert_allclose(filter_coeffs, filter_coeffs_mc)
