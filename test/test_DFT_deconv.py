@@ -62,6 +62,7 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=100,
 )
 @pytest.mark.slow
 def test_dft_deconv(
@@ -75,8 +76,8 @@ def test_dft_deconv(
         n_monte_carlo_runs=n_monte_carlo_runs,
         operator=complex_deconvolution_on_sets,
     )
-    x_deconv_shift_away_from_zero = 1 - x_deconv.min(initial=None)
-    u_deconv_shift_away_from_zero = 1 - u_deconv.min(initial=None)
+    x_deconv_shift_away_from_zero = 1 - np.min(x_deconv)
+    u_deconv_shift_away_from_zero = 1 - np.min(u_deconv)
     assert_allclose(
         x_deconv + x_deconv_shift_away_from_zero,
         monte_carlo_mean + x_deconv_shift_away_from_zero,
@@ -85,7 +86,7 @@ def test_dft_deconv(
     assert_allclose(
         u_deconv + u_deconv_shift_away_from_zero,
         monte_carlo_cov + u_deconv_shift_away_from_zero,
-        rtol=6.7e-2,
+        rtol=7.5e-2,
     )
 
 
