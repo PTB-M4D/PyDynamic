@@ -320,7 +320,7 @@ def LSIIR(
     warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # Prepare frequencies, fitting and stabilization parameters.
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=Fs, freqs=f
     )
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
@@ -481,7 +481,7 @@ def LSIIR(
         return b_res, a_res, final_tau
 
 
-def _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+def _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
     sampling_freq: float, freqs: np.ndarray
 ):
     return 2 * np.pi * freqs / sampling_freq
@@ -529,7 +529,7 @@ def LSFIR(
     n_frequencies = len(frequencies)
     h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=sampling_frequency, freqs=frequencies
     )
 
@@ -611,7 +611,7 @@ def invLSFIR(
     n_frequencies = len(frequencies)
     h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=sampling_frequency, freqs=frequencies
     )  # set up radial frequencies
 
@@ -722,21 +722,25 @@ def invLSFIR_unc(
 
     h_complex_reciprocal = np.reciprocal(h_complex)
     HRI = np.random.multivariate_normal(RI, UH, runs)  # random draws of real,imag of
-    # freq response values
-    omtau = 2 * np.pi * frequencies / sampling_frequency * tau
+
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_frequency, freqs=frequencies
+    )
+    omega_tau = omega * tau
+    e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
 
     # Vectorized Monte Carlo for propagation to inverse
     absHMC = HRI[:, :n_frequencies] ** 2 + HRI[:, n_frequencies:] ** 2
     HiMC = np.hstack(
         (
             (
-                HRI[:, :n_frequencies] * np.tile(np.cos(omtau), (runs, 1))
-                + HRI[:, n_frequencies:] * np.tile(np.sin(omtau), (runs, 1))
+                HRI[:, :n_frequencies] * np.tile(np.cos(omega_tau), (runs, 1))
+                + HRI[:, n_frequencies:] * np.tile(np.sin(omega_tau), (runs, 1))
             )
             / absHMC,
             (
-                HRI[:, n_frequencies:] * np.tile(np.cos(omtau), (runs, 1))
-                - HRI[:, :n_frequencies] * np.tile(np.sin(omtau), (runs, 1))
+                HRI[:, n_frequencies:] * np.tile(np.cos(omega_tau), (runs, 1))
+                - HRI[:, :n_frequencies] * np.tile(np.sin(omega_tau), (runs, 1))
             )
             / absHMC,
         )
@@ -913,7 +917,7 @@ def invLSFIR_uncMC(
     x = _compute_x(
         filter_order=N, freqs=freqs, sampling_freq=sampling_freq, weights=weights
     )
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=sampling_freq, freqs=freqs
     )
     e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
