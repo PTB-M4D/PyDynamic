@@ -810,7 +810,7 @@ def invLSFIR_uncMC(
     tau: int,
     weights: Optional[np.ndarray] = None,
     verbose: Optional[bool] = True,
-    inv: Optional[bool] = True,
+    inv: Optional[bool] = False,
     UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = None,
     trunc_svd_tol: Optional[float] = None,
