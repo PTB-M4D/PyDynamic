@@ -544,7 +544,7 @@ def LSFIR(
         sampling_freq=sampling_frequency, freqs=frequencies
     )
 
-    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
+    weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
 
     x = _compute_x(
         filter_order=N,
@@ -626,7 +626,7 @@ def invLSFIR(
         sampling_freq=sampling_frequency, freqs=frequencies
     )  # set up radial frequencies
 
-    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
+    weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
 
     x = _compute_x(
         filter_order=N,
@@ -759,15 +759,7 @@ def invLSFIR_unc(
     UiH = np.cov(HiMC, rowvar=False)
 
     # Step 2: Fit filter coefficients and evaluate uncertainties
-    if isinstance(wt, np.ndarray):
-        if len(wt) != np.diag(UiH).shape[0]:
-            raise ValueError(
-                "invLSFIR_unc: User-defined weighting has wrong "
-                "dimension. wt is expected to be of length "
-                f"{2 * n_frequencies} but is of length {wt.shape}."
-            )
-    else:
-        wt = np.ones(2 * n_frequencies)
+    wt = _validate_and_return_weights(weights=wt, expected_len=2 * n_frequencies)
 
     X = _compute_x(
         filter_order=N,
@@ -1018,7 +1010,7 @@ def _validate_uncertainties(vector, covariance_matrix):
         )
 
 
-def _validate_weights(
+def _validate_and_return_weights(
     weights: np.ndarray, expected_len: int
 ) -> Union[np.ndarray, None]:
     if weights is not None:
