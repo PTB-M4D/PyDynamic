@@ -800,18 +800,20 @@ def _compute_x(
     sampling_freq: float,
     weights: np.ndarray,
 ):
-    e = np.exp(
-        -1j
-        * 2
-        * np.pi
-        * np.dot(
-            freqs[:, np.newaxis] / sampling_freq,
-            np.arange(filter_order + 1)[:, np.newaxis].T,
-        )
+    return np.dot(
+        np.diag(weights),
+        _assemble_real_imag_from_complex(
+            np.exp(
+                -1j
+                * 2
+                * np.pi
+                * np.dot(
+                    np.arange(filter_order + 1)[..., np.newaxis],
+                    freqs[np.newaxis, ...] / sampling_freq,
+                )
+            )
+        ).T,
     )
-    x = np.vstack((np.real(e), np.imag(e)))
-    x = np.dot(np.diag(weights), x)
-    return x
 
 
 def invLSFIR_uncMC(
