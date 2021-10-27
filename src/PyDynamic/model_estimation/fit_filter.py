@@ -469,9 +469,8 @@ def LSIIR(
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
             b=b_res, a=a_res, omega=omega, tau=tau
         )
-        res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
-        rms = np.sqrt(np.sum(res ** 2) / len(f))
-        print(f"LSIIR: Final rms error = {rms}.\n\n")
+        residuals_real_imag = _assemble_real_imag_from_complex(Hd - Hvals)
+        _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
 
     if UHvals:
         Uab = np.cov(as_and_bs, rowvar=False)
@@ -787,10 +786,8 @@ def invLSFIR_unc(
 
     M = np.dot(np.dot(np.dot(v.T, np.diag(StSInv)), np.diag(s)), u.T)
 
-    bFIR = np.dot(M, Hri[:, np.newaxis])  # actual fitting
-    UbFIR = np.dot(np.dot(M, UiH), M.T)  # evaluation of uncertainties
-
-    bFIR = bFIR.flatten()
+    filter_coeffs = np.dot(M, Hri[:, np.newaxis]).flatten()
+    filter_coeffs_uncertainties = np.dot(np.dot(M, UiH), M.T)
 
     if verbose:
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
@@ -799,33 +796,18 @@ def invLSFIR_unc(
         residuals_real_imag = _assemble_real_imag_from_complex(
             Hd - np.reciprocal(h_complex_recipr)
         )
-        rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
-        print(
-            f"invLSFIR_unc: Calculation of FIR filter coefficients finished. "
-            f"Final rms error = {rms}"
-        )
+        _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
 
-    return bFIR, UbFIR
+    return filter_coeffs, filter_coeffs_uncertainties
 
 
-def _compute_x(
-    filter_order: int,
-    freqs: np.ndarray,
-    sampling_freq: float,
-    weights: np.ndarray,
-):
-    e = np.exp(
-        -1j
-        * 2
-        * np.pi
-        * np.dot(
-            freqs[:, np.newaxis] / sampling_freq,
-            np.arange(filter_order + 1)[:, np.newaxis].T,
-        )
+def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
+    rms = np.sqrt(np.sum(residuals_real_imag ** 2) / (len(residuals_real_imag) // 2))
+    print(
+        f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
+        f"Final rms error = {rms}"
     )
-    x = np.vstack((np.real(e), np.imag(e)))
-    x = np.dot(np.diag(weights), x)
-    return x
+    return rms
 
 
 def invLSFIR_uncMC(
