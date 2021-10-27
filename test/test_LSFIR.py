@@ -528,6 +528,7 @@ def test_compare_invLSFIR_uncMC_with_zero_uncertainty_to_invLSFIR(
         tau=filter_order // 2,
         f=freqs,
         Fs=sampling_freq,
+        inv=True,
         mc_runs=2,
     )
     filter_coeffs = invLSFIR(
