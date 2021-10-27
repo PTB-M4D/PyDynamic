@@ -818,19 +818,19 @@ def invLSFIR_uncMC(
     """Design of FIR filter as fit to freq. resp. or its reciprocal with uncertainties
 
     Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of the
-    frequency response values or directly to the frequency response values for which
+    frequency response values or actual frequency response values for which
     associated uncertainties are given for its real and imaginary part. Uncertainties
     are propagated either using a Monte Carlo method if mc_runs is provided as
-    positive integer or otherwise using a truncated singular-value decomposition and
-    linear matrix propagation. The Monte Carlo approach may help in cases where the
-    weighting matrix or the Jacobian are ill-conditioned, resulting in false
-    uncertainties associated with the filter coefficients.
+    integer greater than one or otherwise using a truncated singular-value
+    decomposition and linear matrix propagation. The Monte Carlo approach may help in
+    cases where the weighting matrix or the Jacobian are ill-conditioned, resulting
+    in false uncertainties associated with the filter coefficients.
 
     Parameters
     ----------
     H : array_like of shape (M,) or (2M,)
-        (Complex) frequency response values in dtype complex or as a vector first
-        containing the real followed by the imaginary parts
+        (Complex) frequency response values in dtype complex or as a vector
+        containing the real parts in the first half followed by the imaginary parts
     N : int
         FIR filter order
     f : array_like of shape (M,)
@@ -838,21 +838,21 @@ def invLSFIR_uncMC(
     Fs : float
         sampling frequency of digital FIR filter
     tau : int
-        time delay of filter in samples
+        time delay in samples for improved fitting
     weights : array_like of shape (2M,), optional
         vector of weights for a weighted least-squares method (default results in no
         weighting)
     verbose: bool, optional
-        whether to print statements to the command line (default = True)
+        If True (default) verbose output is printed to the command line
     inv : bool, optional
         If False (default) apply the fit to the frequency response values directly,
         otherwise fit to the reciprocal of the frequency response values
     UH : array_like of shape (2M,2M), optional
         uncertainties associated with the real and imaginary part of H
     mc_runs : int, optional
-        Number of Monte Carlo runs. Only used, if uncertainties associated with the
-        real and imaginary part of H are provided. Only one of mc_runs and
-        trunc_svd_tol can be provided.
+        Number of Monte Carlo runs greater than one. Only used, if uncertainties
+        associated with the real and imaginary part of H are provided. Only one of
+        mc_runs and trunc_svd_tol can be provided.
     trunc_svd_tol : float, optional
         Lower bound for singular values to be considered for pseudo-inverse. Values
         smaller than this threshold are considered zero. Defaults to zero. Only one of
