@@ -466,9 +466,8 @@ def LSIIR(
                 f"{f'and with {final_stab_iter} for the final filter ' if final_stab_iter != stab_iter_mean else ''}"
                 f"(final tau = {final_tau})."
             )
-
-        Hd = dsp.freqz(b_res, a_res, omega)[1] * _compute_e_to_the_one_j_omega_tau(
-            omega, tau
+        Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
+            b=b_res, a=a_res, omega=omega, tau=tau
         )
         res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
         rms = np.sqrt(np.sum(res ** 2) / len(f))
@@ -485,6 +484,19 @@ def _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
     sampling_freq: float, freqs: np.ndarray
 ):
     return 2 * np.pi * freqs / sampling_freq
+
+
+def _compute_delayed_filters_freq_resp_via_scipys_freqz(
+    b: np.ndarray,
+    a: Union[float, np.ndarray],
+    tau: int,
+    omega: np.ndarray,
+) -> np.ndarray:
+    filters_freq_resp = dsp.freqz(b, a, omega)[1]
+    delayed_filters_freq_resp = filters_freq_resp * _compute_e_to_the_one_j_omega_tau(
+        omega=omega, tau=tau
+    )
+    return delayed_filters_freq_resp
 
 
 def LSFIR(
@@ -781,13 +793,11 @@ def invLSFIR_unc(
     bFIR = bFIR.flatten()
 
     if verbose:
-        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * frequencies / sampling_frequency)[1]
-        Hd = Hd * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
-        res = np.hstack(
-            (
-                np.real(Hd) - np.real(np.reciprocal(h_complex_reciprocal)),
-                np.imag(Hd) - np.imag(np.reciprocal(h_complex_reciprocal)),
-            )
+        Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
+            b=filter_coeffs, a=1.0, tau=tau, omega=omega
+        )
+        residuals_real_imag = _assemble_real_imag_from_complex(
+            Hd - np.reciprocal(h_complex_recipr)
         )
         rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
         print(
@@ -1269,9 +1279,26 @@ def _conduct_uncertainty_propagation_via_svd(
     StSInv = np.zeros_like(s)
     StSInv[s > 0] = s[s > 0] ** (-2)
     M = np.dot(np.dot(np.dot(v.T, np.diag(StSInv)), np.diag(s)), u.T)
-    filter_coeffs = np.dot(M, preprocessed_freq_resp[:, np.newaxis]).flatten()
-    filter_coeffs_uncertainties = np.dot(np.dot(M, UiH), M.T)
-    return filter_coeffs, filter_coeffs_uncertainties
+    b_fir = np.dot(M, preprocessed_freq_resp[:, np.newaxis]).flatten()
+    Ub_fir = np.dot(np.dot(M, UiH), M.T)
+    return b_fir, Ub_fir
+
+
+def _print_fir_result_msg(
+    b_fir: np.ndarray,
+    freq_resps_real_imag: np.ndarray,
+    inv: bool,
+    omega: np.ndarray,
+    tau: int,
+):
+    complex_h = _assemble_complex_from_real_imag(array=freq_resps_real_imag)
+    original_values = np.reciprocal(complex_h) if inv else complex_h
+    delayed_filters_freq_resp = _compute_delayed_filters_freq_resp_via_scipys_freqz(
+        b=b_fir, a=1.0, omega=omega, tau=tau
+    )
+    complex_residuals = delayed_filters_freq_resp - original_values
+    residuals_real_imag = _assemble_real_imag_from_complex(complex_residuals)
+    _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
