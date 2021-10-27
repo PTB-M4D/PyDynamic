@@ -62,6 +62,7 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=100,
 )
 @pytest.mark.slow
 def test_dft_deconv(
