@@ -624,7 +624,7 @@ def invLSFIR(
 
     omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=sampling_frequency, freqs=frequencies
-    )  # set up radial frequencies
+    )
 
     weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
 
@@ -635,12 +635,12 @@ def invLSFIR(
         weights=weights,
     )
 
-    delayed_h_complex_reciprocal = np.reciprocal(
+    delayed_h_complex_recipr = np.reciprocal(
         h_complex * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
-    )  # apply time delay for improved fit quality
-    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_reciprocal)
+    )
+    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_recipr)
 
-    return np.linalg.lstsq(x, iRI, rcond=None)[0]  # the actual fitting
+    return np.linalg.lstsq(x, iRI, rcond=None)[0]
 
 
 def invLSFIR_unc(
