@@ -481,7 +481,7 @@ def LSIIR(
 
 def _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
     sampling_freq: float, freqs: np.ndarray
-):
+) -> np.ndarray:
     return 2 * np.pi * freqs / sampling_freq
 
 
@@ -1175,7 +1175,7 @@ def _validate_uncertainty_propagation_method_related_inputs(
 def _determine_propagation_method(
     covariance_matrix: Union[np.ndarray, None],
     mc_runs: Union[int, None],
-):
+) -> Tuple[_PropagationMethod, Union[int, None]]:
     if covariance_matrix is None:
         return _PropagationMethod.NONE, None
     if mc_runs:
@@ -1214,11 +1214,11 @@ def _conduct_uncertainty_propagation_via_mc(
 def _conduct_uncertainty_propagation_via_svd(
     mc_freq_resps_real_imag: np.ndarray,
     mc_runs: int,
-    omega,
-    preprocessed_freq_resp,
-    tau,
-    trunc_svd_tol,
-    x,
+    omega: np.ndarray,
+    preprocessed_freq_resp: np.ndarray,
+    tau: int,
+    trunc_svd_tol: float,
+    x: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray]:
     list_of_mc_freq_resps_with_white_noise_real_and_imag = (
         _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
