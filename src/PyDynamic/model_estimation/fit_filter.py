@@ -1196,7 +1196,7 @@ def _draw_monte_carlo_samples(
 def _conduct_uncertainty_propagation_via_mc(
     mc_freq_resps_real_imag: np.ndarray, x: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    mc_filter_coeffs = np.array(
+    mc_b_firs = np.array(
         [
             np.linalg.lstsq(
                 a=x,
@@ -1206,9 +1206,9 @@ def _conduct_uncertainty_propagation_via_mc(
             for mc_freq_resp in mc_freq_resps_real_imag
         ]
     ).T
-    filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
-    filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
-    return filter_coeffs, filter_coeffs_uncertainties
+    b_fir = np.mean(mc_b_firs, axis=1)
+    Ub_fir = np.cov(mc_b_firs, rowvar=True)
+    return b_fir, Ub_fir
 
 
 def _conduct_uncertainty_propagation_via_svd(
@@ -1220,20 +1220,15 @@ def _conduct_uncertainty_propagation_via_svd(
     trunc_svd_tol: float,
     x: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    list_of_mc_freq_resps_with_white_noise_real_and_imag = (
+    list_of_mc_freq_resps_real_and_imag = (
         _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
             mc_freq_resps_real_imag
         )
     )
-    mc_freq_resps_with_white_noise_real = (
-        list_of_mc_freq_resps_with_white_noise_real_and_imag[0]
-    )
-    mc_freq_resps_with_white_noise_imag = (
-        list_of_mc_freq_resps_with_white_noise_real_and_imag[1]
-    )
-    reciprocal_of_abs_of_mc_freq_resps_with_white_noise = np.reciprocal(
-        mc_freq_resps_with_white_noise_real ** 2
-        + mc_freq_resps_with_white_noise_imag ** 2
+    mc_freq_resps_real = list_of_mc_freq_resps_real_and_imag[0]
+    mc_freq_resps_imag = list_of_mc_freq_resps_real_and_imag[1]
+    recipr_of_abs_of_mc_freq_resps = np.reciprocal(
+        mc_freq_resps_real ** 2 + mc_freq_resps_imag ** 2
     )
     omega_tau = omega * tau
     cos_omega_tau = np.tile(np.cos(omega_tau), (mc_runs, 1))
@@ -1242,15 +1237,15 @@ def _conduct_uncertainty_propagation_via_svd(
         np.hstack(
             (
                 (
-                    mc_freq_resps_with_white_noise_real * cos_omega_tau
-                    + mc_freq_resps_with_white_noise_imag * sin_omega_tau
+                    mc_freq_resps_real * cos_omega_tau
+                    + mc_freq_resps_imag * sin_omega_tau
                 )
-                * reciprocal_of_abs_of_mc_freq_resps_with_white_noise,
+                * recipr_of_abs_of_mc_freq_resps,
                 (
-                    mc_freq_resps_with_white_noise_imag * cos_omega_tau
-                    - mc_freq_resps_with_white_noise_real * sin_omega_tau
+                    mc_freq_resps_imag * cos_omega_tau
+                    - mc_freq_resps_real * sin_omega_tau
                 )
-                * reciprocal_of_abs_of_mc_freq_resps_with_white_noise,
+                * recipr_of_abs_of_mc_freq_resps,
             )
         ),
         rowvar=False,
