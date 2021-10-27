@@ -75,8 +75,8 @@ def test_dft_deconv(
         n_monte_carlo_runs=n_monte_carlo_runs,
         operator=complex_deconvolution_on_sets,
     )
-    x_deconv_shift_away_from_zero = 1 - x_deconv.min(initial=None)
-    u_deconv_shift_away_from_zero = 1 - u_deconv.min(initial=None)
+    x_deconv_shift_away_from_zero = 1 - np.min(x_deconv)
+    u_deconv_shift_away_from_zero = 1 - np.min(u_deconv)
     assert_allclose(
         x_deconv + x_deconv_shift_away_from_zero,
         monte_carlo_mean + x_deconv_shift_away_from_zero,
