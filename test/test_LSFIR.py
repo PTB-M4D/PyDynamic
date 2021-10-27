@@ -528,9 +528,73 @@ def test_compare_invLSFIR_uncMC_with_zero_uncertainty_to_invLSFIR(
         tau=filter_order // 2,
         f=freqs,
         Fs=sampling_freq,
+        inv=True,
         mc_runs=2,
     )
     filter_coeffs = invLSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+    )
+    assert_allclose(filter_coeffs_mc, filter_coeffs)
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_uncMC_with_zero_uncertainty_to_LSFIR(
+    monte_carlo, freqs, sampling_freq, filter_order
+):
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=False,
+        mc_runs=2,
+    )
+    filter_coeffs = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+    )
+    assert_allclose(filter_coeffs_mc, filter_coeffs)
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_uncMC_with_no_uncertainty_to_LSFIR(
+    monte_carlo, freqs, sampling_freq, filter_order
+):
+    filter_coeffs_mc, _ = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=None,
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=False,
+    )
+    filter_coeffs = LSFIR(
         H=monte_carlo["H"],
         N=filter_order,
         tau=filter_order // 2,

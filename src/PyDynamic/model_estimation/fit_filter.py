@@ -343,7 +343,7 @@ def LSIIR(
     warning_unstable = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # Prepare frequencies, fitting and stabilization parameters.
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=Fs, freqs=f
     )
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
@@ -493,13 +493,11 @@ def LSIIR(
                 f"{f'and with {final_stab_iter} for the final filter ' if final_stab_iter != stab_iter_mean else ''}"
                 f"(final tau = {final_tau})."
             )
-
-        Hd = dsp.freqz(b_res, a_res, omega)[1] * _compute_e_to_the_one_j_omega_tau(
-            omega, tau
+        Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
+            b=b_res, a=a_res, omega=omega, tau=tau
         )
-        res = np.hstack((np.real(Hd) - np.real(Hvals), np.imag(Hd) - np.imag(Hvals)))
-        rms = np.sqrt(np.sum(res ** 2) / len(f))
-        print(f"LSIIR: Final rms error = {rms}.\n\n")
+        residuals_real_imag = _assemble_real_imag_from_complex(Hd - Hvals)
+        _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
 
     if UHvals:
         Uab = np.cov(as_and_bs, rowvar=False)
@@ -508,10 +506,23 @@ def LSIIR(
         return b_res, a_res, final_tau
 
 
-def _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+def _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
     sampling_freq: float, freqs: np.ndarray
-):
+) -> np.ndarray:
     return 2 * np.pi * freqs / sampling_freq
+
+
+def _compute_delayed_filters_freq_resp_via_scipys_freqz(
+    b: np.ndarray,
+    a: Union[float, np.ndarray],
+    tau: int,
+    omega: np.ndarray,
+) -> np.ndarray:
+    filters_freq_resp = dsp.freqz(b, a, omega)[1]
+    delayed_filters_freq_resp = filters_freq_resp * _compute_e_to_the_one_j_omega_tau(
+        omega=omega, tau=tau
+    )
+    return delayed_filters_freq_resp
 
 
 def LSFIR(
@@ -556,11 +567,11 @@ def LSFIR(
     n_frequencies = len(frequencies)
     h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=sampling_frequency, freqs=frequencies
     )
 
-    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
+    weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
 
     x = _compute_x(
         filter_order=N,
@@ -583,6 +594,46 @@ def LSFIR(
         )
 
     return bFIR
+
+
+def _assemble_complex_from_real_imag(array: np.ndarray) -> np.ndarray:
+    if is_2d_matrix(array):
+        array_split_in_two_half = (
+            _split_array_of_monte_carlo_samples_of_real_and_imag_parts(array)
+        )
+    else:
+        array_split_in_two_half = _split_vector_of_real_and_imag_parts(array)
+    return array_split_in_two_half[0] + 1j * array_split_in_two_half[1]
+
+
+def _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
+    array: np.ndarray,
+) -> np.ndarray:
+    return np.split(ary=array, indices_or_sections=2, axis=1)
+
+
+def _split_vector_of_real_and_imag_parts(vector: np.ndarray) -> np.ndarray:
+    return np.split(ary=vector, indices_or_sections=2)
+
+
+def _compute_x(
+    filter_order: int,
+    freqs: np.ndarray,
+    sampling_freq: float,
+    weights: np.ndarray,
+):
+    e = np.exp(
+        -1j
+        * 2
+        * np.pi
+        * np.dot(
+            freqs[:, np.newaxis] / sampling_freq,
+            np.arange(filter_order + 1)[:, np.newaxis].T,
+        )
+    )
+    x = np.vstack((np.real(e), np.imag(e)))
+    x = np.dot(np.diag(weights), x)
+    return x
 
 
 def _assemble_real_imag_from_complex(array: np.ndarray) -> np.ndarray:
@@ -638,11 +689,11 @@ def invLSFIR(
     n_frequencies = len(frequencies)
     h_complex = _assemble_complex_from_real_imag(array=H)
 
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq=sampling_frequency, freqs=frequencies
-    )  # set up radial frequencies
+    )
 
-    weights = _validate_weights(weights=Wt, expected_len=2 * n_frequencies)
+    weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
 
     x = _compute_x(
         filter_order=N,
@@ -651,12 +702,12 @@ def invLSFIR(
         weights=weights,
     )
 
-    delayed_h_complex_reciprocal = np.reciprocal(
+    delayed_h_complex_recipr = np.reciprocal(
         h_complex * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
-    )  # apply time delay for improved fit quality
-    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_reciprocal)
+    )
+    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_recipr)
 
-    return np.linalg.lstsq(x, iRI, rcond=None)[0]  # the actual fitting
+    return np.linalg.lstsq(x, iRI, rcond=None)[0]
 
 
 def invLSFIR_unc(
@@ -741,29 +792,32 @@ def invLSFIR_unc(
 
     if not len(H) == UH.shape[0]:
         # Assume that H is given as complex valued frequency response.
-        RI = np.hstack((np.real(H), np.imag(H)))
+        RI = _assemble_real_imag_from_complex(H)
         h_complex = H.copy()
     else:
         RI = H.copy()
-        h_complex = H[:n_frequencies] + 1j * H[n_frequencies:]
+        h_complex = _assemble_complex_from_real_imag(H)
 
-    h_complex_reciprocal = np.reciprocal(h_complex)
+    h_complex_recipr = np.reciprocal(h_complex)
     HRI = np.random.multivariate_normal(RI, UH, runs)  # random draws of real,imag of
-    # freq response values
-    omtau = 2 * np.pi * frequencies / sampling_frequency * tau
+
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_frequency, freqs=frequencies
+    )
+    omega_tau = omega * tau
 
     # Vectorized Monte Carlo for propagation to inverse
     absHMC = HRI[:, :n_frequencies] ** 2 + HRI[:, n_frequencies:] ** 2
     HiMC = np.hstack(
         (
             (
-                HRI[:, :n_frequencies] * np.tile(np.cos(omtau), (runs, 1))
-                + HRI[:, n_frequencies:] * np.tile(np.sin(omtau), (runs, 1))
+                HRI[:, :n_frequencies] * np.tile(np.cos(omega_tau), (runs, 1))
+                + HRI[:, n_frequencies:] * np.tile(np.sin(omega_tau), (runs, 1))
             )
             / absHMC,
             (
-                HRI[:, n_frequencies:] * np.tile(np.cos(omtau), (runs, 1))
-                - HRI[:, :n_frequencies] * np.tile(np.sin(omtau), (runs, 1))
+                HRI[:, n_frequencies:] * np.tile(np.cos(omega_tau), (runs, 1))
+                - HRI[:, :n_frequencies] * np.tile(np.sin(omega_tau), (runs, 1))
             )
             / absHMC,
         )
@@ -771,15 +825,7 @@ def invLSFIR_unc(
     UiH = np.cov(HiMC, rowvar=False)
 
     # Step 2: Fit filter coefficients and evaluate uncertainties
-    if isinstance(wt, np.ndarray):
-        if len(wt) != np.diag(UiH).shape[0]:
-            raise ValueError(
-                "invLSFIR_unc: User-defined weighting has wrong "
-                "dimension. wt is expected to be of length "
-                f"{2 * n_frequencies} but is of length {wt.shape}."
-            )
-    else:
-        wt = np.ones(2 * n_frequencies)
+    wt = _validate_and_return_weights(weights=wt, expected_len=2 * n_frequencies)
 
     X = _compute_x(
         filter_order=N,
@@ -787,8 +833,11 @@ def invLSFIR_unc(
         sampling_freq=sampling_frequency,
         weights=wt,
     )
-    Hm = h_complex * np.exp(1j * omtau)
-    Hri = np.hstack((np.real(1.0 / Hm), np.imag(1.0 / Hm)))
+    Hri = _assemble_real_imag_from_complex(
+        np.reciprocal(
+            h_complex * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+        )
+    )
 
     u, s, v = np.linalg.svd(X, full_matrices=False)
     if isinstance(trunc_svd_tol, float):
@@ -798,47 +847,28 @@ def invLSFIR_unc(
 
     M = np.dot(np.dot(np.dot(v.T, np.diag(StSInv)), np.diag(s)), u.T)
 
-    bFIR = np.dot(M, Hri[:, np.newaxis])  # actual fitting
-    UbFIR = np.dot(np.dot(M, UiH), M.T)  # evaluation of uncertainties
-
-    bFIR = bFIR.flatten()
+    filter_coeffs = np.dot(M, Hri[:, np.newaxis]).flatten()
+    filter_coeffs_uncertainties = np.dot(np.dot(M, UiH), M.T)
 
     if verbose:
-        Hd = dsp.freqz(bFIR, 1, 2 * np.pi * frequencies / sampling_frequency)[1]
-        Hd = Hd * np.exp(1j * 2 * np.pi * frequencies / sampling_frequency * tau)
-        res = np.hstack(
-            (
-                np.real(Hd) - np.real(np.reciprocal(h_complex_reciprocal)),
-                np.imag(Hd) - np.imag(np.reciprocal(h_complex_reciprocal)),
-            )
+        Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
+            b=filter_coeffs, a=1.0, tau=tau, omega=omega
         )
-        rms = np.sqrt(np.sum(res ** 2) / n_frequencies)
-        print(
-            f"invLSFIR_unc: Calculation of FIR filter coefficients finished. "
-            f"Final rms error = {rms}"
+        residuals_real_imag = _assemble_real_imag_from_complex(
+            Hd - np.reciprocal(h_complex_recipr)
         )
+        _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
 
-    return bFIR, UbFIR
+    return filter_coeffs, filter_coeffs_uncertainties
 
 
-def _compute_x(
-    filter_order: int,
-    freqs: np.ndarray,
-    sampling_freq: float,
-    weights: np.ndarray,
-):
-    e = np.exp(
-        -1j
-        * 2
-        * np.pi
-        * np.dot(
-            freqs[:, np.newaxis] / sampling_freq,
-            np.arange(filter_order + 1)[:, np.newaxis].T,
-        )
+def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
+    rms = np.sqrt(np.sum(residuals_real_imag ** 2) / (len(residuals_real_imag) // 2))
+    print(
+        f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
+        f"Final rms error = {rms}"
     )
-    x = np.vstack((np.real(e), np.imag(e)))
-    x = np.dot(np.diag(weights), x)
-    return x
+    return rms
 
 
 def invLSFIR_uncMC(
@@ -849,7 +879,7 @@ def invLSFIR_uncMC(
     tau: int,
     weights: Optional[np.ndarray] = None,
     verbose: Optional[bool] = True,
-    inv: Optional[bool] = True,
+    inv: Optional[bool] = False,
     UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = None,
     trunc_svd_tol: Optional[float] = None,
@@ -857,19 +887,19 @@ def invLSFIR_uncMC(
     """Design of FIR filter as fit to freq. resp. or its reciprocal with uncertainties
 
     Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of the
-    frequency response values or directly to the frequency response values for which
+    frequency response values or actual frequency response values for which
     associated uncertainties are given for its real and imaginary part. Uncertainties
     are propagated either using a Monte Carlo method if mc_runs is provided as
-    positive integer or otherwise using a truncated singular-value decomposition and
-    linear matrix propagation. The Monte Carlo approach may help in cases where the
-    weighting matrix or the Jacobian are ill-conditioned, resulting in false
-    uncertainties associated with the filter coefficients.
+    integer greater than one or otherwise using a truncated singular-value
+    decomposition and linear matrix propagation. The Monte Carlo approach may help in
+    cases where the weighting matrix or the Jacobian are ill-conditioned, resulting
+    in false uncertainties associated with the filter coefficients.
 
     Parameters
     ----------
     H : array_like of shape (M,) or (2M,)
-        (Complex) frequency response values in dtype complex or as a vector first
-        containing the real followed by the imaginary parts
+        (Complex) frequency response values in dtype complex or as a vector
+        containing the real parts in the first half followed by the imaginary parts
     N : int
         FIR filter order
     f : array_like of shape (M,)
@@ -877,21 +907,21 @@ def invLSFIR_uncMC(
     Fs : float
         sampling frequency of digital FIR filter
     tau : int
-        time delay of filter in samples
+        time delay in samples for improved fitting
     weights : array_like of shape (2M,), optional
         vector of weights for a weighted least-squares method (default results in no
         weighting)
     verbose: bool, optional
-        whether to print statements to the command line (default = True)
+        If True (default) verbose output is printed to the command line
     inv : bool, optional
         If False (default) apply the fit to the frequency response values directly,
         otherwise fit to the reciprocal of the frequency response values
     UH : array_like of shape (2M,2M), optional
         uncertainties associated with the real and imaginary part of H
     mc_runs : int, optional
-        Number of Monte Carlo runs. Only used, if uncertainties associated with the
-        real and imaginary part of H are provided. Only one of mc_runs and
-        trunc_svd_tol can be provided.
+        Number of Monte Carlo runs greater than one. Only used, if uncertainties
+        associated with the real and imaginary part of H are provided. Only one of
+        mc_runs and trunc_svd_tol can be provided.
     trunc_svd_tol : float, optional
         Lower bound for singular values to be considered for pseudo-inverse. Values
         smaller than this threshold are considered zero. Defaults to zero. Only one of
@@ -909,147 +939,123 @@ def invLSFIR_uncMC(
     * Elster and Link [Elster2008]_
 
     """
+    (
+        freq_resps_real_imag,
+        freqs,
+        mc_runs,
+        propagation_method,
+        sampling_freq,
+        weights,
+    ) = _validate_and_prepare_fir_inputs(
+        sampling_freq=Fs,
+        freq_resp=H,
+        freq_resp_uncertainty=UH,
+        freqs=f,
+        inv=inv,
+        mc_runs=mc_runs,
+        trunc_svd_tol=trunc_svd_tol,
+        weights=weights,
+    )
     if verbose:
-        print(
-            f"\ninvLSFIR_uncMC: Least-squares fit of an order {N} digital FIR filter "
-            f"to {' the reciprocal of' if inv else ''} a frequency response given by "
-            f"{len(H)} values and propagation of associated uncertainties."
+        _print_fir_welcome_msg(
+            freq_resp_in_provided_shape=H,
+            filter_order=N,
+            inv=inv,
+            mc_runs=mc_runs,
+            propagation_method=propagation_method,
+            trunc_svd_tol=trunc_svd_tol,
         )
-    freqs = f.copy()
-    n_freqs = len(freqs)
-    two_n_freqs = 2 * n_freqs
-    sampling_freq = Fs
-
-    weights = _validate_weights(weights=weights, expected_len=two_n_freqs)
-
-    freq_resps_real_imag = _validate_and_assemble_freq_resps(
-        freq_resps=H,
-        expected_len_when_complex=n_freqs,
-        expected_len_when_real_imag=two_n_freqs,
+    omega, delayed_freq_resp_real_imag_or_recipr, x = _prepare_common_fitting_inputs(
+        filter_order=N,
+        freq_resps_real_imag=freq_resps_real_imag,
+        freqs=freqs,
+        inv=inv,
+        sampling_freq=sampling_freq,
+        tau=tau,
+        weights=weights,
     )
-
-    _validate_uncertainties(vector=freq_resps_real_imag, covariance_matrix=UH)
-
-    _validate_uncertainty_propagation_method_related_inputs(
-        covariance_matrix=UH, inv=inv, mc_runs=mc_runs, trunc_svd_tol=trunc_svd_tol
-    )
-
-    propagation_method, mc_runs = _determine_propagation_method(
-        covariance_matrix=UH, mc_runs=mc_runs
-    )
-    x = _compute_x(
-        filter_order=N, freqs=freqs, sampling_freq=sampling_freq, weights=weights
-    )
-    omega = _compute_omega_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_freq=sampling_freq, freqs=freqs
-    )
-    e_to_the_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
-
-    complex_freq_resp = _assemble_complex_from_real_imag(array=freq_resps_real_imag)
-
-    delayed_complex_freq_resp = complex_freq_resp * _compute_e_to_the_one_j_omega_tau(
-        omega=omega, tau=tau
-    )
-    if inv:
-        reciprocal_of_delayed_complex_freq_resp = np.reciprocal(
-            delayed_complex_freq_resp
-        )
-        preprocessed_freq_resp = _assemble_real_imag_from_complex(
-            reciprocal_of_delayed_complex_freq_resp
-        )
-    else:
-        preprocessed_freq_resp = _assemble_real_imag_from_complex(
-            delayed_complex_freq_resp
-        )
     if propagation_method == _PropagationMethod.NONE:
-        filter_coeffs = np.linalg.lstsq(x, preprocessed_freq_resp, rcond=None)[0]
-        filter_coeffs_uncertainties = None
+        b_fir = _fit_fir_filter_coeffs(
+            delayed_freq_resp_real_imag_or_recipr=delayed_freq_resp_real_imag_or_recipr,
+            x=x,
+        )
+        Ub_fir = None
     else:
-        mc_freq_resps_with_white_noise_real_imag = _draw_monte_carlo_samples(
+        mc_freq_resps_real_imag = _draw_multivariate_monte_carlo_samples(
             vector=freq_resps_real_imag, covariance_matrix=UH, mc_runs=mc_runs
         )
         if propagation_method == _PropagationMethod.MC:
-            mc_complex_freq_resps_with_white_noise = _assemble_complex_from_real_imag(
-                mc_freq_resps_with_white_noise_real_imag
+            b_fir, Ub_fir = _fit_fir_filter_with_uncertainty_propagation_via_mc(
+                inv=inv,
+                mc_freq_resps_real_imag=mc_freq_resps_real_imag,
+                omega=omega,
+                tau=tau,
+                x=x,
             )
-            mc_delayed_complex_freq_resps_with_white_noise = (
-                mc_complex_freq_resps_with_white_noise * e_to_the_one_j_omega_tau
-            )
-            mc_preprocessed_freq_resps_real_imag = (
-                _assemble_real_imag_from_complex(
-                    np.reciprocal(mc_delayed_complex_freq_resps_with_white_noise)
-                )
-                if inv
-                else _assemble_real_imag_from_complex(
-                    mc_delayed_complex_freq_resps_with_white_noise
-                )
-            )
-            (
-                filter_coeffs,
-                filter_coeffs_uncertainties,
-            ) = _conduct_uncertainty_propagation_via_mc(
-                mc_freq_resps_real_imag=mc_preprocessed_freq_resps_real_imag, x=x
-            )
-        else:  # propagation_method == _PropagationMethod.SVD:
-            (
-                filter_coeffs,
-                filter_coeffs_uncertainties,
-            ) = _conduct_uncertainty_propagation_via_svd(
-                mc_freq_resps_real_imag=mc_freq_resps_with_white_noise_real_imag,
+        else:
+            b_fir, Ub_fir = _fit_fir_filter_with_uncertainty_propagation_via_svd(
+                mc_freq_resps_real_imag=mc_freq_resps_real_imag,
                 mc_runs=mc_runs,
                 omega=omega,
-                preprocessed_freq_resp=preprocessed_freq_resp,
+                preprocessed_freq_resp=delayed_freq_resp_real_imag_or_recipr,
                 tau=tau,
                 trunc_svd_tol=trunc_svd_tol,
                 x=x,
             )
-
     if verbose:
-        complex_h = freq_resps_real_imag[:n_freqs] + 1j * freq_resps_real_imag[n_freqs:]
-        original_values = np.reciprocal(complex_h) if inv else complex_h
-        filters_freq_resp = dsp.freqz(filter_coeffs, 1, omega)[1]
-        delayed_filters_freq_resp = filters_freq_resp * e_to_the_one_j_omega_tau
-        complex_residuals = delayed_filters_freq_resp - original_values
-        residuals_real_imag = np.hstack(
-            (np.real(complex_residuals), np.imag(complex_residuals))
-        )
-        rms = np.sqrt(np.sum(residuals_real_imag ** 2) / n_freqs)
-        print(
-            "invLSFIR_uncMC: Calculation of FIR filter coefficients finished. "
-            f"Final rms error = {rms}"
-        )
-
-    return filter_coeffs, filter_coeffs_uncertainties
+        _print_fir_result_msg(b_fir, freq_resps_real_imag, inv, omega, tau)
+    return b_fir, Ub_fir
 
 
-def _assemble_complex_from_real_imag(array: np.ndarray) -> np.ndarray:
-    if is_2d_matrix(array):
-        array_split_in_two_half = (
-            _split_array_of_monte_carlo_samples_of_real_and_imag_parts(array)
-        )
-    else:
-        array_split_in_two_half = _split_vector_of_real_and_imag_parts(array)
-    return array_split_in_two_half[0] + 1j * array_split_in_two_half[1]
+class _PropagationMethod(Enum):
+    NONE = 0
+    MC = 1
+    SVD = 2
 
 
-def _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
-    array: np.ndarray,
-) -> np.ndarray:
-    return np.split(ary=array, indices_or_sections=2, axis=1)
+def _validate_and_prepare_fir_inputs(
+    sampling_freq: float,
+    freq_resp: np.ndarray,
+    freq_resp_uncertainty: np.ndarray,
+    freqs: np.ndarray,
+    inv: bool,
+    mc_runs: int,
+    trunc_svd_tol: float,
+    weights: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, int, _PropagationMethod, float, np.ndarray]:
+    n_freqs = len(freqs)
+    two_n_freqs = 2 * n_freqs
+    freqs = freqs.copy()
+    sampling_freq = sampling_freq
+    weights = _validate_and_return_weights(weights=weights, expected_len=two_n_freqs)
+    freq_resps_real_imag = _validate_and_assemble_freq_resps(
+        freq_resps=freq_resp,
+        expected_len_when_complex=n_freqs,
+        expected_len_when_real_imag=two_n_freqs,
+    )
+    _validate_uncertainties(
+        vector=freq_resps_real_imag, covariance_matrix=freq_resp_uncertainty
+    )
+    _validate_fir_uncertainty_propagation_method_related_inputs(
+        covariance_matrix=freq_resp_uncertainty,
+        inv=inv,
+        mc_runs=mc_runs,
+        trunc_svd_tol=trunc_svd_tol,
+    )
+    propagation_method, mc_runs = _determine_fir_propagation_method(
+        covariance_matrix=freq_resp_uncertainty, mc_runs=mc_runs
+    )
+    return (
+        freq_resps_real_imag,
+        freqs,
+        mc_runs,
+        propagation_method,
+        sampling_freq,
+        weights,
+    )
 
 
-def _split_vector_of_real_and_imag_parts(vector: np.ndarray) -> np.ndarray:
-    return np.split(ary=vector, indices_or_sections=2)
-
-
-def _validate_uncertainties(vector, covariance_matrix):
-    if covariance_matrix is not None:
-        _validate_vector_and_corresponding_uncertainties_dims(
-            vector=vector, uncertainties=covariance_matrix
-        )
-
-
-def _validate_weights(
+def _validate_and_return_weights(
     weights: np.ndarray, expected_len: int
 ) -> Union[np.ndarray, None]:
     if weights is not None:
@@ -1069,6 +1075,13 @@ def _validate_weights(
     return np.ones(expected_len)
 
 
+def _get_first_public_caller():
+    for caller in inspect.stack():
+        if path.join("PyDynamic") in caller.filename and caller.function[0] != "_":
+            return caller.function
+    return inspect.stack()[1].function
+
+
 def _validate_and_assemble_freq_resps(
     freq_resps: np.ndarray,
     expected_len_when_complex: int,
@@ -1078,17 +1091,36 @@ def _validate_and_assemble_freq_resps(
         _validate_length_of_h(
             freq_resp=freq_resps, expected_length=expected_len_when_complex
         )
-        h_real_imag = np.hstack((np.real(freq_resps), np.imag(freq_resps)))
-    else:
-        _validate_length_of_h(
-            freq_resp=freq_resps, expected_length=expected_len_when_real_imag
-        )
-        h_real_imag = freq_resps.copy()
-    return h_real_imag
+        return _assemble_real_imag_from_complex(freq_resps)
+    _validate_length_of_h(
+        freq_resp=freq_resps, expected_length=expected_len_when_real_imag
+    )
+    return freq_resps.copy()
 
 
 def _is_dtype_complex(array: np.ndarray) -> bool:
     return array.dtype == np.complexfloating
+
+
+def _validate_length_of_h(freq_resp: np.ndarray, expected_length: int):
+    if not len(freq_resp) == expected_length:
+        raise ValueError(
+            f"{_get_first_public_caller()}: vector of complex frequency responses "
+            f"is expected to contain {expected_length} elements, corresponding to the "
+            f"number of frequencies, but actually contains {len(freq_resp)} "
+            f"elements. Please adjust either of the two inputs."
+        )
+
+
+def _validate_uncertainties(vector: np.ndarray, covariance_matrix: np.ndarray):
+    if not _no_uncertainties_were_provided(covariance_matrix):
+        _validate_vector_and_corresponding_uncertainties_dims(
+            vector=vector, uncertainties=covariance_matrix
+        )
+
+
+def _no_uncertainties_were_provided(covariance_matrix: Union[np.ndarray, None]) -> bool:
+    return covariance_matrix is None
 
 
 def _validate_vector_and_corresponding_uncertainties_dims(
@@ -1114,48 +1146,36 @@ def _validate_vector_and_corresponding_uncertainties_dims(
         )
 
 
-def _validate_length_of_h(freq_resp: np.ndarray, expected_length: int):
-    if not len(freq_resp) == expected_length:
-        raise ValueError(
-            f"{_get_first_public_caller()}: vector of complex frequency responses "
-            f"is expected to contain {expected_length} elements, corresponding to the "
-            f"number of frequencies, but actually contains {len(freq_resp)} "
-            f"elements. Please adjust either of the two inputs."
-        )
-
-
-def _get_first_public_caller():
-    for caller in inspect.stack():
-        if path.join("PyDynamic") in caller.filename and caller.function[0] != "_":
-            return caller.function
-    return inspect.stack()[1].function
-
-
-class _PropagationMethod(Enum):
-    NONE = 0
-    MC = 1
-    SVD = 2
-
-
-def _validate_uncertainty_propagation_method_related_inputs(
+def _validate_fir_uncertainty_propagation_method_related_inputs(
     covariance_matrix: Union[np.ndarray, None],
     inv: bool,
     mc_runs: Union[int, None],
     trunc_svd_tol: Union[float, None],
 ):
-    def _no_uncertainties_were_provided() -> bool:
-        return covariance_matrix is None
-
     def _number_of_monte_carlo_runs_was_provided() -> bool:
         return bool(mc_runs)
 
     def _input_for_svd_was_provided() -> bool:
         return trunc_svd_tol is not None
 
-    def _supposed_to_apply_method_on_freq_resp_directly() -> bool:
+    def _are_we_supposed_to_apply_method_on_freq_resp_directly() -> bool:
         return not inv
 
-    if _no_uncertainties_were_provided():
+    def _both_propagation_methods_simultaneously_requested():
+        return (
+            _input_for_svd_was_provided() and _number_of_monte_carlo_runs_was_provided()
+        )
+
+    def _are_we_supposed_to_fit_freq_resp_with_svd_propagation() -> bool:
+        return (
+            _input_for_svd_was_provided()
+            or not _number_of_monte_carlo_runs_was_provided()
+        ) and _are_we_supposed_to_apply_method_on_freq_resp_directly()
+
+    def _number_of_mc_runs_too_small():
+        return mc_runs == 1
+
+    if _no_uncertainties_were_provided(covariance_matrix=covariance_matrix):
         if _number_of_monte_carlo_runs_was_provided():
             raise ValueError(
                 "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
@@ -1175,26 +1195,21 @@ def _validate_uncertainty_propagation_method_related_inputs(
                 f"singular values trunc_svd_tol={trunc_svd_tol}. Either remove "
                 "trunc_svd_tol or provide uncertainties."
             )
-    elif _input_for_svd_was_provided() and _number_of_monte_carlo_runs_was_provided():
+    elif _both_propagation_methods_simultaneously_requested():
         raise ValueError(
             "\ninvLSFIR_uncMC: Only one of mc_runs and trunc_svd_tol can be "
             f"provided but mc_runs={mc_runs} and trunc_svd_tol={trunc_svd_tol}."
         )
-    elif (
-        _input_for_svd_was_provided() or not _number_of_monte_carlo_runs_was_provided()
-    ) and _supposed_to_apply_method_on_freq_resp_directly():
+    elif _are_we_supposed_to_fit_freq_resp_with_svd_propagation():
         raise NotImplementedError(
             f"\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
-            f"to "
-            f"a frequency response H values with propagation of associated "
-            f"uncertainties using a truncated singular-value decomposition and "
-            f"linear matrix propagation is not yet implemented. Alternatively "
-            f"specify "
+            f"to a frequency response H with propagation of associated uncertainties "
+            f"using a truncated singular-value decomposition and linear matrix "
+            f"propagation is not yet implemented. Alternatively specify "
             f"the number mc_runs of runs to propagate the uncertainties via the "
-            f"Monte "
-            f"Carlo method."
+            f"Monte Carlo method."
         )
-    elif mc_runs == 1:
+    elif _number_of_mc_runs_too_small():
         raise ValueError(
             f"\ninvLSFIR_uncMC: Number of Monte Carlo runs is expected to be greater "
             f"than 1 but mc_runs={mc_runs}. Please provide a greater "
@@ -1203,10 +1218,10 @@ def _validate_uncertainty_propagation_method_related_inputs(
         )
 
 
-def _determine_propagation_method(
+def _determine_fir_propagation_method(
     covariance_matrix: Union[np.ndarray, None],
     mc_runs: Union[int, None],
-):
+) -> Tuple[_PropagationMethod, Union[int, None]]:
     if covariance_matrix is None:
         return _PropagationMethod.NONE, None
     if mc_runs:
@@ -1214,20 +1229,126 @@ def _determine_propagation_method(
     return _PropagationMethod.SVD, 10000
 
 
-def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int):
+def _print_fir_welcome_msg(
+    freq_resp_in_provided_shape,
+    filter_order,
+    inv,
+    mc_runs,
+    propagation_method,
+    trunc_svd_tol,
+):
+    if propagation_method != _PropagationMethod.NONE:
+        if propagation_method == _PropagationMethod.MC:
+            method_specific_propagation_msg = f"Monte Carlo method with {mc_runs} runs"
+        else:
+            method_specific_propagation_msg = (
+                f"truncated singular-value decomposition and linear matrix "
+                f"propagation with {trunc_svd_tol} as lower bound for the singular "
+                f"values to be considered for the pseudo-inverse"
+            )
+        propagation_msg = (
+            ". The frequency response's associated uncertainties are propagated "
+            "via a " + method_specific_propagation_msg
+        )
+    else:
+        propagation_msg = " without propagation of associated uncertainties"
+    print(
+        f"\ninvLSFIR_uncMC: Least-squares fit of an order {filter_order} digital FIR "
+        f"filter to{' the reciprocal of' if inv else ''} a frequency response given by "
+        f"{len(freq_resp_in_provided_shape)} values{propagation_msg}."
+    )
+
+
+def _prepare_common_fitting_inputs(
+    filter_order: int,
+    freq_resps_real_imag: np.ndarray,
+    freqs: np.ndarray,
+    inv: bool,
+    sampling_freq: float,
+    tau: int,
+    weights: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    x = _compute_x(
+        filter_order=filter_order,
+        freqs=freqs,
+        sampling_freq=sampling_freq,
+        weights=weights,
+    )
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
+        sampling_freq=sampling_freq, freqs=freqs
+    )
+    complex_freq_resp = _assemble_complex_from_real_imag(array=freq_resps_real_imag)
+    delayed_complex_freq_resp = complex_freq_resp * _compute_e_to_the_one_j_omega_tau(
+        omega=omega, tau=tau
+    )
+    delayed_freq_resp_real_imag_or_recipr = (
+        _assemble_delayed_freq_resp_real_imag_or_recipr(
+            delayed_complex_freq_resp=delayed_complex_freq_resp, inv=inv
+        )
+    )
+    return omega, delayed_freq_resp_real_imag_or_recipr, x
+
+
+def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int) -> np.ndarray:
     return np.exp(1j * omega * tau)
 
 
-def _draw_monte_carlo_samples(
+def _assemble_delayed_freq_resp_real_imag_or_recipr(
+    delayed_complex_freq_resp: np.ndarray, inv: bool
+) -> np.ndarray:
+    return _assemble_real_imag_from_complex(
+        np.reciprocal(delayed_complex_freq_resp) if inv else delayed_complex_freq_resp
+    )
+
+
+def _fit_fir_filter_coeffs(
+    delayed_freq_resp_real_imag_or_recipr: np.ndarray, x: np.ndarray
+) -> np.ndarray:
+    return np.linalg.lstsq(x, delayed_freq_resp_real_imag_or_recipr, rcond=None)[0]
+
+
+def _draw_multivariate_monte_carlo_samples(
     vector: np.ndarray, covariance_matrix: np.ndarray, mc_runs: int
 ) -> np.ndarray:
     return multivariate_normal.rvs(mean=vector, cov=covariance_matrix, size=mc_runs)
 
 
-def _conduct_uncertainty_propagation_via_mc(
+def _fit_fir_filter_with_uncertainty_propagation_via_mc(
+    inv: bool,
+    mc_freq_resps_real_imag: np.ndarray,
+    omega: np.ndarray,
+    tau: int,
+    x: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray]:
+    mc_delayed_freq_resps_or_recipr_real_imag = (
+        _compute_mc_delayed_freq_resps_or_reciprs_real_imag(
+            inv=inv,
+            mc_freq_resps_real_imag=mc_freq_resps_real_imag,
+            omega=omega,
+            tau=tau,
+        )
+    )
+    return _conduct_fir_uncertainty_propagation_via_mc(
+        mc_freq_resps_real_imag=mc_delayed_freq_resps_or_recipr_real_imag, x=x
+    )
+
+
+def _compute_mc_delayed_freq_resps_or_reciprs_real_imag(
+    inv: bool, mc_freq_resps_real_imag: np.ndarray, omega: np.ndarray, tau: int
+) -> np.ndarray:
+    mc_complex_freq_resps = _assemble_complex_from_real_imag(mc_freq_resps_real_imag)
+    mc_delayed_complex_freq_resps = (
+        mc_complex_freq_resps * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+    )
+    return _assemble_delayed_freq_resp_real_imag_or_recipr(
+        delayed_complex_freq_resp=mc_delayed_complex_freq_resps, inv=inv
+    )
+
+
+def _conduct_fir_uncertainty_propagation_via_mc(
     mc_freq_resps_real_imag: np.ndarray, x: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    mc_filter_coeffs = np.array(
+    mc_b_firs = np.array(
         [
             np.linalg.lstsq(
                 a=x,
@@ -1237,34 +1358,29 @@ def _conduct_uncertainty_propagation_via_mc(
             for mc_freq_resp in mc_freq_resps_real_imag
         ]
     ).T
-    filter_coeffs = np.mean(mc_filter_coeffs, axis=1)
-    filter_coeffs_uncertainties = np.cov(mc_filter_coeffs, rowvar=True)
-    return filter_coeffs, filter_coeffs_uncertainties
+    b_fir = np.mean(mc_b_firs, axis=1)
+    Ub_fir = np.cov(mc_b_firs, rowvar=True)
+    return b_fir, Ub_fir
 
 
-def _conduct_uncertainty_propagation_via_svd(
+def _fit_fir_filter_with_uncertainty_propagation_via_svd(
     mc_freq_resps_real_imag: np.ndarray,
     mc_runs: int,
-    omega,
-    preprocessed_freq_resp,
-    tau,
-    trunc_svd_tol,
-    x,
+    omega: np.ndarray,
+    preprocessed_freq_resp: np.ndarray,
+    tau: int,
+    trunc_svd_tol: float,
+    x: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    list_of_mc_freq_resps_with_white_noise_real_and_imag = (
+    list_of_mc_freq_resps_real_and_imag = (
         _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
             mc_freq_resps_real_imag
         )
     )
-    mc_freq_resps_with_white_noise_real = (
-        list_of_mc_freq_resps_with_white_noise_real_and_imag[0]
-    )
-    mc_freq_resps_with_white_noise_imag = (
-        list_of_mc_freq_resps_with_white_noise_real_and_imag[1]
-    )
-    reciprocal_of_abs_of_mc_freq_resps_with_white_noise = np.reciprocal(
-        mc_freq_resps_with_white_noise_real ** 2
-        + mc_freq_resps_with_white_noise_imag ** 2
+    mc_freq_resps_real = list_of_mc_freq_resps_real_and_imag[0]
+    mc_freq_resps_imag = list_of_mc_freq_resps_real_and_imag[1]
+    recipr_of_abs_of_mc_freq_resps = np.reciprocal(
+        mc_freq_resps_real ** 2 + mc_freq_resps_imag ** 2
     )
     omega_tau = omega * tau
     cos_omega_tau = np.tile(np.cos(omega_tau), (mc_runs, 1))
@@ -1273,15 +1389,15 @@ def _conduct_uncertainty_propagation_via_svd(
         np.hstack(
             (
                 (
-                    mc_freq_resps_with_white_noise_real * cos_omega_tau
-                    + mc_freq_resps_with_white_noise_imag * sin_omega_tau
+                    mc_freq_resps_real * cos_omega_tau
+                    + mc_freq_resps_imag * sin_omega_tau
                 )
-                * reciprocal_of_abs_of_mc_freq_resps_with_white_noise,
+                * recipr_of_abs_of_mc_freq_resps,
                 (
-                    mc_freq_resps_with_white_noise_imag * cos_omega_tau
-                    - mc_freq_resps_with_white_noise_real * sin_omega_tau
+                    mc_freq_resps_imag * cos_omega_tau
+                    - mc_freq_resps_real * sin_omega_tau
                 )
-                * reciprocal_of_abs_of_mc_freq_resps_with_white_noise,
+                * recipr_of_abs_of_mc_freq_resps,
             )
         ),
         rowvar=False,
@@ -1292,9 +1408,26 @@ def _conduct_uncertainty_propagation_via_svd(
     StSInv = np.zeros_like(s)
     StSInv[s > 0] = s[s > 0] ** (-2)
     M = np.dot(np.dot(np.dot(v.T, np.diag(StSInv)), np.diag(s)), u.T)
-    filter_coeffs = np.dot(M, preprocessed_freq_resp[:, np.newaxis]).flatten()
-    filter_coeffs_uncertainties = np.dot(np.dot(M, UiH), M.T)
-    return filter_coeffs, filter_coeffs_uncertainties
+    b_fir = np.dot(M, preprocessed_freq_resp[:, np.newaxis]).flatten()
+    Ub_fir = np.dot(np.dot(M, UiH), M.T)
+    return b_fir, Ub_fir
+
+
+def _print_fir_result_msg(
+    b_fir: np.ndarray,
+    freq_resps_real_imag: np.ndarray,
+    inv: bool,
+    omega: np.ndarray,
+    tau: int,
+):
+    complex_h = _assemble_complex_from_real_imag(array=freq_resps_real_imag)
+    original_values = np.reciprocal(complex_h) if inv else complex_h
+    delayed_filters_freq_resp = _compute_delayed_filters_freq_resp_via_scipys_freqz(
+        b=b_fir, a=1.0, omega=omega, tau=tau
+    )
+    complex_residuals = delayed_filters_freq_resp - original_values
+    residuals_real_imag = _assemble_real_imag_from_complex(complex_residuals)
+    _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
