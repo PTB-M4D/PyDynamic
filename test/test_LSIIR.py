@@ -93,18 +93,18 @@ def LSIIR_parameters(draw):
 def compute_fitting_parameters():
     """Compute the parameters needed to calculate an IIR model least-square fit
 
-    This provides w and E for the least-squares fits based on provided params.
+    This provides omega and E for the least-squares fits based on provided params.
     """
 
     def _compute_fitting_parameters(LSIIR_params: Dict[str, np.ndarray]):
         """Compute the parameters needed to calculate an IIR model least-square fit"""
-        w = 2 * np.pi * LSIIR_params["f"] / LSIIR_params["Fs"]
+        omega = 2 * np.pi * LSIIR_params["f"] / LSIIR_params["Fs"]
         Ns = np.arange(0, max(LSIIR_params["Nb"], LSIIR_params["Na"]) + 1)[
             :, np.newaxis
         ]
-        E = np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))
+        E = np.exp(-1j * np.dot(omega[:, np.newaxis], Ns.T))
 
-        return {"w": w, "E": E}
+        return {"omega": omega, "E": E}
 
     return _compute_fitting_parameters
 
@@ -117,8 +117,8 @@ def provide_fitted_filter():
         """This provides a IIR least-squares filter fit to a frequency response"""
         Filter = namedtuple("Filter", ["b", "a"])
 
-        b, a = fit_filter._fit_iir_via_least_squares(
-            Hvals=ls_base_parameters["Hvals"],
+        b, a = fit_filter._compute_actual_iir_least_squares_fit(
+            freq_resp=ls_base_parameters["Hvals"],
             tau=0,
             **compute_fitting_parameters(ls_base_parameters),
             Na=ls_base_parameters["Na"],
@@ -135,9 +135,9 @@ def provide_former_fitIIR():
     """This is the fixture providing the former implementation of _fitIIR"""
 
     def _former_fitIIR(
-        _Hvals: np.ndarray,
+        _freq_resp: np.ndarray,
         _tau: int,
-        _w: np.ndarray,
+        _omega: np.ndarray,
         _E: np.ndarray,
         _Na: int,
         _Nb: int,
@@ -147,11 +147,11 @@ def provide_former_fitIIR():
 
         Parameters
         ----------
-            _Hvals :  (M,) np.ndarray
+            _freq_resp :  (M,) np.ndarray
                 (complex) frequency response values
             _tau : integer
                 initial estimate of time delay
-            _w : np.ndarray
+            _omega : np.ndarray
                 :math:`2 * np.pi * f / Fs`
             _E : np.ndarray
                 :math:`np.exp(-1j * np.dot(w[:, np.newaxis], Ns.T))`
@@ -171,7 +171,7 @@ def provide_former_fitIIR():
         exponent = -1 if _inv else 1
         Ea = _E[:, 1 : _Na + 1]
         Eb = _E[:, : _Nb + 1]
-        Htau = np.exp(-1j * _w * _tau) * _Hvals ** exponent
+        Htau = np.exp(-1j * _omega * _tau) * _freq_resp ** exponent
         HEa = np.dot(np.diag(Htau), Ea)
         D = np.hstack((HEa, -Eb))
         Tmp1 = np.real(np.dot(np.conj(D.T), D))
@@ -322,7 +322,7 @@ def test_fitIIR_results_against_former_implementations(
 
     # Initialize parameters.
     fit_params = {
-        "Hvals": lsiir_base_params["Hvals"],
+        "freq_resp": lsiir_base_params["Hvals"],
         "tau": tau,
         **compute_fitting_parameters(LSIIR_params=lsiir_base_params),
         "Na": lsiir_base_params["Na"],
@@ -331,7 +331,9 @@ def test_fitIIR_results_against_former_implementations(
     }
 
     # Compute solution of current version.
-    b_current, a_current = fit_filter._fit_iir_via_least_squares(**fit_params)
+    b_current, a_current = fit_filter._compute_actual_iir_least_squares_fit(
+        **fit_params
+    )
 
     # Rename parameter dict keys to the same name with leading underscore for the old
     # version.
@@ -369,8 +371,8 @@ def test_fit_iir_via_least_squares_exception(
             lsiir_base_params["Hvals"], dtype=complex
         )
     with pytest.raises(ValueError):
-        fit_filter._fit_iir_via_least_squares(
-            Hvals=lsiir_base_params["Hvals"],
+        fit_filter._compute_actual_iir_least_squares_fit(
+            freq_resp=lsiir_base_params["Hvals"],
             tau=0,
             **compute_fitting_parameters(lsiir_base_params),
             Na=lsiir_base_params["Na"],
