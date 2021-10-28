@@ -143,8 +143,6 @@ def LSIIR(
     else:
         relevant_filters_mask = np.zeros((mc_runs,), dtype=bool)
 
-    # Conduct the Monte Carlo runs or in case we did not have uncertainties execute
-    # just once the actual algorithm.
     for mc_run in range(mc_runs):
         b_i, a_i = _compute_actual_iir_least_squares_fit(
             freq_resp=freq_resp_to_fit, tau=tau, omega=omega, E=E, Na=Na, Nb=Nb, inv=inv
@@ -171,12 +169,10 @@ def LSIIR(
             # delay to start iterations.
             taus[mc_run] = tau_max
 
-            # Stabilize filter coefficients with a maximum number of iterations.
             while (
                 not relevant_filters_mask[mc_run]
                 and current_stabilization_iteration_counter < max_stab_iter
             ):
-                # Compute appropriate time delay for the stabilization of the filter.
                 (
                     b_i,
                     a_i,
