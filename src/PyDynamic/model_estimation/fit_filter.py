@@ -111,7 +111,7 @@ def LSIIR(
     .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
     """
     if _no_uncertainties_were_provided(covariance_matrix=UHvals):
-        freq_resp_to_fit, mc_runs = _prepare_fitting_input_and_fitting_loop_visit(Hvals)
+        freq_resp_to_fit, mc_runs = Hvals, 1
     else:
         freq_resp_to_fit = _assemble_complex_from_real_imag(
             _draw_multivariate_monte_carlo_samples(
@@ -296,12 +296,6 @@ def LSIIR(
         Uab = np.cov(as_and_bs, rowvar=False)
         return b_res, a_res, final_tau, Uab
     return b_res, a_res, final_tau, None
-
-
-def _prepare_fitting_input_and_fitting_loop_visit(
-    freq_resp: np.ndarray,
-) -> Tuple[np.ndarray, int]:
-    return freq_resp, 1
 
 
 def _print_iir_welcome_msg(
