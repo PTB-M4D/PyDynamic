@@ -227,9 +227,7 @@ def LSIIR(
     inv: Optional[bool] = False,
     UHvals: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = 1000,
-) -> Union[
-    Tuple[np.ndarray, np.ndarray, int], Tuple[np.ndarray, np.ndarray, int, np.ndarray]
-]:
+) -> Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None]]:
     """Least-squares (time-discrete) IIR filter fit to frequency response or reciprocal
 
     For fitting an IIR filter model to the reciprocal of the frequency response values
@@ -279,8 +277,8 @@ def LSIIR(
     tau : int
         Filter time delay (in samples).
     Uab : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
-        Uncertainties associated with `[a[1:],b]`. Will only be returned if `UHvals`
-        was provided.
+        Uncertainties associated with `[a[1:],b]`. Will be None if UHvals is not
+        provided or equals None.
 
     References
     ----------
@@ -475,8 +473,28 @@ def LSIIR(
     if UHvals:
         Uab = np.cov(as_and_bs, rowvar=False)
         return b_res, a_res, final_tau, Uab
-    else:
-        return b_res, a_res, final_tau
+    return b_res, a_res, final_tau, None
+
+
+def _prepare_fitting_input_and_fitting_loop_visit(
+    freq_resp: np.ndarray,
+) -> Tuple[np.ndarray, int]:
+    return freq_resp, 1
+
+
+def _print_iir_welcome_msg(
+    freq_resp: np.ndarray, Na: int, Nb: int, UHvals: np.ndarray, inv: bool, mc_runs: int
+):
+    monte_carlo_message = (
+        f" Uncertainties of the filter coefficients are "
+        f"evaluated using the GUM S2 Monte Carlo method "
+        f"with {mc_runs} runs."
+    )
+    print(
+        f"LSIIR: Least-squares fit of an order {max(Nb, Na)} digital IIR filter to"
+        f"{' the reciprocal of' if inv else ''} a frequency response "
+        f"given by {len(freq_resp)} values.{monte_carlo_message if UHvals else ''}"
+    )
 
 
 def _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(

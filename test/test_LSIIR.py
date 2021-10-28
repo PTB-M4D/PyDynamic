@@ -281,7 +281,7 @@ def former_LSIIR():
 @given(LSIIR_parameters())
 def test_LSIIR_outputs_format(parameters):
     """This checks against expected formats of the outputs."""
-    b, a, tau = fit_filter.LSIIR(**parameters)
+    b, a, tau, _ = fit_filter.LSIIR(**parameters)
 
     assert len(b) == parameters["Nb"] + 1
     assert len(a) == parameters["Na"] + 1
@@ -350,7 +350,7 @@ def test_LSIIR_results_against_former_implementations(
     lsiir_base_params, provide_former_fitIIR, former_LSIIR
 ):
     """This takes the implementation prior to the rewrite and compares results."""
-    b_current, a_current, tau_current = fit_filter.LSIIR(**lsiir_base_params)
+    b_current, a_current, tau_current, _ = fit_filter.LSIIR(**lsiir_base_params)
     b_former, a_former, tau_former = former_LSIIR(
         provide_former_fitIIR, **lsiir_base_params
     )
