@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Perform tests on identification part of package model_estimation."""
 from collections import namedtuple
 from datetime import timedelta
