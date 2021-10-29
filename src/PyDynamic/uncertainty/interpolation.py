@@ -11,7 +11,7 @@ __all__ = ["interp1d_unc"]
 def interp1d_unc(*args, **kwargs):
     """
     .. deprecated:: 2.0.0
-    Please use :func:`PyDynamic.uncertainty.interpolate.interp1d_unc`    """
+        Please use :func:`PyDynamic.uncertainty.interpolate.interp1d_unc`"""
     raise DeprecationWarning(
         "The module *interpolation* is renamed to "
         ":mod:`PyDynamic.uncertainty.interpolate` since the last major release 2.0.0. "
