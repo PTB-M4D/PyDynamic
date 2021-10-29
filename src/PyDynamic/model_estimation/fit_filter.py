@@ -853,7 +853,6 @@ def _validate_and_prepare_fir_inputs(
 ) -> Tuple[np.ndarray, np.ndarray, int, _PropagationMethod, float, np.ndarray]:
     n_freqs = len(freqs)
     two_n_freqs = 2 * n_freqs
-    freqs = freqs.copy()
     sampling_freq = sampling_freq
     weights = _validate_and_return_weights(weights, expected_len=two_n_freqs)
     freq_resps_real_imag = _validate_and_assemble_freq_resps(
