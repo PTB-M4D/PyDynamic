@@ -7,7 +7,7 @@ from typing import Dict
 import numpy as np
 import pytest
 from hypothesis import assume, given, settings, strategies as hst
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_equal
 
 from PyDynamic import grpdelay, isstable, mapinside, sos_FreqResp
 from PyDynamic.model_estimation import fit_filter
@@ -283,8 +283,8 @@ def test_LSIIR_outputs_format(parameters):
     """This checks against expected formats of the outputs."""
     b, a, tau, _ = fit_filter.LSIIR(**parameters)
 
-    assert len(b) == parameters["Nb"] + 1
-    assert len(a) == parameters["Na"] + 1
+    assert_equal(len(b), parameters["Nb"] + 1)
+    assert_equal(len(a), parameters["Na"] + 1)
     assert isinstance(tau, np.integer)
     assert tau >= 0
 
