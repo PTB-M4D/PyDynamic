@@ -9,9 +9,6 @@
 __version__ = "1.11.1"
 
 __all__ = [
-    "invLSFIR",
-    "invLSFIR_unc",
-    "invLSFIR_uncMC",
     "LSFIR",
     "LSIIR",
     "fit_som",

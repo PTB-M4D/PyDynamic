@@ -15,7 +15,7 @@ This module contains the following functions:
 
 """
 
-__all__ = ["LSIIR", "invLSFIR_uncMC"]
+__all__ = ["LSIIR", "LSFIR"]
 
 import inspect
 from enum import Enum
@@ -431,7 +431,7 @@ def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
     return rms
 
 
-def invLSFIR_uncMC(
+def LSFIR(
     H: np.ndarray,
     N: int,
     f: np.ndarray,
@@ -791,7 +791,7 @@ def _print_fir_welcome_msg(
     else:
         propagation_msg = " without propagation of associated uncertainties"
     print(
-        f"\ninvLSFIR_uncMC: Least-squares fit of an order {filter_order} digital FIR "
+        f"\nLSFIR: Least-squares fit of an order {filter_order} digital FIR "
         f"filter to{' the reciprocal of' if inv else ''} a frequency response given by "
         f"{len(freq_resp_in_provided_shape)} values{propagation_msg}."
     )
