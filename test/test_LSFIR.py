@@ -774,7 +774,7 @@ def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
             mc_runs=10000,
             verbose=True,
         )
-    assert_allclose(b, b_mc, rtol=4e-2)
+    assert_allclose(b, b_mc, rtol=5e-2)
     assert_allclose(ub, ub_mc, rtol=6e-1)
 
 
