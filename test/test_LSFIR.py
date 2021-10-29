@@ -918,7 +918,7 @@ def test_invLSFIR_uncMC_with_wrong_type_UH(
 ):
     uh_list = monte_carlo["UH"].tolist()
     with pytest.raises(
-        ValueError,
+        TypeError,
         match=r"invLSFIR_uncMC: if uncertainties are provided, "
         r"they are expected to be of type np\.ndarray.*",
     ):
@@ -986,7 +986,7 @@ def test_invLSFIR_uncMC_with_wrong_type_weights(
 ):
     weight_list = [1] * 2 * len(freqs)
     with pytest.raises(
-        ValueError, match=r"invLSFIR_uncMC: User-defined weighting has wrong type.*"
+        TypeError, match=r"invLSFIR_uncMC: User-defined weighting has wrong type.*"
     ):
         invLSFIR_uncMC(
             H=monte_carlo["H"],

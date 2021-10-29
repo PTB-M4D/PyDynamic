@@ -947,7 +947,7 @@ def _validate_and_return_weights(
 ) -> Union[np.ndarray, None]:
     if weights is not None:
         if not isinstance(weights, np.ndarray):
-            raise ValueError(
+            raise TypeError(
                 f"{_get_first_public_caller()}: User-defined weighting has wrong "
                 "type. wt is expected to be a NumPy ndarray but is of type "
                 f"{type(weights)}.",
@@ -1014,7 +1014,7 @@ def _validate_vector_and_corresponding_uncertainties_dims(
     vector: np.ndarray, uncertainties: Union[np.ndarray]
 ):
     if not isinstance(uncertainties, np.ndarray):
-        raise ValueError(
+        raise TypeError(
             f"{_get_first_public_caller()}: if uncertainties are provided, "
             f"they are expected to be of type np.ndarray, but uncertainties are of type"
             f" {type(uncertainties)}."
