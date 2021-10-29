@@ -132,9 +132,7 @@ def LSIIR(
     warn_unstable_msg = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
     # Prepare frequencies, fitting and stabilization parameters.
-    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_freq=Fs, freqs=f
-    )
+    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(Fs, f)
     Ns = np.arange(0, max(Nb, Na) + 1)[:, np.newaxis]
     E = np.exp(-1j * np.dot(omega[:, np.newaxis], Ns.T))
     as_and_bs = np.empty((mc_runs, Nb + Na + 1))
@@ -148,11 +146,11 @@ def LSIIR(
 
     for mc_run in range(mc_runs):
         b_i, a_i = _compute_actual_iir_least_squares_fit(
-            freq_resp=freq_resp_to_fit, tau=tau, omega=omega, E=E, Na=Na, Nb=Nb, inv=inv
+            freq_resp_to_fit, tau, omega, E, Na, Nb, inv
         )
 
         current_stabilization_iteration_counter = 1
-        if isstable(b=b_i, a=a_i, ftype="digital"):
+        if isstable(b_i, a_i, "digital"):
             relevant_filters_mask[mc_run] = True
             taus[mc_run] = tau
         else:
@@ -161,11 +159,11 @@ def LSIIR(
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
                 b_i, a_i = _compute_actual_iir_least_squares_fit(
-                    freq_resp_to_fit, tau_max, omega, E, Na, Nb, inv=inv
+                    freq_resp_to_fit, tau_max, omega, E, Na, Nb, inv
                 )
                 current_stabilization_iteration_counter += 1
 
-            if isstable(b=b_i, a=a_i, ftype="digital"):
+            if isstable(b_i, a_i, "digital"):
                 relevant_filters_mask[mc_run] = True
 
             # Set the either needed delay for reaching stability or the initial
@@ -182,16 +180,7 @@ def LSIIR(
                     taus[mc_run],
                     relevant_filters_mask[mc_run],
                 ) = _compute_stabilized_filter_through_time_delay_iteration(
-                    b=b_i,
-                    a=a_i,
-                    tau=taus[mc_run],
-                    w=omega,
-                    E=E,
-                    Hvals=freq_resp_to_fit,
-                    Nb=Nb,
-                    Na=Na,
-                    Fs=Fs,
-                    inv=inv,
+                    b_i, a_i, taus[mc_run], omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
                 )
                 current_stabilization_iteration_counter += 1
             else:
@@ -231,14 +220,14 @@ def LSIIR(
 
         # Determine if the resulting filter already is stable and if not stabilize with
         # an initial delay of the previous maximum delay.
-        if not isstable(b=b_res, a=a_res, ftype="digital"):
+        if not isstable(b_res, a_res, "digital"):
             final_tau = tau_max
             b_res, a_res = _compute_actual_iir_least_squares_fit(
-                freq_resp_to_fit, final_tau, omega, E, Na, Nb, inv=inv
+                freq_resp_to_fit, final_tau, omega, E, Na, Nb, inv
             )
             final_stabilization_iteration_counter += 1
 
-        final_stable = isstable(b=b_res, a=a_res, ftype="digital")
+        final_stable = isstable(b_res, a_res, "digital")
 
         while (
             not final_stable and final_stabilization_iteration_counter < max_stab_iter
@@ -251,16 +240,7 @@ def LSIIR(
                 final_tau,
                 final_stable,
             ) = _compute_stabilized_filter_through_time_delay_iteration(
-                b=b_res,
-                a=a_res,
-                tau=final_tau,
-                w=omega,
-                E=E,
-                Hvals=freq_resp_to_fit,
-                Nb=Nb,
-                Na=Na,
-                Fs=Fs,
-                inv=inv,
+                b_res, a_res, final_tau, omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
             )
 
             final_stabilization_iteration_counter += 1
@@ -290,10 +270,10 @@ def LSIIR(
                 f"(final tau = {final_tau})."
             )
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
-            b=b_res, a=a_res, omega=omega, tau=tau
+            b_res, a_res, tau, omega
         )
         residuals_real_imag = _assemble_real_imag_from_complex(Hd - freq_resp_to_fit)
-        _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
+        _compute_and_print_rms(residuals_real_imag)
 
     if UHvals:
         Uab = np.cov(as_and_bs, rowvar=False)
@@ -340,9 +320,7 @@ def _compute_actual_iir_least_squares_fit(
         )
     Ea = E[:, 1 : Na + 1]
     Eb = E[:, : Nb + 1]
-    e_to_the_minus_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(
-        omega=-omega, tau=tau
-    )
+    e_to_the_minus_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(-omega, tau)
     delayed_freq_resp_or_recipr = e_to_the_minus_one_j_omega_tau * (
         np.reciprocal(freq_resp) if inv else freq_resp
     )
@@ -350,7 +328,7 @@ def _compute_actual_iir_least_squares_fit(
     D = np.hstack((HEa, -Eb))
     Tmp1 = np.real(np.dot(np.conj(D.T), D))
     Tmp2 = np.real(np.dot(np.conj(D.T), -delayed_freq_resp_or_recipr))
-    ab = np.linalg.lstsq(Tmp1, Tmp2, rcond=None)[0]
+    ab = _fit_filter_coeffs_via_least_squares(Tmp1, Tmp2)
     a = np.hstack((1.0, ab[:Na]))
     b = ab[Na:]
     return b, a
@@ -368,13 +346,13 @@ def _compute_stabilized_filter_through_time_delay_iteration(
     Fs: float,
     inv: Optional[bool] = False,
 ) -> Tuple[np.ndarray, np.ndarray, float, bool]:
-    tau += _compute_filter_stabilization_time_delay(b=b, a=a, Fs=Fs)
+    tau += _compute_filter_stabilization_time_delay(b, a, Fs)
 
     b, a = _compute_one_filter_stabilization_iteration_through_time_delay(
         Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv
     )
 
-    return b, a, tau, isstable(b=b, a=a, ftype="digital")
+    return b, a, tau, isstable(b, a, "digital")
 
 
 def _compute_filter_stabilization_time_delay(
@@ -410,7 +388,7 @@ def _compute_delayed_filters_freq_resp_via_scipys_freqz(
 ) -> np.ndarray:
     filters_freq_resp = dsp.freqz(b, a, omega)[1]
     delayed_filters_freq_resp = filters_freq_resp * _compute_e_to_the_one_j_omega_tau(
-        omega=omega, tau=tau
+        omega, tau
     )
     return delayed_filters_freq_resp
 
@@ -455,25 +433,18 @@ def LSFIR(
     sampling_frequency = Fs
 
     n_frequencies = len(frequencies)
-    h_complex = _assemble_complex_from_real_imag(array=H)
+    h_complex = _assemble_complex_from_real_imag(H)
 
     omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_freq=sampling_frequency, freqs=frequencies
+        sampling_frequency, frequencies
     )
 
     weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
 
-    x = _compute_x(
-        filter_order=N,
-        freqs=frequencies,
-        sampling_freq=sampling_frequency,
-        weights=weights,
-    )
+    x = _compute_x(N, frequencies, sampling_frequency, weights)
 
-    delayed_h_complex = h_complex * _compute_e_to_the_one_j_omega_tau(
-        omega=omega, tau=tau
-    )
-    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex)
+    delayed_h_complex = h_complex * _compute_e_to_the_one_j_omega_tau(omega, tau)
+    iRI = _assemble_real_imag_from_complex(delayed_h_complex)
 
     bFIR, res = np.linalg.lstsq(x, iRI, rcond=None)[:2]
 
@@ -577,25 +548,20 @@ def invLSFIR(
     sampling_frequency = Fs
 
     n_frequencies = len(frequencies)
-    h_complex = _assemble_complex_from_real_imag(array=H)
+    h_complex = _assemble_complex_from_real_imag(H)
 
     omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_freq=sampling_frequency, freqs=frequencies
+        sampling_frequency, frequencies
     )
 
     weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
 
-    x = _compute_x(
-        filter_order=N,
-        freqs=frequencies,
-        sampling_freq=sampling_frequency,
-        weights=weights,
-    )
+    x = _compute_x(N, frequencies, sampling_frequency, weights)
 
     delayed_h_complex_recipr = np.reciprocal(
-        h_complex * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+        h_complex * _compute_e_to_the_one_j_omega_tau(omega, tau)
     )
-    iRI = _assemble_real_imag_from_complex(array=delayed_h_complex_recipr)
+    iRI = _assemble_real_imag_from_complex(delayed_h_complex_recipr)
 
     return np.linalg.lstsq(x, iRI, rcond=None)[0]
 
@@ -692,7 +658,7 @@ def invLSFIR_unc(
     HRI = np.random.multivariate_normal(RI, UH, runs)  # random draws of real,imag of
 
     omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_freq=sampling_frequency, freqs=frequencies
+        sampling_frequency, frequencies
     )
     omega_tau = omega * tau
 
@@ -717,16 +683,9 @@ def invLSFIR_unc(
     # Step 2: Fit filter coefficients and evaluate uncertainties
     wt = _validate_and_return_weights(weights=wt, expected_len=2 * n_frequencies)
 
-    X = _compute_x(
-        filter_order=N,
-        freqs=frequencies,
-        sampling_freq=sampling_frequency,
-        weights=wt,
-    )
+    X = _compute_x(N, frequencies, sampling_frequency, wt)
     Hri = _assemble_real_imag_from_complex(
-        np.reciprocal(
-            h_complex * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
-        )
+        np.reciprocal(h_complex * _compute_e_to_the_one_j_omega_tau(omega, tau))
     )
 
     u, s, v = np.linalg.svd(X, full_matrices=False)
@@ -742,12 +701,12 @@ def invLSFIR_unc(
 
     if verbose:
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
-            b=filter_coeffs, a=1.0, tau=tau, omega=omega
+            filter_coeffs, 1.0, tau, omega
         )
         residuals_real_imag = _assemble_real_imag_from_complex(
             Hd - np.reciprocal(h_complex_recipr)
         )
-        _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
+        _compute_and_print_rms(residuals_real_imag)
 
     return filter_coeffs, filter_coeffs_uncertainties
 
@@ -837,37 +796,16 @@ def invLSFIR_uncMC(
         sampling_freq,
         weights,
     ) = _validate_and_prepare_fir_inputs(
-        sampling_freq=Fs,
-        freq_resp=H,
-        freq_resp_uncertainty=UH,
-        freqs=f,
-        inv=inv,
-        mc_runs=mc_runs,
-        trunc_svd_tol=trunc_svd_tol,
-        weights=weights,
+        Fs, H, UH, f, inv, mc_runs, trunc_svd_tol, weights
     )
     if verbose:
-        _print_fir_welcome_msg(
-            freq_resp_in_provided_shape=H,
-            filter_order=N,
-            inv=inv,
-            mc_runs=mc_runs,
-            propagation_method=propagation_method,
-            trunc_svd_tol=trunc_svd_tol,
-        )
+        _print_fir_welcome_msg(H, N, inv, mc_runs, propagation_method, trunc_svd_tol)
     omega, delayed_freq_resp_real_imag_or_recipr, x = _prepare_common_fitting_inputs(
-        filter_order=N,
-        freq_resps_real_imag=freq_resps_real_imag,
-        freqs=freqs,
-        inv=inv,
-        sampling_freq=sampling_freq,
-        tau=tau,
-        weights=weights,
+        N, freq_resps_real_imag, freqs, inv, sampling_freq, tau, weights
     )
     if propagation_method == _PropagationMethod.NONE:
-        b_fir = _fit_fir_filter_coeffs(
-            delayed_freq_resp_real_imag_or_recipr=delayed_freq_resp_real_imag_or_recipr,
-            x=x,
+        b_fir = _fit_filter_coeffs_via_least_squares(
+            x, delayed_freq_resp_real_imag_or_recipr
         )
         Ub_fir = None
     else:
@@ -876,21 +814,17 @@ def invLSFIR_uncMC(
         )
         if propagation_method == _PropagationMethod.MC:
             b_fir, Ub_fir = _fit_fir_filter_with_uncertainty_propagation_via_mc(
-                inv=inv,
-                mc_freq_resps_real_imag=mc_freq_resps_real_imag,
-                omega=omega,
-                tau=tau,
-                x=x,
+                inv, mc_freq_resps_real_imag, omega, tau, x
             )
         else:
             b_fir, Ub_fir = _fit_fir_filter_with_uncertainty_propagation_via_svd(
-                mc_freq_resps_real_imag=mc_freq_resps_real_imag,
-                mc_runs=mc_runs,
-                omega=omega,
-                preprocessed_freq_resp=delayed_freq_resp_real_imag_or_recipr,
-                tau=tau,
-                trunc_svd_tol=trunc_svd_tol,
-                x=x,
+                mc_freq_resps_real_imag,
+                mc_runs,
+                omega,
+                delayed_freq_resp_real_imag_or_recipr,
+                tau,
+                trunc_svd_tol,
+                x,
             )
     if verbose:
         _print_fir_result_msg(b_fir, freq_resps_real_imag, inv, omega, tau)
@@ -917,7 +851,7 @@ def _validate_and_prepare_fir_inputs(
     two_n_freqs = 2 * n_freqs
     freqs = freqs.copy()
     sampling_freq = sampling_freq
-    weights = _validate_and_return_weights(weights=weights, expected_len=two_n_freqs)
+    weights = _validate_and_return_weights(weights, expected_len=two_n_freqs)
     freq_resps_real_imag = _validate_and_assemble_freq_resps(
         freq_resps=freq_resp,
         expected_len_when_complex=n_freqs,
@@ -1159,23 +1093,16 @@ def _prepare_common_fitting_inputs(
     tau: int,
     weights: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    x = _compute_x(
-        filter_order=filter_order,
-        freqs=freqs,
-        sampling_freq=sampling_freq,
-        weights=weights,
-    )
+    x = _compute_x(filter_order, freqs, sampling_freq, weights)
     omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_freq=sampling_freq, freqs=freqs
+        sampling_freq, freqs
     )
-    complex_freq_resp = _assemble_complex_from_real_imag(array=freq_resps_real_imag)
+    complex_freq_resp = _assemble_complex_from_real_imag(freq_resps_real_imag)
     delayed_complex_freq_resp = complex_freq_resp * _compute_e_to_the_one_j_omega_tau(
-        omega=omega, tau=tau
+        omega, tau
     )
     delayed_freq_resp_real_imag_or_recipr = (
-        _assemble_delayed_freq_resp_real_imag_or_recipr(
-            delayed_complex_freq_resp=delayed_complex_freq_resp, inv=inv
-        )
+        _assemble_delayed_freq_resp_real_imag_or_recipr(delayed_complex_freq_resp, inv)
     )
     return omega, delayed_freq_resp_real_imag_or_recipr, x
 
@@ -1213,14 +1140,11 @@ def _fit_fir_filter_with_uncertainty_propagation_via_mc(
 ) -> Tuple[np.ndarray, np.ndarray]:
     mc_delayed_freq_resps_or_recipr_real_imag = (
         _compute_mc_delayed_freq_resps_or_reciprs_real_imag(
-            inv=inv,
-            mc_freq_resps_real_imag=mc_freq_resps_real_imag,
-            omega=omega,
-            tau=tau,
+            inv, mc_freq_resps_real_imag, omega, tau
         )
     )
     return _conduct_fir_uncertainty_propagation_via_mc(
-        mc_freq_resps_real_imag=mc_delayed_freq_resps_or_recipr_real_imag, x=x
+        mc_delayed_freq_resps_or_recipr_real_imag, x
     )
 
 
@@ -1229,10 +1153,10 @@ def _compute_mc_delayed_freq_resps_or_reciprs_real_imag(
 ) -> np.ndarray:
     mc_complex_freq_resps = _assemble_complex_from_real_imag(mc_freq_resps_real_imag)
     mc_delayed_complex_freq_resps = (
-        mc_complex_freq_resps * _compute_e_to_the_one_j_omega_tau(omega=omega, tau=tau)
+        mc_complex_freq_resps * _compute_e_to_the_one_j_omega_tau(omega, tau)
     )
     return _assemble_delayed_freq_resp_real_imag_or_recipr(
-        delayed_complex_freq_resp=mc_delayed_complex_freq_resps, inv=inv
+        mc_delayed_complex_freq_resps, inv
     )
 
 
@@ -1241,11 +1165,7 @@ def _conduct_fir_uncertainty_propagation_via_mc(
 ) -> Tuple[np.ndarray, np.ndarray]:
     mc_b_firs = np.array(
         [
-            np.linalg.lstsq(
-                a=x,
-                b=mc_freq_resp,
-                rcond=None,
-            )[0]
+            _fit_filter_coeffs_via_least_squares(x, mc_freq_resp)
             for mc_freq_resp in mc_freq_resps_real_imag
         ]
     ).T
@@ -1311,14 +1231,14 @@ def _print_fir_result_msg(
     omega: np.ndarray,
     tau: int,
 ):
-    complex_h = _assemble_complex_from_real_imag(array=freq_resps_real_imag)
+    complex_h = _assemble_complex_from_real_imag(freq_resps_real_imag)
     original_values = np.reciprocal(complex_h) if inv else complex_h
     delayed_filters_freq_resp = _compute_delayed_filters_freq_resp_via_scipys_freqz(
-        b=b_fir, a=1.0, omega=omega, tau=tau
+        b_fir, 1.0, tau, omega
     )
     complex_residuals = delayed_filters_freq_resp - original_values
     residuals_real_imag = _assemble_real_imag_from_complex(complex_residuals)
-    _compute_and_print_rms(residuals_real_imag=residuals_real_imag)
+    _compute_and_print_rms(residuals_real_imag)
 
 
 def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
