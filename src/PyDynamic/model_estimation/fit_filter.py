@@ -103,8 +103,8 @@ def LSIIR(
     tau : int
         Filter time delay (in samples).
     Uab : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
-        Uncertainties associated with `[a[1:],b]`. Will be None if UHvals is not
-        provided or equals None.
+        Uncertainties associated with `[a[1:],b]`. Will be None if UH is not
+        provided or is None.
 
     References
     ----------
