@@ -1002,7 +1002,7 @@ def _validate_length_of_h(freq_resp: np.ndarray, expected_length: int):
 def _validate_uncertainties(vector: np.ndarray, covariance_matrix: np.ndarray):
     if not _no_uncertainties_were_provided(covariance_matrix):
         _validate_vector_and_corresponding_uncertainties_dims(
-            vector=vector, uncertainties=covariance_matrix
+            vector=vector, covariance_matrix=covariance_matrix
         )
 
 
@@ -1011,25 +1011,26 @@ def _no_uncertainties_were_provided(covariance_matrix: Union[np.ndarray, None]) 
 
 
 def _validate_vector_and_corresponding_uncertainties_dims(
-    vector: np.ndarray, uncertainties: Union[np.ndarray]
+    vector: np.ndarray, covariance_matrix: Union[np.ndarray]
 ):
-    if not isinstance(uncertainties, np.ndarray):
+    if not isinstance(covariance_matrix, np.ndarray):
         raise TypeError(
             f"{_get_first_public_caller()}: if uncertainties are provided, "
             f"they are expected to be of type np.ndarray, but uncertainties are of type"
-            f" {type(uncertainties)}."
+            f" {type(covariance_matrix)}."
         )
-    if not number_of_rows_equals_vector_dim(matrix=uncertainties, vector=vector):
+    if not number_of_rows_equals_vector_dim(matrix=covariance_matrix, vector=vector):
         raise ValueError(
             f"{_get_first_public_caller()}: number of rows of uncertainties and "
             f"number of elements of values are expected to match. But {len(vector)} "
-            f"values and {uncertainties.shape} uncertainties were provided. Please "
+            f"values and {covariance_matrix.shape} uncertainties were provided. Please "
             f"adjust either the values or their corresponding uncertainties."
         )
-    if not is_2d_square_matrix(uncertainties):
+    if not is_2d_square_matrix(covariance_matrix):
         raise ValueError(
             f"{_get_first_public_caller()}: uncertainties are expected to be "
-            f"provided in a square matrix shape but are of shape {uncertainties.shape}."
+            f"provided in a square matrix shape but are of shape "
+            f"{covariance_matrix.shape}."
         )
 
 
