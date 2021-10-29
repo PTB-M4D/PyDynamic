@@ -18,7 +18,7 @@ from PyDynamic.misc.tools import normalize_vector_or_matrix
 settings.register_profile(
     name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
 )
-if "CIRCLECI" in os.environ:
+if os.getenv("CIRCLECI") == "true":
     settings.load_profile("ci")
 
 
