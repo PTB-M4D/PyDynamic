@@ -735,7 +735,9 @@ def invLSFIR_uncMC(
     integer greater than one or otherwise using a truncated singular-value
     decomposition and linear matrix propagation. The Monte Carlo approach may help in
     cases where the weighting matrix or the Jacobian are ill-conditioned, resulting
-    in false uncertainties associated with the filter coefficients.
+    in false uncertainties associated with the filter coefficients. Additionally it
+    is needed to propagate uncertainties when fitting to the frequency response
+    directly.
 
     Parameters
     ----------
@@ -774,12 +776,21 @@ def invLSFIR_uncMC(
     b : array_like of shape (N+1,)
         The FIR filter coefficient vector in a 1-D sequence
     Ub : array_like of shape (N+1,N+1)
-        Uncertainties associated with b. Will only be returned if UH was provided
+        Uncertainties associated with b.  Will be None if UH is not
+        provided or is None.
 
     References
     ----------
     * Elster and Link [Elster2008]_
 
+    Raises
+    ------
+    NotImplementedError
+        The least-squares fitting of a digital FIR filter to a frequency response H
+        with propagation of associated uncertainties using a truncated singular-value
+        decomposition and linear matrix propagation is not yet implemented.
+        Alternatively specify the number mc_runs of runs to propagate the uncertainties
+        via the Monte Carlo method.
     """
     (
         freq_resps_real_imag,
