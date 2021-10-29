@@ -16,7 +16,7 @@ This module contains the following functions:
 * :func:`invLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
   values with uncertainty propagation via a singular-value decomposition and
   linear matrix propagation.
-* :func:`invLSFIR_uncMC`: Least-squares (time-discrete) IIR filter fit to a given
+* :func:`invLSFIR_uncMC`: Least-squares (time-discrete) FIR filter fit to a given
   frequency response or its reciprocal optionally propagating uncertainties either
   via Monte Carlo or via a singular-value decomposition and linear matrix propagation.
 
