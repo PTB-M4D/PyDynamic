@@ -970,31 +970,25 @@ def _validate_fir_uncertainty_propagation_method_related_inputs(
     mc_runs: Union[int, None],
     trunc_svd_tol: Union[float, None],
 ):
-    def _number_of_monte_carlo_runs_was_provided() -> bool:
-        return bool(mc_runs)
-
-    def _input_for_svd_was_provided() -> bool:
-        return trunc_svd_tol is not None
-
     def _are_we_supposed_to_apply_method_on_freq_resp_directly() -> bool:
         return not inv
 
-    def _both_propagation_methods_simultaneously_requested():
-        return (
-            _input_for_svd_was_provided() and _number_of_monte_carlo_runs_was_provided()
-        )
+    def _both_propagation_methods_simultaneously_requested() -> bool:
+        return _input_for_svd_was_provided(
+            trunc_svd_tol
+        ) and _number_of_monte_carlo_runs_was_provided(mc_runs)
 
     def _are_we_supposed_to_fit_freq_resp_with_svd_propagation() -> bool:
         return (
-            _input_for_svd_was_provided()
-            or not _number_of_monte_carlo_runs_was_provided()
+            _input_for_svd_was_provided(trunc_svd_tol)
+            or not _number_of_monte_carlo_runs_was_provided(mc_runs)
         ) and _are_we_supposed_to_apply_method_on_freq_resp_directly()
 
     def _number_of_mc_runs_too_small():
         return mc_runs == 1
 
-    if _no_uncertainties_were_provided(covariance_matrix=covariance_matrix):
-        if _number_of_monte_carlo_runs_was_provided():
+    if _no_uncertainties_were_provided(covariance_matrix):
+        if _number_of_monte_carlo_runs_was_provided(mc_runs):
             raise ValueError(
                 "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
                 "to a frequency response H with propagation of associated "
@@ -1003,7 +997,7 @@ def _validate_fir_uncertainty_propagation_method_related_inputs(
                 f"but number of Monte Carlo runs set to {mc_runs}. Either remove "
                 f"mc_runs or provide uncertainties."
             )
-        if _input_for_svd_was_provided():
+        if _input_for_svd_was_provided(trunc_svd_tol):
             raise ValueError(
                 "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
                 "to a frequency response H with propagation of associated "
@@ -1036,13 +1030,21 @@ def _validate_fir_uncertainty_propagation_method_related_inputs(
         )
 
 
+def _number_of_monte_carlo_runs_was_provided(mc_runs: Union[int, None]) -> bool:
+    return bool(mc_runs)
+
+
+def _input_for_svd_was_provided(trunc_svd_tol: Union[float, None]) -> bool:
+    return trunc_svd_tol is not None
+
+
 def _determine_fir_propagation_method(
     covariance_matrix: Union[np.ndarray, None],
     mc_runs: Union[int, None],
 ) -> Tuple[_PropagationMethod, Union[int, None]]:
     if covariance_matrix is None:
         return _PropagationMethod.NONE, None
-    if mc_runs:
+    if _number_of_monte_carlo_runs_was_provided(mc_runs):
         return _PropagationMethod.MC, mc_runs
     return _PropagationMethod.SVD, 10000
 
@@ -1207,7 +1209,7 @@ def _fit_fir_filter_with_uncertainty_propagation_via_svd(
         rowvar=False,
     )
     u, s, v = np.linalg.svd(x, full_matrices=False)
-    if isinstance(trunc_svd_tol, float):
+    if _input_for_svd_was_provided(trunc_svd_tol):
         s[s < trunc_svd_tol] = 0.0
     StSInv = np.zeros_like(s)
     StSInv[s > 0] = s[s > 0] ** (-2)
