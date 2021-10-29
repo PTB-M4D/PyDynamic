@@ -875,9 +875,7 @@ def _validate_and_prepare_fir_inputs(
     )
 
 
-def _validate_and_return_weights(
-    weights: np.ndarray, expected_len: int
-) -> Union[np.ndarray, None]:
+def _validate_and_return_weights(weights: np.ndarray, expected_len: int) -> np.ndarray:
     if weights is not None:
         if not isinstance(weights, np.ndarray):
             raise TypeError(
