@@ -11,16 +11,7 @@ with associated uncertainties.
      -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
    - `GitHub website <https://www.github.com/PTB-M4D/PyDynamic>`_
 """
+__all__ = ["LSIIR", "invLSFIR_uncMC", "fit_som"]
 
-from .fit_filter import (LSFIR, LSIIR, invLSFIR, invLSFIR_unc, invLSFIR_uncMC,
-                         invLSIIR, invLSIIR_unc)
+from .fit_filter import LSIIR, invLSFIR_uncMC
 from .fit_transfer import fit_som
-
-__all__ = [
-    "LSFIR",
-    "LSIIR",
-    "invLSFIR",
-    "invLSFIR_unc",
-    "invLSFIR_uncMC",
-    "fit_som",
-]
