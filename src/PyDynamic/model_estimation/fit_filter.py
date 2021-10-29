@@ -33,9 +33,12 @@ import numpy as np
 import scipy.signal as dsp
 from scipy.stats import multivariate_normal
 
-from .. import is_2d_matrix, number_of_rows_equals_vector_dim
 from ..misc.filterstuff import grpdelay, isstable, mapinside
-from ..misc.tools import is_2d_square_matrix
+from ..misc.tools import (
+    is_2d_matrix,
+    is_2d_square_matrix,
+    number_of_rows_equals_vector_dim,
+)
 
 
 def LSIIR(
