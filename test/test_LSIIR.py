@@ -16,76 +16,38 @@ from PyDynamic.model_estimation import fit_filter
 def LSIIR_parameters(draw):
     """Design a sample measurement system and a corresponding frequency response."""
     # Set the maximum absolute value for floats to be really unique in calculations.
-    float_generic_params = {
-        "allow_nan": False,
-        "allow_infinity": False,
-    }
+    float_generic_params = {"allow_nan": False, "allow_infinity": False}
     # measurement system
     f0 = draw(
-        hst.floats(
-            min_value=1e2,
-            max_value=1e6,
-            **float_generic_params,
-        )
+        hst.floats(min_value=1e2, max_value=1e6, **float_generic_params)
     )  # originally this was set to 36e3 for the system resonance frequency in Hz
 
     S0 = draw(
-        hst.floats(
-            min_value=0,
-            max_value=1,
-            **float_generic_params,
-        )
+        hst.floats(min_value=0, max_value=1, **float_generic_params)
     )  # originally this was set to 0.124 for the system static gain
 
     delta = draw(
-        hst.floats(
-            min_value=1e-5,
-            max_value=1e-1,
-            **float_generic_params,
-        )
+        hst.floats(min_value=1e-5, max_value=1e-1, **float_generic_params)
     )  # originally this was set to 0.0055 for the system damping
     dim = draw(
-        hst.integers(
-            min_value=1,
-            max_value=60,
-        )
+        hst.integers(min_value=1, max_value=60)
     )  # originally this was set to 30 for the number of frequencies
     maximum_frequency = draw(
-        hst.floats(
-            min_value=1e2,
-            max_value=1e6,
-            **float_generic_params,
-        )
+        hst.floats(min_value=1e2, max_value=1e6, **float_generic_params)
     )  # originally this was set to 80e3 for the system damping
     f = np.linspace(0, maximum_frequency, dim)  # frequencies for fitting the system
-    Hvals = sos_FreqResp(S0, delta, f0, f)  # frequency response of the 2nd order system
+    H = sos_FreqResp(S0, delta, f0, f)  # frequency response of the 2nd order system
 
     Fs = draw(
-        hst.floats(
-            min_value=1e5,
-            max_value=5e6,
-            **float_generic_params,
-        )
+        hst.floats(min_value=1e5, max_value=5e6, **float_generic_params)
     )  # originally this was set to 500e3 for the sampling frequency
     Na = draw(
-        hst.integers(
-            min_value=1,
-            max_value=10,
-        )
+        hst.integers(min_value=1, max_value=10)
     )  # originally this was set to 4 for the IIR denominator filter order
     Nb = draw(
-        hst.integers(
-            min_value=1,
-            max_value=10,
-        )
+        hst.integers(min_value=1, max_value=10)
     )  # originally this was set to 4 for the IIR numerator filter order
-    return {
-        "Hvals": Hvals,
-        "Na": Na,
-        "Nb": Nb,
-        "f": f,
-        "Fs": Fs,
-    }
+    return {"H": H, "Na": Na, "Nb": Nb, "f": f, "Fs": Fs}
 
 
 @pytest.fixture(scope="module")
