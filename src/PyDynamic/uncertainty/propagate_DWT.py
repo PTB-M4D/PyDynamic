@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
+"""This module assists in uncertainty propagation for the discrete wavelet transform
 
-"""
 The :mod:`PyDynamic.uncertainty.propagate_DWT` module implements methods for
 the propagation of uncertainties in the application of the discrete wavelet
 transform (DWT).
