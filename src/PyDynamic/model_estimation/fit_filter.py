@@ -1117,8 +1117,8 @@ def _assemble_delayed_freq_resp_real_imag_or_recipr(
     )
 
 
-def _fit_fir_filter_coeffs(
-    delayed_freq_resp_real_imag_or_recipr: np.ndarray, x: np.ndarray
+def _fit_filter_coeffs_via_least_squares(
+    x: np.ndarray, delayed_freq_resp_real_imag_or_recipr: np.ndarray
 ) -> np.ndarray:
     return np.linalg.lstsq(x, delayed_freq_resp_real_imag_or_recipr, rcond=None)[0]
 
