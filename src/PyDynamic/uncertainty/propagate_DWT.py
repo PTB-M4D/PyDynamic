@@ -414,30 +414,31 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
 def wave_rec(coeffs, Ucoeffs, lowpass, highpass, original_length=None):
     """Multilevel discrete wavelet reconstruction from levels back into time-series
 
-    Parameters:
-    -----------
-        coeffs : list of arrays
-            order of arrays within list is:
-            [cAn, cDn, cDn-1, ..., cD2, cD1]
-            where:
+    Parameters
+    ----------
+    coeffs : list of arrays
+        order of arrays within list is:
+        [cAn, cDn, cDn-1, ..., cD2, cD1]
+        where:
 
-            * cAi: approximation coefficients array from i-th level
-            * cDi: detail coefficients array from i-th level
-        Ucoeffs : list of arrays
-            uncertainty of coeffs, same order as coeffs
-        lowpass : np.ndarray
-            reconstruction low-pass for wavelet_block
-        highpass : np.ndarray
-            reconstruction high-pass for wavelet_block
-        original_length : int, optional (default: None)
-            necessary to restore correct length of original time-series
+        * cAi: approximation coefficients array from i-th level
+        * cDi: detail coefficients array from i-th level
+
+    Ucoeffs : list of arrays
+        uncertainty of coeffs, same order as coeffs
+    lowpass : np.ndarray
+        reconstruction low-pass for wavelet_block
+    highpass : np.ndarray
+        reconstruction high-pass for wavelet_block
+    original_length : int, optional (default: None)
+        necessary to restore correct length of original time-series
 
     Returns
     -------
-        x : np.ndarray
-            reconstructed signal
-        Ux : np.ndarray
-            uncertainty of reconstructed signal
+    x : np.ndarray
+        reconstructed signal
+    Ux : np.ndarray
+        uncertainty of reconstructed signal
     """
 
     # init the approximation coefficients
