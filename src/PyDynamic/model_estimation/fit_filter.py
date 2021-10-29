@@ -1045,7 +1045,7 @@ def _determine_fir_propagation_method(
     covariance_matrix: Union[np.ndarray, None],
     mc_runs: Union[int, None],
 ) -> Tuple[_PropagationMethod, Union[int, None]]:
-    if covariance_matrix is None:
+    if _no_uncertainties_were_provided(covariance_matrix):
         return _PropagationMethod.NONE, None
     if _number_of_monte_carlo_runs_was_provided(mc_runs):
         return _PropagationMethod.MC, mc_runs
