@@ -103,6 +103,7 @@ def interp1d_unc(
         coefficients are not returned and internal computation is
         slightly more efficient.
 
+
     If returnC is False, which is the default behaviour, the method returns:
 
     Returns
@@ -113,6 +114,7 @@ def interp1d_unc(
         interpolated values
     uy_new : (M,) array_like
         interpolated associated standard uncertainties
+
 
     Otherwise the method returns:
 
