@@ -1006,15 +1006,14 @@ def test_invLSFIR_uncMC_with_wrong_type_weights(
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow
 def test_invLSFIR_uncMC_with_wrong_len_weights(
-    capsys, monte_carlo, freqs, sampling_freq, weight_vector, filter_order
+    monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
     weight_vector = weight_vector[1:]
-    with capsys.disabled(), pytest.raises(
+    with pytest.raises(
         ValueError,
         match=r"invLSFIR_uncMC: User-defined weighting has wrong dimension.*",
     ):
