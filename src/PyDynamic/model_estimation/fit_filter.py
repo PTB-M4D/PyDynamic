@@ -1188,7 +1188,7 @@ def _fit_fir_filter_with_uncertainty_propagation_via_svd(
     )
     mc_freq_resps_real = list_of_mc_freq_resps_real_and_imag[0]
     mc_freq_resps_imag = list_of_mc_freq_resps_real_and_imag[1]
-    recipr_of_abs_of_mc_freq_resps = np.reciprocal(
+    recipr_of_sqr_abs_of_mc_freq_resps = np.reciprocal(
         mc_freq_resps_real ** 2 + mc_freq_resps_imag ** 2
     )
     omega_tau = omega * tau
@@ -1201,12 +1201,12 @@ def _fit_fir_filter_with_uncertainty_propagation_via_svd(
                     mc_freq_resps_real * cos_omega_tau
                     + mc_freq_resps_imag * sin_omega_tau
                 )
-                * recipr_of_abs_of_mc_freq_resps,
+                * recipr_of_sqr_abs_of_mc_freq_resps,
                 (
                     mc_freq_resps_imag * cos_omega_tau
                     - mc_freq_resps_real * sin_omega_tau
                 )
-                * recipr_of_abs_of_mc_freq_resps,
+                * recipr_of_sqr_abs_of_mc_freq_resps,
             )
         ),
         rowvar=False,
