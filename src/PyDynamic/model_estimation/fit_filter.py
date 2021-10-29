@@ -42,7 +42,7 @@ from ..misc.tools import (
 
 
 def LSIIR(
-    Hvals: np.ndarray,
+    H: np.ndarray,
     Nb: int,
     Na: int,
     f: np.ndarray,
@@ -51,7 +51,7 @@ def LSIIR(
     verbose: Optional[bool] = True,
     max_stab_iter: Optional[int] = 50,
     inv: Optional[bool] = False,
-    UHvals: Optional[np.ndarray] = None,
+    UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = 1000,
 ) -> Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None]]:
     """Least-squares (time-discrete) IIR filter fit to frequency response or reciprocal
@@ -65,14 +65,14 @@ def LSIIR(
 
     Parameters
     ----------
-    Hvals : array_like of shape (M,)
+    H : array_like of shape (M,)
         (Complex) frequency response values.
     Nb : int
         Order of IIR numerator polynomial.
     Na : int
         Order of IIR denominator polynomial.
     f : array_like of shape (M,)
-        Frequencies at which ``Hvals`` is given.
+        Frequencies at which H is given.
     Fs : float
         Sampling frequency for digital IIR filter.
     tau : int, optional
@@ -88,11 +88,11 @@ def LSIIR(
     inv : bool, optional
         If False (default) apply the fit to the frequency response values directly,
         otherwise fit to the reciprocal of the frequency response values.
-    UHvals : array_like of shape (2M, 2M), optional
+    UH : array_like of shape (2M, 2M), optional
         Uncertainties associated with real and imaginary part of H.
     mc_runs : int, optional
         Number of Monte Carlo runs (default = 1000). Only used if uncertainties
-        `UHvals` are provided.
+        UH are provided.
 
     Returns
     -------
@@ -113,21 +113,17 @@ def LSIIR(
 
     .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
     """
-    if _no_uncertainties_were_provided(covariance_matrix=UHvals):
-        freq_resp_to_fit, mc_runs = Hvals, 1
+    if _no_uncertainties_were_provided(UH):
+        freq_resp_to_fit, mc_runs = H, 1
     else:
         freq_resp_to_fit = _assemble_complex_from_real_imag(
             _draw_multivariate_monte_carlo_samples(
-                vector=_assemble_real_imag_from_complex(Hvals),
-                covariance_matrix=UHvals,
-                mc_runs=mc_runs,
+                _assemble_real_imag_from_complex(H), UH, mc_runs
             )
         )
 
     if verbose:
-        _print_iir_welcome_msg(
-            freq_resp=Hvals, Na=Na, Nb=Nb, UHvals=UHvals, inv=inv, mc_runs=mc_runs
-        )
+        _print_iir_welcome_msg(H, Na, Nb, UH, inv, mc_runs)
 
     warn_unstable_msg = "CAUTION - The algorithm did NOT result in a stable IIR filter!"
 
@@ -191,9 +187,8 @@ def LSIIR(
                         np.abs((dsp.freqz(b_i, a_i, omega)[1] - freq_resp_to_fit) ** 2)
                     )
                     print(
-                        f"LSIIR: Fitting "
-                        f"{'' if UHvals is None else f'for MC run {mc_run} '}"
-                        f"finished. Conducted "
+                        f"LSIIR: Fitting{'' if UH is None else f' for MC run {mc_run}'}"
+                        f" finished. Conducted "
                         f"{current_stabilization_iteration_counter} attempts to "
                         f"stabilize filter. "
                         f"{'' if relevant_filters_mask[mc_run] else warn_unstable_msg} "
@@ -275,14 +270,14 @@ def LSIIR(
         residuals_real_imag = _assemble_real_imag_from_complex(Hd - freq_resp_to_fit)
         _compute_and_print_rms(residuals_real_imag)
 
-    if UHvals:
+    if UH:
         Uab = np.cov(as_and_bs, rowvar=False)
         return b_res, a_res, final_tau, Uab
     return b_res, a_res, final_tau, None
 
 
 def _print_iir_welcome_msg(
-    freq_resp: np.ndarray, Na: int, Nb: int, UHvals: np.ndarray, inv: bool, mc_runs: int
+    H: np.ndarray, Na: int, Nb: int, UH: np.ndarray, inv: bool, mc_runs: int
 ):
     monte_carlo_message = (
         f" Uncertainties of the filter coefficients are "
@@ -292,7 +287,7 @@ def _print_iir_welcome_msg(
     print(
         f"LSIIR: Least-squares fit of an order {max(Nb, Na)} digital IIR filter to"
         f"{' the reciprocal of' if inv else ''} a frequency response "
-        f"given by {len(freq_resp)} values.{monte_carlo_message if UHvals else ''}"
+        f"given by {len(H)} values.{monte_carlo_message if UH else ''}"
     )
 
 
@@ -303,7 +298,7 @@ def _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
 
 
 def _compute_actual_iir_least_squares_fit(
-    freq_resp: np.ndarray,
+    H: np.ndarray,
     tau: int,
     omega: np.ndarray,
     E: np.ndarray,
@@ -311,18 +306,18 @@ def _compute_actual_iir_least_squares_fit(
     Nb: int,
     inv: bool = False,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    if inv and np.all(freq_resp == 0):
+    if inv and np.all(H == 0):
         raise ValueError(
             f"{_get_first_public_caller()}: It is not possible to compute the "
             f"reciprocal of zero but the provided frequency response"
-            f"{'s are constant ' if len(freq_resp) > 1 else 'is '} zero. Please "
+            f"{'s are constant ' if len(H) > 1 else 'is '} zero. Please "
             f"provide other frequency responses Hvals."
         )
     Ea = E[:, 1 : Na + 1]
     Eb = E[:, : Nb + 1]
     e_to_the_minus_one_j_omega_tau = _compute_e_to_the_one_j_omega_tau(-omega, tau)
     delayed_freq_resp_or_recipr = e_to_the_minus_one_j_omega_tau * (
-        np.reciprocal(freq_resp) if inv else freq_resp
+        np.reciprocal(H) if inv else H
     )
     HEa = np.dot(np.diag(delayed_freq_resp_or_recipr), Ea)
     D = np.hstack((HEa, -Eb))
@@ -340,7 +335,7 @@ def _compute_stabilized_filter_through_time_delay_iteration(
     tau: int,
     w: np.ndarray,
     E: np.ndarray,
-    Hvals: np.ndarray,
+    H: np.ndarray,
     Nb: int,
     Na: int,
     Fs: float,
@@ -349,7 +344,7 @@ def _compute_stabilized_filter_through_time_delay_iteration(
     tau += _compute_filter_stabilization_time_delay(b, a, Fs)
 
     b, a = _compute_one_filter_stabilization_iteration_through_time_delay(
-        Hvals=Hvals, tau=tau, w=w, E=E, Na=Na, Nb=Nb, inv=inv
+        H, tau, w, E, Nb, Na, inv
     )
 
     return b, a, tau, isstable(b, a, "digital")
@@ -367,7 +362,7 @@ def _compute_filter_stabilization_time_delay(
 
 
 def _compute_one_filter_stabilization_iteration_through_time_delay(
-    Hvals: np.ndarray,
+    H: np.ndarray,
     tau: int,
     w: np.ndarray,
     E: np.ndarray,
@@ -375,9 +370,7 @@ def _compute_one_filter_stabilization_iteration_through_time_delay(
     Na: int,
     inv: Optional[bool] = False,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    return _compute_actual_iir_least_squares_fit(
-        freq_resp=Hvals, tau=tau, omega=w, E=E, Na=Na, Nb=Nb, inv=inv
-    )
+    return _compute_actual_iir_least_squares_fit(H, tau, w, E, Na, Nb, inv)
 
 
 def _compute_delayed_filters_freq_resp_via_scipys_freqz(
@@ -839,8 +832,8 @@ class _PropagationMethod(Enum):
 
 def _validate_and_prepare_fir_inputs(
     sampling_freq: float,
-    freq_resp: np.ndarray,
-    freq_resp_uncertainty: np.ndarray,
+    H: np.ndarray,
+    UH: np.ndarray,
     freqs: np.ndarray,
     inv: bool,
     mc_runs: int,
@@ -853,22 +846,15 @@ def _validate_and_prepare_fir_inputs(
     sampling_freq = sampling_freq
     weights = _validate_and_return_weights(weights, expected_len=two_n_freqs)
     freq_resps_real_imag = _validate_and_assemble_freq_resps(
-        freq_resps=freq_resp,
+        H,
         expected_len_when_complex=n_freqs,
         expected_len_when_real_imag=two_n_freqs,
     )
-    _validate_uncertainties(
-        vector=freq_resps_real_imag, covariance_matrix=freq_resp_uncertainty
-    )
+    _validate_uncertainties(vector=freq_resps_real_imag, covariance_matrix=UH)
     _validate_fir_uncertainty_propagation_method_related_inputs(
-        covariance_matrix=freq_resp_uncertainty,
-        inv=inv,
-        mc_runs=mc_runs,
-        trunc_svd_tol=trunc_svd_tol,
+        UH, inv, mc_runs, trunc_svd_tol
     )
-    propagation_method, mc_runs = _determine_fir_propagation_method(
-        covariance_matrix=freq_resp_uncertainty, mc_runs=mc_runs
-    )
+    propagation_method, mc_runs = _determine_fir_propagation_method(UH, mc_runs)
     return (
         freq_resps_real_imag,
         freqs,
@@ -907,31 +893,27 @@ def _get_first_public_caller():
 
 
 def _validate_and_assemble_freq_resps(
-    freq_resps: np.ndarray,
+    H: np.ndarray,
     expected_len_when_complex: int,
     expected_len_when_real_imag: int,
 ) -> np.ndarray:
-    if _is_dtype_complex(freq_resps):
-        _validate_length_of_h(
-            freq_resp=freq_resps, expected_length=expected_len_when_complex
-        )
-        return _assemble_real_imag_from_complex(freq_resps)
-    _validate_length_of_h(
-        freq_resp=freq_resps, expected_length=expected_len_when_real_imag
-    )
-    return freq_resps.copy()
+    if _is_dtype_complex(H):
+        _validate_length_of_h(H, expected_length=expected_len_when_complex)
+        return _assemble_real_imag_from_complex(H)
+    _validate_length_of_h(H, expected_length=expected_len_when_real_imag)
+    return H
 
 
 def _is_dtype_complex(array: np.ndarray) -> bool:
     return array.dtype == np.complexfloating
 
 
-def _validate_length_of_h(freq_resp: np.ndarray, expected_length: int):
-    if not len(freq_resp) == expected_length:
+def _validate_length_of_h(H: np.ndarray, expected_length: int):
+    if not len(H) == expected_length:
         raise ValueError(
             f"{_get_first_public_caller()}: vector of complex frequency responses "
             f"is expected to contain {expected_length} elements, corresponding to the "
-            f"number of frequencies, but actually contains {len(freq_resp)} "
+            f"number of frequencies, but actually contains {len(H)} "
             f"elements. Please adjust either of the two inputs."
         )
 
@@ -1241,7 +1223,7 @@ def _print_fir_result_msg(
     _compute_and_print_rms(residuals_real_imag)
 
 
-def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
+def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     """Least-squares IIR filter fit to the reciprocal of given frequency response values
 
     Least-squares fit of a digital IIR filter to the reciprocal of a given set
@@ -1250,7 +1232,7 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 
     Parameters
     ----------
-    Hvals : array_like of shape (M,)
+    H : array_like of shape (M,)
         (Complex) frequency response values.
     Nb : int
         Order of IIR numerator polynomial.
@@ -1285,20 +1267,8 @@ def invLSIIR(Hvals, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
 
     """
     if justFit:
-        return LSIIR(
-            Hvals=Hvals,
-            Nb=Nb,
-            Na=Na,
-            f=f,
-            Fs=Fs,
-            tau=tau,
-            verbose=verbose,
-            max_stab_iter=0,
-            inv=True,
-        )
-    return LSIIR(
-        Hvals=Hvals, Nb=Nb, Na=Na, f=f, Fs=Fs, tau=tau, verbose=verbose, inv=True
-    )
+        return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 0, True)
+    return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 50, True)
 
 
 def invLSIIR_unc(
@@ -1355,15 +1325,4 @@ def invLSIIR_unc(
         f"values. Uncertainties of the filter coefficients are evaluated using "
         "the GUM S2 Monte Carlo method with 1000 runs."
     )
-    return LSIIR(
-        Hvals=H,
-        Nb=Nb,
-        Na=Na,
-        f=f,
-        Fs=Fs,
-        tau=tau,
-        verbose=False,
-        inv=True,
-        UHvals=UH,
-        mc_runs=1000,
-    )
+    return LSIIR(H, Nb, Na, f, Fs, tau, False, 50, True, UH, 1000)
