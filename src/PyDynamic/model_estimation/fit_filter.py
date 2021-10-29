@@ -990,7 +990,8 @@ def _validate_fir_uncertainty_propagation_method_related_inputs(
     if _no_uncertainties_were_provided(covariance_matrix):
         if _number_of_monte_carlo_runs_was_provided(mc_runs):
             raise ValueError(
-                "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+                f"\n{_get_first_public_caller()}: The least-squares fitting of a "
+                f"digital FIR filter "
                 "to a frequency response H with propagation of associated "
                 f"uncertainties via the Monte Carlo method requires that uncertainties "
                 f"are provided via input parameter UH. No uncertainties were given "
@@ -999,7 +1000,8 @@ def _validate_fir_uncertainty_propagation_method_related_inputs(
             )
         if _input_for_svd_was_provided(trunc_svd_tol):
             raise ValueError(
-                "\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
+                f"\n{_get_first_public_caller()}: The least-squares fitting of a "
+                f"digital FIR filter "
                 "to a frequency response H with propagation of associated "
                 "uncertainties via a truncated singular-value decomposition and linear "
                 "matrix propagation requires that uncertainties are provided via "
@@ -1009,22 +1011,23 @@ def _validate_fir_uncertainty_propagation_method_related_inputs(
             )
     elif _both_propagation_methods_simultaneously_requested():
         raise ValueError(
-            "\ninvLSFIR_uncMC: Only one of mc_runs and trunc_svd_tol can be "
+            f"\n{_get_first_public_caller()}: Only one of mc_runs and trunc_svd_tol "
+            f"can be "
             f"provided but mc_runs={mc_runs} and trunc_svd_tol={trunc_svd_tol}."
         )
     elif _are_we_supposed_to_fit_freq_resp_with_svd_propagation():
         raise NotImplementedError(
-            f"\ninvLSFIR_uncMC: The least-squares fitting of a digital FIR filter "
-            f"to a frequency response H with propagation of associated uncertainties "
-            f"using a truncated singular-value decomposition and linear matrix "
-            f"propagation is not yet implemented. Alternatively specify "
+            f"\n{_get_first_public_caller()}: The least-squares fitting of a digital "
+            f"FIR filter to a frequency response H with propagation of associated "
+            f"uncertainties using a truncated singular-value decomposition and linear "
+            f"matrix propagation is not yet implemented. Alternatively specify "
             f"the number mc_runs of runs to propagate the uncertainties via the "
             f"Monte Carlo method."
         )
     elif _number_of_mc_runs_too_small():
         raise ValueError(
-            f"\ninvLSFIR_uncMC: Number of Monte Carlo runs is expected to be greater "
-            f"than 1 but mc_runs={mc_runs}. Please provide a greater "
+            f"\n{_get_first_public_caller()}: Number of Monte Carlo runs is expected "
+            f"to be greater than 1 but mc_runs={mc_runs}. Please provide a greater "
             f"number of runs or switch to propagation of uncertainties "
             f"via singular-value decomposition by leaving out mc_runs."
         )
