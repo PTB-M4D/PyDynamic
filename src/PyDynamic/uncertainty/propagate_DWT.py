@@ -15,12 +15,6 @@ This modules contains the following functions:
 * :func:`dwt_max_level`: return the maximum achievable DWT level
 
 """
-
-import numpy as np
-import pywt
-
-from .propagate_filter import IIRuncFilter, IIR_get_initial_state
-
 __all__ = [
     "dwt",
     "wave_dec",
@@ -30,6 +24,11 @@ __all__ = [
     "filter_design",
     "dwt_max_level",
 ]
+
+import numpy as np
+import pywt
+
+from .propagate_filter import IIRuncFilter, IIR_get_initial_state
 
 
 def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1):
