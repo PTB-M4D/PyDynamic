@@ -48,88 +48,89 @@ def interp1d_unc(
 
     Parameters
     ----------
-        x_new : (M,) array_like
-            A 1-D array of real values to evaluate the interpolant at. x_new can be
-            sorted in any order.
-        x : (N,) array_like
-            A 1-D array of real values.
-        y : (N,) array_like
-            A 1-D array of real values. The length of y must be equal to the length
-            of x.
-        uy : (N,) array_like
-            A 1-D array of real values representing the standard uncertainties
-            associated with y.
-        kind : str, optional
-            Specifies the kind of interpolation for y as a string ('previous',
-            'next', 'nearest', 'linear' or 'cubic'). Default is ‘linear’.
-        copy : bool, optional
-            If True, the method makes internal copies of x and y. If False,
-            references to x and y are used. The default is to copy.
-        bounds_error : bool, optional
-            If True, a ValueError is raised any time interpolation is attempted on a
-            value outside of the range of x (where extrapolation is necessary). If
-            False, out of bounds values are assigned fill_value. By default, an error
-            is raised unless `fill_value="extrapolate"`.
-        fill_value : array-like or (array-like, array_like) or “extrapolate”, optional
+    x_new : (M,) array_like
+        A 1-D array of real values to evaluate the interpolant at. x_new can be
+        sorted in any order.
+    x : (N,) array_like
+        A 1-D array of real values.
+    y : (N,) array_like
+        A 1-D array of real values. The length of y must be equal to the length
+        of x.
+    uy : (N,) array_like
+        A 1-D array of real values representing the standard uncertainties
+        associated with y.
+    kind : str, optional
+        Specifies the kind of interpolation for y as a string ('previous',
+        'next', 'nearest', 'linear' or 'cubic'). Default is ‘linear’.
+    copy : bool, optional
+        If True, the method makes internal copies of x and y. If False,
+        references to x and y are used. The default is to copy.
+    bounds_error : bool, optional
+        If True, a ValueError is raised any time interpolation is attempted on a
+        value outside of the range of x (where extrapolation is necessary). If
+        False, out of bounds values are assigned fill_value. By default, an error
+        is raised unless ``fill_value="extrapolate"``.
+    fill_value : array-like or (array-like, array_like) or “extrapolate”, optional
+        - if a ndarray (or float), this value will be used to fill in for
+          requested points outside of the data range. If not provided, then the
+          default is NaN. The array-like must broadcast properly to the dimensions
+          of the non-interpolation axes.
+        - If a two-element tuple, then the first element is used as a fill value
+          for ``x_new < t[0]`` and the second element is used for ``x_new > t[-1]``.
+          Anything that is not a 2-element tuple (e.g., list or ndarray, regardless
+          of shape) is taken to be a single array-like argument meant to be used
+          for both bounds as ``below, above = fill_value, fill_value``.
+        - If “extrapolate”, then points outside the data range will be set
+          to the first or last element of the values.
+        - If cubic-interpolation, C2-continuity at the transition to the
+          extrapolation-range is not guaranteed. This behavior might change
+          in future implementations, see issue #210 for details.
 
-            - if or float, this value will be used to fill in for requested points
-            outside of the data range. If not provided, then the default is NaN.
-            - If a two-element tuple, then the first element is used as a fill value
-              for `x_new < t[0]` and the second element is used for `x_new > t[-1]`.
-              Anything that is not a 2-element tuple (e.g., list or ndarray, regardless
-              of shape) is taken to be a single array-like argument meant to be used
-              for both bounds as `below, above = fill_value, fill_value`.
-            - If “extrapolate”, then points outside the data range will be set
-              to the first or last element of the values.
-            - If cubic-interpolation, C2-continuity at the transition to the
-              extrapolation-range is not guaranteed. This behavior might change
-              in future implementations, see issue #210 for details.
+        Both parameters fill_value and fill_unc should be
+        provided to ensure desired behaviour in the extrapolation range.
 
-            Both parameters `fill_value` and `fill_unc` should be
-            provided to ensure desired behaviour in the extrapolation range.
+    fill_unc : array-like or (array-like, array_like) or “extrapolate”, optional
+        Usage and behaviour as described in fill_value but for the
+        uncertainties. Both parameters fill_value and fill_unc should be
+        provided to ensure desired behaviour in the extrapolation range.
+    assume_sorted : bool, optional
+        If False, values of x can be in any order and they are sorted first. If
+        True, x has to be an array of monotonically increasing values.
+    returnC : bool, optional
+        If True, return sensitivity coefficients for later use. This is only
+        available for interpolation kind 'linear' and for
+        fill_unc="extrapolate" at the moment. If False sensitivity
+        coefficients are not returned and internal computation is
+        slightly more efficient.
 
-        fill_unc : array-like or (array-like, array_like) or “extrapolate”, optional
-            Usage and behaviour as described in `fill_value` but for the
-            uncertainties. Both parameters `fill_value` and `fill_unc` should be
-            provided to ensure desired behaviour in the extrapolation range.
-        assume_sorted : bool, optional
-            If False, values of x can be in any order and they are sorted first. If
-            True, x has to be an array of monotonically increasing values.
-        returnC : bool, optional
-            If True, return sensitivity coefficients for later use. This is only
-            available for interpolation kind 'linear' and for
-            fill_unc="extrapolate" at the moment. If False sensitivity
-            coefficients are not returned and internal computation is
-            slightly more efficient.
-
-    If `returnC` is False, which is the default behaviour, the method returns:
+    If returnC is False, which is the default behaviour, the method returns:
 
     Returns
     -------
-        x_new : (M,) array_like
-            values at which the interpolant is evaluated
-        y_new : (M,) array_like
-            interpolated values
-        uy_new : (M,) array_like
-            interpolated associated standard uncertainties
+    x_new : (M,) array_like
+        values at which the interpolant is evaluated
+    y_new : (M,) array_like
+        interpolated values
+    uy_new : (M,) array_like
+        interpolated associated standard uncertainties
 
     Otherwise the method returns:
 
     Returns
     -------
-        x_new : (M,) array_like
-            values at which the interpolant is evaluated
-        y_new : (M,) array_like
-            interpolated values
-        uy_new : (M,) array_like
-            interpolated associated standard uncertainties
-        C : (M,N) array_like
-            sensitivity matrix :math:`C`, which is used to compute the uncertainties
-            :math:`U_{y_{new}} = C \cdot \operatorname{diag}(u_y^2) \cdot C^T`
+    x_new : (M,) array_like
+        values at which the interpolant is evaluated
+    y_new : (M,) array_like
+        interpolated values
+    uy_new : (M,) array_like
+        interpolated associated standard uncertainties
+    C : (M,N) array_like
+        sensitivity matrix :math:`C`, which is used to compute the uncertainties
+        :math:`U_{y_{new}} = C \cdot \operatorname{diag}(u_y^2) \cdot C^T`
 
     References
     ----------
-        * White [White2017]_
+    * White [White2017]_
     """
     # This is taken from the class scipy.interpolate.interp1d to copy and sort the
     # arrays in case that is requested and of course extended by the uncertainties.
