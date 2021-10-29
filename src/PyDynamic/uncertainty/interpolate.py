@@ -12,12 +12,11 @@ This module contains the following functions:
   associated uncertainties
 
 """
+__all__ = ["interp1d_unc", "make_equidistant"]
 from typing import Optional, Tuple, Union
 
 import numpy as np
-from scipy.interpolate import interp1d, splrep, BSpline
-
-__all__ = ["interp1d_unc", "make_equidistant"]
+from scipy.interpolate import BSpline, interp1d, splrep
 
 
 def interp1d_unc(
