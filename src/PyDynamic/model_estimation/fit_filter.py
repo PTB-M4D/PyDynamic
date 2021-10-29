@@ -895,7 +895,7 @@ def _validate_and_return_weights(weights: np.ndarray, expected_len: int) -> np.n
 
 def _get_first_public_caller() -> str:
     for caller in inspect.stack():
-        if path.join("PyDynamic") in caller.filename and caller.function[0] != "_":
+        if "PyDynamic" in caller.filename and caller.function[0] != "_":
             return caller.function
     return inspect.stack()[1].function
 
