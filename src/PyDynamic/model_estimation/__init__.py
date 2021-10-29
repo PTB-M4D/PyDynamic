@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
+"""Fit IIR and FIR filters and identify transfer function models with uncertainties
+
 The package :doc:`PyDynamic.model_estimation` implements methods for the model
 estimation by least-squares fitting and the identification of transfer function models
 with associated uncertainties.
