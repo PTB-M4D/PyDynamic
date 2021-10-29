@@ -155,11 +155,7 @@ such that the filtered signal
 
 .. math:: \hat{x}[n] = (g\ast y)[n] \qquad n=1,\ldots,M
 
-<<<<<<< HEAD
-is an estimate of the system's input signal at the discrete time points
-=======
 is an estimate of the system's input signal at the discrete time points.
->>>>>>> devel1
 
 Publication
 
