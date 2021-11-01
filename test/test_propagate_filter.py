@@ -27,8 +27,6 @@ from .conftest import (
     hypothesis_covariance_matrix,
     hypothesis_float_vector,
     hypothesis_not_negative_float,
-    random_covariance_matrix,
-    scale_matrix_or_vector_to_range,
 )
 
 
@@ -36,45 +34,27 @@ from .conftest import (
 def FIRuncFilter_input(
     draw: Callable, exclude_corr_kind: bool = False
 ) -> Dict[str, Any]:
-    filter_length = draw(
-        hst.integers(min_value=2, max_value=100)
-    )  # scipy.linalg.companion requires N >= 2
-    filter_theta = draw(
-        hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e3)
-    )
-    filter_theta_covariance = draw(
-        hst.one_of(
-            hypothesis_covariance_matrix(number_of_rows=filter_length), hst.just(None)
-        )
-    )
-
-    signal_length = draw(hst.integers(min_value=200, max_value=1000))
-    signal = draw(
-        hypothesis_float_vector(length=signal_length, min_value=1e-2, max_value=1e3)
-    )
-
     if exclude_corr_kind:
         kind = draw(hst.sampled_from(("float", "diag")))
     else:
         kind = draw(hst.sampled_from(("float", "diag", "corr")))
-    if kind == "diag":
-        signal_standard_deviation = draw(
-            hypothesis_float_vector(length=signal_length, min_value=0, max_value=1e2)
-        )
-    elif kind == "corr":
-        random_data = draw(
-            hypothesis_float_vector(
-                length=signal_length // 2, min_value=1e-2, max_value=1e2
-            )
-        )
-        acf = scipy.signal.correlate(random_data, random_data, mode="full")
 
-        scaled_acf = scale_matrix_or_vector_to_range(
-            acf, range_min=1e-10, range_max=1e3
-        )
-        signal_standard_deviation = scaled_acf[len(scaled_acf) // 2 :]
+    if kind == "corr":
+        fir_input = draw(fir_filter_input(include_signal_cov=True))
+        signal_standard_deviation = fir_input["Ux"]
     else:
-        signal_standard_deviation = draw(hypothesis_not_negative_float(max_value=1e2))
+        fir_input = draw(fir_filter_input(include_signal_cov=False))
+
+        if kind == "diag":
+            signal_standard_deviation = draw(
+                hypothesis_float_vector(
+                    length=len(fir_input["x"]), min_value=0, max_value=1e2
+                )
+            )
+        else:
+            signal_standard_deviation = draw(
+                hypothesis_not_negative_float(max_value=1e2)
+            )
 
     lowpass_length = draw(
         hst.integers(min_value=2, max_value=10)
@@ -93,14 +73,51 @@ def FIRuncFilter_input(
     shift = draw(hypothesis_not_negative_float(max_value=1e2))
 
     return {
-        "theta": filter_theta,
-        "Utheta": filter_theta_covariance,
-        "y": signal,
+        "theta": fir_input["theta"],
+        "Utheta": fir_input["Utheta"],
+        "y": fir_input["x"],
         "sigma_noise": signal_standard_deviation,
         "kind": kind,
         "blow": lowpass,
         "shift": shift,
     }
+
+
+@composite
+def fir_filter_input(
+    draw: Callable, include_signal_cov: bool = False
+) -> Dict[str, Any]:
+    filter_length = draw(
+        hst.integers(min_value=2, max_value=100)
+    )  # scipy.linalg.companion requires N >= 2
+    filter_theta = draw(
+        hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e3)
+    )
+    filter_theta_covariance = draw(
+        hst.one_of(
+            hypothesis_covariance_matrix(number_of_rows=filter_length), hst.just(None)
+        )
+    )
+
+    signal_length = draw(hst.integers(min_value=200, max_value=1000))
+    signal = draw(
+        hypothesis_float_vector(length=signal_length, min_value=1e-2, max_value=1e3)
+    )
+
+    if include_signal_cov:
+        signal_full_covariance = draw(
+            hypothesis_covariance_matrix(
+                number_of_rows=signal_length, min_value=1e-10, max_value=1e3
+            )
+        )
+
+        return {
+            "theta": filter_theta,
+            "Utheta": filter_theta_covariance,
+            "x": signal,
+            "Ux": signal_full_covariance,
+        }
+    return {"theta": filter_theta, "Utheta": filter_theta_covariance, "x": signal}
 
 
 def random_array(length):
@@ -590,15 +607,21 @@ def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
     )
 
 
+@given(fir_filter_input(include_signal_cov=True))
+@settings(
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+        HealthCheck.too_slow,
+    ],
+)
 @pytest.mark.slow
-def test_fir_filter_MC_comparison():
-    N_signal = np.random.randint(20, 25)
-    x = random_array(N_signal)
-    Ux = random_covariance_matrix(N_signal)
+def test_fir_filter_MC_comparison(fir_filter_and_mc_input):
+    x = fir_filter_and_mc_input["x"]
+    Ux = fir_filter_and_mc_input["Ux"]
 
-    N_theta = np.random.randint(2, 5)  # scipy.linalg.companion requires N >= 2
-    theta = random_array(N_theta)  # scipy.signal.firwin(N_theta, 0.1)
-    Utheta = random_covariance_matrix(N_theta)
+    theta = fir_filter_and_mc_input["theta"]
+    Utheta = fir_filter_and_mc_input["Utheta"]
 
     # run method
     y_fir, Uy_fir = _fir_filter(x, theta, Ux, Utheta, initial_conditions="zero")
