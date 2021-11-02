@@ -14,7 +14,12 @@ from numpy.testing import assert_allclose, assert_almost_equal
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.tools import make_semiposdef
-from PyDynamic.model_estimation.fit_filter import LSFIR
+from PyDynamic.model_estimation.fit_filter import (
+    invLSFIR,
+    invLSFIR_unc,
+    invLSFIR_uncMC,
+    LSFIR,
+)
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 from .conftest import (
     hypothesis_dimension,
@@ -1084,3 +1089,108 @@ def test_compare_LSFIR_with_svd_and_with_mc(
         atol=6e-1,
         rtol=6e-1,
     )
+
+
+@given(hypothesis_dimension(min_value=4, max_value=8))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_uncMC_LSFIR(
+    capsys, monte_carlo, freqs, sampling_freq, filter_order
+):
+    with capsys.disabled():
+        b_fir_mc, Ub_fir_mc = invLSFIR_uncMC(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+        )
+        b_fir, Ub_fir = LSFIR(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=freqs,
+            Fs=sampling_freq,
+            tau=filter_order // 2,
+            inv=True,
+            UH=monte_carlo["UH"],
+            mc_runs=10000,
+        )
+    assert_allclose(b_fir_mc, b_fir, rtol=4e-2)
+    assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
+
+
+@given(hypothesis_dimension(min_value=4, max_value=8), weights())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_unc_LSFIR(
+    capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector
+):
+    with capsys.disabled():
+        b_fir_mc, Ub_fir_mc = invLSFIR_unc(
+            H=monte_carlo["H"],
+            UH=monte_carlo["UH"],
+            N=filter_order,
+            tau=filter_order // 2,
+            f=freqs,
+            Fs=sampling_freq,
+            wt=weight_vector,
+        )
+        b_fir, Ub_fir = LSFIR(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=freqs,
+            Fs=sampling_freq,
+            tau=filter_order // 2,
+            weights=weight_vector,
+            inv=True,
+            UH=monte_carlo["UH"],
+        )
+    assert_allclose(b_fir_mc, b_fir)
+    assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
+
+
+@given(hypothesis_dimension(min_value=2, max_value=12), weights())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.too_slow,
+    ],
+)
+@pytest.mark.slow
+def test_compare_invLSFIR_to_LSFIR(
+    monte_carlo, freqs, sampling_freq, filter_order, weight_vector
+):
+    b_fir_inv_lsfir = invLSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        Wt=weight_vector,
+    )
+    b_fir = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        weights=weight_vector,
+        inv=True,
+    )[0]
+    assert_allclose(b_fir, b_fir_inv_lsfir)
