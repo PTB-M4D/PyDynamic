@@ -1137,11 +1137,11 @@ def test_compare_invLSFIR_uncMC_LSFIR(
     ],
 )
 @pytest.mark.slow
-def test_compare_invLSFIR_unc_LSFIR(
+def test_compare_invLSFIR_unc_LSFIR_only_by_filter_coefficients(
     capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector
 ):
     with capsys.disabled():
-        b_fir_mc, Ub_fir_mc = invLSFIR_unc(
+        b_fir_mc = invLSFIR_unc(
             H=monte_carlo["H"],
             UH=monte_carlo["UH"],
             N=filter_order,
@@ -1149,8 +1149,8 @@ def test_compare_invLSFIR_unc_LSFIR(
             f=freqs,
             Fs=sampling_freq,
             wt=weight_vector,
-        )
-        b_fir, Ub_fir = LSFIR(
+        )[0]
+        b_fir = LSFIR(
             H=monte_carlo["H"],
             N=filter_order,
             f=freqs,
@@ -1159,9 +1159,8 @@ def test_compare_invLSFIR_unc_LSFIR(
             weights=weight_vector,
             inv=True,
             UH=monte_carlo["UH"],
-        )
+        )[0]
     assert_allclose(b_fir_mc, b_fir)
-    assert_allclose(Ub_fir_mc, Ub_fir, atol=7e-1, rtol=7e-1)
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12), weights())
