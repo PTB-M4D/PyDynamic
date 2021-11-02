@@ -954,6 +954,170 @@ def _print_fir_result_msg(
     _compute_and_print_rms(residuals_real_imag)
 
 
+def invLSFIR(
+    H: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    Wt: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    """Least-squares (time-discrete) digital FIR filter fit to freq. resp. reciprocal
+
+    This essentially is a wrapper for a call of :func:`LSFIR` with the according
+    parameter set.
+
+    Parameters
+    ----------
+    H : array_like of shape (M,)
+        (Complex) frequency response values
+    N : int
+        FIR filter order
+    tau : int
+        delay of filter
+    f : array_like of shape (M,)
+        frequencies at which H is given
+    Fs : float
+        sampling frequency of digital FIR filter
+    Wt : array_like of shape (M,) or shape (M,M), optional
+        vector of weights for a weighted least-squares method (default results in no
+        weighting)
+
+    Returns
+    -------
+    b : np.ndarray of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
+
+    References
+    ----------
+    * Elster and Link [Elster2008]_
+
+    .. see_also :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
+    """
+    print(
+        f"invLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
+        f"reciprocal of a frequency response H given by {len(H)} values.\n"
+    )
+    return LSFIR(H=H, N=N, f=f, Fs=Fs, tau=tau, weights=Wt, verbose=False, inv=True)[0]
+
+
+def invLSFIR_unc(
+    H: np.ndarray,
+    UH: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    wt: Optional[np.ndarray] = None,
+    verbose: Optional[bool] = True,
+    trunc_svd_tol: Optional[float] = None,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Design of FIR filter as fit to the reciprocal of a freq. resp. with uncertainties
+
+    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
+    given frequency response for which associated uncertainties are given for its
+    real and imaginary part. Uncertainties are propagated using a truncated svd
+    and linear matrix propagation. This essentially is a wrapper for a call of
+    :func:`LSFIR` with the according parameter set.
+
+    Parameters
+    ----------
+    H : array_like of shape (M,) or (2M,)
+        (Complex) frequency response values in dtype complex or as a vector first
+        containing the real followed by the imaginary parts
+    UH : array_like of shape (2M,2M)
+        uncertainties associated with the real and imaginary part of H
+    N : int
+        FIR filter order
+    tau : int
+        time delay of filter in samples
+    f : array_like of shape (M,)
+        frequencies at which H is given
+    Fs : float
+        sampling frequency of digital FIR filter
+    wt : array_like of shape (2M,), optional
+        vector of weights for a weighted least-squares method (default results in no
+        weighting)
+    verbose : bool, optional
+        whether to print statements to the command line (default = True)
+    trunc_svd_tol : float, optional
+        lower bound for singular values to be considered for pseudo-inverse
+
+    Returns
+    -------
+    b : array_like of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
+    Ub : array_like of shape (N+1,N+1)
+        uncertainties associated with b
+
+    References
+    ----------
+    * Elster and Link [Elster2008]_
+
+    .. see_also :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
+    """
+    return LSFIR(H, N, f, Fs, tau, wt, verbose, True, UH, trunc_svd_tol=trunc_svd_tol)
+
+
+def invLSFIR_uncMC(
+    H: np.ndarray,
+    UH: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    verbose: Optional[bool] = True,
+    mc_runs: Optional[int] = 10000,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Design of FIR filter as fit to the reciprocal of a freq. resp. with uncertainties
+
+    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of the
+    frequency response values for which associated uncertainties are given for its
+    real and imaginary part. Uncertainties are propagated using a Monte Carlo method.
+    The Monte Carlo approach may help in cases where the weighting matrix or the
+    Jacobian are ill-conditioned, resulting in false uncertainties associated with
+    the filter coefficients. This essentially is a wrapper for a call of
+    :func:`LSFIR` with the according parameter set.
+
+    Parameters
+    ----------
+    H : array_like of shape (M,) or (2M,)
+        (Complex) frequency response values in dtype complex or as a vector
+        containing the real parts in the first half followed by the imaginary parts
+    UH : array_like of shape (2M,2M), optional
+        uncertainties associated with the real and imaginary part of H
+    N : int
+        FIR filter order
+    tau : int
+        time delay in samples for improved fitting
+    f : array_like of shape (M,)
+        frequencies at which H is given
+    Fs : float
+        sampling frequency of digital FIR filter
+    verbose: bool, optional
+        If True (default) verbose output is printed to the command line
+    mc_runs : int, optional
+        Number of Monte Carlo runs greater than one. Only used, if uncertainties
+        associated with the real and imaginary part of H are provided. Only one of
+        mc_runs and trunc_svd_tol can be provided.
+
+    Returns
+    -------
+    b : array_like of shape (N+1,)
+        The FIR filter coefficient vector in a 1-D sequence
+    Ub : array_like of shape (N+1,N+1)
+        Uncertainties associated with b.  Will be None if UH is not
+        provided or is None.
+
+    References
+    ----------
+    * Elster and Link [Elster2008]_
+
+    .. see_also :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
+    """
+    return LSFIR(H, N, f, Fs, tau, verbose=verbose, inv=True, UH=UH, mc_runs=mc_runs)
+
+
 def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
     """Least-squares IIR filter fit to the reciprocal of given frequency response values
 
