@@ -1161,7 +1161,7 @@ def test_compare_invLSFIR_unc_LSFIR(
             UH=monte_carlo["UH"],
         )
     assert_allclose(b_fir_mc, b_fir)
-    assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
+    assert_allclose(Ub_fir_mc, Ub_fir, atol=7e-1, rtol=7e-1)
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12), weights())
