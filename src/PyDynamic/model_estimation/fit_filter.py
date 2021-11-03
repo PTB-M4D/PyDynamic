@@ -26,7 +26,6 @@ __all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
 
 import inspect
 from enum import Enum
-from os import path
 from typing import Optional, Tuple, Union
 
 import numpy as np
