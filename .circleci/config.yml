@@ -450,6 +450,7 @@ jobs:
           pyenv: ${PYENV}
       - run:
           command: |
+            source venv/bin/activate
             python setup.py tweet
 
   persist_dummy_tweet_file:
