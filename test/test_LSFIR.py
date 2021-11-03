@@ -46,7 +46,7 @@ def weights(
     draw: Callable, guarantee_vector: Optional[bool] = False
 ) -> Union[np.ndarray, None]:
     valid_vector_strategy = hypothesis_float_vector(
-        min_value=0, max_value=1, length=400
+        length=400, min_value=0, max_value=1, exclude_min=True
     )
     valid_weight_strategies = (
         valid_vector_strategy
@@ -55,9 +55,7 @@ def weights(
     )
     unscaled_weights = draw(hst.one_of(valid_weight_strategies))
     if unscaled_weights is not None:
-        if np.any(unscaled_weights):
-            return scale_matrix_or_vector_to_convex_combination(unscaled_weights)
-        return np.ones_like(unscaled_weights)
+        return scale_matrix_or_vector_to_convex_combination(unscaled_weights)
 
 
 @pytest.fixture(scope="module")
