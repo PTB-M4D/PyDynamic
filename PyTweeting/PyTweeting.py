@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tweet a random sequence of eight letters."""
 
 import random
