@@ -66,20 +66,26 @@ def remove_commit_hash(text: str) -> str:
     return new_text
 
 
+def _tweet():
+    _get_twitter_api_handle().update_status(generate_tweet())
+
+
+def _get_twitter_api_handle():
+    return tweepy.API(_get_twitter_api_auth_handle())
+
+
+def _get_twitter_api_auth_handle():
+    auth = tweepy.OAuthHandler(os.getenv("public_key"), os.getenv("public_token"))
+    auth.set_access_token(os.getenv("private_key"), os.getenv("private_token"))
+    return auth
+
+
 def generate_tweet() -> str:
     file_content = read_from_file()
-    hash_less_commits = remove_commit_hash(file_content)
-    tweet = format_md_to_unicode(hash_less_commits)
-    return tweet# + '\n'+generate_random_string()
+    hashless_commits = remove_commit_hash(file_content)
+    tweet = format_md_to_unicode(hashless_commits)
+    return tweet  # + '\n'+generate_random_string()
 
 
-auth = tweepy.OAuthHandler(os.getenv('public_key'), os.getenv('public_token'))
-
-auth.set_access_token(os.getenv('private_key'),
-                      os.getenv('private_token'))
-
-api = tweepy.API(
-    auth)  # , proxy='https://webproxy.bs.ptb.de:8080') use when tweeting from inside
-# PTB Network
-print(format_md_to_unicode(remove_commit_hash(read_from_file())))
-api.update_status(generate_tweet())
+if __name__ == "__main__":
+    _tweet()
