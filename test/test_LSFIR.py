@@ -545,7 +545,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
 def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_directly(
     monte_carlo, freqs, sampling_freq, filter_order
 ):
-    b_fir_mc, _ = LSFIR(
+    b_fir_mc = LSFIR(
         H=monte_carlo["H"],
         UH=np.zeros_like(monte_carlo["UH"]),
         N=filter_order,
@@ -554,7 +554,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
         Fs=sampling_freq,
         inv=False,
         mc_runs=2,
-    )
+    )[0]
     b_fir_none = LSFIR(
         H=monte_carlo["H"],
         N=filter_order,
