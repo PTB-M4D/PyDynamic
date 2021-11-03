@@ -31,10 +31,10 @@ executors:
     parameters:
       tag:
         type: string
-        default: "3.8"
+        default: "3.9"
       pyenv:
         type: string
-        default: "py38"
+        default: "py39"
     docker:
       - image: circleci/python:<< parameters.tag >>
     environment:
@@ -106,38 +106,6 @@ commands:
     steps:
     - store_test_results:
         path: test-results
-  tweet:
-    description: "Issue a tweet with release-relevant commit messages"
-    parameters:
-      pyenv:
-        type: string
-    steps:
-    - checkout
-    - run:
-        command: |  # use pipenv to install dependencies sudo pip3 install -r requirements.txt python PyTweeting.py
-          echo "TweetyTweet"
-          cd PyTweeting
-          sudo pip3 install -r requirements.txt
-          python3 PyTweeting.py
-  create_tweet_file:
-    description: "Try persisting a file to the workspace so that it is available for tweet"
-    parameters:
-      pyenv:
-        type: string
-    steps:
-      - run:
-          command: |
-            mkdir PyTweeting
-            ls -a
-            cd PyTweeting
-            echo "#ABCDEFGabcdefg" >> tweet.txt
-
-      - persist_to_workspace:
-          root: .
-          paths:
-            - PyTweeting/tweet.txt
-
-
 
 workflows:
   nightly_test:
@@ -259,20 +227,15 @@ workflows:
           requires:
             - confirm_previewed_release_actions
       - tweet:
-          name: "tweet"
           context: Twitter.com publish release
           requires:
             - preview_release
   tweet:
     jobs:
-      - persist_file:
-          name: "persist_file"
-          context: Twitter.com publish release
+      - persist_dummy_tweet_file
       - tweet:
-          name: "tweet"
           context: Twitter.com publish release
-          requires:
-            - persist_file
+
 jobs:
 
   # Define one 'test' job with parameters to deal with all desired cases. The
@@ -435,8 +398,6 @@ jobs:
       - install_development_deps:
           pyenv: ${PYENV}
 
-      # Fake publish, just to make sure everything works after merging a PR and
-      # before actual release jos run.
       - run:
           name: Preview python-semantic-release actions
           command: |
@@ -446,35 +407,36 @@ jobs:
             source venv/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            ls -a
+
             echo "
             The changelog of the next release will contain:
             "
-            version=$(git describe --abbrev=0)
-            echo -n $version>> PyTweeting/tweet.txt
-            echo " of PyDynamic will be released: " >> PyTweeting/tweet.txt
-            semantic-release --unreleased changelog 2>&1 | tee -a PyTweeting/tweet.txt
-            echo "Top three contributors by commits are: " >> PyTweeting/tweet.txt
-            git shortlog -n -s | head -n 3 | tee -a PyTweeting/tweet.txt
-            echo "Get the newes release here:" >> PyTweeting/tweet.txt
-            git config --get remote.origin.url | tee -a PyTweeting/tweet.txt
-            echo "
-            tweet.txt contains :
-            "
-            cat PyTweeting/tweet.txt
+            semantic-release --unreleased changelog
             echo "
             -----------------------------------------------------------
 
             python-semantic-release would perform the following actions:
             "
             semantic-release --noop publish
+
+      - run:
+          name: Generate file with tweet's content
+          command: |
+            echo -n "PyDynamic " > tweet.txt
+            echo -n $(semantic-release print-version) >> tweet.txt
+            echo -n " just got released! Find out more on " >> tweet.txt
+            echo -n "https://github.com/PTB-M4D/PyDynamic/" >> tweet.txt
+            echo -n " #PyDynamic #metrologysoftware" >> tweet.txt
+            echo -n " #measurementuncertainty" >> tweet.txt
+            echo " #PhysikalischTechnischeBundesanstalt" >> tweet.txt
+            echo "tweet.txt contains:\n"
+            cat tweet.txt
+
       - persist_to_workspace:
           root: .
           paths:
-            - PyTweeting/tweet.txt
+            - tweet.txt
 
-
-  #Job which issues a Tweet to the specified account
   tweet:
     executor:
       name: tweeter
@@ -482,16 +444,23 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - tweet:
+
+      - create_venv
+      - install_development_deps:
           pyenv: ${PYENV}
+      - run:
+          command: |
+            python setup.py tweet
 
-
-
-  #Job to persist a file to the Workspace
-  persist_file:
+  persist_dummy_tweet_file:
     executor:
       name: tweeter
     steps:
-      - create_tweet_file:
-          pyenv: ${PYENV}
+      - run:
+          command: echo "#ABCDEFGabcdefg" >> tweet.txt
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - tweet.txt
 
