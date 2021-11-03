@@ -22,8 +22,8 @@
     <img alt="PyPI - license badge" src="https://img.shields.io/pypi/l/pydynamic?color=bright">
   </a>
   <!-- Zenodo DOI -->
-  <a href="https://doi.org/10.5281/zenodo.4748367">
-    <img src="https://zenodo.org/badge/34848642.svg" alt="DOI"></a>
+  <a href="https://doi.org/10.5281/zenodo.1489877">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1489877.svg" alt="DOI"></a>
 </p>
 
 <h1 align="center">
