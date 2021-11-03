@@ -739,7 +739,8 @@ def invLSFIR_uncMC(
 
     .. note:: Uncertainty propagation via singular-value decomposition is not yet
         implemented, when fitting to the actual frequency response and not its
-        reciprocal.
+        reciprocal. Alternatively specify the number mc_runs of runs to propagate the
+        uncertainties via the Monte Carlo method.
 
     Parameters
     ----------
@@ -781,10 +782,6 @@ def invLSFIR_uncMC(
         Uncertainties associated with b.  Will be None if UH is not
         provided or is None.
 
-    References
-    ----------
-    * Elster and Link [Elster2008]_
-
     Raises
     ------
     NotImplementedError
@@ -793,6 +790,10 @@ def invLSFIR_uncMC(
         decomposition and linear matrix propagation is not yet implemented.
         Alternatively specify the number mc_runs of runs to propagate the uncertainties
         via the Monte Carlo method.
+
+    References
+    ----------
+    * Elster and Link [Elster2008]_
 
     .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
     """
