@@ -1,8 +1,10 @@
 """Install PyDynamic in Python path and provide all packaging metadata."""
 import codecs
+import os
 from os import path
 
-from setuptools import find_packages, setup
+import tweepy
+from setuptools import Command, find_packages, setup
 
 
 def get_readme():
@@ -18,6 +20,53 @@ def read(rel_path):
         return fp.read()
 
 
+class Tweet(Command):
+
+    filename: str
+
+    description = "Send new tweets to the Twitter API to announce releases"
+
+    user_options = [("filename=", "f", "filename containing the tweet")]
+
+    def initialize_options(self):
+        self.filename = "tweet.txt"
+
+    def finalize_options(self):
+        if self.filename is None:
+            raise Exception("Parameter --filename is missing")
+
+    def run(self):
+        def _tweet():
+            _get_twitter_api_handle().update_status(read_tweet_from_file())
+
+        def _get_twitter_api_handle():
+            return tweepy.API(_get_twitter_api_auth_handle())
+
+        def _get_twitter_api_auth_handle():
+            try:
+                auth = tweepy.OAuthHandler(
+                    os.getenv("public_key"), os.getenv("public_token")
+                )
+                auth.set_access_token(
+                    os.getenv("private_key"), os.getenv("private_token")
+                )
+                return auth
+            except TypeError as e:
+                if "Consumer key must be" in str(e):
+                    raise TypeError(
+                        "TypeError: Environment variables 'public_key', "
+                        "'public_token', 'private_key' and 'private_token' have to be "
+                        "set."
+                    )
+
+        def read_tweet_from_file() -> str:
+            with open(self.filename, "r") as f:
+                content: str = f.read()
+            return content
+
+        _tweet()
+
+
 def get_version(rel_path):
     for line in read(rel_path).splitlines():
         if line.startswith("__version__"):
@@ -30,7 +79,6 @@ def get_version(rel_path):
 current_release_version = get_version("src/PyDynamic/__init__.py")
 
 setup(
-    metadata_version="2.1",
     name="PyDynamic",
     version=current_release_version,
     description="A software package for the analysis of dynamic measurements",
@@ -75,4 +123,7 @@ setup(
         "Operating System :: OS Independent",
         "Typing :: Typed",
     ],
+    cmdclass={
+        "tweet": Tweet,
+    },
 )
