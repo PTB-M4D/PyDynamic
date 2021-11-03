@@ -1,4 +1,4 @@
-"""Tweet a random sequence of eight letters."""
+"""Tweet on releases"""
 
 import os
 import re
@@ -6,15 +6,6 @@ import string
 from typing import List
 
 import tweepy as tweepy
-
-
-def read_from_file(filename="tweet.txt"):
-    with open(filename, "r") as f:
-        content: str = f.read()
-    content = content.lstrip()
-    content = re.sub(" +", " ", content)
-
-    return content
 
 
 def convert_to_bold(a: str) -> str:
@@ -74,10 +65,18 @@ def _get_twitter_api_auth_handle():
 
 
 def generate_tweet() -> str:
-    file_content = read_from_file()
+    file_content = clean_spaces_from_file_content()
     hashless_commits = remove_commit_hash(file_content)
     tweet = format_md_to_unicode(hashless_commits)
     return tweet  # + '\n'+generate_random_string()
+
+
+def clean_spaces_from_file_content(filename: str = "tweet.txt") -> str:
+    with open(filename, "r") as f:
+        content: str = f.read()
+    content_without_leading_spaces = content.lstrip()
+    content_without_double_spaces = re.sub(" +", " ", content_without_leading_spaces)
+    return content_without_double_spaces
 
 
 if __name__ == "__main__":
