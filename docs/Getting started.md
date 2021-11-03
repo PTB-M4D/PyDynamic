@@ -50,34 +50,65 @@ If you are not familiar with [Python virtual environments
 motivation and an insight into the mechanism in the
 [official docs](https://docs.python.org/3/tutorial/venv.html).
 
-### Create a virtual environment and install requirements
+You have the option to set up PyDynamic using _Anaconda_, if you already have it 
+installed, or use the Python built-in tool `venv`. The commands differ slightly 
+between [Windows](#create-a-venv-python-environment-on-windows) and [Mac/Linux
+](#create-a-venv-python-environment-on-mac-linux) or if you use [Anaconda
+](#create-an-anaconda-python-environment).
 
-Creating a virtual environment with Python built-in tools is easy and explained
-in more detail in the
-[official docs of Python itself](https://docs.python.org/3/tutorial/venv.html#creating-virtual-environments).
+#### Create a `venv` Python environment on Windows
 
-It boils down to creating an environment anywhere on your computer, then activate
-it and finally install PyDynamic and its dependencies.
-
-#### _venv_ creation and installation in Windows
-
-In your Windows command prompt execute the following:
+In your Windows PowerShell execute the following to set up a virtual environment in
+a folder of your choice.
 
 ```shell
-> py -3 -m venv LOCAL\PATH\TO\ENVS\PyDynamic_venv
-> LOCAL\PATH\TO\ENVS\PyDynamic_venv\Scripts\activate.bat
-(PyDynamic_venv) > pip install PyDynamic
+PS C:> cd C:\LOCAL\PATH\TO\ENVS
+PS C:\LOCAL\PATH\TO\ENVS> py -3 -m venv PyDynamic_venv
+PS C:\LOCAL\PATH\TO\ENVS> PyDynamic_venv\Scripts\activate
 ```
 
-#### _venv_ creation and installation on Mac and Linux
+Proceed to [the next step](#install-pydynamic-via-pip).
 
-In your terminal execute the following:
+#### Create a `venv` Python environment on Mac & Linux
+
+In your terminal execute the following to set up a virtual environment in a folder
+of your choice.
 
 ```shell
-$ python3 -m venv /LOCAL/PATH/TO/ENVS/PyDynamic_venv
-$  /LOCAL/PATH/TO/ENVS/PyDynamic_venv/bin/activate
-(PyDynamic_venv) $ pip install PyDynamic
+$ cd /LOCAL/PATH/TO/ENVS
+$ python3 -m venv PyDynamic_venv
+$ source PyDynamic_venv/bin/activate
 ```
+
+Proceed to [the next step](#install-pydynamic-via-pip).
+
+#### Create an Anaconda Python environment
+
+To get started with your present *Anaconda* installation just go to *Anaconda
+prompt* and execute
+
+```shell
+$ cd /LOCAL/PATH/TO/ENVS
+$ conda env create --file /LOCAL/PATH/TO/PyDynamic/requirements/environment.yml 
+```
+
+That's it!
+
+### Install PyDynamic via `pip`
+
+Once you activated your virtual environment, you can install PyDynamic via:
+
+```shell
+pip install PyDynamic
+```
+
+```shell
+Collecting PyDynamic
+[...]
+Successfully installed PyDynamic-[...] [...]
+```
+
+That's it!
 
 ### Updating to the newest version
 
