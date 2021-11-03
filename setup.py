@@ -3,7 +3,6 @@ import codecs
 import os
 from os import path
 
-import tweepy
 from setuptools import Command, find_packages, setup
 
 
@@ -36,6 +35,8 @@ class Tweet(Command):
             raise Exception("Parameter --filename is missing")
 
     def run(self):
+        import tweepy
+
         def _tweet():
             _get_twitter_api_handle().update_status(read_tweet_from_file())
 
