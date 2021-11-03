@@ -3,9 +3,11 @@ from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
 import pytest
+import scipy.stats as stats
 from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
+from numpy.linalg import LinAlgError
 
 from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
@@ -343,8 +345,12 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
         cov_with_one_eigenvalue_close_to_zero
     )
     cov_positive_semi_definite = cov_after_discarding_smallest_singular_value
-    while np.any(np.linalg.eigvals(cov_positive_semi_definite) < 0):
-        cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
+    while True:
+        try:
+            stats.multivariate_normal(cov=cov_positive_semi_definite)
+            break
+        except LinAlgError:
+            cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
     return cov_positive_semi_definite
 
 
