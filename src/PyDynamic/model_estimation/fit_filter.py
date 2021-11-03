@@ -487,9 +487,12 @@ def LSFIR(
     integer greater than one or otherwise using a truncated singular-value
     decomposition and linear matrix propagation. The Monte Carlo approach may help in
     cases where the weighting matrix or the Jacobian are ill-conditioned, resulting
-    in false uncertainties associated with the filter coefficients. Additionally it
-    is needed to propagate uncertainties when fitting to the frequency response
-    directly.
+    in false uncertainties associated with the filter coefficients.
+
+    .. note:: Uncertainty propagation via singular-value decomposition is not yet
+        implemented, when fitting to the actual frequency response and not its
+        reciprocal. Alternatively specify the number mc_runs of runs to propagate the
+        uncertainties via the Monte Carlo method.
 
     Parameters
     ----------
@@ -531,10 +534,6 @@ def LSFIR(
         Uncertainties associated with b.  Will be None if UH is not
         provided or is None.
 
-    References
-    ----------
-    * Elster and Link [Elster2008]_
-
     Raises
     ------
     NotImplementedError
@@ -543,6 +542,12 @@ def LSFIR(
         decomposition and linear matrix propagation is not yet implemented.
         Alternatively specify the number mc_runs of runs to propagate the uncertainties
         via the Monte Carlo method.
+
+    References
+    ----------
+    * Elster and Link [Elster2008]_
+
+    .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
     """
     (
         freq_resps_real_imag,
