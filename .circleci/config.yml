@@ -417,15 +417,12 @@ jobs:
       - run:
           name: Generate file with tweet's content
           command: |
-            echo -n "PyDynamic " > tweet.txt
-            echo -n $(semantic-release print-version) >> tweet.txt
-            echo -n " just got released! Find out more on " >> tweet.txt
-            echo -n "https://github.com/PTB-M4D/PyDynamic/" >> tweet.txt
-            echo -n " #PyDynamic #metrologysoftware" >> tweet.txt
-            echo -n " #measurementuncertainty" >> tweet.txt
-            echo " #PhysikalischTechnischeBundesanstalt" >> tweet.txt
-            echo "tweet.txt contains:\n"
-            cat tweet.txt
+            source venv/bin/activate
+            echo "The generated tweet will be:"
+            echo "PyDynamic $(semantic-release print-version) just got released! \
+                Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
+                #metrologysoftware #measurementuncertainty \
+                #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
 
       - persist_to_workspace:
           root: .
