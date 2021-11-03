@@ -23,7 +23,3 @@ pytest.xml
 # Environment artifacts #
 #########################
 .idea/
-
-# Local Artifacts #
-########################
-versuch.txt
