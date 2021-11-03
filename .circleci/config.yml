@@ -230,11 +230,6 @@ workflows:
           context: Twitter.com publish release
           requires:
             - preview_release
-  tweet:
-    jobs:
-      - persist_dummy_tweet_file
-      - tweet:
-          context: Twitter.com publish release
 
 jobs:
 
@@ -452,16 +447,3 @@ jobs:
           command: |
             source venv/bin/activate
             python setup.py tweet
-
-  persist_dummy_tweet_file:
-    executor:
-      name: tweeter
-    steps:
-      - run:
-          command: echo "#ABCDEFGabcdefg" >> tweet.txt
-
-      - persist_to_workspace:
-          root: .
-          paths:
-            - tweet.txt
-
