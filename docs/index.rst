@@ -21,7 +21,7 @@ it is tested to work with Python 3.6 to 3.9.
    :maxdepth: 1
    :caption: Getting started:
 
-   Getting started
+   INSTALL
    Examples
    CONTRIBUTING
 
