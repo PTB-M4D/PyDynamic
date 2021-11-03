@@ -3,19 +3,19 @@
   <a href="https://circleci.com/gh/PTB-M4D/PyDynamic"><img alt="CircleCI pipeline status badge" src="https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield"></a>
   <!-- ReadTheDocs Documentation -->
   <a href="https://pydynamic.readthedocs.io/en/latest/index.html">
-    <img src="https://readthedocs.org/projects/pydynamic/badge/?version=latest">
+    <img src="https://readthedocs.org/projects/pydynamic/badge/?version=latest" alt="PyDynamic's ReadTheDocs status">
   </a>
   <!-- CodeCov(erage) -->
   <a href="https://codecov.io/gh/PTB-M4D/PyDynamic">
-    <img src="https://codecov.io/gh/PTB-M4D/PyDynamic/branch/master/graph/badge.svg"/>
+    <img src="https://codecov.io/gh/PTB-M4D/PyDynamic/branch/master/graph/badge.svg" alt=" PyDynamic's CodeCov badge">
   </a>
   <!-- Codacy -->
   <a href="https://www.codacy.com/gh/PTB-M4D/PyDynamic/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PTB-M4D/PyDynamic&amp;utm_campaign=Badge_Grade">
-    <img src="https://app.codacy.com/project/badge/Grade/db86b58d6fa5446e8408644c8196f5e2"/>
+    <img src="https://app.codacy.com/project/badge/Grade/db86b58d6fa5446e8408644c8196f5e2" alt=" PyDynamic's Codacy badge">
   </a>
   <!-- PyPI Version -->
   <a href="https://pypi.org/project/pydynamic">
-    <img src="https://img.shields.io/pypi/v/pydynamic.svg?label=release&color=blue&style=flat-square" alt="pypi">
+    <img src="https://img.shields.io/pypi/v/pydynamic.svg?label=release&color=blue&style=flat-square" alt=" PyDynamic's PyPI version number">
   </a>
   <!-- PyPI License -->
   <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html">
