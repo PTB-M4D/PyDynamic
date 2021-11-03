@@ -1,24 +1,24 @@
 """Tweet a random sequence of eight letters."""
 
-import random
 import os
 import re
 import string
+from typing import List
 
 import tweepy as tweepy
 
 
-def read_from_file(filename='tweet.txt'):
-    f = open(filename, 'r')
-    content:str = f.read()
+def read_from_file(filename="tweet.txt"):
+    with open(filename, "r") as f:
+        content: str = f.read()
     content = content.lstrip()
-    content = re.sub(' +', ' ', content)
+    content = re.sub(" +", " ", content)
 
     return content
 
 
 def convert_to_bold(a: str) -> str:
-    converted = ''
+    converted = ""
     for c in a:
         print(c)
         if c in string.ascii_letters or c in string.digits:
@@ -29,10 +29,10 @@ def convert_to_bold(a: str) -> str:
                 c = chr(ord(c) + 119737)
             elif c.isdigit():
                 c = chr(ord(c) + 120728)
-        elif c in {' ', '\n', '\t', '\r'}:
-            c = ' '
-        elif c in {'#'}:
-            c= ''
+        elif c in {" ", "\n", "\t", "\r"}:
+            c = " "
+        elif c in {"#"}:
+            c = ""
         else:
             c = c
         converted += c
@@ -41,21 +41,21 @@ def convert_to_bold(a: str) -> str:
 
 
 def format_md_to_unicode(to_format: str) -> str:
-    string_list : [str] = to_format.split('\n')
-    resulting_string : str = ''
+    string_list: List[str] = to_format.split("\n")
+    resulting_string: str = ""
     fragment: str
     for fragment in string_list:
         fragment = fragment.lstrip()
-        to_add = fragment.replace('*', u'\U000025cf')
-        if '#' in fragment:
+        to_add = fragment.replace("*", u"\U000025cf")
+        if "#" in fragment:
             to_add = convert_to_bold(fragment)
-        resulting_string += to_add.lstrip('') + '\n'
+        resulting_string += to_add.lstrip("") + "\n"
     return resulting_string
 
 
 def remove_commit_hash(text: str) -> str:
     new_text = text
-    new_text = re.sub('\(.*\)', '', new_text)
+    new_text = re.sub("\(.*\)", "", new_text)
     return new_text
 
 
