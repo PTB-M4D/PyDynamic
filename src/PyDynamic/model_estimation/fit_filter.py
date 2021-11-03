@@ -15,7 +15,7 @@ This module contains the following functions:
 
 """
 
-__all__ = ["LSIIR", "LSFIR"]
+__all__ = ["LSFIR", "LSIIR"]
 
 import inspect
 from enum import Enum
