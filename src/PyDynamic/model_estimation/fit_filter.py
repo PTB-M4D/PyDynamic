@@ -1000,33 +1000,6 @@ def invLSFIR(
 
     This essentially is a wrapper for a call of :func:`LSFIR` with the according
     parameter set.
-
-    Parameters
-    ----------
-    H : array_like of shape (M,)
-        (Complex) frequency response values
-    N : int
-        FIR filter order
-    tau : int
-        delay of filter
-    f : array_like of shape (M,)
-        frequencies at which H is given
-    Fs : float
-        sampling frequency of digital FIR filter
-    Wt : array_like of shape (M,) or shape (M,M), optional
-        vector of weights for a weighted least-squares method (default results in no
-        weighting)
-
-    Returns
-    -------
-    b : np.ndarray of shape (N+1,)
-        The FIR filter coefficient vector in a 1-D sequence
-
-    References
-    ----------
-    * Elster and Link [Elster2008]_
-
-    .. see_also :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
     """
     print(
         f"invLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
@@ -1048,47 +1021,8 @@ def invLSFIR_unc(
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Design of FIR filter as fit to the reciprocal of a freq. resp. with uncertainties
 
-    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
-    given frequency response for which associated uncertainties are given for its
-    real and imaginary part. Uncertainties are propagated using a truncated svd
-    and linear matrix propagation. This essentially is a wrapper for a call of
-    :func:`LSFIR` with the according parameter set.
-
-    Parameters
-    ----------
-    H : array_like of shape (M,) or (2M,)
-        (Complex) frequency response values in dtype complex or as a vector first
-        containing the real followed by the imaginary parts
-    UH : array_like of shape (2M,2M)
-        uncertainties associated with the real and imaginary part of H
-    N : int
-        FIR filter order
-    tau : int
-        time delay of filter in samples
-    f : array_like of shape (M,)
-        frequencies at which H is given
-    Fs : float
-        sampling frequency of digital FIR filter
-    wt : array_like of shape (2M,), optional
-        vector of weights for a weighted least-squares method (default results in no
-        weighting)
-    verbose : bool, optional
-        whether to print statements to the command line (default = True)
-    trunc_svd_tol : float, optional
-        lower bound for singular values to be considered for pseudo-inverse
-
-    Returns
-    -------
-    b : array_like of shape (N+1,)
-        The FIR filter coefficient vector in a 1-D sequence
-    Ub : array_like of shape (N+1,N+1)
-        uncertainties associated with b
-
-    References
-    ----------
-    * Elster and Link [Elster2008]_
-
-    .. see_also :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
+    This essentially is a wrapper for a call of :func:`LSFIR` with the according
+    parameter set.
     """
     return LSFIR(H, N, f, Fs, tau, wt, verbose, True, UH, trunc_svd_tol=trunc_svd_tol)
 
@@ -1105,48 +1039,7 @@ def invLSFIR_uncMC(
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Design of FIR filter as fit to the reciprocal of a freq. resp. with uncertainties
 
-    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of the
-    frequency response values for which associated uncertainties are given for its
-    real and imaginary part. Uncertainties are propagated using a Monte Carlo method.
-    The Monte Carlo approach may help in cases where the weighting matrix or the
-    Jacobian are ill-conditioned, resulting in false uncertainties associated with
-    the filter coefficients. This essentially is a wrapper for a call of
-    :func:`LSFIR` with the according parameter set.
-
-    Parameters
-    ----------
-    H : array_like of shape (M,) or (2M,)
-        (Complex) frequency response values in dtype complex or as a vector
-        containing the real parts in the first half followed by the imaginary parts
-    UH : array_like of shape (2M,2M), optional
-        uncertainties associated with the real and imaginary part of H
-    N : int
-        FIR filter order
-    tau : int
-        time delay in samples for improved fitting
-    f : array_like of shape (M,)
-        frequencies at which H is given
-    Fs : float
-        sampling frequency of digital FIR filter
-    verbose: bool, optional
-        If True (default) verbose output is printed to the command line
-    mc_runs : int, optional
-        Number of Monte Carlo runs greater than one. Only used, if uncertainties
-        associated with the real and imaginary part of H are provided. Only one of
-        mc_runs and trunc_svd_tol can be provided.
-
-    Returns
-    -------
-    b : array_like of shape (N+1,)
-        The FIR filter coefficient vector in a 1-D sequence
-    Ub : array_like of shape (N+1,N+1)
-        Uncertainties associated with b.  Will be None if UH is not
-        provided or is None.
-
-    References
-    ----------
-    * Elster and Link [Elster2008]_
-
-    .. see_also :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
+    This essentially is a wrapper for a call of :func:`LSFIR` with the according
+    parameter set.
     """
     return LSFIR(H, N, f, Fs, tau, verbose=verbose, inv=True, UH=UH, mc_runs=mc_runs)
