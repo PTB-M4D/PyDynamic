@@ -9,12 +9,6 @@ import string
 import tweepy as tweepy
 
 
-def generate_random_string():
-    letters = string.ascii_lowercase
-    res_string = ''.join(random.choice(letters) for i in range(8))
-    return res_string
-
-
 def read_from_file(filename='tweet.txt'):
     f = open(filename, 'r')
     content:str = f.read()
