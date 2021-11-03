@@ -431,6 +431,40 @@ def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
     return rms
 
 
+def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
+    """Least-squares IIR filter fit to the reciprocal of given frequency response values
+
+    This essentially is a wrapper for a call of :func:`LSIIR` with the according
+    parameter set.
+    """
+    if justFit:
+        return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 0, True)
+    return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 50, True)
+
+
+def invLSIIR_unc(
+    H: np.ndarray,
+    UH: np.ndarray,
+    Nb: int,
+    Na: int,
+    f: np.ndarray,
+    Fs: float,
+    tau: int = 0,
+) -> Tuple[np.ndarray, np.ndarray, int, Optional[np.ndarray]]:
+    """Stable IIR filter as fit to reciprocal of frequency response with uncertainty
+
+    This essentially is a wrapper for a call of :func:`LSIIR` with the according
+    parameter set.
+    """
+    print(
+        f"invLSIIR_unc: Least-squares fit of an order {max(Nb, Na)} digital IIR "
+        f"filter to the reciprocal of a frequency response given by {len(H)} "
+        f"values. Uncertainties of the filter coefficients are evaluated using "
+        "the GUM S2 Monte Carlo method with 1000 runs."
+    )
+    return LSIIR(H, Nb, Na, f, Fs, tau, False, 50, True, UH, 1000)
+
+
 def LSFIR(
     H: np.ndarray,
     N: int,
@@ -1116,108 +1150,3 @@ def invLSFIR_uncMC(
     .. see_also :func:`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
     """
     return LSFIR(H, N, f, Fs, tau, verbose=verbose, inv=True, UH=UH, mc_runs=mc_runs)
-
-
-def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
-    """Least-squares IIR filter fit to the reciprocal of given frequency response values
-
-    Least-squares fit of a digital IIR filter to the reciprocal of a given set
-    of frequency response values and stabilization by pole mapping and introduction
-    of a time delay.
-
-    Parameters
-    ----------
-    H : array_like of shape (M,)
-        (Complex) frequency response values.
-    Nb : int
-        Order of IIR numerator polynomial.
-    Na : int
-        Order of IIR denominator polynomial.
-    f : array_like of shape (M,)
-        Frequencies at which `Hvals` is given.
-    Fs : float
-        Sampling frequency for digital IIR filter.
-    tau : int, optional
-        Initial estimate of time delay for filter stabilization (default = 0). If
-        `justFit = True` this parameter is not used and `tau = 0` will be returned.
-    justFit : bool, optional
-        If True then no stabilization is carried out, if False (default) filter is
-        stabilized.
-    verbose : bool, optional
-        If True (default) be more talkative on stdout. Otherwise no output is written
-        anywhere.
-
-    Returns
-    -------
-    b : array_like
-        The IIR filter numerator coefficient vector in a 1-D sequence.
-    a : array_like
-        The IIR filter denominator coefficient vector in a 1-D sequence.
-    tau : int
-        Filter time delay (in samples).
-
-    References
-    ----------
-    * Eichstädt, Elster, Esward, Hessling [Eichst2010]_
-
-    """
-    if justFit:
-        return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 0, True)
-    return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 50, True)
-
-
-def invLSIIR_unc(
-    H: np.ndarray,
-    UH: np.ndarray,
-    Nb: int,
-    Na: int,
-    f: np.ndarray,
-    Fs: float,
-    tau: int = 0,
-) -> Tuple[np.ndarray, np.ndarray, int, Optional[np.ndarray]]:
-    """Stable IIR filter as fit to reciprocal of frequency response with uncertainty
-
-    Least-squares fit of a digital IIR filter to the reciprocal of a given set
-    of frequency response values with given associated uncertainty.
-    Propagation of uncertainties is carried out using the GUM S2 Monte Carlo method.
-
-    Parameters
-    ----------
-    H : np.ndarray of shape (M,) and dtype complex
-        frequency response values.
-    UH : np.ndarray of shape (2M,2M)
-        uncertainties associated with real and imaginary part of H
-    Nb : int
-        order of IIR numerator polynomial.
-    Na : int
-        order of IIR denominator polynomial.
-    f : np.ndarray of shape (M,)
-        frequencies corresponding to H
-    Fs : float
-        sampling frequency for digital IIR filter.
-    tau : int
-        initial estimate of time delay for filter stabilization.
-
-    Returns
-    -------
-    b, a : np.ndarray
-        IIR filter coefficients
-    tau : int
-        time delay (in samples)
-    Uba : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
-        uncertainties associated with [a[1:],b]
-
-    References
-    ----------
-    * Eichstädt, Elster, Esward and Hessling [Eichst2010]_
-
-    .. seealso:: :mod:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
-                 :mod:`PyDynamic.model_estimation.fit_filter.invLSIIR`
-    """
-    print(
-        f"invLSIIR_unc: Least-squares fit of an order {max(Nb, Na)} digital IIR "
-        f"filter to the reciprocal of a frequency response given by {len(H)} "
-        f"values. Uncertainties of the filter coefficients are evaluated using "
-        "the GUM S2 Monte Carlo method with 1000 runs."
-    )
-    return LSIIR(H, Nb, Na, f, Fs, tau, False, 50, True, UH, 1000)
