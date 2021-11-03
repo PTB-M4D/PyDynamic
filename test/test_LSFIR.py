@@ -776,7 +776,7 @@ def test_compare_invLSFIR_unc_to_invLSFIR_uncMC(
             verbose=True,
         )
     assert_allclose(b, b_mc, rtol=5e-2)
-    assert_allclose(ub, ub_mc, rtol=6e-1)
+    assert_allclose(ub, ub_mc, rtol=7e-1)
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12))
