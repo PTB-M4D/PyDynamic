@@ -11,7 +11,7 @@ formats: all
 build:
   image: latest
 
-# Python environment to build the docs for and install the package in
+# Python environment to build the docs for and install the library in
 python:
   version: "3.8"
   install:
