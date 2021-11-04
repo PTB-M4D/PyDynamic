@@ -182,6 +182,7 @@ In case you add a new feature you generally follow the pattern:
   or [_test_propagate_filter_](https://github.com/PTB-M4D/PyDynamic/blob/master/test/test_propagate_filter.py)
 - write docstrings in the
   [NumPy docstring format](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
+  for all public functions you add
 - as early as possible create a draft pull request onto the upstream's _master_
   branch
 - once you think your changes are ready to merge,
