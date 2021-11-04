@@ -394,6 +394,16 @@ jobs:
           pyenv: ${PYENV}
 
       - run:
+          name: Generate file with tweet's content
+          command: |
+            source venv/bin/activate
+            echo "The generated tweet will be:"
+            echo "PyDynamic $(semantic-release print-version) just got released! \
+                Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
+                #metrologysoftware #measurementuncertainty \
+                #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
+
+      - run:
           name: Preview python-semantic-release actions
           command: |
             unset CIRCLE_PULL_REQUEST CIRCLE_PULL_REQUESTS CI_PULL_REQUEST \
@@ -413,16 +423,6 @@ jobs:
             python-semantic-release would perform the following actions:
             "
             semantic-release --noop publish
-
-      - run:
-          name: Generate file with tweet's content
-          command: |
-            source venv/bin/activate
-            echo "The generated tweet will be:"
-            echo "PyDynamic $(semantic-release print-version) just got released! \
-                Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
-                #metrologysoftware #measurementuncertainty \
-                #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
 
       - persist_to_workspace:
           root: .
