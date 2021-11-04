@@ -98,9 +98,10 @@ releases as a result. We use the following types:
 - _build_: Commits that affect packaging
 - _ci_: Commits that affect the CI pipeline
 - _test_: Commits that apply significant changes to tests
-- _chore_: Commits that affect other non-PyDynamic components (e.g., ReadTheDocs, Git
-, ... )
-- _revert_: commits, which undo previous commits using `git revert`
+- _chore_: Commits that affect other non-PyDynamic components (e.g., ReadTheDocs, Git, 
+  ... )
+- _revert_: commits, which undo previous commits using
+  [`git revert`](https://git-scm.com/docs/git-revert)
 - _refactor_: commits that merely reformulate, rename or similar
 - _style_: commits, which essentially make changes to line breaks and whitespace
 - _wip_: Commits which are not recognizable as one of the above-mentioned types until
