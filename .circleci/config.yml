@@ -229,7 +229,7 @@ workflows:
       - tweet:
           context: Twitter.com publish release
           requires:
-            - preview_release
+            - release
 
 jobs:
 
