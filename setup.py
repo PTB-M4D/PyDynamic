@@ -32,7 +32,7 @@ class Tweet(Command):
 
     def finalize_options(self):
         if self.filename is None:
-            raise Exception("Parameter --filename is missing")
+            raise RuntimeError("Parameter --filename is missing")
 
     def run(self):
         import tweepy
