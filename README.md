@@ -193,5 +193,5 @@ PyDynamic is distributed under the [LGPLv3 license
 except for the module [`impinvar.py`
 ](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/src/PyDynamic/misc/impinvar.py) 
 in the package [`misc`
-](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/src/PyDynamic/misc), 
+](https://pydynamic.readthedocs.io/en/polish_readme/PyDynamic.misc.html), 
 which is distributed under the GPLv3 license.
