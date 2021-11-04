@@ -35,7 +35,7 @@ carefully.
 ### Initial development setup
 
 This guide assumes you already have a valid runtime environment for PyDynamic as
-described in the [installation section of the docs](https://pydynamic.readthedocs.io/en/latest/Install.html#install-known-to-work-dependencies-versions).
+described in the [installation section of the docs](https://pydynamic.readthedocs.io/en/polish_readme/INSTALL.html#install-known-to-work-dependencies-versions).
 To start developing, install the known to work dependencies' versions for your specific
 Python version.
 
