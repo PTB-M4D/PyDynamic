@@ -45,6 +45,8 @@ virtual environments, in which our project specific dependencies are satisfied
 without polluting or breaking other projects' dependencies and to avoid breaking all
 our dependencies in case of an update of our Python distribution.
 
+### Set up a virtual environment
+
 If you are not familiar with [Python virtual environments
 ](https://docs.python.org/3/glossary.html#term-virtual-environment) you can get the
 motivation and an insight into the mechanism in the
@@ -110,11 +112,38 @@ Successfully installed PyDynamic-[...] [...]
 
 That's it!
 
-### Updating to the newest version
+### Optional Jupyter Notebook dependencies
 
-Updates can then be installed on all platforms after activating the virtual environment
-via:
+If you are familiar with Jupyter Notebooks, you find some examples in the _examples_
+subfolder of the source code repository. To execute these you need additional 
+dependencies which you get by appending `[examples]` to PyDynamic in all 
+the above, e.g.
 
 ```shell
-(PyDynamic_venv) $ pip install --upgrade PyDynamic
+(PyDynamic_venv) $ pip install PyDynamic[examples]
+```
+
+### Install known to work dependencies' versions
+
+In case errors arise within PyDynamic, the first thing you can try is installing the
+known to work configuration of dependencies against which we run our test suite. This
+you can easily achieve with our version specific requirements files. First you need
+to install our dependency management package _pip-tools_, then find the Python
+version you are using with PyDynamic. Finally, you install the provided dependency
+versions for your specific Python version. This is all done with the following
+sequence of commands after activating. Change the suffix `-py38` according to the
+Python version you find after executing `(PyDynamic_venv) $ python --version`:
+
+```shell
+(PyDynamic_venv) $ pip install --upgrade pip-tools
+Collecting pip-tools
+[...]
+Successfully installed pip-tools-5.2.1
+(PyDynamic_venv) $ python --version
+Python 3.8.8
+(PyDynamic_venv) $ pip-sync requirements/dev-requirements-py38.txt requirements/requirements-py38.txt
+Collecting [...]
+[...]
+Successfully installed [...]
+(PyDynamic_venv) $
 ```
