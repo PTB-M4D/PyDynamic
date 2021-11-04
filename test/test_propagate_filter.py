@@ -1,14 +1,18 @@
 """Perform test for uncertainty.propagate_filter"""
 import itertools
+from typing import Any, Callable, Dict, Tuple
 
 import numpy as np
 import pytest
 import scipy
+from hypothesis import given, HealthCheck, settings, strategies as hst
+from hypothesis.strategies import composite
+from numpy.testing import assert_allclose, assert_equal
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.testsignals import rect
-from PyDynamic.misc.tools import trimOrPad
+from PyDynamic.misc.tools import shift_uncertainty, trimOrPad
 
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
@@ -19,59 +23,88 @@ from PyDynamic.uncertainty.propagate_filter import (
     IIRuncFilter,
 )
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-from .conftest import random_covariance_matrix
+from .conftest import (
+    hypothesis_covariance_matrix,
+    hypothesis_float_vector,
+    hypothesis_not_negative_float,
+    random_covariance_matrix,
+    scale_matrix_or_vector_to_range,
+)
+
+
+@composite
+def FIRuncFilter_input(
+    draw: Callable, exclude_corr_kind: bool = False
+) -> Dict[str, Any]:
+    filter_length = draw(
+        hst.integers(min_value=2, max_value=100)
+    )  # scipy.linalg.companion requires N >= 2
+    filter_theta = draw(
+        hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e3)
+    )
+    filter_theta_covariance = draw(
+        hst.one_of(
+            hypothesis_covariance_matrix(number_of_rows=filter_length), hst.just(None)
+        )
+    )
+
+    signal_length = draw(hst.integers(min_value=200, max_value=1000))
+    signal = draw(
+        hypothesis_float_vector(length=signal_length, min_value=1e-2, max_value=1e3)
+    )
+
+    if exclude_corr_kind:
+        kind = draw(hst.sampled_from(("float", "diag")))
+    else:
+        kind = draw(hst.sampled_from(("float", "diag", "corr")))
+    if kind == "diag":
+        signal_standard_deviation = draw(
+            hypothesis_float_vector(length=signal_length, min_value=0, max_value=1e2)
+        )
+    elif kind == "corr":
+        random_data = draw(
+            hypothesis_float_vector(
+                length=signal_length // 2, min_value=1e-2, max_value=1e2
+            )
+        )
+        acf = scipy.signal.correlate(random_data, random_data, mode="full")
+
+        scaled_acf = scale_matrix_or_vector_to_range(
+            acf, range_min=1e-10, range_max=1e3
+        )
+        signal_standard_deviation = scaled_acf[len(scaled_acf) // 2 :]
+    else:
+        signal_standard_deviation = draw(hypothesis_not_negative_float(max_value=1e2))
+
+    lowpass_length = draw(
+        hst.integers(min_value=2, max_value=10)
+    )  # scipy.linalg.companion requires N >= 2
+    lowpass = draw(
+        hst.one_of(
+            (
+                hypothesis_float_vector(
+                    length=lowpass_length, min_value=1e-2, max_value=1e2
+                ),
+                hst.just(None),
+            )
+        )
+    )
+
+    shift = draw(hypothesis_not_negative_float(max_value=1e2))
+
+    return {
+        "theta": filter_theta,
+        "Utheta": filter_theta_covariance,
+        "y": signal,
+        "sigma_noise": signal_standard_deviation,
+        "kind": kind,
+        "blow": lowpass,
+        "shift": shift,
+    }
 
 
 def random_array(length):
-    array = np.random.randn(length)
-    return array
-
-
-def random_nonnegative_array(length):
-    array = np.random.random(length)
-    return array
-
-
-def random_rightsided_autocorrelation(length):
-    array = random_array(length)
-    acf = scipy.signal.correlate(array, array, mode="full")
-    return acf[len(acf) // 2 :]
-
-
-def valid_filters():
-    N = np.random.randint(2, 100)  # scipy.linalg.companion requires N >= 2
-    theta = random_array(N)
-
-    return [
-        {"theta": theta, "Utheta": None},
-        {"theta": theta, "Utheta": np.zeros((N, N))},
-        {"theta": theta, "Utheta": random_covariance_matrix(N)},
-    ]
-
-
-def valid_signals():
-    N = np.random.randint(100, 1000)
-    signal = random_array(N)
-
-    return [
-        {"y": signal, "sigma_noise": np.random.randn(), "kind": "float"},
-        {"y": signal, "sigma_noise": random_nonnegative_array(N), "kind": "diag"},
-        {
-            "y": signal,
-            "sigma_noise": random_rightsided_autocorrelation(N // 2),
-            "kind": "corr",
-        },
-    ]
-
-
-def valid_lows():
-    N = np.random.randint(2, 10)  # scipy.linalg.companion requires N >= 2
-    blow = random_array(N)
-
-    return [
-        {"blow": None},
-        {"blow": blow},
-    ]
+    return np.random.randn(length)
 
 
 @pytest.fixture
@@ -110,15 +143,14 @@ def equal_signals():
     return equal_signals
 
 
-@pytest.mark.parametrize("filters", valid_filters())
-@pytest.mark.parametrize("signals", valid_signals())
-@pytest.mark.parametrize("lowpasses", valid_lows())
+@given(FIRuncFilter_input())
+@settings(deadline=None)
 @pytest.mark.slow
-def test_FIRuncFilter(filters, signals, lowpasses):
+def test_FIRuncFilter(fir_unc_filter_input):
     # Check expected output for thinkable permutations of input parameters.
-    y, Uy = FIRuncFilter(**filters, **signals, **lowpasses)
-    assert len(y) == len(signals["y"])
-    assert len(Uy) == len(signals["y"])
+    y, Uy = FIRuncFilter(**fir_unc_filter_input)
+    assert len(y) == len(fir_unc_filter_input["y"])
+    assert len(Uy) == len(fir_unc_filter_input["y"])
 
     # note: a direct comparison against scipy.signal.lfilter is not needed,
     #       as y is already computed using this method
@@ -363,96 +395,199 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
 
     # check that all have the same output, as they are supposed to represent equal cases
     for a, b in itertools.combinations(all_y, 2):
-        assert np.allclose(a, b)
+        assert_allclose(a, b)
 
     for a, b in itertools.combinations(all_uy, 2):
-        assert np.allclose(a, b)
+        assert_allclose(a, b)
 
 
-# in the following test, we exclude the case of a valid signal with uncertainty given as
+@given(FIRuncFilter_input())
+@settings(deadline=None)
+@pytest.mark.slow
+def test_FIRuncFilter_for_correct_output_dimensions_for_full_covariance(
+    fir_unc_filter_input,
+):
+    y_fir, Uy_fir = FIRuncFilter(**fir_unc_filter_input, return_full_covariance=True)
+    assert_equal(len(fir_unc_filter_input["y"]), len(y_fir))
+    assert_equal(Uy_fir.shape, (len(y_fir), len(y_fir)))
+
+
+@given(FIRuncFilter_input())
+@settings(deadline=None)
+@pytest.mark.slow
+def test_FIRuncFilter_for_correct_output_dimensions_for_vector_covariance(
+    fir_unc_filter_input,
+):
+    _, Uy = FIRuncFilter(**fir_unc_filter_input)
+    assert_equal(Uy.shape, (len(fir_unc_filter_input["y"]),))
+
+
+@given(FIRuncFilter_input())
+@settings(deadline=None)
+@pytest.mark.slow
+def test_FIRuncFilter_for_correct_dimension_of_y(fir_unc_filter_input):
+    y_fir = FIRuncFilter(**fir_unc_filter_input)[0]
+    assert_equal(len(fir_unc_filter_input["y"]), len(y_fir))
+
+
+# in the following test, we exclude the case of a valid signal with uncertainty
+# given as
 # the right-sided auto-covariance (acf). This is done, because we currently do not
 # ensure, that the random-drawn acf generates a positive-semidefinite
-# Toeplitz-matrix. Therefore we cannot construct a valid and equivalent input for the
+# Toeplitz-matrix. Therefore we cannot construct a valid and equivalent input for
+# the
 # Monte-Carlo method in that case.
-@pytest.mark.parametrize("filters", valid_filters())
-@pytest.mark.parametrize("signals", valid_signals()[:2])  # exclude kind="corr"
-@pytest.mark.parametrize("lowpasses", valid_lows())
+@given(FIRuncFilter_input(exclude_corr_kind=True))
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+        HealthCheck.too_slow,
+    ],
+    max_examples=10,
+)
 @pytest.mark.slow
-def test_FIRuncFilter_MC_uncertainty_comparison(filters, signals, lowpasses):
+def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     # Check output for thinkable permutations of input parameters against a Monte Carlo
     # approach.
 
     # run method
-    y_fir, Uy_fir = FIRuncFilter(
-        **filters, **signals, **lowpasses, return_full_covariance=True
-    )
+    y_fir, Uy_fir = FIRuncFilter(**fir_unc_filter_input, return_full_covariance=True)
 
     # run Monte Carlo simulation of an FIR
     # adjust input to match conventions of MC
-    x = signals["y"]
-    ux = signals["sigma_noise"]
+    x = fir_unc_filter_input["y"]
+    ux = fir_unc_filter_input["sigma_noise"]
 
-    b = filters["theta"]
-    a = [1.0]
-    if isinstance(filters["Utheta"], np.ndarray):
-        Uab = filters["Utheta"]
+    b = fir_unc_filter_input["theta"]
+    a = np.ones(1)
+    if isinstance(fir_unc_filter_input["Utheta"], np.ndarray):
+        Uab = fir_unc_filter_input["Utheta"]
     else:  # Utheta == None
         Uab = np.zeros((len(b), len(b)))  # MC-method cant deal with Utheta = None
 
-    blow = lowpasses["blow"]
+    blow = fir_unc_filter_input["blow"]
     if isinstance(blow, np.ndarray):
         n_blow = len(blow)
     else:
         n_blow = 0
 
     # run FIR with MC and extract diagonal of returned covariance
-    y_mc, Uy_mc = MC(x, ux, b, a, Uab, blow=blow, runs=2000)
-
-    # HACK for visualization during debugging
-    # import matplotlib.pyplot as plt
-    # fig, ax = plt.subplots(nrows=1, ncols=3)
-    # ax[0].plot(y_fir, label="fir")
-    # ax[0].plot(y_mc, label="mc")
-    # ax[0].set_title("filter: {0}, signal: {1}".format(len(b), len(x)))
-    # ax[0].legend()
-    # ax[1].imshow(Uy_fir)
-    # ax[1].set_title("FIR")
-    # ax[2].imshow(Uy_mc)
-    # ax[2].set_title("MC")
-    # plt.show()
-    # /HACK
-
-    # check basic properties
-    assert np.all(np.diag(Uy_fir) >= 0)
-    assert np.all(np.diag(Uy_mc) >= 0)
-    assert Uy_fir.shape == Uy_mc.shape
+    with capsys.disabled():
+        y_mc, Uy_mc = MC(
+            x,
+            ux,
+            b,
+            a,
+            Uab,
+            blow=blow,
+            runs=2000,
+            shift=-fir_unc_filter_input["shift"],
+            verbose=True,
+        )
 
     # approximate comparison after swing-in of MC-result (which is after the combined
     # length of blow and b)
-    assert np.allclose(
-        Uy_fir[len(b) + n_blow :, len(b) + n_blow :],
-        Uy_mc[len(b) + n_blow :, len(b) + n_blow :],
-        atol=2e-1 * Uy_fir.max(),  # very broad check, increase runs for better fit
-        rtol=1e-1,
+    swing_in_length = len(b) + n_blow
+    relevant_y_fir, relevant_Uy_fir = _set_irrelevant_ranges_to_zero(
+        signal=y_fir,
+        uncertainties=Uy_fir,
+        swing_in_length=swing_in_length,
+        shift=fir_unc_filter_input["shift"],
+    )
+    relevant_y_mc, relevant_Uy_mc = _set_irrelevant_ranges_to_zero(
+        signal=y_mc,
+        uncertainties=Uy_mc,
+        swing_in_length=swing_in_length,
+        shift=fir_unc_filter_input["shift"],
+    )
+
+    # HACK for visualization during debugging
+    # from PyDynamic.misc.tools import plot_vectors_and_covariances_comparison
+    #
+    # plot_vectors_and_covariances_comparison(
+    #     vector_1=relevant_y_fir,
+    #     vector_2=relevant_y_mc,
+    #     covariance_1=relevant_Uy_fir,
+    #     covariance_2=relevant_Uy_mc,
+    #     label_1="fir",
+    #     label_2="mc",
+    #     title=f"filter length: {len(b)}, signal length: {len(x)}, blow: "
+    #     f"{fir_unc_filter_input['blow']}",
+    # )
+    # /HACK
+    assert_allclose(
+        relevant_y_fir,
+        relevant_y_mc,
+        atol=np.max((np.max(np.abs(y_fir)), 2e-1)),
+    )
+    assert_allclose(
+        relevant_Uy_fir,
+        relevant_Uy_mc,
+        atol=np.max((np.max(Uy_fir), 1e-7)),
     )
 
 
-@pytest.mark.parametrize("filters", valid_filters())
-@pytest.mark.parametrize("signals", valid_signals())
-@pytest.mark.parametrize("lowpasses", valid_lows())
+def _set_irrelevant_ranges_to_zero(
+    signal: np.ndarray, uncertainties: np.ndarray, swing_in_length: int, shift: float
+) -> Tuple[np.ndarray, np.ndarray]:
+    relevant_signal_comparison_range_after_swing_in = np.zeros_like(signal, dtype=bool)
+    relevant_uncertainty_comparison_range_after_swing_in = np.zeros_like(
+        uncertainties, dtype=bool
+    )
+    relevant_signal_comparison_range_after_swing_in[swing_in_length:] = 1
+    relevant_uncertainty_comparison_range_after_swing_in[
+        swing_in_length:, swing_in_length:
+    ] = 1
+    (
+        shifted_relevant_signal_comparison_range_after_swing_in,
+        shifted_relevant_uncertainty_comparison_range_after_swing_in,
+    ) = shift_uncertainty(
+        relevant_signal_comparison_range_after_swing_in,
+        relevant_uncertainty_comparison_range_after_swing_in,
+        -int(shift),
+    )
+    signal[np.logical_not(shifted_relevant_signal_comparison_range_after_swing_in)] = 0
+    uncertainties[
+        np.logical_not(shifted_relevant_uncertainty_comparison_range_after_swing_in)
+    ] = 0
+    return signal, uncertainties
+
+
+@given(FIRuncFilter_input())
+@settings(deadline=None)
 @pytest.mark.slow
-def test_FIRuncFilter_legacy_comparison(filters, signals, lowpasses):
-    # Compare output of both functions for thinkable permutations of input parameters.
-    y, Uy = legacy_FIRuncFilter(**filters, **signals, **lowpasses)
-    y2, Uy2 = FIRuncFilter(**filters, **signals, **lowpasses)
+def test_FIRuncFilter_non_negative_main_diagonal_covariance(fir_unc_filter_input):
+    _, Uy_fir = FIRuncFilter(**fir_unc_filter_input, return_full_covariance=True)
+    assert np.all(np.diag(Uy_fir) >= 0)
 
-    # check output dimensions
-    assert len(y2) == len(signals["y"])
-    assert Uy2.shape == (len(signals["y"]),)
 
-    # check value identity
-    assert np.allclose(y, y2)
-    assert np.allclose(Uy, Uy2)
+@given(FIRuncFilter_input())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
+@pytest.mark.slow
+def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
+    legacy_y, legacy_Uy = legacy_FIRuncFilter(**fir_unc_filter_input)
+    with capsys.disabled():
+        current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
+
+    assert_allclose(
+        legacy_y,
+        current_y,
+        atol=1e-15,
+    )
+    assert_allclose(
+        legacy_Uy,
+        current_Uy,
+        atol=np.max((np.max(current_Uy) * 1e-7, 1e-7)),
+        rtol=3e-6,
+    )
 
 
 @pytest.mark.slow
@@ -469,27 +604,22 @@ def test_fir_filter_MC_comparison():
     y_fir, Uy_fir = _fir_filter(x, theta, Ux, Utheta, initial_conditions="zero")
 
     # run FIR with MC and extract diagonal of returned covariance
-    y_mc, Uy_mc = MC(x, Ux, theta, [1.0], Utheta, blow=None, runs=10000)
+    y_mc, Uy_mc = MC(x, Ux, theta, np.ones(1), Utheta, blow=None, runs=10000)
 
     # HACK: for visualization during debugging
-    # import matplotlib.pyplot as plt
-    # fig, ax = plt.subplots(nrows=1, ncols=3)
-    # ax[0].plot(y_fir, label="fir")
-    # ax[0].plot(y_mc, label="mc")
-    # ax[0].set_title("filter: {0}, signal: {1}".format(len(theta), len(x)))
-    # ax[0].legend()
-    # ax[1].imshow(Uy_fir)
-    # ax[1].set_title("FIR")
-    # ax[2].imshow(Uy_mc)
-    # ax[2].set_title("MC")
-    # plt.show()
+    # from PyDynamic.misc.tools import plot_vectors_and_covariances_comparison
+    # plot_vectors_and_covariances_comparison(
+    #     vector_1=y_fir,
+    #     vector_2=y_mc,
+    #     covariance_1=Uy_fir,
+    #     covariance_2=Uy_mc,
+    #     label_1="fir",
+    #     label_2="mc",
+    #     title=f"filter: {len(theta)}, signal: {len(x)}",
+    # )
     # /HACK
-
-    # approximate comparison
-    assert np.all(np.diag(Uy_fir) >= 0)
-    assert np.all(np.diag(Uy_mc) >= 0)
-    assert Uy_fir.shape == Uy_mc.shape
-    assert np.allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
+    assert_allclose(y_fir, y_mc, atol=1e-1, rtol=1e-1)
+    assert_allclose(Uy_fir, Uy_mc, atol=1e-1, rtol=1e-1)
 
 
 def test_IIRuncFilter():
@@ -523,7 +653,12 @@ def fir_filter():
 
 
 @pytest.fixture(scope="module")
-def input_signal():
+def sigma_noise():
+    return 1e-2  # std for input signal
+
+
+@pytest.fixture(scope="module")
+def input_signal(sigma_noise):
 
     # simulate input and output signals
     Fs = 100e3  # sampling frequency (in Hz)
@@ -532,7 +667,6 @@ def input_signal():
     time = np.arange(nx) * Ts  # time values
 
     # input signal + run methods
-    sigma_noise = 1e-2  # std for input signal
     x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)  # generate input signal
     Ux = sigma_noise * np.ones_like(x)  # uncertainty of input signal
 
@@ -596,8 +730,8 @@ def test_IIRuncFilter_identity_nonchunk_chunk(
     y2, Uy2 = run_IIRuncFilter_in_chunks
 
     # check if both ways of calling IIRuncFilter yield the same result
-    assert np.allclose(y1, y2)
-    assert np.allclose(Uy1, Uy2)
+    assert_allclose(y1, y2)
+    assert_allclose(Uy1, Uy2)
 
 
 @pytest.mark.parametrize("kind", ["diag", "corr"])
@@ -612,8 +746,8 @@ def test_FIR_IIR_identity(kind, fir_filter, input_signal):
         kind=kind,
     )
 
-    assert np.allclose(y_fir, y_iir)
-    assert np.allclose(Uy_fir, Uy_iir)
+    assert_allclose(y_fir, y_iir)
+    assert_allclose(Uy_fir, Uy_iir)
 
 
 def test_tf2ss(iir_filter):
@@ -623,10 +757,10 @@ def test_tf2ss(iir_filter):
     A1, B1, C1, D1 = _tf2ss(b, a)
     A2, B2, C2, D2 = scipy.signal.tf2ss(b, a)
 
-    assert np.allclose(A1, A2[::-1, ::-1])
-    assert np.allclose(B1, B2[::-1, ::-1])
-    assert np.allclose(C1, C2[::-1, ::-1])
-    assert np.allclose(D1, D2[::-1, ::-1])
+    assert_allclose(A1, A2[::-1, ::-1])
+    assert_allclose(B1, B2[::-1, ::-1])
+    assert_allclose(C1, C2[::-1, ::-1])
+    assert_allclose(D1, D2[::-1, ::-1])
 
 
 def test_get_derivative_A():
@@ -639,4 +773,12 @@ def test_get_derivative_A():
 
     sliced_diagonal = np.full(p, -1.0)
 
-    assert np.allclose(dA[index1, index2, index3], sliced_diagonal)
+    assert_allclose(dA[index1, index2, index3], sliced_diagonal)
+
+
+def test_IIRuncFilter_raises_warning_for_kind_not_diag_with_scalar_covariance(
+    sigma_noise, iir_filter, input_signal
+):
+    input_signal["Ux"] = sigma_noise
+    with pytest.warns(UserWarning):
+        IIRuncFilter(**input_signal, **iir_filter, kind="corr")

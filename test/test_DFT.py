@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Perform tests on methods to handle DFT and inverse DFT."""
 
 from typing import Callable, Dict, Optional, Tuple, Union
@@ -10,6 +9,7 @@ from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from PyDynamic.misc.testsignals import multi_sine
+
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_DFT import (
     _apply_window,
@@ -21,9 +21,9 @@ from PyDynamic.uncertainty.propagate_DFT import (
 )
 from .conftest import (
     check_no_nans_and_infs,
-    hypothesis_float_vector,
     hypothesis_float_matrix,
     hypothesis_float_square_matrix_strategy,
+    hypothesis_float_vector,
     hypothesis_not_negative_float_strategy,
     VectorAndCompatibleMatrix,
 )
@@ -186,6 +186,7 @@ class TestDFT:
         assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
 
 
+@pytest.mark.slow
 def test_compose_DFT_and_iDFT_with_full_covariance(multisine_testsignal, corrmatrix):
     """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
     x, ux = multisine_testsignal

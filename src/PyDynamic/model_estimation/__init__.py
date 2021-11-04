@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
+"""Fit IIR and FIR filters and identify transfer function models with uncertainties
+
 The package :doc:`PyDynamic.model_estimation` implements methods for the model
 estimation by least-squares fitting and the identification of transfer function models
 with associated uncertainties.
@@ -11,18 +11,7 @@ with associated uncertainties.
      -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
    - `GitHub website <https://www.github.com/PTB-M4D/PyDynamic>`_
 """
+__all__ = ["LSIIR", "LSFIR", "fit_som"]
 
-from .fit_filter import (LSFIR, LSIIR, invLSFIR, invLSFIR_unc, invLSFIR_uncMC,
-                         invLSIIR, invLSIIR_unc)
+from .fit_filter import LSFIR, LSIIR
 from .fit_transfer import fit_som
-
-__all__ = [
-    "LSFIR",
-    "LSIIR",
-    "invLSFIR",
-    "invLSIIR",
-    "invLSFIR_unc",
-    "invLSFIR_uncMC",
-    "invLSIIR_unc",
-    "fit_som",
-]

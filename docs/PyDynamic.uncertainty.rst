@@ -54,5 +54,5 @@ Monte Carlo methods for digital filtering
 Uncertainty evaluation for interpolation
 ----------------------------------------
 
-.. automodule:: PyDynamic.uncertainty.interpolation
+.. automodule:: PyDynamic.uncertainty.interpolate
     :members:

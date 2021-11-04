@@ -1,7 +1,7 @@
 from typing import Dict, Optional, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
-import hypothesis.strategies as st
+import hypothesis.strategies as hst
 import numpy as np
 import pytest
 from hypothesis import assume, given
@@ -94,10 +94,10 @@ def values_uncertainties_kind(
         -------
             The drawn sample to match desired fill_value.
         """
-        float_strategy = st.floats(**float_generic_params)
-        tuple_strategy = st.tuples(float_strategy, float_strategy)
-        string_strategy = st.just("extrapolate")
-        nan_strategy = st.just(np.nan)
+        float_strategy = hst.floats(**float_generic_params)
+        tuple_strategy = hst.tuples(float_strategy, float_strategy)
+        string_strategy = hst.just("extrapolate")
+        nan_strategy = hst.just(np.nan)
         if strategy_spec == "float":
             fill_strategy = float_strategy
         elif strategy_spec == "tuple":
@@ -107,7 +107,7 @@ def values_uncertainties_kind(
         elif strategy_spec == "nan":
             fill_strategy = nan_strategy
         else:
-            fill_strategy = st.one_of(
+            fill_strategy = hst.one_of(
                 float_strategy, tuple_strategy, string_strategy, nan_strategy
             )
         return draw(fill_strategy)
@@ -124,7 +124,7 @@ def values_uncertainties_kind(
     strategy_params = {
         "dtype": np.float,
         "shape": shape_for_x,
-        "elements": st.floats(
+        "elements": hst.floats(
             min_value=-float_abs_max, max_value=float_abs_max, **float_generic_params
         ),
         "unique": True,
@@ -143,11 +143,11 @@ def values_uncertainties_kind(
     uy = draw(hnp.arrays(**strategy_params))
 
     # Draw the interpolation kind from the provided tuple.
-    kind = draw(st.sampled_from(kind_tuple))
+    kind = draw(hst.sampled_from(kind_tuple))
 
     if for_make_equidistant:
         dx = draw(
-            st.floats(
+            hst.floats(
                 min_value=(np.max(x) - np.min(x)) * 1e-3,
                 max_value=(np.max(x) - np.min(x)) / 2,
                 exclude_min=True,
@@ -166,13 +166,13 @@ def values_uncertainties_kind(
         if not extrapolate:
             # In case we do not want to extrapolate, use range of "original"
             # x values as boundaries.
-            strategy_params["elements"] = st.floats(
+            strategy_params["elements"] = hst.floats(
                 min_value=x_min, max_value=x_max, **float_generic_params
             )
             fill_value = fill_unc = np.nan
             # Switch between default value None and intentionally setting to True,
             # which should behave identically.
-            bounds_error = draw(st.one_of(st.just(True), st.none()))
+            bounds_error = draw(hst.one_of(hst.just(True), hst.none()))
         else:
             # In case we want to extrapolate, draw some fill values for the
             # out-of-bounds range. Those will be either single floats or a 2-tuple of
@@ -585,7 +585,7 @@ def test_value_error_for_returnc_interp1d_unc(interp_inputs):
         interp1d_unc(**interp_inputs)
 
 
-@given(st.integers(min_value=3, max_value=1000))
+@given(hst.integers(min_value=3, max_value=1000))
 def test_linear_uy_in_interp1d_unc(
     n,
 ):
@@ -688,7 +688,7 @@ def test_linear_in_make_equidistant(interp_inputs):
     assert np.all(np.amax(interp_inputs["y"]) >= y_new)
 
 
-@given(st.integers(min_value=3, max_value=1000))
+@given(hst.integers(min_value=3, max_value=1000))
 @pytest.mark.slow
 def test_linear_uy_in_make_equidistant(n):
     # Check for given input, if interpolated uncertainties equal 1 and
