@@ -23,7 +23,7 @@ Python library for the analysis of dynamic measurements
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials:
+   :caption: Examples:
 
    Examples
 
