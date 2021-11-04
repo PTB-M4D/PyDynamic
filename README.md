@@ -106,14 +106,19 @@ The installation of PyDynamic is as straightforward as the Python ecosystem sugg
 Detailed instructions on different options to install PyDynamic you can find in the 
 [installation section of the docs](https://pydynamic.readthedocs.io/en/latest/INSTALL.html).
 
-## Contributing to PyDynamic
+## Contributing
 
-If you want to contribute code to the project you find additional set up and related
-information in our [Contribution advices and tips](CONTRIBUTING.md).
-
-If you have a feature request please take a look at the roadmap, and the links
-provided there to find out more about planned and ongoing developments. If you
-have the feeling, something is missing, let us know by opening an issue.
+Whenever you are involved with PyDynamic, please respect our [Code of Conduct
+](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/CODE_OF_CONDUCT.md).
+If you want to contribute back to the project, after reading our Code of Conduct,
+take a look at our open developments in the [project board
+](https://github.com/PTB-M4D/PyDynamic/projects/1), [pull requests
+](https://github.com/PTB-M4D/PyDynamic/pulls) and search [the issues
+](https://github.com/PTB-M4D/PyDynamic/issues). If you find something similar to
+your ideas or troubles, let us know by leaving a comment or remark. If you have
+something new to tell us, feel free to open a feature request or bug report in the
+issues. If you want to contribute code or improve our documentation, please check our
+[contribution advices and tips](https://pydynamic.readthedocs.io/en/polish_README/CONTRIBUTING.html).
 
 If you have downloaded this software, we would be very thankful for letting
 us know. You may, for instance, drop an email to one of the [authors
