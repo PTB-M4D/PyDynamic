@@ -102,7 +102,7 @@ setup(
         f"v{current_release_version}/",
         "Tracker": "https://github.com/PTB-M4D/PyDynamic/issues",
     },
-    install_requires=["matplotlib", "numpy", "pandas", "scipy", "pyparsing<3"],
+    install_requires=["matplotlib", "numpy", "pandas", "scipy"],
     extras_require={
         "examples": ["notebook"],
     },
