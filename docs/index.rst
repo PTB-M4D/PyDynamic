@@ -1,11 +1,10 @@
 :github_url: https://github.com/PTB-M4D/PyDynamic
 
 .. image:: https://raw.githubusercontent.com/PTB-M4D/PyDynamic/polish_README/docs/PyDynamic_logo.svg
+  :alt: PyDynamic logo
 
 Python library for the analysis of dynamic measurements
 =======================================================
-
-  :alt: PyDynamic logo
 
 .. toctree::
    :maxdepth: 2
