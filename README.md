@@ -104,7 +104,7 @@ The documentation for PyDynamic can be found on
 
 The installation of PyDynamic is as straightforward as the Python ecosystem suggests.
 Detailed instructions on different options to install PyDynamic you can find in the 
-[installation section of the docs](https://pydynamic.readthedocs.io/en/latest/INSTALL.html).
+[installation section of the docs](https://pydynamic.readthedocs.io/en/polish_README/INSTALL.html).
 
 ## Contributing
 
@@ -133,8 +133,8 @@ We have collected extended material for an easier introduction to PyDynamic in t
 package _examples_. Detailed assistance on getting started you can find in the
 corresponding sections of the docs:
 
-* [examples](https://pydynamic.readthedocs.io/en/latest/Examples.html)
-* [tutorials](https://pydynamic.readthedocs.io/en/latest/Tutorials.html)
+* [examples](https://pydynamic.readthedocs.io/en/polish_README/Examples.html)
+* [tutorials](https://pydynamic.readthedocs.io/en/polish_README/Tutorials.html)
 
 In various Jupyter Notebooks and scripts we demonstrate the use of
 the provided methods to aid the first steps in PyDynamic. New features are introduced
