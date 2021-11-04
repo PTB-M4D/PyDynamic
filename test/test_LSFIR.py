@@ -1059,7 +1059,7 @@ def test_compare_LSFIR_with_svd_and_with_mc(
     capsys, monte_carlo, freqs, sampling_freq, weight_vector, filter_order
 ):
     with capsys.disabled():
-        b_fir_svd, Ub_fir_svd = LSFIR(
+        b_fir_svd = LSFIR(
             H=monte_carlo["H"],
             N=filter_order,
             f=freqs,
@@ -1069,8 +1069,8 @@ def test_compare_LSFIR_with_svd_and_with_mc(
             verbose=True,
             inv=True,
             UH=monte_carlo["UH"],
-        )
-        b_fir_mc, Ub_fir_mc = LSFIR(
+        )[0]
+        b_fir_mc = LSFIR(
             H=monte_carlo["H"],
             N=filter_order,
             f=freqs,
@@ -1081,7 +1081,7 @@ def test_compare_LSFIR_with_svd_and_with_mc(
             inv=True,
             UH=monte_carlo["UH"],
             mc_runs=10000,
-        )
+        )[0]
     assert_allclose(b_fir_mc, b_fir_svd, rtol=4e-2)
 
 
