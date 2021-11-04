@@ -61,8 +61,9 @@ We use [_black_](https://pypi.org/project/black/) to implement our coding style,
 [_python-semantic-release_](https://github.com/relekang/python-semantic-release) in
 [our pipeline on _CircleCI_](https://app.circleci.com/pipelines/github/PTB-M4D/PyDynamic)
 . All requirements for contributions are derived from this. If you followed the
-steps for the [initial development setup](#Initial-development-setup) you have
-everything at your hands.
+steps for the
+[initial development setup](https://pydynamic.readthedocs.io/en/polish_readme/INSTALL.html#install-known-to-work-dependencies-versions)
+you have everything at your hands.
 
 ### Coding style
 
