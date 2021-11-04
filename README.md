@@ -79,9 +79,6 @@ For the validation of the propagation of uncertainties, the Monte-Carlo
 method can be applied using a memory-efficient implementation of Monte-Carlo
 for digital filtering.
 
-The documentation for PyDynamic can be found on
-[ReadTheDocs](http://pydynamic.readthedocs.io)
-
 ## Package diagram
 
 The fundamental structure of PyDynamic is shown in the following figure.
@@ -97,6 +94,11 @@ from PyDynamic.uncertainty.interpolate import make_equidistant
 from PyDynamic.uncertainty import make_equidistant
 from PyDynamic import make_equidistant
 ```
+
+## Documentation
+
+The documentation for PyDynamic can be found on
+[ReadTheDocs](http://pydynamic.readthedocs.io)
 
 ## Installation
 
