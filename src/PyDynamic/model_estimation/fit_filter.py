@@ -9,20 +9,13 @@ This module contains the following functions:
 
 * :func:`LSIIR`: Least-squares (time-discrete) IIR filter fit to a given frequency
   response or its reciprocal optionally propagating uncertainties.
-* :func:`LSFIR`: Least-squares fit of a digital FIR filter to a given frequency
-  response.
-* :func:`invLSFIR`: Least-squares fit of a digital FIR filter to the reciprocal of a
-  given frequency response.
-* :func:`invLSFIR_unc`: Design of FIR filter as fit to reciprocal of frequency response
-  values with uncertainty propagation via a singular-value decomposition and
-  linear matrix propagation.
-* :func:`invLSFIR_uncMC`: Least-squares (time-discrete) FIR filter fit to a given
+* :func:`LSFIR`: Least-squares (time-discrete) FIR filter fit to a given
   frequency response or its reciprocal optionally propagating uncertainties either
   via Monte Carlo or via a singular-value decomposition and linear matrix propagation.
 
 """
 
-__all__ = ["LSIIR", "LSFIR", "invLSFIR", "invLSFIR_unc", "invLSFIR_uncMC"]
+__all__ = ["LSFIR", "LSIIR"]
 
 import inspect
 from enum import Enum
@@ -385,70 +378,6 @@ def _compute_delayed_filters_freq_resp_via_scipys_freqz(
     return delayed_filters_freq_resp
 
 
-def LSFIR(
-    H: np.ndarray,
-    N: int,
-    tau: int,
-    f: np.ndarray,
-    Fs: float,
-    Wt: Optional[np.ndarray] = None,
-) -> np.ndarray:
-    """Least-squares (time-discrete) digital FIR filter fit to frequency response
-
-    Parameters
-    ----------
-    H : array_like of shape (M,)
-        (Complex) frequency response values
-    N : int
-        FIR filter order
-    tau : int
-        delay of filter
-    f : array_like of shape (M,)
-        Frequencies at which ``H`` is given
-    Fs : float
-        sampling frequency of digital FIR filter.
-    Wt : array_like of shape (M,) or shape (M,M), optional
-        vector of weights
-
-    Returns
-    -------
-    b : np.ndarray of shape (N+1,)
-        The FIR filter coefficient vector in a 1-D sequence
-    """
-
-    print(
-        f"\nLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
-        f"frequency response H given by {len(H)} values.\n"
-    )
-
-    frequencies = f.copy()
-    sampling_frequency = Fs
-
-    n_frequencies = len(frequencies)
-    h_complex = _assemble_complex_from_real_imag(H)
-
-    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_frequency, frequencies
-    )
-
-    weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
-
-    x = _compute_x(N, frequencies, sampling_frequency, weights)
-
-    delayed_h_complex = h_complex * _compute_e_to_the_one_j_omega_tau(omega, tau)
-    iRI = _assemble_real_imag_from_complex(delayed_h_complex)
-
-    bFIR, res = np.linalg.lstsq(x, iRI, rcond=None)[:2]
-
-    if not isinstance(res, np.ndarray):
-        print(
-            "LSFIR: Calculation of FIR filter coefficients finished with residual "
-            f"norm {res}."
-        )
-
-    return bFIR
-
-
 def _assemble_complex_from_real_imag(array: np.ndarray) -> np.ndarray:
     if is_2d_matrix(array):
         array_split_in_two_half = (
@@ -493,216 +422,6 @@ def _assemble_real_imag_from_complex(array: np.ndarray) -> np.ndarray:
     return np.hstack((np.real(array), np.imag(array)))
 
 
-def invLSFIR(
-    H: np.ndarray,
-    N: int,
-    tau: int,
-    f: np.ndarray,
-    Fs: float,
-    Wt: Optional[np.ndarray] = None,
-) -> np.ndarray:
-    """Least-squares (time-discrete) digital FIR filter fit to freq. resp. reciprocal
-
-    Parameters
-    ----------
-    H : array_like of shape (M,)
-        (Complex) frequency response values
-    N : int
-        FIR filter order
-    tau : int
-        delay of filter
-    f : array_like of shape (M,)
-        frequencies at which ``H`` is given
-    Fs : float
-        sampling frequency of digital FIR filter
-    Wt : array_like of shape (M,) or shape (M,M), optional
-        vector of weights for a weighted least-squares method (default results in no
-        weighting)
-
-    Returns
-    -------
-    b : np.ndarray of shape (N+1,)
-        The FIR filter coefficient vector in a 1-D sequence
-
-    References
-    ----------
-    * Elster and Link [Elster2008]_
-
-    .. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
-
-    """
-    print(
-        f"\ninvLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
-        f"reciprocal of a frequency response H given by {len(H)} values.\n"
-    )
-
-    frequencies = f.copy()
-    sampling_frequency = Fs
-
-    n_frequencies = len(frequencies)
-    h_complex = _assemble_complex_from_real_imag(H)
-
-    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_frequency, frequencies
-    )
-
-    weights = _validate_and_return_weights(weights=Wt, expected_len=2 * n_frequencies)
-
-    x = _compute_x(N, frequencies, sampling_frequency, weights)
-
-    delayed_h_complex_recipr = np.reciprocal(
-        h_complex * _compute_e_to_the_one_j_omega_tau(omega, tau)
-    )
-    iRI = _assemble_real_imag_from_complex(delayed_h_complex_recipr)
-
-    return np.linalg.lstsq(x, iRI, rcond=None)[0]
-
-
-def invLSFIR_unc(
-    H: np.ndarray,
-    UH: np.ndarray,
-    N: int,
-    tau: int,
-    f: np.ndarray,
-    Fs: float,
-    wt: Optional[np.ndarray] = None,
-    verbose: Optional[bool] = True,
-    inv: Optional[bool] = True,
-    trunc_svd_tol: Optional[float] = None,
-):
-    """Design of FIR filter as fit to freq. resp. or its reciprocal with uncertainties
-
-    Least-squares fit of a (time-discrete) digital FIR filter to the reciprocal of a
-    given frequency response for which associated uncertainties are given for its
-    real and imaginary part. Uncertainties are propagated using a truncated svd
-    and linear matrix propagation.
-
-    Parameters
-    ----------
-    H : array_like of shape (M,) or (2M,)
-        (Complex) frequency response values in dtype complex or as a vector first
-        containing the real followed by the imaginary parts
-    UH : array_like of shape (2M,2M)
-        uncertainties associated with the real and imaginary part of H
-    N : int
-        FIR filter order
-    tau : int
-        time delay of filter in samples
-    f : array_like of shape (M,)
-        frequencies at which H is given
-    Fs : float
-        sampling frequency of digital FIR filter
-    wt : array_like of shape (2M,), optional
-        vector of weights for a weighted least-squares method (default results in no
-        weighting)
-    verbose : bool, optional
-        whether to print statements to the command line (default = True)
-    inv : bool, optional
-        If False (default) apply the fit to the frequency response values directly,
-        otherwise fit to the reciprocal of the frequency response values
-    trunc_svd_tol : float, optional
-        lower bound for singular values to be considered for pseudo-inverse
-
-    Returns
-    -------
-    b : array_like of shape (N+1,)
-        The FIR filter coefficient vector in a 1-D sequence
-    Ub : array_like of shape (N+1,N+1)
-        uncertainties associated with b
-
-    References
-    ----------
-    * Elster and Link [Elster2008]_
-
-    .. see_also ::mod::`PyDynamic.uncertainty.propagate_filter.FIRuncFilter`
-    """
-    if not inv:
-        raise NotImplementedError(
-            f"\ninvLSFIR_unc: The least-squares fitting of an order {N} digital FIR "
-            f"filter to a frequency response H given by {len(H)} values with "
-            f"propagation of associated uncertainties is not yet implemented. "
-            f"Let us know, if this feature is of interest to you."
-        )
-
-    if verbose:
-        print(
-            f"\ninvLSFIR_unc: Least-squares fit of an order {N} digital FIR filter "
-            f"to the reciprocal of a frequency response H given by {len(H)} values "
-            f"and propagation of associated uncertainties."
-        )
-
-    frequencies = f.copy()
-    sampling_frequency = Fs
-    n_frequencies = len(frequencies)
-
-    # Step 1: Propagation of uncertainties to reciprocal of frequency response
-    runs = 10000
-
-    if not len(H) == UH.shape[0]:
-        # Assume that H is given as complex valued frequency response.
-        RI = _assemble_real_imag_from_complex(H)
-        h_complex = H.copy()
-    else:
-        RI = H.copy()
-        h_complex = _assemble_complex_from_real_imag(H)
-
-    h_complex_recipr = np.reciprocal(h_complex)
-    HRI = np.random.multivariate_normal(RI, UH, runs)  # random draws of real,imag of
-
-    omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
-        sampling_frequency, frequencies
-    )
-    omega_tau = omega * tau
-
-    # Vectorized Monte Carlo for propagation to inverse
-    absHMC = HRI[:, :n_frequencies] ** 2 + HRI[:, n_frequencies:] ** 2
-    HiMC = np.hstack(
-        (
-            (
-                HRI[:, :n_frequencies] * np.tile(np.cos(omega_tau), (runs, 1))
-                + HRI[:, n_frequencies:] * np.tile(np.sin(omega_tau), (runs, 1))
-            )
-            / absHMC,
-            (
-                HRI[:, n_frequencies:] * np.tile(np.cos(omega_tau), (runs, 1))
-                - HRI[:, :n_frequencies] * np.tile(np.sin(omega_tau), (runs, 1))
-            )
-            / absHMC,
-        )
-    )
-    UiH = np.cov(HiMC, rowvar=False)
-
-    # Step 2: Fit filter coefficients and evaluate uncertainties
-    wt = _validate_and_return_weights(weights=wt, expected_len=2 * n_frequencies)
-
-    X = _compute_x(N, frequencies, sampling_frequency, wt)
-    Hri = _assemble_real_imag_from_complex(
-        np.reciprocal(h_complex * _compute_e_to_the_one_j_omega_tau(omega, tau))
-    )
-
-    u, s, v = np.linalg.svd(X, full_matrices=False)
-    if isinstance(trunc_svd_tol, float):
-        s[s < trunc_svd_tol] = 0.0
-    StSInv = np.zeros_like(s)
-    StSInv[s > 0] = s[s > 0] ** (-2)
-
-    M = np.dot(np.dot(np.dot(v.T, np.diag(StSInv)), np.diag(s)), u.T)
-
-    filter_coeffs = np.dot(M, Hri[:, np.newaxis]).flatten()
-    filter_coeffs_uncertainties = np.dot(np.dot(M, UiH), M.T)
-
-    if verbose:
-        Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
-            filter_coeffs, 1.0, tau, omega
-        )
-        residuals_real_imag = _assemble_real_imag_from_complex(
-            Hd - np.reciprocal(h_complex_recipr)
-        )
-        _compute_and_print_rms(residuals_real_imag)
-
-    return filter_coeffs, filter_coeffs_uncertainties
-
-
 def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
     rms = np.sqrt(np.sum(residuals_real_imag ** 2) / (len(residuals_real_imag) // 2))
     print(
@@ -712,7 +431,41 @@ def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
     return rms
 
 
-def invLSFIR_uncMC(
+def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
+    """Least-squares IIR filter fit to the reciprocal of given frequency response values
+
+    This essentially is a wrapper for a call of :func:`LSIIR` with the according
+    parameter set.
+    """
+    if justFit:
+        return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 0, True)
+    return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 50, True)
+
+
+def invLSIIR_unc(
+    H: np.ndarray,
+    UH: np.ndarray,
+    Nb: int,
+    Na: int,
+    f: np.ndarray,
+    Fs: float,
+    tau: int = 0,
+) -> Tuple[np.ndarray, np.ndarray, int, Optional[np.ndarray]]:
+    """Stable IIR filter as fit to reciprocal of frequency response with uncertainty
+
+    This essentially is a wrapper for a call of :func:`LSIIR` with the according
+    parameter set.
+    """
+    print(
+        f"invLSIIR_unc: Least-squares fit of an order {max(Nb, Na)} digital IIR "
+        f"filter to the reciprocal of a frequency response given by {len(H)} "
+        f"values. Uncertainties of the filter coefficients are evaluated using "
+        "the GUM S2 Monte Carlo method with 1000 runs."
+    )
+    return LSIIR(H, Nb, Na, f, Fs, tau, False, 50, True, UH, 1000)
+
+
+def LSFIR(
     H: np.ndarray,
     N: int,
     f: np.ndarray,
@@ -1077,7 +830,7 @@ def _print_fir_welcome_msg(
     else:
         propagation_msg = " without propagation of associated uncertainties"
     print(
-        f"\ninvLSFIR_uncMC: Least-squares fit of an order {filter_order} digital FIR "
+        f"\nLSFIR: Least-squares fit of an order {filter_order} digital FIR "
         f"filter to{' the reciprocal of' if inv else ''} a frequency response given by "
         f"{len(freq_resp_in_provided_shape)} values{propagation_msg}."
     )
@@ -1240,106 +993,58 @@ def _print_fir_result_msg(
     _compute_and_print_rms(residuals_real_imag)
 
 
-def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
-    """Least-squares IIR filter fit to the reciprocal of given frequency response values
-
-    Least-squares fit of a digital IIR filter to the reciprocal of a given set
-    of frequency response values and stabilization by pole mapping and introduction
-    of a time delay.
-
-    Parameters
-    ----------
-    H : array_like of shape (M,)
-        (Complex) frequency response values.
-    Nb : int
-        Order of IIR numerator polynomial.
-    Na : int
-        Order of IIR denominator polynomial.
-    f : array_like of shape (M,)
-        Frequencies at which `Hvals` is given.
-    Fs : float
-        Sampling frequency for digital IIR filter.
-    tau : int, optional
-        Initial estimate of time delay for filter stabilization (default = 0). If
-        `justFit = True` this parameter is not used and `tau = 0` will be returned.
-    justFit : bool, optional
-        If True then no stabilization is carried out, if False (default) filter is
-        stabilized.
-    verbose : bool, optional
-        If True (default) be more talkative on stdout. Otherwise no output is written
-        anywhere.
-
-    Returns
-    -------
-    b : array_like
-        The IIR filter numerator coefficient vector in a 1-D sequence.
-    a : array_like
-        The IIR filter denominator coefficient vector in a 1-D sequence.
-    tau : int
-        Filter time delay (in samples).
-
-    References
-    ----------
-    * Eichstädt, Elster, Esward, Hessling [Eichst2010]_
-
-    """
-    if justFit:
-        return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 0, True)
-    return LSIIR(H, Nb, Na, f, Fs, tau, verbose, 50, True)
-
-
-def invLSIIR_unc(
+def invLSFIR(
     H: np.ndarray,
-    UH: np.ndarray,
-    Nb: int,
-    Na: int,
+    N: int,
+    tau: int,
     f: np.ndarray,
     Fs: float,
-    tau: int = 0,
-) -> Tuple[np.ndarray, np.ndarray, int, Optional[np.ndarray]]:
-    """Stable IIR filter as fit to reciprocal of frequency response with uncertainty
+    Wt: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    """Least-squares (time-discrete) digital FIR filter fit to freq. resp. reciprocal
 
-    Least-squares fit of a digital IIR filter to the reciprocal of a given set
-    of frequency response values with given associated uncertainty.
-    Propagation of uncertainties is carried out using the GUM S2 Monte Carlo method.
-
-    Parameters
-    ----------
-    H : np.ndarray of shape (M,) and dtype complex
-        frequency response values.
-    UH : np.ndarray of shape (2M,2M)
-        uncertainties associated with real and imaginary part of H
-    Nb : int
-        order of IIR numerator polynomial.
-    Na : int
-        order of IIR denominator polynomial.
-    f : np.ndarray of shape (M,)
-        frequencies corresponding to H
-    Fs : float
-        sampling frequency for digital IIR filter.
-    tau : int
-        initial estimate of time delay for filter stabilization.
-
-    Returns
-    -------
-    b, a : np.ndarray
-        IIR filter coefficients
-    tau : int
-        time delay (in samples)
-    Uba : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
-        uncertainties associated with [a[1:],b]
-
-    References
-    ----------
-    * Eichstädt, Elster, Esward and Hessling [Eichst2010]_
-
-    .. seealso:: :mod:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
-                 :mod:`PyDynamic.model_estimation.fit_filter.invLSIIR`
+    This essentially is a wrapper for a call of :func:`LSFIR` with the according
+    parameter set.
     """
     print(
-        f"invLSIIR_unc: Least-squares fit of an order {max(Nb, Na)} digital IIR "
-        f"filter to the reciprocal of a frequency response given by {len(H)} "
-        f"values. Uncertainties of the filter coefficients are evaluated using "
-        "the GUM S2 Monte Carlo method with 1000 runs."
+        f"invLSFIR: Least-squares fit of an order {N} digital FIR filter to the "
+        f"reciprocal of a frequency response H given by {len(H)} values.\n"
     )
-    return LSIIR(H, Nb, Na, f, Fs, tau, False, 50, True, UH, 1000)
+    return LSFIR(H=H, N=N, f=f, Fs=Fs, tau=tau, weights=Wt, verbose=False, inv=True)[0]
+
+
+def invLSFIR_unc(
+    H: np.ndarray,
+    UH: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    wt: Optional[np.ndarray] = None,
+    verbose: Optional[bool] = True,
+    trunc_svd_tol: Optional[float] = None,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Design of FIR filter as fit to the reciprocal of a freq. resp. with uncertainties
+
+    This essentially is a wrapper for a call of :func:`LSFIR` with the according
+    parameter set.
+    """
+    return LSFIR(H, N, f, Fs, tau, wt, verbose, True, UH, trunc_svd_tol=trunc_svd_tol)
+
+
+def invLSFIR_uncMC(
+    H: np.ndarray,
+    UH: np.ndarray,
+    N: int,
+    tau: int,
+    f: np.ndarray,
+    Fs: float,
+    verbose: Optional[bool] = True,
+    mc_runs: Optional[int] = 10000,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Design of FIR filter as fit to the reciprocal of a freq. resp. with uncertainties
+
+    This essentially is a wrapper for a call of :func:`LSFIR` with the according
+    parameter set.
+    """
+    return LSFIR(H, N, f, Fs, tau, verbose=verbose, inv=True, UH=UH, mc_runs=mc_runs)
