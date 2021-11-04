@@ -35,7 +35,7 @@ carefully.
 ### Initial development setup
 
 This guide assumes you already have a valid runtime environment for PyDynamic as
-described in the [installation section of the docs](https://pydynamic.readthedocs.io/en/polish_readme/INSTALL.html#install-known-to-work-dependencies-versions).
+described in the [installation section of the docs](https://pydynamic.readthedocs.io/en/latest/INSTALL.html#install-known-to-work-dependencies-versions).
 To start developing, install the known to work dependencies' versions for your specific
 Python version.
 
@@ -62,7 +62,7 @@ We use [_black_](https://pypi.org/project/black/) to implement our coding style,
 [our pipeline on _CircleCI_](https://app.circleci.com/pipelines/github/PTB-M4D/PyDynamic)
 . All requirements for contributions are derived from this. If you followed the
 steps for the
-[initial development setup](https://pydynamic.readthedocs.io/en/polish_readme/INSTALL.html#install-known-to-work-dependencies-versions)
+[initial development setup](https://pydynamic.readthedocs.io/en/latest/INSTALL.html#install-known-to-work-dependencies-versions)
 you have everything at your hands.
 
 ### Coding style
@@ -85,7 +85,7 @@ machine-readable.
 are required for the following:
 
 - Releasing automatically according to [semantic versioning](https://semver.org/)
-- [Generating  a changelog automatically](https://pydynamic.readthedocs.io/en/polish_readme/CHANGELOG.html)
+- [Generating  a changelog automatically](https://pydynamic.readthedocs.io/en/latest/CHANGELOG.html)
 
 Parts of the commit messages and links appear in the changelogs of subsequent
 releases as a result. We use the following types:

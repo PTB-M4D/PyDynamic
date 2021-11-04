@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/PTB-M4D/PyDynamic/polish_README/docs/PyDynamic_logo.svg" alt="the logo of PyDynamic" title="PyDynamic logo">
+<img src="https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_logo.svg" alt="the logo of PyDynamic" title="PyDynamic logo">
 <p align="center">
   <!-- CircleCI Tests -->
   <a href="https://circleci.com/gh/PTB-M4D/PyDynamic"><img alt="CircleCI pipeline status badge" src="https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield"></a>
@@ -104,12 +104,12 @@ The documentation for PyDynamic can be found on
 
 The installation of PyDynamic is as straightforward as the Python ecosystem suggests.
 Detailed instructions on different options to install PyDynamic you can find in the 
-[installation section of the docs](https://pydynamic.readthedocs.io/en/polish_README/INSTALL.html).
+[installation section of the docs](https://pydynamic.readthedocs.io/en/latest/INSTALL.html).
 
 ## Contributing
 
 Whenever you are involved with PyDynamic, please respect our [Code of Conduct
-](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/CODE_OF_CONDUCT.md).
+](https://github.com/PTB-M4D/PyDynamic/blob/master/CODE_OF_CONDUCT.md).
 If you want to contribute back to the project, after reading our Code of Conduct,
 take a look at our open developments in the [project board
 ](https://github.com/PTB-M4D/PyDynamic/projects/1), [pull requests
@@ -118,7 +118,7 @@ take a look at our open developments in the [project board
 your ideas or troubles, let us know by leaving a comment or remark. If you have
 something new to tell us, feel free to open a feature request or bug report in the
 issues. If you want to contribute code or improve our documentation, please check our
-[contribution advices and tips](https://pydynamic.readthedocs.io/en/polish_README/CONTRIBUTING.html).
+[contribution advices and tips](https://pydynamic.readthedocs.io/en/latest/CONTRIBUTING.html).
 
 If you have downloaded this software, we would be very thankful for letting
 us know. You may, for instance, drop an email to one of the [authors
@@ -133,8 +133,8 @@ We have collected extended material for an easier introduction to PyDynamic in t
 package _examples_. Detailed assistance on getting started you can find in the
 corresponding sections of the docs:
 
-* [examples](https://pydynamic.readthedocs.io/en/polish_readme/Examples.html)
-* [tutorials](https://pydynamic.readthedocs.io/en/polish_readme/Tutorials.html)
+* [examples](https://pydynamic.readthedocs.io/en/latest/Examples.html)
+* [tutorials](https://pydynamic.readthedocs.io/en/latest/Tutorials.html)
 
 In various Jupyter Notebooks and scripts we demonstrate the use of
 the provided methods to aid the first steps in PyDynamic. New features are introduced
@@ -189,9 +189,9 @@ consequential damage arising in connection with the use of this software.
 ## License
 
 PyDynamic is distributed under the [LGPLv3 license
-](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/licence.txt)
+](https://github.com/PTB-M4D/PyDynamic/blob/master/licence.txt)
 except for the module [`impinvar.py`
-](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/src/PyDynamic/misc/impinvar.py) 
+](https://github.com/PTB-M4D/PyDynamic/blob/master/src/PyDynamic/misc/impinvar.py) 
 in the package [`misc`
-](https://pydynamic.readthedocs.io/en/polish_readme/PyDynamic.misc.html), 
+](https://pydynamic.readthedocs.io/en/master/PyDynamic.misc.html), 
 which is distributed under the GPLv3 license.
