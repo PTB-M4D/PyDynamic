@@ -1,3 +1,4 @@
+<img src="https://raw.githubusercontent.com/PTB-M4D/PyDynamic/polish_README/docs/PyDynamic_logo.svg" alt="the logo of PyDynamic" title="PyDynamic logo">
 <p align="center">
   <!-- CircleCI Tests -->
   <a href="https://circleci.com/gh/PTB-M4D/PyDynamic"><img alt="CircleCI pipeline status badge" src="https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield"></a>
@@ -213,7 +214,7 @@ Successfully installed [...]
 ## Contributing to PyDynamic
 
 If you want to contribute code to the project you find additional set up and related
-information in our [Contribution advices and tips](docs/CONTRIBUTING.md).
+information in our [Contribution advices and tips](CONTRIBUTING.md).
 
 If you have a feature request please take a look at the roadmap, and the links
 provided there to find out more about planned and ongoing developments. If you
