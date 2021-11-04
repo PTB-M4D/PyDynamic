@@ -194,6 +194,9 @@ pygments_style = "colorful"
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
 
+# A list of warning types to suppress arbitrary warning messages.
+suppress_warnings = ["epub.unknown_project_files"]
+
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
 
