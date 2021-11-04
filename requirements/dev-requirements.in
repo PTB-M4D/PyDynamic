@@ -11,4 +11,5 @@ ipython
 recommonmark
 black
 nbsphinx
+ipykernel
 tweepy

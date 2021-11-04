@@ -102,10 +102,15 @@ iniconfig==1.1.1
     # via pytest
 invoke==1.6.0
     # via python-semantic-release
-ipython==7.16.1
+ipykernel==5.5.6
     # via -r requirements/dev-requirements.in
+ipython==7.16.1
+    # via
+    #   -r requirements/dev-requirements.in
+    #   ipykernel
 ipython-genutils==0.2.0
     # via
+    #   ipykernel
     #   nbformat
     #   traitlets
 isort==5.9.3
@@ -124,7 +129,9 @@ jinja2==3.0.1
 jsonschema==3.2.0
     # via nbformat
 jupyter-client==7.0.2
-    # via nbclient
+    # via
+    #   ipykernel
+    #   nbclient
 jupyter-core==4.7.1
     # via
     #   jupyter-client
@@ -316,13 +323,16 @@ tomli==1.2.1
 tomlkit==0.7.0
     # via python-semantic-release
 tornado==6.1
-    # via jupyter-client
+    # via
+    #   ipykernel
+    #   jupyter-client
 tox==3.24.3
     # via -r requirements/dev-requirements.in
 tqdm==4.62.2
     # via twine
 traitlets==4.3.3
     # via
+    #   ipykernel
     #   ipython
     #   jupyter-client
     #   jupyter-core
