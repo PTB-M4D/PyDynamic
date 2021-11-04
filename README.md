@@ -188,5 +188,10 @@ consequential damage arising in connection with the use of this software.
 
 ## License
 
-PyDynamic is distributed under the LGPLv3 license except for the module `impinvar.
-py` in the package `misc`, which is distributed under the GPLv3 license.
+PyDynamic is distributed under the [LGPLv3 license
+](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/licence.txt)
+except for the module [`impinvar.py`
+](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/src/PyDynamic/misc/impinvar.py) 
+in the package [`misc`
+](https://github.com/PTB-M4D/PyDynamic/blob/polish_README/src/PyDynamic/misc), 
+which is distributed under the GPLv3 license.
