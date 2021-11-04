@@ -46,7 +46,7 @@ extensions = [
 # https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
 html_theme_options = {
     # True hides the + signs to expand the menu entries in the sidebar.
-    'collapse_navigation': False,
+    "collapse_navigation": False,
 }
 
 # This should make SciPy documentation available inside our docs.
@@ -56,12 +56,8 @@ intersphinx_mapping = {
         "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
     ),
-    "np": (
-        "https://docs.scipy.org/doc/numpy/",
-        None,
-    ),
+    "np": ("https://docs.scipy.org/doc/numpy/", None),
     "Python": ("https://docs.python.org/3", None),
-
 }
 
 nbsphinx_allow_errors = True
