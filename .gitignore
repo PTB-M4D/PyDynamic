@@ -4,6 +4,11 @@ build/
 dist/
 PyDynamic.egg-info/
 docs/_build
+docs/CHANGELOG.md
+docs/CONTRIBUTING.md
+docs/INSTALL.md
+docs/README.md
+docs/**/*.ipynb
 
 # Testing artifacts #
 #####################
