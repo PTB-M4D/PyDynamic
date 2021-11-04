@@ -45,6 +45,20 @@ Met4FoF</a> and the German research project <a href="https://famous-project.
 eu">FAMOUS</a>.
 </p>
 
+## Table of content
+
+- [Features](#features)
+- [Package diagram](#package-diagram)
+- [Documentation](#documentation)
+- [Installation](#installation)
+- [Contributing](#contributing)
+- [Examples](#examples)
+- [Roadmap](#roadmap)
+- [Citation](#citation)
+- [Acknowledgement](#acknowledgement)
+- [Disclaimer](#disclaimer)
+- [License](#license)
+
 ## Features
 
 PyDynamic offers propagation of *uncertainties* for
