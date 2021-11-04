@@ -12,9 +12,9 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-
-import sys
 import os
+import shutil
+import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -46,7 +46,7 @@ extensions = [
 # https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
 html_theme_options = {
     # True hides the + signs to expand the menu entries in the sidebar.
-    'collapse_navigation': False,
+    "collapse_navigation": False,
 }
 
 # This should make SciPy documentation available inside our docs.
@@ -56,15 +56,74 @@ intersphinx_mapping = {
         "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
     ),
-    "np": (
-        "https://docs.scipy.org/doc/numpy/",
-        None,
-    ),
+    "np": ("https://docs.scipy.org/doc/numpy/", None),
     "Python": ("https://docs.python.org/3", None),
-
 }
+# We keep the objects.inv files in our docs folder to get hints on how to specify the
+# cross-references. More on the topic can be found here:
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+# The objects.inv we gathered by the command:
+# $ python -msphinx.ext.intersphinx https://docs.python.org/3/objects.inv
+# which we took from the linked page (almost at the very bottom at the time of
+# writing this).
 
 nbsphinx_allow_errors = True
+
+################################################################################
+# This part is originally taken from
+# https://github.com/cornellius-gp/gpytorch/issues/new/choose?permalink=https%3A%2F%2Fgithub.com%2Fcornellius-gp%2Fgpytorch%2Fblob%2F0b28dd0b8430a0df9838593e7e632dc01d20bcf4%2Fdocs%2Fsource%2Fconf.py%23L107
+#
+# Copy over examples and tutorials and all other folders to docs' source
+# This makes it so that nbsphinx can properly load the notebook images
+
+md_files_from_root_into_docs = {
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "INSTALL.md",
+    "CODE_OF_CONDUCT.md",
+}
+
+for file_from_root in md_files_from_root_into_docs:
+    shutil.copyfile(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", file_from_root)),
+        os.path.join(os.path.dirname(__file__), file_from_root),
+    )
+
+
+def assemble_path_dict_to_copy_files(source: str, destination: str) -> dict:
+    # Function to construct the desired dict structure for the folders to copy.
+    return {"source": source, "destination": destination}
+
+
+# Set up all paths for source and destination folders.
+tutorials_source = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "src", "PyDynamic", "examples")
+)
+tutorials_dest = os.path.abspath(os.path.join(os.path.dirname(__file__), "examples"))
+
+# Assemble the list of dicts of all source and destination folders to copy.
+path_dicts = [
+    assemble_path_dict_to_copy_files(tutorials_source, tutorials_dest),
+]
+
+# Do the actual copying.
+for path_dict in path_dicts:
+    source_folder = path_dict["source"]
+    dest_folder = path_dict["destination"]
+    if os.path.exists(dest_folder):
+        shutil.rmtree(dest_folder)
+    os.mkdir(dest_folder)
+
+    for root, dirs, files in os.walk(source_folder):
+        for dr in dirs:
+            os.mkdir(os.path.join(root.replace(source_folder, dest_folder), dr))
+        for fil in files:
+            if os.path.splitext(fil)[1] in [".ipynb", ".md", ".rst"]:
+                source_filename = os.path.join(root, fil)
+                dest_filename = source_filename.replace(source_folder, dest_folder)
+                shutil.copyfile(source_filename, dest_filename)
+################################################################################
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -134,6 +193,9 @@ pygments_style = "colorful"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
+
+# A list of warning types to suppress arbitrary warning messages.
+suppress_warnings = ["epub.unknown_project_files"]
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False

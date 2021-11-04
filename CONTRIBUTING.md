@@ -35,30 +35,9 @@ carefully.
 ### Initial development setup
 
 This guide assumes you already have a valid runtime environment for PyDynamic as
-described in the [README](https://github.com/PTB-M4D/PyDynamic/blob/master/README.md).
-To start developing, install the required dependencies for your specific Python
-version. To find it, activate the desired virtual environment and execute:
-
-```shell
-(PyDynamic_venv) $ python --version
-Python 3.8.8
-```
-
-Then upgrade/install _pip_ and _pip-tools_ which we use to pin our dependencies to
-specific versions:
- 
-```shell
-(PyDynamic_venv) $ pip install --upgrade pip pip-tools
-```
-
-You can then initially install or at any later time update
-all dependencies to the versions we use. From the repository root run _pip-tools_'
-command [`sync`](https://pypi.org/project/pip-tools/#example-usage-for-pip-sync)
-e.g., for Python 3.9:
-
-```shell
-(PyDynamic_venv) $ python -m piptools sync requirements/dev-requirements-py39.txt requirements/requirements-py39.txt
-```
+described in the [installation section of the docs](https://pydynamic.readthedocs.io/en/latest/INSTALL.html#install-known-to-work-dependencies-versions).
+To start developing, install the known to work dependencies' versions for your specific
+Python version.
 
 Afterwards you should always install PyDynamic itself in
 ["development mode"](https://packaging.python.org/tutorials/installing-packages/#installing-from-a-local-src-tree)
@@ -68,7 +47,7 @@ into your virtual environment to be able to properly test against the shipped ve
 (PyDynamic_venv) $ python -m pip install -e .
 ```
 
-For the testing refer to [the according testing section in this guide](#Testing).
+For the testing refer to [the according testing section in this guide](#testing).
 
 ### Advised toolset
 
@@ -82,8 +61,9 @@ We use [_black_](https://pypi.org/project/black/) to implement our coding style,
 [_python-semantic-release_](https://github.com/relekang/python-semantic-release) in
 [our pipeline on _CircleCI_](https://app.circleci.com/pipelines/github/PTB-M4D/PyDynamic)
 . All requirements for contributions are derived from this. If you followed the
-steps for the [initial development setup](#Initial-development-setup) you have
-everything at your hands.
+steps for the
+[initial development setup](https://pydynamic.readthedocs.io/en/latest/INSTALL.html#install-known-to-work-dependencies-versions)
+you have everything at your hands.
 
 ### Coding style
 
@@ -105,7 +85,7 @@ machine-readable.
 are required for the following:
 
 - Releasing automatically according to [semantic versioning](https://semver.org/)
-- [Generating  a changelog automatically](https://github.com/PTB-M4D/PyDynamic/releases/tag/v1.4.0)
+- [Generating  a changelog automatically](https://pydynamic.readthedocs.io/en/latest/CHANGELOG.html)
 
 Parts of the commit messages and links appear in the changelogs of subsequent
 releases as a result. We use the following types:
@@ -118,9 +98,10 @@ releases as a result. We use the following types:
 - _build_: Commits that affect packaging
 - _ci_: Commits that affect the CI pipeline
 - _test_: Commits that apply significant changes to tests
-- _chore_: Commits that affect other non-PyDynamic components (e.g., ReadTheDocs, Git
-, ... )
-- _revert_: commits, which undo previous commits using `git revert`
+- _chore_: Commits that affect other non-PyDynamic components (e.g., ReadTheDocs, Git, 
+  ... )
+- _revert_: commits, which undo previous commits using
+  [`git revert`](https://git-scm.com/docs/git-revert)
 - _refactor_: commits that merely reformulate, rename or similar
 - _style_: commits, which essentially make changes to line breaks and whitespace
 - _wip_: Commits which are not recognizable as one of the above-mentioned types until
@@ -150,7 +131,9 @@ If a commit changes parts of PyDynamic's public interface so that previously wri
 code may no longer be executable, it is considered a BREAKING CHANGE (correlating
 with MAJOR in semantic versioning). This has to be marked by putting _BREAKING
  CHANGE_ in the footer of the message as described in the [conventional commit messages
-](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+](https://www.conventionalcommits.org/en/v1.0.0/#summary). The introduced change and
+especially how to convert breaking code to further work should follow without a blank
+line and will be included in the changelog in full length.
 
 #### Examples
 
@@ -199,6 +182,7 @@ In case you add a new feature you generally follow the pattern:
   or [_test_propagate_filter_](https://github.com/PTB-M4D/PyDynamic/blob/master/test/test_propagate_filter.py)
 - write docstrings in the
   [NumPy docstring format](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
+  for all public functions you add
 - as early as possible create a draft pull request onto the upstream's _master_
   branch
 - once you think your changes are ready to merge,
