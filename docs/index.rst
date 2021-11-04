@@ -28,6 +28,12 @@ Python library for the analysis of dynamic measurements
    Examples
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Tutorials:
+
+   Tutorials
+
+.. toctree::
    :maxdepth: 1
    :caption: Code Reference:
 
@@ -36,12 +42,6 @@ Python library for the analysis of dynamic measurements
    PyDynamic.deconvolution
    PyDynamic.identification
    PyDynamic.misc
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Tutorials:
-
-   Tutorials
 
 Indices and tables
 ==================
