@@ -157,7 +157,7 @@ take a look at the [project board](https://github.com/PTB-M4D/PyDynamic/projects
 ## Citation
 
 If you publish results obtained with the help of PyDynamic, please use the above linked
-[Zenodo DOI](https://zenodo.org/badge/latestdoi/34848642) for the code itself or cite
+[Zenodo DOI](https://doi.org/10.5281/zenodo.1489877) for the code itself or cite
 
 Sascha Eichstädt, Clemens Elster, Ian M. Smith, and Trevor J. Esward
 *Evaluation of dynamic measurement uncertainty – an open-source software
