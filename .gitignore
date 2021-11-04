@@ -8,6 +8,7 @@ docs/CHANGELOG.md
 docs/CONTRIBUTING.md
 docs/INSTALL.md
 docs/README.md
+docs/CODE_OF_CONDUCT.md
 docs/**/*.ipynb
 
 # Testing artifacts #
