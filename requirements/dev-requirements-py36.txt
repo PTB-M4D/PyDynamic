@@ -6,7 +6,7 @@
 #
 alabaster==0.7.12
     # via sphinx
-astroid==2.8.4
+astroid==2.7.3
     # via pylint
 async-generator==1.10
     # via nbclient
@@ -17,23 +17,21 @@ attrs==21.2.0
     #   pytest
 babel==2.9.1
     # via sphinx
-backcall==0.2.0
-    # via ipython
 backports.entry-points-selectable==1.1.0
     # via virtualenv
-black==21.10b0
+black==21.8b0
     # via -r requirements/dev-requirements.in
 bleach==4.1.0
     # via
     #   nbconvert
     #   readme-renderer
-certifi==2021.10.8
+certifi==2021.5.30
     # via requests
-cffi==1.15.0
+cffi==1.14.6
     # via cryptography
-charset-normalizer==2.0.7
+charset-normalizer==2.0.4
     # via requests
-click==8.0.3
+click==8.0.1
     # via
     #   black
     #   click-log
@@ -44,21 +42,19 @@ colorama==0.4.4
     # via twine
 commonmark==0.9.1
     # via recommonmark
-coverage[toml]==6.1.1
+coverage==5.5
     # via pytest-cov
-cryptography==35.0.0
+cryptography==3.4.8
     # via secretstorage
 dataclasses==0.8
     # via black
-decorator==5.1.0
-    # via
-    #   ipython
-    #   traitlets
+decorator==5.0.9
+    # via traitlets
 defusedxml==0.7.1
     # via nbconvert
-distlib==0.3.3
+distlib==0.3.2
     # via virtualenv
-docutils==0.17.1
+docutils==0.16
     # via
     #   nbsphinx
     #   readme-renderer
@@ -71,17 +67,17 @@ entrypoints==0.3
     # via
     #   jupyter-client
     #   nbconvert
-filelock==3.3.2
+filelock==3.0.12
     # via
     #   tox
     #   virtualenv
-gitdb==4.0.9
+gitdb==4.0.7
     # via gitpython
 gitpython==3.1.18
     # via python-semantic-release
-hypothesis==6.24.1
+hypothesis==6.20.0
     # via -r requirements/dev-requirements.in
-idna==3.3
+idna==3.2
     # via requests
 imagesize==1.2.0
     # via sphinx
@@ -96,43 +92,39 @@ importlib-metadata==4.8.1
     #   tox
     #   twine
     #   virtualenv
-importlib-resources==5.4.0
+importlib-resources==5.2.2
     # via virtualenv
 iniconfig==1.1.1
     # via pytest
 invoke==1.6.0
     # via python-semantic-release
-ipython==7.16.1
-    # via -r requirements/dev-requirements.in
 ipython-genutils==0.2.0
     # via
     #   nbformat
     #   traitlets
-isort==5.10.0
+isort==5.9.3
     # via pylint
-jedi==0.18.0
-    # via ipython
 jeepney==0.7.1
     # via
     #   keyring
     #   secretstorage
-jinja2==3.0.2
+jinja2==3.0.1
     # via
     #   nbconvert
     #   nbsphinx
     #   sphinx
 jsonschema==3.2.0
     # via nbformat
-jupyter-client==7.0.6
+jupyter-client==7.0.2
     # via nbclient
-jupyter-core==4.9.1
+jupyter-core==4.7.1
     # via
     #   jupyter-client
     #   nbconvert
     #   nbformat
 jupyterlab-pygments==0.1.2
     # via nbconvert
-keyring==23.2.1
+keyring==23.1.0
     # via twine
 lazy-object-proxy==1.6.0
     # via astroid
@@ -159,26 +151,20 @@ nest-asyncio==1.5.1
     # via
     #   jupyter-client
     #   nbclient
-packaging==21.2
+packaging==21.0
     # via
     #   bleach
     #   pytest
     #   setuptools-scm
     #   sphinx
     #   tox
-pandocfilters==1.5.0
+pandocfilters==1.4.3
     # via nbconvert
-parso==0.8.2
-    # via jedi
 pathspec==0.9.0
     # via black
-pexpect==4.8.0
-    # via ipython
-pickleshare==0.7.5
-    # via ipython
 pkginfo==1.7.1
     # via twine
-platformdirs==2.4.0
+platformdirs==2.3.0
     # via
     #   black
     #   pylint
@@ -187,11 +173,7 @@ pluggy==1.0.0
     # via
     #   pytest
     #   tox
-prompt-toolkit==3.0.22
-    # via ipython
-ptyprocess==0.7.0
-    # via pexpect
-py==1.11.0
+py==1.10.0
     # via
     #   pytest
     #   tox
@@ -199,12 +181,11 @@ pycparser==2.20
     # via cffi
 pygments==2.10.0
     # via
-    #   ipython
     #   jupyterlab-pygments
     #   nbconvert
     #   readme-renderer
     #   sphinx
-pylint==2.11.1
+pylint==2.10.2
     # via -r requirements/dev-requirements.in
 pyparsing==2.4.7
     # via
@@ -216,7 +197,7 @@ pytest==6.2.5
     # via
     #   -r requirements/dev-requirements.in
     #   pytest-cov
-pytest-cov==3.0.0
+pytest-cov==2.12.1
     # via -r requirements/dev-requirements.in
 python-dateutil==2.8.2
     # via
@@ -226,17 +207,17 @@ python-gitlab==2.10.1
     # via python-semantic-release
 python-semantic-release==7.19.2
     # via -r requirements/dev-requirements.in
-pytz==2021.3
+pytz==2021.1
     # via
     #   -c requirements/requirements-py36.txt
     #   babel
-pyzmq==22.3.0
+pyzmq==22.2.1
     # via jupyter-client
-readme-renderer==30.0
+readme-renderer==29.0
     # via twine
 recommonmark==0.7.1
     # via -r requirements/dev-requirements.in
-regex==2021.11.2
+regex==2021.8.28
     # via black
 requests==2.26.0
     # via
@@ -251,13 +232,13 @@ requests-toolbelt==0.9.1
     #   twine
 rfc3986==1.5.0
     # via twine
-rope==0.21.0
+rope==0.19.0
     # via -r requirements/dev-requirements.in
 secretstorage==3.3.1
     # via keyring
 semver==2.13.0
     # via python-semantic-release
-setuptools-scm==6.3.2
+setuptools-scm==6.3.1
     # via dotty-dict
 six==1.16.0
     # via
@@ -265,22 +246,23 @@ six==1.16.0
     #   bleach
     #   jsonschema
     #   python-dateutil
+    #   readme-renderer
     #   tox
     #   traitlets
     #   virtualenv
-smmap==5.0.0
+smmap==4.0.0
     # via gitdb
 snowballstemmer==2.1.0
     # via sphinx
 sortedcontainers==2.4.0
     # via hypothesis
-sphinx==4.2.0
+sphinx==4.1.2
     # via
     #   -r requirements/dev-requirements.in
     #   nbsphinx
     #   recommonmark
     #   sphinx-rtd-theme
-sphinx-rtd-theme==1.0.0
+sphinx-rtd-theme==0.5.2
     # via -r requirements/dev-requirements.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
@@ -300,30 +282,29 @@ toml==0.10.2
     # via
     #   pylint
     #   pytest
+    #   pytest-cov
     #   tox
-tomli==1.2.2
+tomli==1.2.1
     # via
     #   black
-    #   coverage
     #   setuptools-scm
 tomlkit==0.7.0
     # via python-semantic-release
 tornado==6.1
     # via jupyter-client
-tox==3.24.4
+tox==3.24.3
     # via -r requirements/dev-requirements.in
-tqdm==4.62.3
+tqdm==4.62.2
     # via twine
 traitlets==4.3.3
     # via
-    #   ipython
     #   jupyter-client
     #   jupyter-core
     #   nbclient
     #   nbconvert
     #   nbformat
     #   nbsphinx
-twine==3.5.0
+twine==3.4.2
     # via python-semantic-release
 typed-ast==1.4.3
     # via
@@ -335,20 +316,17 @@ typing-extensions==3.10.0.2
     #   black
     #   gitpython
     #   importlib-metadata
-    #   pylint
-urllib3==1.26.7
+urllib3==1.26.6
     # via requests
-virtualenv==20.10.0
+virtualenv==20.7.2
     # via tox
-wcwidth==0.2.5
-    # via prompt-toolkit
 webencodings==0.5.1
     # via bleach
 wheel==0.37.0
     # via python-semantic-release
-wrapt==1.13.3
+wrapt==1.12.1
     # via astroid
-zipp==3.6.0
+zipp==3.5.0
     # via
     #   importlib-metadata
     #   importlib-resources

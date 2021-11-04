@@ -7,7 +7,6 @@ pylint
 rope
 sphinx
 sphinx-rtd-theme
-ipython
 recommonmark
 black
 nbsphinx
