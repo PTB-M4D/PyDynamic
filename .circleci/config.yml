@@ -26,6 +26,19 @@ executors:
       - image: circleci/python:3.9
     environment:
       PYENV: "py39"
+  tweeter:
+    working_directory: ~/repo
+    parameters:
+      tag:
+        type: string
+        default: "3.9"
+      pyenv:
+        type: string
+        default: "py39"
+    docker:
+      - image: circleci/python:<< parameters.tag >>
+    environment:
+      PYENV: << parameters.pyenv >>
 
 commands:
   # Reusable command to prepare the environment for testing.
@@ -213,6 +226,10 @@ workflows:
             - GitHub pushes to BjoernLudwigPTB's public_repos
           requires:
             - confirm_previewed_release_actions
+      - tweet:
+          context: Twitter.com publish release
+          requires:
+            - release
 
 jobs:
 
@@ -376,8 +393,16 @@ jobs:
       - install_development_deps:
           pyenv: ${PYENV}
 
-      # Fake publish, just to make sure everything works after merging a PR and
-      # before actual release jos run.
+      - run:
+          name: Generate file with tweet's content
+          command: |
+            source venv/bin/activate
+            echo "The generated tweet will be:"
+            echo "PyDynamic $(semantic-release print-version) just got released! \
+                Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
+                #metrologysoftware #measurementuncertainty \
+                #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
+
       - run:
           name: Preview python-semantic-release actions
           command: |
@@ -397,3 +422,24 @@ jobs:
             python-semantic-release would perform the following actions:
             "
             semantic-release --noop publish
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - tweet.txt
+
+  tweet:
+    executor:
+      name: tweeter
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+
+      - create_venv
+      - install_development_deps:
+          pyenv: ${PYENV}
+      - run:
+          command: |
+            source venv/bin/activate
+            python setup.py tweet
