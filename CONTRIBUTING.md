@@ -35,30 +35,9 @@ carefully.
 ### Initial development setup
 
 This guide assumes you already have a valid runtime environment for PyDynamic as
-described in the [README](https://github.com/PTB-M4D/PyDynamic/blob/master/README.md).
-To start developing, install the required dependencies for your specific Python
-version. To find it, activate the desired virtual environment and execute:
-
-```shell
-(PyDynamic_venv) $ python --version
-Python 3.8.8
-```
-
-Then upgrade/install _pip_ and _pip-tools_ which we use to pin our dependencies to
-specific versions:
- 
-```shell
-(PyDynamic_venv) $ pip install --upgrade pip pip-tools
-```
-
-You can then initially install or at any later time update
-all dependencies to the versions we use. From the repository root run _pip-tools_'
-command [`sync`](https://pypi.org/project/pip-tools/#example-usage-for-pip-sync)
-e.g., for Python 3.9:
-
-```shell
-(PyDynamic_venv) $ python -m piptools sync requirements/dev-requirements-py39.txt requirements/requirements-py39.txt
-```
+described in the [installation section of the docs](https://pydynamic.readthedocs.io/en/latest/Install.html#install-known-to-work-dependencies-versions).
+To start developing, install the known to work dependencies' versions for your specific
+Python version.
 
 Afterwards you should always install PyDynamic itself in
 ["development mode"](https://packaging.python.org/tutorials/installing-packages/#installing-from-a-local-src-tree)
