@@ -27,10 +27,10 @@
     <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1489877.svg" alt="DOI"></a>
 </p>
 
-# Python package for the analysis of dynamic measurements
+# Python library for the analysis of dynamic measurements
 
 <p align="justify">
-The goal of this package is to provide a starting point for users in metrology and
+The goal of this library is to provide a starting point for users in metrology and
 related areas who deal with time-dependent i.e., <i>dynamic</i>, measurements. The
 initial version of this software was developed as part of a joint research project of
 the national metrology institutes from Germany and the UK, i.e.
@@ -48,7 +48,7 @@ eu">FAMOUS</a>.
 ## Table of content
 
 - [Features](#features)
-- [Package diagram](#package-diagram)
+- [Module diagram](#module-diagram)
 - [Documentation](#documentation)
 - [Installation](#installation)
 - [Contributing](#contributing)
@@ -79,11 +79,11 @@ For the validation of the propagation of uncertainties, the Monte-Carlo
 method can be applied using a memory-efficient implementation of Monte-Carlo
 for digital filtering.
 
-## Package diagram
+## Module diagram
 
 The fundamental structure of PyDynamic is shown in the following figure.
 
-![PyDynamic package diagram](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_package_diagram.png)
+![PyDynamic module diagram](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_package_diagram.png)
 
 However, imports should generally be possible without explicitly naming all packages
 and modules in the path, so that for example the following import statements are all
