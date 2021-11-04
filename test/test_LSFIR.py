@@ -1053,7 +1053,6 @@ def test_too_small_number_of_monte_carlo_runs_LSFIR(
         HealthCheck.too_slow,
         HealthCheck.function_scoped_fixture,
     ],
-    max_examples=10,
 )
 @pytest.mark.slow
 def test_compare_LSFIR_with_svd_and_with_mc(
@@ -1084,12 +1083,6 @@ def test_compare_LSFIR_with_svd_and_with_mc(
             mc_runs=10000,
         )
     assert_allclose(b_fir_mc, b_fir_svd, rtol=4e-2)
-    assert_allclose(
-        Ub_fir_mc,
-        Ub_fir_svd,
-        atol=6e-1,
-        rtol=6e-1,
-    )
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8))
