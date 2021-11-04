@@ -130,7 +130,9 @@ If a commit changes parts of PyDynamic's public interface so that previously wri
 code may no longer be executable, it is considered a BREAKING CHANGE (correlating
 with MAJOR in semantic versioning). This has to be marked by putting _BREAKING
  CHANGE_ in the footer of the message as described in the [conventional commit messages
-](https://www.conventionalcommits.org/en/v1.0.0/#summary).
+](https://www.conventionalcommits.org/en/v1.0.0/#summary). The introduced change and
+especially how to convert breaking code to further work should follow without a blank
+line and will be included in the changelog in full length.
 
 #### Examples
 
