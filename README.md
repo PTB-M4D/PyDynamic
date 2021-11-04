@@ -133,8 +133,8 @@ We have collected extended material for an easier introduction to PyDynamic in t
 package _examples_. Detailed assistance on getting started you can find in the
 corresponding sections of the docs:
 
-* [examples](https://pydynamic.readthedocs.io/en/polish_README/Examples.html)
-* [tutorials](https://pydynamic.readthedocs.io/en/polish_README/Tutorials.html)
+* [examples](https://pydynamic.readthedocs.io/en/polish_readme/Examples.html)
+* [tutorials](https://pydynamic.readthedocs.io/en/polish_readme/Tutorials.html)
 
 In various Jupyter Notebooks and scripts we demonstrate the use of
 the provided methods to aid the first steps in PyDynamic. New features are introduced
