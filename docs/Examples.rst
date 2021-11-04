@@ -62,3 +62,5 @@ Afterwards you can browser through the following list:
    Deconvolution by FIR.rst
    Uncertainty propagation for IIR filters.rst
    Deconvolution in the DFT domain.rst
+   examples/DFT and iDFT with PyDynamic - best practice guide and use cases
+   examples/Shock calibration/Input estimation for shock acceleration example
