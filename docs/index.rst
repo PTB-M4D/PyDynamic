@@ -1,33 +1,32 @@
+:github_url: https://github.com/PTB-M4D/PyDynamic
+
 PyDynamic - Analysis of dynamic measurements
 ============================================
 
-PyDynamic is a Python software package developed jointly by mathematicians from
-`Physikalisch-Technische Bundesanstalt <www.ptb.de>`_ (Germany) and
-`National Physical Laboratory <www.npl.co.uk>`_ (UK) as part of the joint
-European Research Project
-`EMPIR 14SIP08 Dynamic <https://www.euramet.org/research-innovation/search
--research-projects/details/project/standards-and-software-to-maximise-end-user
--uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_.
+.. toctree::
+   :maxdepth: 2
+   :caption: Getting started:
 
-For the PyDynamic homepage go to
-`GitHub <https://github.com/PTB-M4D/PyDynamic>`_.
-
-*PyDynamic* is written in Python 3 and strives to run with `all Python versions with
-upstream support <https://devguide.python.org/#status-of-python-branches>`_. Currently
-it is tested to work with Python 3.6 to 3.9.
-
+   README
 
 .. toctree::
    :maxdepth: 1
-   :caption: Getting started:
+   :caption: Detailed information:
 
    INSTALL
-   Examples
+   CHANGELOG
+   CODE_OF_CONDUCT
    CONTRIBUTING
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Tutorials:
+
+   Examples
+
+.. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Code Reference:
 
    PyDynamic.uncertainty
    PyDynamic.model_estimation
