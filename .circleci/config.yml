@@ -412,7 +412,6 @@ jobs:
             source venv/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-
             echo "
             The changelog of the next release will contain:
             "
