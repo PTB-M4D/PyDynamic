@@ -85,7 +85,7 @@ machine-readable.
 are required for the following:
 
 - Releasing automatically according to [semantic versioning](https://semver.org/)
-- [Generating  a changelog automatically](https://github.com/PTB-M4D/PyDynamic/releases/tag/v1.4.0)
+- [Generating  a changelog automatically](https://pydynamic.readthedocs.io/en/polish_readme/CHANGELOG.html)
 
 Parts of the commit messages and links appear in the changelogs of subsequent
 releases as a result. We use the following types:
