@@ -27,9 +27,7 @@
     <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1489877.svg" alt="DOI"></a>
 </p>
 
-<h1 align="center">
-PyDynamic – Python package for the analysis of dynamic measurements
-</h1>
+# Python package for the analysis of dynamic measurements
 
 <p align="justify">
 The goal of this package is to provide a starting point for users in metrology and
