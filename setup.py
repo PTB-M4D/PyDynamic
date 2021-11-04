@@ -54,8 +54,8 @@ class Tweet(Command):
                 return auth
             except TypeError as e:
                 if "Consumer key must be" in str(e):
-                    raise TypeError(
-                        "TypeError: Environment variables 'public_key', "
+                    raise ValueError(
+                        "ValueError: Environment variables 'public_key', "
                         "'public_token', 'private_key' and 'private_token' have to be "
                         "set."
                     )
