@@ -47,7 +47,7 @@ into your virtual environment to be able to properly test against the shipped ve
 (PyDynamic_venv) $ python -m pip install -e .
 ```
 
-For the testing refer to [the according testing section in this guide](#Testing).
+For the testing refer to [the according testing section in this guide](#testing).
 
 ### Advised toolset
 
