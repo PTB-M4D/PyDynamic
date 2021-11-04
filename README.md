@@ -90,9 +90,9 @@ and modules in the path, so that for example the following import statements are
 equivalent.
 
 ```python
-from PyDynamic.uncertainty.interpolate import make_equidistant
-from PyDynamic.uncertainty import make_equidistant
-from PyDynamic import make_equidistant
+from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
+from PyDynamic.uncertainty import FIRuncFilter
+from PyDynamic import FIRuncFilter
 ```
 
 ## Documentation
