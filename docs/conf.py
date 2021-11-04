@@ -59,6 +59,13 @@ intersphinx_mapping = {
     "np": ("https://docs.scipy.org/doc/numpy/", None),
     "Python": ("https://docs.python.org/3", None),
 }
+# We keep the objects.inv files in our docs folder to get hints on how to specify the
+# cross-references. More on the topic can be found here:
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+# The objects.inv we gathered by the command:
+# $ python -msphinx.ext.intersphinx https://docs.python.org/3/objects.inv
+# which we took from the linked page (almost at the very bottom at the time of
+# writing this).
 
 nbsphinx_allow_errors = True
 
