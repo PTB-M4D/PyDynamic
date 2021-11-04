@@ -4,8 +4,24 @@
 #
 #    pip-compile --output-file=requirements/requirements-py36.txt
 #
-cycler==0.10.0
+backports.entry-points-selectable==1.1.0
+    # via virtualenv
+cycler==0.11.0
     # via matplotlib
+distlib==0.3.3
+    # via virtualenv
+filelock==3.3.2
+    # via
+    #   tox
+    #   virtualenv
+importlib-metadata==4.8.1
+    # via
+    #   backports.entry-points-selectable
+    #   pluggy
+    #   tox
+    #   virtualenv
+importlib-resources==5.4.0
+    # via virtualenv
 kiwisolver==1.3.1
     # via matplotlib
 matplotlib==3.3.4
@@ -16,21 +32,44 @@ numpy==1.19.5
     #   matplotlib
     #   pandas
     #   scipy
+packaging==21.2
+    # via tox
 pandas==1.1.5
     # via PyDynamic (setup.py)
-pillow==8.3.2
+pillow==8.4.0
     # via matplotlib
+platformdirs==2.4.0
+    # via virtualenv
+pluggy==1.0.0
+    # via tox
+py==1.10.0
+    # via tox
 pyparsing==2.4.7
-    # via matplotlib
+    # via
+    #   matplotlib
+    #   packaging
 python-dateutil==2.8.2
     # via
     #   matplotlib
     #   pandas
-pytz==2021.1
+pytz==2021.3
     # via pandas
 scipy==1.5.4
     # via PyDynamic (setup.py)
 six==1.16.0
     # via
-    #   cycler
     #   python-dateutil
+    #   tox
+    #   virtualenv
+toml==0.10.2
+    # via tox
+tox==3.24.4
+    # via PyDynamic (setup.py)
+typing-extensions==3.10.0.2
+    # via importlib-metadata
+virtualenv==20.10.0
+    # via tox
+zipp==3.6.0
+    # via
+    #   importlib-metadata
+    #   importlib-resources
