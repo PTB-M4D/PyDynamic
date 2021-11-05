@@ -194,4 +194,5 @@ except for the module [`impinvar.py`
 ](https://github.com/PTB-M4D/PyDynamic/blob/master/src/PyDynamic/misc/impinvar.py) 
 in the package [`misc`
 ](https://pydynamic.readthedocs.io/en/master/PyDynamic.misc.html), 
-which is distributed under the GPLv3 license.
+which is distributed under the [GPLv3 license
+](https://github.com/PTB-M4D/PyDynamic/blob/master/src/PyDynamic/misc/impinvar_license.txt).
