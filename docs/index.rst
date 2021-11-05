@@ -39,8 +39,6 @@ Python library for the analysis of dynamic measurements
 
    PyDynamic.uncertainty
    PyDynamic.model_estimation
-   PyDynamic.deconvolution
-   PyDynamic.identification
    PyDynamic.misc
 
 Indices and tables

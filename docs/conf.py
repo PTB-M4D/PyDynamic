@@ -56,8 +56,9 @@ intersphinx_mapping = {
         "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
     ),
-    "np": ("https://docs.scipy.org/doc/numpy/", None),
+    "np": ("https://numpy.org/doc/stable/", None),
     "Python": ("https://docs.python.org/3", None),
+    "pywt": (" https://pywavelets.readthedocs.io/en/latest/", None),
 }
 # We keep the objects.inv files in our docs folder to get hints on how to specify the
 # cross-references. More on the topic can be found here:
@@ -68,6 +69,7 @@ intersphinx_mapping = {
 # writing this).
 
 nbsphinx_allow_errors = True
+nbsphinx_kernel_name = 'python3'
 
 ################################################################################
 # This part is originally taken from
@@ -149,7 +151,7 @@ author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
-# built documents.
+# built documents.K
 #
 # The short X.Y version.
 version = "1.11.1"
@@ -199,9 +201,6 @@ suppress_warnings = ["epub.unknown_project_files"]
 
 # If true, keep warnings as "system message" paragraphs in the built documents.
 # keep_warnings = False
-
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
 
 
 # -- Options for HTML output ----------------------------------------------

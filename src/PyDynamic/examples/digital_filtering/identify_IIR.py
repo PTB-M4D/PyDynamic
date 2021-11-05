@@ -4,13 +4,13 @@
 
     Try to play with this script by changing the parameters of the 2nd order system or the order of the fitted filter.
 
-.. seealso:: :mod:`..identification.fit_filter`
+.. seealso:: :mod:`..model_estimation.fit_filter`
 """
 import numpy as np
 from matplotlib.pyplot import figure, cla, show
 from scipy.signal import freqz
 
-import PyDynamic.identification.fit_filter as fit_filter
+import PyDynamic.model_estimation.fit_filter as fit_filter
 from PyDynamic.misc.SecondOrderSystem import sos_FreqResp
 from PyDynamic.misc.filterstuff import db
 
@@ -26,7 +26,7 @@ Hvals = sos_FreqResp(S0, delta, f0, f)      # frequency response of the 2nd orde
 Fs = 500e3          # sampling frequency
 Na = 4; Nb = 4      # IIR filter order (Na - denominator, Nb - numerator)
 
-b, a, tau = fit_filter.LSIIR(Hvals, Na, Nb, f, Fs)      # fit IIR filter to freq response
+b, a, tau = fit_filter.LSIIR(Hvals, Na, Nb, f, Fs)  # fit IIR filter to freq response
 
 fplot = np.linspace(0, 80e3, 1000)                # frequency range for the plot
 Hc = sos_FreqResp(S0, delta, f0, fplot)           # frequency response of the 2nd order system

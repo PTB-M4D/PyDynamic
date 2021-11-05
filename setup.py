@@ -102,7 +102,15 @@ setup(
         f"v{current_release_version}/",
         "Tracker": "https://github.com/PTB-M4D/PyDynamic/issues",
     },
-    install_requires=["matplotlib", "numpy", "pandas", "scipy"],
+    install_requires=[
+        "matplotlib",
+        "numpy",
+        "pandas",
+        "scipy",
+        "sympy",
+        "PyWavelets",
+        "time-series-buffer",
+    ],
     extras_require={
         "examples": ["notebook"],
     },

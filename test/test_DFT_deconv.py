@@ -190,6 +190,7 @@ def _covariance_of_multivariate_monte_carlo_samples():
 
 @given(deconvolution_input(reveal_bug=True))
 @settings(deadline=None)
+@pytest.mark.slow
 def test_reveal_bug_in_dft_deconv_up_to_1_9(
     multivariate_complex_monte_carlo, complex_deconvolution_on_sets, DFT_deconv_input
 ):

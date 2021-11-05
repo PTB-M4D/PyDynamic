@@ -64,3 +64,4 @@ Afterwards you can browser through the following list:
    Deconvolution in the DFT domain.rst
    examples/DFT and iDFT with PyDynamic - best practice guide and use cases
    examples/Shock calibration/Input estimation for shock acceleration example
+   examples/digital_filtering/Design of a digital deconvolution filter (FIR type).ipynb
