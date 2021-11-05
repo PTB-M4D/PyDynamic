@@ -570,27 +570,30 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
     assert_allclose(b_fir_mc, b_fir_none)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=2, max_value=12), weights())
 @settings(
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
+        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow
 def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
-    monte_carlo, freqs, sampling_freq, filter_order
+    capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector
 ):
-    LSFIR(
-        H=monte_carlo["H"],
-        N=filter_order,
-        f=freqs,
-        Fs=sampling_freq,
-        tau=filter_order // 2,
-        inv=True,
-        UH=monte_carlo["UH"],
-    )
+    with capsys.disabled():
+        LSFIR(
+            H=monte_carlo["H"],
+            N=filter_order,
+            f=freqs,
+            Fs=sampling_freq,
+            tau=filter_order // 2,
+            weights=weight_vector,
+            inv=True,
+            UH=monte_carlo["UH"],
+        )
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
