@@ -56,9 +56,9 @@ intersphinx_mapping = {
         "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
     ),
-    "np": ("https://docs.scipy.org/doc/numpy/", None),
+    "np": ("https://numpy.org/doc/stable/objects.inv", None),
     "Python": ("https://docs.python.org/3", None),
-    "pywt": (" https://pywavelets.readthedocs.io/en/latest/", None),
+    "pywt": (" https://pywavelets.readthedocs.io/en/latest/objects.inv", None),
 }
 # We keep the objects.inv files in our docs folder to get hints on how to specify the
 # cross-references. More on the topic can be found here:
