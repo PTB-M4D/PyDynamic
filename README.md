@@ -83,7 +83,7 @@ for digital filtering.
 
 The fundamental structure of PyDynamic is shown in the following figure.
 
-![PyDynamic module diagram](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_package_diagram.png)
+![PyDynamic module diagram](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_module_diagram.png)
 
 However, imports should generally be possible without explicitly naming all packages
 and modules in the path, so that for example the following import statements are all
