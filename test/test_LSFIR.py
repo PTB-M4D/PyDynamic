@@ -26,6 +26,7 @@ from PyDynamic.model_estimation.fit_filter import (
 )
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 from .conftest import (
+    _print_current_ram_usage,
     hypothesis_dimension,
     hypothesis_float_vector,
     scale_matrix_or_vector_to_convex_combination,
@@ -480,25 +481,25 @@ def test_digital_deconvolution_FIR_example_figure_7(
 def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_over_H(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
-    with capsys.disabled():
-        b_fir_svd = LSFIR(
-            H=monte_carlo["H"],
-            UH=np.zeros_like(monte_carlo["UH"]),
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-        )[0]
-        b_fir_none = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-            UH=None,
-        )[0]
+    b_fir_svd = LSFIR(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+    )[0]
+    b_fir_none = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+        UH=None,
+    )[0]
+    _print_current_ram_usage(capsys)
     assert_allclose(b_fir_svd, b_fir_none)
 
 
@@ -515,26 +516,26 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
 def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_over_H(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
-    with capsys.disabled():
-        b_fir_mc = LSFIR(
-            H=monte_carlo["H"],
-            UH=np.zeros_like(monte_carlo["UH"]),
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-            mc_runs=2,
-        )[0]
-        b_fir_none = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-            UH=None,
-        )[0]
+    b_fir_mc = LSFIR(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+        mc_runs=2,
+    )[0]
+    b_fir_none = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+        UH=None,
+    )[0]
+    _print_current_ram_usage(capsys)
     assert_allclose(b_fir_mc, b_fir_none)
 
 
@@ -551,26 +552,26 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
 def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_directly(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
-    with capsys.disabled():
-        b_fir_mc = LSFIR(
-            H=monte_carlo["H"],
-            UH=np.zeros_like(monte_carlo["UH"]),
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=False,
-            mc_runs=2,
-        )[0]
-        b_fir_none = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=False,
-            UH=None,
-        )[0]
+    b_fir_mc = LSFIR(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=False,
+        mc_runs=2,
+    )[0]
+    b_fir_none = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=False,
+        UH=None,
+    )[0]
+    _print_current_ram_usage(capsys)
     assert_allclose(b_fir_mc, b_fir_none)
 
 
@@ -587,17 +588,17 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
 def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
     capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector
 ):
-    with capsys.disabled():
-        LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            weights=weight_vector,
-            inv=True,
-            UH=monte_carlo["UH"],
-        )
+    LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        weights=weight_vector,
+        inv=True,
+        UH=monte_carlo["UH"],
+    )
+    _print_current_ram_usage(capsys)
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
@@ -639,19 +640,19 @@ def test_usual_call_LSFIR_with_None_uncertainties(
 def test_usual_call_LSFIR_with_mc(
     capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector, verbose, inv
 ):
-    with capsys.disabled():
-        LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            weights=weight_vector,
-            verbose=verbose,
-            inv=inv,
-            UH=monte_carlo["UH"],
-            mc_runs=2,
-        )
+    LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        weights=weight_vector,
+        verbose=verbose,
+        inv=inv,
+        UH=monte_carlo["UH"],
+        mc_runs=2,
+    )
+    _print_current_ram_usage(capsys)
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12))
@@ -818,29 +819,29 @@ def test_compare_different_dtypes_LSFIR(
     sampling_freq,
     filter_order,
 ):
-    with capsys.disabled():
-        b_real_imaginary, ub_real_imaginary = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            verbose=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
-        )
-        b_complex, ub_complex = LSFIR(
-            H=complex_H_with_UH["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            verbose=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
-        )
+    b_real_imaginary, ub_real_imaginary = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        verbose=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
+    b_complex, ub_complex = LSFIR(
+        H=complex_H_with_UH["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        verbose=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
+    _print_current_ram_usage(capsys)
     assert_allclose(b_real_imaginary, b_complex, rtol=4e-2)
     assert_allclose(ub_real_imaginary, ub_complex, rtol=6e-1)
 
@@ -1068,28 +1069,28 @@ def test_too_small_number_of_monte_carlo_runs_LSFIR(
 def test_compare_LSFIR_with_svd_and_with_mc(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
-    with capsys.disabled():
-        b_fir_svd, Ub_fir_svd = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            verbose=True,
-            inv=True,
-            UH=monte_carlo["UH"],
-        )
-        b_fir_mc, Ub_fir_mc = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            verbose=True,
-            inv=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
-        )
+    b_fir_svd, Ub_fir_svd = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        verbose=True,
+        inv=True,
+        UH=monte_carlo["UH"],
+    )
+    b_fir_mc, Ub_fir_mc = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        verbose=True,
+        inv=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
+    _print_current_ram_usage(capsys)
     assert_allclose(b_fir_mc, b_fir_svd, rtol=9e-2)
     assert_allclose(Ub_fir_mc, Ub_fir_svd, atol=6e-1, rtol=6e-1)
 
@@ -1107,25 +1108,25 @@ def test_compare_LSFIR_with_svd_and_with_mc(
 def test_compare_invLSFIR_uncMC_LSFIR(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
-    with capsys.disabled():
-        b_fir_mc, Ub_fir_mc = invLSFIR_uncMC(
-            H=monte_carlo["H"],
-            UH=monte_carlo["UH"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-        )
-        b_fir, Ub_fir = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
-        )
+    b_fir_mc, Ub_fir_mc = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+    )
+    b_fir, Ub_fir = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
+    _print_current_ram_usage(capsys)
     assert_allclose(b_fir_mc, b_fir, rtol=4e-2)
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
 
@@ -1143,24 +1144,24 @@ def test_compare_invLSFIR_uncMC_LSFIR(
 def test_compare_invLSFIR_unc_LSFIR_only_by_filter_coefficients(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
-    with capsys.disabled():
-        b_fir_mc, Ub_fir_mc = invLSFIR_unc(
-            H=monte_carlo["H"],
-            UH=monte_carlo["UH"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-        )
-        b_fir, Ub_fir = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            UH=monte_carlo["UH"],
-        )
+    b_fir_mc, Ub_fir_mc = invLSFIR_unc(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+    )
+    b_fir, Ub_fir = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        UH=monte_carlo["UH"],
+    )
+    _print_current_ram_usage(capsys)
     assert_allclose(b_fir_mc, b_fir)
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
 
