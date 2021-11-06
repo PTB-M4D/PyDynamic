@@ -46,18 +46,18 @@ class Tweet(Command):
         def _get_twitter_api_auth_handle():
             try:
                 auth = tweepy.OAuthHandler(
-                    os.getenv("public_key"), os.getenv("public_token")
+                    os.getenv("consumer_key"), os.getenv("consumer_secret")
                 )
                 auth.set_access_token(
-                    os.getenv("private_key"), os.getenv("private_token")
+                    os.getenv("access_token"), os.getenv("access_token_secret")
                 )
                 return auth
             except TypeError as e:
                 if "Consumer key must be" in str(e):
                     raise ValueError(
-                        "ValueError: Environment variables 'public_key', "
-                        "'public_token', 'private_key' and 'private_token' have to be "
-                        "set."
+                        "ValueError: Environment variables 'consumer_key', "
+                        "'consumer_secret', 'access_token' and 'access_token_secret' "
+                        "have to be set."
                     )
 
         def read_tweet_from_file() -> str:
