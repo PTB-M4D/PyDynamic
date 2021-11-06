@@ -1,9 +1,11 @@
+import inspect
 import os
 import pathlib
 from typing import Callable, cast, Optional, Union
 
 import hypothesis.strategies as hst
 import numpy as np
+import psutil
 import pytest
 import scipy.signal as dsp
 from hypothesis import given, HealthCheck, settings
@@ -481,24 +483,28 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
     with capsys.disabled():
-        b_fir_svd = LSFIR(
-            H=monte_carlo["H"],
-            UH=np.zeros_like(monte_carlo["UH"]),
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-        )[0]
-        b_fir_none = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-            UH=None,
-        )[0]
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
+        )
+    b_fir_svd = LSFIR(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+    )[0]
+    b_fir_none = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+        UH=None,
+    )[0]
     assert_allclose(b_fir_svd, b_fir_none)
 
 
@@ -516,25 +522,29 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
     with capsys.disabled():
-        b_fir_mc = LSFIR(
-            H=monte_carlo["H"],
-            UH=np.zeros_like(monte_carlo["UH"]),
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-            mc_runs=2,
-        )[0]
-        b_fir_none = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=True,
-            UH=None,
-        )[0]
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
+        )
+    b_fir_mc = LSFIR(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+        mc_runs=2,
+    )[0]
+    b_fir_none = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=True,
+        UH=None,
+    )[0]
     assert_allclose(b_fir_mc, b_fir_none)
 
 
@@ -552,25 +562,29 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
     with capsys.disabled():
-        b_fir_mc = LSFIR(
-            H=monte_carlo["H"],
-            UH=np.zeros_like(monte_carlo["UH"]),
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=False,
-            mc_runs=2,
-        )[0]
-        b_fir_none = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
-            inv=False,
-            UH=None,
-        )[0]
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
+        )
+    b_fir_mc = LSFIR(
+        H=monte_carlo["H"],
+        UH=np.zeros_like(monte_carlo["UH"]),
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=False,
+        mc_runs=2,
+    )[0]
+    b_fir_none = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+        inv=False,
+        UH=None,
+    )[0]
     assert_allclose(b_fir_mc, b_fir_none)
 
 
@@ -588,16 +602,20 @@ def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
     capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector
 ):
     with capsys.disabled():
-        LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            weights=weight_vector,
-            inv=True,
-            UH=monte_carlo["UH"],
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
         )
+    LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        weights=weight_vector,
+        inv=True,
+        UH=monte_carlo["UH"],
+    )
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
@@ -640,18 +658,22 @@ def test_usual_call_LSFIR_with_mc(
     capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector, verbose, inv
 ):
     with capsys.disabled():
-        LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            weights=weight_vector,
-            verbose=verbose,
-            inv=inv,
-            UH=monte_carlo["UH"],
-            mc_runs=2,
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
         )
+    LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        weights=weight_vector,
+        verbose=verbose,
+        inv=inv,
+        UH=monte_carlo["UH"],
+        mc_runs=2,
+    )
 
 
 @given(hypothesis_dimension(min_value=2, max_value=12))
@@ -819,28 +841,32 @@ def test_compare_different_dtypes_LSFIR(
     filter_order,
 ):
     with capsys.disabled():
-        b_real_imaginary, ub_real_imaginary = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            verbose=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
         )
-        b_complex, ub_complex = LSFIR(
-            H=complex_H_with_UH["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            verbose=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
-        )
+    b_real_imaginary, ub_real_imaginary = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        verbose=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
+    b_complex, ub_complex = LSFIR(
+        H=complex_H_with_UH["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        verbose=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
     assert_allclose(b_real_imaginary, b_complex, rtol=4e-2)
     assert_allclose(ub_real_imaginary, ub_complex, rtol=6e-1)
 
@@ -1069,27 +1095,31 @@ def test_compare_LSFIR_with_svd_and_with_mc(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
     with capsys.disabled():
-        b_fir_svd, Ub_fir_svd = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            verbose=True,
-            inv=True,
-            UH=monte_carlo["UH"],
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
         )
-        b_fir_mc, Ub_fir_mc = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            verbose=True,
-            inv=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
-        )
+    b_fir_svd, Ub_fir_svd = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        verbose=True,
+        inv=True,
+        UH=monte_carlo["UH"],
+    )
+    b_fir_mc, Ub_fir_mc = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        verbose=True,
+        inv=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
     assert_allclose(b_fir_mc, b_fir_svd, rtol=9e-2)
     assert_allclose(Ub_fir_mc, Ub_fir_svd, atol=6e-1, rtol=6e-1)
 
@@ -1108,24 +1138,28 @@ def test_compare_invLSFIR_uncMC_LSFIR(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
     with capsys.disabled():
-        b_fir_mc, Ub_fir_mc = invLSFIR_uncMC(
-            H=monte_carlo["H"],
-            UH=monte_carlo["UH"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
         )
-        b_fir, Ub_fir = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            UH=monte_carlo["UH"],
-            mc_runs=10000,
-        )
+    b_fir_mc, Ub_fir_mc = invLSFIR_uncMC(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+    )
+    b_fir, Ub_fir = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        UH=monte_carlo["UH"],
+        mc_runs=10000,
+    )
     assert_allclose(b_fir_mc, b_fir, rtol=4e-2)
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
 
@@ -1144,23 +1178,27 @@ def test_compare_invLSFIR_unc_LSFIR_only_by_filter_coefficients(
     capsys, monte_carlo, freqs, sampling_freq, filter_order
 ):
     with capsys.disabled():
-        b_fir_mc, Ub_fir_mc = invLSFIR_unc(
-            H=monte_carlo["H"],
-            UH=monte_carlo["UH"],
-            N=filter_order,
-            tau=filter_order // 2,
-            f=freqs,
-            Fs=sampling_freq,
+        print(
+            f"Run {inspect.stack()[0].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
         )
-        b_fir, Ub_fir = LSFIR(
-            H=monte_carlo["H"],
-            N=filter_order,
-            f=freqs,
-            Fs=sampling_freq,
-            tau=filter_order // 2,
-            inv=True,
-            UH=monte_carlo["UH"],
-        )
+    b_fir_mc, Ub_fir_mc = invLSFIR_unc(
+        H=monte_carlo["H"],
+        UH=monte_carlo["UH"],
+        N=filter_order,
+        tau=filter_order // 2,
+        f=freqs,
+        Fs=sampling_freq,
+    )
+    b_fir, Ub_fir = LSFIR(
+        H=monte_carlo["H"],
+        N=filter_order,
+        f=freqs,
+        Fs=sampling_freq,
+        tau=filter_order // 2,
+        inv=True,
+        UH=monte_carlo["UH"],
+    )
     assert_allclose(b_fir_mc, b_fir)
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
 
