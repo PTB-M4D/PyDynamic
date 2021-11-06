@@ -398,14 +398,15 @@ jobs:
           command: |
             source venv/bin/activate
             new_version=$(semantic-release print-version)
-            if [[ -z $new_version ]]; then
+            if [ -z $new_version ]; then
+              rm -f tweet.txt
+              touch tweet.txt
+            else
               echo "The generated tweet will be:"
-              echo "PyDynamic $new_version just got released! \
+              echo "PyDynamic "$new_version" just got released! \
                   Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
                   #metrologysoftware #measurementuncertainty \
                   #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
-            else
-              touch tweet.txt
             fi
 
       - run:
@@ -446,7 +447,7 @@ jobs:
           pyenv: ${PYENV}
       - run:
           command: |
-            if [[ -n $(cat tweet.txt) ]]; then
+            if [[ -s tweet.txt ]]; then
               source venv/bin/activate
               python setup.py tweet
             fi
