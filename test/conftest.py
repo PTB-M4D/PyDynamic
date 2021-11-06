@@ -29,15 +29,18 @@ if os.getenv("CIRCLECI") == "true":
 @pytest.fixture(autouse=True)
 def _print_ram_and_cpu_usage__automatically_before_every_test(capsys):
     with capsys.disabled():
-        print(f"Currently we use {psutil.virtual_memory().percent}% of RAM and "
-              f"{psutil.cpu_percent()}% of CPU.")
+        print(
+            f"\nCurrently we use {psutil.virtual_memory().percent}% of RAM and "
+            f"{psutil.cpu_percent()}% of CPU."
+        )
 
 
 def _print_current_ram_usage(capsys):
     with capsys.disabled():
         print(
-            f"Run {inspect.stack()[1].function} with "
-            f"{psutil.virtual_memory().percent}% of RAM used."
+            f"Run iteration of {inspect.stack()[1].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used and "
+            f"{psutil.cpu_percent()}% of CPU."
         )
 
 
