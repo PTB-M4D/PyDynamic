@@ -34,63 +34,6 @@ executors:
     environment:
       PYENV: << parameters.pyenv >>
 
-commands:
-  create_folders:
-    description: "Checkout code and prepare test results location."
-    steps:
-    - checkout
-    - run:
-        name: Create test result folder
-        command: |
-          mkdir test-results
-
-  create_venv:
-    description: "Prepare virtual environment."
-    steps:
-    - run:
-        name: Create virtual environment
-        command: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-
-  install_development_deps:
-    description: "Install development dependencies."
-    parameters:
-      pyenv:
-        type: string
-        default: "py38"
-    steps:
-
-    - run:
-        name: Install development dependencies
-        command: |
-          source venv/bin/activate
-          pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
-
-  tox:
-    description: "Perform tox testing."
-    parameters:
-      toxenvs:
-        type: string
-        default: ""
-      posargs:
-        type: string
-        default: ""
-    steps:
-
-    - run:
-        name: Perform tox testing
-        command: |
-          source venv/bin/activate
-          tox << parameters.toxenvs >> << parameters.posargs >>
-
-  store_results:
-    description: "Store test results."
-    steps:
-    - store_test_results:
-        path: test-results
-
 workflows:
   nightly_test:
     triggers:
@@ -210,6 +153,63 @@ workflows:
           context: Twitter.com publish release
           requires:
             - release
+
+commands:
+  create_folders:
+    description: "Checkout code and prepare test results location."
+    steps:
+    - checkout
+    - run:
+        name: Create test result folder
+        command: |
+          mkdir test-results
+
+  create_venv:
+    description: "Prepare virtual environment."
+    steps:
+    - run:
+        name: Create virtual environment
+        command: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+
+  install_development_deps:
+    description: "Install development dependencies."
+    parameters:
+      pyenv:
+        type: string
+        default: "py38"
+    steps:
+
+    - run:
+        name: Install development dependencies
+        command: |
+          source venv/bin/activate
+          pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
+
+  tox:
+    description: "Perform tox testing."
+    parameters:
+      toxenvs:
+        type: string
+        default: ""
+      posargs:
+        type: string
+        default: ""
+    steps:
+
+    - run:
+        name: Perform tox testing
+        command: |
+          source venv/bin/activate
+          tox << parameters.toxenvs >> << parameters.posargs >>
+
+  store_results:
+    description: "Store test results."
+    steps:
+    - store_test_results:
+        path: test-results
 
 jobs:
 
