@@ -186,6 +186,8 @@ pluggy==1.0.0
     #   tox
 prompt-toolkit==3.0.22
     # via ipython
+psutil==5.8.0
+    # via -r requirements/dev-requirements.in
 ptyprocess==0.7.0
     # via pexpect
 py==1.10.0
