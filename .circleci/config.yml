@@ -409,6 +409,11 @@ jobs:
                   #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
             fi
 
+      - persist_to_workspace:
+          root: .
+          paths:
+            - tweet.txt
+
       - run:
           name: Preview python-semantic-release actions
           command: |
@@ -428,11 +433,6 @@ jobs:
             python-semantic-release would perform the following actions:
             "
             semantic-release --noop publish
-
-      - persist_to_workspace:
-          root: .
-          paths:
-            - tweet.txt
 
   tweet:
     executor:
