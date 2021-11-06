@@ -1,7 +1,9 @@
+import inspect
 import os
 from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
+import psutil
 import pytest
 import scipy.stats as stats
 from hypothesis import assume, HealthCheck, settings, strategies as hst
@@ -22,6 +24,20 @@ settings.register_profile(
 )
 if os.getenv("CIRCLECI") == "true":
     settings.load_profile("ci")
+
+
+@pytest.fixture(autouse=True)
+def _print_ram_usage__automatically_before_every_test(capsys):
+    with capsys.disabled():
+        print(f"Currently we use {psutil.virtual_memory().percent}% of RAM.")
+
+
+def _print_current_ram_usage(capsys):
+    with capsys.disabled():
+        print(
+            f"Run {inspect.stack()[1].function} with "
+            f"{psutil.virtual_memory().percent}% of RAM used."
+        )
 
 
 def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
