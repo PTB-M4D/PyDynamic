@@ -397,11 +397,16 @@ jobs:
           name: Generate file with tweet's content
           command: |
             source venv/bin/activate
-            echo "The generated tweet will be:"
-            echo "PyDynamic $(semantic-release print-version) just got released! \
-                Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
-                #metrologysoftware #measurementuncertainty \
-                #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
+            new_version=$(semantic-release print-version)
+            if [[ -z $new_version ]]; then
+              echo "The generated tweet will be:"
+              echo "PyDynamic $new_version just got released! \
+                  Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
+                  #metrologysoftware #measurementuncertainty \
+                  #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
+            else
+              touch tweet.txt
+            fi
 
       - run:
           name: Preview python-semantic-release actions
@@ -441,5 +446,7 @@ jobs:
           pyenv: ${PYENV}
       - run:
           command: |
-            source venv/bin/activate
-            python setup.py tweet
+            if [[ -n $(cat tweet.txt) ]]; then
+              source venv/bin/activate
+              python setup.py tweet
+            fi
