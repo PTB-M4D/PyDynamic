@@ -446,6 +446,7 @@ jobs:
       - install_development_deps:
           pyenv: ${PYENV}
       - run:
+          name: Tweet on new releases
           command: |
             if [[ -s tweet.txt ]]; then
               source venv/bin/activate
