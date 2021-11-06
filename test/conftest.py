@@ -30,7 +30,7 @@ if os.getenv("CIRCLECI") == "true":
 def _print_ram_and_cpu_usage__automatically_before_every_test(capsys):
     with capsys.disabled():
         print(f"Currently we use {psutil.virtual_memory().percent}% of RAM and "
-              f"{psutil.cpu_percent}% of CPU.")
+              f"{psutil.cpu_percent()}% of CPU.")
 
 
 def _print_current_ram_usage(capsys):
