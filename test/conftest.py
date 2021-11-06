@@ -1,15 +1,15 @@
-import inspect
 import os
+from inspect import stack
 from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
-import psutil
 import pytest
 import scipy.stats as stats
 from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
 from numpy.linalg import LinAlgError
+from psutil import cpu_percent, virtual_memory
 
 from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
@@ -26,21 +26,12 @@ if os.getenv("CIRCLECI") == "true":
     settings.load_profile("ci")
 
 
-@pytest.fixture(autouse=True)
-def _print_ram_and_cpu_usage__automatically_before_every_test(capsys):
-    with capsys.disabled():
-        print(
-            f"\nCurrently we use {psutil.virtual_memory().percent}% of RAM and "
-            f"{psutil.cpu_percent()}% of CPU."
-        )
-
-
 def _print_current_ram_usage(capsys):
     with capsys.disabled():
         print(
-            f"Run iteration of {inspect.stack()[1].function} with "
-            f"{psutil.virtual_memory().percent}% of RAM used and "
-            f"{psutil.cpu_percent()}% of CPU."
+            f"Run iteration of `{stack()[1].function}()` with "
+            f"{virtual_memory().percent}% of RAM used and "
+            f"{cpu_percent()}% of CPU."
         )
 
 
