@@ -473,18 +473,18 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     else:
         n_blow = 0
 
-        # run FIR with MC and extract diagonal of returned covariance
-        y_mc, Uy_mc = MC(
-            x,
-            ux,
-            b,
-            a,
-            Uab,
-            blow=blow,
-            runs=2000,
-            shift=-fir_unc_filter_input["shift"],
-            verbose=True,
-        )
+    # run FIR with MC and extract diagonal of returned covariance
+    y_mc, Uy_mc = MC(
+        x,
+        ux,
+        b,
+        a,
+        Uab,
+        blow=blow,
+        runs=2000,
+        shift=-fir_unc_filter_input["shift"],
+        verbose=True,
+    )
 
     # approximate comparison after swing-in of MC-result (which is after the combined
     # length of blow and b)
