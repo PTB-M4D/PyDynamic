@@ -1,12 +1,7 @@
-# Python CircleCI 2.1 configuration file
-#
 # Check https://circleci.com/docs/2.0/language-python/ for more details
-#
 version: 2.1
 
 executors:
-  # Define a parameterized executor which accepts two parameters to choose the python
-  # version which will be used for the docker image and the tox actions.
   venv_tester:
     working_directory: ~/repo
     parameters:
@@ -19,7 +14,6 @@ executors:
     working_directory: ~/repo
     docker:
       - image: cimg/base:2021.04
-  # Define the executor for the Python semantic release.
   publisher:
     working_directory: ~/repo
     docker:
@@ -41,23 +35,18 @@ executors:
       PYENV: << parameters.pyenv >>
 
 commands:
-  # Reusable command to prepare the environment for testing.
   create_folders:
     description: "Checkout code and prepare test results location."
     steps:
-    # Checkout code.
     - checkout
-    # Create test-result folder.
     - run:
         name: Create test result folder
         command: |
           mkdir test-results
 
-  # Reusable command to prepare the environment for testing.
   create_venv:
     description: "Prepare virtual environment."
     steps:
-    # Create PyDynamic virtual environment.
     - run:
         name: Create virtual environment
         command: |
@@ -65,7 +54,6 @@ commands:
           source venv/bin/activate
           pip install --upgrade pip
 
-  # Reusable command to install development dependencies.
   install_development_deps:
     description: "Install development dependencies."
     parameters:
@@ -74,14 +62,12 @@ commands:
         default: "py38"
     steps:
 
-    # Install dependencies.
     - run:
         name: Install development dependencies
         command: |
           source venv/bin/activate
           pip install -r requirements/dev-requirements-<< parameters.pyenv >>.txt
 
-  # Reusable command to conduct actual testing.
   tox:
     description: "Perform tox testing."
     parameters:
@@ -93,14 +79,12 @@ commands:
         default: ""
     steps:
 
-    # Perform tox testing.
     - run:
         name: Perform tox testing
         command: |
           source venv/bin/activate
           tox << parameters.toxenvs >> << parameters.posargs >>
 
-  # Reusable command to store the previously generated test results.
   store_results:
     description: "Store test results."
     steps:
@@ -116,7 +100,6 @@ workflows:
             branches:
               only: /.*/
     jobs:
-      # Create 'test' job to test PyDynamic every night thoroughly.
       - test:
           name: "nightly_test_python_py36"
           tag: "3.6"
@@ -194,8 +177,6 @@ workflows:
           name: "test_conda_py39_with_all_tests"
           is_nightly_run: True
       - preview_release:
-          # Test the 'release' job to avoid trouble when Pull Requests get merged and
-          # to preview publishing actions and the new changelog.
           requires:
             - test_python_py36_slow_tests
             - test_python_py37_slow_tests
@@ -214,7 +195,6 @@ workflows:
             - preview_release
           filters:
             branches:
-              # This assures the job only being triggered on branch master.
               only: /master/
       - release:
           # Job to potentially create a release based on python-semantic-release's
@@ -239,9 +219,6 @@ jobs:
   #
   # - all tests are guaranteed to pass
   # - PyDynamic with respect to its `setup.py` successfully installs
-  #
-  # Additionally we want to create one coverage report during all these tests (which are
-  # of course the same for all versions).
   test:
     # Define all parameters, where 'tag' is used for the docker image and 'toxenvs' is
     # the string which is used in tox to identify the desired entries of envlist.
@@ -259,12 +236,10 @@ jobs:
         type: string
         default: ""
 
-    # Specify the executor and hand over the docker image tag parameter.
     executor:
       name: venv_tester
       tag: << parameters.tag >>
 
-    # Specify the steps to execute during this test jobs.
     steps:
       - create_folders
       - create_venv
@@ -278,8 +253,6 @@ jobs:
           posargs: << parameters.posargs >>
       - store_results
 
-  # Define one 'test' job to run the test suite against the
-  # installed dependencies from the environment.yml.
   test_conda_py39:
     parameters:
       is_nightly_run:
@@ -304,15 +277,11 @@ jobs:
             conda update -q conda
             echo 'export PATH=$HOME/conda/bin:$PATH' >> $BASH_ENV
 
-      # Download and cache dependencies.
       - restore_cache:
           keys:
-            # Specify the unique identifier for the cache.
             - v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
-            # Fallback to using the latest cache if no exact match is found.
             - v3-conda-dependencies-
 
-      # Create environment and install extra_requires dependencies manually.
       - run:
           name: Create or update environment
           command: |
@@ -374,7 +343,6 @@ jobs:
       - install_development_deps:
           pyenv: ${PYENV}
 
-      # Publish it, if there is anything to publish!
       - run:
           name: Run semantic-release publish
           command: |
