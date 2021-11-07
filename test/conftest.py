@@ -1,11 +1,15 @@
 import os
+from inspect import stack
 from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
 import pytest
+import scipy.stats as stats
 from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
+from numpy.linalg import LinAlgError
+from psutil import cpu_percent, virtual_memory
 
 from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
@@ -18,8 +22,17 @@ from PyDynamic.misc.tools import normalize_vector_or_matrix
 settings.register_profile(
     name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
 )
-if "CIRCLECI" in os.environ:
+if os.getenv("CIRCLECI") == "true":
     settings.load_profile("ci")
+
+
+def _print_current_ram_usage(capsys):
+    with capsys.disabled():
+        print(
+            f"Run iteration of `{stack()[1].function}()` with "
+            f"{virtual_memory().percent}% of RAM used and "
+            f"{cpu_percent()}% of CPU."
+        )
 
 
 def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
@@ -57,8 +70,12 @@ def hypothesis_float_matrix(
     number_of_rows: Optional[int] = None,
     number_of_cols: Optional[int] = None,
 ) -> np.ndarray:
-    number_of_rows = draw(hypothesis_dimension(number_of_rows))
-    number_of_cols = draw(hypothesis_dimension(number_of_cols))
+    number_of_rows = draw(
+        hypothesis_dimension(min_value=number_of_rows, max_value=number_of_rows)
+    )
+    number_of_cols = draw(
+        hypothesis_dimension(min_value=number_of_cols, max_value=number_of_cols)
+    )
     return draw(
         hypothesis_float_matrix_strategy(
             number_of_rows=number_of_rows, number_of_cols=number_of_cols
@@ -89,7 +106,7 @@ def hypothesis_nonzero_complex_vector(
     min_magnitude: Optional[float] = 1e-4,
     max_magnitude: Optional[float] = 1e4,
 ) -> np.ndarray:
-    number_of_elements = draw(hypothesis_dimension(length))
+    number_of_elements = draw(hypothesis_dimension(min_value=length, max_value=length))
     complex_vector = draw(
         hnp.arrays(
             dtype=complex,
@@ -123,7 +140,7 @@ def hypothesis_float_vector(
     exclude_min: Optional[bool] = False,
     exclude_max: Optional[bool] = False,
 ) -> np.ndarray:
-    number_of_elements = draw(hypothesis_dimension(length))
+    number_of_elements = draw(hypothesis_dimension(min_value=length, max_value=length))
     return draw(
         hnp.arrays(
             dtype=float,
@@ -140,8 +157,17 @@ def hypothesis_float_vector(
     )
 
 
-def hypothesis_not_negative_float_strategy() -> SearchStrategy:
-    return hst.floats(min_value=0)
+def hypothesis_not_negative_float_strategy(
+    max_value: Optional[float] = None,
+    allow_nan: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
+) -> SearchStrategy:
+    return hst.floats(
+        min_value=0,
+        max_value=max_value,
+        allow_nan=allow_nan,
+        allow_infinity=allow_infinity,
+    )
 
 
 def hypothesis_bounded_float_strategy(
@@ -154,15 +180,24 @@ def hypothesis_bounded_float_strategy(
     return hst.floats(
         min_value=min_value,
         max_value=max_value,
-        include_min=exclude_min,
-        include_max=exclude_max,
+        exclude_min=exclude_min,
+        exclude_max=exclude_max,
         allow_infinity=allow_infinity,
     )
 
 
 @composite
-def hypothesis_not_negative_float(draw: Callable) -> float:
-    return draw(hypothesis_not_negative_float_strategy)
+def hypothesis_not_negative_float(
+    draw: Callable,
+    max_value: Optional[float] = None,
+    allow_nan: Optional[bool] = False,
+    allow_infinity: Optional[bool] = False,
+) -> float:
+    return draw(
+        hypothesis_not_negative_float_strategy(
+            max_value=max_value, allow_nan=allow_nan, allow_infinity=allow_infinity
+        )
+    )
 
 
 @composite
@@ -192,7 +227,9 @@ def hypothesis_covariance_matrix(
     min_value: Optional[float] = 0,
     max_value: Optional[float] = 1,
 ) -> np.ndarray:
-    number_of_rows_and_columns = draw(hypothesis_dimension(number_of_rows))
+    number_of_rows_and_columns = draw(
+        hypothesis_dimension(min_value=number_of_rows, max_value=number_of_rows)
+    )
     cov_with_one_eigenvalue_close_to_zero = np.cov(
         draw(
             hnp.arrays(
@@ -217,7 +254,7 @@ def hypothesis_covariance_matrix(
     nonzero_diagonal_cov = draw(
         ensure_hypothesis_nonzero_diagonal(cov_after_discarding_smallest_singular_value)
     )
-    scaled_cov = _scale_matrix_or_vector_to_range(
+    scaled_cov = scale_matrix_or_vector_to_range(
         nonzero_diagonal_cov, range_min=min_value, range_max=max_value
     )
     assume(np.all(np.linalg.eigvals(scaled_cov) >= 0))
@@ -237,10 +274,14 @@ def ensure_hypothesis_nonzero_diagonal(
     )
 
 
-def _scale_matrix_or_vector_to_range(
+def scale_matrix_or_vector_to_range(
     array: np.ndarray, range_min: Optional[float] = 0, range_max: Optional[float] = 1
 ) -> np.ndarray:
     return normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
+
+
+def scale_matrix_or_vector_to_convex_combination(array: np.ndarray) -> np.ndarray:
+    return array / np.sum(array)
 
 
 @composite
@@ -253,11 +294,21 @@ def hypothesis_covariance_matrix_with_zero_correlation(
 
 
 @composite
-def hypothesis_dimension(draw: Callable, dimension: Optional[int] = None) -> int:
+def hypothesis_dimension(
+    draw: Callable,
+    min_value: Optional[int] = None,
+    max_value: Optional[int] = None,
+) -> int:
+    minimum_dimension = min_value if min_value is not None else 1
+    maximum_dimension = max_value if max_value is not None else 20
     return (
-        dimension
-        if dimension is not None
-        else draw(hypothesis_reasonable_dimension_strategy())
+        minimum_dimension
+        if minimum_dimension is not None and minimum_dimension == maximum_dimension
+        else draw(
+            hypothesis_reasonable_dimension_strategy(
+                min_value=minimum_dimension, max_value=maximum_dimension
+            )
+        )
     )
 
 
@@ -305,8 +356,12 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
         cov_with_one_eigenvalue_close_to_zero
     )
     cov_positive_semi_definite = cov_after_discarding_smallest_singular_value
-    while np.any(np.linalg.eigvals(cov_positive_semi_definite) < 0):
-        cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
+    while True:
+        try:
+            stats.multivariate_normal(cov=cov_positive_semi_definite)
+            break
+        except LinAlgError:
+            cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
     return cov_positive_semi_definite
 
 

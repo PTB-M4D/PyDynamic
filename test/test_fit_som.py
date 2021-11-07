@@ -10,7 +10,7 @@ from PyDynamic import fit_som, make_semiposdef, sos_FreqResp
 from PyDynamic.examples.demonstrate_fit_som import (
     demonstrate_second_order_model_fitting,
 )
-from .conftest import hypothesis_float_vector
+from .conftest import _print_current_ram_usage, hypothesis_float_vector
 
 
 def test_demonstrate_second_order_model_fitting(capsys, monkeypatch):
@@ -78,8 +78,8 @@ def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
     ],
 )
 def test_usual_calls_fit_som(capsys, params):
-    with capsys.disabled():
-        fit_som(verbose=True, **params)
+    _print_current_ram_usage(capsys)
+    fit_som(verbose=True, **params)
 
 
 @given(random_input_to_fit_som())
@@ -105,16 +105,15 @@ def test_fit_som_with_too_short_UH(params):
 
 
 @given(random_input_to_fit_som(guarantee_UH_as_matrix=True))
-def test_fit_som_with_unsquare_UH(params):
+def test_fit_som_with_nonsquare_UH(params):
     params["UH"] = params["UH"][:, 1:]
     with pytest.raises(ValueError):
         fit_som(**params)
 
 
-@given(random_input_to_fit_som())
+@given(random_input_to_fit_som(guarantee_UH_as_matrix=True))
 def test_fit_som_with_nonint_MCruns(params):
     params["MCruns"] = float(params["MCruns"])
-    assume(params["UH"] is not None)
     with pytest.raises(ValueError):
         fit_som(**params)
 
@@ -134,6 +133,7 @@ def test_fit_som_with_too_short_weighting_vector(params):
 
 
 @given(random_input_to_fit_som())
+@pytest.mark.slow
 def test_fit_som_with_zero_frequency_response_but_without_MCruns_or_UH(params):
     params["H"][0] = 0.0
     assume(params["MCruns"] is None or params["UH"] is None)

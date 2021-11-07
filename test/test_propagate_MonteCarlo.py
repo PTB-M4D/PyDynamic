@@ -5,6 +5,7 @@ import functools
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.noise import ARMA
@@ -64,6 +65,11 @@ def test_MC(visualizeOutput=False):
         )
 
         plt.show()
+
+
+def test_MC_non_negative_main_diagonal_covariance():
+    _, Uy = MC(x, sigma_noise, b1, np.ones(1), Ub, runs=runs, blow=b2)
+    assert np.all(np.diag(Uy) >= 0)
 
 
 def test_SMC():
@@ -167,8 +173,8 @@ def test_compare_MC_UMC():
     )
 
     # both methods should yield roughly the same results
-    assert np.allclose(y_MC, y_UMC, atol=5e-4)
-    assert np.allclose(Uy_MC, Uy_UMC, atol=5e-4)
+    assert_allclose(y_MC, y_UMC, atol=5e-4)
+    assert_allclose(Uy_MC, Uy_UMC, atol=5e-4)
 
 
 def test_noise_ARMA():

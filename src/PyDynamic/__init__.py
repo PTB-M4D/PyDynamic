@@ -6,21 +6,12 @@
      -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
    - `GitHub website <https://www.github.com/PTB-M4D/PyDynamic>`_
 """
-__version__ = "1.11.1"
+__version__ = "2.0.0"
 
 __all__ = [
-    "invLSFIR",
-    "invLSIIR",
-    "invLSFIR_unc",
-    "invLSFIR_uncMC",
-    "invLSIIR_unc",
     "LSFIR",
     "LSIIR",
-    "LSFIR_unc",
-    "LSFIR_uncMC",
-    "LSIIR_unc",
     "fit_som",
-    "fit_sos",
     "FreqResp2RealImag",
     "GUM_DFT",
     "GUM_iDFT",
@@ -30,8 +21,16 @@ __all__ = [
     "AmpPhase2DFT",
     "AmpPhase2Time",
     "Time2AmpPhase",
+    "dwt",
+    "wave_dec",
+    "wave_dec_realtime",
+    "inv_dwt",
+    "wave_rec",
+    "filter_design",
+    "dwt_max_level",
     "FIRuncFilter",
     "IIRuncFilter",
+    "IIR_get_initial_state",
     "ARMA",
     "MC",
     "SMC",
@@ -55,6 +54,7 @@ __all__ = [
     "rect",
     "corr_noise",
     "sine",
+    "multi_sine",
     "ARMA",
     "print_mat",
     "print_vec",
@@ -68,9 +68,6 @@ __all__ = [
     "is_2d_matrix",
     "number_of_rows_equals_vector_dim",
 ]
-
-from .deconvolution.fit_filter import LSFIR_unc, LSFIR_uncMC, LSIIR_unc
-from .identification.fit_transfer import fit_sos
 
 from .misc import *
 from .model_estimation import *
