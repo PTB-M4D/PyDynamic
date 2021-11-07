@@ -13,7 +13,6 @@ from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.testsignals import rect
 from PyDynamic.misc.tools import shift_uncertainty, trimOrPad
-
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
     _fir_filter,
@@ -24,6 +23,7 @@ from PyDynamic.uncertainty.propagate_filter import (
 )
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 from .conftest import (
+    _print_current_ram_usage,
     hypothesis_covariance_matrix,
     hypothesis_float_vector,
     hypothesis_not_negative_float,
@@ -474,18 +474,17 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
         n_blow = 0
 
     # run FIR with MC and extract diagonal of returned covariance
-    with capsys.disabled():
-        y_mc, Uy_mc = MC(
-            x,
-            ux,
-            b,
-            a,
-            Uab,
-            blow=blow,
-            runs=2000,
-            shift=-fir_unc_filter_input["shift"],
-            verbose=True,
-        )
+    y_mc, Uy_mc = MC(
+        x,
+        ux,
+        b,
+        a,
+        Uab,
+        blow=blow,
+        runs=2000,
+        shift=-fir_unc_filter_input["shift"],
+        verbose=True,
+    )
 
     # approximate comparison after swing-in of MC-result (which is after the combined
     # length of blow and b)
@@ -517,6 +516,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     #     f"{fir_unc_filter_input['blow']}",
     # )
     # /HACK
+    _print_current_ram_usage(capsys)
     assert_allclose(
         relevant_y_fir,
         relevant_y_mc,
@@ -574,9 +574,8 @@ def test_FIRuncFilter_non_negative_main_diagonal_covariance(fir_unc_filter_input
 @pytest.mark.slow
 def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
     legacy_y, legacy_Uy = legacy_FIRuncFilter(**fir_unc_filter_input)
-    with capsys.disabled():
-        current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
-
+    current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
+    _print_current_ram_usage(capsys)
     assert_allclose(
         legacy_y,
         current_y,

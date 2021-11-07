@@ -1,4 +1,5 @@
 import os
+from inspect import stack
 from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
@@ -8,6 +9,7 @@ from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
 from numpy.linalg import LinAlgError
+from psutil import cpu_percent, virtual_memory
 
 from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
@@ -22,6 +24,15 @@ settings.register_profile(
 )
 if os.getenv("CIRCLECI") == "true":
     settings.load_profile("ci")
+
+
+def _print_current_ram_usage(capsys):
+    with capsys.disabled():
+        print(
+            f"Run iteration of `{stack()[1].function}()` with "
+            f"{virtual_memory().percent}% of RAM used and "
+            f"{cpu_percent()}% of CPU."
+        )
 
 
 def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
