@@ -1,11 +1,15 @@
 import os
+from inspect import stack
 from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
 import pytest
+import scipy.stats as stats
 from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
+from numpy.linalg import LinAlgError
+from psutil import cpu_percent, virtual_memory
 
 from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
@@ -18,8 +22,17 @@ from PyDynamic.misc.tools import normalize_vector_or_matrix
 settings.register_profile(
     name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
 )
-if "CIRCLECI" in os.environ:
+if os.getenv("CIRCLECI") == "true":
     settings.load_profile("ci")
+
+
+def _print_current_ram_usage(capsys):
+    with capsys.disabled():
+        print(
+            f"Run iteration of `{stack()[1].function}()` with "
+            f"{virtual_memory().percent}% of RAM used and "
+            f"{cpu_percent()}% of CPU."
+        )
 
 
 def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
@@ -343,8 +356,12 @@ def random_covariance_matrix(length: Optional[int]) -> np.ndarray:
         cov_with_one_eigenvalue_close_to_zero
     )
     cov_positive_semi_definite = cov_after_discarding_smallest_singular_value
-    while np.any(np.linalg.eigvals(cov_positive_semi_definite) < 0):
-        cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
+    while True:
+        try:
+            stats.multivariate_normal(cov=cov_positive_semi_definite)
+            break
+        except LinAlgError:
+            cov_positive_semi_definite = make_semiposdef(cov_positive_semi_definite)
     return cov_positive_semi_definite
 
 

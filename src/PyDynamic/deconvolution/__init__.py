@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. deprecated:: 2.0.0
     The module *deconvolution* is combined with the module *identification* and
@@ -12,18 +11,4 @@
     in the module *deconvolution*.
 """
 
-from .fit_filter import (
-    LSFIR,
-    LSIIR,
-    LSFIR_unc,
-    LSFIR_uncMC,
-    LSIIR_unc,
-)
-
-__all__ = [
-    "LSFIR",
-    "LSIIR",
-    "LSFIR_unc",
-    "LSFIR_uncMC",
-    "LSIIR_unc",
-]
+from .fit_filter import LSFIR, LSFIR_unc, LSFIR_uncMC, LSIIR, LSIIR_unc

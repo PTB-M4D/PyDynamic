@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/requirements-py38.txt
 #
-cycler==0.10.0
+cycler==0.11.0
     # via matplotlib
 future==0.18.2
     # via uncertainties
@@ -14,7 +14,7 @@ matplotlib==3.4.3
     # via PyDynamic (setup.py)
 mpmath==1.2.1
     # via sympy
-numpy==1.21.2
+numpy==1.21.3
     # via
     #   PyDynamic (setup.py)
     #   matplotlib
@@ -22,7 +22,7 @@ numpy==1.21.2
     #   pywavelets
     #   scipy
     #   time-series-buffer
-pandas==1.3.3
+pandas==1.3.4
     # via PyDynamic (setup.py)
 pillow==8.4.0
     # via matplotlib
@@ -39,9 +39,7 @@ pywavelets==1.1.1
 scipy==1.7.1
     # via PyDynamic (setup.py)
 six==1.16.0
-    # via
-    #   cycler
-    #   python-dateutil
+    # via python-dateutil
 sympy==1.9
     # via PyDynamic (setup.py)
 time-series-buffer==0.1.4b0

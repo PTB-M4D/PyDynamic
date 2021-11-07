@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/requirements-py36.txt
 #
-cycler==0.10.0
+cycler==0.11.0
     # via matplotlib
 future==0.18.2
     # via uncertainties
@@ -39,9 +39,7 @@ pywavelets==1.1.1
 scipy==1.5.4
     # via PyDynamic (setup.py)
 six==1.16.0
-    # via
-    #   cycler
-    #   python-dateutil
+    # via python-dateutil
 sympy==1.9
     # via PyDynamic (setup.py)
 time-series-buffer==0.1.4b0

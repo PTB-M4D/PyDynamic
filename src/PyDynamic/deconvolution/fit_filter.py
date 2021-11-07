@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. deprecated:: 2.0.0
     The module *deconvolution* is combined with the module *identification* and
@@ -23,14 +22,6 @@ warning = (
     "against the reciprocal of the frequency response like with the previous versions "
     "in the module *deconvolution*. Please use the current function name "
 )
-
-__all__ = [
-    "LSFIR",
-    "LSIIR",
-    "LSFIR_unc",
-    "LSFIR_uncMC",
-    "LSIIR_unc",
-]
 
 
 def LSFIR(*args, **kwargs):
