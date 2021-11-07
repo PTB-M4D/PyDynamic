@@ -165,8 +165,8 @@ def squarepulse(time, height, numpulse=4, noise=0.0):
     return x
 
 
-def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
-    r""" Generate a sine signal
+def sine(time, amp=1., freq=1., noise=0.):
+    r"""Generate a batch of a sine signal with normally distributed noise
 
     Parameters
     ----------
@@ -175,7 +175,7 @@ def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
         amp : float, optional
              amplitude of the sine (default = 1.0)
         freq : float, optional
-             frequency of the sine in Hz (default = :math:`2 * \pi`)
+             frequency of the sine in Hz (default = 1.0)
         noise : float, optional
             std of simulated signal noise (default = 0.0)
 
@@ -184,22 +184,24 @@ def sine(time, amp=1.0, freq=2 * np.pi, noise=0.0):
         x : np.ndarray of shape (N,)
             signal amplitude at time instants
     """
-    x = amp * np.sin(2 * np.pi / freq * time)
-    if noise > 0:
-        x += np.random.randn(len(time)) * noise
+    # Design the sine signal according to e.g.
+    #   https://de.wikipedia.org/wiki/Sinuston#Mathematischer_Hintergrund
+    x = amp * np.sin(2 * np.pi * freq * time)
+    if noise:   # noise = 0.0 (default)  is equivalent to noise = False here
+        x += np.random.randn(len(x)) * noise
     return x
 
 
-def multi_sine(time, amps, freqs, noise=0.0):
-    r"""Generate a multi-sine signal as summation of single sine signals
+def multi_sine(time, amps, freqs, noise=0.):
+    r"""Generate a batch of a summation of sine signals with normally distributed noise
 
     Parameters
     ----------
         time: np.ndarray of shape (N,)
             time instants
-        amps: list or np.ndarray of floating point values
+        amps: list or np.ndarray of shape (M,) of floating point values
             amplitudes of the sine signals
-        freqs: list or np.ndarray of floating point values
+        freqs: list or np.ndarray of shape (M,) of floating point values
             frequencies of the sine signals in Hz
         noise: float, optional
             std of simulated signal noise (default = 0.0)
@@ -212,8 +214,9 @@ def multi_sine(time, amps, freqs, noise=0.0):
 
     x = np.zeros_like(time)
     for amp, freq in zip(amps, freqs):
-        x += amp * np.sin(freq * time)
-    x += np.random.randn(len(x)) * noise ** 2
+        x += sine(time=time, amp=amp, freq=freq, noise=0.)
+    if noise:
+        x += np.random.randn(len(x)) * noise
     return x
 
 

@@ -7,14 +7,14 @@
 # specified dependencies from setup.py and the dev-requirements-files for all the
 # different versions.
 # The production dependencies belong into the according list 'install_requires' in
-# setup.py and the development dependencies into the various dev-requirements.in-files.
+# setup.py and the development dependencies into the dev-requirements.in-file.
 # For execution the script needs virtual environments, one for each of the upstream
 # supported Python versions, with pip-tools installed. Those environments need to be
 # placed at ../envs/PyDynamic-PYTHONVERSION relative to the project root.
 # 'PYTHONVERSION' takes the value 'py3X', where X is one of the numbers in the line
 # starting with 'for PYVENV in ' in this script, prescribing the supported Python
-# versions. If you want to execute this script on Windows you should adapt line 33
-# appropriately.
+# versions. If you want to execute this script on Windows you have to adapt all path
+# separators to backslashes.
 # The script starts with navigating to the project root, if it was called from
 # the subfolder ./requirements/.
 if [ -f requirements.txt ] && [ -d ../PyDynamic/ ] && [ -d ../requirements/ ]; then

@@ -24,9 +24,21 @@ from .propagate_DFT import (
     GUM_iDFT,
     Time2AmpPhase,
 )
-from .propagate_filter import FIRuncFilter, IIRuncFilter
+
+from .propagate_filter import FIRuncFilter, IIRuncFilter, IIR_get_initial_state
+
 from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
 from ..misc.noise import ARMA
+
+from .propagate_DWT import (
+    dwt,
+    wave_dec,
+    wave_dec_realtime,
+    inv_dwt,
+    wave_rec,
+    filter_design,
+    dwt_max_level,
+)
 
 __all__ = [
     "ARMA",
@@ -40,9 +52,17 @@ __all__ = [
     "Time2AmpPhase",
     "FIRuncFilter",
     "IIRuncFilter",
+    "IIR_get_initial_state",
     "MC",
     "SMC",
     "UMC",
     "UMC_generic",
     "interp1d_unc",
+    "dwt",
+    "wave_dec",
+    "wave_dec_realtime",
+    "inv_dwt",
+    "wave_rec",
+    "filter_design",
+    "dwt_max_level",
 ]
