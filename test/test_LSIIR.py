@@ -307,7 +307,7 @@ def test_fitIIR_results_against_former_implementations(
     assert_almost_equal(a_current, a_former)
 
 
-@settings(deadline=timedelta(milliseconds=1000))
+@settings(deadline=None)
 @given(lsiir_base_params=LSIIR_parameters())
 def test_LSIIR_results_against_former_implementations(
     lsiir_base_params, provide_former_fitIIR, former_LSIIR

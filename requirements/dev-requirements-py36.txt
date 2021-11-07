@@ -6,8 +6,6 @@
 #
 alabaster==0.7.12
     # via sphinx
-astroid==2.7.3
-    # via pylint
 async-generator==1.10
     # via nbclient
 attrs==21.2.0
@@ -113,8 +111,6 @@ ipython-genutils==0.2.0
     #   ipykernel
     #   nbformat
     #   traitlets
-isort==5.9.3
-    # via pylint
 jedi==0.18.0
     # via ipython
 jeepney==0.7.1
@@ -141,12 +137,8 @@ jupyterlab-pygments==0.1.2
     # via nbconvert
 keyring==23.1.0
     # via twine
-lazy-object-proxy==1.6.0
-    # via astroid
 markupsafe==2.0.1
     # via jinja2
-mccabe==0.6.1
-    # via pylint
 mistune==0.8.4
     # via nbconvert
 mypy-extensions==0.4.3
@@ -190,7 +182,6 @@ pkginfo==1.7.1
 platformdirs==2.3.0
     # via
     #   black
-    #   pylint
     #   virtualenv
 pluggy==1.0.0
     # via
@@ -198,6 +189,8 @@ pluggy==1.0.0
     #   tox
 prompt-toolkit==3.0.22
     # via ipython
+psutil==5.8.0
+    # via -r requirements/dev-requirements.in
 ptyprocess==0.7.0
     # via pexpect
 py==1.10.0
@@ -213,8 +206,6 @@ pygments==2.10.0
     #   nbconvert
     #   readme-renderer
     #   sphinx
-pylint==2.10.2
-    # via -r requirements/dev-requirements.in
 pyparsing==2.4.7
     # via
     #   -c requirements/requirements-py36.txt
@@ -264,8 +255,6 @@ requests-toolbelt==0.9.1
     #   twine
 rfc3986==1.5.0
     # via twine
-rope==0.19.0
-    # via -r requirements/dev-requirements.in
 secretstorage==3.3.1
     # via keyring
 semver==2.13.0
@@ -312,7 +301,6 @@ testpath==0.5.0
     # via nbconvert
 toml==0.10.2
     # via
-    #   pylint
     #   pytest
     #   pytest-cov
     #   tox
@@ -345,12 +333,9 @@ tweepy==4.3.0
 twine==3.4.2
     # via python-semantic-release
 typed-ast==1.4.3
-    # via
-    #   astroid
-    #   black
+    # via black
 typing-extensions==3.10.0.2
     # via
-    #   astroid
     #   black
     #   gitpython
     #   importlib-metadata
@@ -364,8 +349,6 @@ webencodings==0.5.1
     # via bleach
 wheel==0.37.0
     # via python-semantic-release
-wrapt==1.12.1
-    # via astroid
 zipp==3.5.0
     # via
     #   importlib-metadata
