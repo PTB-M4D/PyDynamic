@@ -26,7 +26,7 @@ pandas==1.1.5
     # via PyDynamic (setup.py)
 pillow==8.4.0
     # via matplotlib
-pyparsing==2.4.7
+pyparsing==3.0.5
     # via matplotlib
 python-dateutil==2.8.2
     # via
