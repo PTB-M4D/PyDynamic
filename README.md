@@ -64,7 +64,7 @@ eu">FAMOUS</a>.
 
 To dive right into it, install PyDynamic and execute one of the examples:
 
-```python
+```shell
 (my_PyDynamice_venv) $ pip install PyDynamic
 Collecting PyDynamic
 [...]
@@ -73,6 +73,8 @@ Successfully installed PyDynamic-[...]
 Python 3.9.7 (default, Aug 31 2021, 13:28:12) 
 [GCC 11.1.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
+```
+```python
 >>> from PyDynamic.examples.uncertainty_for_dft.deconv_DFT import DftDeconvolutionExample
 >>> DftDeconvolutionExample()
 Propagating uncertainty associated with measurement through DFT
