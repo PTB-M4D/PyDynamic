@@ -8,13 +8,13 @@ This modules contains the following functions:
 
 * :func:`dwt`: single level DWT
 * :func:`wave_dec`: wavelet decomposition / multi level DWT
-* :func:`wave_dec_realtime"`: multi level DWT
+* :func:`wave_dec_realtime`: multi level DWT
 * :func:`inv_dwt`: single level inverse DWT
 * :func:`wave_rec`: wavelet reconstruction / multi level inverse DWT
-* :func:`filter_design`: provide common wavelet filters (via :py:mod:`PyWavelets`)
+* :func:`filter_design`: provide common wavelet filters (via :class:`pywt.Wavelet`)
 * :func:`dwt_max_level`: return the maximum achievable DWT level
-
 """
+
 __all__ = [
     "dwt",
     "wave_dec",
@@ -28,14 +28,14 @@ __all__ = [
 import numpy as np
 import pywt
 
-from .propagate_filter import IIRuncFilter, IIR_get_initial_state
+from .propagate_filter import IIR_get_initial_state, IIRuncFilter
 
 
 def dwt(x, Ux, lowpass, highpass, states=None, realtime=False, subsample_start=1):
-    """
-    Apply low-pass `lowpass` and high-pass `highpass` to time-series data `x`.
+    """Apply low-pass ``lowpass`` and high-pass ``highpass`` to time-series data ``x``
+
     The uncertainty is propagated through the transformation by using
-    :func:`PyDynamic.uncertainty.IIRuncFilter`.
+    :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`.
 
     Return the subsampled results.
 
@@ -119,8 +119,7 @@ def inv_dwt(
     states=None,
     realtime=False,
 ):
-    """
-    Single step of inverse discrete wavelet transform
+    """Single step of inverse discrete wavelet transform
 
     Parameters
     ----------
@@ -210,16 +209,17 @@ def inv_dwt(
 
 
 def filter_design(kind):
-    """
-    Provide low- and highpass filters suitable for discrete wavelet transformation.
-    This wraps :py:mod:`PyWavelets`.
+    """Provide low- and highpass filters suitable for discrete wavelet transformation
+
+    This wraps :class:`pywt.Wavelet`.
 
     Parameters
     ----------
     kind : string
         filter name, i.e. db4, coif6, gaus9, rbio3.3, ...
-        supported families: :func:`pywt.families`
-        supported wavelets: :func:`pywt.wavelist`
+
+        * supported families: :func:`pywt.families`
+        * supported wavelets: :func:`pywt.wavelist`
 
     Returns
     -------
@@ -256,13 +256,13 @@ def dwt_max_level(data_length, filter_length):
     -------
     n_max : int
     """
+
     n_max = int(np.floor(np.log2(data_length / (filter_length - 1))))
     return n_max
 
 
 def wave_dec(x, Ux, lowpass, highpass, n=-1):
-    """
-    Multilevel discrete wavelet transformation of time-series x with uncertainty Ux.
+    """Multilevel discrete wavelet transformation of time-series x with uncertainty Ux
 
     Parameters
     ----------

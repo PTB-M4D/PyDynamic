@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.signal as scs
+import scipy.signal as dsp
 
 import PyDynamic.uncertainty.propagate_filter as pf
 from PyDynamic.misc.testsignals import rect
@@ -11,8 +11,8 @@ ws = 0.3
 gpass = 0.1
 gstop = 40
 # noinspection PyTupleAssignmentBalance
-b, a = scs.iirdesign(wp, ws, gpass, gstop)
-a = np.array([1.0])
+b, _ = dsp.iirdesign(wp, ws, gpass, gstop)
+a = np.ones(1)
 
 # simulate input and output signals
 Fs = 100e3  # sampling frequency (in Hz)
@@ -40,7 +40,7 @@ tmp_y = []
 for i in range(n_mc):
     x_mc = x + np.random.randn(nx) * Ux
     b_tmp = b + np.random.randn(len(b)) * np.sqrt(np.diag(Uab))
-    y_mc = scs.lfilter(b_tmp, a, x_mc)
+    y_mc = dsp.lfilter(b_tmp, a, x_mc)
     tmp_y.append(y_mc)
 y_mc_mean = np.mean(tmp_y, axis=0)
 y_mc_std = np.std(tmp_y, axis=0)

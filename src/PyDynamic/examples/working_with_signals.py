@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-This module contains a very first draft for the utilization of the experimental
-`Signal` class.
+"""A very first draft for the utilization of the experimental `Signal` class.
 
-.. note:: The `Signal` class in :mod:`PyDynamic.signals` is experimental and its
+.. note:: The :class:`Signal` class in :mod:`PyDynamic.signals` is experimental and its
 signatures might change in the future or it might as well disappear completely. Let
 us know if you have special needs or want to make extended use of this feature.
 """
