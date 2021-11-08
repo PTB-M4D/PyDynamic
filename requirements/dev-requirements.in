@@ -1,4 +1,4 @@
-black
+black[jupyter]
 pytest
 pytest-cov
 hypothesis
