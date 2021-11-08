@@ -1,8 +1,9 @@
-"""
-    Example how the discrete wavelet transformation can run continuously,
-    by repetitive calls of :func:`wave_dec_realtime`.
+"""Example how the discrete wavelet transformation can run continuously
 
-    The script runs infinitely and can be stopped by pressing "Ctrl + c".
+This script demonstrates a continuous run of :func:`wave_dec_realtime` by
+repetitively calling it.
+
+The script runs infinitely and can be stopped by pressing "Ctrl + c".
 """
 import random
 

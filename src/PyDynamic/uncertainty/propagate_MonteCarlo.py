@@ -84,14 +84,23 @@ class Normal_ZeroCorr:
 
     def rvs(self, size=1):
         # This function mimics the behavior of the scipy stats package
-        return np.tile(self.loc, (size, 1)) + \
-               np.random.randn(size, len(self.loc)) * \
-               np.tile(self.scale, (size, 1))
+        return np.tile(self.loc, (size, 1)) + np.random.randn(
+            size, len(self.loc)
+        ) * np.tile(self.scale, (size, 1))
 
 
 def MC(
-        x, Ux, b, a, Uab, runs=1000, blow=None, alow=None,
-        return_samples=False, shift=0, verbose=True
+    x,
+    Ux,
+    b,
+    a,
+    Uab,
+    runs=1000,
+    blow=None,
+    alow=None,
+    return_samples=False,
+    shift=0,
+    verbose=True,
 ):
     r"""Standard Monte Carlo method
 
@@ -101,49 +110,45 @@ def MC(
 
     Parameters
     ----------
-        x: np.ndarray
-            filter input signal
-        Ux: float or np.ndarray
-            standard deviation of signal noise (float), point-wise standard
-            uncertainties or covariance matrix associated with x
-        b: np.ndarray
-            filter numerator coefficients
-        a: np.ndarray
-            filter denominator coefficients
-        Uab: np.ndarray
-            uncertainty matrix :math:`U_\theta`
-        runs: int,optional
-            number of Monte Carlo runs
-        return_samples: bool, optional
-            whether samples or mean and std are returned
-
-    If ``return_samples`` is ``False``, the method returns:
+    x : np.ndarray
+        filter input signal
+    Ux : float or np.ndarray
+        standard deviation of signal noise (float), point-wise standard
+        uncertainties or covariance matrix associated with x
+    b : np.ndarray
+        filter numerator coefficients
+    a : np.ndarray
+        filter denominator coefficients
+    Uab : np.ndarray
+        uncertainty matrix :math:`U_\theta`
+    runs : int,optional
+        number of Monte Carlo runs
+    return_samples : bool, optional
+        whether samples or mean and std are returned
 
     Returns
     -------
-        y: np.ndarray
-            filter output signal
-        Uy: np.ndarray
-            uncertainty associated with
-
-    Otherwise the method returns:
-
-    Returns
-    -------
-        Y: np.ndarray
-            array of Monte Carlo results
+    y, Uy : np.ndarray
+        filtered output signal and  associated uncertainties, only returned if
+        return_samples is ``False``
+    Y : np.ndarray
+        array of Monte Carlo results, only returned if return_samples is ``True``
 
     References
     ----------
-        * Eichstädt, Link, Harris and Elster [Eichst2012]_
+    * Eichstädt, Link, Harris and Elster [Eichst2012]_
     """
 
     Na = len(a)
     runs = int(runs)
 
-    Y = np.zeros((runs, len(x)))   # set up matrix of MC results
-    theta = np.hstack((a[1:], b))  # create the parameter vector from the filter coefficients
-    Theta = np.random.multivariate_normal(theta, Uab, runs)  # Theta is small and thus we
+    Y = np.zeros((runs, len(x)))  # set up matrix of MC results
+    theta = np.hstack(
+        (a[1:], b)
+    )  # create the parameter vector from the filter coefficients
+    Theta = np.random.multivariate_normal(
+        theta, Uab, runs
+    )  # Theta is small and thus we
 
     # can draw the full matrix now.
     if isinstance(Ux, np.ndarray):
@@ -194,9 +199,20 @@ def MC(
 
 
 def SMC(
-        x, noise_std, b, a, Uab=None, runs=1000, Perc=None, blow=None,
-        alow=None, shift=0, return_samples=False, phi=None, theta=None,
-        Delta=0.0
+    x,
+    noise_std,
+    b,
+    a,
+    Uab=None,
+    runs=1000,
+    Perc=None,
+    blow=None,
+    alow=None,
+    shift=0,
+    return_samples=False,
+    phi=None,
+    theta=None,
+    Delta=0.0,
 ):
     r"""Sequential Monte Carlo method
 
@@ -399,9 +415,21 @@ def SMC(
 
 
 def UMC(
-        x, b, a, Uab, runs=1000, blocksize=8, blow=1.0, alow=1.0, phi=0.0,
-        theta=0.0, sigma=1, Delta=0.0, runs_init=100, nbins=1000,
-        credible_interval=0.95
+    x,
+    b,
+    a,
+    Uab,
+    runs=1000,
+    blocksize=8,
+    blow=1.0,
+    alow=1.0,
+    phi=0.0,
+    theta=0.0,
+    sigma=1,
+    Delta=0.0,
+    runs_init=100,
+    nbins=1000,
+    credible_interval=0.95,
 ):
     """
     Batch Monte Carlo for filtering using update formulae for mean, variance and (approximated) histogram.
@@ -479,7 +507,9 @@ def UMC(
     # define generic functions to hand over to UMC_generic
 
     # variate the coefficients of filter as main simulation influence
-    ab = np.hstack((a[1:], b))    # create the parameter vector from the filter coefficients (should be named theta, but this name is already used)
+    ab = np.hstack(
+        (a[1:], b)
+    )  # create the parameter vector from the filter coefficients (should be named theta, but this name is already used)
     draw_samples = lambda size: np.random.multivariate_normal(ab, Uab, size)
 
     # how to evaluate functions
@@ -496,7 +526,9 @@ def UMC(
     evaluate = functools.partial(_UMCevaluate, **params)
 
     # run UMC
-    y, Uy, happr, _ = UMC_generic(draw_samples, evaluate, runs=runs, blocksize=blocksize, runs_init=runs_init)
+    y, Uy, happr, _ = UMC_generic(
+        draw_samples, evaluate, runs=runs, blocksize=blocksize, runs_init=runs_init
+    )
 
     # further post-calculation steps
     y_cred_low = np.zeros((len(nbins), len(y)))
@@ -505,9 +537,11 @@ def UMC(
     # approximate lower and upper credible quantiles
     for k in range(x.size):
         for m, h in enumerate(happr.values()):
-            e = h["bin-edges"][:,k]                 # take all bin-edges
-            f = np.append(0, h["bin-counts"][:,k])  # bin count for before first bin is 0
-            G = np.cumsum(f)/np.sum(f)
+            e = h["bin-edges"][:, k]  # take all bin-edges
+            f = np.append(
+                0, h["bin-counts"][:, k]
+            )  # bin count for before first bin is 0
+            G = np.cumsum(f) / np.sum(f)
 
             ## interpolate the cumulated relative bin-count G(e) for the requested credibility interval
             interp_e = interp1d(G, e)
@@ -558,17 +592,27 @@ def _UMCevaluate(th, nbb, x, Delta, phi, theta, sigma, blow, alow):
     e = ARMA(x.size, phi=phi, theta=theta, std=sigma)
 
     xlow = lfilter(blow, alow, x + e)
-    d = Delta * (2 * np.random.random_sample(size=x.size) - 1 )   # uniform distribution [-Delta, Delta]
+    d = Delta * (
+        2 * np.random.random_sample(size=x.size) - 1
+    )  # uniform distribution [-Delta, Delta]
 
     return lfilter(bb, aa, xlow) + d
 
 
-def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 10, nbins = 100,
-                return_samples = False, n_cpu = multiprocessing.cpu_count()):
+def UMC_generic(
+    draw_samples,
+    evaluate,
+    runs=100,
+    blocksize=8,
+    runs_init=10,
+    nbins=100,
+    return_samples=False,
+    n_cpu=multiprocessing.cpu_count(),
+):
     """
     Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
     Assumes that the input and output of evaluate are numeric vectors (but not necessarily of same dimension).
-    If the output of evaluate is multi-dimensional, it will be flattened into 1D. 
+    If the output of evaluate is multi-dimensional, it will be flattened into 1D.
 
     Parameters
     ----------
@@ -601,7 +645,7 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
         ``evaluate = functools.partial(_UMCevaluate, nbb=b.size, x=x, Delta=Delta, phi=phi, theta=theta, sigma=sigma, blow=blow, alow=alow)``
         ``evaluate = functools.partial(bigFunction, **dict_of_kwargs)``
 
-    By default the method 
+    By default the method
 
     Returns
     -------
@@ -616,8 +660,8 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             shape of the unraveled simulation output
             can be used to reshape y and np.diag(Uy) into original shape
 
-    If ``return_samples`` is ``True``, the method additionally returns all evaluated samples. 
-    This should only be done for testing and debugging reasons, as this removes all memory-improvements of the UMC-method. 
+    If ``return_samples`` is ``True``, the method additionally returns all evaluated samples.
+    This should only be done for testing and debugging reasons, as this removes all memory-improvements of the UMC-method.
 
     Returns
     -------
@@ -672,8 +716,12 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
     happr = {}
     for nbin in nbins:
         happr[nbin] = {}
-        happr[nbin]["bin-edges"] = np.linspace(ymin, ymax, num=nbin+1)           # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
-        happr[nbin]["bin-counts"] = np.zeros((nbin, np.prod(output_shape)))   # init. bin-counts
+        happr[nbin]["bin-edges"] = np.linspace(
+            ymin, ymax, num=nbin + 1
+        )  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
+        happr[nbin]["bin-counts"] = np.zeros(
+            (nbin, np.prod(output_shape))
+        )  # init. bin-counts
 
     # ----------------- run MC block-wise -----------------------
 
@@ -681,7 +729,10 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
 
     # remember all evaluated simulations, if wanted
     if return_samples:
-        sims = {"samples": np.empty((runs, *input_shape)), "results": np.empty((runs, *output_shape))}
+        sims = {
+            "samples": np.empty((runs, *input_shape)),
+            "results": np.empty((runs, *output_shape)),
+        }
 
     for m in range(nblocks):
         if m == nblocks:
@@ -709,12 +760,20 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             y = y0 + np.sum(Y - y0, axis=0) / (K0 + K_seq)
 
             # update covariance (formula 8 in [Eichst2012])
-            Uy = ( (K0-1)*Uy + K0*np.outer(y-y0, y-y0) + np.matmul((Y-y).T, (Y-y)) ) / (K0 + K_seq - 1)
+            Uy = (
+                (K0 - 1) * Uy
+                + K0 * np.outer(y - y0, y - y0)
+                + np.matmul((Y - y).T, (Y - y))
+            ) / (K0 + K_seq - 1)
 
         # update histogram values
         for k in range(np.prod(output_shape)):
             for h in happr.values():
-                h["bin-counts"][:,k] += np.histogram(Y[:,k], bins = h["bin-edges"][:,k])[0]  # numpy histogram returns (bin-counts, bin-edges)
+                h["bin-counts"][:, k] += np.histogram(
+                    Y[:, k], bins=h["bin-edges"][:, k]
+                )[
+                    0
+                ]  # numpy histogram returns (bin-counts, bin-edges)
 
         ymin = np.min(np.vstack((ymin, Y)), axis=0)
         ymax = np.max(np.vstack((ymax, Y)), axis=0)
@@ -724,10 +783,14 @@ def UMC_generic(draw_samples, evaluate, runs = 100, blocksize = 8, runs_init = 1
             block_start = m * blocksize
             block_end = block_start + curr_block
             sims["samples"][block_start:block_end] = samples
-            sims["results"][block_start:block_end] = np.asarray([element.reshape(output_shape) for element in Y])
+            sims["results"][block_start:block_end] = np.asarray(
+                [element.reshape(output_shape) for element in Y]
+            )
 
-        progress_bar(m*blocksize, runs, prefix="UMC running:            ")  # spaces on purpose, to match length of progress-bar below
-    print("\n") # to escape the carriage-return of progress_bar
+        progress_bar(
+            m * blocksize, runs, prefix="UMC running:            "
+        )  # spaces on purpose, to match length of progress-bar below
+    print("\n")  # to escape the carriage-return of progress_bar
 
     # ----------------- post-calculation steps -----------------------
 

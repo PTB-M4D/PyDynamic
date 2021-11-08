@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-The `PyDynamic.misc` module provides various functions and methods which are
-used in the examples and in some of the other implemented routines.
+"""Various functions to reduce redundancy in PyDynamic's codebase
 
 .. seealso::
 
@@ -44,36 +41,36 @@ __all__ = [
     "number_of_rows_equals_vector_dim",
 ]
 
-from .SecondOrderSystem import sos_FreqResp, sos_phys2filter, sos_absphase, sos_realimag
 from .filterstuff import (
     db,
     grpdelay,
-    mapinside,
     isstable,
     kaiser_lowpass,
+    mapinside,
     savitzky_golay,
 )
 from .impinvar import impinvar
-from .testsignals import (
-    shocklikeGaussian,
-    GaussianPulse,
-    squarepulse,
-    rect,
-    corr_noise,
-    sine,
-    multi_sine,
-)
 from .noise import ARMA
+from .SecondOrderSystem import sos_absphase, sos_FreqResp, sos_phys2filter, sos_realimag
+from .testsignals import (
+    corr_noise,
+    GaussianPulse,
+    multi_sine,
+    rect,
+    shocklikeGaussian,
+    sine,
+    squarepulse,
+)
 from .tools import (
+    FreqResp2RealImag,
+    is_2d_matrix,
+    is_vector,
+    make_equidistant,
+    make_semiposdef,
+    number_of_rows_equals_vector_dim,
     print_mat,
     print_vec,
-    make_semiposdef,
-    FreqResp2RealImag,
-    make_equidistant,
-    trimOrPad,
     progress_bar,
     shift_uncertainty,
-    is_vector,
-    is_2d_matrix,
-    number_of_rows_equals_vector_dim,
+    trimOrPad,
 )

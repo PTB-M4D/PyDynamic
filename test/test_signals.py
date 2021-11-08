@@ -15,6 +15,7 @@ from PyDynamic.misc.testsignals import (
     sine,
     squarepulse,
 )
+from .conftest import hypothesis_not_negative_float
 
 
 @pytest.fixture(scope="module")
@@ -155,7 +156,7 @@ def test_medium_call_hi_res_max_sine(hi_res_time, amp):
     assert_almost_equal(np.min(x), -amp)
 
 
-@given(hst.floats(), hst.floats(), hst.floats())
+@given(hst.floats(), hst.floats(), hypothesis_not_negative_float(allow_infinity=True))
 def test_full_call_sine(time, amp, freq, noise):
     # Check for all possible calls.
     sine(time)

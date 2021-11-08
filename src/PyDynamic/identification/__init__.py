@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. deprecated:: 2.0.0
     The module *identification* is combined with the module *deconvolution* and
@@ -7,7 +6,7 @@
     immediately.
 """
 
+__all__ = ["LSFIR", "LSIIR", "fit_sos"]
+
 from .fit_filter import LSFIR, LSIIR
 from .fit_transfer import fit_sos
-
-__all__ = ["LSFIR", "LSIIR", "fit_sos"]

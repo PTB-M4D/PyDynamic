@@ -8,9 +8,8 @@ propagated to the estimate of the input signal.
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.signal as dsp
-
 import PyDynamic.model_estimation.fit_filter as model_est
+import scipy.signal as dsp
 from PyDynamic.misc.filterstuff import db, kaiser_lowpass
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.testsignals import shocklikeGaussian

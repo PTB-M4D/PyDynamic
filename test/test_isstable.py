@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Perform tests on *misc.filterstuff.isstable*."""
 
 import numpy as np
