@@ -9,7 +9,6 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from PyDynamic.uncertainty.propagate_DFT import (
     AmpPhase2DFT,
     DFT_deconv,

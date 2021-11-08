@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Perform tests on methods specialized for second order dynamic systems."""
 import pytest
 from matplotlib.pyplot import np as np

@@ -1,4 +1,5 @@
-"""
+"""This module assists in uncertainty propagation for the convolution operation
+
 The convolution operation is a common operation in signal and data
 processing. Convolving signals is mathematically similar to a filter
 application. 
@@ -6,33 +7,33 @@ application.
 This module contains the following function:
 
 * :func:`convolve_unc`: Convolution with uncertainty propagation based on FIR-filter
-
 """
+
+__all__ = ["convolve_unc"]
 
 import numpy as np
 
 from .propagate_filter import _fir_filter
 
-__all__ = ["convolve_unc"]
-
 
 def convolve_unc(x1, U1, x2, U2, mode="full"):
-    """
-    An implementation of the discrete convolution of two signals with uncertainty propagation.
-    It supports the convolution modes of :func:`numpy.convolve` and :func:`scipy.ndimage.convolve1d`.
+    """Discrete convolution of two signals with uncertainty propagation
+
+    This function supports the convolution modes of :func:`numpy.convolve` and
+    :func:`scipy.ndimage.convolve1d`.
 
     Parameters
     ----------
     x1 : np.ndarray, (N,)
         first input signal
     U1 : np.ndarray, (N, N)
-        full 2D-covariance matrix associated with x1
-        if the signal is fully certain, use ``U1 = None`` to make use of more efficient calculations.
+        full 2D-covariance matrix associated with x1. If the signal is fully certain,
+        use U1 = ``None`` to make use of more efficient calculations.
     x2 : np.ndarray, (M,)
         second input signal
     U2 : np.ndarray, (M, M)
-        full 2D-covariance matrix associated with x2
-        if the signal is fully certain, use ``U2 = None`` to make use of more efficient calculations.
+        full 2D-covariance matrix associated with x2. If the signal is fully certain,
+        use U2 = ``None`` to make use of more efficient calculations.
     mode : str, optional
         :func:`numpy.convolve`-modes:
 

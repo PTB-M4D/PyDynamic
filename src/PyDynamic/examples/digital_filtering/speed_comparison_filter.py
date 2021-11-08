@@ -2,9 +2,8 @@ import time as tm
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.signal as scs
-
 import PyDynamic.uncertainty.propagate_filter as pf
+import scipy.signal as dsp
 from PyDynamic.misc.testsignals import rect
 
 for kind in ["corr", "diag"]:
@@ -17,7 +16,7 @@ for kind in ["corr", "diag"]:
 
         # init filter
         a = np.array([1.0])
-        b = scs.firwin(5, 0.3)
+        b = dsp.firwin(5, 0.3)
         Uab = 0.00001 * np.diag([1] * (a.size - 1) + [2] * b.size)
         # Uab = None
 
@@ -45,17 +44,17 @@ for kind in ["corr", "diag"]:
 # visualize
 fig, ax = plt.subplots(nrows=1, ncols=1)
 
-## plot input
+# plot input
 ax.plot(x, color="g", label="x")
-## plot pydynamic restoration
+# plot pydynamic restoration
 ax.plot(y1, color="r", label="y1")
 ax.plot(y1 + Uy1, color="r", linestyle=":", label="y1 + Uy1")
 ax.plot(y1 - Uy1, color="r", linestyle=":", label="y1 - Uy1")
-## plot monte carlo results
+# plot monte carlo results
 ax.plot(y2, color="k", label="y2")
 ax.plot(y2 + Uy2, color="k", linestyle=":", label="y2 + Uy2")
 ax.plot(y2 - Uy2, color="k", linestyle=":", label="y2 + Uy2")
 
-## show plot
+# show plot
 ax.legend()
 plt.show()

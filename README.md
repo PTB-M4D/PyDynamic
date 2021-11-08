@@ -47,6 +47,7 @@ eu">FAMOUS</a>.
 
 ## Table of content
 
+- [Quickstart](#quickstart)
 - [Features](#features)
 - [Module diagram](#module-diagram)
 - [Documentation](#documentation)
@@ -58,6 +59,34 @@ eu">FAMOUS</a>.
 - [Acknowledgement](#acknowledgement)
 - [Disclaimer](#disclaimer)
 - [License](#license)
+
+## Quickstart
+
+To dive right into it, install PyDynamic and execute one of the examples:
+
+```shell
+(my_PyDynamice_venv) $ pip install PyDynamic
+Collecting PyDynamic
+[...]
+Successfully installed PyDynamic-[...]
+(my_PyDynamice_venv) $ python
+Python 3.9.7 (default, Aug 31 2021, 13:28:12) 
+[GCC 11.1.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+```
+```python
+>>> from PyDynamic.examples.uncertainty_for_dft.deconv_DFT import DftDeconvolutionExample
+>>> DftDeconvolutionExample()
+Propagating uncertainty associated with measurement through DFT
+Propagating uncertainty associated with calibration data to real and imag part
+Propagating uncertainty through the inverse system
+Propagating uncertainty through the low-pass filter
+Propagating uncertainty associated with the estimate back to time domain
+```
+
+You will see a couple of plots opening up to observe the results. For 
+further information just read on and visit our 
+[tutorial section](#examples). 
 
 ## Features
 

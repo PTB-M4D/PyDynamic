@@ -1,6 +1,4 @@
-"""
-The :mod:`PyDynamic.misc.tools` module is a collection of miscellaneous helper
-functions.
+"""A collection of miscellaneous helper functions
 
 This module contains the following functions:
 
@@ -24,13 +22,6 @@ This module contains the following functions:
   uncertainties ux
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
 """
-from typing import Any, Optional
-
-import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib.colors import Normalize
-from scipy.sparse import eye, issparse
-from scipy.sparse.linalg.eigen.arpack import eigs
 
 __all__ = [
     "print_mat",
@@ -48,6 +39,14 @@ __all__ = [
     "is_2d_square_matrix",
     "normalize_vector_or_matrix",
 ]
+
+from typing import Any, List, Optional, Union
+
+import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.colors import Normalize
+from scipy.sparse import eye, issparse
+from scipy.sparse.linalg.eigen.arpack import eigs
 
 
 def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
@@ -78,6 +77,7 @@ def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
         If shift, x or ux are of unexpected type, dimensions of x and ux do not fit
         or ux is of unexpected shape
     """
+
     shifted_x = _shift_vector(vector=x, shift=shift)
 
     if isinstance(ux, float):
@@ -119,8 +119,13 @@ def _shift_2d_matrix(matrix: np.ndarray, shift: int) -> np.ndarray:
     return np.roll(matrix, (shift, shift), axis=(0, 1))
 
 
-def trimOrPad(array, length, mode="constant"):
+def trimOrPad(
+    array: Union[List, np.ndarray], length: int, mode: Optional[str] = "constant"
+):
     """Trim or pad (with zeros) a vector to the desired length
+
+    Either trim or zero-pad an array to achieve the required `length`. Both actions
+    are applied to the end of the array.
 
     Parameters
     ----------
@@ -134,9 +139,7 @@ def trimOrPad(array, length, mode="constant"):
     Returns
     -------
     array_modified : np.ndarray of shape (length,)
-        An array that is either trimmed or zero-padded to achieve
-        the required `length`. Both actions are applied to the
-        right side of the array
+        An either trimmed or zero-padded array
     """
 
     if len(array) < length:  # pad zeros to the right if too short
@@ -164,6 +167,7 @@ def print_vec(vector, prec=5, retS=False, vertical=False):
         if retS is True
 
     """
+
     if vertical:
         t = "\n"
     else:
@@ -194,6 +198,7 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
         if retS is True
 
     """
+
     if vertical:
         matrix = matrix.T
 
@@ -206,8 +211,8 @@ def print_mat(matrix, prec=5, vertical=False, retS=False):
 
     if retS:
         return s
-    else:
-        print(s)
+
+    print(s)
 
 
 def make_semiposdef(

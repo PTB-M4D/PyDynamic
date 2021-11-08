@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. deprecated:: 2.0.0
     The module *identification* is combined with the module *deconvolution* and
@@ -6,6 +5,7 @@
     *identification* might be removed any time. Please switch to the current module
     immediately.
 """
+__all__ = ["LSIIR", "LSFIR"]
 
 warning = (
     "The module *identification* is combined with the module *deconvolution* and "
@@ -13,8 +13,6 @@ warning = (
     "*identification* might be removed any time. Please switch to the current module "
     "immediately. Please use the current function name "
 )
-
-__all__ = ["LSIIR", "LSFIR"]
 
 
 def LSIIR(*args, **kwargs):

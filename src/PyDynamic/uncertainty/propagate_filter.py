@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains functions for the propagation of uncertainties through
 the application of a digital filter using the GUM approach.

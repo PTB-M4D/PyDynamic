@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-r"""
-The :mod:`PyDynamic.misc.filterstuff` module is a collection of methods which are
-related to filter design.
+r"""This module is a collection of functions which are related to filter design
 
 This module contains the following functions:
 
@@ -16,10 +13,7 @@ This module contains the following functions:
 * :func:`isstable`: Determine whether an IIR filter with certain coefficients is stable
 * :func:`savitzky_golay`: Smooth (and optionally differentiate) data with a
   Savitzky-Golay filter
-
 """
-
-import numpy as np
 
 __all__ = [
     "db",
@@ -30,6 +24,8 @@ __all__ = [
     "isstable",
     "savitzky_golay",
 ]
+
+import numpy as np
 
 
 def db(vals):
@@ -44,7 +40,7 @@ def ua(vals):
 
 def grpdelay(b, a, Fs, nfft=512):
     """Calculation of the group delay of a digital filter
-   
+
     Parameters
     ----------
         b: ndarray
@@ -92,10 +88,10 @@ def grpdelay(b, a, Fs, nfft=512):
 
 
 def mapinside(a):
-    """ Maps the roots of polynomial to the unit circle.
+    """Maps the roots of polynomial to the unit circle.
 
     Maps the roots of polynomial with coefficients :math:`a` to the unit circle.
-    
+
     Parameters
     ----------
         a: ndarray
@@ -112,12 +108,12 @@ def mapinside(a):
 
 
 def kaiser_lowpass(L, fcut, Fs, beta=8.0):
-    """ Design of a FIR lowpass filter using the window technique with a
+    """Design of a FIR lowpass filter using the window technique with a
     Kaiser window.
 
     This method uses a Kaiser window. Filters of that type are often used as
     FIR low-pass filters due to their linear phase.
-    
+
     Parameters
     ----------
         L: int
@@ -134,12 +130,12 @@ def kaiser_lowpass(L, fcut, Fs, beta=8.0):
               FIR filter coefficients
         shift: int
                delay of the filter (in samples)
-    
+
     """
     from scipy.signal import firwin
 
     if np.mod(L, 2) == 0:
-        L = L + 1
+        L += 1
     blow = firwin(L, 2 * fcut / Fs, window=("kaiser", beta))
     shift = L / 2
     return blow, shift
@@ -150,7 +146,7 @@ def isstable(b, a, ftype="digital"):
 
     Determine whether IIR filter with coefficients `b` and `a` is stable by checking
     the roots of the polynomial `a`.
-    
+
     Parameters
     ----------
     b : ndarray
@@ -177,9 +173,11 @@ def isstable(b, a, ftype="digital"):
         # ... are non-negative in continuous time.
         return not np.any(np.real(v) < 0)
     else:
-        raise ValueError(f"isstable: filter type 'ftype={ftype}'unknown. Please "
-                         f"check documentation and choose a valid assignment for "
-                         f"'ftype' or leave out to fallback to default.")
+        raise ValueError(
+            f"isstable: filter type 'ftype={ftype}'unknown. Please "
+            f"check documentation and choose a valid assignment for "
+            f"'ftype' or leave out to fallback to default."
+        )
 
 
 def savitzky_golay(y, window_size, order, deriv=0, delta=1.0):
