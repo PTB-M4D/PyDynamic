@@ -10,9 +10,10 @@ This module contains the following functions:
   uncertainties
 * :func:`make_equidistant`: Interpolate a 1-D function equidistantly considering
   associated uncertainties
-
 """
+
 __all__ = ["interp1d_unc", "make_equidistant"]
+
 from typing import Optional, Tuple, Union
 
 import numpy as np
@@ -103,21 +104,6 @@ def interp1d_unc(
         coefficients are not returned and internal computation is
         slightly more efficient.
 
-
-    If returnC is False, which is the default behaviour, the method returns:
-
-    Returns
-    -------
-    x_new : (M,) array_like
-        values at which the interpolant is evaluated
-    y_new : (M,) array_like
-        interpolated values
-    uy_new : (M,) array_like
-        interpolated associated standard uncertainties
-
-
-    Otherwise the method returns:
-
     Returns
     -------
     x_new : (M,) array_like
@@ -128,7 +114,8 @@ def interp1d_unc(
         interpolated associated standard uncertainties
     C : (M,N) array_like
         sensitivity matrix :math:`C`, which is used to compute the uncertainties
-        :math:`U_{y_{new}} = C \cdot \operatorname{diag}(u_y^2) \cdot C^T`
+        :math:`U_{y_{new}} = C \cdot \operatorname{diag}(u_y^2) \cdot C^T`,
+        only returned if returnC is False, which is the default behaviour.
 
     References
     ----------
@@ -293,20 +280,21 @@ def interp1d_unc(
                             C_row[next(lo_it)] = next(L_1_it)
                             C_row[next(hi_it)] = next(L_2_it)
                     # Compute the standard uncertainties avoiding to build the sparse
-                    # covariance matrix diag(u_y^2). We reduce the equation C diag(u_y^2)
-                    # C^T for now to a more efficient calculation, which will work as
-                    # long as we deal with uncorrelated values, so that all information
-                    # can be found on the diagonal of the covariance and thus the result
-                    # matrix.
+                    # covariance matrix diag(u_y^2). We reduce the equation
+                    # C diag(u_y^2) C^T for now to a more efficient calculation, which
+                    # will work as long as we deal with uncorrelated values, so that
+                    # all information can be found on the diagonal of the covariance
+                    # and thus the result matrix.
                     uy_new[interp_range] = np.sqrt(
                         np.sum(C[interp_range] ** 2 * uy ** 2, 1)
                     )
                 else:
-                    # Since we do not need the sensitivity matrix, we compute uncertainties
-                    # more efficient (although we are actually not so sure about this
-                    # anymore). The simplification of the equation by pulling out the
-                    # denominator, just works because we work with the squared Lagrangians.
-                    # Otherwise we would have to account for the summation order.
+                    # Since we do not need the sensitivity matrix, we compute
+                    # uncertainties more efficient (although we are actually not so
+                    # sure about this anymore). The simplification of the equation by
+                    # pulling out the denominator, just works because we work with
+                    # the squared Lagrangians. Otherwise we would have to account for
+                    # the summation order.
                     uy_prev_sqr = uy[lo] ** 2
                     uy_next_sqr = uy[hi] ** 2
                     uy_new[interp_range] = np.sqrt(
@@ -362,7 +350,7 @@ def make_equidistant(
     uy: np.ndarray,
     dx: Optional[float] = 5e-2,
     kind: Optional[str] = "linear",
-):
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     r"""Interpolate a 1-D function equidistantly considering associated uncertainties
 
     Interpolate function values equidistantly and propagate uncertainties
@@ -379,27 +367,28 @@ def make_equidistant(
 
     Parameters
     ----------
-        x: (N,) array_like
-            A 1-D array of real values.
-        y: (N,) array_like
-            A 1-D array of real values. The length of y must be equal to the length
-            of x.
-        uy: (N,) array_like
-            A 1-D array of real values representing the standard uncertainties
-            associated with y.
-        dx: float, optional
-            desired interval length (defaults to 5e-2)
-        kind : str, optional
-            Specifies the kind of interpolation for y as a string ('previous',
-            'next', 'nearest', 'linear' or 'cubic'). Default is ‘linear’.
+    x: (N,) array_like
+        A 1-D array of real values.
+    y: (N,) array_like
+        A 1-D array of real values. The length of y must be equal to the length
+        of x.
+    uy: (N,) array_like
+        A 1-D array of real values representing the standard uncertainties
+        associated with y.
+    dx: float, optional
+        desired interval length (defaults to 5e-2)
+    kind : str, optional
+        Specifies the kind of interpolation for y as a string ('previous',
+        'next', 'nearest', 'linear' or 'cubic'). Default is ‘linear’.
+
     Returns
     -------
-        x_new : (M,) array_like
-            values at which the interpolant is evaluated
-        y_new : (M,) array_like
-            interpolated values
-        uy_new : (M,) array_like
-            interpolated associated standard uncertainties
+    x_new : (M,) array_like
+        values at which the interpolant is evaluated
+    y_new : (M,) array_like
+        interpolated values
+    uy_new : (M,) array_like
+        interpolated associated standard uncertainties
 
     References
     ----------

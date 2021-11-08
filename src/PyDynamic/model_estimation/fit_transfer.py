@@ -2,18 +2,19 @@
 
 * :func:`fit_som`: Fit second-order model to complex-valued frequency response
 """
+
+__all__ = ["fit_som"]
+
 from typing import Optional, Union
 
 import numpy as np
 
-from PyDynamic.misc.tools import (
+from ..misc.tools import (
     is_2d_matrix,
     is_2d_square_matrix,
     number_of_rows_equals_vector_dim,
     progress_bar,
 )
-
-__all__ = ["fit_som"]
 
 
 def fit_som(
@@ -62,6 +63,7 @@ def fit_som(
     verbose : bool, optional
         if True a progressbar will be printed to console during the Monte Carlo
         simulations, if False nothing will be printed out, defaults to False
+
     Returns
     -------
     p : np.ndarray
@@ -69,6 +71,7 @@ def fit_som(
     Up : np.ndarray
         covariance associated with parameter estimate
     """
+
     n = len(f)
     two_n = len(H)
     if 2 * n != two_n:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. deprecated:: 2.0.0
     The module *identification* is combined with the module *deconvolution* and

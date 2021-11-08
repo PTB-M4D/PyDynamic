@@ -19,7 +19,7 @@ backcall==0.2.0
     # via ipython
 backports.entry-points-selectable==1.1.0
     # via virtualenv
-black==21.8b0
+black[jupyter]==21.8b0
     # via -r requirements/dev-requirements.in
 bleach==4.1.0
     # via
@@ -103,6 +103,7 @@ ipykernel==6.5.0
 ipython==7.29.0
     # via
     #   -r requirements/dev-requirements.in
+    #   black
     #   ipykernel
 ipython-genutils==0.2.0
     # via nbformat
@@ -205,7 +206,7 @@ pygments==2.10.0
     #   nbconvert
     #   readme-renderer
     #   sphinx
-pyparsing==2.4.7
+pyparsing==3.0.5
     # via
     #   -c requirements/requirements-py37.txt
     #   packaging
@@ -297,6 +298,8 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 testpath==0.5.0
     # via nbconvert
+tokenize-rt==4.2.1
+    # via black
 toml==0.10.2
     # via
     #   pytest

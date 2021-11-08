@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
+"""Functions for the propagation of uncertainties in the application of the DFT
 
-"""
-The :mod:`PyDynamic.uncertainty.propagate_DFT` module implements methods for
+The :mod:`PyDynamic.uncertainty.propagate_DFT` module implements functions for
 the propagation of uncertainties in the application of the DFT, inverse DFT,
 deconvolution and multiplication in the frequency domain, transformation from
 amplitude and phase to real and imaginary parts and vice versa.
@@ -11,7 +10,7 @@ The corresponding scientific publications is
     GUM2DFT — a software tool for uncertainty evaluation of transient signals
     in the frequency domain. *Measurement Science and Technology*, 27(5),
     055001, 2016. [DOI: `10.1088/0957-0233/27/5/055001
-    <http://dx.doi.org/10.1088/0957-0233/27/5/055001>`_]
+    <https://dx.doi.org/10.1088/0957-0233/27/5/055001>`_]
 
 This module contains the following functions:
 
@@ -34,12 +33,6 @@ This module contains the following functions:
 * :func:`Time2AmpPhase`: Transformation from time domain to amplitude and phase
 """
 
-import warnings
-from typing import Dict, Optional, Tuple, Union
-
-import numpy as np
-from scipy import sparse
-
 __all__ = [
     "GUM_DFT",
     "GUM_iDFT",
@@ -54,7 +47,13 @@ __all__ = [
     "Time2AmpPhase_multi",
 ]
 
-from PyDynamic.misc.tools import (
+import warnings
+from typing import Dict, Optional, Tuple, Union
+
+import numpy as np
+from scipy import sparse
+
+from ..misc.tools import (
     is_2d_matrix,
     is_vector,
     number_of_rows_equals_vector_dim,
@@ -116,7 +115,7 @@ def GUM_DFT(
 
     References
     ----------
-        * Eichstädt and Wilkens [Eichst2016]_
+    * Eichstädt and Wilkens [Eichst2016]_
 
     Raises
     ------
@@ -166,22 +165,21 @@ def GUM_DFT(
     # For simplified calculation of sensitivities
     beta = 2 * np.pi * np.arange(N - L) / N
 
-    # sensitivity matrix wrt cosine part
-    Cxkc = lambda k: np.cos(k * beta)[np.newaxis, :]
-    # sensitivity matrix wrt sinus part
-    Cxks = lambda k: -np.sin(k * beta)[np.newaxis, :]
-
     if isinstance(Ux, float):
         UF = np.zeros(Nm)
         km = 0
         for k in range(M // 2):  # Block cos/cos
             if mask[k]:
-                UF[km] = np.sum(Ux * Cxkc(k) ** 2)
+                UF[km] = np.sum(
+                    Ux * _compute_sensitivity_matrix_wrt_cosine_part(k, beta) ** 2
+                )
                 km += 1
         km = 0
         for k in range(M // 2):  # Block sin/sin
             if mask[k]:
-                UF[Nm // 2 + km] = np.sum(Ux * Cxks(k) ** 2)
+                UF[Nm // 2 + km] = np.sum(
+                    Ux * _compute_sensitivity_matrix_wrt_sine_part(k, beta) ** 2
+                )
                 km += 1
     else:  # general method
         if len(Ux.shape) == 1:
@@ -192,8 +190,8 @@ def GUM_DFT(
             km = 0
             for k in range(M // 2):
                 if mask[k]:
-                    CxCos[km, :] = Cxkc(k)
-                    CxSin[km, :] = Cxks(k)
+                    CxCos[km, :] = _compute_sensitivity_matrix_wrt_cosine_part(k, beta)
+                    CxSin[km, :] = _compute_sensitivity_matrix_wrt_sine_part(k, beta)
                     km += 1
         UFCC = np.dot(CxCos, np.dot(Ux, CxCos.T))
         UFCS = np.dot(CxCos, np.dot(Ux, CxSin.T))
@@ -294,13 +292,13 @@ def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 def _check_matrix_vector_dimension_match(a: np.ndarray, b: np.ndarray) -> bool:
     return (
-                   is_vector(a)
-                   and is_2d_matrix(b)
-                   and number_of_rows_equals_vector_dim(vector=a, matrix=b)
+        is_vector(a)
+        and is_2d_matrix(b)
+        and number_of_rows_equals_vector_dim(vector=a, matrix=b)
     ) or (
-                   is_vector(b)
-                   and is_2d_matrix(a)
-                   and _number_of_cols_equals_vector_dim(vector=b, matrix=a)
+        is_vector(b)
+        and is_2d_matrix(a)
+        and _number_of_cols_equals_vector_dim(vector=b, matrix=a)
     )
 
 
@@ -318,6 +316,14 @@ def _multiply_diagonal_matrix_from_vector_with_matrix_from_left(
     matrix: np.ndarray, vector: np.ndarray
 ) -> np.ndarray:
     return np.diag(v=vector) @ matrix
+
+
+def _compute_sensitivity_matrix_wrt_cosine_part(_k, _beta):
+    return np.cos(_k * _beta)[np.newaxis, :]
+
+
+def _compute_sensitivity_matrix_wrt_sine_part(_k, _beta):
+    return -np.sin(_k * _beta)[np.newaxis, :]
 
 
 def GUM_iDFT(
@@ -372,7 +378,7 @@ def GUM_iDFT(
 
     References
     ----------
-        * Eichstädt and Wilkens [Eichst2016]_
+    * Eichstädt and Wilkens [Eichst2016]_
 
     Raises
     ------
@@ -416,7 +422,7 @@ def GUM_iDFT(
         # propagate uncertainties
         Ux = np.dot(Cc, np.dot(RR, Cc.T))
         Ux = Ux + 2 * np.dot(Cc, np.dot(RI, Cs.T))
-        Ux = Ux + np.dot(Cs, np.dot(II, Cs.T))
+        Ux += np.dot(Cs, np.dot(II, Cs.T))
     else:
         RR = UF[: N // 2 + 1]
         II = UF[N // 2 + 1 :]
@@ -433,20 +439,19 @@ def GUM_DFTfreq(N, dt=1):
 
     Parameters
     ----------
-        N: int
-            window length
-        dt: float
-            sample spacing (inverse of sampling rate)
+    N : int
+        window length
+    dt : float
+        sample spacing (inverse of sampling rate)
 
     Returns
     -------
-        f: ndarray
-            Array of length ``n//2 + 1`` containing the sample frequencies
+    f : ndarray
+        Array of length ``n//2 + 1`` containing the sample frequencies
 
     See also
     --------
         `mod`::numpy.fft.rfftfreq
-
     """
 
     return np.fft.rfftfreq(N, dt)
@@ -505,10 +510,10 @@ def DFT2AmpPhase(
     # calculate inverse DFT
     N = len(F) - 2
     R = F[: N // 2 + 1]
-    I = F[N // 2 + 1 :]
+    i = F[N // 2 + 1 :]
 
-    A = np.sqrt(R ** 2 + I ** 2)  # absolute value
-    P = np.arctan2(I, R)  # phase value
+    A = np.sqrt(R ** 2 + i ** 2)  # absolute value
+    P = np.arctan2(i, R)  # phase value
     if len(UF.shape) == 1:
         uF = 0.5 * (
             np.sqrt(UF[: N // 2 + 1]) + np.sqrt(UF[N // 2 + 1 :])
@@ -526,8 +531,8 @@ def DFT2AmpPhase(
             f"is {round((A / uF).min(), 2)} and the threshold is {round(tol, 2)}."
         )
     aR = R / A  # sensitivities
-    aI = I / A
-    pR = -I / A ** 2
+    aI = i / A
+    pR = -i / A ** 2
     pI = R / A ** 2
 
     if len(UF.shape) == 1:  # uncertainty calculation of zero correlation
@@ -565,8 +570,8 @@ def DFT2AmpPhase(
 
     if return_type == "separate":
         return A, P, UAP  # amplitude and phase as separate variables
-    else:
-        return np.r_[A, P], UAP
+
+    return np.r_[A, P], UAP
 
 
 def AmpPhase2DFT(
@@ -720,24 +725,26 @@ def Time2AmpPhase_multi(x, Ux, selector=None):
 
     Parameters
     ----------
-        x: np.ndarray of shape (M, nx)
-            M time domain signals of length nx
-        Ux: np.ndarray of shape (M,)
-            squared standard deviations representing noise variances of the
-            signals x
-        selector: np.ndarray of shape (L,), optional
-            indices of amplitude and phase values that should be returned;
-            default is 0:N-1
+    x : np.ndarray of shape (M, nx)
+        M time domain signals of length nx
+    Ux : np.ndarray of shape (M,)
+        squared standard deviations representing noise variances of the
+        signals x
+    selector : np.ndarray of shape (L,), optional
+        indices of amplitude and phase values that should be returned;
+        default is 0:N-1
+
     Returns
     -------
-        A: np.ndarray of shape (M,N)
-            amplitude values
-        P: np.ndarray of shape (M,N)
-            phase values
-        UAP: np.ndarray of shape (M, 3N)
-            diagonals of the covariance matrices: [diag(UAA), diag(UAP),
-            diag(UPP)]
+    A : np.ndarray of shape (M,N)
+        amplitude values
+    P : np.ndarray of shape (M,N)
+        phase values
+    UAP : np.ndarray of shape (M, 3N)
+        diagonals of the covariance matrices: [diag(UAA), diag(UAP),
+        diag(UPP)]
     """
+
     M, nx = x.shape
     assert len(Ux) == M
     N = nx // 2 + 1
@@ -870,21 +877,21 @@ def DFT_transferfunction(X, Y, UX, UY):
 
     Parameters
     ----------
-        X: np.ndarray
-            real and imaginary parts of the system's input signal
-        Y: np.ndarray
-            real and imaginary parts of the system's output signal
-        UX: np.ndarray
-            covariance matrix associated with X
-        UY: np.ndarray
-            covariance matrix associated with Y
+    X : np.ndarray
+        real and imaginary parts of the system's input signal
+    Y : np.ndarray
+        real and imaginary parts of the system's output signal
+    UX : np.ndarray
+        covariance matrix associated with X
+    UY : np.ndarray
+        covariance matrix associated with Y
 
     Returns
     -------
-        H: np.ndarray
-            real and imaginary parts of the system's frequency response
-        UH: np.ndarray
-            covariance matrix associated with H
+    H : np.ndarray
+        real and imaginary parts of the system's frequency response
+    UH : np.ndarray
+        covariance matrix associated with H
 
     This function only calls `DFT_deconv`.
     """
@@ -921,13 +928,13 @@ def DFT_deconv(
     UX : np.ndarray of shape (2M,2M) or 3-tuple of np.ndarray of shape (M,M)
         Covariance matrix associated with real and imaginary part of X. If the matrix
         fully assembled does not fit the memory, we return the auto-covariance for the
-        real parts ``URRX``and the imaginary parts ``UIIX`` and the covariance between
+        real parts ``URRX`` and the imaginary parts ``UIIX`` and the covariance between
         the real and imaginary parts ``URIX`` as separate
         :class:`np.ndarrays <numpy.ndarray>` arranged as follows: ``(URRX, URIX, UIIX)``
 
     References
     ----------
-        * Eichstädt and Wilkens [Eichst2016]_
+    * Eichstädt and Wilkens [Eichst2016]_
 
     Raises
     ------

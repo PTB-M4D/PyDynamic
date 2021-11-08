@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-This module implements the signals class and its derivatives. Signals are
-dynamic quantities with associated uncertainties. A signal has to be defined
+"""This module implements the signals class and its derivatives
+
+Signals are dynamic quantities with associated uncertainties. A signal has to be defined
 together with a time axis.
 
 .. note:: This module is experimental!
 """
 
+__all__ = ["Signal"]
+
 import numpy as np
 from matplotlib.pyplot import figure, fill_between, legend, plot, xlabel, ylabel
 
-from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
-from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-
-__all__ = ["Signal"]
+from .uncertainty.propagate_filter import FIRuncFilter
+from .uncertainty.propagate_MonteCarlo import MC
 
 
 class Signal:
@@ -25,9 +24,7 @@ class Signal:
 
     def __init__(self, time, values, Ts=None, Fs=None, uncertainty=None):
         if len(values.shape) > 1:
-            raise NotImplementedError(
-                "Multivariate signals are not " "implemented yet."
-            )
+            raise NotImplementedError("Multivariate signals are not implemented yet.")
         assert len(time) == len(values)
         self.time = time
         self.values = values
@@ -40,9 +37,9 @@ class Signal:
             if Fs is None:
                 self.Fs = 1 / Ts
             else:
-                assert np.abs(Fs * self.Ts - 1) < 1e-5, (
-                    "Sampling interval and " "sampling frequency are " "inconsistent."
-                )
+                assert (
+                    np.abs(Fs * self.Ts - 1) < 1e-5
+                ), "Sampling interval and sampling frequency are inconsistent."
         # set initial uncertainty
         if isinstance(uncertainty, float):
             self.uncertainty = np.ones_like(values) * uncertainty
@@ -104,20 +101,18 @@ class Signal:
 
         Parameters
         ----------
-            b: np.ndarray
-                filter numerator coefficients
-            a: np.ndarray
-                filter denominator coefficients, use a=1 for FIR-type filter
-            filter_uncertainty: np.ndarray
-                covariance matrix associated with filter coefficients,
-                Uab=None if no uncertainty associated with filter
-            MonteCarloRuns: int
-                number of Monte Carlo runs, if `None` then GUM linearization
-                will be used
-        Returns
-        -------
-            no return variables
+        b : np.ndarray
+            filter numerator coefficients
+        a : np.ndarray
+            filter denominator coefficients, use a=1 for FIR-type filter
+        filter_uncertainty : np.ndarray
+            covariance matrix associated with filter coefficients,
+            Uab=None if no uncertainty associated with filter
+        MonteCarloRuns : int
+            number of Monte Carlo runs, if `None` then GUM linearization
+            will be used
         """
+
         if isinstance(a, list):
             a = np.array(a)
         if not (isinstance(a, np.ndarray)):  # FIR type filter

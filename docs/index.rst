@@ -75,29 +75,33 @@ References
                 Metrologia, vol 45 464-473, 2008
                 https://dx.doi.org/10.1088/0026-1394/45/4/013
 
-.. [Link2009]   A. Link and C. Elster
-                Uncertainty evaluation for IIR filtering using a state-space
-                approach
-                Meas. Sci. Technol. vol. 20, 2009
-                https://dx.doi.org/10.1088/0957-0233/20/5/055104
+.. [Link2009] A. Link and C. Elster
+              Uncertainty evaluation for IIR filtering using a state-space
+              approach
+              Meas. Sci. Technol. vol. 20, 2009
+              https://dx.doi.org/10.1088/0957-0233/20/5/055104
 
-.. [Vuer1996]   R. Vuerinckx, Y. Rolain, J. Schoukens and R. Pintelon
-                Design of stable IIR filters in the complex domain by
-                automatic delay selection
-                IEEE Trans. Signal Proc., 44, 2339-44, 1996
-                https://dx.doi.org/10.1109/78.536690
+.. [Vuer1996] R. Vuerinckx, Y. Rolain, J. Schoukens and R. Pintelon
+              Design of stable IIR filters in the complex domain by
+              automatic delay selection
+              IEEE Trans. Signal Proc., 44, 2339-44, 1996
+              https://dx.doi.org/10.1109/78.536690
 
-.. [Smith]      Smith, J.O. Introduction to Digital Filters with Audio
-                Applications, https://ccrma.stanford.edu/~jos/filters/, online
-                book
+.. [Smith] Smith, J.O. Introduction to Digital Filters with Audio
+           Applications, https://ccrma.stanford.edu/~jos/filters/, online
+           book
 
-.. [Savitzky]   A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of
-                Data by Simplified Least Squares Procedures. Analytical
-                Chemistry, 1964, 36 (8), pp 1627-1639.
+.. [Savitzky] A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of
+              Data by Simplified Least Squares Procedures. Analytical
+              Chemistry, 1964, 36 (8), pp 1627-1639.
 
-.. [NumRec]     Numerical Recipes 3rd Edition: The Art of Scientific Computing
-                W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
-                Cambridge University Press ISBN-13: 9780521880688
+.. [NumRec] Numerical Recipes 3rd Edition: The Art of Scientific Computing
+            W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
+            Cambridge University Press ISBN-13: 9780521880688
 
-.. [White2017]  White, D.R. Int J Thermophys (2017) 38: 39.
-                https://doi.org/10.1007/s10765-016-2174-6
+.. [White2017] White, D.R. Int J Thermophys (2017) 38: 39.
+               https://doi.org/10.1007/s10765-016-2174-6
+
+.. [Zhivomirov2018] Zhivomirov, H. 2018. A Method for Colored Noise Generation.
+                     Romanian Journal of Acoustics and Vibration. 15, 1 (Aug. 2018),
+                     14-19: http://rjav.sra.ro/index.php/rjav/article/view/40
