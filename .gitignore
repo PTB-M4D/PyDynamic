@@ -17,6 +17,7 @@ docs/**/*.ipynb
 __pycache__/
 .coverage
 .coverage.*
+coverage.xml
 pytest.xml
 .tox
 .hypothesis/*
