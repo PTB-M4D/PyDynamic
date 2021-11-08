@@ -308,7 +308,7 @@ jobs:
                 command: |
                   source $HOME/conda/etc/profile.d/conda.sh
                   conda activate PyDynamic_conda_env
-                  pytest -v --cov=PyDynamic --junitxml=test-results/pytest.xml .
+                  pytest --junitxml=test-results/pytest.xml .
             - run:
                 name: Upload coverage report
                 command: |
