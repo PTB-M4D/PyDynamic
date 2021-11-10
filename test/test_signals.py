@@ -269,7 +269,8 @@ def test_signal_example(monkeypatch):
         HealthCheck.too_slow,
     ],
 )
-def test_signal_class_usual_instanciations(inputs):
+@pytest.mark.slow
+def test_signal_class_usual_instanciations(capsys, inputs):
     Signal(**inputs)
 
 
@@ -280,7 +281,9 @@ def test_signal_class_usual_instanciations(inputs):
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=10,
 )
+@pytest.mark.slow
 def test_signal_class_raise_not_implemented(inputs):
     inputs["values"] = inputs["values"][..., np.newaxis]
     with pytest.raises(
@@ -297,7 +300,9 @@ def test_signal_class_raise_not_implemented(inputs):
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=10,
 )
+@pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_step(
     inputs,
 ):
@@ -317,7 +322,9 @@ def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_s
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=10,
 )
+@pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainties(
     inputs,
 ):
@@ -338,7 +345,9 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainti
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=10,
 )
+@pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_square_uncertainties(
     inputs,
 ):
