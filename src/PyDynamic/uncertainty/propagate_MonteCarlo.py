@@ -162,10 +162,11 @@ def MC(
 
     unst_count = 0  # Count how often in the MC runs the IIR filter is unstable.
     st_inds = list()
+    samples = dist.rvs(size=runs)
     if verbose:
         sys.stdout.write("MC progress: ")
-    for k in range(runs):
-        xn = dist.rvs()  # draw filter input signal
+    for k, sample in enumerate(samples):
+        xn = sample  # draw filter input signal
         if not blow is None:
             if alow is None:
                 alow = 1.0  # FIR low-pass filter
