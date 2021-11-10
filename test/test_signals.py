@@ -20,6 +20,7 @@ from PyDynamic.misc.testsignals import (
 )
 from PyDynamic.signals import Signal
 from .conftest import (
+    _print_current_ram_usage,
     hypothesis_bounded_float,
     hypothesis_covariance_matrix,
     hypothesis_float_vector,
@@ -266,11 +267,13 @@ def test_signal_example(monkeypatch):
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
 )
 @pytest.mark.slow
 def test_signal_class_usual_instanciations(capsys, inputs):
+    _print_current_ram_usage(capsys)
     Signal(**inputs)
 
 
