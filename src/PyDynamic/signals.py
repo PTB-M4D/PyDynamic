@@ -107,9 +107,7 @@ class Signal:
         ylabel("uncertainty / %s" % self.unit_values)
         legend(loc="best")
 
-    def apply_filter(
-        self, b, a=np.ones(1), filter_uncertainty=None, MonteCarloRuns=None
-    ):
+    def apply_filter(self, b, a=1, filter_uncertainty=None, MonteCarloRuns=None):
         """Apply digital filter (b, a) to the signal values
 
         Apply digital filter (b, a) to the signal values and propagate the
