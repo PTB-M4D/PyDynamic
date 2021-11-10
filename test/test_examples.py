@@ -13,7 +13,6 @@ def test_deconvolution_example(monkeypatch):
     DftDeconvolutionExample()
 
 
-@pytest.mark.slow
 def test_dft_amp_phase_example(monkeypatch):
     monkeypatch.setattr(pyplot, "show", lambda: None, raising=True)
     DftAmplitudePhaseExample()
