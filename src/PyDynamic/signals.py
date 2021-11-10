@@ -11,11 +11,6 @@ __all__ = ["Signal"]
 import numpy as np
 from matplotlib.pyplot import figure, fill_between, legend, plot, xlabel, ylabel
 
-from .misc.tools import (
-    is_2d_matrix,
-    is_2d_square_matrix,
-    number_of_rows_equals_vector_dim,
-)
 from .uncertainty.propagate_filter import FIRuncFilter
 from .uncertainty.propagate_MonteCarlo import MC
 
@@ -29,9 +24,7 @@ class Signal:
 
     def __init__(self, time, values, Ts=None, Fs=None, uncertainty=None):
         if len(values.shape) > 1:
-            raise NotImplementedError(
-                "Signal: Multivariate signals are not implemented yet."
-            )
+            raise NotImplementedError("Multivariate signals are not implemented yet.")
         assert len(time) == len(values)
         self.time = time
         self.values = values
@@ -43,32 +36,19 @@ class Signal:
             self.Ts = Ts
             if Fs is None:
                 self.Fs = 1 / Ts
-            elif not np.allclose(Fs, np.reciprocal(self.Ts)):
-                raise ValueError(
-                    "Signal: Sampling interval and sampling frequency are assumed to "
-                    "be approximately multiplicative inverse to each other, but "
-                    f"Fs={Fs} and Ts={Ts}. Please adjust either one of them."
-                )
+            else:
+                assert (
+                    np.abs(Fs * self.Ts - 1) < 1e-5
+                ), "Sampling interval and sampling frequency are inconsistent."
         # set initial uncertainty
         if isinstance(uncertainty, float):
             self.uncertainty = np.ones_like(values) * uncertainty
         elif isinstance(uncertainty, np.ndarray):
             uncertainty = uncertainty.squeeze()
-            if not number_of_rows_equals_vector_dim(matrix=uncertainty, vector=time):
-                raise ValueError(
-                    "Signal: if uncertainties are provided as np.ndarray "
-                    f"they are expected to match the number of elements of the "
-                    f"provided time vector, but uncertainties are of shape "
-                    f"{uncertainty.shape} and time is of length {len(time)}. Please "
-                    f"adjust either one of them."
-                )
-            if is_2d_matrix(uncertainty) and not is_2d_square_matrix(uncertainty):
-                raise ValueError(
-                    "Signal: if uncertainties are provided as 2-dimensional np.ndarray "
-                    f"they are expected to resemble a square matrix, but uncertainties "
-                    f"are of shape {uncertainty.shape}. Please "
-                    f"adjust them."
-                )
+            if len(uncertainty.shape) == 1:
+                assert len(uncertainty) == len(time)
+            else:
+                assert uncertainty.shape[0] == uncertainty.shape[1]
             self.uncertainty = uncertainty
         else:
             self.uncertainty = np.zeros_like(values)
