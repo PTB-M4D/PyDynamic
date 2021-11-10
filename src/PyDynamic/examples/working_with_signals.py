@@ -34,7 +34,8 @@ def demonstrate_signal():
     bl, al = dsp.bessel(4, 0.2)
     Ul = np.diag(np.r_[al[1:] * 1e-3, bl * 1e-2] ** 2)
     signal.apply_filter(bl, al, filter_uncertainty=Ul)
-    signal.plot_uncertainty(fignr=3)
+    signal.plot(3)
+    signal.plot_uncertainty(4)
     plt.show()
 
 
