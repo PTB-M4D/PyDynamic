@@ -131,7 +131,7 @@ class Signal:
 
         if isinstance(a, list):
             a = np.array(a)
-        if not (isinstance(a, np.ndarray)):  # FIR type filter
+        if self._is_fir_type_filter(a):
             if len(self.uncertainty.shape) == 1:
                 if not isinstance(MonteCarloRuns, int):
                     self.values, self.uncertainty = FIRuncFilter(
@@ -168,3 +168,7 @@ class Signal:
                     filter_uncertainty,
                     runs=MonteCarloRuns,
                 )
+
+    @staticmethod
+    def _is_fir_type_filter(a):
+        return len(a) == 1 and a[0] == 1
