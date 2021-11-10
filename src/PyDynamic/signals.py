@@ -52,7 +52,6 @@ class Signal:
         # set initial uncertainty
         if isinstance(uncertainty, float):
             self.uncertainty = np.ones_like(values) * uncertainty
-            self.uncertainty_main_diagonal = self.uncertainty
         elif isinstance(uncertainty, np.ndarray):
             uncertainty = uncertainty.squeeze()
             if not number_of_rows_equals_vector_dim(matrix=uncertainty, vector=time):
@@ -71,10 +70,8 @@ class Signal:
                     f"adjust them."
                 )
             self.uncertainty = uncertainty
-            self.uncertainty_main_diagonal = np.diag(self.uncertainty)
         else:
             self.uncertainty = np.zeros_like(values)
-            self.uncertainty_main_diagonal = self.uncertainty
         self.set_labels()
 
     def set_labels(self, unit_time=None, unit_values=None, name_values=None):
@@ -96,8 +93,8 @@ class Signal:
         plot(self.time, self.values, label=self.name)
         fill_between(
             self.time,
-            self.values - self.uncertainty_main_diagonal,
-            self.values + self.uncertainty_main_diagonal,
+            self.values - self.uncertainty,
+            self.values + self.uncertainty,
             color="gray",
             alpha=0.2,
         )
@@ -109,7 +106,7 @@ class Signal:
         figure(fignr, **kwargs)
         plot(
             self.time,
-            self.uncertainty_main_diagonal,
+            self.uncertainty,
             label="uncertainty associated with %s" % self.name,
         )
         xlabel("time / %s" % self.unit_time)
