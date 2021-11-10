@@ -5,9 +5,9 @@ signatures might change in the future or it might as well disappear completely. 
 us know if you have special needs or want to make extended use of this feature.
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal as dsp
-from matplotlib import pyplot as plt
 
 from PyDynamic import rect
 from PyDynamic.signals import Signal
@@ -28,7 +28,6 @@ def demonstrate_signal():
     )
     Ub = np.diag(b * 1e-1)
     signal.apply_filter(b, filter_uncertainty=Ub)
-    signal.plot()
     signal.plot_uncertainty()
     plt.show()
     bl, al = dsp.bessel(4, 0.2)
