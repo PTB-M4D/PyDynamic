@@ -83,10 +83,9 @@ class Normal_ZeroCorr:
             )
 
     def rvs(self, size=1):
-        # This function mimics the behavior of the scipy stats package
-        return np.tile(self.loc, (size, 1)) + np.random.randn(
-            size, len(self.loc)
-        ) * np.tile(self.scale, (size, 1))
+        return np.random.normal(
+            loc=self.loc, scale=self.scale, size=(size, len(self.loc))
+        )
 
 
 def MC(
