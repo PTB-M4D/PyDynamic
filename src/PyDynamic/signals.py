@@ -77,19 +77,10 @@ class Signal:
             self.uncertainty_main_diagonal = self.uncertainty
         self.set_labels()
 
-    def set_labels(self, unit_time=None, unit_values=None, name_values=None):
-        if isinstance(unit_time, str):
-            self.unit_time = unit_time
-        else:
-            self.unit_time = "s"
-        if isinstance(unit_values, str):
-            self.unit_values = unit_values
-        else:
-            self.unit_values = "a.u."
-        if isinstance(name_values, str):
-            self.name = name_values
-        else:
-            self.name = "signal"
+    def set_labels(self, unit_time="s", unit_values="a.u.", name_values="signal"):
+        self.unit_time = unit_time
+        self.unit_values = unit_values
+        self.name = name_values
 
     def plot(self, fignr=1, figsize=(10, 8)):
         figure(fignr, figsize=figsize)
