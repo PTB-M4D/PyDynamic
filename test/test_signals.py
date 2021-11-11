@@ -282,13 +282,15 @@ def test_signal_class_usual_instanciations(capsys, inputs):
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
     max_examples=10,
 )
 @pytest.mark.slow
-def test_signal_class_raise_not_implemented(inputs):
+def test_signal_class_raise_not_implemented(capsys, inputs):
     inputs["values"] = inputs["values"][..., np.newaxis]
+    _print_current_ram_usage(capsys)
     with pytest.raises(
         NotImplementedError,
         match=r"Signal: Multivariate signals are not implemented yet.",
@@ -301,15 +303,17 @@ def test_signal_class_raise_not_implemented(inputs):
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
     max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_step(
-    inputs,
+    capsys, inputs,
 ):
     inputs["Fs"] = inputs["Ts"]
+    _print_current_ram_usage(capsys)
     with pytest.raises(
         ValueError,
         match=r"Signal: Sampling interval and sampling frequency are assumed to be "
@@ -323,15 +327,17 @@ def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_s
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
     max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainties(
-    inputs,
+    capsys, inputs,
 ):
     inputs["uncertainty"] = inputs["uncertainty"][:-1]
+    _print_current_ram_usage(capsys)
     with pytest.raises(
         ValueError,
         match=r"Signal: if uncertainties are provided as np.ndarray "
@@ -346,15 +352,17 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainti
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
     max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_square_uncertainties(
-    inputs,
+    capsys, inputs,
 ):
     inputs["uncertainty"] = inputs["uncertainty"][..., :-1]
+    _print_current_ram_usage(capsys)
     with pytest.raises(
         ValueError,
         match=r"Signal: if uncertainties are provided as 2-dimensional np.ndarray "
