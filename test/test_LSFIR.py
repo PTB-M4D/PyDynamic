@@ -82,21 +82,20 @@ def monte_carlo(
     uf0 = 0.01 * measurement_system["f0"]
 
     runs = 10000
-    MCS0 = (
-        measurement_system["S0"] + random_number_generator.standard_normal(runs) * uS0
+    MCS0 = random_number_generator.normal(
+        loc=measurement_system["S0"], scale=uS0, size=runs
     )
-    MCd = (
-        measurement_system["delta"]
-        + random_number_generator.standard_normal(runs) * udelta
+    MCd = random_number_generator.normal(
+        loc=measurement_system["delta"], scale=udelta, size=runs
     )
-    MCf0 = (
-        measurement_system["f0"] + random_number_generator.standard_normal(runs) * uf0
+    MCf0 = random_number_generator.normal(
+        loc=measurement_system["f0"], scale=uf0, size=runs
     )
-    HMC = np.zeros((runs, len(freqs)), dtype=complex)
-    for k in range(runs):
-        bc_, ac_ = sos_phys2filter(MCS0[k], MCd[k], MCf0[k])
+    HMC = np.empty((runs, len(freqs)), dtype=complex)
+    for index, mcs0_mcd_mcf0 in enumerate(zip(MCS0, MCd, MCf0)):
+        bc_, ac_ = sos_phys2filter(mcs0_mcd_mcf0[0], mcs0_mcd_mcf0[1], mcs0_mcd_mcf0[2])
         b_, a_ = dsp.bilinear(bc_, ac_, sampling_freq)
-        HMC[k, :] = dsp.freqz(b_, a_, 2 * np.pi * freqs / sampling_freq)[1]
+        HMC[index, :] = dsp.freqz(b_, a_, 2 * np.pi * freqs / sampling_freq)[1]
 
     H = _assemble_real_imag_from_complex(complex_freq_resp)
     assert_allclose(
