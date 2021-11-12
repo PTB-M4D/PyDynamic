@@ -467,7 +467,7 @@ def test_digital_deconvolution_FIR_example_figure_7(
     plt.xlim(1.9, 2.4)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -502,7 +502,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
     assert_allclose(b_fir_svd, b_fir_none)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -538,7 +538,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
     assert_allclose(b_fir_mc, b_fir_none)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -574,7 +574,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
     assert_allclose(b_fir_mc, b_fir_none)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12), weights())
+@given(hypothesis_dimension(min_value=4, max_value=8), weights())
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -600,7 +600,7 @@ def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
     _print_current_ram_usage(capsys)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
+@given(hypothesis_dimension(min_value=4, max_value=8), hst.booleans())
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -623,7 +623,7 @@ def test_usual_call_LSFIR_with_None_uncertainties(
 
 
 @given(
-    hypothesis_dimension(min_value=2, max_value=12),
+    hypothesis_dimension(min_value=4, max_value=8),
     weights(),
     hst.booleans(),
     hst.booleans(),
@@ -654,7 +654,7 @@ def test_usual_call_LSFIR_with_mc(
     _print_current_ram_usage(capsys)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(deadline=None)
 def test_LSFIR_with_too_short_H(monte_carlo, freqs, sampling_freq, filter_order):
     too_short_H = monte_carlo["H"][1:]
@@ -675,7 +675,7 @@ def test_LSFIR_with_too_short_H(monte_carlo, freqs, sampling_freq, filter_order)
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(deadline=None)
 def test_LSFIR_with_complex_but_too_short_H(
     complex_H_with_UH, freqs, sampling_freq, filter_order
@@ -698,7 +698,7 @@ def test_LSFIR_with_complex_but_too_short_H(
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(deadline=None)
 def test_LSFIR_with_too_short_f(monte_carlo, freqs, sampling_freq, filter_order):
     too_short_f = freqs[1:]
@@ -719,7 +719,7 @@ def test_LSFIR_with_too_short_f(monte_carlo, freqs, sampling_freq, filter_order)
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -746,7 +746,7 @@ def test_LSFIR_with_too_short_UH(monte_carlo, freqs, sampling_freq, filter_order
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -773,7 +773,7 @@ def test_LSFIR_with_nonsquare_UH(monte_carlo, freqs, sampling_freq, filter_order
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -845,7 +845,7 @@ def test_compare_different_dtypes_LSFIR(
     assert_allclose(ub_real_imaginary, ub_complex, rtol=6e-1)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(deadline=None)
 def test_LSFIR_with_wrong_type_weights(monte_carlo, freqs, sampling_freq, filter_order):
     weight_list = [1] * 2 * len(freqs)
@@ -865,7 +865,7 @@ def test_LSFIR_with_wrong_type_weights(monte_carlo, freqs, sampling_freq, filter
         )
 
 
-@given(weights(guarantee_vector=True), hypothesis_dimension(min_value=2, max_value=12))
+@given(weights(guarantee_vector=True), hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -894,7 +894,7 @@ def test_LSFIR_with_wrong_len_weights(
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -938,7 +938,7 @@ def test_not_implemented_LSFIR(monte_carlo, freqs, sampling_freq, filter_order):
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -967,7 +967,7 @@ def test_missing_mc_uncertainties_LSFIR(
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -996,7 +996,7 @@ def test_missing_svd_uncertainties_LSFIR(
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -1025,7 +1025,7 @@ def test_both_propagation_methods_simultaneously_requested_uncertainties_LSFIR(
         )
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12), hst.booleans())
+@given(hypothesis_dimension(min_value=4, max_value=8), hst.booleans())
 @settings(
     deadline=None,
     suppress_health_check=[
@@ -1165,7 +1165,7 @@ def test_compare_invLSFIR_unc_LSFIR_only_by_filter_coefficients(
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
 
 
-@given(hypothesis_dimension(min_value=2, max_value=12))
+@given(hypothesis_dimension(min_value=4, max_value=8))
 @settings(
     deadline=None,
     suppress_health_check=[
