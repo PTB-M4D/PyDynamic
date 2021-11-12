@@ -608,6 +608,7 @@ def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=10,
 )
 def test_usual_call_LSFIR_with_None_uncertainties(
     monte_carlo, freqs, sampling_freq, filter_order, fit_reciprocal
