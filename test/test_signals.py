@@ -310,7 +310,7 @@ def test_signal_class_raise_not_implemented(capsys, inputs):
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_step(
-    capsys, inputs,
+    capsys, inputs
 ):
     inputs["Fs"] = inputs["Ts"]
     _print_current_ram_usage(capsys)
@@ -334,7 +334,7 @@ def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_s
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainties(
-    capsys, inputs,
+    capsys, inputs
 ):
     inputs["uncertainty"] = inputs["uncertainty"][:-1]
     _print_current_ram_usage(capsys)
@@ -358,9 +358,7 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainti
     max_examples=10,
 )
 @pytest.mark.slow
-def test_signal_class_raise_value_error_on_non_square_uncertainties(
-    capsys, inputs,
-):
+def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inputs):
     inputs["uncertainty"] = inputs["uncertainty"][..., :-1]
     _print_current_ram_usage(capsys)
     with pytest.raises(
