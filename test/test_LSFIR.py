@@ -636,6 +636,7 @@ def test_usual_call_LSFIR_with_None_uncertainties(
         *settings.default.suppress_health_check,
         HealthCheck.function_scoped_fixture,
     ],
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_usual_call_LSFIR_with_mc(
