@@ -37,7 +37,7 @@ def signal_inputs(
 ) -> Dict[str, Union[float, np.ndarray]]:
     minimum_float = 1e-5
     maximum_float = 1e-1
-    number_of_samples = draw(hst.integers(min_value=4, max_value=2048))
+    number_of_samples = draw(hst.integers(min_value=4, max_value=512))
     small_positive_float_strategy = hypothesis_bounded_float(
         min_value=minimum_float, max_value=maximum_float
     )
