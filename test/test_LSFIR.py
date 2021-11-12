@@ -582,6 +582,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
         HealthCheck.too_slow,
         HealthCheck.function_scoped_fixture,
     ],
+    max_examples=20,
 )
 @pytest.mark.slow
 def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
