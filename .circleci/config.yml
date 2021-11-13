@@ -41,7 +41,7 @@ workflows:
           cron: "0 0 * * *"
           filters:
             branches:
-              only: /.*/
+              only: /master/
     jobs:
       - test:
           name: "nightly_test_python_py36"
