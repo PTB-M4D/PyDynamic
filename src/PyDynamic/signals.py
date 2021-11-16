@@ -8,6 +8,8 @@ together with a time axis.
 
 __all__ = ["Signal"]
 
+from math import isclose
+
 import numpy as np
 from matplotlib.pyplot import figure, fill_between, legend, plot, xlabel, ylabel
 
@@ -44,7 +46,7 @@ class Signal:
             self.Ts = Ts
             if Fs is None:
                 self.Fs = 1 / Ts
-            elif not np.allclose(Fs, np.reciprocal(self.Ts)):
+            elif not isclose(Fs, 1 / self.Ts):
                 raise ValueError(
                     "Signal: Sampling interval and sampling frequency are assumed to "
                     "be approximately multiplicative inverse to each other, but "
