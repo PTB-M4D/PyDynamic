@@ -14,6 +14,7 @@ from matplotlib.pyplot import figure, fill_between, legend, plot, xlabel, ylabel
 from .misc.tools import (
     is_2d_matrix,
     is_2d_square_matrix,
+    is_vector,
     number_of_rows_equals_vector_dim,
 )
 from .uncertainty.propagate_filter import FIRuncFilter
@@ -50,31 +51,7 @@ class Signal:
                     f"Fs={Fs} and Ts={Ts}. Please adjust either one of them."
                 )
         # set initial uncertainty
-        if isinstance(uncertainty, float):
-            self.uncertainty = np.ones_like(values) * uncertainty
-            self.uncertainty_main_diagonal = self.uncertainty
-        elif isinstance(uncertainty, np.ndarray):
-            uncertainty = uncertainty.squeeze()
-            if not number_of_rows_equals_vector_dim(matrix=uncertainty, vector=time):
-                raise ValueError(
-                    "Signal: if uncertainties are provided as np.ndarray "
-                    f"they are expected to match the number of elements of the "
-                    f"provided time vector, but uncertainties are of shape "
-                    f"{uncertainty.shape} and time is of length {len(time)}. Please "
-                    f"adjust either one of them."
-                )
-            if is_2d_matrix(uncertainty) and not is_2d_square_matrix(uncertainty):
-                raise ValueError(
-                    "Signal: if uncertainties are provided as 2-dimensional np.ndarray "
-                    f"they are expected to resemble a square matrix, but uncertainties "
-                    f"are of shape {uncertainty.shape}. Please "
-                    f"adjust them."
-                )
-            self.uncertainty = uncertainty
-            self.uncertainty_main_diagonal = np.diag(self.uncertainty)
-        else:
-            self.uncertainty = np.zeros_like(values)
-            self.uncertainty_main_diagonal = self.uncertainty
+        self.uncertainty = uncertainty
         self.set_labels()
 
     def set_labels(self, unit_time="s", unit_values="a.u.", name_values="signal"):
@@ -87,8 +64,8 @@ class Signal:
         plot(self.time, self.values, label=self.name)
         fill_between(
             self.time,
-            self.values - self.uncertainty_main_diagonal,
-            self.values + self.uncertainty_main_diagonal,
+            self.values - self._standard_uncertainties,
+            self.values + self._standard_uncertainties,
             color="gray",
             alpha=0.2,
         )
@@ -100,7 +77,7 @@ class Signal:
         figure(fignr, **kwargs)
         plot(
             self.time,
-            self.uncertainty_main_diagonal,
+            self._standard_uncertainties,
             label="uncertainty associated with %s" % self.name,
         )
         xlabel("time / %s" % self.unit_time)
@@ -132,43 +109,60 @@ class Signal:
         if isinstance(a, list):
             a = np.array(a)
         if self._is_fir_type_filter(a):
-            if len(self.uncertainty.shape) == 1:
-                if not isinstance(MonteCarloRuns, int):
-                    self.values, self.uncertainty = FIRuncFilter(
-                        self.values, self.uncertainty, b, Utheta=filter_uncertainty
-                    )
-                else:
-                    self.values, self.uncertainty = MC(
-                        self.values,
-                        self.uncertainty,
-                        b,
-                        a,
-                        filter_uncertainty,
-                        runs=MonteCarloRuns,
-                    )
-            else:
-                if not isinstance(MonteCarloRuns, int):
-                    MonteCarloRuns = 10000
-                self.values, self.uncertainty = MC(
-                    self.values,
-                    self.uncertainty,
-                    b,
-                    a,
-                    filter_uncertainty,
-                    runs=MonteCarloRuns,
-                )
+            self.values, self.uncertainty = FIRuncFilter(
+                self.values, self.uncertainty, b, Utheta=filter_uncertainty, kind="diag"
+            )
         else:  # IIR-type filter
             if not isinstance(MonteCarloRuns, int):
                 MonteCarloRuns = 10000
-                self.values, self.uncertainty = MC(
-                    self.values,
-                    self.uncertainty,
-                    b,
-                    a,
-                    filter_uncertainty,
-                    runs=MonteCarloRuns,
-                )
+            self.values, self.uncertainty = MC(
+                self.values,
+                self.uncertainty,
+                b,
+                a,
+                filter_uncertainty,
+                runs=MonteCarloRuns,
+            )
 
     @staticmethod
     def _is_fir_type_filter(a):
         return len(a) == 1 and a[0] == 1
+
+    @property
+    def uncertainty(self):
+        return self._uncertainty
+
+    @uncertainty.setter
+    def uncertainty(self, value):
+        if isinstance(value, float):
+            self._uncertainty = np.ones_like(self.values) * value
+            self._standard_uncertainties = self._uncertainty
+        elif isinstance(value, np.ndarray):
+            uncertainties_array = value.squeeze()
+            if not number_of_rows_equals_vector_dim(
+                matrix=uncertainties_array, vector=self.time
+            ):
+                raise ValueError(
+                    "Signal: if uncertainties are provided as np.ndarray "
+                    f"they are expected to match the number of elements of the "
+                    f"provided time vector, but uncertainties are of shape "
+                    f"{uncertainties_array.shape} and time is of length {len(self.time)}. "
+                    f"Please adjust either one of them."
+                )
+            if is_2d_matrix(uncertainties_array) and not is_2d_square_matrix(
+                uncertainties_array
+            ):
+                raise ValueError(
+                    "Signal: if uncertainties are provided as 2-dimensional np.ndarray "
+                    f"they are expected to resemble a square matrix, but uncertainties "
+                    f"are of shape {uncertainties_array.shape}. Please "
+                    f"adjust them."
+                )
+            self._uncertainty = uncertainties_array
+            if is_vector(uncertainties_array):
+                self._standard_uncertainties = uncertainties_array
+            else:
+                self._standard_uncertainties = np.diag(uncertainties_array)
+        else:
+            self._uncertainty = np.zeros_like(self.values)
+            self._standard_uncertainties = self._uncertainty
