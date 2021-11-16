@@ -18,7 +18,7 @@ def demonstrate_signal():
     delta_t = 0.01
     t = np.arange(0, N * delta_t, delta_t)
     x = rect(t, delta_t * N // 4, delta_t * N // 4 * 3)
-    ux = 0.02
+    ux = 0.2
     signal = Signal(t, x, Ts=delta_t, uncertainty=ux)
     b = dsp.firls(
         15,
