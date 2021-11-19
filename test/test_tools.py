@@ -9,13 +9,20 @@ from matplotlib import pyplot as plt
 from numpy.testing import assert_equal
 
 from PyDynamic.misc.tools import (
+    complex_2_real_imag_array,
     is_2d_matrix,
     is_2d_square_matrix,
     is_vector,
     normalize_vector_or_matrix,
     plot_vectors_and_covariances_comparison,
+    separate_real_imag_of_vector,
 )
-from .conftest import hypothesis_covariance_matrix, hypothesis_float_vector
+from .conftest import (
+    hypothesis_covariance_matrix,
+    hypothesis_dimension,
+    hypothesis_float_vector,
+    hypothesis_odd_dimension,
+)
 
 
 @composite
@@ -96,3 +103,27 @@ def _minimum_is_zero(array: np.ndarray) -> bool:
 
 def _maximum_is_one(array: np.ndarray) -> bool:
     return np.max(array) == 1
+
+
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_dimension()))
+def test_complex_2_real_imag_array_len(array):
+    assert_equal(len(complex_2_real_imag_array(array)), len(array) * 2)
+
+
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_dimension()))
+def test_complex_2_real_imag_array_equality_real(array):
+    array_real_imag = complex_2_real_imag_array(array)
+    assert_equal(array_real_imag[: len(array_real_imag) // 2], np.real(array))
+
+
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_dimension()))
+def test_complex_2_real_imag_array_equality_imag(array):
+    array_real_imag = complex_2_real_imag_array(array)
+    assert_equal(array_real_imag[len(array_real_imag) // 2 :], np.imag(array))
+
+
+@settings(deadline=None, suppress_health_check=(HealthCheck.too_slow,))
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_odd_dimension()))
+def test_separate_real_imag_of_vector_wrong_len(array):
+    with pytest.raises(ValueError, match=r""):
+        separate_real_imag_of_vector(array)
