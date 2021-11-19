@@ -607,7 +607,7 @@ def separate_real_imag_of_vector(vector: np.ndarray) -> np.ndarray:
 
 
 def complex_2_real_imag_array(array: np.ndarray) -> np.ndarray:
-    r"""Take a np.ndarray with dtype complex and return real and imaginary parts
+    r"""Take an array of any non-flexible scalar dtype to return real and imaginary part
 
     The input array :math:`x \in \mathbb R^n` is reassembled to the form
     of the expected input of some of the functions in the modules
@@ -618,8 +618,7 @@ def complex_2_real_imag_array(array: np.ndarray) -> np.ndarray:
     Parameters
     ----------
     array : np.ndarray of shape (M,)
-        the array of any complex dtype to assemble the version with real and
-        imaginary parts from
+        the array to assemble the version with real and imaginary parts from
 
     Returns
     -------
