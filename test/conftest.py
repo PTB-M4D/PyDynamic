@@ -477,8 +477,9 @@ def hypothesis_two_to_the_k(
     draw: Callable, min_k: Optional[int] = None, max_k: Optional[int] = None
 ) -> int:
     k = draw(hst.integers(min_value=min_k, max_value=max_k))
-    assert k % 2 == 0
-    return 2 ** k
+    two_to_the_k = 2 ** k
+    assert two_to_the_k % 2 == 0
+    return two_to_the_k
 
 
 @pytest.fixture
