@@ -52,6 +52,30 @@ def hypothesis_reasonable_dimension_strategy(
     return draw(hst.integers(min_value=min_value, max_value=max_value))
 
 
+@composite
+def hypothesis_even_dimension_strategy(
+    draw: Callable, min_value: Optional[int] = 2, max_value: Optional[int] = 20
+):
+    even_dimension = (
+        draw(hst.integers(min_value=min_value // 2 + 1, max_value=max_value // 2 + 1))
+        * 2
+    )
+    _ensure_odd_dimension_is_odd_and_in_bounds(max_value, min_value, even_dimension)
+    return even_dimension
+
+
+@composite
+def hypothesis_odd_dimension_strategy(
+    draw: Callable, min_value: Optional[int] = 1, max_value: Optional[int] = 21
+):
+    even_dimension = (
+        draw(hst.integers(min_value=min_value // 2, max_value=max_value // 2)) * 2
+    )
+    odd_dimension = even_dimension + 1
+    _ensure_odd_dimension_is_odd_and_in_bounds(max_value, min_value, odd_dimension)
+    return odd_dimension
+
+
 def hypothesis_float_square_matrix_strategy(
     number_of_rows: int,
 ) -> SearchStrategy:
@@ -301,7 +325,7 @@ def hypothesis_dimension(
 ) -> int:
     minimum_dimension = min_value if min_value is not None else 1
     maximum_dimension = max_value if max_value is not None else 20
-    return (
+    dimension = (
         minimum_dimension
         if minimum_dimension is not None and minimum_dimension == maximum_dimension
         else draw(
@@ -310,6 +334,72 @@ def hypothesis_dimension(
             )
         )
     )
+    assert minimum_dimension <= dimension <= maximum_dimension
+    return dimension
+
+
+@composite
+def hypothesis_even_dimension(
+    draw: Callable,
+    min_value: Optional[int] = None,
+    max_value: Optional[int] = None,
+) -> int:
+    minimum_dimension = min_value if min_value is not None else 2
+    maximum_dimension = max_value if max_value is not None else 20
+    even_dimension = (
+        minimum_dimension
+        if minimum_dimension is not None
+        and minimum_dimension % 2 == 0
+        and minimum_dimension == maximum_dimension
+        else draw(
+            hypothesis_even_dimension_strategy(
+                min_value=minimum_dimension, max_value=maximum_dimension
+            )
+        )
+    )
+    _ensure_odd_dimension_is_odd_and_in_bounds(
+        maximum_dimension, minimum_dimension, even_dimension
+    )
+    return even_dimension
+
+
+def _ensure_even_dimension_is_even_and_in_bounds(
+    max_val: int, min_val: int, odd_dimension: int
+):
+    assert min_val <= odd_dimension <= max_val
+    assert odd_dimension % 2 == 0
+
+
+@composite
+def hypothesis_odd_dimension(
+    draw: Callable,
+    min_value: Optional[int] = None,
+    max_value: Optional[int] = None,
+) -> int:
+    minimum_dimension = min_value if min_value is not None else 1
+    maximum_dimension = max_value if max_value is not None else 21
+    odd_dimension = (
+        minimum_dimension
+        if minimum_dimension is not None
+        and minimum_dimension % 2 == 1
+        and minimum_dimension == maximum_dimension
+        else draw(
+            hypothesis_odd_dimension_strategy(
+                min_value=minimum_dimension, max_value=maximum_dimension
+            )
+        )
+    )
+    _ensure_odd_dimension_is_odd_and_in_bounds(
+        maximum_dimension, minimum_dimension, odd_dimension
+    )
+    return odd_dimension
+
+
+def _ensure_odd_dimension_is_odd_and_in_bounds(
+    max_val: int, min_val: int, odd_dimension: int
+):
+    assert min_val <= odd_dimension <= max_val
+    assert odd_dimension % 2 == 1
 
 
 @composite
