@@ -560,7 +560,7 @@ def real_imag_2_complex(array: np.ndarray) -> np.ndarray:
     return array_split_in_two_half[0] + 1j * array_split_in_two_half[1]
 
 
-def separate_real_imag_of_mc_samples(array: np.ndarray) -> np.ndarray:
+def separate_real_imag_of_mc_samples(array: np.ndarray) -> List[np.ndarray]:
     r"""Split a np.ndarray containing MonteCarlo samples real and imaginary parts
 
     The input array :math:`x \in \mathbb R^{n \times 2m}` representing an
