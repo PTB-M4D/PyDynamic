@@ -314,10 +314,8 @@ def test_real_imag_2_complex_vector_values(array):
 def test_real_imag_2_complex_vector_wrong_len(vector):
     with pytest.raises(
         ValueError,
-        match="separate_real_imag_of_vector: vector of real and imaginary "
-        "parts is "
-        "expected to contain exactly as many real as imaginary parts "
-        "but is of "
+        match="separate_real_imag_of_vector: vector of real and imaginary parts is "
+        "expected to contain exactly as many real as imaginary parts but is of "
         r"odd length=.*",
     ):
         real_imag_2_complex(vector)
