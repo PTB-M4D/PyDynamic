@@ -21,14 +21,14 @@ This module contains the following functions:
 * :func:`shift_uncertainty`: Shift the elements in the vector x and associated
   uncertainties ux
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
+* :func:`complex_2_real_imag`: Take a np.ndarray with dtype complex and return
+  real and imaginary parts
 * :func:`real_imag_2_complex`: Take a np.ndarray with real and imaginary parts
   and return dtype complex ndarray
 * :func:`separate_real_imag_of_mc_samples`: Split a np.ndarray containing MonteCarlo
   samples real and imaginary parts
 * :func:`separate_real_imag_of_vector`: Split a np.ndarray containing real and
   imaginary parts into half
-* :func:`complex_2_real_imag`: Take a np.ndarray with dtype complex and return
-  real and imaginary parts
 """
 
 __all__ = [
@@ -46,10 +46,10 @@ __all__ = [
     "plot_vectors_and_covariances_comparison",
     "is_2d_square_matrix",
     "normalize_vector_or_matrix",
+    "complex_2_real_imag",
     "real_imag_2_complex",
     "separate_real_imag_of_mc_samples",
     "separate_real_imag_of_vector",
-    "complex_2_real_imag",
 ]
 
 from typing import Any, List, Optional, Union
@@ -534,6 +534,28 @@ def normalize_vector_or_matrix(numbers: np.ndarray) -> np.ndarray:
     return (numbers - translator) / normalizer
 
 
+def complex_2_real_imag(array: np.ndarray) -> np.ndarray:
+    r"""Take an array of any non-flexible scalar dtype to return real and imaginary part
+
+    The input array :math:`x \in \mathbb R^n` is reassembled to the form
+    of the expected input of some of the functions in the modules
+    :mod:`PyDynamic.uncertainty.propagate_DFT` and
+    :mod:`PyDynamic.model_estimation.fit_filter`: :math:`y = \left( \operatorname{Re}(
+    x), \operatorname{Im}(x) \right)`.
+
+    Parameters
+    ----------
+    array : np.ndarray of shape (M,)
+        the array to assemble the version with real and imaginary parts from
+
+    Returns
+    -------
+    np.ndarray of shape (2M,)
+        the array of real and imaginary parts
+    """
+    return np.hstack((np.real(array), np.imag(array)))
+
+
 def real_imag_2_complex(array: np.ndarray) -> np.ndarray:
     r"""Take a np.ndarray with real and imaginary parts and return dtype complex ndarray
 
@@ -620,25 +642,3 @@ def separate_real_imag_of_vector(vector: np.ndarray) -> List[np.ndarray]:
 
 def _vector_has_odd_length(vector: np.ndarray) -> bool:
     return len(vector) % 2 == 1
-
-
-def complex_2_real_imag(array: np.ndarray) -> np.ndarray:
-    r"""Take an array of any non-flexible scalar dtype to return real and imaginary part
-
-    The input array :math:`x \in \mathbb R^n` is reassembled to the form
-    of the expected input of some of the functions in the modules
-    :mod:`PyDynamic.uncertainty.propagate_DFT` and
-    :mod:`PyDynamic.model_estimation.fit_filter`: :math:`y = \left( \operatorname{Re}(
-    x), \operatorname{Im}(x) \right)`.
-
-    Parameters
-    ----------
-    array : np.ndarray of shape (M,)
-        the array to assemble the version with real and imaginary parts from
-
-    Returns
-    -------
-    np.ndarray of shape (2M,)
-        the array of real and imaginary parts
-    """
-    return np.hstack((np.real(array), np.imag(array)))
