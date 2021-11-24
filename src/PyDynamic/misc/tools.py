@@ -24,7 +24,7 @@ This module contains the following functions:
 * :func:`real_imag_2_complex`: Take a np.ndarray with real and imaginary parts
   and return dtype complex ndarray
 * :func:`separate_real_imag_of_mc_samples`: Split a np.ndarray containing MonteCarlo
-  samples real and imaginary parts
+  samples' real and imaginary parts
 * :func:`separate_real_imag_of_vector`: Split a np.ndarray containing real and
   imaginary parts into half
 * :func:`complex_2_real_imag`: Take a np.ndarray with dtype complex and return
