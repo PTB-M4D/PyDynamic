@@ -580,6 +580,12 @@ def separate_real_imag_of_mc_samples(array: np.ndarray) -> List[np.ndarray]:
     list of two np.ndarrays of shape (N,M)
         two-element list of the two arrays containing the real and imaginary parts
     """
+    if _vector_has_odd_length(array[0]):
+        raise ValueError(
+            "separate_real_imag_of_mc_samples: vectors of real and imaginary "
+            "parts are expected to contain exactly as many real as "
+            f"imaginary parts but the first one is of odd length={len(array[0])}."
+        )
     return np.split(ary=array, indices_or_sections=2, axis=1)
 
 
