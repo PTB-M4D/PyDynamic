@@ -1,11 +1,12 @@
-from typing import Callable, Dict, List, Set, Union
+from typing import Callable, Dict, List, Set, Tuple, Union
 
 import hypothesis.extra.numpy as hnp
+import hypothesis.strategies as hst
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from hypothesis import assume, given, HealthCheck, settings, Verbosity
 from hypothesis.strategies import composite
-from matplotlib import pyplot as plt
 from numpy.testing import assert_equal
 
 from PyDynamic.misc.tools import (
