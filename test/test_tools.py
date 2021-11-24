@@ -16,6 +16,7 @@ from PyDynamic.misc.tools import (
     is_vector,
     normalize_vector_or_matrix,
     plot_vectors_and_covariances_comparison,
+    separate_real_imag_of_mc_samples,
     separate_real_imag_of_vector,
 )
 from .conftest import (
@@ -193,3 +194,74 @@ def test_separate_real_imag_of_vector_first_half(vector):
 def test_separate_real_imag_of_vector_second_half(vector):
     list_of_separated_imag = separate_real_imag_of_vector(vector)[1]
     assert_equal(list_of_separated_imag, vector[len(vector) // 2 :])
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hst.builds(
+            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2 - 1),
+            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
+        ),
+    )
+)
+def test_separate_real_imag_of_mc_samples_wrong_len(array):
+    with pytest.raises(
+        ValueError,
+        match="separate_real_imag_of_mc_samples: vectors of real and imaginary "
+        "parts are expected to contain exactly as many real as "
+        r"imaginary parts but the first one is of odd length=.*",
+    ):
+        separate_real_imag_of_mc_samples(array)
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hst.builds(
+            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
+            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
+        ),
+    )
+)
+def test_separate_real_imag_of_mc_samples_dimensions(array):
+    list_of_separated_real_imag = separate_real_imag_of_mc_samples(array)
+    assert_equal(len(list_of_separated_real_imag), 2)
+    assert_equal(
+        _set_of_shapes_of_ndarray_list(list_of_separated_real_imag),
+        {(len(array), len(array[0]) / 2)},
+    )
+
+
+def _set_of_shapes_of_ndarray_list(
+    list_of_anything: List[np.ndarray],
+) -> Set[Tuple[int, int]]:
+    return set(list_entry.shape for list_entry in list_of_anything)
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hst.builds(
+            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
+            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
+        ),
+    )
+)
+def test_separate_real_imag_of_mc_samples_first_half(array):
+    list_of_separated_real = separate_real_imag_of_mc_samples(array)[0]
+    assert_equal(list_of_separated_real, array[:, : len(array[0]) // 2])
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hst.builds(
+            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
+            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
+        ),
+    )
+)
+def test_separate_real_imag_of_mc_samples_second_half(array):
+    list_of_separated_imag = separate_real_imag_of_mc_samples(array)[1]
+    assert_equal(list_of_separated_imag, array[:, len(array[0]) // 2 :])
