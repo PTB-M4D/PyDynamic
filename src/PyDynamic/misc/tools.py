@@ -559,8 +559,8 @@ def complex_2_real_imag(array: np.ndarray) -> np.ndarray:
 def real_imag_2_complex(array: np.ndarray) -> np.ndarray:
     r"""Take a np.ndarray with real and imaginary parts and return dtype complex ndarray
 
-    The input array :math:`x \in \mathbb R^n` representing a complex vector
-    :math:`y \in \mathbb C^{n/2}` has the form of the expected input of
+    The input array :math:`x \in \mathbb R^{2m}` representing a complex vector
+    :math:`y \in \mathbb C^m` has the form of the expected input of
     some of the functions in the modules
     :mod:`propagate_DFT <PyDynamic.uncertainty.propagate_DFT>` and
     :mod:`fit_filter <PyDynamic.model_estimation.fit_filter>`: :math:`x = \left(
