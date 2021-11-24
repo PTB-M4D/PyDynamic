@@ -537,7 +537,7 @@ def normalize_vector_or_matrix(numbers: np.ndarray) -> np.ndarray:
 def complex_2_real_imag(array: np.ndarray) -> np.ndarray:
     r"""Take an array of any non-flexible scalar dtype to return real and imaginary part
 
-    The input array :math:`x \in \mathbb R^n` is reassembled to the form
+    The input array :math:`x \in \mathbb R^m` is reassembled to the form
     of the expected input of some of the functions in the modules
     :mod:`propagate_DFT <PyDynamic.uncertainty.propagate_DFT>` and
     :mod:`fit_filter <PyDynamic.model_estimation.fit_filter>`: :math:`y = \left(
