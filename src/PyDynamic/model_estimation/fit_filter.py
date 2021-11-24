@@ -911,11 +911,9 @@ def _fit_fir_filter_with_uncertainty_propagation_via_svd(
     trunc_svd_tol: float,
     x: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    list_of_mc_freq_resps_real_and_imag = separate_real_imag_of_mc_samples(
+    mc_freq_resps_real, mc_freq_resps_imag = separate_real_imag_of_mc_samples(
         mc_freq_resps_real_imag
     )
-    mc_freq_resps_real = list_of_mc_freq_resps_real_and_imag[0]
-    mc_freq_resps_imag = list_of_mc_freq_resps_real_and_imag[1]
     recipr_of_sqr_abs_of_mc_freq_resps = np.reciprocal(
         mc_freq_resps_real ** 2 + mc_freq_resps_imag ** 2
     )
