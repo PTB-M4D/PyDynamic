@@ -57,8 +57,7 @@ def hypothesis_even_dimension_strategy(
     draw: Callable, min_value: Optional[int] = 2, max_value: Optional[int] = 20
 ):
     even_dimension = (
-        draw(hst.integers(min_value=min_value // 2 + 1, max_value=max_value // 2 + 1))
-        * 2
+        draw(hst.integers(min_value=min_value // 2 + 1, max_value=max_value // 2)) * 2
     )
     _ensure_dimension_is_even_and_in_bounds(max_value, min_value, even_dimension)
     return even_dimension
