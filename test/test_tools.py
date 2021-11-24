@@ -26,6 +26,7 @@ from .conftest import (
     hypothesis_even_dimension,
     hypothesis_float_vector,
     hypothesis_odd_dimension,
+    hypothesis_two_dimensional_array_shape,
 )
 
 
@@ -128,8 +129,7 @@ def test_complex_2_real_imag_vector_equality_imag(array):
 
 @given(
     hnp.arrays(
-        dtype=hnp.scalar_dtypes(),
-        shape=hnp.array_shapes(min_dims=2, max_dims=2, max_side=20),
+        dtype=hnp.scalar_dtypes(), shape=hypothesis_two_dimensional_array_shape()
     )
 )
 def test_complex_2_real_imag_array_len(array):
@@ -140,8 +140,7 @@ def test_complex_2_real_imag_array_len(array):
 
 @given(
     hnp.arrays(
-        dtype=hnp.scalar_dtypes(),
-        shape=hnp.array_shapes(min_dims=2, max_dims=2, max_side=20),
+        dtype=hnp.scalar_dtypes(), shape=hypothesis_two_dimensional_array_shape()
     )
 )
 def test_complex_2_real_imag_array_equality_real(array):
@@ -151,8 +150,7 @@ def test_complex_2_real_imag_array_equality_real(array):
 
 @given(
     hnp.arrays(
-        dtype=hnp.scalar_dtypes(),
-        shape=hnp.array_shapes(min_dims=2, max_dims=2, max_side=20),
+        dtype=hnp.scalar_dtypes(), shape=hypothesis_two_dimensional_array_shape()
     )
 )
 def test_complex_2_real_imag_array_equality_imag(array):
@@ -198,10 +196,7 @@ def test_separate_real_imag_of_vector_second_half(vector):
 @given(
     hnp.arrays(
         dtype=hnp.scalar_dtypes(),
-        shape=hst.builds(
-            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2 - 1),
-            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
-        ),
+        shape=hypothesis_two_dimensional_array_shape(ensure_odd_second_dimension=True),
     )
 )
 def test_separate_real_imag_of_mc_samples_wrong_len(array):
@@ -217,10 +212,7 @@ def test_separate_real_imag_of_mc_samples_wrong_len(array):
 @given(
     hnp.arrays(
         dtype=hnp.scalar_dtypes(),
-        shape=hst.builds(
-            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
-            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
-        ),
+        shape=hypothesis_two_dimensional_array_shape(ensure_even_second_dimension=True),
     )
 )
 def test_separate_real_imag_of_mc_samples_dimensions(array):
@@ -241,10 +233,7 @@ def _set_of_shapes_of_ndarray_list(
 @given(
     hnp.arrays(
         dtype=hnp.scalar_dtypes(),
-        shape=hst.builds(
-            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
-            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
-        ),
+        shape=hypothesis_two_dimensional_array_shape(ensure_even_second_dimension=True),
     )
 )
 def test_separate_real_imag_of_mc_samples_first_half(array):
@@ -256,10 +245,7 @@ def test_separate_real_imag_of_mc_samples_first_half(array):
 @given(
     hnp.arrays(
         dtype=hnp.scalar_dtypes(),
-        shape=hst.builds(
-            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
-            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
-        ),
+        shape=hypothesis_two_dimensional_array_shape(ensure_even_second_dimension=True),
     )
 )
 def test_separate_real_imag_of_mc_samples_second_half(array):
@@ -273,10 +259,7 @@ def test_separate_real_imag_of_mc_samples_second_half(array):
         dtype=hst.one_of(
             hnp.unsigned_integer_dtypes(), hnp.integer_dtypes(), hnp.floating_dtypes()
         ),
-        shape=hst.builds(
-            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
-            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
-        ),
+        shape=hypothesis_two_dimensional_array_shape(ensure_even_second_dimension=True),
     )
 )
 def test_real_imag_2_complex_array_shape(array):
@@ -300,10 +283,7 @@ def test_real_imag_2_complex_vector_len(array):
         dtype=hst.one_of(
             hnp.unsigned_integer_dtypes(), hnp.integer_dtypes(), hnp.floating_dtypes()
         ),
-        shape=hst.builds(
-            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
-            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
-        ),
+        shape=hypothesis_two_dimensional_array_shape(ensure_even_second_dimension=True),
     )
 )
 def test_real_imag_2_complex_array_values(array):
@@ -346,10 +326,7 @@ def test_real_imag_2_complex_vector_wrong_len(vector):
 @given(
     hnp.arrays(
         dtype=hnp.scalar_dtypes(),
-        shape=hst.builds(
-            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2 - 1),
-            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
-        ),
+        shape=hypothesis_two_dimensional_array_shape(ensure_odd_second_dimension=True),
     )
 )
 def test_real_imag_2_complex_array_wrong_len(array):
