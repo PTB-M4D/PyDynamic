@@ -539,9 +539,9 @@ def complex_2_real_imag(array: np.ndarray) -> np.ndarray:
 
     The input array :math:`x \in \mathbb R^n` is reassembled to the form
     of the expected input of some of the functions in the modules
-    :mod:`PyDynamic.uncertainty.propagate_DFT` and
-    :mod:`PyDynamic.model_estimation.fit_filter`: :math:`y = \left( \operatorname{Re}(
-    x), \operatorname{Im}(x) \right)`.
+    :mod:`propagate_DFT <PyDynamic.uncertainty.propagate_DFT>` and
+    :mod:`fit_filter <PyDynamic.model_estimation.fit_filter>`: :math:`y = \left(
+    \operatorname{Re}(x), \operatorname{Im}(x) \right)`.
 
     Parameters
     ----------
@@ -561,9 +561,11 @@ def real_imag_2_complex(array: np.ndarray) -> np.ndarray:
 
     The input array :math:`x \in \mathbb R^n` representing a complex vector
     :math:`y \in \mathbb C^{n/2}` has the form of the expected input of
-    some of the functions in the modules :mod:`PyDynamic.uncertainty.propagate_DFT` and
-    :mod:`PyDynamic.model_estimation.fit_filter`: :math:`x = \left( \operatorname{Re}(
-    y), \operatorname{Im}(y) \right)` or a np.ndarray containing several of these.
+    some of the functions in the modules
+    :mod:`propagate_DFT <PyDynamic.uncertainty.propagate_DFT>` and
+    :mod:`fit_filter <PyDynamic.model_estimation.fit_filter>`: :math:`x = \left(
+    \operatorname{Re}(y), \operatorname{Im}(y) \right)` or a np.ndarray containing
+    several of these.
 
     Parameters
     ----------
@@ -588,9 +590,9 @@ def separate_real_imag_of_mc_samples(array: np.ndarray) -> List[np.ndarray]:
     The input array :math:`x \in \mathbb R^{n \times 2m}` representing an
     n-elemental array of complex vectors :math:`y \in \mathbb C^m` has the form of
     the expected input of some of the functions in the modules
-    :mod:`PyDynamic.uncertainty.propagate_DFT` and
-    :mod:`PyDynamic.model_estimation.fit_filter`: :math:`x = \left( \operatorname{Re}(
-    y_i), \operatorname{Im}(y_i) \right)_{i=1,\ldots,n}`.
+    :mod:`propagate_DFT <PyDynamic.uncertainty.propagate_DFT>` and
+    :mod:`fit_filter <PyDynamic.model_estimation.fit_filter>`: :math:`x = \left(
+    \operatorname{Re}(y_i), \operatorname{Im}(y_i) \right)_{i=1,\ldots,n}`.
 
     Parameters
     ----------
@@ -617,9 +619,9 @@ def separate_real_imag_of_vector(vector: np.ndarray) -> List[np.ndarray]:
     The input array :math:`x \in \mathbb R^{2m}` representing a complex vector
     :math:`y \in \mathbb C^m` has the form of
     the expected input of some of the functions in the modules
-    :mod:`PyDynamic.uncertainty.propagate_DFT` and
-    :mod:`PyDynamic.model_estimation.fit_filter`: :math:`x = \left( \operatorname{Re}(
-    y), \operatorname{Im}(y) \right)`.
+    :mod:`propagate_DFT <PyDynamic.uncertainty.propagate_DFT>` and
+    :mod:`fit_filter <PyDynamic.model_estimation.fit_filter>`:
+    :math:`x = \left( \operatorname{Re}(y), \operatorname{Im}(y) \right)`.
 
     Parameters
     ----------
