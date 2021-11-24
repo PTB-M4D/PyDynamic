@@ -438,7 +438,7 @@ def random_covariance_matrix_for_complex_vectors() -> Callable:
 
 @composite
 def hypothesis_two_to_the_k(
-    draw: Callable, min_k: Optional[int] = None, max_k: Optional[int] = None
+    draw: Callable, min_k: Optional[int] = 0, max_k: Optional[int] = None
 ) -> int:
     k = draw(hst.integers(min_value=min_k, max_value=max_k))
     two_to_the_k = 2 ** k
