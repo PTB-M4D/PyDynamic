@@ -159,5 +159,10 @@ def test_complex_2_real_imag_array_equality_imag(array):
 @settings(deadline=None, suppress_health_check=(HealthCheck.too_slow,))
 @given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_odd_dimension()))
 def test_separate_real_imag_of_vector_wrong_len(array):
-    with pytest.raises(ValueError, match=r""):
+    with pytest.raises(
+        ValueError,
+        match="separate_real_imag_of_vector: vector of real and imaginary parts is "
+        "expected to contain exactly as many real as imaginary parts but is of "
+        r"odd length=.*",
+    ):
         separate_real_imag_of_vector(array)
