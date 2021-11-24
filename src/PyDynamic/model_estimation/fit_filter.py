@@ -27,9 +27,11 @@ from scipy.stats import multivariate_normal
 
 from ..misc.filterstuff import grpdelay, isstable, mapinside
 from ..misc.tools import (
-    is_2d_matrix,
+    complex_2_real_imag,
     is_2d_square_matrix,
     number_of_rows_equals_vector_dim,
+    real_imag_2_complex,
+    separate_real_imag_of_mc_samples,
 )
 
 
@@ -108,10 +110,8 @@ def LSIIR(
     if _no_uncertainties_were_provided(UH):
         freq_resp_to_fit, mc_runs = H, 1
     else:
-        freq_resp_to_fit = _assemble_complex_from_real_imag(
-            _draw_multivariate_monte_carlo_samples(
-                _assemble_real_imag_from_complex(H), UH, mc_runs
-            )
+        freq_resp_to_fit = real_imag_2_complex(
+            _draw_multivariate_monte_carlo_samples(complex_2_real_imag(H), UH, mc_runs)
         )
 
     if verbose:
@@ -259,7 +259,7 @@ def LSIIR(
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
             b_res, a_res, tau, omega
         )
-        residuals_real_imag = _assemble_real_imag_from_complex(Hd - freq_resp_to_fit)
+        residuals_real_imag = complex_2_real_imag(Hd - freq_resp_to_fit)
         _compute_and_print_rms(residuals_real_imag)
 
     if UH:
@@ -378,26 +378,6 @@ def _compute_delayed_filters_freq_resp_via_scipys_freqz(
     return delayed_filters_freq_resp
 
 
-def _assemble_complex_from_real_imag(array: np.ndarray) -> np.ndarray:
-    if is_2d_matrix(array):
-        array_split_in_two_half = (
-            _split_array_of_monte_carlo_samples_of_real_and_imag_parts(array)
-        )
-    else:
-        array_split_in_two_half = _split_vector_of_real_and_imag_parts(array)
-    return array_split_in_two_half[0] + 1j * array_split_in_two_half[1]
-
-
-def _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
-    array: np.ndarray,
-) -> np.ndarray:
-    return np.split(ary=array, indices_or_sections=2, axis=1)
-
-
-def _split_vector_of_real_and_imag_parts(vector: np.ndarray) -> np.ndarray:
-    return np.split(ary=vector, indices_or_sections=2)
-
-
 def _compute_x(
     filter_order: int,
     freqs: np.ndarray,
@@ -416,10 +396,6 @@ def _compute_x(
     x = np.vstack((np.real(e), np.imag(e)))
     x = np.dot(np.diag(weights), x)
     return x
-
-
-def _assemble_real_imag_from_complex(array: np.ndarray) -> np.ndarray:
-    return np.hstack((np.real(array), np.imag(array)))
 
 
 def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
@@ -664,7 +640,7 @@ def _validate_and_assemble_freq_resps(
 ) -> np.ndarray:
     if _is_dtype_complex(H):
         _validate_length_of_h(H, expected_length=expected_len_when_complex)
-        return _assemble_real_imag_from_complex(H)
+        return complex_2_real_imag(H)
     _validate_length_of_h(H, expected_length=expected_len_when_real_imag)
     return H
 
@@ -849,7 +825,7 @@ def _prepare_common_fitting_inputs(
     omega = _compute_radial_freqs_equals_two_pi_times_freqs_over_sampling_freq(
         sampling_freq, freqs
     )
-    complex_freq_resp = _assemble_complex_from_real_imag(freq_resps_real_imag)
+    complex_freq_resp = real_imag_2_complex(freq_resps_real_imag)
     delayed_complex_freq_resp = complex_freq_resp * _compute_e_to_the_one_j_omega_tau(
         omega, tau
     )
@@ -866,7 +842,7 @@ def _compute_e_to_the_one_j_omega_tau(omega: np.ndarray, tau: int) -> np.ndarray
 def _assemble_delayed_freq_resp_real_imag_or_recipr(
     delayed_complex_freq_resp: np.ndarray, inv: bool
 ) -> np.ndarray:
-    return _assemble_real_imag_from_complex(
+    return complex_2_real_imag(
         np.reciprocal(delayed_complex_freq_resp) if inv else delayed_complex_freq_resp
     )
 
@@ -903,7 +879,7 @@ def _fit_fir_filter_with_uncertainty_propagation_via_mc(
 def _compute_mc_delayed_freq_resps_or_reciprs_real_imag(
     inv: bool, mc_freq_resps_real_imag: np.ndarray, omega: np.ndarray, tau: int
 ) -> np.ndarray:
-    mc_complex_freq_resps = _assemble_complex_from_real_imag(mc_freq_resps_real_imag)
+    mc_complex_freq_resps = real_imag_2_complex(mc_freq_resps_real_imag)
     mc_delayed_complex_freq_resps = (
         mc_complex_freq_resps * _compute_e_to_the_one_j_omega_tau(omega, tau)
     )
@@ -935,13 +911,9 @@ def _fit_fir_filter_with_uncertainty_propagation_via_svd(
     trunc_svd_tol: float,
     x: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    list_of_mc_freq_resps_real_and_imag = (
-        _split_array_of_monte_carlo_samples_of_real_and_imag_parts(
-            mc_freq_resps_real_imag
-        )
+    mc_freq_resps_real, mc_freq_resps_imag = separate_real_imag_of_mc_samples(
+        mc_freq_resps_real_imag
     )
-    mc_freq_resps_real = list_of_mc_freq_resps_real_and_imag[0]
-    mc_freq_resps_imag = list_of_mc_freq_resps_real_and_imag[1]
     recipr_of_sqr_abs_of_mc_freq_resps = np.reciprocal(
         mc_freq_resps_real ** 2 + mc_freq_resps_imag ** 2
     )
@@ -983,13 +955,13 @@ def _print_fir_result_msg(
     omega: np.ndarray,
     tau: int,
 ):
-    complex_h = _assemble_complex_from_real_imag(freq_resps_real_imag)
+    complex_h = real_imag_2_complex(freq_resps_real_imag)
     original_values = np.reciprocal(complex_h) if inv else complex_h
     delayed_filters_freq_resp = _compute_delayed_filters_freq_resp_via_scipys_freqz(
         b_fir, 1.0, tau, omega
     )
     complex_residuals = delayed_filters_freq_resp - original_values
-    residuals_real_imag = _assemble_real_imag_from_complex(complex_residuals)
+    residuals_real_imag = complex_2_real_imag(complex_residuals)
     _compute_and_print_rms(residuals_real_imag)
 
 
