@@ -613,7 +613,7 @@ def complex_2_real_imag_array(array: np.ndarray) -> np.ndarray:
     of the expected input of some of the functions in the modules
     :mod:`PyDynamic.uncertainty.propagate_DFT` and
     :mod:`PyDynamic.model_estimation.fit_filter`: :math:`y = \left \operatorname{Re}(
-    x), \operatorname{Im}(x) \right`.
+    x), \operatorname{Im}(x) \right)`.
 
     Parameters
     ----------
