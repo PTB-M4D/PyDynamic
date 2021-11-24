@@ -603,7 +603,17 @@ def separate_real_imag_of_vector(vector: np.ndarray) -> np.ndarray:
     np.ndarray of shape (M,)
         the complex array
     """
+    if _vector_has_odd_length(vector):
+        raise ValueError(
+            "separate_real_imag_of_vector: vector of real and imaginary "
+            "parts is expected to contain exactly as many real as "
+            f"imaginary parts but is of odd length={len(vector)}."
+        )
     return np.split(ary=vector, indices_or_sections=2)
+
+
+def _vector_has_odd_length(vector: np.ndarray) -> bool:
+    return len(vector) % 2 == 1
 
 
 def complex_2_real_imag(array: np.ndarray) -> np.ndarray:
