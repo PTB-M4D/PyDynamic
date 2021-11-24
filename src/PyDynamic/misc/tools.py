@@ -588,7 +588,7 @@ def separate_real_imag_of_mc_samples(array: np.ndarray) -> List[np.ndarray]:
     r"""Split a np.ndarray containing MonteCarlo samples real and imaginary parts
 
     The input array :math:`x \in \mathbb R^{n \times 2m}` representing an
-    n-elemental array of complex vectors :math:`y \in \mathbb C^m` has the form of
+    n-elemental array of complex vectors :math:`y_i \in \mathbb C^m` has the form of
     the expected input of some of the functions in the modules
     :mod:`propagate_DFT <PyDynamic.uncertainty.propagate_DFT>` and
     :mod:`fit_filter <PyDynamic.model_estimation.fit_filter>`: :math:`x = \left(
