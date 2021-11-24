@@ -16,6 +16,7 @@ from PyDynamic.misc.tools import (
     is_vector,
     normalize_vector_or_matrix,
     plot_vectors_and_covariances_comparison,
+    real_imag_2_complex,
     separate_real_imag_of_mc_samples,
     separate_real_imag_of_vector,
 )
@@ -186,14 +187,12 @@ def _set_of_lens_of_list_entries(list_of_anything: List) -> Set[int]:
 
 @given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_even_dimension()))
 def test_separate_real_imag_of_vector_first_half(vector):
-    list_of_separated_real = separate_real_imag_of_vector(vector)[0]
-    assert_equal(list_of_separated_real, vector[: len(vector) // 2])
+    assert_equal(separate_real_imag_of_vector(vector)[0], vector[: len(vector) // 2])
 
 
 @given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_even_dimension()))
 def test_separate_real_imag_of_vector_second_half(vector):
-    list_of_separated_imag = separate_real_imag_of_vector(vector)[1]
-    assert_equal(list_of_separated_imag, vector[len(vector) // 2 :])
+    assert_equal(separate_real_imag_of_vector(vector)[1], vector[len(vector) // 2 :])
 
 
 @given(
@@ -249,8 +248,9 @@ def _set_of_shapes_of_ndarray_list(
     )
 )
 def test_separate_real_imag_of_mc_samples_first_half(array):
-    list_of_separated_real = separate_real_imag_of_mc_samples(array)[0]
-    assert_equal(list_of_separated_real, array[:, : len(array[0]) // 2])
+    assert_equal(
+        separate_real_imag_of_mc_samples(array)[0], array[:, : len(array[0]) // 2]
+    )
 
 
 @given(
@@ -263,5 +263,100 @@ def test_separate_real_imag_of_mc_samples_first_half(array):
     )
 )
 def test_separate_real_imag_of_mc_samples_second_half(array):
-    list_of_separated_imag = separate_real_imag_of_mc_samples(array)[1]
-    assert_equal(list_of_separated_imag, array[:, len(array[0]) // 2 :])
+    assert_equal(
+        separate_real_imag_of_mc_samples(array)[1], array[:, len(array[0]) // 2 :]
+    )
+
+
+@given(
+    hnp.arrays(
+        dtype=hst.one_of(
+            hnp.unsigned_integer_dtypes(), hnp.integer_dtypes(), hnp.floating_dtypes()
+        ),
+        shape=hst.builds(
+            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
+            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
+        ),
+    )
+)
+def test_real_imag_2_complex_array_shape(array):
+    assert_equal(real_imag_2_complex(array).shape, (len(array), len(array[0]) // 2))
+
+
+@given(
+    hnp.arrays(
+        dtype=hst.one_of(
+            hnp.unsigned_integer_dtypes(), hnp.integer_dtypes(), hnp.floating_dtypes()
+        ),
+        shape=hypothesis_even_dimension(),
+    )
+)
+def test_real_imag_2_complex_vector_len(array):
+    assert_equal(len(real_imag_2_complex(array)), len(array) // 2)
+
+
+@given(
+    hnp.arrays(
+        dtype=hst.one_of(
+            hnp.unsigned_integer_dtypes(), hnp.integer_dtypes(), hnp.floating_dtypes()
+        ),
+        shape=hst.builds(
+            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2),
+            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
+        ),
+    )
+)
+def test_real_imag_2_complex_array_values(array):
+    half_the_array_length = len(array[0]) // 2
+    assert_equal(
+        real_imag_2_complex(array),
+        array[:, :half_the_array_length] + 1j * array[:, half_the_array_length:],
+    )
+
+
+@given(
+    hnp.arrays(
+        dtype=hst.one_of(
+            hnp.unsigned_integer_dtypes(), hnp.integer_dtypes(), hnp.floating_dtypes()
+        ),
+        shape=hypothesis_even_dimension(),
+    )
+)
+def test_real_imag_2_complex_vector_values(array):
+    half_the_array_length = len(array) // 2
+    assert_equal(
+        real_imag_2_complex(array),
+        array[:half_the_array_length] + 1j * array[half_the_array_length:],
+    )
+
+
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_odd_dimension()))
+def test_real_imag_2_complex_vector_wrong_len(vector):
+    with pytest.raises(
+        ValueError,
+        match="separate_real_imag_of_vector: vector of real and imaginary "
+        "parts is "
+        "expected to contain exactly as many real as imaginary parts "
+        "but is of "
+        r"odd length=.*",
+    ):
+        real_imag_2_complex(vector)
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hst.builds(
+            lambda shape_tuple: (shape_tuple[0], shape_tuple[1] * 2 - 1),
+            hnp.array_shapes(min_dims=2, max_dims=2, max_side=10),
+        ),
+    )
+)
+def test_real_imag_2_complex_array_wrong_len(array):
+    with pytest.raises(
+        ValueError,
+        match="separate_real_imag_of_mc_samples: vectors of real and imaginary "
+        "parts are expected to contain exactly as many real as "
+        r"imaginary parts but the first one is of odd length=.*",
+    ):
+        real_imag_2_complex(array)
