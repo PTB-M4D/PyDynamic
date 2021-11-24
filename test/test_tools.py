@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from numpy.testing import assert_equal
 
 from PyDynamic.misc.tools import (
-    complex_2_real_imag_array,
+    complex_2_real_imag,
     is_2d_matrix,
     is_2d_square_matrix,
     is_vector,
@@ -106,20 +106,54 @@ def _maximum_is_one(array: np.ndarray) -> bool:
 
 
 @given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_dimension()))
-def test_complex_2_real_imag_array_len(array):
-    assert_equal(len(complex_2_real_imag_array(array)), len(array) * 2)
+def test_complex_2_real_imag_vector_len(array):
+    assert_equal(len(complex_2_real_imag(array)), len(array) * 2)
 
 
 @given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_dimension()))
-def test_complex_2_real_imag_array_equality_real(array):
-    array_real_imag = complex_2_real_imag_array(array)
+def test_complex_2_real_imag_vector_equality_real(array):
+    array_real_imag = complex_2_real_imag(array)
     assert_equal(array_real_imag[: len(array_real_imag) // 2], np.real(array))
 
 
 @given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_dimension()))
-def test_complex_2_real_imag_array_equality_imag(array):
-    array_real_imag = complex_2_real_imag_array(array)
+def test_complex_2_real_imag_vector_equality_imag(array):
+    array_real_imag = complex_2_real_imag(array)
     assert_equal(array_real_imag[len(array_real_imag) // 2 :], np.imag(array))
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hnp.array_shapes(min_dims=2, max_dims=2, max_side=20),
+    )
+)
+def test_complex_2_real_imag_array_len(array):
+    array_real_imag = complex_2_real_imag(array)
+    assert_equal(len(array_real_imag), len(array))
+    assert_equal(array_real_imag.shape[1], array.shape[1] * 2)
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hnp.array_shapes(min_dims=2, max_dims=2, max_side=20),
+    )
+)
+def test_complex_2_real_imag_array_equality_real(array):
+    array_real_imag = complex_2_real_imag(array)
+    assert_equal(array_real_imag[:, : len(array_real_imag[0]) // 2], np.real(array))
+
+
+@given(
+    hnp.arrays(
+        dtype=hnp.scalar_dtypes(),
+        shape=hnp.array_shapes(min_dims=2, max_dims=2, max_side=20),
+    )
+)
+def test_complex_2_real_imag_array_equality_imag(array):
+    array_real_imag = complex_2_real_imag(array)
+    assert_equal(array_real_imag[:, len(array_real_imag[0]) // 2 :], np.imag(array))
 
 
 @settings(deadline=None, suppress_health_check=(HealthCheck.too_slow,))

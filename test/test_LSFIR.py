@@ -14,9 +14,9 @@ from numpy.testing import assert_allclose, assert_almost_equal
 from PyDynamic.misc.filterstuff import kaiser_lowpass
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.tools import (
-    complex_2_real_imag_array,
+    complex_2_real_imag,
     make_semiposdef,
-    real_imag_2_complex_array,
+    real_imag_2_complex,
 )
 
 # noinspection PyProtectedMember
@@ -100,7 +100,7 @@ def monte_carlo(
         b_, a_ = dsp.bilinear(bc_, ac_, sampling_freq)
         HMC[k, :] = dsp.freqz(b_, a_, 2 * np.pi * freqs / sampling_freq)[1]
 
-    H = complex_2_real_imag_array(complex_freq_resp)
+    H = complex_2_real_imag(complex_freq_resp)
     assert_allclose(
         H,
         np.load(
@@ -154,7 +154,7 @@ def monte_carlo(
 @pytest.fixture(scope="module")
 def complex_H_with_UH(monte_carlo):
     return {
-        "H": real_imag_2_complex_array(monte_carlo["H"]),
+        "H": real_imag_2_complex(monte_carlo["H"]),
         "UH": monte_carlo["UH"],
     }
 

@@ -21,13 +21,13 @@ This module contains the following functions:
 * :func:`shift_uncertainty`: Shift the elements in the vector x and associated
   uncertainties ux
 * :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
-* :func:`real_imag_2_complex_array`: Take a np.ndarray with real and imaginary parts
+* :func:`real_imag_2_complex`: Take a np.ndarray with real and imaginary parts
   and return dtype complex ndarray
 * :func:`separate_real_imag_of_mc_samples`: Split a np.ndarray containing MonteCarlo
   samples real and imaginary parts
 * :func:`separate_real_imag_of_vector`: Split a np.ndarray containing real and
   imaginary parts into half
-* :func:`complex_2_real_imag_array`: Take a np.ndarray with dtype complex and return
+* :func:`complex_2_real_imag`: Take a np.ndarray with dtype complex and return
   real and imaginary parts
 """
 
@@ -46,10 +46,10 @@ __all__ = [
     "plot_vectors_and_covariances_comparison",
     "is_2d_square_matrix",
     "normalize_vector_or_matrix",
-    "real_imag_2_complex_array",
+    "real_imag_2_complex",
     "separate_real_imag_of_mc_samples",
     "separate_real_imag_of_vector",
-    "complex_2_real_imag_array",
+    "complex_2_real_imag",
 ]
 
 from typing import Any, List, Optional, Union
@@ -534,7 +534,7 @@ def normalize_vector_or_matrix(numbers: np.ndarray) -> np.ndarray:
     return (numbers - translator) / normalizer
 
 
-def real_imag_2_complex_array(array: np.ndarray) -> np.ndarray:
+def real_imag_2_complex(array: np.ndarray) -> np.ndarray:
     r"""Take a np.ndarray with real and imaginary parts and return dtype complex ndarray
 
     The input array :math:`x \in \mathbb R^n` representing a complex vector
@@ -568,7 +568,7 @@ def separate_real_imag_of_mc_samples(array: np.ndarray) -> np.ndarray:
     the expected input of some of the functions in the modules
     :mod:`PyDynamic.uncertainty.propagate_DFT` and
     :mod:`PyDynamic.model_estimation.fit_filter`: :math:`x = \left( \operatorname{Re}(
-    y_i), \operatorname{Im}(y_i) \right)_{i=1,\hdots,n}`.
+    y_i), \operatorname{Im}(y_i) \right)_{i=1,\ldots,n}`.
 
     Parameters
     ----------
@@ -606,7 +606,7 @@ def separate_real_imag_of_vector(vector: np.ndarray) -> np.ndarray:
     return np.split(ary=vector, indices_or_sections=2)
 
 
-def complex_2_real_imag_array(array: np.ndarray) -> np.ndarray:
+def complex_2_real_imag(array: np.ndarray) -> np.ndarray:
     r"""Take an array of any non-flexible scalar dtype to return real and imaginary part
 
     The input array :math:`x \in \mathbb R^n` is reassembled to the form
