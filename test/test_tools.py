@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, List, Set, Union
 
 import hypothesis.extra.numpy as hnp
 import numpy as np
@@ -171,5 +171,25 @@ def test_separate_real_imag_of_vector_wrong_len(array):
 
 @given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_even_dimension()))
 def test_separate_real_imag_of_vector_dimensions(vector):
-    list_of_separated_real_imag = complex_2_real_imag(vector)
+    list_of_separated_real_imag = separate_real_imag_of_vector(vector)
     assert_equal(len(list_of_separated_real_imag), 2)
+    assert_equal(
+        _set_of_lens_of_list_entries(list_of_separated_real_imag),
+        {len(vector) / 2},
+    )
+
+
+def _set_of_lens_of_list_entries(list_of_anything: List) -> Set[int]:
+    return set(len(list_entry) for list_entry in list_of_anything)
+
+
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_even_dimension()))
+def test_separate_real_imag_of_vector_first_half(vector):
+    list_of_separated_real = separate_real_imag_of_vector(vector)[0]
+    assert_equal(list_of_separated_real, vector[: len(vector) // 2])
+
+
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_even_dimension()))
+def test_separate_real_imag_of_vector_second_half(vector):
+    list_of_separated_imag = separate_real_imag_of_vector(vector)[1]
+    assert_equal(list_of_separated_imag, vector[len(vector) // 2 :])
