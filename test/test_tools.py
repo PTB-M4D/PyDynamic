@@ -20,6 +20,7 @@ from PyDynamic.misc.tools import (
 from .conftest import (
     hypothesis_covariance_matrix,
     hypothesis_dimension,
+    hypothesis_even_dimension,
     hypothesis_float_vector,
     hypothesis_odd_dimension,
 )
@@ -166,3 +167,9 @@ def test_separate_real_imag_of_vector_wrong_len(array):
         r"odd length=.*",
     ):
         separate_real_imag_of_vector(array)
+
+
+@given(hnp.arrays(dtype=hnp.scalar_dtypes(), shape=hypothesis_even_dimension()))
+def test_separate_real_imag_of_vector_dimensions(vector):
+    list_of_separated_real_imag = complex_2_real_imag(vector)
+    assert_equal(len(list_of_separated_real_imag), 2)

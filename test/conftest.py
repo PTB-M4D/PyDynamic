@@ -60,7 +60,7 @@ def hypothesis_even_dimension_strategy(
         draw(hst.integers(min_value=min_value // 2 + 1, max_value=max_value // 2 + 1))
         * 2
     )
-    _ensure_odd_dimension_is_odd_and_in_bounds(max_value, min_value, even_dimension)
+    _ensure_dimension_is_even_and_in_bounds(max_value, min_value, even_dimension)
     return even_dimension
 
 
@@ -72,7 +72,7 @@ def hypothesis_odd_dimension_strategy(
         draw(hst.integers(min_value=min_value // 2, max_value=max_value // 2)) * 2
     )
     odd_dimension = even_dimension + 1
-    _ensure_odd_dimension_is_odd_and_in_bounds(max_value, min_value, odd_dimension)
+    _ensure_dimension_is_odd_and_in_bounds(max_value, min_value, odd_dimension)
     return odd_dimension
 
 
@@ -357,17 +357,17 @@ def hypothesis_even_dimension(
             )
         )
     )
-    _ensure_odd_dimension_is_odd_and_in_bounds(
+    _ensure_dimension_is_even_and_in_bounds(
         maximum_dimension, minimum_dimension, even_dimension
     )
     return even_dimension
 
 
-def _ensure_even_dimension_is_even_and_in_bounds(
-    max_val: int, min_val: int, odd_dimension: int
+def _ensure_dimension_is_even_and_in_bounds(
+    max_val: int, min_val: int, even_dimension: int
 ):
-    assert min_val <= odd_dimension <= max_val
-    assert odd_dimension % 2 == 0
+    assert min_val <= even_dimension <= max_val
+    assert even_dimension % 2 == 0
 
 
 @composite
@@ -389,13 +389,13 @@ def hypothesis_odd_dimension(
             )
         )
     )
-    _ensure_odd_dimension_is_odd_and_in_bounds(
+    _ensure_dimension_is_odd_and_in_bounds(
         maximum_dimension, minimum_dimension, odd_dimension
     )
     return odd_dimension
 
 
-def _ensure_odd_dimension_is_odd_and_in_bounds(
+def _ensure_dimension_is_odd_and_in_bounds(
     max_val: int, min_val: int, odd_dimension: int
 ):
     assert min_val <= odd_dimension <= max_val
