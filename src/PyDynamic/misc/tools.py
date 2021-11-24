@@ -583,7 +583,7 @@ def separate_real_imag_of_mc_samples(array: np.ndarray) -> np.ndarray:
     return np.split(ary=array, indices_or_sections=2, axis=1)
 
 
-def separate_real_imag_of_vector(vector: np.ndarray) -> np.ndarray:
+def separate_real_imag_of_vector(vector: np.ndarray) -> List[np.ndarray]:
     r"""Split a np.ndarray containing real and imaginary parts into half
 
     The input array :math:`x \in \mathbb R^{2m}` representing a complex vector
@@ -600,8 +600,8 @@ def separate_real_imag_of_vector(vector: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray of shape (M,)
-        the complex array
+    list of two np.ndarrays of shape (M,)
+        two-element list of the two arrays containing the real and imaginary parts
     """
     if _vector_has_odd_length(vector):
         raise ValueError(
