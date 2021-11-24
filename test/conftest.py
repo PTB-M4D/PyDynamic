@@ -112,6 +112,21 @@ def hypothesis_odd_dimension(
     return odd_dimension
 
 
+@composite
+def hypothesis_two_dimensional_array_shape(
+    draw: Callable,
+    ensure_even_second_dimension: Optional[bool] = False,
+    ensure_odd_second_dimension: Optional[bool] = False,
+):
+    if ensure_even_second_dimension:
+        second_dimension = draw(hypothesis_even_dimension())
+    elif ensure_odd_second_dimension:
+        second_dimension = draw(hypothesis_odd_dimension())
+    else:
+        second_dimension = draw(hypothesis_dimension())
+    return draw(hypothesis_dimension()), second_dimension
+
+
 def hypothesis_float_square_matrix_strategy(
     number_of_rows: int,
 ) -> SearchStrategy:
