@@ -546,7 +546,7 @@ def real_imag_2_complex(array: np.ndarray) -> np.ndarray:
     Parameters
     ----------
     array : np.ndarray of shape (N,2M) or of shape (2M,)
-        the array of any non-flexible scalar dtype to assemble the complex version of
+        the array of any integer or floating dtype to assemble the complex version of
 
     Returns
     -------
@@ -573,7 +573,7 @@ def separate_real_imag_of_mc_samples(array: np.ndarray) -> List[np.ndarray]:
     Parameters
     ----------
     array : np.ndarray of shape (N,2M)
-        the array of any non-flexible scalar dtype to assemble the complex version of
+        the array of any integer or floating dtype to assemble the complex version of
 
     Returns
     -------
@@ -602,7 +602,7 @@ def separate_real_imag_of_vector(vector: np.ndarray) -> List[np.ndarray]:
     Parameters
     ----------
     vector : np.ndarray of shape (2M,)
-        the array of any non-flexible scalar dtype to assemble the complex version of
+        the array of any integer or floating dtype to assemble the complex version of
 
     Returns
     -------
