@@ -1,5 +1,6 @@
 import os
 from inspect import stack
+from math import ceil
 from typing import Callable, NamedTuple, Optional, Tuple
 
 import numpy as np
@@ -46,10 +47,84 @@ class VectorAndCompatibleMatrix(NamedTuple):
 
 
 @composite
-def hypothesis_reasonable_dimension_strategy(
-    draw: Callable, min_value: Optional[int] = 1, max_value: Optional[int] = 20
+def hypothesis_dimension(
+    draw: Callable, min_value: Optional[int] = None, max_value: Optional[int] = None
+) -> SearchStrategy:
+    return (
+        min_value
+        if min_value is not None and min_value == max_value
+        else draw(
+            hst.one_of(
+                hypothesis_even_dimension(min_value, max_value),
+                hypothesis_odd_dimension(min_value, max_value),
+            )
+        )
+    )
+
+
+@composite
+def hypothesis_even_dimension(
+    draw: Callable, min_value: Optional[int] = None, max_value: Optional[int] = None
+) -> SearchStrategy:
+    minimum_dimension = min_value if min_value is not None else 2
+    maximum_dimension = max_value if max_value is not None else 20
+    even_dimension = (
+        minimum_dimension
+        if minimum_dimension is not None
+        and minimum_dimension % 2 == 0
+        and minimum_dimension == maximum_dimension
+        else draw(
+            hst.integers(
+                min_value=ceil(minimum_dimension / 2), max_value=maximum_dimension // 2
+            )
+        )
+        * 2
+    )
+    assert (
+        minimum_dimension <= even_dimension <= maximum_dimension
+        and even_dimension % 2 == 0
+    )
+    return even_dimension
+
+
+@composite
+def hypothesis_odd_dimension(
+    draw: Callable, min_value: Optional[int] = None, max_value: Optional[int] = None
+) -> SearchStrategy:
+    minimum_dimension = min_value if min_value is not None else 1
+    maximum_dimension = max_value if max_value is not None else 19
+    odd_dimension = (
+        minimum_dimension
+        if minimum_dimension is not None
+        and minimum_dimension % 2 == 1
+        and minimum_dimension == maximum_dimension
+        else draw(
+            hypothesis_even_dimension(
+                min_value=minimum_dimension - 1, max_value=maximum_dimension - 1
+            )
+        )
+        + 1
+    )
+    assert (
+        minimum_dimension <= odd_dimension <= maximum_dimension
+        and odd_dimension % 2 == 1
+    )
+    return odd_dimension
+
+
+@composite
+def hypothesis_two_dimensional_array_shape(
+    draw: Callable,
+    ensure_even_second_dimension: Optional[bool] = False,
+    ensure_odd_second_dimension: Optional[bool] = False,
 ):
-    return draw(hst.integers(min_value=min_value, max_value=max_value))
+    if ensure_even_second_dimension:
+        second_dimension = draw(hypothesis_even_dimension())
+    elif ensure_odd_second_dimension:
+        second_dimension = draw(hypothesis_odd_dimension())
+    else:
+        second_dimension = draw(hypothesis_dimension())
+    return draw(hypothesis_dimension()), second_dimension
 
 
 def hypothesis_float_square_matrix_strategy(
@@ -88,9 +163,7 @@ def hypothesis_float_square_matrix(
     draw: Callable, number_of_rows: Optional[int] = None
 ) -> np.ndarray:
     number_of_rows_and_columns = (
-        number_of_rows
-        if number_of_rows is not None
-        else draw(hst.integers(min_value=1, max_value=20))
+        number_of_rows if number_of_rows is not None else draw(hypothesis_dimension())
     )
     return draw(
         hypothesis_float_square_matrix_strategy(
@@ -294,25 +367,6 @@ def hypothesis_covariance_matrix_with_zero_correlation(
 
 
 @composite
-def hypothesis_dimension(
-    draw: Callable,
-    min_value: Optional[int] = None,
-    max_value: Optional[int] = None,
-) -> int:
-    minimum_dimension = min_value if min_value is not None else 1
-    maximum_dimension = max_value if max_value is not None else 20
-    return (
-        minimum_dimension
-        if minimum_dimension is not None and minimum_dimension == maximum_dimension
-        else draw(
-            hypothesis_reasonable_dimension_strategy(
-                min_value=minimum_dimension, max_value=maximum_dimension
-            )
-        )
-    )
-
-
-@composite
 def hypothesis_covariance_matrix_for_complex_vectors(
     draw: Callable,
     length: int,
@@ -383,11 +437,12 @@ def random_covariance_matrix_for_complex_vectors() -> Callable:
 
 
 @composite
-def hypothesis_two_to_the_k(
-    draw: Callable, min_k: Optional[int] = None, max_k: Optional[int] = None
+def hypothesis_positive_powers_of_two(
+    draw: Callable, min_k: Optional[int] = 0, max_k: Optional[int] = None
 ) -> int:
     k = draw(hst.integers(min_value=min_k, max_value=max_k))
-    return 2 ** k
+    two_to_the_k = 2 ** k
+    return two_to_the_k
 
 
 @pytest.fixture

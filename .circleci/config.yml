@@ -371,10 +371,12 @@ jobs:
               touch tweet.txt
             else
               echo "The generated tweet will be:"
-              echo "PyDynamic "$new_version" just got released! \
-                  Find out more on https://github.com/PTB-M4D/PyDynamic/ #PyDynamic \
-                  #metrologysoftware #measurementuncertainty \
-                  #PhysikalischTechnischeBundesanstalt" | tr -s ' ' | tee tweet.txt
+              echo "#PyDynamic "$new_version" just got released by \
+                  #PhysikalischTechnischeBundesanstalt! \
+                  Find out more about propagation \
+                  of #measurementuncertainty in #dynamicmeasurements on \
+                  https://github.com/PTB-M4D/PyDynamic/" \
+                  | tr -s ' ' | tee tweet.txt
             fi
 
       - persist_to_workspace:

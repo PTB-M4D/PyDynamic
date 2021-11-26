@@ -67,6 +67,10 @@ __all__ = [
     "is_vector",
     "is_2d_matrix",
     "number_of_rows_equals_vector_dim",
+    "real_imag_2_complex",
+    "separate_real_imag_of_mc_samples",
+    "separate_real_imag_of_vector",
+    "complex_2_real_imag",
 ]
 
 from .misc import *
