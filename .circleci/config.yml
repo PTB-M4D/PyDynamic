@@ -41,7 +41,7 @@ workflows:
           cron: "0 0 * * *"
           filters:
             branches:
-              only: /.*/
+              only: /master/
     jobs:
       - test:
           name: "nightly_test_python_py36"
@@ -62,6 +62,11 @@ workflows:
           name: "nightly_test_python_py39"
           tag: "3.9"
           toxenvs: "-e py39 -e py39-without_requirements"
+          posargs: "-- ''"
+      - test:
+          name: "nightly_test_python_py310"
+          tag: "3.10"
+          toxenvs: "-e py310 -e py310-without_requirements"
           posargs: "-- ''"
       - test_conda_py39:
           name: "nightly_test_conda_py39"
@@ -116,6 +121,17 @@ workflows:
           tag: "3.9"
           toxenvs: "-e py39-without_requirements"
           posargs: "-- -m 'slow'"
+      - test:
+          name: "test_python_py310"
+          tag: "3.10"
+          toxenvs: "-e py310-without_requirements"
+      - test:
+          name: "test_python_py310_slow_tests"
+          tag: "3.10"
+          toxenvs: "-e py310-without_requirements"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py310
       - test_conda_py39:
           name: "test_conda_py39_with_all_tests"
           is_nightly_run: True
@@ -125,6 +141,7 @@ workflows:
             - test_python_py37_slow_tests
             - test_python_py38_slow_tests
             - test_python_py39_slow_tests
+            - test_python_py310_slow_tests
             - test_conda_py39_with_all_tests
           filters:
             branches:
