@@ -23,6 +23,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import scipy.signal as dsp
+from scipy.optimize import lsq_linear
 from scipy.stats import multivariate_normal
 
 from ..misc.filterstuff import grpdelay, isstable, mapinside
@@ -47,6 +48,7 @@ def LSIIR(
     inv: Optional[bool] = False,
     UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = 1000,
+    bounds: Optional[Tuple[Union[np.ndarray, float], Union[np.ndarray, float]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None]]:
     """Least-squares (time-discrete) IIR filter fit to frequency response or reciprocal
 
@@ -87,6 +89,11 @@ def LSIIR(
     mc_runs : int, optional
         Number of Monte Carlo runs (default = 1000). Only used if uncertainties
         UH are provided.
+    bounds : 2-tuple of array_like of shape (Na+Nb+1,) or float, optional
+         Lower and upper bounds on independent variables. Defaults to no
+         bounds. If scalars are provided,the bound will be the same for all
+         variables. Use np.inf with an appropriate sign to disable bounds on all or some
+         variables. (defaults to unbounded)
 
     Returns
     -------
@@ -134,7 +141,7 @@ def LSIIR(
 
     for mc_run in range(mc_runs):
         b_i, a_i = _compute_actual_iir_least_squares_fit(
-            freq_resp_to_fit, tau, omega, E, Na, Nb, inv
+            freq_resp_to_fit, tau, omega, E, Na, Nb, inv, bounds=bounds
         )
 
         current_stabilization_iteration_counter = 1
@@ -147,7 +154,7 @@ def LSIIR(
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
                 b_i, a_i = _compute_actual_iir_least_squares_fit(
-                    freq_resp_to_fit, tau_max, omega, E, Na, Nb, inv
+                    freq_resp_to_fit, tau_max, omega, E, Na, Nb, inv, bounds=bounds
                 )
                 current_stabilization_iteration_counter += 1
 
@@ -168,7 +175,17 @@ def LSIIR(
                     taus[mc_run],
                     relevant_filters_mask[mc_run],
                 ) = _compute_stabilized_filter_through_time_delay_iteration(
-                    b_i, a_i, taus[mc_run], omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
+                    b_i,
+                    a_i,
+                    taus[mc_run],
+                    omega,
+                    E,
+                    freq_resp_to_fit,
+                    Nb,
+                    Na,
+                    Fs,
+                    inv,
+                    bounds=bounds,
                 )
                 current_stabilization_iteration_counter += 1
             else:
@@ -210,7 +227,7 @@ def LSIIR(
         if not isstable(b_res, a_res, "digital"):
             final_tau = tau_max
             b_res, a_res = _compute_actual_iir_least_squares_fit(
-                freq_resp_to_fit, final_tau, omega, E, Na, Nb, inv
+                freq_resp_to_fit, final_tau, omega, E, Na, Nb, inv, bounds=bounds
             )
             final_stabilization_iteration_counter += 1
 
@@ -227,7 +244,17 @@ def LSIIR(
                 final_tau,
                 final_stable,
             ) = _compute_stabilized_filter_through_time_delay_iteration(
-                b_res, a_res, final_tau, omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
+                b_res,
+                a_res,
+                final_tau,
+                omega,
+                E,
+                freq_resp_to_fit,
+                Nb,
+                Na,
+                Fs,
+                inv,
+                bounds,
             )
 
             final_stabilization_iteration_counter += 1
@@ -297,6 +324,7 @@ def _compute_actual_iir_least_squares_fit(
     Na: int,
     Nb: int,
     inv: bool = False,
+    bounds=None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     if inv and np.all(H == 0):
         raise ValueError(
@@ -315,7 +343,10 @@ def _compute_actual_iir_least_squares_fit(
     D = np.hstack((HEa, -Eb))
     Tmp1 = np.real(np.dot(np.conj(D.T), D))
     Tmp2 = np.real(np.dot(np.conj(D.T), -delayed_freq_resp_or_recipr))
-    ab = _fit_filter_coeffs_via_least_squares(Tmp1, Tmp2)
+    if bounds is None:
+        ab = _fit_filter_coeffs_via_least_squares(Tmp1, Tmp2)
+    else:
+        ab = lsq_linear(A=Tmp1, b=Tmp2, bounds=bounds).x
     a = np.hstack((1.0, ab[:Na]))
     b = ab[Na:]
     return b, a
@@ -332,11 +363,12 @@ def _compute_stabilized_filter_through_time_delay_iteration(
     Na: int,
     Fs: float,
     inv: Optional[bool] = False,
+    bounds: Optional[Tuple[Union[np.ndarray, float], Union[np.ndarray, float]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray, float, bool]:
     tau += _compute_filter_stabilization_time_delay(b, a, Fs)
 
     b, a = _compute_one_filter_stabilization_iteration_through_time_delay(
-        H, tau, w, E, Nb, Na, inv
+        H, tau, w, E, Nb, Na, inv, bounds=bounds
     )
 
     return b, a, tau, isstable(b, a, "digital")
@@ -361,8 +393,9 @@ def _compute_one_filter_stabilization_iteration_through_time_delay(
     Nb: int,
     Na: int,
     inv: Optional[bool] = False,
+    bounds: Optional[Tuple[Union[np.ndarray, float], Union[np.ndarray, float]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    return _compute_actual_iir_least_squares_fit(H, tau, w, E, Na, Nb, inv)
+    return _compute_actual_iir_least_squares_fit(H, tau, w, E, Na, Nb, inv, bounds)
 
 
 def _compute_delayed_filters_freq_resp_via_scipys_freqz(

@@ -25,7 +25,13 @@ Fs = 500e3  # sampling frequency
 Na = 4
 Nb = 4  # IIR filter order (Na - denominator, Nb - numerator)
 
-b, a, tau, _ = LSIIR(Hvals, Na, Nb, f, Fs)  # fit IIR filter to freq response
+# Setting upper and lower bounds for the fitted variables to adjust for a high pass
+# filter.
+lower_bounds = np.concatenate([[-1e-16], np.full((Na + Nb,), -np.inf)])
+upper_bounds = np.concatenate([[1e-16], np.full((Na + Nb,), np.inf)])
+bounds = (lower_bounds, upper_bounds)
+
+b, a, tau, _ = LSIIR(Hvals, Na, Nb, f, Fs, bounds=bounds)  # fit IIR filter
 
 f_plot = np.linspace(0, 80e3, 1000)  # frequency range for the plot
 Hc = sos_FreqResp(S0, delta, f0, f_plot)  # frequency response of the 2nd order system
