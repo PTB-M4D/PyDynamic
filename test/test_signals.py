@@ -347,6 +347,30 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainti
         Signal(**inputs)
 
 
+@given(signal_inputs())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+        HealthCheck.too_slow,
+    ],
+    max_examples=10,
+)
+@pytest.mark.slow
+def test_signal_class_raise_value_error_on_non_matching_dimension_of_time_and_values(
+    capsys, inputs
+):
+    inputs["time"] = inputs["time"][:-1]
+    _print_current_ram_usage(capsys)
+    with pytest.raises(
+        ValueError,
+        match=r"Signal: Number of elements of the provided time and signal vectors "
+        "are expected to match, but time is of length.*",
+    ):
+        Signal(**inputs)
+
+
 @given(signal_inputs(ensure_uncertainty_covariance_matrix=True))
 @settings(
     deadline=None,
