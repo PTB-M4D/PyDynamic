@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v2.1.0 (2021-12-03)
+### Feature
+* **tools:** Provide convenience functions to prepare input vectors for DFT and filtering ([`6d15922`](https://github.com/PTB-M4D/PyDynamic/commit/6d15922d14d934467710cc0466ad1a21b4d6a066))
+
+### Documentation
+* **examples:** Add reference to hydrophone paper ([`3c7880a`](https://github.com/PTB-M4D/PyDynamic/commit/3c7880a977cc35f76bfcf33e60ea3ebc95d56ab5))
+* **examples:** Add regularization example inside DFT best practice ([`75f6dcc`](https://github.com/PTB-M4D/PyDynamic/commit/75f6dccc923d084e68872c0afbfce9cc536c15a0))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.0.0...v2.1.0)**
+
 ## v2.0.0 (2021-11-05)
 ### Feature
 * Weighted least-squares IIR or FIR filter fit to freq. resp. or reciprocal with uncertainties ([`8aca955`](https://github.com/PTB-M4D/PyDynamic/commit/8aca9554165b805aee82d6081db967d7947b5c1e))
