@@ -43,16 +43,15 @@ class Signal:
             self.Ts = np.unique(np.diff(self.time)).mean()
             self.Fs = 1 / self.Ts
         elif isinstance(Ts, float):
-            self.Ts = Ts
             if Fs is None:
                 self.Fs = 1 / Ts
-            elif not isclose(Fs, 1 / self.Ts):
+            elif not isclose(Fs, 1 / Ts):
                 raise ValueError(
                     "Signal: Sampling interval and sampling frequency are assumed to "
                     "be approximately multiplicative inverse to each other, but "
                     f"Fs={Fs} and Ts={Ts}. Please adjust either one of them."
                 )
-        # set initial uncertainty
+            self.Ts = Ts
         self.uncertainty = uncertainty
         self.set_labels()
 
