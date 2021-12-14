@@ -410,3 +410,21 @@ def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inpu
         r"shape.*",
     ):
         Signal(**inputs)
+
+
+@given(apply_fir_filter_inputs())
+@settings(
+    deadline=None,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+        HealthCheck.too_slow,
+    ],
+    max_examples=10,
+)
+@pytest.mark.slow
+def test_signal_apply_fir_filter(capsys, signal_and_filter_inputs):
+    _print_current_ram_usage(capsys)
+    signal_init_inputs, filter_inputs = signal_and_filter_inputs
+    test_signal = Signal(**signal_init_inputs)
+    test_signal.apply_filter(**filter_inputs)
