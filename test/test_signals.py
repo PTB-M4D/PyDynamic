@@ -26,6 +26,7 @@ from .conftest import (
     hypothesis_float_vector,
     hypothesis_not_negative_float,
 )
+from .test_propagate_filter import FIRuncFilter_input
 
 
 @composite
@@ -86,6 +87,21 @@ def signal_inputs(
         "Fs": sampling_frequency,
         "uncertainty": ux,
     }
+
+
+@composite
+def apply_fir_filter_inputs(draw: Callable):
+    filter_inputs = draw(FIRuncFilter_input(exclude_corr_kind=True))
+    signal_init_inputs = draw(
+        signal_inputs(force_number_of_samples_to=len(filter_inputs["y"]))
+    )
+    signal_init_inputs["values"] = filter_inputs["y"]
+    signal_init_inputs["uncertainty"] = filter_inputs["sigma_noise"]
+    signals_apply_filter_inputs = {
+        "b": filter_inputs["theta"],
+        "filter_uncertainty": filter_inputs["Utheta"],
+    }
+    return signal_init_inputs, signals_apply_filter_inputs
 
 
 @pytest.fixture(scope="module")
