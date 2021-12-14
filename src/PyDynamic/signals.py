@@ -107,8 +107,6 @@ class Signal:
             will be used
         """
 
-        if isinstance(a, list):
-            a = np.array(a)
         if self._is_fir_type_filter(a):
             self.values, self.uncertainty = FIRuncFilter(
                 self.values, self.uncertainty, b, Utheta=filter_uncertainty, kind="diag"
