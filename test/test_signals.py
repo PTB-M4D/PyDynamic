@@ -31,13 +31,16 @@ from .conftest import (
 @composite
 def signal_inputs(
     draw: Callable,
+    force_number_of_samples_to: int = None,
     ensure_time_step_to_be_float: bool = False,
     ensure_uncertainty_array: bool = False,
     ensure_uncertainty_covariance_matrix: bool = False,
 ) -> Dict[str, Union[float, np.ndarray]]:
     minimum_float = 1e-5
     maximum_float = 1e-1
-    number_of_samples = draw(hst.integers(min_value=4, max_value=512))
+    number_of_samples = force_number_of_samples_to or draw(
+        hst.integers(min_value=4, max_value=512)
+    )
     small_positive_float_strategy = hypothesis_bounded_float(
         min_value=minimum_float, max_value=maximum_float
     )
@@ -56,15 +59,14 @@ def signal_inputs(
     else:
         max_time = number_of_samples * time_step
         sampling_frequency = draw(hst.sampled_from((np.reciprocal(time_step), None)))
-    time = np.arange(0, max_time, time_step)
-    len_time = len(time)
+    time = np.arange(0, max_time, time_step)[:number_of_samples]
     values = rect(time, max_time // 4, max_time // 4 * 3)
     uncertainties_covariance_strategy = (
-        hypothesis_covariance_matrix(number_of_rows=len_time),
+        hypothesis_covariance_matrix(number_of_rows=number_of_samples),
     )
     uncertainties_array_strategies = uncertainties_covariance_strategy + (
         hypothesis_float_vector(
-            min_value=minimum_float, max_value=maximum_float, length=len_time
+            min_value=minimum_float, max_value=maximum_float, length=number_of_samples
         ),
     )
     if ensure_uncertainty_covariance_matrix:
