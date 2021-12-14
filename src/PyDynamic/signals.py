@@ -9,6 +9,7 @@ together with a time axis.
 __all__ = ["Signal"]
 
 from math import isclose
+from typing import Optional
 
 import numpy as np
 from matplotlib.pyplot import figure, fill_between, legend, plot, xlabel, ylabel
@@ -91,7 +92,11 @@ class Signal:
         legend(loc="best")
 
     def apply_filter(
-        self, b, a=np.ones(1), filter_uncertainty=None, MonteCarloRuns=None
+        self,
+        b: np.ndarray,
+        a: Optional[np.ndarray] = np.ones(1),
+        filter_uncertainty: Optional[np.ndarray] = None,
+        MonteCarloRuns: Optional[int] = 10000,
     ):
         """Apply digital filter (b, a) to the signal values
 
@@ -102,14 +107,21 @@ class Signal:
         ----------
         b : np.ndarray
             filter numerator coefficients
-        a : np.ndarray
-            filter denominator coefficients, use a=1 for FIR-type filter
-        filter_uncertainty : np.ndarray
-            covariance matrix associated with filter coefficients,
-            Uab=None if no uncertainty associated with filter
-        MonteCarloRuns : int
-            number of Monte Carlo runs, if `None` then GUM linearization
-            will be used
+        a : np.ndarray, optional
+            filter denominator coefficients, defaults to :math:`a=(1)` for FIR-type
+            filter
+        filter_uncertainty : np.ndarray, optional
+            For IIR-type filter provide covariance matrix associated with filter
+            coefficients. For FIR-type filter provide one of the following
+
+            - 1D-array: coefficient-wise standard uncertainties of filter
+            - 2D-array: covariance matrix associated with theta
+
+            if the filter is fully certain, use `Utheta = None` (default) to make use
+            of more efficient calculations.
+
+        MonteCarloRuns : int, optional
+            number of Monte Carlo runs, defaults to 10.000
         """
 
         if self._is_fir_type_filter(a):
