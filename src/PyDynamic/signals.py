@@ -35,7 +35,12 @@ class Signal:
             raise NotImplementedError(
                 "Signal: Multivariate signals are not implemented yet."
             )
-        assert len(time) == len(values)
+        if len(time) != len(values):
+            raise ValueError(
+                "Signal: Number of elements of the provided time and signal vectors "
+                f"are expected to match, but time is of length {len(time)} and values "
+                f"is of length {len(values)}. Please adjust either one of them."
+            )
         self.time = time
         self.values = values
         # set sampling interval and frequency
