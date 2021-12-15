@@ -262,7 +262,7 @@ def LSIIR(
         residuals_real_imag = complex_2_real_imag(Hd - freq_resp_to_fit)
         _compute_and_print_rms(residuals_real_imag)
 
-    if UH:
+    if UH is not None:
         Uab = np.cov(as_and_bs, rowvar=False)
         return b_res, a_res, final_tau, Uab
     return b_res, a_res, final_tau, None
@@ -279,7 +279,7 @@ def _print_iir_welcome_msg(
     print(
         f"LSIIR: Least-squares fit of an order {max(Nb, Na)} digital IIR filter to"
         f"{' the reciprocal of' if inv else ''} a frequency response "
-        f"given by {len(H)} values.{monte_carlo_message if UH else ''}"
+        f"given by {len(H)} values.{monte_carlo_message if UH is not None else ''}"
     )
 
 
