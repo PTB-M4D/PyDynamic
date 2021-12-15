@@ -108,7 +108,7 @@ def LSIIR(
     .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
     """
     if _no_uncertainties_were_provided(UH):
-        freq_resp_to_fit, mc_runs = H, 1
+        freq_resp_to_fit, mc_runs = [H], 1
     else:
         freq_resp_to_fit = real_imag_2_complex(
             _draw_multivariate_monte_carlo_samples(complex_2_real_imag(H), UH, mc_runs)
@@ -134,7 +134,7 @@ def LSIIR(
 
     for mc_run in range(mc_runs):
         b_i, a_i = _compute_actual_iir_least_squares_fit(
-            freq_resp_to_fit, tau, omega, E, Na, Nb, inv
+            freq_resp_to_fit[mc_run], tau, omega, E, Na, Nb, inv
         )
 
         current_stabilization_iteration_counter = 1
@@ -147,7 +147,7 @@ def LSIIR(
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
                 b_i, a_i = _compute_actual_iir_least_squares_fit(
-                    freq_resp_to_fit, tau_max, omega, E, Na, Nb, inv
+                    freq_resp_to_fit[mc_run], tau_max, omega, E, Na, Nb, inv
                 )
                 current_stabilization_iteration_counter += 1
 
@@ -168,7 +168,7 @@ def LSIIR(
                     taus[mc_run],
                     relevant_filters_mask[mc_run],
                 ) = _compute_stabilized_filter_through_time_delay_iteration(
-                    b_i, a_i, taus[mc_run], omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
+                    b_i, a_i, taus[mc_run], omega, E, freq_resp_to_fit[mc_run], Nb, Na, Fs, inv
                 )
                 current_stabilization_iteration_counter += 1
             else:
@@ -176,7 +176,7 @@ def LSIIR(
                     tau_max = taus[mc_run]
                 if verbose:
                     sos = np.sum(
-                        np.abs((dsp.freqz(b_i, a_i, omega)[1] - freq_resp_to_fit) ** 2)
+                        np.abs((dsp.freqz(b_i, a_i, omega)[1] - freq_resp_to_fit[mc_run]) ** 2)
                     )
                     print(
                         f"LSIIR: Fitting{'' if UH is None else f' for MC run {mc_run}'}"
