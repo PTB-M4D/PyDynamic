@@ -128,9 +128,7 @@ class Signal:
             self.values, self.uncertainty = FIRuncFilter(
                 self.values, self.uncertainty, b, Utheta=filter_uncertainty, kind="diag"
             )
-        else:  # IIR-type filter
-            if not isinstance(MonteCarloRuns, int):
-                MonteCarloRuns = 10000
+        else:
             self.values, self.uncertainty = MC(
                 self.values,
                 self.uncertainty,
