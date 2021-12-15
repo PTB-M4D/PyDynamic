@@ -50,13 +50,13 @@ def signal_inputs(
         hst.just(None),
     )
     if ensure_time_step_to_be_float:
-        time_step_strategy = small_positive_float_strategy
+        freq_strategy = small_positive_float_strategy
     else:
-        time_step_strategy = time_step_and_freq_strategy
-    time_step = draw(time_step_strategy)
+        freq_strategy = time_step_and_freq_strategy
+    time_step = draw(small_positive_float_strategy)
     if time_step is None:
-        max_time = number_of_samples * draw(small_positive_float_strategy)
-        sampling_frequency = draw(time_step_and_freq_strategy)
+        max_time = number_of_samples * draw(freq_strategy)
+        sampling_frequency = draw(freq_strategy)
     else:
         max_time = number_of_samples * time_step
         sampling_frequency = draw(hst.sampled_from((np.reciprocal(time_step), None)))
@@ -304,7 +304,7 @@ def test_signal_class_usual_instanciations(capsys, inputs):
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    # max_examples=10,
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_not_implemented(capsys, inputs):
@@ -325,7 +325,7 @@ def test_signal_class_raise_not_implemented(capsys, inputs):
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    # max_examples=10,
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_step(
@@ -349,7 +349,7 @@ def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_s
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    # max_examples=10,
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainties(
@@ -374,7 +374,7 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainti
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    # max_examples=10,
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_dimension_of_time_and_values(
@@ -398,7 +398,7 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_time_and_va
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    # max_examples=10,
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inputs):
@@ -421,7 +421,7 @@ def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inpu
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    # max_examples=10,
+    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_apply_fir_filter(capsys, signal_and_filter_inputs):
