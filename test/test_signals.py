@@ -77,6 +77,7 @@ def signal_inputs(
     else:
         uncertainties_strategies = uncertainties_array_strategies + (
             small_positive_float_strategy,
+            hst.just(None),
         )
 
     ux = draw(hst.one_of(uncertainties_strategies))
