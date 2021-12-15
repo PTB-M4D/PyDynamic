@@ -50,13 +50,13 @@ def signal_inputs(
         hst.just(None),
     )
     if ensure_time_step_to_be_float:
-        freq_strategy = small_positive_float_strategy
+        time_step_strategy = small_positive_float_strategy
     else:
-        freq_strategy = time_step_and_freq_strategy
-    time_step = draw(small_positive_float_strategy)
+        time_step_strategy = time_step_and_freq_strategy
+    time_step = draw(time_step_strategy)
     if time_step is None:
-        max_time = number_of_samples * draw(freq_strategy)
-        sampling_frequency = draw(freq_strategy)
+        max_time = number_of_samples * draw(small_positive_float_strategy)
+        sampling_frequency = draw(time_step_and_freq_strategy)
     else:
         max_time = number_of_samples * time_step
         sampling_frequency = draw(hst.sampled_from((np.reciprocal(time_step), None)))
