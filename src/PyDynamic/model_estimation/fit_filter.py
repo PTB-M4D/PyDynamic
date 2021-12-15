@@ -207,10 +207,11 @@ def LSIIR(
 
         # Determine if the resulting filter already is stable and if not stabilize with
         # an initial delay of the previous maximum delay.
+        final_tau = np.mean(taus)
         if not isstable(b_res, a_res, "digital"):
             final_tau = tau_max
             b_res, a_res = _compute_actual_iir_least_squares_fit(
-                freq_resp_to_fit, final_tau, omega, E, Na, Nb, inv
+                H, final_tau, omega, E, Na, Nb, inv
             )
             final_stabilization_iteration_counter += 1
 
@@ -227,7 +228,7 @@ def LSIIR(
                 final_tau,
                 final_stable,
             ) = _compute_stabilized_filter_through_time_delay_iteration(
-                b_res, a_res, final_tau, omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
+                b_res, a_res, final_tau, omega, E, H, Nb, Na, Fs, inv
             )
 
             final_stabilization_iteration_counter += 1
@@ -259,7 +260,7 @@ def LSIIR(
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
             b_res, a_res, tau, omega
         )
-        residuals_real_imag = complex_2_real_imag(Hd - freq_resp_to_fit)
+        residuals_real_imag = complex_2_real_imag(Hd - H)
         _compute_and_print_rms(residuals_real_imag)
 
     if UH is not None:
