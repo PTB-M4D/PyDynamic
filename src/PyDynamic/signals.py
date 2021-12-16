@@ -149,7 +149,7 @@ class Signal:
     @uncertainty.setter
     def uncertainty(self, value):
         if isinstance(value, float):
-            self._uncertainty = np.ones_like(self.values) * value
+            self._uncertainty = np.full_like(self.values, value)
             self._standard_uncertainties = self._uncertainty
         elif isinstance(value, np.ndarray):
             uncertainties_array = value.squeeze()
