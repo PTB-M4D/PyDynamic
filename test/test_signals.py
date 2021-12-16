@@ -59,9 +59,7 @@ def signal_inputs(
     if time_step is None:
         sampling_frequency = draw(freq_strategy)
     else:
-        max_time = number_of_samples * time_step
         sampling_frequency = draw(hst.sampled_from((np.reciprocal(time_step), None)))
-    time = np.arange(0, max_time, time_step)[:number_of_samples]
     values = rect(time, max_time // 4, max_time // 4 * 3)
     uncertainties_covariance_strategy = (
         hypothesis_covariance_matrix(number_of_rows=number_of_samples),
