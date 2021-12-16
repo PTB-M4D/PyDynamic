@@ -1,5 +1,5 @@
 """ Perform tests on methods to create test signals."""
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -90,7 +90,12 @@ def signal_inputs(
 
 
 @composite
-def apply_fir_filter_inputs(draw: Callable):
+def apply_fir_filter_inputs(
+    draw: Callable,
+) -> Tuple[
+    Dict[str, Optional[Union[float, np.ndarray]]],
+    Dict[str, Optional[Union[float, np.ndarray]]],
+]:
     filter_inputs = draw(FIRuncFilter_input(exclude_corr_kind=True))
     signal_init_inputs = draw(
         signal_inputs(force_number_of_samples_to=len(filter_inputs["y"]))
