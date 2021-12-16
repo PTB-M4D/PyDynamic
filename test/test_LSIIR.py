@@ -346,6 +346,6 @@ def test_fit_iir_with_uncertainty():
     H = np.random.randn(N) + 1j*np.random.randn(N)
     UH = np.diag(1 + np.random.rand(2*N))
 
-    res = fit_filter.LSIIR(H=H, UH=UH, Nb=3, Na=6, f=f, Fs=Fs, tau=2, mc_runs=100)
+    res = fit_filter.LSIIR(H=H, UH=UH, Nb=3, Na=6, f=f, Fs=Fs, tau=2, mc_runs=2)
 
     print(res)
