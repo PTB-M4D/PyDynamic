@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from hypothesis import given, HealthCheck, settings, strategies as hst
 from hypothesis.strategies import composite
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_almost_equal, assert_equal
 from pytest import approx
 
 from PyDynamic.examples.working_with_signals import demonstrate_signal
@@ -297,7 +297,19 @@ def test_signal_example(monkeypatch):
 @pytest.mark.slow
 def test_signal_class_usual_instanciations(capsys, inputs):
     _print_current_ram_usage(capsys)
-    Signal(**inputs)
+    test_signal = Signal(**inputs)
+    assert test_signal.Ts is not None
+    assert test_signal.Fs is not None
+    assert isinstance(test_signal.uncertainty, np.ndarray)
+    assert isinstance(test_signal.standard_uncertainties, np.ndarray)
+    assert_equal(len(test_signal.uncertainty), len(test_signal.standard_uncertainties))
+    assert_equal(len(test_signal.standard_uncertainties), len(test_signal.time))
+    assert test_signal.name
+    assert isinstance(test_signal.name, str)
+    assert test_signal.unit_time
+    assert isinstance(test_signal.unit_time, str)
+    assert test_signal.unit_values
+    assert isinstance(test_signal.unit_values, str)
 
 
 @given(signal_inputs())
