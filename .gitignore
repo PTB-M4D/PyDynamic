@@ -22,6 +22,7 @@ pytest.xml
 .tox
 .hypothesis/*
 !.hypothesis/examples/
+codecov*
 
 # Jupyter Notebook artifacts #
 ##############################
