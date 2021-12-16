@@ -1,15 +1,15 @@
 """This module implements the signals class and its derivatives
 
-Signals are dynamic quantities with associated uncertainties. A signal has to be defined
-together with a time axis.
+Signals are dynamic quantities with associated uncertainties, quantity and time
+units. A signal has to be defined together with a time axis.
 
-.. note:: This module is experimental!
+.. note:: This module is work in progress!
 """
 
 __all__ = ["Signal"]
 
 from math import isclose
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from matplotlib.pyplot import figure, fill_between, legend, plot, xlabel, ylabel
@@ -25,11 +25,36 @@ from .uncertainty.propagate_MonteCarlo import MC
 
 
 class Signal:
-    """The base class which defines the interfaces and default behaviour."""
+    """Signal class which represents a common signal in digital signal processing
 
-    unit_time = ""
-    unit_values = ""
-    name = ""
+    Parameters
+    ----------
+    time: np.ndarray
+        the time axis as :class:`np.ndarray <numpy.ndarray>` equidistant floats,
+        number of elements must coincide with number of values
+    values: np.ndarray
+        signal values, number of elements must coincide with number of elements in time
+    Ts: float, optional
+        the sampling interval length, i.e. the difference between each two time stamps,
+        defaults to the reciprocal of the sampling frequency if provided and the mean of
+        all unique interval lengths otherwise
+    Fs: float, optional
+        the sampling frequency, defaults to the reciprocal of the sampling interval
+        length
+    uncertainty: float or np.ndarray, optional
+        the uncertainties associated with the signal values, depending on the type and
+        shape the following should be provided:
+
+        - float: constant standard uncertainty for all values
+        - 1D-array: element-wise standard uncertainties
+        - 2D-array: covariance matrix
+    """
+
+    _unit_time: str
+    _unit_values: str
+    _name: str
+    _standard_uncertainties: np.ndarray
+    _Ts: float
 
     def __init__(self, time, values, Ts=None, Fs=None, uncertainty=None):
         if len(values.shape) > 1:
@@ -44,31 +69,32 @@ class Signal:
             )
         self.time = time
         self.values = values
-        # set sampling interval and frequency
-        if (Ts is None) and (Fs is None):
-            self.Ts = np.unique(np.diff(self.time)).mean()
-            self.Fs = 1 / self.Ts
-        elif isinstance(Ts, float):
-            if Fs is None:
-                self.Fs = 1 / Ts
-            elif not isclose(Fs, 1 / Ts):
-                raise ValueError(
-                    "Signal: Sampling interval and sampling frequency are assumed to "
-                    "be approximately multiplicative inverse to each other, but "
-                    f"Fs={Fs} and Ts={Ts}. Please adjust either one of them."
-                )
-            self.Ts = Ts
+        if Ts is not None and Fs is not None and not isclose(Fs, 1 / Ts):
+            raise ValueError(
+                "Signal: Sampling interval and sampling frequency are assumed to "
+                "be approximately multiplicative inverse to each other, but "
+                f"Fs={Fs} and Ts={Ts}. Please adjust either one of them."
+            )
+        if Ts is None and Fs is None:
+            self._Ts = np.unique(np.diff(self.time)).mean()
+            self._Fs = 1 / self._Ts
+        elif isinstance(Fs, float):
+            self._Ts = 1 / Fs
+            self._Fs = Fs
+        else:
+            self._Fs = 1 / Ts
+            self._Ts = Ts
         self.uncertainty = uncertainty
         self.set_labels()
 
     def set_labels(self, unit_time="s", unit_values="a.u.", name_values="signal"):
-        self.unit_time = unit_time
-        self.unit_values = unit_values
-        self.name = name_values
+        self._unit_time = unit_time
+        self._unit_values = unit_values
+        self._name = name_values
 
     def plot(self, fignr=1, figsize=(10, 8)):
         figure(fignr, figsize=figsize)
-        plot(self.time, self.values, label=self.name)
+        plot(self.time, self.values, label=self._name)
         fill_between(
             self.time,
             self.values - self._standard_uncertainties,
@@ -76,8 +102,8 @@ class Signal:
             color="gray",
             alpha=0.2,
         )
-        xlabel("time / %s" % self.unit_time)
-        ylabel("%s / %s" % (self.name, self.unit_values))
+        xlabel("time / %s" % self._unit_time)
+        ylabel("%s / %s" % (self._name, self._unit_values))
         legend(loc="best")
 
     def plot_uncertainty(self, fignr=2, **kwargs):
@@ -85,10 +111,10 @@ class Signal:
         plot(
             self.time,
             self._standard_uncertainties,
-            label="uncertainty associated with %s" % self.name,
+            label="uncertainty associated with %s" % self._name,
         )
-        xlabel("time / %s" % self.unit_time)
-        ylabel("uncertainty / %s" % self.unit_values)
+        xlabel("time / %s" % self._unit_time)
+        ylabel("uncertainty / %s" % self._unit_values)
         legend(loc="best")
 
     def apply_filter(
@@ -98,7 +124,7 @@ class Signal:
         filter_uncertainty: Optional[np.ndarray] = None,
         MonteCarloRuns: Optional[int] = 10000,
     ):
-        """Apply digital filter (b, a) to the signal values
+        r"""Apply digital filter (b, a) to the signal values
 
         Apply digital filter (b, a) to the signal values and propagate the
         uncertainty associated with the signal.
@@ -111,17 +137,20 @@ class Signal:
             filter denominator coefficients, defaults to :math:`a=(1)` for FIR-type
             filter
         filter_uncertainty : np.ndarray, optional
-            For IIR-type filter provide covariance matrix associated with filter
-            coefficients. For FIR-type filter provide one of the following
+            For IIR-type filter provide covariance matrix :math:`U_{\theta}`
+            associated with filter coefficient vector :math:`\theta=(a_1,\ldots,a_{N_a},
+            b_0,\ldots,b_{N_b})^T`. For FIR-type filter provide one of the following:
 
             - 1D-array: coefficient-wise standard uncertainties of filter
             - 2D-array: covariance matrix associated with theta
 
-            if the filter is fully certain, use `Utheta = None` (default) to make use
-            of more efficient calculations.
+            if the filter is fully certain, use `filter_uncertainty = None` (default)
+            to make use of more efficient calculations.
 
         MonteCarloRuns : int, optional
-            number of Monte Carlo runs, defaults to 10.000
+            number of Monte Carlo runs, defaults to 10.000, only considered for
+            IIR-type filters. Otherwise :func:`FIRuncFilter
+            <PyDynamic.uncertainty.propagate_filter.FIRuncFilter>` is applied directly
         """
 
         if self._is_fir_type_filter(a):
@@ -143,11 +172,49 @@ class Signal:
         return len(a) == 1 and a[0] == 1
 
     @property
-    def uncertainty(self):
+    def Ts(self) -> float:
+        """Sampling interval, i.e. (averaged) difference between each two time stamps"""
+        return self._Ts
+
+    @property
+    def Fs(self) -> float:
+        """Sampling frequency, i.e. the reciprocal of the sampling interval length"""
+        return self._Fs
+
+    @property
+    def unit_time(self) -> str:
+        """Unit of the time vector"""
+        return self._unit_time
+
+    @property
+    def unit_values(self) -> str:
+        """Unit of the values vector"""
+        return self._unit_values
+
+    @property
+    def name(self) -> str:
+        """Signal name"""
+        return self._name
+
+    @property
+    def standard_uncertainties(self) -> np.ndarray:
+        """Element-wise standard uncertainties associated to values"""
+        return self._standard_uncertainties
+
+    @property
+    def uncertainty(self) -> np.ndarray:
+        """Uncertainties associated with the signal values
+
+        Depending on the uncertainties provided during initialization, one of following
+        will be provided:
+
+        - 1D-array: element-wise standard uncertainties
+        - 2D-array: covariance matrix
+        """
         return self._uncertainty
 
     @uncertainty.setter
-    def uncertainty(self, value):
+    def uncertainty(self, value: Union[float, np.ndarray]):
         if isinstance(value, float):
             self._uncertainty = np.full_like(self.values, value)
             self._standard_uncertainties = self._uncertainty
@@ -176,7 +243,7 @@ class Signal:
             if is_vector(uncertainties_array):
                 self._standard_uncertainties = uncertainties_array
             else:
-                self._standard_uncertainties = np.diag(uncertainties_array)
+                self._standard_uncertainties = np.sqrt(np.diag(uncertainties_array))
         else:
             self._uncertainty = np.zeros_like(self.values)
             self._standard_uncertainties = self._uncertainty
