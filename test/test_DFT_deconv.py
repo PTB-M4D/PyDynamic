@@ -13,13 +13,13 @@ from .conftest import (
     hypothesis_covariance_matrix_for_complex_vectors,
     hypothesis_float_vector,
     hypothesis_nonzero_complex_vector,
-    hypothesis_two_to_the_k,
+    hypothesis_positive_powers_of_two,
 )
 
 
 @composite
 def deconvolution_input(draw: Callable, reveal_bug: bool = False):
-    n = draw(hypothesis_two_to_the_k(min_k=2, max_k=4))
+    n = draw(hypothesis_positive_powers_of_two(min_k=2, max_k=4))
     if reveal_bug:
         y = np.r_[
             draw(hypothesis_float_vector(length=n, min_value=0.5, max_value=1.0)),
