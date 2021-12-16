@@ -204,12 +204,11 @@ def LSIIR(
         stab_iter_mean = np.mean(stab_iters[relevant_filters_mask])
 
         final_stabilization_iteration_counter = 1
+        final_tau = tau_max
 
         # Determine if the resulting filter already is stable and if not stabilize with
         # an initial delay of the previous maximum delay.
-        final_tau = np.mean(taus)
         if not isstable(b_res, a_res, "digital"):
-            final_tau = tau_max
             b_res, a_res = _compute_actual_iir_least_squares_fit(
                 H, final_tau, omega, E, Na, Nb, inv
             )
