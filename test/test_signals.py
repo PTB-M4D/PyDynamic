@@ -45,18 +45,19 @@ def signal_inputs(
     small_positive_float_strategy = hypothesis_bounded_float(
         min_value=minimum_float, max_value=maximum_float
     )
-    time_step_and_freq_strategy = hst.one_of(
+    freq_strategy = hst.one_of(
         small_positive_float_strategy,
         hst.just(None),
     )
+    intermediate_time_step = draw(small_positive_float_strategy)
+    max_time = number_of_samples * intermediate_time_step
+    time = np.arange(0, max_time, intermediate_time_step)[:number_of_samples]
     if ensure_time_step_to_be_float:
-        time_step_strategy = small_positive_float_strategy
+        time_step = intermediate_time_step
     else:
-        time_step_strategy = time_step_and_freq_strategy
-    time_step = draw(time_step_strategy)
+        time_step = draw(hst.sampled_from((intermediate_time_step, None)))
     if time_step is None:
-        max_time = number_of_samples * draw(small_positive_float_strategy)
-        sampling_frequency = draw(time_step_and_freq_strategy)
+        sampling_frequency = draw(freq_strategy)
     else:
         max_time = number_of_samples * time_step
         sampling_frequency = draw(hst.sampled_from((np.reciprocal(time_step), None)))
