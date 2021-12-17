@@ -168,7 +168,16 @@ def LSIIR(
                     taus[mc_run],
                     relevant_filters_mask[mc_run],
                 ) = _compute_stabilized_filter_through_time_delay_iteration(
-                    b_i, a_i, taus[mc_run], omega, E, freq_resp_to_fit[mc_run], Nb, Na, Fs, inv
+                    b_i,
+                    a_i,
+                    taus[mc_run],
+                    omega,
+                    E,
+                    freq_resp_to_fit[mc_run],
+                    Nb,
+                    Na,
+                    Fs,
+                    inv,
                 )
                 current_stabilization_iteration_counter += 1
             else:
@@ -176,7 +185,10 @@ def LSIIR(
                     tau_max = taus[mc_run]
                 if verbose:
                     sos = np.sum(
-                        np.abs((dsp.freqz(b_i, a_i, omega)[1] - freq_resp_to_fit[mc_run]) ** 2)
+                        np.abs(
+                            (dsp.freqz(b_i, a_i, omega)[1] - freq_resp_to_fit[mc_run])
+                            ** 2
+                        )
                     )
                     print(
                         f"LSIIR: Fitting{f' for MC run {mc_run}' if _uncertainties_were_provided(UH) else ''}"
@@ -279,7 +291,8 @@ def _print_iir_welcome_msg(
     print(
         f"LSIIR: Least-squares fit of an order {max(Nb, Na)} digital IIR filter to"
         f"{' the reciprocal of' if inv else ''} a frequency response "
-        f"given by {len(H)} values.{monte_carlo_message if _uncertainties_were_provided(UH) else ''}"
+        f"given by {len(H)} values."
+        f"{monte_carlo_message if _uncertainties_were_provided(UH) else ''}"
     )
 
 
