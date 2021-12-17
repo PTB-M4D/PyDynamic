@@ -30,7 +30,7 @@ class Signal:
     Parameters
     ----------
     time: np.ndarray
-        the time axis as :class:`np.ndarray <numpy.ndarray>` equidistant floats,
+        the time axis as :class:`np.ndarray <numpy.ndarray>` floats,
         number of elements must coincide with number of values
     values: np.ndarray
         signal values, number of elements must coincide with number of elements in time
@@ -127,7 +127,9 @@ class Signal:
         r"""Apply digital filter (b, a) to the signal values
 
         Apply digital filter (b, a) to the signal values and propagate the
-        uncertainty associated with the signal.
+        uncertainty associated with the signal. Time vector is assumed to be
+        equidistant, as well as corresponding values should represent evenly spaced
+        signal magnitudes.
 
         Parameters
         ----------
