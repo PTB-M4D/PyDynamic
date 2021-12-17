@@ -83,10 +83,9 @@ class Normal_ZeroCorr:
             )
 
     def rvs(self, size=1):
-        # This function mimics the behavior of the scipy stats package
-        return np.tile(self.loc, (size, 1)) + np.random.randn(
-            size, len(self.loc)
-        ) * np.tile(self.scale, (size, 1))
+        return np.random.normal(
+            loc=self.loc, scale=self.scale, size=(size, len(self.loc))
+        )
 
 
 def MC(
@@ -163,10 +162,11 @@ def MC(
 
     unst_count = 0  # Count how often in the MC runs the IIR filter is unstable.
     st_inds = list()
+    samples = dist.rvs(size=runs)
     if verbose:
         sys.stdout.write("MC progress: ")
-    for k in range(runs):
-        xn = dist.rvs()  # draw filter input signal
+    for k, sample in enumerate(samples):
+        xn = sample  # draw filter input signal
         if not blow is None:
             if alow is None:
                 alow = 1.0  # FIR low-pass filter
