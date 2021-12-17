@@ -30,10 +30,11 @@ class Signal:
     Parameters
     ----------
     time: np.ndarray
-        the time axis as :class:`np.ndarray <numpy.ndarray>` floats,
+        the time axis as :class:`np.ndarray <numpy.ndarray>` of floats,
         number of elements must coincide with number of values
     values: np.ndarray
-        signal values, number of elements must coincide with number of elements in time
+        signal values' magnitudes, number of elements must coincide with number of
+        elements in time
     Ts: float, optional
         the sampling interval length, i.e. the difference between each two time stamps,
         defaults to the reciprocal of the sampling frequency if provided and the mean of
@@ -53,10 +54,21 @@ class Signal:
     _unit_time: str
     _unit_values: str
     _name: str
+    _uncertainty: np.ndarray
     _standard_uncertainties: np.ndarray
     _Ts: float
+    _Fs: float
+    _time: np.ndarray
+    _values: np.ndarray
 
-    def __init__(self, time, values, Ts=None, Fs=None, uncertainty=None):
+    def __init__(
+        self,
+        time: np.ndarray,
+        values: np.ndarray,
+        Ts: Optional[float] = None,
+        Fs: Optional[float] = None,
+        uncertainty: Optional[Union[float, np.ndarray]] = None,
+    ):
         if len(values.shape) > 1:
             raise NotImplementedError(
                 "Signal: Multivariate signals are not implemented yet."
@@ -67,8 +79,8 @@ class Signal:
                 f"are expected to match, but time is of length {len(time)} and values "
                 f"is of length {len(values)}. Please adjust either one of them."
             )
-        self.time = time
-        self.values = values
+        self._time = time
+        self._values = values
         if Ts is not None and Fs is not None and not isclose(Fs, 1 / Ts):
             raise ValueError(
                 "Signal: Sampling interval and sampling frequency are assumed to "
@@ -94,27 +106,27 @@ class Signal:
 
     def plot(self, fignr=1, figsize=(10, 8)):
         figure(fignr, figsize=figsize)
-        plot(self.time, self.values, label=self._name)
+        plot(self.time, self.values, label=self.name)
         fill_between(
             self.time,
-            self.values - self._standard_uncertainties,
-            self.values + self._standard_uncertainties,
+            self.values - self.standard_uncertainties,
+            self.values + self.standard_uncertainties,
             color="gray",
             alpha=0.2,
         )
-        xlabel("time / %s" % self._unit_time)
-        ylabel("%s / %s" % (self._name, self._unit_values))
+        xlabel("time / %s" % self.unit_time)
+        ylabel("%s / %s" % (self.name, self.unit_values))
         legend(loc="best")
 
     def plot_uncertainty(self, fignr=2, **kwargs):
         figure(fignr, **kwargs)
         plot(
             self.time,
-            self._standard_uncertainties,
-            label="uncertainty associated with %s" % self._name,
+            self.standard_uncertainties,
+            label="uncertainty associated with %s" % self.name,
         )
-        xlabel("time / %s" % self._unit_time)
-        ylabel("uncertainty / %s" % self._unit_values)
+        xlabel("time / %s" % self.unit_time)
+        ylabel("uncertainty / %s" % self.unit_values)
         legend(loc="best")
 
     def apply_filter(
@@ -156,11 +168,11 @@ class Signal:
         """
 
         if self._is_fir_type_filter(a):
-            self.values, self.uncertainty = FIRuncFilter(
+            self._values, self.uncertainty = FIRuncFilter(
                 self.values, self.uncertainty, b, Utheta=filter_uncertainty, kind="diag"
             )
         else:
-            self.values, self.uncertainty = MC(
+            self._values, self.uncertainty = MC(
                 self.values,
                 self.uncertainty,
                 b,
@@ -170,7 +182,7 @@ class Signal:
             )
 
     @staticmethod
-    def _is_fir_type_filter(a):
+    def _is_fir_type_filter(a: np.ndarray) -> bool:
         return len(a) == 1 and a[0] == 1
 
     @property
@@ -180,17 +192,17 @@ class Signal:
 
     @property
     def Fs(self) -> float:
-        """Sampling frequency, i.e. the reciprocal of the sampling interval length"""
+        """Sampling frequency, i.e. the sampling interval :attr:`Ts`' reciprocal"""
         return self._Fs
 
     @property
     def unit_time(self) -> str:
-        """Unit of the time vector"""
+        """Unit of the :attr:`time` vector"""
         return self._unit_time
 
     @property
     def unit_values(self) -> str:
-        """Unit of the values vector"""
+        """Unit of the :attr:`values` vector"""
         return self._unit_values
 
     @property
@@ -200,12 +212,12 @@ class Signal:
 
     @property
     def standard_uncertainties(self) -> np.ndarray:
-        """Element-wise standard uncertainties associated to values"""
+        """Element-wise standard uncertainties associated to :attr:`values`"""
         return self._standard_uncertainties
 
     @property
     def uncertainty(self) -> np.ndarray:
-        """Uncertainties associated with the signal values
+        """Uncertainties associated with the signal :attr:`values`
 
         Depending on the uncertainties provided during initialization, one of following
         will be provided:
@@ -229,8 +241,8 @@ class Signal:
                     "Signal: if uncertainties are provided as np.ndarray "
                     f"they are expected to match the number of elements of the "
                     f"provided time vector, but uncertainties are of shape "
-                    f"{uncertainties_array.shape} and time is of length {len(self.time)}. "
-                    f"Please adjust either one of them."
+                    f"{uncertainties_array.shape} and time is of length "
+                    f"{len(self.time)}. Please adjust either one of them."
                 )
             if is_2d_matrix(uncertainties_array) and not is_2d_square_matrix(
                 uncertainties_array
@@ -249,3 +261,13 @@ class Signal:
         else:
             self._uncertainty = np.zeros_like(self.values)
             self._standard_uncertainties = self._uncertainty
+
+    @property
+    def time(self) -> np.ndarray:
+        """Signal's time axis"""
+        return self._time
+
+    @property
+    def values(self) -> np.ndarray:
+        """Signal values' magnitudes"""
+        return self._values
