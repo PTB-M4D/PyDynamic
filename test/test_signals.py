@@ -323,7 +323,7 @@ def test_signal_class_usual_instanciations(capsys, inputs):
     max_examples=10,
 )
 @pytest.mark.slow
-def test_signal_class_raise_not_implemented(capsys, inputs):
+def test_signal_class_raise_not_implemented_multivariate_signal(capsys, inputs):
     inputs["values"] = inputs["values"][..., np.newaxis]
     _print_current_ram_usage(capsys)
     with pytest.raises(
