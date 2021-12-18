@@ -107,12 +107,12 @@ def LSIIR(
 
     .. seealso:: :func:`PyDynamic.uncertainty.propagate_filter.IIRuncFilter`
     """
-    if _no_uncertainties_were_provided(UH):
-        freq_resp_to_fit, mc_runs = H, 1
-    else:
+    if _uncertainties_were_provided(UH):
         freq_resp_to_fit = real_imag_2_complex(
             _draw_multivariate_monte_carlo_samples(complex_2_real_imag(H), UH, mc_runs)
         )
+    else:
+        freq_resp_to_fit, mc_runs = [H], 1
 
     if verbose:
         _print_iir_welcome_msg(H, Na, Nb, UH, inv, mc_runs)
@@ -134,7 +134,7 @@ def LSIIR(
 
     for mc_run in range(mc_runs):
         b_i, a_i = _compute_actual_iir_least_squares_fit(
-            freq_resp_to_fit, tau, omega, E, Na, Nb, inv
+            freq_resp_to_fit[mc_run], tau, omega, E, Na, Nb, inv
         )
 
         current_stabilization_iteration_counter = 1
@@ -147,7 +147,7 @@ def LSIIR(
             # we try with previously required maximum time delay to obtain stability.
             if tau_max > tau:
                 b_i, a_i = _compute_actual_iir_least_squares_fit(
-                    freq_resp_to_fit, tau_max, omega, E, Na, Nb, inv
+                    freq_resp_to_fit[mc_run], tau_max, omega, E, Na, Nb, inv
                 )
                 current_stabilization_iteration_counter += 1
 
@@ -168,7 +168,16 @@ def LSIIR(
                     taus[mc_run],
                     relevant_filters_mask[mc_run],
                 ) = _compute_stabilized_filter_through_time_delay_iteration(
-                    b_i, a_i, taus[mc_run], omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
+                    b_i,
+                    a_i,
+                    taus[mc_run],
+                    omega,
+                    E,
+                    freq_resp_to_fit[mc_run],
+                    Nb,
+                    Na,
+                    Fs,
+                    inv,
                 )
                 current_stabilization_iteration_counter += 1
             else:
@@ -176,10 +185,13 @@ def LSIIR(
                     tau_max = taus[mc_run]
                 if verbose:
                     sos = np.sum(
-                        np.abs((dsp.freqz(b_i, a_i, omega)[1] - freq_resp_to_fit) ** 2)
+                        np.abs(
+                            (dsp.freqz(b_i, a_i, omega)[1] - freq_resp_to_fit[mc_run])
+                            ** 2
+                        )
                     )
                     print(
-                        f"LSIIR: Fitting{'' if UH is None else f' for MC run {mc_run}'}"
+                        f"LSIIR: Fitting{f' for MC run {mc_run}' if _uncertainties_were_provided(UH) else ''}"
                         f" finished. Conducted "
                         f"{current_stabilization_iteration_counter} attempts to "
                         f"stabilize filter. "
@@ -204,13 +216,13 @@ def LSIIR(
         stab_iter_mean = np.mean(stab_iters[relevant_filters_mask])
 
         final_stabilization_iteration_counter = 1
+        final_tau = tau_max
 
         # Determine if the resulting filter already is stable and if not stabilize with
         # an initial delay of the previous maximum delay.
         if not isstable(b_res, a_res, "digital"):
-            final_tau = tau_max
             b_res, a_res = _compute_actual_iir_least_squares_fit(
-                freq_resp_to_fit, final_tau, omega, E, Na, Nb, inv
+                H, final_tau, omega, E, Na, Nb, inv
             )
             final_stabilization_iteration_counter += 1
 
@@ -227,7 +239,7 @@ def LSIIR(
                 final_tau,
                 final_stable,
             ) = _compute_stabilized_filter_through_time_delay_iteration(
-                b_res, a_res, final_tau, omega, E, freq_resp_to_fit, Nb, Na, Fs, inv
+                b_res, a_res, final_tau, omega, E, H, Nb, Na, Fs, inv
             )
 
             final_stabilization_iteration_counter += 1
@@ -259,10 +271,10 @@ def LSIIR(
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
             b_res, a_res, tau, omega
         )
-        residuals_real_imag = complex_2_real_imag(Hd - freq_resp_to_fit)
+        residuals_real_imag = complex_2_real_imag(Hd - H)
         _compute_and_print_rms(residuals_real_imag)
 
-    if UH:
+    if _uncertainties_were_provided(UH):
         Uab = np.cov(as_and_bs, rowvar=False)
         return b_res, a_res, final_tau, Uab
     return b_res, a_res, final_tau, None
@@ -279,7 +291,8 @@ def _print_iir_welcome_msg(
     print(
         f"LSIIR: Least-squares fit of an order {max(Nb, Na)} digital IIR filter to"
         f"{' the reciprocal of' if inv else ''} a frequency response "
-        f"given by {len(H)} values.{monte_carlo_message if UH else ''}"
+        f"given by {len(H)} values."
+        f"{monte_carlo_message if _uncertainties_were_provided(UH) else ''}"
     )
 
 
@@ -660,14 +673,14 @@ def _validate_length_of_h(H: np.ndarray, expected_length: int):
 
 
 def _validate_uncertainties(vector: np.ndarray, covariance_matrix: np.ndarray):
-    if not _no_uncertainties_were_provided(covariance_matrix):
+    if _uncertainties_were_provided(covariance_matrix):
         _validate_vector_and_corresponding_uncertainties_dims(
             vector=vector, covariance_matrix=covariance_matrix
         )
 
 
-def _no_uncertainties_were_provided(covariance_matrix: Union[np.ndarray, None]) -> bool:
-    return covariance_matrix is None
+def _uncertainties_were_provided(covariance_matrix: Union[np.ndarray, None]) -> bool:
+    return covariance_matrix is not None
 
 
 def _validate_vector_and_corresponding_uncertainties_dims(
@@ -717,7 +730,7 @@ def _validate_fir_uncertainty_propagation_method_related_inputs(
     def _number_of_mc_runs_too_small():
         return mc_runs == 1
 
-    if _no_uncertainties_were_provided(covariance_matrix):
+    if not _uncertainties_were_provided(covariance_matrix):
         if _number_of_monte_carlo_runs_was_provided(mc_runs):
             raise ValueError(
                 f"\n{_get_first_public_caller()}: The least-squares fitting of a "
@@ -775,7 +788,7 @@ def _determine_fir_propagation_method(
     covariance_matrix: Union[np.ndarray, None],
     mc_runs: Union[int, None],
 ) -> Tuple[_PropagationMethod, Union[int, None]]:
-    if _no_uncertainties_were_provided(covariance_matrix):
+    if not _uncertainties_were_provided(covariance_matrix):
         return _PropagationMethod.NONE, None
     if _number_of_monte_carlo_runs_was_provided(mc_runs):
         return _PropagationMethod.MC, mc_runs
