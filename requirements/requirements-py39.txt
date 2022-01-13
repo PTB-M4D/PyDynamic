@@ -24,7 +24,7 @@ numpy==1.21.4
     #   time-series-buffer
 pandas==1.3.4
     # via PyDynamic (setup.py)
-pillow==8.4.0
+pillow==9.0.0
     # via matplotlib
 pyparsing==3.0.5
     # via matplotlib
