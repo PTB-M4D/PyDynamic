@@ -337,22 +337,22 @@ jobs:
             python -m piptools compile --upgrade \
               requirements/dev-requirements-py${PYVENV}.in \
               --output-file requirements/dev-requirements-py${PYVENV}.txt
-            python -m piptools sync \
-              requirements/requirements-py${PYVENV}.txt \
-              requirements/dev-requirements-py${PYVENV}.txt
-            python -m pip install .
-      - run:
-          name: Run split tests
-          command: |
-            source venv/bin/activate
-            set -e
-            TEST_FILES=$(circleci tests glob "test/test_*.py" | \
-              circleci tests split --split-by=timings)
-            pytest -m "not slow" -v --junitxml=test-results/pytest.xml $TEST_FILES
+#            python -m piptools sync \
+#              requirements/requirements-py${PYVENV}.txt \
+#              requirements/dev-requirements-py${PYVENV}.txt
+#            python -m pip install .
+#      - run:
+#          name: Run split tests
+#          command: |
+#            source venv/bin/activate
+#            set -e
+#            TEST_FILES=$(circleci tests glob "test/test_*.py" | \
+#              circleci tests split --split-by=timings)
+#            pytest -m "not slow" -v --junitxml=test-results/pytest.xml $TEST_FILES
 #      - tox:
 #          toxenvs: << parameters.toxenvs >>
 #          posargs: << parameters.posargs >>
-      - store_results
+#      - store_results
 
       - persist_to_workspace:
           root: .
