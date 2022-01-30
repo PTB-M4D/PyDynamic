@@ -95,15 +95,15 @@ workflows:
 #          is_nightly_run: True
 #          context:
 #            - Docker publishing as bludoc
-
-  quick_test:
-    jobs:
-      - test:
-          name: "test_python_py39"
-          tag: "3.9"
-          toxenvs: "-e py39-without_requirements"
-          context:
-            - Docker publishing as bludoc
+#
+#  quick_test:
+#    jobs:
+#      - test:
+#          name: "test_python_py39"
+#          tag: "3.9"
+#          toxenvs: "-e py39-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
 #      - test_conda_py39:
 #          is_nightly_run: False
 #          context:
