@@ -47,6 +47,14 @@ executors:
       PYENV: << parameters.pyenv >>
 
 workflows:
+
+  check_for_upgraded_deps:
+    jobs:
+      - test:
+          name: "test_with_updated_deps"
+          context:
+            - Docker publishing as bludoc
+
 #  nightly_test:
 #    triggers:
 #      - schedule:
@@ -246,6 +254,22 @@ commands:
           source venv/bin/activate
           pip install --upgrade pip
 
+  recompile_and_sync_deps:
+    parameters:
+      pyenv:
+        type: string
+        default: ""
+    description: "Recompile and sync deps."
+    steps:
+    - run:
+        name: Recompile and sync deps
+        command: |
+          PYENV = echo << parameters.pyenv >> | tr -d '.'
+          source venv/bin/activate
+          python -m pip install --upgrade pip-tools
+          python -m piptools compile --upgrade \
+            --output-file requirements/requirements-py3${PYVENV}.txt
+
   install_development_deps:
     description: "Install development dependencies."
     parameters:
@@ -284,6 +308,31 @@ commands:
         path: test-results
 
 jobs:
+
+  test_with_updated_deps:
+    parameters:
+      tag:
+        type: string
+        default: "3.10"
+
+    executor:
+      name: venv_tester
+      tag: << parameters.tag >>
+
+    steps:
+      - create_result_folder
+      - create_venv
+      - recompile_and_sync_deps:
+          pyenv: << parameters.tag >>
+#      - run:
+#          name: Install tox
+#          command: |
+#            source venv/bin/activate
+#            pip install tox
+#      - tox:
+#          toxenvs: << parameters.toxenvs >>
+#          posargs: << parameters.posargs >>
+#      - store_results
 
   # Define one 'test' job with parameters to deal with all desired cases. The
   # reason for this is the desire to ensure the following for all supported Python
