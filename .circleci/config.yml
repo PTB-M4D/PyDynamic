@@ -254,25 +254,6 @@ commands:
           source venv/bin/activate
           python -m pip install --upgrade pip==21.3.0
 
-  recompile_and_sync_deps:
-    parameters:
-      pyenv:
-        type: string
-        default: ""
-    description: "Recompile and sync deps."
-    steps:
-    - run:
-        name: Recompile and sync deps
-        command: |
-          PYVENV=$(echo << parameters.pyenv >> | tr -d '.')
-          source venv/bin/activate
-          python -m pip install --upgrade tox pip-tools
-          python -m piptools compile --upgrade \
-            --output-file requirements/requirements-py${PYVENV}.txt
-          python -m piptools compile --upgrade \
-            requirements/dev-requirements-py${PYVENV}.in \
-            --output-file requirements/dev-requirements-py${PYVENV}.txt
-
   install_development_deps:
     description: "Install development dependencies."
     parameters:
@@ -331,8 +312,17 @@ jobs:
     steps:
       - create_result_folder
       - create_venv
-      - recompile_and_sync_deps:
-          pyenv: << parameters.tag >>
+      - run:
+          name: Recompile and sync deps
+          command: |
+            PYVENV=$(echo << parameters.tag >> | tr -d '.')
+            source venv/bin/activate
+            python -m pip install --upgrade tox pip-tools
+            python -m piptools compile --upgrade \
+              --output-file requirements/requirements-py${PYVENV}.txt
+            python -m piptools compile --upgrade \
+              requirements/dev-requirements-py${PYVENV}.in \
+              --output-file requirements/dev-requirements-py${PYVENV}.txt
       - tox:
           toxenvs: << parameters.toxenvs >>
           posargs: << parameters.posargs >>
