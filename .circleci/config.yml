@@ -50,8 +50,7 @@ workflows:
 
   check_for_upgraded_deps:
     jobs:
-      - test:
-          name: "test_with_updated_deps"
+      - test_with_updated_deps:
           context:
             - Docker publishing as bludoc
 
