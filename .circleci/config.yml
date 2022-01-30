@@ -104,11 +104,12 @@ workflows:
           toxenvs: "-e py39-without_requirements"
           context:
             - Docker publishing as bludoc
-      - test_conda_py39:
-          is_nightly_run: False
-          context:
-            - Docker publishing as bludoc
-
+          parallelism: 4
+#      - test_conda_py39:
+#          is_nightly_run: False
+#          context:
+#            - Docker publishing as bludoc
+#
 #  test_and_deploy:
 #    jobs:
 #      - test:
