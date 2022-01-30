@@ -9,7 +9,7 @@ executors:
         type: string
         default: "3.9"
     docker:
-      - image: circleci/python:<< parameters.tag >>
+      - image: cimg/python:<< parameters.tag >>
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
@@ -39,7 +39,7 @@ executors:
         type: string
         default: "py39"
     docker:
-      - image: circleci/python:<< parameters.tag >>
+      - image: cimg/python:<< parameters.tag >>
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
