@@ -267,7 +267,10 @@ commands:
           source venv/bin/activate
           python -m pip install --upgrade pip-tools
           python -m piptools compile --upgrade \
-            --output-file requirements/requirements-py3${PYVENV}.txt
+            --output-file requirements/requirements-py${PYVENV}.txt
+          python -m piptools compile --upgrade \
+            requirements/dev-requirements-py${PYVENV}.in \
+            --output-file requirements/dev-requirements-py${PYVENV}.txt
 
   install_development_deps:
     description: "Install development dependencies."
