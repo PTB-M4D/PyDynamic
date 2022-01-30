@@ -263,7 +263,7 @@ commands:
     - run:
         name: Recompile and sync deps
         command: |
-          PYENV = echo << parameters.pyenv >> | tr -d '.'
+          PYENV=$(echo << parameters.pyenv >> | tr -d '.')
           source venv/bin/activate
           python -m pip install --upgrade pip-tools
           python -m piptools compile --upgrade \
