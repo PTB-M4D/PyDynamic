@@ -251,7 +251,7 @@ commands:
         command: |
           python3 -m venv venv
           source venv/bin/activate
-          python -m pip install --upgrade pip==21.3.1
+          python -m pip install --upgrade pip==21.3.0
 
   recompile_and_sync_deps:
     parameters:
@@ -263,7 +263,7 @@ commands:
     - run:
         name: Recompile and sync deps
         command: |
-          PYENV=$(echo << parameters.pyenv >> | tr -d '.')
+          PYVENV=$(echo << parameters.pyenv >> | tr -d '.')
           source venv/bin/activate
           python -m pip install --upgrade pip-tools
           python -m piptools compile --upgrade \
