@@ -367,6 +367,7 @@ jobs:
       name: gh_releaser
 
     steps:
+      - checkout
       - attach_workspace:
           at: .
       - run:
