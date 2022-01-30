@@ -325,6 +325,9 @@ jobs:
             python -m piptools compile --upgrade \
               requirements/dev-requirements-py${PYVENV}.in \
               --output-file requirements/dev-requirements-py${PYVENV}.txt
+            python -m piptools sync \
+              requirements/requirements-py${PYVENV}.txt \
+              requirements/dev-requirements-py${PYVENV}.txt
       - run:
           name: Run split tests
           command: |
