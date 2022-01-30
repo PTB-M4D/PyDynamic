@@ -228,7 +228,7 @@ workflows:
 #            - release
 
 commands:
-  create_folders:
+  create_result_folder:
     description: "Checkout code and prepare test results location."
     steps:
     - checkout
@@ -314,7 +314,7 @@ jobs:
       tag: << parameters.tag >>
 
     steps:
-      - create_folders
+      - create_result_folder
       - create_venv
       - run:
           name: Install tox
@@ -336,7 +336,7 @@ jobs:
     executor: conda_tester
 
     steps:
-      - create_folders
+      - create_result_folder
       - run:
           name: Install Miniconda
           command: |
@@ -411,7 +411,7 @@ jobs:
       name: publisher
 
     steps:
-      - create_folders
+      - create_result_folder
       - create_venv
       - install_development_deps:
           pyenv: ${PYENV}
@@ -429,7 +429,7 @@ jobs:
       name: publisher
 
     steps:
-      - create_folders
+      - create_result_folder
       - create_venv
       - install_development_deps:
           pyenv: ${PYENV}
