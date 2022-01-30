@@ -328,6 +328,7 @@ jobs:
             python -m piptools sync \
               requirements/requirements-py${PYVENV}.txt \
               requirements/dev-requirements-py${PYVENV}.txt
+            python -m pip install .
       - run:
           name: Run split tests
           command: |
