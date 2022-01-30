@@ -328,6 +328,7 @@ jobs:
       - run:
           name: Run split tests
           command: |
+            source venv/bin/activate
             set -e
             TEST_FILES=$(circleci tests glob "test/test_*.py" | \
               circleci tests split --split-by=timings)
