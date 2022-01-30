@@ -45,12 +45,24 @@ executors:
           password: $DOCKER_PASS
     environment:
       PYENV: << parameters.pyenv >>
+  gh_releaser:
+    working_directory: ~/repo
+    docker:
+      - image: cimg/base:2021.04
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
 
 workflows:
 
   check_for_upgraded_deps:
     jobs:
       - test_with_updated_deps:
+          context:
+            - Docker publishing as bludoc
+      - commit_push_open_pr:
+          requires:
+            - test_with_updated_deps
           context:
             - Docker publishing as bludoc
             - GitHub pushes to BjoernLudwigPTB's public_repos
@@ -341,18 +353,31 @@ jobs:
 #          toxenvs: << parameters.toxenvs >>
 #          posargs: << parameters.posargs >>
       - store_results
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - requirements/requirements-py*.txt
+            - requirements/dev-requirements-py*.txt
+
+  commit_push_open_pr:
+    parallelism: 1
+
+    executor:
+      name: gh_releaser
+
+    steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Commit and push changes
           command: |
-            PYVENV=$(echo << parameters.tag >> | tr -d '.')
             git config --global user.name "Bjoern Ludwig (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            NEW_BRANCH=recompile_Python_${PYVENV}_deps
+            NEW_BRANCH=recompile_deps
             git checkout -b ${NEW_BRANCH}
-            git commit \
-              requirements/dev-requirements-py${PYVENV}.txt \
-              requirements/requirements-py${PYVENV}.txt -m \
-              "build(deps): recompile Python << parameters.tag >> (dev) deps"
+            git commit -am \
+              "build(deps): recompile Python (dev) deps"
             git push -u origin  ${NEW_BRANCH}
             git push -d origin  ${NEW_BRANCH}
 # The last command obviously needs to be taken out again when going live and just
@@ -373,7 +398,6 @@ jobs:
       - run:
           name: Open PR
           command: |
-            PYVENV=$(echo << parameters.tag >> | tr -d '.')
             gh pr list
 # This temporarily takes the place of the following command to not clutter GitHub
 
