@@ -53,6 +53,7 @@ workflows:
       - test_with_updated_deps:
           context:
             - Docker publishing as bludoc
+            - GitHub pushes to BjoernLudwigPTB's public_repos
 
 #  nightly_test:
 #    triggers:
