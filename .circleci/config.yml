@@ -360,7 +360,6 @@ jobs:
           name: Open PR
           command: |
             PYVENV=$(echo << parameters.tag >> | tr -d '.')
-            gh auth login --with-token \\<<< $GH_TOKEN            
             gh pr list
 # This temporarily takes the place of the following command to not clutter GitHub
 
