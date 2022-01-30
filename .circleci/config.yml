@@ -265,7 +265,7 @@ commands:
         command: |
           PYVENV=$(echo << parameters.pyenv >> | tr -d '.')
           source venv/bin/activate
-          python -m pip install --upgrade pip-tools
+          python -m pip install --upgrade tox pip-tools
           python -m piptools compile --upgrade \
             --output-file requirements/requirements-py${PYVENV}.txt
           python -m piptools compile --upgrade \
@@ -316,6 +316,12 @@ jobs:
       tag:
         type: string
         default: "3.10"
+      toxenvs:
+        type: string
+        default: "-e py310"
+      posargs:
+        type: string
+        default: ""
 
     executor:
       name: venv_tester
@@ -326,15 +332,10 @@ jobs:
       - create_venv
       - recompile_and_sync_deps:
           pyenv: << parameters.tag >>
-#      - run:
-#          name: Install tox
-#          command: |
-#            source venv/bin/activate
-#            pip install tox
-#      - tox:
-#          toxenvs: << parameters.toxenvs >>
-#          posargs: << parameters.posargs >>
-#      - store_results
+      - tox:
+          toxenvs: << parameters.toxenvs >>
+          posargs: << parameters.posargs >>
+      - store_results
 
   # Define one 'test' job with parameters to deal with all desired cases. The
   # reason for this is the desire to ensure the following for all supported Python
