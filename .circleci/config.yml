@@ -400,9 +400,6 @@ jobs:
             git commit -am \
               "build(deps): recompile Python (dev) deps"
             git push -u origin  ${NEW_BRANCH}
-            git push -d origin  ${NEW_BRANCH}
-# The last command obviously needs to be taken out again when going live and just
-# avoids cluttering GitHub during testing.
 
       - run:
           name: Install GitHub CLI
@@ -419,15 +416,12 @@ jobs:
       - run:
           name: Open PR
           command: |
-            gh pr list
-# This temporarily takes the place of the following command to not clutter GitHub
-
-#            gh pr create --base master --title "Update deps for Python ${PYVENV}" \
-#              --body "This PR provides recompiled deps for the specicied Python " \
-#              "version. It was opened after the commited deps were succesfully " \
-#              "compiled and all tests passed with the new versions. It should be " \
-#              "merged as soon as possible to avoid any security issues due to " \
-#              "outdated dependencies."
+            gh pr create --base master --title "Update deps" \
+              --body "This PR provides recompiled deps for all outdated package " \
+              "versions. It was opened after the commited deps were succesfully " \
+              "compiled and all tests passed with the new versions. It should be " \
+              "merged as soon as possible to avoid any security issues due to " \
+              "outdated dependencies."
 
   # Define one 'test' job with parameters to deal with all desired cases. The
   # reason for this is the desire to ensure the following for all supported Python
