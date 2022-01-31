@@ -91,184 +91,184 @@ workflows:
             - Docker publishing as bludoc
             - GitHub pushes to BjoernLudwigPTB's public_repos
 
-#  nightly_test:
-#    triggers:
-#      - schedule:
-#          cron: "0 0 * * *"
-#          filters:
-#            branches:
-#              only: /master/
-#    jobs:
-#      - test:
-#          name: "nightly_test_python_py36"
-#          tag: "3.6"
-#          toxenvs: "-e py36 -e py36-without_requirements"
-#          posargs: "-- ''"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "nightly_test_python_py37"
-#          tag: "3.7"
-#          toxenvs: "-e py37 -e py37-without_requirements"
-#          posargs: "-- ''"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "nightly_test_python_py38"
-#          tag: "3.8"
-#          toxenvs: "-e py38 -e py38-without_requirements"
-#          posargs: "-- ''"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "nightly_test_python_py39"
-#          tag: "3.9"
-#          toxenvs: "-e py39 -e py39-without_requirements"
-#          posargs: "-- ''"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "nightly_test_python_py310"
-#          tag: "3.10"
-#          toxenvs: "-e py310 -e py310-without_requirements"
-#          posargs: "-- ''"
-#          context:
-#            - Docker publishing as bludoc
-#      - test_conda_py39:
-#          name: "nightly_test_conda_py39"
-#          is_nightly_run: True
-#          context:
-#            - Docker publishing as bludoc
-#
-#  quick_test:
-#    jobs:
-#      - test:
-#          name: "test_python_py39"
-#          tag: "3.9"
-#          toxenvs: "-e py39-without_requirements"
-#          context:
-#            - Docker publishing as bludoc
-#      - test_conda_py39:
-#          is_nightly_run: False
-#          context:
-#            - Docker publishing as bludoc
-#
-#  test_and_deploy:
-#    jobs:
-#      - test:
-#          name: "test_python_py36"
-#          tag: "3.6"
-#          toxenvs: "-e py36-without_requirements"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py36_slow_tests"
-#          tag: "3.6"
-#          toxenvs: "-e py36-without_requirements"
-#          posargs: "-- -m 'slow'"
-#          requires:
-#            - test_python_py36
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py37"
-#          tag: "3.7"
-#          toxenvs: "-e py37-without_requirements"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py37_slow_tests"
-#          tag: "3.7"
-#          toxenvs: "-e py37-without_requirements"
-#          posargs: "-- -m 'slow'"
-#          requires:
-#            - test_python_py37
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py38"
-#          tag: "3.8"
-#          toxenvs: "-e py38-without_requirements"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py38_slow_tests"
-#          tag: "3.8"
-#          toxenvs: "-e py38-without_requirements"
-#          posargs: "-- -m 'slow'"
-#          requires:
-#            - test_python_py38
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py39_slow_tests"
-#          tag: "3.9"
-#          toxenvs: "-e py39-without_requirements"
-#          posargs: "-- -m 'slow'"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py310"
-#          tag: "3.10"
-#          toxenvs: "-e py310-without_requirements"
-#          context:
-#            - Docker publishing as bludoc
-#      - test:
-#          name: "test_python_py310_slow_tests"
-#          tag: "3.10"
-#          toxenvs: "-e py310-without_requirements"
-#          posargs: "-- -m 'slow'"
-#          requires:
-#            - test_python_py310
-#          context:
-#            - Docker publishing as bludoc
-#      - test_conda_py39:
-#          name: "test_conda_py39_with_all_tests"
-#          is_nightly_run: True
-#          context:
-#            - Docker publishing as bludoc
-#      - preview_release:
-#          requires:
-#            - test_python_py36_slow_tests
-#            - test_python_py37_slow_tests
-#            - test_python_py38_slow_tests
-#            - test_python_py39_slow_tests
-#            - test_python_py310_slow_tests
-#            - test_conda_py39_with_all_tests
-#          filters:
-#            branches:
-#              ignore: /.*dev$/
-#          context:
-#            - Docker publishing as bludoc
-#      - confirm_previewed_release_actions:
-#          # This job allows for checking that the release we will create in the
-#          # next step actually is the desired release, by observing the result of
-#          # preview_release.
-#          type: approval
-#          requires:
-#            - preview_release
-#          filters:
-#            branches:
-#              only: /master/
-#          context:
-#            - Docker publishing as bludoc
-#      - release:
-#          # Job to potentially create a release based on python-semantic-release's
-#          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
-#          # approval in the previous step, which is only triggered on branch master,
-#          # thus this job here is triggered only on master as well.
-#          context:
-#            - pypi.org publishing for PyDynamic
-#            - GitHub pushes to BjoernLudwigPTB's public_repos
-#            - Docker publishing as bludoc
-#          requires:
-#            - confirm_previewed_release_actions
-#      - tweet:
-#          context:
-#            - Twitter.com publish release
-#            - Docker publishing as bludoc
-#          requires:
-#            - release
+  nightly_test:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only: /master/
+    jobs:
+      - test:
+          name: "nightly_test_python_py36"
+          tag: "3.6"
+          toxenvs: "-e py36 -e py36-without_requirements"
+          posargs: "-- ''"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "nightly_test_python_py37"
+          tag: "3.7"
+          toxenvs: "-e py37 -e py37-without_requirements"
+          posargs: "-- ''"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "nightly_test_python_py38"
+          tag: "3.8"
+          toxenvs: "-e py38 -e py38-without_requirements"
+          posargs: "-- ''"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "nightly_test_python_py39"
+          tag: "3.9"
+          toxenvs: "-e py39 -e py39-without_requirements"
+          posargs: "-- ''"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "nightly_test_python_py310"
+          tag: "3.10"
+          toxenvs: "-e py310 -e py310-without_requirements"
+          posargs: "-- ''"
+          context:
+            - Docker publishing as bludoc
+      - test_conda_py39:
+          name: "nightly_test_conda_py39"
+          is_nightly_run: True
+          context:
+            - Docker publishing as bludoc
+
+  quick_test:
+    jobs:
+      - test:
+          name: "test_python_py39"
+          tag: "3.9"
+          toxenvs: "-e py39-without_requirements"
+          context:
+            - Docker publishing as bludoc
+      - test_conda_py39:
+          is_nightly_run: False
+          context:
+            - Docker publishing as bludoc
+
+  test_and_deploy:
+    jobs:
+      - test:
+          name: "test_python_py36"
+          tag: "3.6"
+          toxenvs: "-e py36-without_requirements"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py36_slow_tests"
+          tag: "3.6"
+          toxenvs: "-e py36-without_requirements"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py36
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py37"
+          tag: "3.7"
+          toxenvs: "-e py37-without_requirements"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py37_slow_tests"
+          tag: "3.7"
+          toxenvs: "-e py37-without_requirements"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py37
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py38"
+          tag: "3.8"
+          toxenvs: "-e py38-without_requirements"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py38_slow_tests"
+          tag: "3.8"
+          toxenvs: "-e py38-without_requirements"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py38
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py39_slow_tests"
+          tag: "3.9"
+          toxenvs: "-e py39-without_requirements"
+          posargs: "-- -m 'slow'"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py310"
+          tag: "3.10"
+          toxenvs: "-e py310-without_requirements"
+          context:
+            - Docker publishing as bludoc
+      - test:
+          name: "test_python_py310_slow_tests"
+          tag: "3.10"
+          toxenvs: "-e py310-without_requirements"
+          posargs: "-- -m 'slow'"
+          requires:
+            - test_python_py310
+          context:
+            - Docker publishing as bludoc
+      - test_conda_py39:
+          name: "test_conda_py39_with_all_tests"
+          is_nightly_run: True
+          context:
+            - Docker publishing as bludoc
+      - preview_release:
+          requires:
+            - test_python_py36_slow_tests
+            - test_python_py37_slow_tests
+            - test_python_py38_slow_tests
+            - test_python_py39_slow_tests
+            - test_python_py310_slow_tests
+            - test_conda_py39_with_all_tests
+          filters:
+            branches:
+              ignore: /.*dev$/
+          context:
+            - Docker publishing as bludoc
+      - confirm_previewed_release_actions:
+          # This job allows for checking that the release we will create in the
+          # next step actually is the desired release, by observing the result of
+          # preview_release.
+          type: approval
+          requires:
+            - preview_release
+          filters:
+            branches:
+              only: /master/
+          context:
+            - Docker publishing as bludoc
+      - release:
+          # Job to potentially create a release based on python-semantic-release's
+          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
+          # approval in the previous step, which is only triggered on branch master,
+          # thus this job here is triggered only on master as well.
+          context:
+            - pypi.org publishing for PyDynamic
+            - GitHub pushes to BjoernLudwigPTB's public_repos
+            - Docker publishing as bludoc
+          requires:
+            - confirm_previewed_release_actions
+      - tweet:
+          context:
+            - Twitter.com publish release
+            - Docker publishing as bludoc
+          requires:
+            - release
 
 commands:
   create_result_folder:
