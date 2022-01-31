@@ -337,22 +337,18 @@ jobs:
       - create_result_folder
       - create_venv
       - run:
-          name: Persist Python version
-          command: |
-            echo 'export PYVENV=$(echo << parameters.tag >> | tr -d '.')' >> $BASH_ENV
-      - run:
           name: Recompile and sync deps
           command: |
             source venv/bin/activate
             python -m pip install --upgrade tox pip-tools
             python -m piptools compile --upgrade \
-              --output-file requirements/requirements-py${PYVENV}.txt
+              --output-file requirements/requirements-<< parameters.toxenvs >>.txt
             python -m piptools compile --upgrade \
-              requirements/dev-requirements-py${PYVENV}.in \
-              --output-file requirements/dev-requirements-py${PYVENV}.txt
+              requirements/dev-requirements-<< parameters.toxenvs >>.in \
+              --output-file requirements/dev-requirements-<< parameters.toxenvs >>.txt
             python -m piptools sync \
-              requirements/requirements-py${PYVENV}.txt \
-              requirements/dev-requirements-py${PYVENV}.txt
+              requirements/requirements-<< parameters.toxenvs >>.txt \
+              requirements/dev-requirements-<< parameters.toxenvs >>.txt
             python -m pip install .
       - run:
           name: Split tests for shared execution
