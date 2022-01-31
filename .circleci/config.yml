@@ -150,12 +150,6 @@ workflows:
       - test:
           name: "test_python_py37"
           tag: "3.7"
-          toxenvs: "-e py37-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "test_python_py37_slow_tests"
-          tag: "3.7"
           toxenvs: "py37-without_requirements"
           context:
             - Docker publishing as bludoc
