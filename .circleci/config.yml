@@ -236,6 +236,17 @@ commands:
           source venv/bin/activate
           python -m pip install --upgrade pip==21.3.0
 
+  split_tests:
+    description: "Split tests for shared execution."
+    steps:
+    - run:
+        name: Split tests for shared execution
+        command: |
+          set -e
+          echo 'export TEST_FILES=$(circleci tests glob "test/test_*.py" | \
+            circleci tests split --split-by=timings --timings-type=classname)' \
+            >> $BASH_ENV
+
   install_development_deps:
     description: "Install development dependencies."
     parameters:
@@ -314,14 +325,8 @@ jobs:
               requirements/requirements-<< parameters.toxenvs >>.txt \
               requirements/dev-requirements-<< parameters.toxenvs >>.txt
             python -m pip install .
-      - run:
-          name: Split tests for shared execution
-          command: |
-            source venv/bin/activate
-            set -e
-            echo 'export TEST_FILES=$(circleci tests glob "test/test_*.py" | \
-              circleci tests split --split-by=timings --timings-type=classname)' \
-              >> $BASH_ENV      - tox:
+      - split_tests
+      - tox:
           toxenvs: << parameters.toxenvs >>
           posargs: "--"
           tests: ${TEST_FILES}
@@ -409,6 +414,7 @@ jobs:
           command: |
             source venv/bin/activate
             pip install tox
+      - split_tests
       - tox:
           toxenvs: << parameters.toxenvs >>
           posargs: << parameters.posargs >>
@@ -461,6 +467,8 @@ jobs:
             - /home/circleci/conda/envs/
           key: >-
             v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
+
+      - split_tests
 
       - when:
           condition: << parameters.is_nightly_run >>
