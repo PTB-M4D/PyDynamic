@@ -138,9 +138,10 @@ workflows:
   quick_test:
     jobs:
       - test:
-          name: "test_python_py39"
-          tag: "3.9"
-          toxenvs: "-e py39-without_requirements"
+          name: "test_python_py310"
+          tag: "3.10"
+          toxenvs: "py310-without_requirements"
+          posargs: ""
           context:
             - Docker publishing as bludoc
       - test_conda_py39:
