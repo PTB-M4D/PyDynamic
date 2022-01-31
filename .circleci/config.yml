@@ -130,8 +130,6 @@ workflows:
           context:
             - Docker publishing as bludoc
       - test_conda_py39:
-          name: "nightly_test_conda_py39"
-          is_nightly_run: True
           context:
             - Docker publishing as bludoc
 
@@ -426,12 +424,6 @@ jobs:
       - store_results
 
   test_conda_py39:
-    parameters:
-      is_nightly_run:
-        description: execute only some tests during push-triggered runs
-        type: boolean
-        default: False
-
     parallelism: 8
 
     executor: conda_tester
@@ -476,38 +468,24 @@ jobs:
 
       - split_tests
 
-      - when:
-          condition: << parameters.is_nightly_run >>
-          steps:
-            - run:
-                name: Run tests
-                command: |
-                  source $HOME/conda/etc/profile.d/conda.sh
-                  conda activate PyDynamic_conda_env
-                  pytest --cov=PyDynamic --junitxml=test-results/junit.xml ${TEST_FILES}
-            - run:
-                name: Upload coverage report
-                command: |
-                  curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --import
-                  curl -Os https://uploader.codecov.io/latest/linux/codecov
-                  curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-                  curl -Os \
-                    https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
-                  gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
-                  shasum -a 256 -c codecov.SHA256SUM
-                  chmod +x codecov
-                  ./codecov
-
-      - unless:
-          condition: << parameters.is_nightly_run >>
-          steps:
-            - run:
-                name: Run tests
-                command: |
-                  source $HOME/conda/etc/profile.d/conda.sh
-                  conda activate PyDynamic_conda_env
-                  pytest -m "not slow" -v \
-                    --junitxml=test-results/junit.xml ${TEST_FILES}
+      - run:
+          name: Run tests
+          command: |
+            source $HOME/conda/etc/profile.d/conda.sh
+            conda activate PyDynamic_conda_env
+            pytest --cov=PyDynamic --junitxml=test-results/junit.xml ${TEST_FILES}
+      - run:
+          name: Upload coverage report
+          command: |
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --import
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+            curl -Os \
+              https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+            shasum -a 256 -c codecov.SHA256SUM
+            chmod +x codecov
+            ./codecov
 
       - store_results
 
