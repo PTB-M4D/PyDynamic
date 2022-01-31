@@ -370,8 +370,8 @@ jobs:
             source venv/bin/activate
             set -e
             echo 'export TEST_FILES=$(circleci tests glob "test/test_*.py" | \
-              circleci tests split --split-by=timings)' >> $BASH_ENV
-      - tox:
+              circleci tests split --split-by=timings --timings-type=classname)' \
+              >> $BASH_ENV      - tox:
           toxenvs: << parameters.toxenvs >>
           posargs: "-- ${TEST_FILES}"
       - store_results
