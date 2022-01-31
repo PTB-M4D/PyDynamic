@@ -100,13 +100,6 @@ workflows:
               only: /master/
     jobs:
       - test:
-          name: "nightly_test_python_py36"
-          tag: "3.6"
-          toxenvs: "-e py36 -e py36-without_requirements"
-          posargs: "-- ''"
-          context:
-            - Docker publishing as bludoc
-      - test:
           name: "nightly_test_python_py37"
           tag: "3.7"
           toxenvs: "-e py37 -e py37-without_requirements"
@@ -155,21 +148,6 @@ workflows:
 
   test_and_deploy:
     jobs:
-      - test:
-          name: "test_python_py36"
-          tag: "3.6"
-          toxenvs: "-e py36-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "test_python_py36_slow_tests"
-          tag: "3.6"
-          toxenvs: "-e py36-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py36
-          context:
-            - Docker publishing as bludoc
       - test:
           name: "test_python_py37"
           tag: "3.7"
@@ -229,7 +207,6 @@ workflows:
             - Docker publishing as bludoc
       - preview_release:
           requires:
-            - test_python_py36_slow_tests
             - test_python_py37_slow_tests
             - test_python_py38_slow_tests
             - test_python_py39_slow_tests
