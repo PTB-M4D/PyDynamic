@@ -7,7 +7,7 @@ executors:
     parameters:
       tag:
         type: string
-        default: "3.9"
+        default: "3.10"
     docker:
       - image: cimg/python:<< parameters.tag >>
         auth:
@@ -28,16 +28,16 @@ executors:
           username: $DOCKER_USER
           password: $DOCKER_PASS
     environment:
-      PYENV: "py39"
+      PYENV: "py310"
   tweeter:
     working_directory: ~/repo
     parameters:
       tag:
         type: string
-        default: "3.9"
+        default: "3.10"
       pyenv:
         type: string
-        default: "py39"
+        default: "py310"
     docker:
       - image: cimg/python:<< parameters.tag >>
         auth:
@@ -295,7 +295,7 @@ commands:
     parameters:
       pyenv:
         type: string
-        default: "py38"
+        default: "py310"
     steps:
 
     - run:
@@ -438,7 +438,7 @@ jobs:
     parameters:
       tag:
         type: string
-        default: "3.9"
+        default: "3.10"
       toxenvs:
         type: string
         default: ""
