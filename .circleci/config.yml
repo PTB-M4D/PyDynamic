@@ -58,6 +58,18 @@ workflows:
   check_for_upgraded_deps:
     jobs:
       - test_with_updated_deps:
+          name: "test_with_updated_deps_py37"
+          tag: "3.7"
+          toxenvs: "py37"
+          context:
+            - Docker publishing as bludoc
+      - test_with_updated_deps:
+          name: "test_with_updated_deps_py38"
+          tag: "3.8"
+          toxenvs: "py38"
+          context:
+            - Docker publishing as bludoc
+      - test_with_updated_deps:
           name: "test_with_updated_deps_py39"
           tag: "3.9"
           toxenvs: "py39"
@@ -71,6 +83,8 @@ workflows:
             - Docker publishing as bludoc
       - commit_push_open_pr:
           requires:
+            - test_with_updated_deps_py37
+            - test_with_updated_deps_py38
             - test_with_updated_deps_py39
             - test_with_updated_deps_py310
           context:
