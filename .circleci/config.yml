@@ -360,8 +360,6 @@ jobs:
             - requirements/dev-requirements-py*.txt
 
   commit_push_open_pr:
-    parallelism: 1
-
     executor:
       name: gh_releaser
 
