@@ -108,29 +108,25 @@ workflows:
       - test:
           name: "nightly_test_python_py37"
           tag: "3.7"
-          toxenvs: "-e py37 -e py37-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py37 -e py37-without_requirements"
           context:
             - Docker publishing as bludoc
       - test:
           name: "nightly_test_python_py38"
           tag: "3.8"
-          toxenvs: "-e py38 -e py38-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py38 -e py38-without_requirements"
           context:
             - Docker publishing as bludoc
       - test:
           name: "nightly_test_python_py39"
           tag: "3.9"
-          toxenvs: "-e py39 -e py39-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py39 -e py39-without_requirements"
           context:
             - Docker publishing as bludoc
       - test:
           name: "nightly_test_python_py310"
           tag: "3.10"
-          toxenvs: "-e py310 -e py310-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py310 -e py310-without_requirements"
           context:
             - Docker publishing as bludoc
       - test_conda_py39:
@@ -163,61 +159,37 @@ workflows:
       - test:
           name: "test_python_py37_slow_tests"
           tag: "3.7"
-          toxenvs: "-e py37-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py37
+          toxenvs: "py37-without_requirements"
           context:
             - Docker publishing as bludoc
       - test:
           name: "test_python_py38"
           tag: "3.8"
-          toxenvs: "-e py38-without_requirements"
+          toxenvs: "py38-without_requirements"
           context:
             - Docker publishing as bludoc
       - test:
-          name: "test_python_py38_slow_tests"
-          tag: "3.8"
-          toxenvs: "-e py38-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py38
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "test_python_py39_slow_tests"
+          name: "test_python_py39"
           tag: "3.9"
-          toxenvs: "-e py39-without_requirements"
-          posargs: "-- -m 'slow'"
+          toxenvs: "py39-without_requirements"
           context:
             - Docker publishing as bludoc
       - test:
           name: "test_python_py310"
           tag: "3.10"
-          toxenvs: "-e py310-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "test_python_py310_slow_tests"
-          tag: "3.10"
-          toxenvs: "-e py310-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py310
+          toxenvs: "py310-without_requirements"
           context:
             - Docker publishing as bludoc
       - test_conda_py39:
-          name: "test_conda_py39_with_all_tests"
-          is_nightly_run: True
           context:
             - Docker publishing as bludoc
       - preview_release:
           requires:
-            - test_python_py37_slow_tests
-            - test_python_py38_slow_tests
-            - test_python_py39_slow_tests
-            - test_python_py310_slow_tests
-            - test_conda_py39_with_all_tests
+            - test_python_py37
+            - test_python_py38
+            - test_python_py39
+            - test_python_py310
+            - test_conda_py39
           filters:
             branches:
               ignore: /.*dev$/
