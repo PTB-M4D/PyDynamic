@@ -478,7 +478,7 @@ jobs:
                 command: |
                   source $HOME/conda/etc/profile.d/conda.sh
                   conda activate PyDynamic_conda_env
-                  pytest  --cov=PyDynamic --junitxml=test-results/junit.xml .
+                  pytest --cov=PyDynamic --junitxml=test-results/junit.xml ${TEST_FILES}
             - run:
                 name: Upload coverage report
                 command: |
@@ -499,7 +499,8 @@ jobs:
                 command: |
                   source $HOME/conda/etc/profile.d/conda.sh
                   conda activate PyDynamic_conda_env
-                  pytest -m "not slow" -v --junitxml=test-results/junit.xml .
+                  pytest -m "not slow" -v \
+                    --junitxml=test-results/junit.xml ${TEST_FILES}
 
       - store_results
 
