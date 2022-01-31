@@ -259,13 +259,17 @@ commands:
       posargs:
         type: string
         default: ""
+      tests:
+        type: string
+        default: ""
     steps:
 
     - run:
         name: Perform tox testing
         command: |
           source venv/bin/activate
-          tox -e << parameters.toxenvs >> << parameters.posargs >>
+          tox -e << parameters.toxenvs >> << parameters.posargs >> \
+            << parameters.tests >>
 
   store_results:
     description: "Store test results."
@@ -319,7 +323,8 @@ jobs:
               circleci tests split --split-by=timings --timings-type=classname)' \
               >> $BASH_ENV      - tox:
           toxenvs: << parameters.toxenvs >>
-          posargs: "-- ${TEST_FILES}"
+          posargs: "--"
+          tests: ${TEST_FILES}
       - store_results
 
       - persist_to_workspace:
@@ -407,6 +412,7 @@ jobs:
       - tox:
           toxenvs: << parameters.toxenvs >>
           posargs: << parameters.posargs >>
+          tests: ${TEST_FILES}
       - store_results
 
   test_conda_py39:
