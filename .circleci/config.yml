@@ -317,7 +317,7 @@ jobs:
         type: string
         default: ""
 
-    parallelism: 2
+    parallelism: 4
 
     executor:
       name: venv_tester
