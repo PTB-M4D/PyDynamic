@@ -13,14 +13,15 @@ docs/**/*.ipynb
 
 # Testing artifacts #
 #####################
-.pytest_cache/
 __pycache__/
+.hypothesis/
+.pytest_cache/
+.tox
+test-results/
 .coverage
 .coverage.*
 coverage.xml
 junit.xml
-.tox
-.hypothesis/*
 codecov*
 
 # Jupyter Notebook artifacts #
