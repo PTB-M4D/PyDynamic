@@ -373,7 +373,7 @@ jobs:
               circleci tests split --split-by=timings)' >> $BASH_ENV
       - tox:
           toxenvs: << parameters.toxenvs >>
-          posargs: "-- -m 'not slow' ${TEST_FILES}"
+          posargs: "-- ${TEST_FILES}"
       - store_results
 
       - persist_to_workspace:
