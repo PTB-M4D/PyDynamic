@@ -141,6 +141,7 @@ workflows:
           tag: "3.10"
           toxenvs: "py310-without_requirements"
           posargs: "-- -m 'not slow'"
+          parallelism: 4
           context:
             - Docker publishing as bludoc
 
