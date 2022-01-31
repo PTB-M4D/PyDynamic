@@ -401,7 +401,7 @@ jobs:
         type: string
         default: ""
       parallelism:
-        type: int
+        type: integer
         default: 8
 
     parallelism: << parameters.parallelism >>
