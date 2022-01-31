@@ -144,10 +144,6 @@ workflows:
           posargs: ""
           context:
             - Docker publishing as bludoc
-      - test_conda_py39:
-          is_nightly_run: False
-          context:
-            - Docker publishing as bludoc
 
   test_and_deploy:
     jobs:
