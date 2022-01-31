@@ -337,9 +337,12 @@ jobs:
       - create_result_folder
       - create_venv
       - run:
-          name: Recompile and sync deps
+          name: Persist Python version
           command: |
             echo 'export PYVENV=$(echo << parameters.tag >> | tr -d '.')' >> $BASH_ENV
+      - run:
+          name: Recompile and sync deps
+          command: |
             source venv/bin/activate
             python -m pip install --upgrade tox pip-tools
             python -m piptools compile --upgrade \
