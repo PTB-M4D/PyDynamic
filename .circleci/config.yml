@@ -445,8 +445,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
-            - v3-conda-dependencies-
+            - v4-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
+            - v4-conda-dependencies-
 
       - run:
           name: Create or update environment
@@ -464,7 +464,7 @@ jobs:
           paths:
             - /home/circleci/conda/envs/
           key: >-
-            v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
+            v4-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
 
       - split_tests
 
