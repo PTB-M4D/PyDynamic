@@ -338,3 +338,13 @@ def test_fit_iir_via_least_squares_exception(
             Nb=lsiir_base_params["Nb"],
             inv=True,
         )
+
+
+def test_fit_iir_with_uncertainty():
+    N = 10
+    f = np.arange(N)
+    Fs = 1.0
+    H = np.random.randn(N) + 1j * np.random.randn(N)
+    UH = np.diag(1 + np.random.rand(2 * N))
+
+    fit_filter.LSIIR(H=H, UH=UH, Nb=3, Na=6, f=f, Fs=Fs, tau=2, mc_runs=2)

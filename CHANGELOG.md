@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v2.1.1 (2021-12-18)
+### Fix
+* **LSIIR:** Proper init of final_tau ([`29f2eef`](https://github.com/PTB-M4D/PyDynamic/commit/29f2eefadc05d7cf8affd9727d8afb9b56259737))
+
+### Documentation
+* **Signal:** Introduce Signal class into docs ([`0da9b9d`](https://github.com/PTB-M4D/PyDynamic/commit/0da9b9d928688460953ffa3e4b92185c5b45f633))
+* **Python 3.10:** Introduce Python 3.10 to the docs ([`a20384a`](https://github.com/PTB-M4D/PyDynamic/commit/a20384abf20cf576d5da6b6f0a5960b78d046093))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.1.0...v2.1.1)**
+
 ## v2.1.0 (2021-12-03)
 ### Feature
 * **tools:** Provide convenience functions to prepare input vectors for DFT and filtering ([`6d15922`](https://github.com/PTB-M4D/PyDynamic/commit/6d15922d14d934467710cc0466ad1a21b4d6a066))
