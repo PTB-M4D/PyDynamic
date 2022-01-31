@@ -18,7 +18,7 @@ __pycache__/
 .coverage
 .coverage.*
 coverage.xml
-pytest.xml
+junit.xml
 .tox
 .hypothesis/*
 !.hypothesis/examples/
