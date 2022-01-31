@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
 import PyDynamic.misc.noise as pn
 
@@ -87,8 +88,8 @@ def test_ARMA():
     # check default parameters (white noise)
     w = pn.ARMA(100)
     assert w.shape == (100,)
-    assert np.std(w) == pytest.approx(1.0, abs=0.2)
-    assert np.mean(w) == pytest.approx(0.0, abs=0.2)
+    assert_allclose(np.std(w), 1.0, rtol=0.2)
+    assert_allclose(np.mean(w), 0.0, atol=0.2)
 
     # check float, list and numpy.arrays as input values
     phi_list = [2, [2], np.array([1, 2])]

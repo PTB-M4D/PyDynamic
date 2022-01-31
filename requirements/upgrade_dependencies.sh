@@ -25,16 +25,16 @@ fi
 # environments and update the corresponding two requirements files by issuing the
 # appropriate pip-tools command pip-compile from within the specific environments.
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-for PYVENV in "6" "7" "8" "9" "10"
+for PYVENV in "7" "8" "9" "10"
 do
     echo "
-Compile dependencies for Python3.$PYVENV
-==================================
+Compile dependencies for Python 3.$PYVENV
+====================================
     "
     # Activate according Python environment.
     source ../envs/PyDynamic-py3$PYVENV/bin/activate && \
     # Upgrade pip and pip-tools.
-    python -m pip install --upgrade pip pip-tools && \
+    python -m pip install --upgrade pip==21.3.1 pip-tools && \
     # Create requirements...txt from setup.py.
     python -m piptools compile --upgrade --output-file requirements/requirements-py3$PYVENV.txt && \
     # Create dev-requirements...txt from dev-requirements...in.

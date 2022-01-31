@@ -7,145 +7,183 @@ executors:
     parameters:
       tag:
         type: string
-        default: "3.9"
+        default: "3.10"
     docker:
-      - image: circleci/python:<< parameters.tag >>
+      - image: cimg/python:<< parameters.tag >>
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
   conda_tester:
     working_directory: ~/repo
     docker:
       - image: cimg/base:2021.04
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
   publisher:
     working_directory: ~/repo
     docker:
       - image: circleci/python:3.9
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
     environment:
-      PYENV: "py39"
+      PYENV: "py310"
   tweeter:
     working_directory: ~/repo
     parameters:
       tag:
         type: string
-        default: "3.9"
+        default: "3.10"
       pyenv:
         type: string
-        default: "py39"
+        default: "py310"
     docker:
-      - image: circleci/python:<< parameters.tag >>
+      - image: cimg/python:<< parameters.tag >>
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
     environment:
       PYENV: << parameters.pyenv >>
+  gh_releaser:
+    working_directory: ~/repo
+    docker:
+      - image: cimg/base:2021.04
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASS
 
 workflows:
+
+  check_for_upgraded_deps:
+    triggers:
+      - schedule:
+          cron: "0 0 1 * *"
+          filters:
+            branches:
+              only: /master/
+    jobs:
+      - test_with_updated_deps:
+          name: "test_with_updated_deps_py37"
+          tag: "3.7"
+          toxenvs: "py37"
+          context:
+            - Docker publishing as bludoc
+      - test_with_updated_deps:
+          name: "test_with_updated_deps_py38"
+          tag: "3.8"
+          toxenvs: "py38"
+          context:
+            - Docker publishing as bludoc
+      - test_with_updated_deps:
+          name: "test_with_updated_deps_py39"
+          tag: "3.9"
+          toxenvs: "py39"
+          context:
+            - Docker publishing as bludoc
+      - test_with_updated_deps:
+          name: "test_with_updated_deps_py310"
+          tag: "3.10"
+          toxenvs: "py310"
+          context:
+            - Docker publishing as bludoc
+      - commit_push_open_pr:
+          requires:
+            - test_with_updated_deps_py37
+            - test_with_updated_deps_py38
+            - test_with_updated_deps_py39
+            - test_with_updated_deps_py310
+          context:
+            - Docker publishing as bludoc
+            - GitHub pushes to BjoernLudwigPTB's public_repos
+
   nightly_test:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "0 0 8,15,22 * *"
           filters:
             branches:
               only: /master/
     jobs:
       - test:
-          name: "nightly_test_python_py36"
-          tag: "3.6"
-          toxenvs: "-e py36 -e py36-without_requirements"
-          posargs: "-- ''"
-      - test:
           name: "nightly_test_python_py37"
           tag: "3.7"
-          toxenvs: "-e py37 -e py37-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py37 -e py37-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test:
           name: "nightly_test_python_py38"
           tag: "3.8"
-          toxenvs: "-e py38 -e py38-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py38 -e py38-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test:
           name: "nightly_test_python_py39"
           tag: "3.9"
-          toxenvs: "-e py39 -e py39-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py39 -e py39-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test:
           name: "nightly_test_python_py310"
           tag: "3.10"
-          toxenvs: "-e py310 -e py310-without_requirements"
-          posargs: "-- ''"
+          toxenvs: "py310 -e py310-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test_conda_py39:
-          name: "nightly_test_conda_py39"
-          is_nightly_run: True
+          context:
+            - Docker publishing as bludoc
 
   quick_test:
     jobs:
       - test:
-          name: "test_python_py39"
-          tag: "3.9"
-          toxenvs: "-e py39-without_requirements"
-      - test_conda_py39:
-          is_nightly_run: False
+          tag: "3.10"
+          toxenvs: "py310-without_requirements"
+          posargs: "-- -m 'not slow'"
+          parallelism: 4
+          context:
+            - Docker publishing as bludoc
 
   test_and_deploy:
     jobs:
       - test:
-          name: "test_python_py36"
-          tag: "3.6"
-          toxenvs: "-e py36-without_requirements"
-      - test:
-          name: "test_python_py36_slow_tests"
-          tag: "3.6"
-          toxenvs: "-e py36-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py36
-      - test:
           name: "test_python_py37"
           tag: "3.7"
-          toxenvs: "-e py37-without_requirements"
-      - test:
-          name: "test_python_py37_slow_tests"
-          tag: "3.7"
-          toxenvs: "-e py37-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py37
+          toxenvs: "py37-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test:
           name: "test_python_py38"
           tag: "3.8"
-          toxenvs: "-e py38-without_requirements"
+          toxenvs: "py38-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test:
-          name: "test_python_py38_slow_tests"
-          tag: "3.8"
-          toxenvs: "-e py38-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py38
-      - test:
-          name: "test_python_py39_slow_tests"
+          name: "test_python_py39"
           tag: "3.9"
-          toxenvs: "-e py39-without_requirements"
-          posargs: "-- -m 'slow'"
+          toxenvs: "py39-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test:
           name: "test_python_py310"
           tag: "3.10"
-          toxenvs: "-e py310-without_requirements"
-      - test:
-          name: "test_python_py310_slow_tests"
-          tag: "3.10"
-          toxenvs: "-e py310-without_requirements"
-          posargs: "-- -m 'slow'"
-          requires:
-            - test_python_py310
+          toxenvs: "py310-without_requirements"
+          context:
+            - Docker publishing as bludoc
       - test_conda_py39:
-          name: "test_conda_py39_with_all_tests"
-          is_nightly_run: True
+          context:
+            - Docker publishing as bludoc
       - preview_release:
           requires:
-            - test_python_py36_slow_tests
-            - test_python_py37_slow_tests
-            - test_python_py38_slow_tests
-            - test_python_py39_slow_tests
-            - test_python_py310_slow_tests
-            - test_conda_py39_with_all_tests
+            - test_python_py37
+            - test_python_py38
+            - test_python_py39
+            - test_python_py310
+            - test_conda_py39
           filters:
             branches:
               ignore: /.*dev$/
+          context:
+            - Docker publishing as bludoc
       - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
@@ -156,6 +194,8 @@ workflows:
           filters:
             branches:
               only: /master/
+          context:
+            - Docker publishing as bludoc
       - release:
           # Job to potentially create a release based on python-semantic-release's
           # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
@@ -164,15 +204,18 @@ workflows:
           context:
             - pypi.org publishing for PyDynamic
             - GitHub pushes to BjoernLudwigPTB's public_repos
+            - Docker publishing as bludoc
           requires:
             - confirm_previewed_release_actions
       - tweet:
-          context: Twitter.com publish release
+          context:
+            - Twitter.com publish release
+            - Docker publishing as bludoc
           requires:
             - release
 
 commands:
-  create_folders:
+  create_result_folder:
     description: "Checkout code and prepare test results location."
     steps:
     - checkout
@@ -189,14 +232,24 @@ commands:
         command: |
           python3 -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip
+          python -m pip install --upgrade pip==21.3.0
+
+  split_tests:
+    description: "Split tests for shared execution."
+    steps:
+    - run:
+        name: Split tests for shared execution
+        command: |
+          set -e
+          echo 'export TEST_FILES=$(circleci tests glob "test/test_*.py" | \
+            circleci tests split --split-by=timings)' >> $BASH_ENV
 
   install_development_deps:
     description: "Install development dependencies."
     parameters:
       pyenv:
         type: string
-        default: "py38"
+        default: "py310"
     steps:
 
     - run:
@@ -214,13 +267,17 @@ commands:
       posargs:
         type: string
         default: ""
+      tests:
+        type: string
+        default: ""
     steps:
 
     - run:
         name: Perform tox testing
         command: |
           source venv/bin/activate
-          tox << parameters.toxenvs >> << parameters.posargs >>
+          tox -e << parameters.toxenvs >> << parameters.posargs >> \
+            << parameters.tests >>
 
   store_results:
     description: "Store test results."
@@ -229,6 +286,94 @@ commands:
         path: test-results
 
 jobs:
+
+  test_with_updated_deps:
+    parameters:
+      tag:
+        type: string
+        default: "3.10"
+      toxenvs:
+        type: string
+        default: "py310"
+      posargs:
+        type: string
+        default: ""
+
+    parallelism: 8
+
+    executor:
+      name: venv_tester
+      tag: << parameters.tag >>
+
+    steps:
+      - create_result_folder
+      - create_venv
+      - run:
+          name: Recompile and sync deps
+          command: |
+            source venv/bin/activate
+            python -m pip install --upgrade tox pip-tools
+            python -m piptools compile --upgrade \
+              --output-file requirements/requirements-<< parameters.toxenvs >>.txt
+            python -m piptools compile --upgrade \
+              requirements/dev-requirements-<< parameters.toxenvs >>.in \
+              --output-file requirements/dev-requirements-<< parameters.toxenvs >>.txt
+            python -m piptools sync \
+              requirements/requirements-<< parameters.toxenvs >>.txt \
+              requirements/dev-requirements-<< parameters.toxenvs >>.txt
+            python -m pip install .
+      - split_tests
+      - tox:
+          toxenvs: << parameters.toxenvs >>
+          tests: ${TEST_FILES}
+      - store_results
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - requirements/requirements-<< parameters.toxenvs >>.txt
+            - requirements/dev-requirements-<< parameters.toxenvs >>.txt
+
+  commit_push_open_pr:
+    executor:
+      name: gh_releaser
+
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Commit and push changes
+          command: |
+            git config --global user.name "Bjoern Ludwig (via CircleCI)"
+            git config --global user.email "bjoern.ludwig@ptb.de"
+            NEW_BRANCH=recompile_deps
+            git checkout -b ${NEW_BRANCH}
+            git commit -am \
+              "build(deps): recompile Python (dev) deps"
+            git push -u origin  ${NEW_BRANCH}
+
+      - run:
+          name: Install GitHub CLI
+          command: |
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+              sudo dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) \
+              signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] \
+              https://cli.github.com/packages stable main" | \
+              sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh
+
+      - run:
+          name: Open PR
+          command: |
+            gh pr create --base master --title "Update deps" \
+              --body "This PR provides recompiled deps for all outdated package \
+              versions. It was opened after the commited deps were succesfully \
+              compiled and all tests passed with the new versions. It should be \
+              merged as soon as possible to avoid any security issues due to \
+              outdated dependencies."
 
   # Define one 'test' job with parameters to deal with all desired cases. The
   # reason for this is the desire to ensure the following for all supported Python
@@ -245,42 +390,45 @@ jobs:
     parameters:
       tag:
         type: string
-        default: "3.9"
+        default: "3.10"
       toxenvs:
         type: string
         default: ""
       posargs:
         type: string
         default: ""
+      parallelism:
+        type: integer
+        default: 8
+
+    parallelism: << parameters.parallelism >>
 
     executor:
       name: venv_tester
       tag: << parameters.tag >>
 
     steps:
-      - create_folders
+      - create_result_folder
       - create_venv
       - run:
           name: Install tox
           command: |
             source venv/bin/activate
             pip install tox
+      - split_tests
       - tox:
           toxenvs: << parameters.toxenvs >>
           posargs: << parameters.posargs >>
+          tests: ${TEST_FILES}
       - store_results
 
   test_conda_py39:
-    parameters:
-      is_nightly_run:
-        description: execute only some tests during push-triggered runs
-        type: boolean
-        default: False
+    parallelism: 8
 
     executor: conda_tester
 
     steps:
-      - create_folders
+      - create_result_folder
       - run:
           name: Install Miniconda
           command: |
@@ -296,8 +444,8 @@ jobs:
 
       - restore_cache:
           keys:
-            - v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
-            - v3-conda-dependencies-
+            - v4-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
+            - v4-conda-dependencies-
 
       - run:
           name: Create or update environment
@@ -309,44 +457,34 @@ jobs:
             fi
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
-            conda install pytest pytest-cov hypothesis psutil
+            conda install pytest pytest-cov hypothesis
 
       - save_cache:
           paths:
             - /home/circleci/conda/envs/
           key: >-
-            v3-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
+            v4-conda-dependencies-{{ checksum "requirements/environment.yml" }}-{{ checksum "requirements/requirements.txt" }}
 
-      - when:
-          condition: << parameters.is_nightly_run >>
-          steps:
-            - run:
-                name: Run tests
-                command: |
-                  source $HOME/conda/etc/profile.d/conda.sh
-                  conda activate PyDynamic_conda_env
-                  pytest  --cov=PyDynamic --junitxml=test-results/pytest.xml .
-            - run:
-                name: Upload coverage report
-                command: |
-                  curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --import
-                  curl -Os https://uploader.codecov.io/latest/linux/codecov
-                  curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-                  curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
-                  gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
-                  shasum -a 256 -c codecov.SHA256SUM
-                  chmod +x codecov
-                  ./codecov
+      - split_tests
 
-      - unless:
-          condition: << parameters.is_nightly_run >>
-          steps:
-            - run:
-                name: Run tests
-                command: |
-                  source $HOME/conda/etc/profile.d/conda.sh
-                  conda activate PyDynamic_conda_env
-                  pytest -m "not slow" -v --junitxml=test-results/pytest.xml .
+      - run:
+          name: Run tests
+          command: |
+            source $HOME/conda/etc/profile.d/conda.sh
+            conda activate PyDynamic_conda_env
+            pytest --cov=PyDynamic --junitxml=test-results/junit.xml ${TEST_FILES}
+      - run:
+          name: Upload coverage report
+          command: |
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --import
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+            curl -Os \
+              https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+            shasum -a 256 -c codecov.SHA256SUM
+            chmod +x codecov
+            ./codecov
 
       - store_results
 
@@ -355,7 +493,7 @@ jobs:
       name: publisher
 
     steps:
-      - create_folders
+      - create_result_folder
       - create_venv
       - install_development_deps:
           pyenv: ${PYENV}
@@ -373,7 +511,7 @@ jobs:
       name: publisher
 
     steps:
-      - create_folders
+      - create_result_folder
       - create_venv
       - install_development_deps:
           pyenv: ${PYENV}

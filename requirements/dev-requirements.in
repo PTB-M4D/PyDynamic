@@ -3,7 +3,6 @@ pytest
 pytest-cov
 hypothesis
 tox
-psutil
 sphinx
 sphinx-rtd-theme
 recommonmark

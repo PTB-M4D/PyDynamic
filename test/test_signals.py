@@ -20,7 +20,7 @@ from PyDynamic.misc.testsignals import (
 )
 from PyDynamic.signals import Signal
 from .conftest import (
-    _print_current_ram_usage,
+    _print_during_test_to_avoid_timeout,
     hypothesis_bounded_float,
     hypothesis_covariance_matrix,
     hypothesis_float_vector,
@@ -296,7 +296,7 @@ def test_signal_example(monkeypatch):
 )
 @pytest.mark.slow
 def test_signal_class_usual_instanciations(capsys, inputs):
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     test_signal = Signal(**inputs)
     assert test_signal.Ts is not None
     assert test_signal.Fs is not None
@@ -325,7 +325,7 @@ def test_signal_class_usual_instanciations(capsys, inputs):
 @pytest.mark.slow
 def test_signal_class_raise_not_implemented_multivariate_signal(capsys, inputs):
     inputs["values"] = inputs["values"][..., np.newaxis]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     with pytest.raises(
         NotImplementedError,
         match=r"Signal: Multivariate signals are not implemented yet.",
@@ -348,7 +348,7 @@ def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_s
     capsys, inputs
 ):
     inputs["Fs"] = inputs["Ts"]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     with pytest.raises(
         ValueError,
         match=r"Signal: Sampling interval and sampling frequency are assumed to be "
@@ -372,7 +372,7 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainti
     capsys, inputs
 ):
     inputs["uncertainty"] = inputs["uncertainty"][:-1]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     with pytest.raises(
         ValueError,
         match=r"Signal: if uncertainties are provided as np.ndarray "
@@ -397,7 +397,7 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_time_and_va
     capsys, inputs
 ):
     inputs["time"] = inputs["time"][:-1]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     with pytest.raises(
         ValueError,
         match=r"Signal: Number of elements of the provided time and signal vectors "
@@ -419,7 +419,7 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_time_and_va
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inputs):
     inputs["uncertainty"] = inputs["uncertainty"][..., :-1]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     with pytest.raises(
         ValueError,
         match=r"Signal: if uncertainties are provided as 2-dimensional np.ndarray "
@@ -441,7 +441,7 @@ def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inpu
 )
 @pytest.mark.slow
 def test_signal_apply_fir_filter(capsys, signal_and_filter_inputs):
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     signal_init_inputs, filter_inputs = signal_and_filter_inputs
     test_signal = Signal(**signal_init_inputs)
     test_signal.apply_filter(**filter_inputs)
