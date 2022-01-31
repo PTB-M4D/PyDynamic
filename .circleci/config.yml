@@ -402,6 +402,8 @@ jobs:
         type: string
         default: "--"
 
+    parallelism: 8
+
     executor:
       name: venv_tester
       tag: << parameters.tag >>
@@ -427,6 +429,8 @@ jobs:
         description: execute only some tests during push-triggered runs
         type: boolean
         default: False
+
+    parallelism: 8
 
     executor: conda_tester
 
