@@ -317,7 +317,7 @@ jobs:
         type: string
         default: ""
 
-    parallelism: 1
+    parallelism: 2
 
     executor:
       name: venv_tester
@@ -342,16 +342,15 @@ jobs:
               requirements/dev-requirements-py${PYVENV}.txt
             python -m pip install .
       - run:
-          name: Run split tests
+          name: Split tests for shared execution
           command: |
             source venv/bin/activate
             set -e
-            TEST_FILES=$(circleci tests glob "test/test_*.py" | \
-              circleci tests split --split-by=timings)
-            pytest -m "not slow" -v --junitxml=test-results/pytest.xml $TEST_FILES
-#      - tox:
-#          toxenvs: << parameters.toxenvs >>
-#          posargs: << parameters.posargs >>
+            echo 'export TEST_FILES=$(circleci tests glob "test/test_*.py" | \
+              circleci tests split --split-by=timings)' >> $BASH_ENV
+      - tox:
+          toxenvs: << parameters.toxenvs >>
+          posargs: "-- -m 'not slow' ${TEST_FILES}"
       - store_results
 
       - persist_to_workspace:
