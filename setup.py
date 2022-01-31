@@ -91,7 +91,7 @@ setup(
     author="Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
     "Martin Weber",
     author_email="sascha.eichstaedt@ptb.de",
-    keywords="uncertainty dynamic deconvolution metrology",
+    keywords="measurement uncertainty, dynamic measurements, metrology, GUM",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     include_package_data=True,
