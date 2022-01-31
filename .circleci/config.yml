@@ -138,10 +138,9 @@ workflows:
   quick_test:
     jobs:
       - test:
-          name: "test_python_py310"
           tag: "3.10"
           toxenvs: "py310-without_requirements"
-          posargs: ""
+          posargs: "-- -m 'not slow'"
           context:
             - Docker publishing as bludoc
 
@@ -328,7 +327,6 @@ jobs:
       - split_tests
       - tox:
           toxenvs: << parameters.toxenvs >>
-          posargs: "--"
           tests: ${TEST_FILES}
       - store_results
 
@@ -400,7 +398,7 @@ jobs:
         default: ""
       posargs:
         type: string
-        default: "--"
+        default: ""
 
     parallelism: 8
 
