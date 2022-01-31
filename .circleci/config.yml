@@ -399,8 +399,11 @@ jobs:
       posargs:
         type: string
         default: ""
+      parallelism:
+        type: int
+        default: 8
 
-    parallelism: 8
+    parallelism: << parameters.parallelism >>
 
     executor:
       name: venv_tester
