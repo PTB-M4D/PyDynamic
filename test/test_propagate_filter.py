@@ -24,7 +24,7 @@ from PyDynamic.uncertainty.propagate_filter import (
 )
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 from .conftest import (
-    _print_current_ram_usage,
+    _print_during_test_to_avoid_timeout,
     hypothesis_covariance_matrix,
     hypothesis_float_vector,
     hypothesis_not_negative_float,
@@ -517,7 +517,7 @@ def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
     #     f"{fir_unc_filter_input['blow']}",
     # )
     # /HACK
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(
         relevant_y_fir,
         relevant_y_mc,
@@ -576,7 +576,7 @@ def test_FIRuncFilter_non_negative_main_diagonal_covariance(fir_unc_filter_input
 def test_FIRuncFilter_legacy_comparison(capsys, fir_unc_filter_input):
     legacy_y, legacy_Uy = legacy_FIRuncFilter(**fir_unc_filter_input)
     current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(
         legacy_y,
         current_y,

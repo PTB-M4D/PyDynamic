@@ -28,7 +28,7 @@ from PyDynamic.model_estimation.fit_filter import (
 )
 from PyDynamic.uncertainty.propagate_filter import FIRuncFilter
 from .conftest import (
-    _print_current_ram_usage,
+    _print_during_test_to_avoid_timeout,
     hypothesis_dimension,
     hypothesis_float_vector,
     scale_matrix_or_vector_to_convex_combination,
@@ -500,7 +500,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
         inv=True,
         UH=None,
     )[0]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_svd, b_fir_none)
 
 
@@ -536,7 +536,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
         inv=True,
         UH=None,
     )[0]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir_none)
 
 
@@ -572,7 +572,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
         inv=False,
         UH=None,
     )[0]
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir_none)
 
 
@@ -600,7 +600,7 @@ def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
         inv=True,
         UH=monte_carlo["UH"],
     )
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8), hst.booleans())
@@ -656,7 +656,7 @@ def test_usual_call_LSFIR_with_mc(
         UH=monte_carlo["UH"],
         mc_runs=2,
     )
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8))
@@ -845,7 +845,7 @@ def test_compare_different_dtypes_LSFIR(
         UH=monte_carlo["UH"],
         mc_runs=10000,
     )
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_real_imaginary, b_complex, rtol=4e-2)
     assert_allclose(ub_real_imaginary, ub_complex, rtol=6e-1)
 
@@ -1094,7 +1094,7 @@ def test_compare_LSFIR_with_svd_and_with_mc(
         UH=monte_carlo["UH"],
         mc_runs=10000,
     )
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir_svd, rtol=9e-2)
     assert_allclose(Ub_fir_mc, Ub_fir_svd, atol=6e-1, rtol=6e-1)
 
@@ -1130,7 +1130,7 @@ def test_compare_invLSFIR_uncMC_LSFIR(
         UH=monte_carlo["UH"],
         mc_runs=10000,
     )
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir, rtol=4e-2)
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
 
@@ -1165,7 +1165,7 @@ def test_compare_invLSFIR_unc_LSFIR_only_by_filter_coefficients(
         inv=True,
         UH=monte_carlo["UH"],
     )
-    _print_current_ram_usage(capsys)
+    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir)
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
 

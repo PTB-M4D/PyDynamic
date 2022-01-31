@@ -71,7 +71,7 @@ gitdb==4.0.9
     # via gitpython
 gitpython==3.1.26
     # via python-semantic-release
-hypothesis==6.36.0
+hypothesis==6.36.1
     # via -r requirements/dev-requirements.in
 idna==3.3
     # via requests
@@ -187,8 +187,6 @@ pluggy==1.0.0
     #   tox
 prompt-toolkit==3.0.26
     # via ipython
-psutil==5.9.0
-    # via -r requirements/dev-requirements.in
 ptyprocess==0.7.0
     # via pexpect
 py==1.11.0
