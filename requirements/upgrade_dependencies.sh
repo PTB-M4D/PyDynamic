@@ -28,8 +28,8 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 for PYVENV in "7" "8" "9" "10"
 do
     echo "
-Compile dependencies for Python3.$PYVENV
-==================================
+Compile dependencies for Python 3.$PYVENV
+====================================
     "
     # Activate according Python environment.
     source ../envs/PyDynamic-py3$PYVENV/bin/activate && \
