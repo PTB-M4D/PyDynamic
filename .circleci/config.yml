@@ -242,8 +242,7 @@ commands:
         command: |
           set -e
           echo 'export TEST_FILES=$(circleci tests glob "test/test_*.py" | \
-            circleci tests split --split-by=timings --timings-type=classname)' \
-            >> $BASH_ENV
+            circleci tests split --split-by=timings)' >> $BASH_ENV
 
   install_development_deps:
     description: "Install development dependencies."
