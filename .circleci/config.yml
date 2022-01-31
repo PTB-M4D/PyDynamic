@@ -58,11 +58,21 @@ workflows:
   check_for_upgraded_deps:
     jobs:
       - test_with_updated_deps:
+          name: "test_with_updated_deps_py39"
+          tag: "3.9"
+          toxenvs: "-e py39"
+          context:
+            - Docker publishing as bludoc
+      - test_with_updated_deps:
+          name: "test_with_updated_deps_py310"
+          tag: "3.10"
+          toxenvs: "-e py310"
           context:
             - Docker publishing as bludoc
       - commit_push_open_pr:
           requires:
-            - test_with_updated_deps
+            - test_with_updated_deps_py39
+            - test_with_updated_deps_py310
           context:
             - Docker publishing as bludoc
             - GitHub pushes to BjoernLudwigPTB's public_repos
