@@ -100,7 +100,7 @@ workflows:
   nightly_test:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "0 0 8,15,22 * *"
           filters:
             branches:
               only: /master/
