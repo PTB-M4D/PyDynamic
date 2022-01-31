@@ -329,7 +329,7 @@ jobs:
       - run:
           name: Recompile and sync deps
           command: |
-            PYVENV=$(echo << parameters.tag >> | tr -d '.')
+            echo 'export PYVENV=$(echo << parameters.tag >> | tr -d '.')' >> $BASH_ENV
             source venv/bin/activate
             python -m pip install --upgrade tox pip-tools
             python -m piptools compile --upgrade \
@@ -356,8 +356,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - requirements/requirements-py*.txt
-            - requirements/dev-requirements-py*.txt
+            - requirements/requirements-py${PYVENV}.txt
+            - requirements/dev-requirements-py${PYVENV}.txt
 
   commit_push_open_pr:
     executor:
