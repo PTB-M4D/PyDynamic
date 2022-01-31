@@ -21,7 +21,6 @@ coverage.xml
 junit.xml
 .tox
 .hypothesis/*
-!.hypothesis/examples/
 codecov*
 
 # Jupyter Notebook artifacts #
