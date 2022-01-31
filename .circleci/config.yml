@@ -369,8 +369,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - requirements/requirements-py<< parameters.toxenvs >>.txt
-            - requirements/dev-requirements-py<< parameters.toxenvs >>.txt
+            - requirements/requirements-<< parameters.toxenvs >>.txt
+            - requirements/dev-requirements-<< parameters.toxenvs >>.txt
 
   commit_push_open_pr:
     executor:
