@@ -458,7 +458,7 @@ jobs:
             fi
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
-            conda install pytest pytest-cov hypothesis psutil
+            conda install pytest pytest-cov hypothesis
 
       - save_cache:
           paths:
