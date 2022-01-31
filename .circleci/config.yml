@@ -60,13 +60,13 @@ workflows:
       - test_with_updated_deps:
           name: "test_with_updated_deps_py39"
           tag: "3.9"
-          toxenvs: "-e py39"
+          toxenvs: "py39"
           context:
             - Docker publishing as bludoc
       - test_with_updated_deps:
           name: "test_with_updated_deps_py310"
           tag: "3.10"
-          toxenvs: "-e py310"
+          toxenvs: "py310"
           context:
             - Docker publishing as bludoc
       - commit_push_open_pr:
@@ -305,7 +305,7 @@ commands:
         name: Perform tox testing
         command: |
           source venv/bin/activate
-          tox << parameters.toxenvs >> << parameters.posargs >>
+          tox -e << parameters.toxenvs >> << parameters.posargs >>
 
   store_results:
     description: "Store test results."
@@ -322,7 +322,7 @@ jobs:
         default: "3.10"
       toxenvs:
         type: string
-        default: "-e py310"
+        default: "py310"
       posargs:
         type: string
         default: ""
@@ -369,8 +369,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - requirements/requirements-py${PYVENV}.txt
-            - requirements/dev-requirements-py${PYVENV}.txt
+            - requirements/requirements-py<< parameters.toxenvs >>.txt
+            - requirements/dev-requirements-py<< parameters.toxenvs >>.txt
 
   commit_push_open_pr:
     executor:
