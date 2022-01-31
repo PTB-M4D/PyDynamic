@@ -56,6 +56,12 @@ executors:
 workflows:
 
   check_for_upgraded_deps:
+    triggers:
+      - schedule:
+          cron: "0 0 1 * *"
+          filters:
+            branches:
+              only: /master/
     jobs:
       - test_with_updated_deps:
           name: "test_with_updated_deps_py37"
