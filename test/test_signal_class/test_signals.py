@@ -1,15 +1,9 @@
-""" Perform tests on methods to create test signals."""
-from typing import Callable, Dict, Optional, Tuple, Union
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from hypothesis import given, HealthCheck, settings, strategies as hst
-from hypothesis.strategies import composite
-from numpy.testing import assert_almost_equal, assert_equal
+from numpy.testing import assert_almost_equal
 from pytest import approx
 
-from PyDynamic.examples.working_with_signals import demonstrate_signal
 from PyDynamic.misc.testsignals import (
     GaussianPulse,
     multi_sine,
@@ -19,94 +13,11 @@ from PyDynamic.misc.testsignals import (
     squarepulse,
 )
 from PyDynamic.signals import Signal
-from .conftest import (
+from .conftest import signal_inputs
+from ..conftest import (
     _print_during_test_to_avoid_timeout,
-    FIRuncFilter_input,
-    hypothesis_bounded_float,
-    hypothesis_covariance_matrix,
-    hypothesis_float_vector,
     hypothesis_not_negative_float,
 )
-
-
-@composite
-def signal_inputs(
-    draw: Callable,
-    force_number_of_samples_to: int = None,
-    ensure_time_step_to_be_float: bool = False,
-    ensure_uncertainty_array: bool = False,
-    ensure_uncertainty_covariance_matrix: bool = False,
-) -> Dict[str, Union[float, np.ndarray]]:
-    minimum_float = 1e-5
-    maximum_float = 1e-1
-    number_of_samples = force_number_of_samples_to or draw(
-        hst.integers(min_value=4, max_value=512)
-    )
-    small_positive_float_strategy = hypothesis_bounded_float(
-        min_value=minimum_float, max_value=maximum_float
-    )
-    freq_strategy = hst.one_of(
-        small_positive_float_strategy,
-        hst.just(None),
-    )
-    intermediate_time_step = draw(small_positive_float_strategy)
-    max_time = number_of_samples * intermediate_time_step
-    time = np.arange(0, max_time, intermediate_time_step)[:number_of_samples]
-    if ensure_time_step_to_be_float:
-        time_step = intermediate_time_step
-    else:
-        time_step = draw(hst.sampled_from((intermediate_time_step, None)))
-    if time_step is None:
-        sampling_frequency = draw(freq_strategy)
-    else:
-        sampling_frequency = draw(hst.sampled_from((np.reciprocal(time_step), None)))
-    values = rect(time, max_time // 4, max_time // 4 * 3)
-    uncertainties_covariance_strategy = (
-        hypothesis_covariance_matrix(number_of_rows=number_of_samples),
-    )
-    uncertainties_array_strategies = uncertainties_covariance_strategy + (
-        hypothesis_float_vector(
-            min_value=minimum_float, max_value=maximum_float, length=number_of_samples
-        ),
-    )
-    if ensure_uncertainty_covariance_matrix:
-        uncertainties_strategies = uncertainties_covariance_strategy
-    elif ensure_uncertainty_array:
-        uncertainties_strategies = uncertainties_array_strategies
-    else:
-        uncertainties_strategies = uncertainties_array_strategies + (
-            small_positive_float_strategy,
-            hst.just(None),
-        )
-
-    ux = draw(hst.one_of(uncertainties_strategies))
-    return {
-        "time": time,
-        "values": values,
-        "Ts": time_step,
-        "Fs": sampling_frequency,
-        "uncertainty": ux,
-    }
-
-
-@composite
-def apply_fir_filter_inputs(
-    draw: Callable,
-) -> Tuple[
-    Dict[str, Optional[Union[float, np.ndarray]]],
-    Dict[str, Optional[Union[float, np.ndarray]]],
-]:
-    filter_inputs = draw(FIRuncFilter_input(exclude_corr_kind=True))
-    signal_init_inputs = draw(
-        signal_inputs(force_number_of_samples_to=len(filter_inputs["y"]))
-    )
-    signal_init_inputs["values"] = filter_inputs["y"]
-    signal_init_inputs["uncertainty"] = filter_inputs["sigma_noise"]
-    signals_apply_filter_inputs = {
-        "b": filter_inputs["theta"],
-        "filter_uncertainty": filter_inputs["Utheta"],
-    }
-    return signal_init_inputs, signals_apply_filter_inputs
 
 
 @pytest.fixture(scope="module")
@@ -207,46 +118,6 @@ def test_minimal_call_hi_res_max_sine(hi_res_time):
     assert_almost_equal(np.min(x), -1.0)
 
 
-@given(
-    hst.floats(min_value=1, max_value=1e64, allow_infinity=False, allow_nan=False),
-    hst.integers(min_value=1, max_value=1000),
-)
-@pytest.mark.slow
-def test_medium_call_freq_multiples_sine(
-    time, hi_res_time, create_timestamps, freq, rep
-):
-    # Create time vector with timestamps near multiples of frequency.
-    fixed_freq_time = create_timestamps(time[0], rep * 1 / freq, 1 / freq)
-    x = sine(fixed_freq_time, freq=freq)
-    # Check if signal at multiples of frequency is start value of signal.
-    for i_x in x:
-        assert_almost_equal(i_x, 0)
-
-
-@given(hst.floats(min_value=0, exclude_min=True, allow_infinity=False))
-@pytest.mark.slow
-def test_medium_call_max_sine(time, amp):
-    # Test if casual time signal's maximum equals the input amplitude.
-
-    x = sine(time, amp=amp)
-    # Check for minimal callability and that maximum amplitude at
-    # timestamps is below default.
-    assert np.max(np.abs(x)) <= amp
-
-
-@given(hst.floats(min_value=0, exclude_min=True, allow_infinity=False))
-@pytest.mark.slow
-def test_medium_call_hi_res_max_sine(hi_res_time, amp):
-    # Test if high-resoluted time signal's maximum equals the input amplitude.
-
-    # Initialize fixed amplitude.
-    x = sine(hi_res_time, amp=amp)
-    # Check for minimal callability with high resolution time vector and
-    # that maximum amplitude at timestamps is almost equal default.
-    assert_almost_equal(np.max(x), amp)
-    assert_almost_equal(np.min(x), -amp)
-
-
 @given(hst.floats(), hst.floats(), hypothesis_not_negative_float(allow_infinity=True))
 def test_full_call_sine(time, amp, freq, noise):
     # Check for all possible calls.
@@ -276,15 +147,6 @@ def test_compare_multisine_with_sine(time, freq, amp):
     assert_almost_equal(x, multi_x)
 
 
-@pytest.mark.slow
-def test_signal_example(monkeypatch):
-    # Test executability of the demonstrate_signal example.
-    # With this expression we override the matplotlib.pyplot.show method with a
-    # lambda expression returning None but only for this one test.
-    monkeypatch.setattr(plt, "show", lambda: None, raising=True)
-    demonstrate_signal()
-
-
 @given(signal_inputs())
 @settings(
     deadline=None,
@@ -293,34 +155,6 @@ def test_signal_example(monkeypatch):
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-)
-@pytest.mark.slow
-def test_signal_class_usual_instanciations(capsys, inputs):
-    _print_during_test_to_avoid_timeout(capsys)
-    test_signal = Signal(**inputs)
-    assert test_signal.Ts is not None
-    assert test_signal.Fs is not None
-    assert isinstance(test_signal.uncertainty, np.ndarray)
-    assert isinstance(test_signal.standard_uncertainties, np.ndarray)
-    assert_equal(len(test_signal.uncertainty), len(test_signal.standard_uncertainties))
-    assert_equal(len(test_signal.standard_uncertainties), len(test_signal.time))
-    assert test_signal.name
-    assert isinstance(test_signal.name, str)
-    assert test_signal.unit_time
-    assert isinstance(test_signal.unit_time, str)
-    assert test_signal.unit_values
-    assert isinstance(test_signal.unit_values, str)
-
-
-@given(signal_inputs())
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ],
-    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_not_implemented_multivariate_signal(capsys, inputs):
@@ -341,7 +175,6 @@ def test_signal_class_raise_not_implemented_multivariate_signal(capsys, inputs):
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_step(
@@ -365,7 +198,6 @@ def test_signal_class_raise_value_error_on_non_matching_sampling_freq_and_time_s
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainties(
@@ -390,7 +222,6 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_uncertainti
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_matching_dimension_of_time_and_values(
@@ -414,7 +245,6 @@ def test_signal_class_raise_value_error_on_non_matching_dimension_of_time_and_va
         HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
-    max_examples=10,
 )
 @pytest.mark.slow
 def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inputs):
@@ -427,21 +257,3 @@ def test_signal_class_raise_value_error_on_non_square_uncertainties(capsys, inpu
         r"shape.*",
     ):
         Signal(**inputs)
-
-
-@given(apply_fir_filter_inputs())
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ],
-    max_examples=10,
-)
-@pytest.mark.slow
-def test_signal_apply_fir_filter(capsys, signal_and_filter_inputs):
-    _print_during_test_to_avoid_timeout(capsys)
-    signal_init_inputs, filter_inputs = signal_and_filter_inputs
-    test_signal = Signal(**signal_init_inputs)
-    test_signal.apply_filter(**filter_inputs)
