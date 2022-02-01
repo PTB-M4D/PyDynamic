@@ -94,7 +94,7 @@ def test(fir_unc_filter_input):
     assert_allclose(
         relevant_y_fir,
         relevant_y_mc,
-        atol=np.max((np.max(np.abs(y_fir)), 2.2e-1)),
+        atol=np.max((np.max(np.abs(y_fir)), 3e-1)),
     )
     assert_allclose(
         relevant_Uy_fir,
