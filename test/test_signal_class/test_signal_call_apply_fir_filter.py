@@ -9,7 +9,6 @@ from PyDynamic.signals import Signal
 from .conftest import signal_inputs
 from ..conftest import (
     _is_np_array_with_len_greater_zero,
-    _print_during_test_to_avoid_timeout,
     FIRuncFilter_input,
 )
 
@@ -44,8 +43,7 @@ def apply_fir_filter_inputs(
     ],
 )
 @pytest.mark.slow
-def test(capsys, signal_and_filter_inputs):
-    _print_during_test_to_avoid_timeout(capsys)
+def test(signal_and_filter_inputs):
     signal_init_inputs, filter_inputs = signal_and_filter_inputs
     test_signal = Signal(**signal_init_inputs)
     test_signal.apply_filter(**filter_inputs)

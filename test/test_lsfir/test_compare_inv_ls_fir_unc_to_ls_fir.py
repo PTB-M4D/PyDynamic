@@ -8,7 +8,6 @@ from PyDynamic.model_estimation.fit_filter import (
     LSFIR,
 )
 from ..conftest import (
-    _print_during_test_to_avoid_timeout,
     hypothesis_dimension,
 )
 
@@ -23,7 +22,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test(capsys, monte_carlo, freqs, sampling_freq, filter_order):
+def test(monte_carlo, freqs, sampling_freq, filter_order):
     b_fir_mc, Ub_fir_mc = invLSFIR_unc(
         H=monte_carlo["H"],
         UH=monte_carlo["UH"],
@@ -41,6 +40,5 @@ def test(capsys, monte_carlo, freqs, sampling_freq, filter_order):
         inv=True,
         UH=monte_carlo["UH"],
     )
-    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir)
     assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)

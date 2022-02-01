@@ -10,7 +10,7 @@ from PyDynamic import fit_som, make_semiposdef, sos_FreqResp
 from PyDynamic.examples.demonstrate_fit_som import (
     demonstrate_second_order_model_fitting,
 )
-from .conftest import _print_during_test_to_avoid_timeout, hypothesis_float_vector
+from .conftest import hypothesis_float_vector
 
 
 def test_demonstrate_second_order_model_fitting(capsys, monkeypatch):
@@ -77,8 +77,7 @@ def random_input_to_fit_som(draw, guarantee_UH_as_matrix: bool = False):
         HealthCheck.function_scoped_fixture,
     ],
 )
-def test_usual_calls_fit_som(capsys, params):
-    _print_during_test_to_avoid_timeout(capsys)
+def test_usual_calls_fit_som(params):
     fit_som(verbose=True, **params)
 
 

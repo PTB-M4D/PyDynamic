@@ -8,7 +8,6 @@ from PyDynamic.model_estimation.fit_filter import (
     LSFIR,
 )
 from ..conftest import (
-    _print_during_test_to_avoid_timeout,
     hypothesis_dimension,
 )
 
@@ -24,7 +23,7 @@ from ..conftest import (
 )
 @pytest.mark.slow
 def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_over_H(
-    capsys, monte_carlo, freqs, sampling_freq, filter_order
+    monte_carlo, freqs, sampling_freq, filter_order
 ):
     b_fir_svd = LSFIR(
         H=monte_carlo["H"],
@@ -44,7 +43,6 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
         inv=True,
         UH=None,
     )[0]
-    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_svd, b_fir_none)
 
 
@@ -59,7 +57,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
 )
 @pytest.mark.slow
 def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_over_H(
-    capsys, monte_carlo, freqs, sampling_freq, filter_order
+    monte_carlo, freqs, sampling_freq, filter_order
 ):
     b_fir_mc = LSFIR(
         H=monte_carlo["H"],
@@ -80,7 +78,6 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
         inv=True,
         UH=None,
     )[0]
-    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir_none)
 
 
@@ -95,7 +92,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
 )
 @pytest.mark.slow
 def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_directly(
-    capsys, monte_carlo, freqs, sampling_freq, filter_order
+    monte_carlo, freqs, sampling_freq, filter_order
 ):
     b_fir_mc = LSFIR(
         H=monte_carlo["H"],
@@ -116,5 +113,4 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
         inv=False,
         UH=None,
     )[0]
-    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(b_fir_mc, b_fir_none)

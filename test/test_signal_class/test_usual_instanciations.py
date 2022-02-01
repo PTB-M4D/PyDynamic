@@ -5,9 +5,6 @@ from numpy.testing import assert_equal
 
 from PyDynamic.signals import Signal
 from .conftest import signal_inputs
-from ..conftest import (
-    _print_during_test_to_avoid_timeout,
-)
 
 
 @given(signal_inputs())
@@ -20,8 +17,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test(capsys, inputs):
-    _print_during_test_to_avoid_timeout(capsys)
+def test(inputs):
     test_signal = Signal(**inputs)
     assert test_signal.Ts is not None
     assert test_signal.Fs is not None

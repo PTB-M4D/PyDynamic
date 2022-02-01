@@ -6,11 +6,12 @@ from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
 
 from PyDynamic.misc.tools import trimOrPad
+
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
     FIRuncFilter,
 )
-from ..conftest import _print_during_test_to_avoid_timeout, FIRuncFilter_input
+from ..conftest import FIRuncFilter_input
 
 
 @given(FIRuncFilter_input())
@@ -22,7 +23,7 @@ from ..conftest import _print_during_test_to_avoid_timeout, FIRuncFilter_input
     ],
 )
 @pytest.mark.slow
-def test(capsys, fir_unc_filter_input):
+def test(fir_unc_filter_input):
     def legacy_FIRuncFilter(
         y, sigma_noise, theta, Utheta=None, shift=0, blow=None, kind="corr"
     ):
@@ -263,7 +264,6 @@ def test(capsys, fir_unc_filter_input):
 
     legacy_y, legacy_Uy = legacy_FIRuncFilter(**fir_unc_filter_input)
     current_y, current_Uy = FIRuncFilter(**fir_unc_filter_input)
-    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(
         legacy_y,
         current_y,

@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose
 
 from PyDynamic import FIRuncFilter, MC
 from .conftest import _set_irrelevant_ranges_to_zero
-from ..conftest import _print_during_test_to_avoid_timeout, FIRuncFilter_input
+from ..conftest import FIRuncFilter_input
 
 
 @given(FIRuncFilter_input(exclude_corr_kind=True))
@@ -18,7 +18,7 @@ from ..conftest import _print_during_test_to_avoid_timeout, FIRuncFilter_input
     ],
 )
 @pytest.mark.slow
-def test(capsys, fir_unc_filter_input):
+def test(fir_unc_filter_input):
     # In this test, we exclude the case of a valid signal with uncertainty given as
     # the right-sided auto-covariance (acf). This is done, because we currently do not
     # ensure, that the random-drawn acf generates a positive-semidefinite
@@ -92,7 +92,6 @@ def test(capsys, fir_unc_filter_input):
     #     f"{fir_unc_filter_input['blow']}",
     # )
     # /HACK
-    _print_during_test_to_avoid_timeout(capsys)
     assert_allclose(
         relevant_y_fir,
         relevant_y_mc,
