@@ -35,6 +35,14 @@ def _print_during_test_to_avoid_timeout(capsys):
         )
 
 
+def _is_np_array(array: Any) -> bool:
+    return type(array).__module__ == np.__name__
+
+
+def _is_np_array_with_len_greater_zero(array: Any) -> bool:
+    return _is_np_array(array) and len(array) > 0
+
+
 @composite
 def FIRuncFilter_input(
     draw: Callable, exclude_corr_kind: bool = False

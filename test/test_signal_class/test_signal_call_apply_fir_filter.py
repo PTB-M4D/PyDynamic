@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pytest
@@ -8,6 +8,7 @@ from hypothesis.strategies import composite
 from PyDynamic.signals import Signal
 from .conftest import signal_inputs
 from ..conftest import (
+    _is_np_array_with_len_greater_zero,
     _print_during_test_to_avoid_timeout,
     FIRuncFilter_input,
 )
@@ -48,9 +49,5 @@ def test(capsys, signal_and_filter_inputs):
     signal_init_inputs, filter_inputs = signal_and_filter_inputs
     test_signal = Signal(**signal_init_inputs)
     test_signal.apply_filter(**filter_inputs)
-    assert is_np_array_with_len_greater_zero(test_signal.values)
-    assert is_np_array_with_len_greater_zero(test_signal.uncertainty)
-
-
-def is_np_array_with_len_greater_zero(array: Any) -> bool:
-    return type(array).__module__ == np.__name__ and len(array) > 0
+    assert _is_np_array_with_len_greater_zero(test_signal.values)
+    assert _is_np_array_with_len_greater_zero(test_signal.uncertainty)
