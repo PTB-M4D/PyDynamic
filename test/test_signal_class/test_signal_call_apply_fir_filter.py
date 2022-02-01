@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pytest
@@ -48,5 +48,9 @@ def test(capsys, signal_and_filter_inputs):
     signal_init_inputs, filter_inputs = signal_and_filter_inputs
     test_signal = Signal(**signal_init_inputs)
     test_signal.apply_filter(**filter_inputs)
-    assert np.all(test_signal.values)
-    assert np.all(test_signal.uncertainty)
+    assert is_np_array_with_len_greater_zero(test_signal.values)
+    assert is_np_array_with_len_greater_zero(test_signal.uncertainty)
+
+
+def is_np_array_with_len_greater_zero(array: Any) -> bool:
+    return type(array).__module__ == np.__name__ and len(array) > 0
