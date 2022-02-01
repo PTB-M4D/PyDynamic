@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 import scipy
 from numpy.testing import assert_allclose
-from scipy.signal import lfilter
 
 from PyDynamic.misc.testsignals import rect
 
