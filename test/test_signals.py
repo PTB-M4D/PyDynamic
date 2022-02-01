@@ -21,12 +21,12 @@ from PyDynamic.misc.testsignals import (
 from PyDynamic.signals import Signal
 from .conftest import (
     _print_during_test_to_avoid_timeout,
+    FIRuncFilter_input,
     hypothesis_bounded_float,
     hypothesis_covariance_matrix,
     hypothesis_float_vector,
     hypothesis_not_negative_float,
 )
-from .test_propagate_filter import FIRuncFilter_input
 
 
 @composite

@@ -1,7 +1,7 @@
 import os
 from inspect import stack
 from math import ceil
-from typing import Callable, NamedTuple, Optional, Tuple
+from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple
 
 import numpy as np
 import pytest
@@ -10,6 +10,7 @@ from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
 from numpy.linalg import LinAlgError
+from scipy.signal import correlate
 
 from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
@@ -29,6 +30,77 @@ if os.getenv("CIRCLECI") == "true":
 def _print_during_test_to_avoid_timeout(capsys):
     with capsys.disabled():
         print(f"Run iteration of `{stack()[1].function}()`.")
+
+
+@composite
+def FIRuncFilter_input(
+    draw: Callable, exclude_corr_kind: bool = False
+) -> Dict[str, Any]:
+    filter_length = draw(
+        hst.integers(min_value=2, max_value=100)
+    )  # scipy.linalg.companion requires N >= 2
+    filter_theta = draw(
+        hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e3)
+    )
+    filter_theta_covariance = draw(
+        hst.one_of(
+            hypothesis_covariance_matrix(number_of_rows=filter_length), hst.just(None)
+        )
+    )
+
+    signal_length = draw(hst.integers(min_value=200, max_value=1000))
+    signal = draw(
+        hypothesis_float_vector(length=signal_length, min_value=1e-2, max_value=1e3)
+    )
+
+    if exclude_corr_kind:
+        kind = draw(hst.sampled_from(("float", "diag")))
+    else:
+        kind = draw(hst.sampled_from(("float", "diag", "corr")))
+    if kind == "diag":
+        signal_standard_deviation = draw(
+            hypothesis_float_vector(length=signal_length, min_value=0, max_value=1e2)
+        )
+    elif kind == "corr":
+        random_data = draw(
+            hypothesis_float_vector(
+                length=signal_length // 2, min_value=1e-2, max_value=1e2
+            )
+        )
+        acf = correlate(random_data, random_data, mode="full")
+
+        scaled_acf = scale_matrix_or_vector_to_range(
+            acf, range_min=1e-10, range_max=1e3
+        )
+        signal_standard_deviation = scaled_acf[len(scaled_acf) // 2 :]
+    else:
+        signal_standard_deviation = draw(hypothesis_not_negative_float(max_value=1e2))
+
+    lowpass_length = draw(
+        hst.integers(min_value=2, max_value=10)
+    )  # scipy.linalg.companion requires N >= 2
+    lowpass = draw(
+        hst.one_of(
+            (
+                hypothesis_float_vector(
+                    length=lowpass_length, min_value=1e-2, max_value=1e2
+                ),
+                hst.just(None),
+            )
+        )
+    )
+
+    shift = draw(hypothesis_not_negative_float(max_value=1e2))
+
+    return {
+        "theta": filter_theta,
+        "Utheta": filter_theta_covariance,
+        "y": signal,
+        "sigma_noise": signal_standard_deviation,
+        "kind": kind,
+        "blow": lowpass,
+        "shift": shift,
+    }
 
 
 def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
