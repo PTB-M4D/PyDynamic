@@ -19,7 +19,7 @@ def test_demonstrate_second_order_model_fitting(capsys, monkeypatch):
     # guarantee this
     monkeypatch.setattr(plt, "show", lambda: None, raising=True)
     with capsys.disabled():
-        demonstrate_second_order_model_fitting(runs=100)
+        demonstrate_second_order_model_fitting(runs=5)
 
 
 @composite
