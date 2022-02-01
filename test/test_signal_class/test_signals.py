@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from hypothesis import given, HealthCheck, settings, strategies as hst
+from hypothesis import given, strategies as hst
 from numpy.testing import assert_almost_equal
 from pytest import approx
 
@@ -12,8 +12,6 @@ from PyDynamic.misc.testsignals import (
     sine,
     squarepulse,
 )
-from PyDynamic.signals import Signal
-from .conftest import signal_inputs
 from ..conftest import (
     hypothesis_not_negative_float,
 )
@@ -115,104 +113,3 @@ def test_compare_multisine_with_sine(time, freq, amp):
     # Check for minimal callability and that maximum amplitude at
     # timestamps is below default.
     assert_almost_equal(x, multi_x)
-
-
-@given(signal_inputs())
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ],
-)
-@pytest.mark.slow
-def test_signal_class_raise_not_implemented_multivariate_signal(inputs):
-    inputs["values"] = inputs["values"][..., np.newaxis]
-    with pytest.raises(
-        NotImplementedError,
-        match=r"Signal: Multivariate signals are not implemented yet.",
-    ):
-        Signal(**inputs)
-
-
-@given(signal_inputs(ensure_time_step_to_be_float=True))
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ],
-)
-@pytest.mark.slow
-def test_signal_raise_value_error_on_non_matching_sampling_freq_and_time_step(inputs):
-    inputs["Fs"] = inputs["Ts"]
-    with pytest.raises(
-        ValueError,
-        match=r"Signal: Sampling interval and sampling frequency are assumed to be "
-        r"approximately multiplicative inverse to each other.*",
-    ):
-        Signal(**inputs)
-
-
-@given(signal_inputs(ensure_uncertainty_array=True))
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ],
-)
-@pytest.mark.slow
-def test_signal_raise_value_error_on_non_matching_dimension_of_uncertainties(inputs):
-    inputs["uncertainty"] = inputs["uncertainty"][:-1]
-    with pytest.raises(
-        ValueError,
-        match=r"Signal: if uncertainties are provided as np.ndarray "
-        r"they are expected to match the number of elements of the "
-        r"provided time vector, but uncertainties are of shape.*",
-    ):
-        Signal(**inputs)
-
-
-@given(signal_inputs())
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ],
-)
-@pytest.mark.slow
-def test_signal_raise_value_error_on_non_matching_dimension_of_time_and_values(inputs):
-    inputs["time"] = inputs["time"][:-1]
-    with pytest.raises(
-        ValueError,
-        match=r"Signal: Number of elements of the provided time and signal vectors "
-        "are expected to match, but time is of length.*",
-    ):
-        Signal(**inputs)
-
-
-@given(signal_inputs(ensure_uncertainty_covariance_matrix=True))
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ],
-)
-@pytest.mark.slow
-def test_signal_class_raise_value_error_on_non_square_uncertainties(inputs):
-    inputs["uncertainty"] = inputs["uncertainty"][..., :-1]
-    with pytest.raises(
-        ValueError,
-        match=r"Signal: if uncertainties are provided as 2-dimensional np.ndarray "
-        r"they are expected to resemble a square matrix, but uncertainties are of "
-        r"shape.*",
-    ):
-        Signal(**inputs)
