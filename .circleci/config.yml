@@ -241,7 +241,7 @@ commands:
         name: Split tests for shared execution
         command: |
           set -e
-          echo 'export TEST_FILES=$(circleci tests glob "(test,test/**)/test_*.py" | \
+          echo 'export TEST_FILES=$(circleci tests glob "test/**/test_*.py" | \
             circleci tests split --split-by=timings)' >> $BASH_ENV
 
   install_development_deps:
