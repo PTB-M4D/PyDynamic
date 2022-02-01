@@ -21,35 +21,6 @@ from ..conftest import (
 
 
 @pytest.fixture(scope="module")
-def N():
-    return 2048
-
-
-@pytest.fixture(scope="module")
-def Ts():
-    return 0.01
-
-
-@pytest.fixture(scope="module")
-def hi_res_time(create_timestamps):
-    return create_timestamps(0, 2 * np.pi, 1e-5)
-
-
-@pytest.fixture(scope="module")
-def create_timestamps(N, Ts):
-    def timestamps(t_0=0, t_n=N * Ts, d_t=Ts):
-        # Compute equally spaced timestamps between t_0 and t_n.
-        return np.arange(t_0, t_n, d_t)
-
-    return timestamps
-
-
-@pytest.fixture(scope="module")
-def time(create_timestamps, N, Ts):
-    return create_timestamps(0, N * Ts, Ts)
-
-
-@pytest.fixture(scope="module")
 def t0(N, Ts):
     return N / 2 * Ts
 
