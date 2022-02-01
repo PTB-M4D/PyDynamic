@@ -48,7 +48,14 @@ def similar_vectors_and_matching_covariances(
 
 
 @given(similar_vectors_and_matching_covariances())
-@settings(deadline=None, verbosity=Verbosity.verbose)
+@settings(
+    deadline=None,
+    verbosity=Verbosity.verbose,
+    suppress_health_check=[
+        *settings.default.suppress_health_check,
+        HealthCheck.function_scoped_fixture,
+    ],
+)
 @pytest.mark.slow
 def test_display_vectors_and_covariances_comparison(monkeypatch, valid_inputs):
     monkeypatch.setattr(plt, "show", lambda: None, raising=True)
