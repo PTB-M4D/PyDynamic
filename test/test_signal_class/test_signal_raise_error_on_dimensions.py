@@ -10,7 +10,6 @@ from test.test_signal_class.conftest import signal_inputs
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
 )
@@ -30,7 +29,6 @@ def test_signal_raise_value_error_on_non_matching_dimension_of_time_and_values(i
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
 )

@@ -18,7 +18,6 @@ from ..conftest import (
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
-        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow
@@ -52,7 +51,6 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
-        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow
@@ -87,7 +85,6 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
-        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow

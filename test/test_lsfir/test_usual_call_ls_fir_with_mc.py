@@ -1,6 +1,6 @@
 import hypothesis.strategies as hst
 import pytest
-from hypothesis import given, HealthCheck, settings
+from hypothesis import given, settings
 
 # noinspection PyProtectedMember
 from PyDynamic.misc.tools import is_2d_square_matrix, number_of_rows_equals_vector_dim
@@ -20,13 +20,7 @@ from ..conftest import (
     hst.booleans(),
     hst.booleans(),
 )
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-    ],
-)
+@settings(deadline=None)
 @pytest.mark.slow
 def test(monte_carlo, freqs, sampling_freq, filter_order, weight_vector, verbose, inv):
     b, Ub = LSFIR(

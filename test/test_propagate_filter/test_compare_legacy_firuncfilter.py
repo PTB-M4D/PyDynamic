@@ -15,13 +15,7 @@ from ..conftest import FIRuncFilter_input
 
 
 @given(FIRuncFilter_input())
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-    ],
-)
+@settings(deadline=None)
 @pytest.mark.slow
 def test(fir_unc_filter_input):
     def legacy_FIRuncFilter(

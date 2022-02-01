@@ -10,7 +10,6 @@ from test.test_signal_class.conftest import signal_inputs
     deadline=None,
     suppress_health_check=[
         *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
         HealthCheck.too_slow,
     ],
 )

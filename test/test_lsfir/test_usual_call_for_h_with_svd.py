@@ -19,7 +19,6 @@ from ..conftest import (
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
-        HealthCheck.function_scoped_fixture,
     ],
 )
 @pytest.mark.slow

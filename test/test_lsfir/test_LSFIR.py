@@ -363,13 +363,7 @@ def test_LSFIR_with_too_short_f(monte_carlo, freqs, sampling_freq, filter_order)
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8))
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-    ],
-)
+@settings(deadline=None)
 def test_LSFIR_with_too_short_UH(monte_carlo, freqs, sampling_freq, filter_order):
     too_few_rows_UH = monte_carlo["UH"][1:]
     with pytest.raises(
@@ -390,13 +384,7 @@ def test_LSFIR_with_too_short_UH(monte_carlo, freqs, sampling_freq, filter_order
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8))
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-    ],
-)
+@settings(deadline=None)
 def test_LSFIR_with_nonsquare_UH(monte_carlo, freqs, sampling_freq, filter_order):
     too_few_columns_UH = monte_carlo["UH"][:, 1:]
     with pytest.raises(
@@ -417,13 +405,7 @@ def test_LSFIR_with_nonsquare_UH(monte_carlo, freqs, sampling_freq, filter_order
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8))
-@settings(
-    deadline=None,
-    suppress_health_check=[
-        *settings.default.suppress_health_check,
-        HealthCheck.function_scoped_fixture,
-    ],
-)
+@settings(deadline=None)
 def test_LSFIR_with_wrong_type_UH(monte_carlo, freqs, sampling_freq, filter_order):
     uh_list = monte_carlo["UH"].tolist()
     with pytest.raises(
