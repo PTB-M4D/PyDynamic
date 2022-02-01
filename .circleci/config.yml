@@ -274,6 +274,7 @@ commands:
 
     - run:
         name: Perform tox testing
+        no_output_timeout: 30m
         command: |
           source venv/bin/activate
           tox -e << parameters.toxenvs >> << parameters.posargs >> \
@@ -469,6 +470,7 @@ jobs:
 
       - run:
           name: Run tests
+          no_output_timeout: 30m
           command: |
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
