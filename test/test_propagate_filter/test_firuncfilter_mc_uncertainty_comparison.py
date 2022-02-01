@@ -18,7 +18,7 @@ from ..conftest import _print_during_test_to_avoid_timeout, FIRuncFilter_input
     ],
 )
 @pytest.mark.slow
-def test_FIRuncFilter_MC_uncertainty_comparison(capsys, fir_unc_filter_input):
+def test(capsys, fir_unc_filter_input):
     # In this test, we exclude the case of a valid signal with uncertainty given as
     # the right-sided auto-covariance (acf). This is done, because we currently do not
     # ensure, that the random-drawn acf generates a positive-semidefinite

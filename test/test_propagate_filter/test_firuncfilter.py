@@ -8,7 +8,7 @@ from ..conftest import FIRuncFilter_input
 @given(FIRuncFilter_input())
 @settings(deadline=None)
 @pytest.mark.slow
-def test_FIRuncFilter(fir_unc_filter_input):
+def test(fir_unc_filter_input):
     # Check expected output for thinkable permutations of input parameters.
     y, Uy = FIRuncFilter(**fir_unc_filter_input)
     assert len(y) == len(fir_unc_filter_input["y"])

@@ -20,7 +20,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test_signal_class_usual_instanciations(capsys, inputs):
+def test(capsys, inputs):
     _print_during_test_to_avoid_timeout(capsys)
     test_signal = Signal(**inputs)
     assert test_signal.Ts is not None

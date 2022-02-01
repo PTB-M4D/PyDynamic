@@ -18,9 +18,7 @@ from ..conftest import (
         HealthCheck.too_slow,
     ],
 )
-def test_usual_call_LSFIR_with_None_uncertainties(
-    monte_carlo, freqs, sampling_freq, filter_order, fit_reciprocal
-):
+def test(monte_carlo, freqs, sampling_freq, filter_order, fit_reciprocal):
     LSFIR(
         H=monte_carlo["H"],
         N=filter_order,

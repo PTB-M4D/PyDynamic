@@ -27,7 +27,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test_usual_call_LSFIR_with_mc(
+def test(
     capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector, verbose, inv
 ):
     LSFIR(

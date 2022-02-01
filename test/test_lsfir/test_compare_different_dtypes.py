@@ -22,14 +22,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test_compare_different_dtypes_LSFIR(
-    capsys,
-    monte_carlo,
-    complex_H_with_UH,
-    freqs,
-    sampling_freq,
-    filter_order,
-):
+def test(capsys, monte_carlo, complex_H_with_UH, freqs, sampling_freq, filter_order):
     b_real_imaginary, ub_real_imaginary = LSFIR(
         H=monte_carlo["H"],
         N=filter_order,

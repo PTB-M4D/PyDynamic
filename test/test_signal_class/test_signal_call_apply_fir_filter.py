@@ -43,7 +43,7 @@ def apply_fir_filter_inputs(
     ],
 )
 @pytest.mark.slow
-def test_call_signal_apply_fir_filter(capsys, signal_and_filter_inputs):
+def test(capsys, signal_and_filter_inputs):
     _print_during_test_to_avoid_timeout(capsys)
     signal_init_inputs, filter_inputs = signal_and_filter_inputs
     test_signal = Signal(**signal_init_inputs)

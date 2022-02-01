@@ -1,5 +1,5 @@
 import os
-from inspect import stack
+from inspect import getmodule, stack
 from math import ceil
 from typing import Any, Callable, Dict, NamedTuple, Optional, Tuple
 
@@ -29,7 +29,10 @@ if os.getenv("CIRCLECI") == "true":
 
 def _print_during_test_to_avoid_timeout(capsys):
     with capsys.disabled():
-        print(f"Run iteration of `{stack()[1].function}()`.")
+        frame = stack()[1]
+        print(
+            f"Run iteration of `{getmodule(frame[0]).__file__}::" f"{frame.function}`."
+        )
 
 
 @composite

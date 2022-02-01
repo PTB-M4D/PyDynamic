@@ -23,9 +23,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test_compare_invLSFIR_unc_LSFIR_only_by_filter_coefficients(
-    capsys, monte_carlo, freqs, sampling_freq, filter_order
-):
+def test(capsys, monte_carlo, freqs, sampling_freq, filter_order):
     b_fir_mc, Ub_fir_mc = invLSFIR_unc(
         H=monte_carlo["H"],
         UH=monte_carlo["UH"],

@@ -22,9 +22,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test_compare_LSFIR_with_svd_and_with_mc(
-    capsys, monte_carlo, freqs, sampling_freq, filter_order
-):
+def test(capsys, monte_carlo, freqs, sampling_freq, filter_order):
     b_fir_svd, Ub_fir_svd = LSFIR(
         H=monte_carlo["H"],
         N=filter_order,

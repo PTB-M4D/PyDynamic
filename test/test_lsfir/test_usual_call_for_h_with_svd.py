@@ -22,9 +22,7 @@ from ..conftest import (
     ],
 )
 @pytest.mark.slow
-def test_usual_call_LSFIR_for_fitting_H_directly_with_svd(
-    capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector
-):
+def test(capsys, monte_carlo, freqs, sampling_freq, filter_order, weight_vector):
     LSFIR(
         H=monte_carlo["H"],
         N=filter_order,
