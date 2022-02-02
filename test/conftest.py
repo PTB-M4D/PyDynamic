@@ -10,10 +10,9 @@ from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, SearchStrategy
 from numpy.linalg import LinAlgError
-from scipy.signal import correlate
-
 from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
+from scipy.signal import correlate
 
 # This will check, if the testrun is executed in the ci environment and if so,
 # disables the 'too_slow' health check. See
@@ -51,7 +50,7 @@ def FIRuncFilter_input(
         hst.integers(min_value=2, max_value=100)
     )  # scipy.linalg.companion requires N >= 2
     filter_theta = draw(
-        hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e3)
+        hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e2)
     )
     filter_theta_covariance = draw(
         hst.one_of(
