@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 from hypothesis import given, HealthCheck, settings
 from numpy.testing import assert_allclose
-
 from PyDynamic import FIRuncFilter, MC
+
 from .conftest import _set_irrelevant_ranges_to_zero
 from ..conftest import FIRuncFilter_input
 
@@ -15,6 +15,7 @@ from ..conftest import FIRuncFilter_input
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
+    max_examples=50,
 )
 @pytest.mark.slow
 def test(fir_unc_filter_input):
@@ -94,7 +95,7 @@ def test(fir_unc_filter_input):
     assert_allclose(
         relevant_y_fir,
         relevant_y_mc,
-        atol=np.max((np.max(np.abs(y_fir)), 4e-1)),
+        atol=np.max((np.max(np.abs(y_fir)), 2e-1)),
     )
     assert_allclose(
         relevant_Uy_fir,
