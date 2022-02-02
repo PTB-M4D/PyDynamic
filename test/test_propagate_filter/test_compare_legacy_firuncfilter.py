@@ -1,16 +1,14 @@
 import numpy as np
 import pytest
-from hypothesis import given, HealthCheck, settings
+from hypothesis import given, settings
 from numpy.testing import assert_allclose
-from scipy.linalg import toeplitz
-from scipy.signal import lfilter, lfilter_zi
-
 from PyDynamic.misc.tools import trimOrPad
-
-# noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_filter import (
     FIRuncFilter,
 )
+from scipy.linalg import toeplitz
+from scipy.signal import lfilter, lfilter_zi
+
 from ..conftest import FIRuncFilter_input
 
 
