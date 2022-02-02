@@ -350,31 +350,42 @@ jobs:
             git config --global user.email "bjoern.ludwig@ptb.de"
             NEW_BRANCH=recompile_deps
             git checkout -b ${NEW_BRANCH}
-            git commit -am \
-              "build(deps): recompile Python (dev) deps"
-            git push -u origin  ${NEW_BRANCH}
-
-      - run:
-          name: Install GitHub CLI
-          command: |
-            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
-              sudo dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
-            echo "deb [arch=$(dpkg --print-architecture) \
-              signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] \
-              https://cli.github.com/packages stable main" | \
-              sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-            sudo apt update
-            sudo apt install gh
-
-      - run:
-          name: Open PR
-          command: |
-            gh pr create --base master --title "Update deps" \
-              --body "This PR provides recompiled deps for all outdated package \
-              versions. It was opened after the commited deps were succesfully \
-              compiled and all tests passed with the new versions. It should be \
-              merged as soon as possible to avoid any security issues due to \
-              outdated dependencies."
+            git add .
+            set +e
+            git status | grep modified
+            if [ $? -eq 0 ]; then
+                set -e
+                git commit -am \
+                  "build(deps): recompile Python (dev) deps"
+                git push -fu origin  ${NEW_BRANCH}
+                curl -fsSL \
+                  https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+                  sudo dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+                echo "deb [arch=$(dpkg --print-architecture) \
+                  signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] \
+                  https://cli.github.com/packages stable main" | \
+                  sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+                sudo apt update
+                sudo apt install gh
+                set +e
+                gh pr list --head=$NEW_BRANCH | grep $NEW_BRANCH
+                if [ $? -eq 1 ]; then
+                    set -e
+                    gh pr create --head --base=master --title "Update deps" \
+                      --body "This PR provides recompiled deps for all outdated \
+                      package versions. It was opened after the commited deps were \
+                      succesfully compiled and all tests passed with the new versions. \
+                      It should be merged as soon as possible to avoid any security \
+                      issues due to outdated dependencies."
+                else
+                    set -e
+                    echo "There already was a PR opened earlier. The changes were \
+                      overridden."
+                fi
+            else
+                set -e
+                echo "Nothing to commit. No updated deps."
+            fi
 
   # Define one 'test' job with parameters to deal with all desired cases. The
   # reason for this is the desire to ensure the following for all supported Python
