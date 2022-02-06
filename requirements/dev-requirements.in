@@ -1,3 +1,4 @@
+-e file:.[examples]
 black[jupyter]
 hypothesis
 ipykernel
