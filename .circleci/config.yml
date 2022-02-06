@@ -337,7 +337,6 @@ jobs:
             python -m piptools sync \
               requirements/requirements-<< parameters.toxenvs >>.txt \
               requirements/dev-requirements-<< parameters.toxenvs >>.txt
-            python -m pip install .
       - check_for_new_deps_compilation
       - split_tests
       - tox:
