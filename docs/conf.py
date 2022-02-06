@@ -51,7 +51,7 @@ html_theme_options = {
 
 # This should make SciPy documentation available inside our docs.
 intersphinx_mapping = {
-    "SciPy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "SciPy": ("https://scipy.github.io/devdocs/", None),
     "PyDynamic_tutorials": (
         "https://pydynamic-tutorials.readthedocs.io/en/latest/",
         None,
