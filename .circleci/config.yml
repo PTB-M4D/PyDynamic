@@ -326,6 +326,7 @@ jobs:
       - split_tests
       - tox:
           toxenvs: << parameters.toxenvs >>
+          posargs: "-- -m 'not slow'"
           tests: ${TEST_FILES}
       - store_results
 
