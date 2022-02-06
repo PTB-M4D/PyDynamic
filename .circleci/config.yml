@@ -232,7 +232,7 @@ commands:
         command: |
           python3 -m venv venv
           source venv/bin/activate
-          python -m pip install --upgrade pip==21.3.0
+          python -m pip install --upgrade pip
 
   split_tests:
     description: "Split tests for shared execution."
