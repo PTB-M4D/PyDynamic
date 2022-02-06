@@ -5,6 +5,7 @@ ipython
 nbsphinx
 pytest
 pytest-cov
+pytest-custom-exit-code
 python-semantic-release
 recommonmark
 sphinx
