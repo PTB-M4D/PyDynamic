@@ -56,31 +56,31 @@ executors:
 workflows:
 
   check_for_upgraded_deps:
-    triggers:
-      - schedule:
-          cron: "0 0 1 * *"
-          filters:
-            branches:
-              only: /master/
+#    triggers:
+#      - schedule:
+#          cron: "0 0 1 * *"
+#          filters:
+#            branches:
+#              only: /master/
     jobs:
-      - test_with_updated_deps:
-          name: "test_with_updated_deps_py37"
-          tag: "3.7"
-          toxenvs: "py37"
-          context:
-            - Docker publishing as bludoc
-      - test_with_updated_deps:
-          name: "test_with_updated_deps_py38"
-          tag: "3.8"
-          toxenvs: "py38"
-          context:
-            - Docker publishing as bludoc
-      - test_with_updated_deps:
-          name: "test_with_updated_deps_py39"
-          tag: "3.9"
-          toxenvs: "py39"
-          context:
-            - Docker publishing as bludoc
+#      - test_with_updated_deps:
+#          name: "test_with_updated_deps_py37"
+#          tag: "3.7"
+#          toxenvs: "py37"
+#          context:
+#            - Docker publishing as bludoc
+#      - test_with_updated_deps:
+#          name: "test_with_updated_deps_py38"
+#          tag: "3.8"
+#          toxenvs: "py38"
+#          context:
+#            - Docker publishing as bludoc
+#      - test_with_updated_deps:
+#          name: "test_with_updated_deps_py39"
+#          tag: "3.9"
+#          toxenvs: "py39"
+#          context:
+#            - Docker publishing as bludoc
       - test_with_updated_deps:
           name: "test_with_updated_deps_py310"
           tag: "3.10"
@@ -89,130 +89,130 @@ workflows:
             - Docker publishing as bludoc
       - commit_push_open_pr:
           requires:
-            - test_with_updated_deps_py37
-            - test_with_updated_deps_py38
-            - test_with_updated_deps_py39
+#            - test_with_updated_deps_py37
+#            - test_with_updated_deps_py38
+#            - test_with_updated_deps_py39
             - test_with_updated_deps_py310
           context:
             - Docker publishing as bludoc
             - GitHub pushes to BjoernLudwigPTB's public_repos
 
-  nightly_test:
-    triggers:
-      - schedule:
-          cron: "0 0 8,15,22 * *"
-          filters:
-            branches:
-              only: /master/
-    jobs:
-      - test:
-          name: "nightly_test_python_py37"
-          tag: "3.7"
-          toxenvs: "py37 -e py37-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "nightly_test_python_py38"
-          tag: "3.8"
-          toxenvs: "py38 -e py38-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "nightly_test_python_py39"
-          tag: "3.9"
-          toxenvs: "py39 -e py39-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "nightly_test_python_py310"
-          tag: "3.10"
-          toxenvs: "py310 -e py310-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test_conda_py39:
-          context:
-            - Docker publishing as bludoc
-
-  quick_test:
-    jobs:
-      - test:
-          tag: "3.10"
-          toxenvs: "py310-without_requirements"
-          posargs: "-- -m 'not slow'"
-          parallelism: 4
-          context:
-            - Docker publishing as bludoc
-
-  test_and_deploy:
-    jobs:
-      - test:
-          name: "test_python_py37"
-          tag: "3.7"
-          toxenvs: "py37-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "test_python_py38"
-          tag: "3.8"
-          toxenvs: "py38-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "test_python_py39"
-          tag: "3.9"
-          toxenvs: "py39-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test:
-          name: "test_python_py310"
-          tag: "3.10"
-          toxenvs: "py310-without_requirements"
-          context:
-            - Docker publishing as bludoc
-      - test_conda_py39:
-          context:
-            - Docker publishing as bludoc
-      - preview_release:
-          requires:
-            - test_python_py37
-            - test_python_py38
-            - test_python_py39
-            - test_python_py310
-            - test_conda_py39
-          filters:
-            branches:
-              ignore: /.*dev$/
-          context:
-            - Docker publishing as bludoc
-      - confirm_previewed_release_actions:
-          # This job allows for checking that the release we will create in the
-          # next step actually is the desired release, by observing the result of
-          # preview_release.
-          type: approval
-          requires:
-            - preview_release
-          filters:
-            branches:
-              only: /master/
-          context:
-            - Docker publishing as bludoc
-      - release:
-          # Job to potentially create a release based on python-semantic-release's
-          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
-          # approval in the previous step, which is only triggered on branch master,
-          # thus this job here is triggered only on master as well.
-          context:
-            - pypi.org publishing for PyDynamic
-            - GitHub pushes to BjoernLudwigPTB's public_repos
-            - Docker publishing as bludoc
-          requires:
-            - confirm_previewed_release_actions
-      - tweet:
-          context:
-            - Twitter.com publish release
-            - Docker publishing as bludoc
-          requires:
-            - release
+#  nightly_test:
+#    triggers:
+#      - schedule:
+#          cron: "0 0 8,15,22 * *"
+#          filters:
+#            branches:
+#              only: /master/
+#    jobs:
+#      - test:
+#          name: "nightly_test_python_py37"
+#          tag: "3.7"
+#          toxenvs: "py37 -e py37-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test:
+#          name: "nightly_test_python_py38"
+#          tag: "3.8"
+#          toxenvs: "py38 -e py38-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test:
+#          name: "nightly_test_python_py39"
+#          tag: "3.9"
+#          toxenvs: "py39 -e py39-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test:
+#          name: "nightly_test_python_py310"
+#          tag: "3.10"
+#          toxenvs: "py310 -e py310-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test_conda_py39:
+#          context:
+#            - Docker publishing as bludoc
+#
+#  quick_test:
+#    jobs:
+#      - test:
+#          tag: "3.10"
+#          toxenvs: "py310-without_requirements"
+#          posargs: "-- -m 'not slow'"
+#          parallelism: 4
+#          context:
+#            - Docker publishing as bludoc
+#
+#  test_and_deploy:
+#    jobs:
+#      - test:
+#          name: "test_python_py37"
+#          tag: "3.7"
+#          toxenvs: "py37-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test:
+#          name: "test_python_py38"
+#          tag: "3.8"
+#          toxenvs: "py38-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test:
+#          name: "test_python_py39"
+#          tag: "3.9"
+#          toxenvs: "py39-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test:
+#          name: "test_python_py310"
+#          tag: "3.10"
+#          toxenvs: "py310-without_requirements"
+#          context:
+#            - Docker publishing as bludoc
+#      - test_conda_py39:
+#          context:
+#            - Docker publishing as bludoc
+#      - preview_release:
+#          requires:
+#            - test_python_py37
+#            - test_python_py38
+#            - test_python_py39
+#            - test_python_py310
+#            - test_conda_py39
+#          filters:
+#            branches:
+#              ignore: /.*dev$/
+#          context:
+#            - Docker publishing as bludoc
+#      - confirm_previewed_release_actions:
+#          # This job allows for checking that the release we will create in the
+#          # next step actually is the desired release, by observing the result of
+#          # preview_release.
+#          type: approval
+#          requires:
+#            - preview_release
+#          filters:
+#            branches:
+#              only: /master/
+#          context:
+#            - Docker publishing as bludoc
+#      - release:
+#          # Job to potentially create a release based on python-semantic-release's
+#          # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
+#          # approval in the previous step, which is only triggered on branch master,
+#          # thus this job here is triggered only on master as well.
+#          context:
+#            - pypi.org publishing for PyDynamic
+#            - GitHub pushes to BjoernLudwigPTB's public_repos
+#            - Docker publishing as bludoc
+#          requires:
+#            - confirm_previewed_release_actions
+#      - tweet:
+#          context:
+#            - Twitter.com publish release
+#            - Docker publishing as bludoc
+#          requires:
+#            - release
 
 commands:
   create_result_folder:
@@ -232,7 +232,7 @@ commands:
         command: |
           python3 -m venv venv
           source venv/bin/activate
-          python -m pip install --upgrade pip==21.3.0
+          python -m pip install --upgrade pip
 
   split_tests:
     description: "Split tests for shared execution."
@@ -286,6 +286,21 @@ commands:
     - store_test_results:
         path: test-results
 
+  check_for_new_deps_compilation:
+    description: "Check for new deps' compilation."
+    steps:
+    - run:
+        name: Abort if no new deps were compiled
+        command: |
+          git add .
+          set +e
+          git status | grep modified
+          if [ $? -ne 0 ]; then
+              set -e
+              echo "No updated deps. Nothing to test and commit. We are all good."
+              circleci-agent step halt
+          fi
+
 jobs:
 
   test_with_updated_deps:
@@ -323,9 +338,11 @@ jobs:
               requirements/requirements-<< parameters.toxenvs >>.txt \
               requirements/dev-requirements-<< parameters.toxenvs >>.txt
             python -m pip install .
+      - check_for_new_deps_compilation
       - split_tests
       - tox:
           toxenvs: << parameters.toxenvs >>
+          posargs: "-- -m 'not slow'"
           tests: ${TEST_FILES}
       - store_results
 
@@ -343,48 +360,53 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
+      - check_for_new_deps_compilation
+      - run:
+          name: Set new branch name to 'recompile_deps'
+          command: echo 'export NEW_BRANCH=recompile_deps' >> $BASH_ENV
+      - run:
+          name: Create and checkout new branch if not already on and add changes
+          command: |
+            if [ ${NEW_BRANCH} != ${CIRCLE_BRANCH} ]; then
+                git checkout -b ${NEW_BRANCH}
+            fi
       - run:
           name: Commit and push changes
           command: |
             git config --global user.name "Bjoern Ludwig (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
-            NEW_BRANCH=recompile_deps
-            git checkout -b ${NEW_BRANCH}
-            git add .
+            git commit -am \
+              "build(deps): recompile Python (dev) deps on $(date)"
+            git push -fu origin  ${NEW_BRANCH}
+      - run:
+          name: Install GitHub CLI
+          command: |
+            curl -fsSL \
+              https://cli.github.com/packages/githubcli-archive-keyring.gpg |\
+              sudo dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) \
+              signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg]\
+              https://cli.github.com/packages stable main" | \
+              sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install gh
+      - run:
+          name: Check for an existing PR or create one
+          command: |
             set +e
-            git status | grep modified
-            if [ $? -eq 0 ]; then
+            gh pr list --head=$NEW_BRANCH | grep $NEW_BRANCH
+            if [ $? -eq 1 ]; then
                 set -e
-                git commit -am \
-                  "build(deps): recompile Python (dev) deps"
-                git push -fu origin  ${NEW_BRANCH}
-                curl -fsSL \
-                  https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
-                  sudo dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
-                echo "deb [arch=$(dpkg --print-architecture) \
-                  signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] \
-                  https://cli.github.com/packages stable main" | \
-                  sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-                sudo apt update
-                sudo apt install gh
-                set +e
-                gh pr list --head=$NEW_BRANCH | grep $NEW_BRANCH
-                if [ $? -eq 1 ]; then
-                    set -e
-                    gh pr create --head --base=master --title "Update deps" \
-                      --body "This PR provides recompiled deps for all outdated \
-                      package versions. It was opened after the commited deps were \
-                      succesfully compiled and all tests passed with the new versions. \
-                      It should be merged as soon as possible to avoid any security \
-                      issues due to outdated dependencies."
-                else
-                    set -e
-                    echo "There already was a PR opened earlier. The changes were \
-                      overridden."
-                fi
+                gh pr create --base=master --title "Update deps" \
+                  --body "This PR provides recompiled deps for all outdated \
+                  package versions. It was opened after the commited deps \
+                  were succesfully compiled and all tests passed with the \
+                  new versions. It should be merged as soon as possible to \
+                  avoid any security issues due to outdated dependencies."
             else
                 set -e
-                echo "Nothing to commit. No updated deps."
+                echo "There already was a PR opened earlier. The 
+                  current changes were force pushed into the existing branch."
             fi
 
   # Define one 'test' job with parameters to deal with all desired cases. The
@@ -485,7 +507,8 @@ jobs:
           command: |
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
-            pytest --cov=PyDynamic --junitxml=test-results/junit.xml ${TEST_FILES}
+            pytest --cov=PyDynamic --junitxml=test-results/junit.xml \
+              --suppress-no-test-exit-code ${TEST_FILES}
       - run:
           name: Upload coverage report
           command: |

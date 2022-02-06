@@ -34,7 +34,7 @@ Compile dependencies for Python 3.$PYVENV
     # Activate according Python environment.
     source ../envs/PyDynamic-py3$PYVENV/bin/activate && \
     # Upgrade pip and pip-tools.
-    python -m pip install --upgrade pip==21.3.1 pip-tools && \
+    python -m pip install --upgrade pip pip-tools && \
     # Create requirements...txt from setup.py.
     python -m piptools compile --upgrade --output-file requirements/requirements-py3$PYVENV.txt && \
     # Create dev-requirements...txt from dev-requirements...in.

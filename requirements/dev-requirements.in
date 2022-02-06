@@ -1,13 +1,15 @@
+-e file:.[examples]
 black[jupyter]
-pytest
-pytest-cov
 hypothesis
-tox
-sphinx
-sphinx-rtd-theme
-recommonmark
-nbsphinx
 ipykernel
 ipython
+nbsphinx
+pytest
+pytest-cov
+pytest-custom-exit-code
 python-semantic-release
+recommonmark
+sphinx
+sphinx-rtd-theme
+tox
 tweepy
