@@ -58,7 +58,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.colors import Normalize
 from scipy.sparse import eye, issparse
-from scipy.sparse.linalg.eigen.arpack import eigs
+from scipy.sparse.linalg import eigs
 
 
 def shift_uncertainty(x: np.ndarray, ux: np.ndarray, shift: int):
