@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.1.2 (2022-02-07)
+### Fix
+* **tools:** Switch to eigs import from scipy.sparse.linalg for scipy>=1.8.0 ([`6618278`](https://github.com/PTB-M4D/PyDynamic/commit/6618278a1f9dda069d433a4a469bbe865a3d54df))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.1.1...v2.1.2)**
+
 ## v2.1.1 (2021-12-18)
 ### Fix
 * **LSIIR:** Proper init of final_tau ([`29f2eef`](https://github.com/PTB-M4D/PyDynamic/commit/29f2eefadc05d7cf8affd9727d8afb9b56259737))
