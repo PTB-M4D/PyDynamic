@@ -111,7 +111,7 @@ iniconfig==1.1.1
     # via pytest
 invoke==1.6.0
     # via python-semantic-release
-ipykernel==6.8.0
+ipykernel==6.9.0
     # via
     #   -r requirements/dev-requirements.in
     #   notebook
@@ -247,7 +247,7 @@ pluggy==1.0.0
     #   tox
 prometheus-client==0.13.1
     # via notebook
-prompt-toolkit==3.0.26
+prompt-toolkit==3.0.27
     # via ipython
 ptyprocess==0.7.0
     # via
@@ -392,7 +392,7 @@ tokenize-rt==4.2.1
     # via black
 toml==0.10.2
     # via tox
-tomli==2.0.0
+tomli==2.0.1
     # via
     #   black
     #   coverage
