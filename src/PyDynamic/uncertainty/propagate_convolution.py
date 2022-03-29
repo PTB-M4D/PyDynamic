@@ -75,6 +75,13 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         x1, x2 = x2, x1
         U1, U2 = U2, U1
 
+    # convert 1d array of standard uncertainties to covariance matrix
+    if isinstance(U1, np.ndarray) and len(U1.shape) == 1:
+        U1 = np.diag(np.square(U1))
+
+    if isinstance(U2, np.ndarray) and len(U2.shape) == 1:
+        U2 = np.diag(np.square(U2))
+
     # actual computation
     if mode == "valid":
         # apply _fir_filter directly
