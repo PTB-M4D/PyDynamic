@@ -30,6 +30,7 @@ def x_and_Ux(
             (
                 hypothesis_covariance_matrix(number_of_rows=dim),
                 hypothesis_covariance_matrix_with_zero_correlation(number_of_rows=dim),
+                hypothesis_float_vector(length=dim, min_value=0.0, max_value=10),
                 hst.just(None),
             )
         )
