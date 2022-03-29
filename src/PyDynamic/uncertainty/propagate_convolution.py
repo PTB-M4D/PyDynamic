@@ -22,18 +22,26 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
     This function supports the convolution modes of :func:`numpy.convolve` and
     :func:`scipy.ndimage.convolve1d`.
 
+    Note: The option to provide the uncertainties as 1D-arrays of standard uncertainties
+          is given for convenience only. It does not result in any performance benefits, 
+          as they are internally just converted into a diagonal covariance matrix. 
+          Moreover, the output will always be a full covariance matrix (and will almost 
+          always have off-diagonal entries in practical scenarios).
+
     Parameters
     ----------
     x1 : np.ndarray, (N,)
         first input signal
     U1 : np.ndarray, (N, N)
-        full 2D-covariance matrix associated with x1. If the signal is fully certain,
-        use U1 = ``None`` to make use of more efficient calculations.
+        1D-array: standard uncertainties associated with x1
+        2D-array: full 2D-covariance matrix associated with x1
+        None: corresponds to a fully certain signal x1, results in more efficient calculation (compared to using np.zeros(...))
     x2 : np.ndarray, (M,)
         second input signal
     U2 : np.ndarray, (M, M)
-        full 2D-covariance matrix associated with x2. If the signal is fully certain,
-        use U2 = ``None`` to make use of more efficient calculations.
+        1D-array: standard uncertainties associated with x2
+        2D-array: full 2D-covariance matrix associated with x2
+        None: corresponds to a fully certain signal x2, results in more efficient calculation (compared to using np.zeros(...))
     mode : str, optional
         :func:`numpy.convolve`-modes:
 
