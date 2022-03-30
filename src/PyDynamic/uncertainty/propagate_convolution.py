@@ -77,11 +77,12 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         U1, U2 = U2, U1
 
     # convert 1d array of standard uncertainties to covariance matrix
-    if isinstance(U1, np.ndarray) and len(U1.shape) == 1:
-        U1 = np.diag(np.square(U1))
+    # squeeze() ensures proper execution on arrays with only one dimension of non-zero length
+    if isinstance(U1, np.ndarray) and len(U1.squeeze().shape) == 1:
+        U1 = np.diag(np.square(U1.squeeze()))
 
-    if isinstance(U2, np.ndarray) and len(U2.shape) == 1:
-        U2 = np.diag(np.square(U2))
+    if isinstance(U2, np.ndarray) and len(U2.squeeze().shape) == 1:
+        U2 = np.diag(np.square(U2.squeeze()))
 
     # actual computation
     if mode == "valid":
