@@ -34,7 +34,7 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
     x1 : np.ndarray, (N,)
         first input signal
     U1 : np.ndarray, (N, N)
-        - 1D-array: standard uncertainties associated with x1
+        - 1D-array: standard uncertainties associated with x1 (corresponding to uncorrelated entries of x1)
         - 2D-array: full 2D-covariance matrix associated with x1
         - None: corresponds to a fully certain signal x1, results in more efficient calculation (compared to using np.zeros(...))
     x2 : np.ndarray, (M,)
