@@ -410,9 +410,10 @@ def is_vector(ndarray: np.ndarray) -> bool:
     Returns
     -------
     bool
-        True, if the array expands over one dimension of non-zero length only, False otherwise
+        True, if the array expands over one dimension of non-zero length only, False
+        otherwise
     """
-    return len(np.squeeze(ndarray).shape) == 1
+    return len(ndarray.squeeze().shape) == 1
 
 
 def is_2d_matrix(ndarray: np.ndarray) -> bool:
