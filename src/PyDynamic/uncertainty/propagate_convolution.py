@@ -173,7 +173,7 @@ def ensure_cov_matrix(unc_array):
     """
 
     # squeeze() ensures proper execution on arrays with only one dimension of non-zero length
-    if unc_array is not None and len(unc_array.squeeze().shape) == 1:
-        unc_array = np.diag(np.square(unc_array.squeeze()))
+    if unc_array is not None and len(np.squeeze(unc_array).shape) == 1:
+        unc_array = np.diag(np.square(np.squeeze(unc_array)))
 
     return unc_array
