@@ -88,8 +88,8 @@ def test_ARMA():
     # check default parameters (white noise)
     w = pn.ARMA(100)
     assert w.shape == (100,)
-    assert_allclose(np.std(w), 1.0, rtol=0.2)
-    assert_allclose(np.mean(w), 0.0, atol=0.2)
+    assert_allclose(np.std(w), 1.0, atol=0.25)
+    assert_allclose(np.mean(w), 0.0, atol=0.35)
 
     # check float, list and numpy.arrays as input values
     phi_list = [2, [2], np.array([1, 2])]
