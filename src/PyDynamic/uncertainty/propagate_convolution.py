@@ -166,12 +166,12 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
 
 def ensure_cov_matrix(unc_array):
     """
-    Converts 1D-arrays of standard uncertainties into the corresponding 
-    (diagonal) covariance matrix by *square*+diag. 
+    Converts 1D-arrays of standard uncertainties into the corresponding
+    (diagonal) covariance matrix by *square*+diag.
 
     Does not modify inputs which are 2D-arrays or None.
     """
-    
+
     # squeeze() ensures proper execution on arrays with only one dimension of non-zero length
     if isinstance(unc_array, np.ndarray) and len(unc_array.squeeze().shape) == 1:
         unc_array = np.diag(np.square(unc_array.squeeze()))
