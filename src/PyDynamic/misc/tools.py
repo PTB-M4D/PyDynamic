@@ -341,7 +341,7 @@ def FreqResp2RealImag(
 def make_equidistant(*args, **kwargs):
     """
     .. deprecated:: 2.0.0
-        Please use :func:`PyDynamic.uncertainty.interpolate.interp1d_unc`
+        Please use :func:`PyDynamic.uncertainty.interpolate.make_equidistant`
     """
     raise DeprecationWarning(
         "The method `PyDynamic.misc.tools.make_equidistant` is moved "
