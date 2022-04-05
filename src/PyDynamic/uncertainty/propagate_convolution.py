@@ -77,7 +77,7 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
         U1, U2 = U2, U1
 
     # convert 1d array of standard uncertainties to covariance matrix (if necessary)
-    U1, U2 = ensure_cov_matrix(U1), ensure_cov_matrix(U2)
+    U1, U2 = _ensure_cov_matrix(U1), _ensure_cov_matrix(U2)
 
     # actual computation
     if mode == "valid":
@@ -164,7 +164,7 @@ def convolve_unc(x1, U1, x2, U2, mode="full"):
     return conv, Uconv
 
 
-def ensure_cov_matrix(unc_array):
+def _ensure_cov_matrix(unc_array):
     """
     Converts 1D-arrays of standard uncertainties into the corresponding
     (diagonal) covariance matrix by *square*+diag.
