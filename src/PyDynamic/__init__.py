@@ -6,7 +6,7 @@
      -uptake-of-nmi-calibrations-of-dynamic-force-torque-and/>`_
    - `GitHub website <https://www.github.com/PTB-M4D/PyDynamic>`_
 """
-__version__ = "2.1.2"
+__version__ = "2.1.3"
 
 __all__ = [
     "LSFIR",

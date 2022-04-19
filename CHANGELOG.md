@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.1.3 (2022-04-19)
+### Fix
+* **test_ARMA:** Increase closeness tolerance ([`e35e536`](https://github.com/PTB-M4D/PyDynamic/commit/e35e536c42966da81930aca05166abe1e04c906a))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.1.2...v2.1.3)**
+
 ## v2.1.2 (2022-02-07)
 ### Fix
 * **tools:** Switch to eigs import from scipy.sparse.linalg for scipy>=1.8.0 ([`6618278`](https://github.com/PTB-M4D/PyDynamic/commit/6618278a1f9dda069d433a4a469bbe865a3d54df))
