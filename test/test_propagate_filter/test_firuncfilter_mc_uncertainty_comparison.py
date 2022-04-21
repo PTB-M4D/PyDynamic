@@ -15,7 +15,6 @@ from ..conftest import FIRuncFilter_input
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
-    max_examples=50,
 )
 @pytest.mark.slow
 def test(fir_unc_filter_input):
