@@ -54,9 +54,10 @@ def _is_np_array_with_len_greater_zero(array: Any) -> bool:
 def FIRuncFilter_input(
     draw: Callable, exclude_corr_kind: bool = False
 ) -> Dict[str, Any]:
+    min_accepted_by_scipy_linalg_companion = 2
     filter_length = draw(
-        hst.integers(min_value=2, max_value=100)
-    )  # scipy.linalg.companion requires N >= 2
+        hst.integers(min_value=min_accepted_by_scipy_linalg_companion, max_value=100)
+    )
     filter_theta = draw(
         hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e2)
     )
@@ -95,8 +96,8 @@ def FIRuncFilter_input(
         signal_standard_deviation = draw(hypothesis_not_negative_float(max_value=1e2))
 
     lowpass_length = draw(
-        hst.integers(min_value=2, max_value=10)
-    )  # scipy.linalg.companion requires N >= 2
+        hst.integers(min_value=min_accepted_by_scipy_linalg_companion, max_value=10)
+    )
     lowpass = draw(
         hst.one_of(
             (
