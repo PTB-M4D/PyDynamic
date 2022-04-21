@@ -14,7 +14,6 @@ __all__ = ["convolve_unc"]
 import numpy as np
 
 from .propagate_filter import _fir_filter
-from ..misc.tools import is_vector
 
 
 def convolve_unc(x1, U1, x2, U2, mode="full"):
@@ -173,7 +172,8 @@ def _ensure_cov_matrix(unc_array):
     Does not modify inputs which are 2D-arrays or None.
     """
 
-    if unc_array is not None and is_vector(unc_array):
-        unc_array = np.diag(np.square(unc_array))
+    # squeeze() ensures proper execution on arrays with only one dimension of non-zero length
+    if unc_array is not None and len(np.squeeze(unc_array).shape) == 1:
+        unc_array = np.diag(np.square(np.squeeze(unc_array)))
 
     return unc_array
