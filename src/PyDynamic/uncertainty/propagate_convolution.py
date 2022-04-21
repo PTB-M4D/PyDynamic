@@ -174,6 +174,6 @@ def _ensure_cov_matrix(unc_array):
     """
 
     if unc_array is not None and is_vector(unc_array):
-        unc_array = np.diag(np.square(unc_array.squeeze()))
+        unc_array = np.diag(np.square(unc_array))
 
     return unc_array
