@@ -14,16 +14,24 @@ from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
 from scipy.signal import correlate
 
-# This will check, if the testrun is executed in the ci environment and if so,
-# disables the 'too_slow' health check. See
-# https://hypothesis.readthedocs.io/en/latest/healthchecks.html#hypothesis.HealthCheck
-# for some details.
 
-settings.register_profile(
-    name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
-)
-if os.getenv("CIRCLECI") == "true":
+def _check_for_ci_to_switch_off_performance_related_healthchecks():
+    if _running_in_ci():
+        _register_and_load_hypothesis_profile_for_slow_ci_machines()
+
+
+def _running_in_ci():
+    return os.getenv("CIRCLECI") == "true"
+
+
+def _register_and_load_hypothesis_profile_for_slow_ci_machines():
+    settings.register_profile(
+        name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
+    )
     settings.load_profile("ci")
+
+
+_check_for_ci_to_switch_off_performance_related_healthchecks()
 
 
 def _print_during_test_to_avoid_timeout(capsys):
