@@ -63,7 +63,10 @@ def FIRuncFilter_input(
     )
     filter_theta_covariance = draw(
         hst.one_of(
-            hypothesis_covariance_matrix(number_of_rows=filter_length), hst.just(None)
+            hypothesis_covariance_matrix(
+                number_of_rows=filter_length, max_value=np.max(filter_theta)
+            ),
+            hst.just(None),
         )
     )
 
@@ -78,7 +81,9 @@ def FIRuncFilter_input(
         kind = draw(hst.sampled_from(("float", "diag", "corr")))
     if kind == "diag":
         signal_standard_deviation = draw(
-            hypothesis_float_vector(length=signal_length, min_value=0, max_value=1e2)
+            hypothesis_float_vector(
+                length=signal_length, min_value=0, max_value=np.max(signal)
+            )
         )
     elif kind == "corr":
         random_data = draw(
@@ -93,7 +98,9 @@ def FIRuncFilter_input(
         )
         signal_standard_deviation = scaled_acf[len(scaled_acf) // 2 :]
     else:
-        signal_standard_deviation = draw(hypothesis_not_negative_float(max_value=1e2))
+        signal_standard_deviation = draw(
+            hypothesis_not_negative_float(max_value=np.max(signal))
+        )
 
     lowpass_length = draw(
         hst.integers(min_value=min_accepted_by_scipy_linalg_companion, max_value=10)
