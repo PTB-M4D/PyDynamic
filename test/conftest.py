@@ -527,7 +527,7 @@ def hypothesis_positive_powers_of_two(
     draw: Callable, min_k: Optional[int] = 0, max_k: Optional[int] = None
 ) -> int:
     k = draw(hst.integers(min_value=min_k, max_value=max_k))
-    two_to_the_k = 2 ** k
+    two_to_the_k = 2**k
     return two_to_the_k
 
 
@@ -542,7 +542,7 @@ def corrmatrix() -> Callable:
             raise ValueError("Correlation scalar should be less than one.")
 
         for k in range(1, Nx):
-            corrmat += np.diag(np.ones(Nx - k) * rho ** (phi * k ** nu), k)
+            corrmat += np.diag(np.ones(Nx - k) * rho ** (phi * k**nu), k)
         corrmat += corrmat.T
         corrmat += np.eye(Nx)
 
