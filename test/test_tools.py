@@ -76,7 +76,7 @@ def test_is_2d_matrix(array):
 
 @given(hnp.arrays(dtype=hnp.array_dtypes(), shape=hnp.array_shapes()))
 def test_is_vector(array):
-    assert is_vector(array) == (len(array.squeeze().shape) == 1)
+    assert is_vector(array) == (len(array.shape) == 1)
 
 
 @given(hnp.arrays(dtype=hnp.floating_dtypes(), shape=hnp.array_shapes()))
