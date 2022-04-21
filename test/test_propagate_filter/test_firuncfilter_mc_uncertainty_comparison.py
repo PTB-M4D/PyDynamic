@@ -22,7 +22,7 @@ def test(fir_unc_filter_input):
     # In this test, we exclude the case of a valid signal with uncertainty given as
     # the right-sided auto-covariance (acf). This is done, because we currently do not
     # ensure, that the random-drawn acf generates a positive-semidefinite
-    # Toeplitz-matrix. Therefore we cannot construct a valid and equivalent input for
+    # Toeplitz-matrix. Therefore, we cannot construct a valid and equivalent input for
     # the Monte-Carlo method in that case.
 
     # Check output for thinkable permutations of input parameters against a Monte Carlo
