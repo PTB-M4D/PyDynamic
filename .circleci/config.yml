@@ -315,7 +315,7 @@ jobs:
         type: string
         default: ""
 
-    parallelism: 8
+    parallelism: 16
 
     executor:
       name: venv_tester
@@ -431,7 +431,7 @@ jobs:
         default: ""
       parallelism:
         type: integer
-        default: 8
+        default: 16
 
     parallelism: << parameters.parallelism >>
 
@@ -455,7 +455,7 @@ jobs:
       - store_results
 
   test_conda_py39:
-    parallelism: 8
+    parallelism: 16
 
     executor: conda_tester
 

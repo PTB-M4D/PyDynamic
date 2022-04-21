@@ -1,13 +1,22 @@
 from typing import Tuple
 
 import numpy as np
-
-# noinspection PyProtectedMember
+import pytest
+from numpy.random import default_rng
 from PyDynamic import shift_uncertainty
 
 
-def random_array(length):
-    return np.random.randn(length)
+@pytest.fixture
+def rng():
+    return default_rng()
+
+
+@pytest.fixture
+def random_standard_normal_array(rng):
+    def _generate_random_array(length):
+        return rng.standard_normal(length)
+
+    return _generate_random_array
 
 
 def _set_irrelevant_ranges_to_zero(
