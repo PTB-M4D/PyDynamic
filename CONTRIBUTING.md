@@ -138,7 +138,7 @@ line and will be included in the changelog in full length.
 #### Examples
 
 For examples please check out the
-[Git Log](https://github.com/PTB-M4D/PyDynamic/commits/master).
+[Git Log](https://github.com/PTB-M4D/PyDynamic/commits/main).
 
 
 ###  Testing
@@ -169,8 +169,8 @@ In case you add a new feature you generally follow the pattern:
   the [advised tool](#advised-toolset) set and [coding style](#coding-style)
 - open an according issue to submit a feature request and get in touch with other
   PyDynamic developers and users
-- fork the repository or update the _master_ branch of your fork and create an
-  arbitrary named feature branch from _master_
+- fork the repository or update the _main_ branch of your fork and create an
+  arbitrary named feature branch from _main_
 - decide which package and module your feature should be integrated into
 - if there is no suitable package or module, create a new one and a corresponding
   module in the _test_ subdirectory with the same name prefixed by _test__
@@ -178,12 +178,12 @@ In case you add a new feature you generally follow the pattern:
   the module itself and in the higher-level `__init__.py`s
 - if new dependencies are introduced, add them to _setup.py_ or _dev-requirements.in_
 - during development write tests in alignment with existing test modules, for example
-  [_test_interpolate_](https://github.com/PTB-M4D/PyDynamic/blob/master/test/test_interpolate.py)
-  or [_test_propagate_filter_](https://github.com/PTB-M4D/PyDynamic/blob/master/test/test_propagate_filter.py)
+  [_test_interpolate_](https://github.com/PTB-M4D/PyDynamic/blob/main/test/test_interpolate.py)
+  or [_test_propagate_filter_](https://github.com/PTB-M4D/PyDynamic/blob/main/test/test_propagate_filter.py)
 - write docstrings in the
   [NumPy docstring format](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard)
   for all public functions you add
-- as early as possible create a draft pull request onto the upstream's _master_
+- as early as possible create a draft pull request onto the upstream's _main_
   branch
 - once you think your changes are ready to merge,
   [request a review](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/requesting-a-pull-request-review)
@@ -246,9 +246,9 @@ As stated in the README and above we use
 [_pip-tools_](https://pypi.org/project/pip-tools/) for dependency management. The
 requirements' subdirectory contains a _requirements.txt_ and a _dev-requirements.txt_
 for all supported Python versions, with a suffix naming the version, for example
-[_requirements-py36.txt_](https://github.com/PTB-M4D/PyDynamic/blob/master/requirements/requirements-py36.txt)
+[_requirements-py36.txt_](https://github.com/PTB-M4D/PyDynamic/blob/main/requirements/requirements-py36.txt)
 To keep them up to date semi-automatically we use the bash script
-[_requirements/upgrade_dependencies.sh_](https://github.com/PTB-M4D/PyDynamic/blob/master/requirements/upgrade_dependencies.sh).
+[_requirements/upgrade_dependencies.sh_](https://github.com/PTB-M4D/PyDynamic/blob/main/requirements/upgrade_dependencies.sh).
 It contains extensive comments on its use. _pip-tools_' command `pip-compile` finds
 the right versions from the dependencies listed in _setup.py_ and the
 _dev-requirements.in_.
@@ -256,4 +256,4 @@ _dev-requirements.in_.
 ## Licensing
 
 All contributions are released under PyDynamic's 
-[GNU Lesser General Public License v3.0](https://github.com/PTB-M4D/PyDynamic/blob/master/licence.txt).
+[GNU Lesser General Public License v3.0](https://github.com/PTB-M4D/PyDynamic/blob/main/licence.txt).

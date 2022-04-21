@@ -138,8 +138,8 @@ source_suffix = [".rst", ".md"]
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # General information about the project.
 project = "PyDynamic"
@@ -319,7 +319,7 @@ htmlhelp_basename = "PyDynamicdoc"
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (
-        master_doc,
+        root_doc,
         "PyDynamic.tex",
         "PyDynamic Documentation",
         "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith",
@@ -352,7 +352,7 @@ latex_domain_indices = True
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "pydynamic", "PyDynamic Documentation", [author], 1)]
+man_pages = [(root_doc, "pydynamic", "PyDynamic Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 man_show_urls = False
@@ -365,7 +365,7 @@ man_show_urls = False
 #  dir menu entry, description, category)
 # texinfo_documents = [
 #     (
-#         master_doc,
+#         root_doc,
 #         "PyDynamic",
 #         "PyDynamic Documentation",
 #         author,

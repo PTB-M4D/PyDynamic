@@ -61,7 +61,7 @@ workflows:
           cron: "0 0 1 * *"
           filters:
             branches:
-              only: /master/
+              only: /main/
     jobs:
       - test_with_updated_deps:
           name: "test_with_updated_deps_py37"
@@ -103,7 +103,7 @@ workflows:
           cron: "0 0 8,15,22 * *"
           filters:
             branches:
-              only: /master/
+              only: /main/
     jobs:
       - test:
           name: "nightly_test_python_py37"
@@ -193,14 +193,14 @@ workflows:
             - preview_release
           filters:
             branches:
-              only: /master/
+              only: /main/
           context:
             - Docker publishing as bludoc
       - release:
           # Job to potentially create a release based on python-semantic-release's
           # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
-          # approval in the previous step, which is only triggered on branch master,
-          # thus this job here is triggered only on master as well.
+          # approval in the previous step, which is only triggered on branch main,
+          # thus this job here is triggered only on main as well.
           context:
             - pypi.org publishing for PyDynamic
             - GitHub pushes to BjoernLudwigPTB's public_repos
@@ -395,7 +395,7 @@ jobs:
             gh pr list --head=$NEW_BRANCH | grep $NEW_BRANCH
             if [ $? -eq 1 ]; then
                 set -e
-                gh pr create --base=master --title "Update deps" \
+                gh pr create --base=main --title "Update deps" \
                   --body "This PR provides recompiled deps for all outdated \
                   package versions. It was opened after the commited deps \
                   were succesfully compiled and all tests passed with the \
@@ -579,7 +579,7 @@ jobs:
           command: |
             unset CIRCLE_PULL_REQUEST CIRCLE_PULL_REQUESTS CI_PULL_REQUEST \
               CI_PULL_REQUESTS
-            export CIRCLE_BRANCH=master
+            export CIRCLE_BRANCH=main
             source venv/bin/activate
             git config --global user.name "semantic-release (via CircleCI)"
             git config --global user.email "bjoern.ludwig@ptb.de"
