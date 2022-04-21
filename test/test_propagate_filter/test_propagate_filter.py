@@ -44,7 +44,7 @@ def equal_signals(random_standard_normal_array):
     N = np.random.randint(100, 1000)
     signal = random_standard_normal_array(N)
     s = np.random.randn()
-    acf = np.array([s ** 2] + [0] * (N - 1))
+    acf = np.array([s**2] + [0] * (N - 1))
 
     equal_signals = [
         {"y": signal, "sigma_noise": s, "kind": "float"},
