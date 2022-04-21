@@ -38,10 +38,10 @@ def test(fir_unc_filter_input):
 
     b = fir_unc_filter_input["theta"]
     a = np.ones(1)
-    if isinstance(fir_unc_filter_input["Utheta"], np.ndarray):
+    if fir_unc_filter_input["Utheta"] is None:
+        Uab = np.zeros((len(b), len(b)))
+    else:
         Uab = fir_unc_filter_input["Utheta"]
-    else:  # Utheta == None
-        Uab = np.zeros((len(b), len(b)))  # MC-method cant deal with Utheta = None
 
     blow = fir_unc_filter_input["blow"]
     if isinstance(blow, np.ndarray):
