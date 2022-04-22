@@ -14,16 +14,24 @@ from PyDynamic import make_semiposdef
 from PyDynamic.misc.tools import normalize_vector_or_matrix
 from scipy.signal import correlate
 
-# This will check, if the testrun is executed in the ci environment and if so,
-# disables the 'too_slow' health check. See
-# https://hypothesis.readthedocs.io/en/latest/healthchecks.html#hypothesis.HealthCheck
-# for some details.
 
-settings.register_profile(
-    name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
-)
-if os.getenv("CIRCLECI") == "true":
+def _check_for_ci_to_switch_off_performance_related_healthchecks():
+    if _running_in_ci():
+        _register_and_load_hypothesis_profile_for_slow_ci_machines()
+
+
+def _running_in_ci():
+    return os.getenv("CIRCLECI") == "true"
+
+
+def _register_and_load_hypothesis_profile_for_slow_ci_machines():
+    settings.register_profile(
+        name="ci", suppress_health_check=(HealthCheck.too_slow,), deadline=None
+    )
     settings.load_profile("ci")
+
+
+_check_for_ci_to_switch_off_performance_related_healthchecks()
 
 
 def _print_during_test_to_avoid_timeout(capsys):
@@ -46,15 +54,19 @@ def _is_np_array_with_len_greater_zero(array: Any) -> bool:
 def FIRuncFilter_input(
     draw: Callable, exclude_corr_kind: bool = False
 ) -> Dict[str, Any]:
+    min_accepted_by_scipy_linalg_companion = 2
     filter_length = draw(
-        hst.integers(min_value=2, max_value=100)
-    )  # scipy.linalg.companion requires N >= 2
+        hst.integers(min_value=min_accepted_by_scipy_linalg_companion, max_value=100)
+    )
     filter_theta = draw(
         hypothesis_float_vector(length=filter_length, min_value=1e-2, max_value=1e2)
     )
     filter_theta_covariance = draw(
         hst.one_of(
-            hypothesis_covariance_matrix(number_of_rows=filter_length), hst.just(None)
+            hypothesis_covariance_matrix(
+                number_of_rows=filter_length, max_value=10 * np.max(filter_theta)
+            ),
+            hst.just(None),
         )
     )
 
@@ -69,7 +81,9 @@ def FIRuncFilter_input(
         kind = draw(hst.sampled_from(("float", "diag", "corr")))
     if kind == "diag":
         signal_standard_deviation = draw(
-            hypothesis_float_vector(length=signal_length, min_value=0, max_value=1e2)
+            hypothesis_float_vector(
+                length=signal_length, min_value=0, max_value=10 * np.max(signal)
+            )
         )
     elif kind == "corr":
         random_data = draw(
@@ -84,11 +98,13 @@ def FIRuncFilter_input(
         )
         signal_standard_deviation = scaled_acf[len(scaled_acf) // 2 :]
     else:
-        signal_standard_deviation = draw(hypothesis_not_negative_float(max_value=1e2))
+        signal_standard_deviation = draw(
+            hypothesis_not_negative_float(max_value=10 * np.max(signal))
+        )
 
     lowpass_length = draw(
-        hst.integers(min_value=2, max_value=10)
-    )  # scipy.linalg.companion requires N >= 2
+        hst.integers(min_value=min_accepted_by_scipy_linalg_companion, max_value=10)
+    )
     lowpass = draw(
         hst.one_of(
             (
@@ -518,7 +534,7 @@ def hypothesis_positive_powers_of_two(
     draw: Callable, min_k: Optional[int] = 0, max_k: Optional[int] = None
 ) -> int:
     k = draw(hst.integers(min_value=min_k, max_value=max_k))
-    two_to_the_k = 2 ** k
+    two_to_the_k = 2**k
     return two_to_the_k
 
 
@@ -533,7 +549,7 @@ def corrmatrix() -> Callable:
             raise ValueError("Correlation scalar should be less than one.")
 
         for k in range(1, Nx):
-            corrmat += np.diag(np.ones(Nx - k) * rho ** (phi * k ** nu), k)
+            corrmat += np.diag(np.ones(Nx - k) * rho ** (phi * k**nu), k)
         corrmat += corrmat.T
         corrmat += np.eye(Nx)
 

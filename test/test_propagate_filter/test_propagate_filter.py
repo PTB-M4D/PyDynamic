@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 import scipy
 from numpy.testing import assert_allclose
-
 from PyDynamic.misc.testsignals import rect
 
 # noinspection PyProtectedMember
@@ -16,17 +15,17 @@ from PyDynamic.uncertainty.propagate_filter import (
     IIRuncFilter,
 )
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
-from .conftest import random_array
+
 from ..conftest import random_covariance_matrix
 
 
 @pytest.fixture
-def equal_filters():
+def equal_filters(random_standard_normal_array):
     # Create two filters with assumed identical FIRuncFilter() output to test
     # equality of the more efficient with the standard implementation.
 
     N = np.random.randint(2, 100)  # scipy.linalg.companion requires N >= 2
-    theta = random_array(N)
+    theta = random_standard_normal_array(N)
 
     equal_filters = [
         {"theta": theta, "Utheta": None},
@@ -37,15 +36,15 @@ def equal_filters():
 
 
 @pytest.fixture
-def equal_signals():
+def equal_signals(random_standard_normal_array):
     # Create three signals with assumed identical FIRuncFilter() output to test
     # equality of the different cases of input parameter 'kind'.
 
     # some shortcuts
     N = np.random.randint(100, 1000)
-    signal = random_array(N)
+    signal = random_standard_normal_array(N)
     s = np.random.randn()
-    acf = np.array([s ** 2] + [0] * (N - 1))
+    acf = np.array([s**2] + [0] * (N - 1))
 
     equal_signals = [
         {"y": signal, "sigma_noise": s, "kind": "float"},
@@ -77,13 +76,13 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
 
 
 @pytest.mark.slow
-def test_fir_filter_MC_comparison():
+def test_fir_filter_MC_comparison(random_standard_normal_array):
     N_signal = np.random.randint(20, 25)
-    x = random_array(N_signal)
+    x = random_standard_normal_array(N_signal)
     Ux = random_covariance_matrix(N_signal)
 
     N_theta = np.random.randint(2, 5)  # scipy.linalg.companion requires N >= 2
-    theta = random_array(N_theta)  # scipy.signal.firwin(N_theta, 0.1)
+    theta = random_standard_normal_array(N_theta)  # scipy.signal.firwin(N_theta, 0.1)
     Utheta = random_covariance_matrix(N_theta)
 
     # run method

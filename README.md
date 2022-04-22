@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_logo.svg" alt="the logo of PyDynamic" title="PyDynamic logo">
+<img src="https://raw.githubusercontent.com/PTB-M4D/PyDynamic/main/docs/PyDynamic_logo.svg" alt="the logo of PyDynamic" title="PyDynamic logo">
 <p align="center">
   <!-- CircleCI Tests -->
   <a href="https://circleci.com/gh/PTB-M4D/PyDynamic"><img alt="CircleCI pipeline status badge" src="https://circleci.com/gh/PTB-M4D/PyDynamic.svg?style=shield"></a>
@@ -8,7 +8,7 @@
   </a>
   <!-- CodeCov(erage) -->
   <a href="https://codecov.io/gh/PTB-M4D/PyDynamic">
-    <img src="https://codecov.io/gh/PTB-M4D/PyDynamic/branch/master/graph/badge.svg" alt=" PyDynamic's CodeCov badge">
+    <img src="https://codecov.io/gh/PTB-M4D/PyDynamic/branch/main/graph/badge.svg" alt=" PyDynamic's CodeCov badge">
   </a>
   <!-- Codacy -->
   <a href="https://www.codacy.com/gh/PTB-M4D/PyDynamic/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PTB-M4D/PyDynamic&amp;utm_campaign=Badge_Grade">
@@ -112,7 +112,7 @@ for digital filtering.
 
 The fundamental structure of PyDynamic is shown in the following figure.
 
-![PyDynamic module diagram](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/master/docs/PyDynamic_module_diagram.png)
+![PyDynamic module diagram](https://raw.githubusercontent.com/PTB-M4D/PyDynamic/main/docs/PyDynamic_module_diagram.png)
 
 However, imports should generally be possible without explicitly naming all packages
 and modules in the path, so that for example the following import statements are all
@@ -138,7 +138,7 @@ Detailed instructions on different options to install PyDynamic you can find in 
 ## Contributing
 
 Whenever you are involved with PyDynamic, please respect our [Code of Conduct
-](https://github.com/PTB-M4D/PyDynamic/blob/master/CODE_OF_CONDUCT.md).
+](https://github.com/PTB-M4D/PyDynamic/blob/main/CODE_OF_CONDUCT.md).
 If you want to contribute back to the project, after reading our Code of Conduct,
 take a look at our open developments in the [project board
 ](https://github.com/PTB-M4D/PyDynamic/projects/1), [pull requests
@@ -218,10 +218,10 @@ consequential damage arising in connection with the use of this software.
 ## License
 
 PyDynamic is distributed under the [LGPLv3 license
-](https://github.com/PTB-M4D/PyDynamic/blob/master/licence.txt)
+](https://github.com/PTB-M4D/PyDynamic/blob/main/licence.txt)
 except for the module [`impinvar.py`
-](https://github.com/PTB-M4D/PyDynamic/blob/master/src/PyDynamic/misc/impinvar.py) 
+](https://github.com/PTB-M4D/PyDynamic/blob/main/src/PyDynamic/misc/impinvar.py) 
 in the package [`misc`
-](https://pydynamic.readthedocs.io/en/master/PyDynamic.misc.html), 
+](https://pydynamic.readthedocs.io/en/main/PyDynamic.misc.html), 
 which is distributed under the [GPLv3 license
-](https://github.com/PTB-M4D/PyDynamic/blob/master/src/PyDynamic/misc/impinvar_license.txt).
+](https://github.com/PTB-M4D/PyDynamic/blob/main/src/PyDynamic/misc/impinvar_license.txt).

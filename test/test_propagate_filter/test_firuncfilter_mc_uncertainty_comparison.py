@@ -15,14 +15,13 @@ from ..conftest import FIRuncFilter_input
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
     ],
-    max_examples=50,
 )
 @pytest.mark.slow
 def test(fir_unc_filter_input):
     # In this test, we exclude the case of a valid signal with uncertainty given as
     # the right-sided auto-covariance (acf). This is done, because we currently do not
     # ensure, that the random-drawn acf generates a positive-semidefinite
-    # Toeplitz-matrix. Therefore we cannot construct a valid and equivalent input for
+    # Toeplitz-matrix. Therefore, we cannot construct a valid and equivalent input for
     # the Monte-Carlo method in that case.
 
     # Check output for thinkable permutations of input parameters against a Monte Carlo
@@ -38,10 +37,10 @@ def test(fir_unc_filter_input):
 
     b = fir_unc_filter_input["theta"]
     a = np.ones(1)
-    if isinstance(fir_unc_filter_input["Utheta"], np.ndarray):
+    if fir_unc_filter_input["Utheta"] is None:
+        Uab = np.zeros((len(b), len(b)))
+    else:
         Uab = fir_unc_filter_input["Utheta"]
-    else:  # Utheta == None
-        Uab = np.zeros((len(b), len(b)))  # MC-method cant deal with Utheta = None
 
     blow = fir_unc_filter_input["blow"]
     if isinstance(blow, np.ndarray):
