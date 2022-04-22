@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.0 (2022-04-22)
+### Feature
+* **convolve_unc:** Allow 1D array of stdunc as input ([`ae5335a`](https://github.com/PTB-M4D/PyDynamic/commit/ae5335a54e2452f0e936cb50263865d4b4916a87))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.1.3...v2.2.0)**
+
 ## v2.1.3 (2022-04-19)
 ### Fix
 * **test_ARMA:** Increase closeness tolerance ([`e35e536`](https://github.com/PTB-M4D/PyDynamic/commit/e35e536c42966da81930aca05166abe1e04c906a))
