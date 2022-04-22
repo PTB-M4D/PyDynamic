@@ -6,15 +6,10 @@ from numpy.random import default_rng
 from PyDynamic import shift_uncertainty
 
 
-@pytest.fixture
-def rng():
-    return default_rng()
-
-
-@pytest.fixture
-def random_standard_normal_array(rng):
+@pytest.fixture(scope="session")
+def random_standard_normal_array():
     def _generate_random_array(length):
-        return rng.standard_normal(length)
+        return default_rng().standard_normal(length)
 
     return _generate_random_array
 
