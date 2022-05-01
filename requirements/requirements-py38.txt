@@ -6,7 +6,7 @@
 #
 cycler==0.11.0
     # via matplotlib
-fonttools==4.31.2
+fonttools==4.33.3
     # via matplotlib
 future==0.18.2
     # via uncertainties
@@ -26,11 +26,11 @@ numpy==1.22.3
     #   time-series-buffer
 packaging==21.3
     # via matplotlib
-pandas==1.4.1
+pandas==1.4.2
     # via PyDynamic (setup.py)
-pillow==9.0.1
+pillow==9.1.0
     # via matplotlib
-pyparsing==3.0.7
+pyparsing==3.0.8
     # via
     #   matplotlib
     #   packaging
