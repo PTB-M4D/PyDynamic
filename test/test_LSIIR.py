@@ -280,7 +280,7 @@ def test_fitIIR_results_against_former_implementations(
         # Make sure there are non-zero frequency responses. Otherwise, fitting to
         # reciprocal of frequency response means dividing by zero.
         assume(
-            not np.any(np.absolute(lsiir_base_params["H"]) < np.finfo(np.float64).eps)
+            not np.all(np.absolute(lsiir_base_params["H"]) < np.finfo(np.float64).eps)
         )
 
     # Initialize parameters.
