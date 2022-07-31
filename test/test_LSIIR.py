@@ -132,7 +132,7 @@ def provide_former_fitIIR():
         exponent = -1 if _inv else 1
         Ea = _E[:, 1 : _Na + 1]
         Eb = _E[:, : _Nb + 1]
-        Htau = np.exp(-1j * _omega * _tau) * _H ** exponent
+        Htau = np.exp(-1j * _omega * _tau) * _H**exponent
         HEa = np.dot(np.diag(Htau), Ea)
         D = np.hstack((HEa, -Eb))
         Tmp1 = np.real(np.dot(np.conj(D.T), D))
@@ -277,9 +277,11 @@ def test_fitIIR_results_against_former_implementations(
 ):
     """This takes the implementation prior to the rewrite and compares results."""
     if inv:
-        # Make sure there are non-zero frequency responses. Otherwise fitting to
+        # Make sure there are non-zero frequency responses. Otherwise, fitting to
         # reciprocal of frequency response means dividing by zero.
-        assume(not np.all(lsiir_base_params["H"] == 0))
+        assume(
+            not np.all(np.absolute(lsiir_base_params["H"]) < np.finfo(np.float64).eps)
+        )
 
     # Initialize parameters.
     fit_params = {
