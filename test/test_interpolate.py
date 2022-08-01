@@ -11,11 +11,13 @@ from pytest import raises
 
 from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
 
+_MIN_NODES_FOR_CUBIC_SPLINE = 4
+
 
 @composite
 def values_uncertainties_kind(
     draw,
-    min_count: Optional[int] = 4,
+    min_count: Optional[int] = _MIN_NODES_FOR_CUBIC_SPLINE,
     max_count: Optional[int] = None,
     kind_tuple: Optional[Tuple[str]] = (
         "linear",
@@ -135,6 +137,31 @@ def values_uncertainties_kind(
     if sorted_xs:
         ind = np.argsort(x)
         x = x[ind]
+
+    # Draw the interpolation kind from the provided tuple.
+    kind = draw(hst.sampled_from(kind_tuple))
+
+    # If a spline will be created, make sure no two values are close to be equal.
+    if kind == "cubic":
+        x = np.append(
+            x[0],
+            x[1:][
+                np.logical_and(
+                    np.logical_not(np.diff(x) < np.finfo(np.float).eps),
+                    np.logical_not(
+                        np.logical_and(
+                            np.abs(x[1:]) / np.max(x) < np.finfo(np.float).eps,
+                            x[1:] != 0,
+                        ),
+                    ),
+                )
+            ],
+        )
+        x_first_order_diffs = np.diff(x)
+        x_shortage = _MIN_NODES_FOR_CUBIC_SPLINE - len(x)
+        while x_shortage > 0:
+            x = np.append(x, x[-1] + x_first_order_diffs[-x_shortage:])
+            x_shortage = _MIN_NODES_FOR_CUBIC_SPLINE - len(x)
 
     # Reuse "original" x values' shape for y values and associated uncertainties and
     # draw both.
