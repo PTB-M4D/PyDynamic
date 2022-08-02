@@ -480,8 +480,12 @@ def test_compare_returnc_interp1d_unc(interp_inputs):
     uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
     interp_inputs["returnC"] = False
     uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
-    # Check that extrapolation results match up to machine epsilon.
-    assert_allclose(uy_new_with_sensitivities, uy_new_without_sensitivities, rtol=9e-15)
+    # Check that extrapolation results match.
+    assert_allclose(
+        uy_new_with_sensitivities,
+        uy_new_without_sensitivities,
+        atol=np.finfo(np.float).eps,
+    )
 
 
 @given(
