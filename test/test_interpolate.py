@@ -690,8 +690,8 @@ def test_full_call_make_equidistant(interp_inputs):
 def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
-        y_wrong = np.tile(interp_inputs["y"], 2)
-        uy_wrong = np.tile(interp_inputs["uy"], 3)
+        y_wrong = interp_inputs["y"][:-1]
+        uy_wrong = interp_inputs["uy"][:-2]
         make_equidistant(interp_inputs["x"], y_wrong, uy_wrong)
 
 
