@@ -151,7 +151,7 @@ def values_uncertainties_kind(
     kind = draw(hst.sampled_from(kind_tuple))
 
     # If a spline will be created, make sure no two values are close to be equal.
-    if kind == "cubic":
+    if kind in ("linear", "cubic"):
         x = np.append(
             x[0],
             x[1:][
@@ -159,14 +159,17 @@ def values_uncertainties_kind(
                     np.logical_not(np.diff(x) < np.finfo(np.float).eps),
                     np.logical_not(
                         np.logical_and(
-                            np.abs(x[1:]) / np.max(x) < np.finfo(np.float).eps,
+                            np.abs(x[1:]) / np.max(np.abs(x)) < np.finfo(np.float).eps,
                             x[1:] != 0,
                         ),
                     ),
                 )
             ],
         )
-        x_first_order_diffs = np.diff(x)
+        if len(x) == 1:
+            x_first_order_diffs = np.abs(x.copy())
+        else:
+            x_first_order_diffs = np.diff(x)
         x_shortage = _MIN_NODES_FOR_CUBIC_SPLINE - len(x)
         while x_shortage > 0:
             x = np.append(x, x[-1] + x_first_order_diffs[-x_shortage:])
@@ -178,26 +181,17 @@ def values_uncertainties_kind(
     y = draw(hnp.arrays(**strategy_params))
     uy = draw(hnp.arrays(**strategy_params))
 
-    # Draw the interpolation kind from the provided tuple.
-    kind = draw(hst.sampled_from(kind_tuple))
+    # Look up minimum and maximum of original x values just once.
+    x_min = np.min(x)
+    x_max = np.max(x)
 
     if for_make_equidistant:
-        dx = draw(
-            hst.floats(
-                min_value=(np.max(x) - np.min(x)) * 1e-3,
-                max_value=(np.max(x) - np.min(x)) / 2,
-                exclude_min=True,
-                allow_nan=False,
-                allow_infinity=False,
-            )
-        )
+        dx = np.abs(x_max - x_min) / (len(x) - 1)
+        assert dx > 0
         return {"x": x, "y": y, "uy": uy, "dx": dx, "kind": kind}
     else:
         # Reset shape for values to evaluate the interpolant at.
         strategy_params["shape"] = shape_for_x
-        # Look up minimum and maximum of original x values just once.
-        x_min = np.min(x)
-        x_max = np.max(x)
 
         if not extrapolate:
             # In case we do not want to extrapolate, use range of "original"
@@ -225,11 +219,11 @@ def values_uncertainties_kind(
             # drawn the values to evaluate the interpolant at not to randomly have
             # drawn values inside original bounds and if even more constraints are
             # given ensure those.
-            assume(np.min(x_new) < np.min(x) or np.max(x_new) > np.max(x))
+            assume(np.min(x_new) < np.min(x) or np.max(x_new) > x_max)
             if extrapolate == "above":
-                assume(np.max(x_new) > np.max(x))
+                assume(np.max(x_new) > x_max)
             else:
-                assume(np.min(x_new) < np.min(x))
+                assume(np.min(x_new) < x_min)
 
         assume_sorted = sorted_xs
         return {
