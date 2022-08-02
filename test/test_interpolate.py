@@ -32,6 +32,7 @@ def values_uncertainties_kind(
     restrict_fill_unc: Optional[str] = None,
     returnC: Optional[bool] = False,
     for_make_equidistant: Optional[bool] = False,
+    keep_ranges_reasonable: Optional[bool] = False,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
@@ -75,6 +76,11 @@ def values_uncertainties_kind(
             If True we return the expected parameters for calling `make_equidistant()`.
             If False (default) we return the expected parameters for calling
             `interp1d_unc()`.
+        keep_ranges_reasonable : bool, optional
+            If True, the total span of x and y is bounded to few orders of magnitude
+            which ensures the result stays within the original bounds, which is not
+            guaranteed anymore for very large values being interpolated in a very small
+            range. If False (default) maximum bounds are applied.
 
     Returns
     -------
@@ -114,8 +120,11 @@ def values_uncertainties_kind(
             )
         return draw(fill_strategy)
 
-    # Set the maximum absolute value for floats to be really unique in calculations.
-    float_abs_max = 1e64
+    # Set the maximum absolute value for floats to be unique in calculations.
+    if for_make_equidistant or keep_ranges_reasonable:
+        float_abs_max = 1e3
+    else:
+        float_abs_max = 1e64
     # Set generic float parameters.
     float_generic_params = {
         "allow_nan": False,
