@@ -275,7 +275,7 @@ def test_trivial_in_interp1d_unc(interp_inputs):
     assert np.all(np.isin(uy_new, interp_inputs["uy"]))
 
 
-@given(values_uncertainties_kind(kind_tuple=["linear"]))
+@given(values_uncertainties_kind(kind_tuple=["linear"], keep_ranges_reasonable=True))
 @pytest.mark.slow
 def test_linear_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
@@ -468,7 +468,11 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
     )
 
 
-@given(values_uncertainties_kind(returnC=True, kind_tuple=("linear",)))
+@given(
+    values_uncertainties_kind(
+        returnC=True, kind_tuple=("linear",), keep_ranges_reasonable=True
+    )
+)
 @pytest.mark.slow
 def test_compare_returnc_interp1d_unc(interp_inputs):
     # Compare the uncertainties computed from the sensitivities inside the
