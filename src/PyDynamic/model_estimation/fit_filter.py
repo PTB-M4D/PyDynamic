@@ -19,7 +19,7 @@ __all__ = ["LSFIR", "LSIIR"]
 
 import inspect
 from enum import Enum
-from typing import Optional, Tuple, Union
+from typing import cast, Optional, Tuple, Union
 
 import numpy as np
 import scipy.signal as dsp
@@ -346,7 +346,7 @@ def _compute_stabilized_filter_through_time_delay_iteration(
     Fs: float,
     inv: Optional[bool] = False,
 ) -> Tuple[np.ndarray, np.ndarray, float, bool]:
-    tau += _compute_filter_stabilization_time_delay(b, a, Fs)
+    tau = np.ceil(tau + _compute_filter_stabilization_time_delay_add_on(b, a, Fs))
 
     b, a = _compute_one_filter_stabilization_iteration_through_time_delay(
         H, tau, w, E, Nb, Na, inv
@@ -355,15 +355,15 @@ def _compute_stabilized_filter_through_time_delay_iteration(
     return b, a, tau, isstable(b, a, "digital")
 
 
-def _compute_filter_stabilization_time_delay(
+def _compute_filter_stabilization_time_delay_add_on(
     b: np.ndarray,
     a: np.ndarray,
     Fs: float,
-) -> int:
+) -> float:
     a_stabilized = mapinside(a)
     g_1 = grpdelay(b, a, Fs)[0]
     g_2 = grpdelay(b, a_stabilized, Fs)[0]
-    return np.ceil(np.median(g_2 - g_1))
+    return cast(float, np.median(g_2 - g_1))
 
 
 def _compute_one_filter_stabilization_iteration_through_time_delay(
