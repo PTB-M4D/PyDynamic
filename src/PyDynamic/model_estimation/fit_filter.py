@@ -412,7 +412,7 @@ def _compute_x(
 
 
 def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
-    rms = np.sqrt(np.sum(residuals_real_imag ** 2) / (len(residuals_real_imag) // 2))
+    rms = np.sqrt(np.sum(residuals_real_imag**2) / (len(residuals_real_imag) // 2))
     print(
         f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
         f"Final rms error = {rms}"
@@ -928,7 +928,7 @@ def _fit_fir_filter_with_uncertainty_propagation_via_svd(
         mc_freq_resps_real_imag
     )
     recipr_of_sqr_abs_of_mc_freq_resps = np.reciprocal(
-        mc_freq_resps_real ** 2 + mc_freq_resps_imag ** 2
+        mc_freq_resps_real**2 + mc_freq_resps_imag**2
     )
     omega_tau = omega * tau
     cos_omega_tau = np.tile(np.cos(omega_tau), (mc_runs, 1))
