@@ -146,6 +146,7 @@ def values_uncertainties_kind(
     if sorted_xs:
         ind = np.argsort(x)
         x = x[ind]
+        assume(not np.any(np.diff(x) == 0))
 
     # Draw the interpolation kind from the provided tuple.
     kind = draw(hst.sampled_from(kind_tuple))
@@ -468,6 +469,7 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
         uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["fill_unc"][1]
     )
+
 
 @given(
     values_uncertainties_kind(returnC=True, extrapolate=True, kind_tuple=("linear",))
