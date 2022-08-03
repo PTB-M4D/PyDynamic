@@ -467,27 +467,6 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
         == interp_inputs["fill_unc"][1]
     )
 
-
-@given(
-    values_uncertainties_kind(
-        returnC=True, kind_tuple=("linear",), keep_ranges_reasonable=True
-    )
-)
-@pytest.mark.slow
-def test_compare_returnc_interp1d_unc(interp_inputs):
-    # Compare the uncertainties computed from the sensitivities inside the
-    # interpolation range and directly.
-    uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
-    interp_inputs["returnC"] = False
-    uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
-    # Check that extrapolation results match.
-    assert_allclose(
-        uy_new_with_sensitivities,
-        uy_new_without_sensitivities,
-        atol=np.finfo(np.float).eps,
-    )
-
-
 @given(
     values_uncertainties_kind(returnC=True, extrapolate=True, kind_tuple=("linear",))
 )
