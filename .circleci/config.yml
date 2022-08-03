@@ -315,7 +315,7 @@ jobs:
         type: string
         default: ""
 
-    parallelism: 12
+    parallelism: 16
 
     executor:
       name: venv_tester
@@ -431,7 +431,7 @@ jobs:
         default: ""
       parallelism:
         type: integer
-        default: 12
+        default: 16
 
     parallelism: << parameters.parallelism >>
 
