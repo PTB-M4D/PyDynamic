@@ -187,7 +187,7 @@ def values_uncertainties_kind(
 
     if for_make_equidistant:
         dx = np.abs(x_max - x_min) / (len(x) - 1)
-        assert dx > 0
+        assume(dx > 0)
         return {"x": x, "y": y, "uy": uy, "dx": dx, "kind": kind}
     else:
         # Reset shape for values to evaluate the interpolant at.
