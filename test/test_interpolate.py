@@ -150,7 +150,7 @@ def values_uncertainties_kind(
     # Draw the interpolation kind from the provided tuple.
     kind = draw(hst.sampled_from(kind_tuple))
 
-    # If a spline will be created, make sure no two values are close to be equal.
+    # For more involved interpolations, make sure no two values are close to be equal.
     if kind in ("linear", "cubic"):
         x = np.append(
             x[0],
