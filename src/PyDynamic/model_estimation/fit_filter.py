@@ -43,6 +43,7 @@ def LSIIR(
     Fs: float,
     tau: Optional[int] = 0,
     verbose: Optional[bool] = True,
+    return_rms: Optional[bool] = False,
     max_stab_iter: Optional[int] = 50,
     inv: Optional[bool] = False,
     UH: Optional[np.ndarray] = None,
@@ -268,16 +269,25 @@ def LSIIR(
                 f"{f'on average ' if mc_runs > 1 else ''}{final_stabilization_msg}"
                 f"(final tau = {final_tau})."
             )
+
+    if verbose or return_rms:
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
             b_res, a_res, tau, omega
         )
         residuals_real_imag = complex_2_real_imag(Hd - H)
-        _compute_and_print_rms(residuals_real_imag)
+        rms = _compute_and_print_rms(residuals_real_imag, suppress_print=not verbose)
 
+    return_list = [b_res, a_res, final_tau]
+    
+    Uab = None
     if _uncertainties_were_provided(UH):
         Uab = np.cov(as_and_bs, rowvar=False)
-        return b_res, a_res, final_tau, Uab
-    return b_res, a_res, final_tau, None
+    return_list.append(Uab)
+
+    if return_rms:
+        return_list.append(rms)
+
+    return tuple(return_list)
 
 
 def _print_iir_welcome_msg(
@@ -411,12 +421,13 @@ def _compute_x(
     return x
 
 
-def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
+def _compute_and_print_rms(residuals_real_imag: np.ndarray, suppress_print=False) -> np.ndarray:
     rms = np.sqrt(np.sum(residuals_real_imag ** 2) / (len(residuals_real_imag) // 2))
-    print(
-        f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
-        f"Final rms error = {rms}"
-    )
+    if not suppress_print:
+        print(
+            f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
+            f"Final rms error = {rms}"
+        )
     return rms
 
 
