@@ -75,6 +75,9 @@ def LSIIR(
     verbose : bool, optional
         If True (default) be more talkative on stdout. Otherwise no output is written
         anywhere.
+    return_rms : bool, optional
+        If True (default is False), the root-mean-square (rms) value of the fit 
+        is returned as an additional output value. 
     max_stab_iter : int, optional
         Maximum count of iterations for stabilizing the resulting filter. If no
         stabilization should be carried out, this parameter can be set to 0 (default =
@@ -100,6 +103,8 @@ def LSIIR(
     Uab : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
         Uncertainties associated with `[a[1:],b]`. Will be None if UH is not
         provided or is None.
+    rms : float
+        The root-mean-square error of the fit. Only return, if `rms_value == True`.
 
     References
     ----------
