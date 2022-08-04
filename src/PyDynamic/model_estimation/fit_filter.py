@@ -76,8 +76,8 @@ def LSIIR(
         If True (default) be more talkative on stdout. Otherwise no output is written
         anywhere.
     return_rms : bool, optional
-        If True (default is False), the root-mean-square (rms) value of the fit 
-        is returned as an additional output value. 
+        If True (default is False), the root-mean-square (rms) value of the fit
+        is returned as an additional output value.
     max_stab_iter : int, optional
         Maximum count of iterations for stabilizing the resulting filter. If no
         stabilization should be carried out, this parameter can be set to 0 (default =
@@ -283,7 +283,7 @@ def LSIIR(
         rms = _compute_and_print_rms(residuals_real_imag, suppress_print=not verbose)
 
     return_list = [b_res, a_res, final_tau]
-    
+
     Uab = None
     if _uncertainties_were_provided(UH):
         Uab = np.cov(as_and_bs, rowvar=False)
@@ -426,7 +426,9 @@ def _compute_x(
     return x
 
 
-def _compute_and_print_rms(residuals_real_imag: np.ndarray, suppress_print=False) -> np.ndarray:
+def _compute_and_print_rms(
+    residuals_real_imag: np.ndarray, suppress_print=False
+) -> np.ndarray:
     rms = np.sqrt(np.sum(residuals_real_imag ** 2) / (len(residuals_real_imag) // 2))
     if not suppress_print:
         print(
