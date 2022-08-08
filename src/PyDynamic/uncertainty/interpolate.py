@@ -205,9 +205,8 @@ def interp1d_unc(
         # Initialize the result array for the standard uncertainties.
         uy_new = np.empty_like(y_new)
 
-        # Initialize the sensitivity matrix of shape (M, N) if needed.
-        if returnC or kind == "cubic":
-            C = np.zeros((len(x_new), len(uy)), "float64")
+        # Initialize the sensitivity matrix of shape (M, N).
+        C = np.zeros((len(x_new), len(uy)), "float64")
 
         # First extrapolate the according values if required and then
         # compute interpolated uncertainties following White, 2017.
@@ -223,14 +222,13 @@ def interp1d_unc(
                 # Now fill_unc should be a 2-tuple, which we can fill into uy_new.
                 uy_new[extrap_range_below], uy_new[extrap_range_above] = fill_unc
 
-            if returnC:
-                # In each row of C corresponding to an extrapolation value below the
-                # original range set the first column to 1 and in each row of C
-                # corresponding to an extrapolation value above the original range set
-                # the last column to 1. It is important to do this before
-                # interpolating, because in general those two columns can contain
-                # non-zero values in the interpolation range.
-                C[:, 0], C[:, -1] = extrap_range_below, extrap_range_above
+            # In each row of C corresponding to an extrapolation value below the
+            # original range set the first column to 1 and in each row of C
+            # corresponding to an extrapolation value above the original range set
+            # the last column to 1. It is important to do this before
+            # interpolating, because in general those two columns can contain
+            # non-zero values in the interpolation range.
+            C[:, 0], C[:, -1] = extrap_range_below, extrap_range_above
 
         # If interpolation is needed, compute uncertainties following White, 2017.
         if np.any(interp_range):
@@ -257,50 +255,36 @@ def interp1d_unc(
                 x_lo = x[lo]
                 x_hi = x[hi]
                 # --------------------------------------------------------------------------
-                if returnC:
-                    # Prepare the sensitivity coefficients, which in the first place
-                    # inside the interpolation range are the Lagrangian polynomials. We
-                    # compute the Lagrangian polynomials for all interpolation nodes
-                    # inside the original range.
-                    L_1 = (x_new[interp_range] - x_hi) / (x_lo - x_hi)
-                    L_2 = (x_new[interp_range] - x_lo) / (x_hi - x_lo)
+                # Prepare the sensitivity coefficients, which in the first place
+                # inside the interpolation range are the Lagrangian polynomials. We
+                # compute the Lagrangian polynomials for all interpolation nodes
+                # inside the original range.
+                L_1 = (x_new[interp_range] - x_hi) / (x_lo - x_hi)
+                L_2 = (x_new[interp_range] - x_lo) / (x_hi - x_lo)
 
-                    # Create iterators needed to efficiently fill our sensitivity matrix
-                    # in the rows corresponding to interpolation range.
-                    lo_it = iter(lo)
-                    hi_it = iter(hi)
-                    L_1_it = iter(L_1)
-                    L_2_it = iter(L_2)
+                # Create iterators needed to efficiently fill our sensitivity matrix
+                # in the rows corresponding to interpolation range.
+                lo_it = iter(lo)
+                hi_it = iter(hi)
+                L_1_it = iter(L_1)
+                L_2_it = iter(L_2)
 
-                    # In each row of C set the column with the corresponding
-                    # index in lo to L_1 and the column with the corresponding
-                    # index in hi to L_2.
-                    for index, C_row in enumerate(C):
-                        if interp_range[index]:
-                            C_row[next(lo_it)] = next(L_1_it)
-                            C_row[next(hi_it)] = next(L_2_it)
-                    # Compute the standard uncertainties avoiding to build the sparse
-                    # covariance matrix diag(u_y^2). We reduce the equation
-                    # C diag(u_y^2) C^T for now to a more efficient calculation, which
-                    # will work as long as we deal with uncorrelated values, so that
-                    # all information can be found on the diagonal of the covariance
-                    # and thus the result matrix.
-                    uy_new[interp_range] = np.sqrt(
-                        np.sum(C[interp_range] ** 2 * uy ** 2, 1)
-                    )
-                else:
-                    # Since we do not need the sensitivity matrix, we compute
-                    # uncertainties more efficient (although we are actually not so
-                    # sure about this anymore). The simplification of the equation by
-                    # pulling out the denominator, just works because we work with
-                    # the squared Lagrangians. Otherwise we would have to account for
-                    # the summation order.
-                    uy_prev_sqr = uy[lo] ** 2
-                    uy_next_sqr = uy[hi] ** 2
-                    uy_new[interp_range] = np.sqrt(
-                        (x_new[interp_range] - x_hi) ** 2 * uy_prev_sqr
-                        + (x_new[interp_range] - x_lo) ** 2 * uy_next_sqr
-                    ) / (x_hi - x_lo)
+                # In each row of C set the column with the corresponding
+                # index in lo to L_1 and the column with the corresponding
+                # index in hi to L_2.
+                for index, C_row in enumerate(C):
+                    if interp_range[index]:
+                        C_row[next(lo_it)] = next(L_1_it)
+                        C_row[next(hi_it)] = next(L_2_it)
+                # Compute the standard uncertainties avoiding to build the sparse
+                # covariance matrix diag(u_y^2). We reduce the equation
+                # C diag(u_y^2) C^T for now to a more efficient calculation, which
+                # will work as long as we deal with uncorrelated values, so that
+                # all information can be found on the diagonal of the covariance
+                # and thus the result matrix.
+                uy_new[interp_range] = np.sqrt(
+                    np.sum(C[interp_range] ** 2 * uy ** 2, 1)
+                )
 
             elif kind == "cubic":
                 # Calculate the uncertainty by generating a spline of sensitivity

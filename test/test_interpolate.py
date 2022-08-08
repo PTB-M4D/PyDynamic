@@ -11,11 +11,13 @@ from pytest import raises
 
 from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
 
+_MIN_NODES_FOR_CUBIC_SPLINE = 4
+
 
 @composite
 def values_uncertainties_kind(
     draw,
-    min_count: Optional[int] = 4,
+    min_count: Optional[int] = _MIN_NODES_FOR_CUBIC_SPLINE,
     max_count: Optional[int] = None,
     kind_tuple: Optional[Tuple[str]] = (
         "linear",
@@ -30,6 +32,7 @@ def values_uncertainties_kind(
     restrict_fill_unc: Optional[str] = None,
     returnC: Optional[bool] = False,
     for_make_equidistant: Optional[bool] = False,
+    keep_ranges_reasonable: Optional[bool] = False,
 ) -> Dict[str, Union[np.ndarray, str]]:
     """Set custom strategy for _hypothesis_ to draw desired input from
 
@@ -73,6 +76,11 @@ def values_uncertainties_kind(
             If True we return the expected parameters for calling `make_equidistant()`.
             If False (default) we return the expected parameters for calling
             `interp1d_unc()`.
+        keep_ranges_reasonable : bool, optional
+            If True, the total span of x and y is bounded to few orders of magnitude
+            which ensures the result stays within the original bounds, which is not
+            guaranteed anymore for very large values being interpolated in a very small
+            range. If False (default) maximum bounds are applied.
 
     Returns
     -------
@@ -112,8 +120,11 @@ def values_uncertainties_kind(
             )
         return draw(fill_strategy)
 
-    # Set the maximum absolute value for floats to be really unique in calculations.
-    float_abs_max = 1e64
+    # Set the maximum absolute value for floats to be unique in calculations.
+    if for_make_equidistant or keep_ranges_reasonable:
+        float_abs_max = 1e3
+    else:
+        float_abs_max = 1e64
     # Set generic float parameters.
     float_generic_params = {
         "allow_nan": False,
@@ -135,6 +146,35 @@ def values_uncertainties_kind(
     if sorted_xs:
         ind = np.argsort(x)
         x = x[ind]
+        assume(not np.any(np.diff(x) == 0))
+
+    # Draw the interpolation kind from the provided tuple.
+    kind = draw(hst.sampled_from(kind_tuple))
+
+    # For more involved interpolations, make sure no two values are close to be equal.
+    if kind in ("linear", "cubic"):
+        x = np.append(
+            x[0],
+            x[1:][
+                np.logical_and(
+                    np.logical_not(np.diff(x) < np.finfo(np.float).eps),
+                    np.logical_not(
+                        np.logical_and(
+                            np.abs(x[1:]) / np.max(np.abs(x)) < np.finfo(np.float).eps,
+                            x[1:] != 0,
+                        ),
+                    ),
+                )
+            ],
+        )
+        if len(x) == 1:
+            x_first_order_diffs = np.abs(x.copy())
+        else:
+            x_first_order_diffs = np.diff(x)
+        x_shortage = _MIN_NODES_FOR_CUBIC_SPLINE - len(x)
+        while x_shortage > 0:
+            x = np.append(x, x[-1] + x_first_order_diffs[-x_shortage:])
+            x_shortage = _MIN_NODES_FOR_CUBIC_SPLINE - len(x)
 
     # Reuse "original" x values' shape for y values and associated uncertainties and
     # draw both.
@@ -142,26 +182,17 @@ def values_uncertainties_kind(
     y = draw(hnp.arrays(**strategy_params))
     uy = draw(hnp.arrays(**strategy_params))
 
-    # Draw the interpolation kind from the provided tuple.
-    kind = draw(hst.sampled_from(kind_tuple))
+    # Look up minimum and maximum of original x values just once.
+    x_min = np.min(x)
+    x_max = np.max(x)
 
     if for_make_equidistant:
-        dx = draw(
-            hst.floats(
-                min_value=(np.max(x) - np.min(x)) * 1e-3,
-                max_value=(np.max(x) - np.min(x)) / 2,
-                exclude_min=True,
-                allow_nan=False,
-                allow_infinity=False,
-            )
-        )
+        dx = np.abs(x_max - x_min) / (len(x) - 1)
+        assume(dx > 0)
         return {"x": x, "y": y, "uy": uy, "dx": dx, "kind": kind}
     else:
         # Reset shape for values to evaluate the interpolant at.
         strategy_params["shape"] = shape_for_x
-        # Look up minimum and maximum of original x values just once.
-        x_min = np.min(x)
-        x_max = np.max(x)
 
         if not extrapolate:
             # In case we do not want to extrapolate, use range of "original"
@@ -189,11 +220,11 @@ def values_uncertainties_kind(
             # drawn the values to evaluate the interpolant at not to randomly have
             # drawn values inside original bounds and if even more constraints are
             # given ensure those.
-            assume(np.min(x_new) < np.min(x) or np.max(x_new) > np.max(x))
+            assume(np.min(x_new) < np.min(x) or np.max(x_new) > x_max)
             if extrapolate == "above":
-                assume(np.max(x_new) > np.max(x))
+                assume(np.max(x_new) > x_max)
             else:
-                assume(np.min(x_new) < np.min(x))
+                assume(np.min(x_new) < x_min)
 
         assume_sorted = sorted_xs
         return {
@@ -245,13 +276,15 @@ def test_trivial_in_interp1d_unc(interp_inputs):
     assert np.all(np.isin(uy_new, interp_inputs["uy"]))
 
 
-@given(values_uncertainties_kind(kind_tuple=["linear"]))
+@given(values_uncertainties_kind(kind_tuple=["linear"], keep_ranges_reasonable=True))
 @pytest.mark.slow
 def test_linear_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
-    assert np.all(np.min(interp_inputs["y"]) <= y_new)
-    assert np.all(np.max(interp_inputs["y"]) >= y_new)
+    y_in_max, y_out_max = np.max(interp_inputs["y"]), np.max(y_new)
+    y_in_min, y_out_min = np.min(interp_inputs["y"]), np.min(y_new)
+    assert np.logical_or(y_in_min <= y_out_min, np.isclose(y_in_min, y_out_min))
+    assert np.logical_or(y_in_max >= y_out_max, np.isclose(y_in_max, y_out_max))
 
 
 @given(values_uncertainties_kind(extrapolate=True))
@@ -436,18 +469,6 @@ def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
         uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["fill_unc"][1]
     )
-
-
-@given(values_uncertainties_kind(returnC=True, kind_tuple=("linear",)))
-@pytest.mark.slow
-def test_compare_returnc_interp1d_unc(interp_inputs):
-    # Compare the uncertainties computed from the sensitivities inside the
-    # interpolation range and directly.
-    uy_new_with_sensitivities = interp1d_unc(**interp_inputs)[2]
-    interp_inputs["returnC"] = False
-    uy_new_without_sensitivities = interp1d_unc(**interp_inputs)[2]
-    # Check that extrapolation results match up to machine epsilon.
-    assert_allclose(uy_new_with_sensitivities, uy_new_without_sensitivities, rtol=9e-15)
 
 
 @given(
@@ -652,8 +673,8 @@ def test_full_call_make_equidistant(interp_inputs):
 def test_wrong_input_lengths_call_make_equidistant(interp_inputs):
     # Check erroneous calls with unequally long inputs.
     with raises(ValueError):
-        y_wrong = np.tile(interp_inputs["y"], 2)
-        uy_wrong = np.tile(interp_inputs["uy"], 3)
+        y_wrong = interp_inputs["y"][:-1]
+        uy_wrong = interp_inputs["uy"][:-2]
         make_equidistant(interp_inputs["x"], y_wrong, uy_wrong)
 
 
