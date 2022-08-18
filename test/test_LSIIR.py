@@ -10,6 +10,7 @@ from numpy.testing import assert_almost_equal, assert_equal
 
 from PyDynamic import grpdelay, isstable, mapinside, sos_FreqResp
 from PyDynamic.model_estimation import fit_filter
+from PyDynamic.model_estimation.fit_filter import _rms_is_required
 
 
 @hst.composite
@@ -350,3 +351,14 @@ def test_fit_iir_with_uncertainty():
     UH = np.diag(1 + np.random.rand(2 * N))
 
     fit_filter.LSIIR(H=H, UH=UH, Nb=3, Na=6, f=f, Fs=Fs, tau=2, mc_runs=2)
+
+
+@given(LSIIR_parameters())
+def test_LSIIR_rms_output_format(parameters):
+    _, _, _, _, rms = fit_filter.LSIIR(**parameters, return_rms=True)
+    assert isinstance(rms, float)
+
+
+@given(hst.booleans(), hst.booleans())
+def test_rms_is_required(return_rms, verbose):
+    assert_equal(_rms_is_required(return_rms, verbose), return_rms or verbose)
