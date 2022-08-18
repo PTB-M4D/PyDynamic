@@ -277,22 +277,24 @@ def LSIIR(
                 f"{f'on average ' if mc_runs > 1 else ''}{final_stabilization_msg}"
                 f"(final tau = {final_tau})."
             )
-
-    if verbose or return_rms:
-        Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
-            b_res, a_res, tau, omega
-        )
-        residuals_real_imag = complex_2_real_imag(Hd - H)
-        rms = _compute_and_print_rms(residuals_real_imag, suppress_print=not verbose)
-
     appendable_return_values = [b_res, a_res, final_tau]
 
     if _uncertainties_were_provided(UH):
         Uab = np.cov(as_and_bs, rowvar=False)
+    else:
+        Uab = None
     appendable_return_values.append(Uab)
 
-    if return_rms:
-        appendable_return_values.append(rms)
+    if _rms_is_required(return_rms, verbose):
+        Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
+            b_res, a_res, tau, omega
+        )
+        residuals_real_imag = complex_2_real_imag(Hd - H)
+        rms = _compute_rms(residuals_real_imag)
+        if verbose:
+            _print_rms(rms)
+        if return_rms:
+            appendable_return_values.append(rms)
 
     return cast(
         Union[
@@ -434,16 +436,19 @@ def _compute_x(
     return x
 
 
-def _compute_and_print_rms(
-    residuals_real_imag: np.ndarray, suppress_print=False
-) -> np.ndarray:
-    rms = np.sqrt(np.sum(residuals_real_imag**2) / (len(residuals_real_imag) // 2))
-    if not suppress_print:
-        print(
-            f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
-            f"Final rms error = {rms}"
-        )
-    return rms
+def _rms_is_required(return_rms: bool, verbose: bool) -> bool:
+    return verbose or return_rms
+
+
+def _compute_rms(residuals_real_imag: np.ndarray) -> float:
+    return np.sqrt(np.sum(residuals_real_imag**2) / (len(residuals_real_imag) // 2))
+
+
+def _print_rms(rms: float):
+    print(
+        f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
+        f"Final rms error = {rms}"
+    )
 
 
 def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
@@ -1001,7 +1006,7 @@ def _print_fir_result_msg(
     )
     complex_residuals = delayed_filters_freq_resp - original_values
     residuals_real_imag = complex_2_real_imag(complex_residuals)
-    _compute_and_print_rms(residuals_real_imag)
+    _print_rms(_compute_rms(residuals_real_imag))
 
 
 def invLSFIR(
