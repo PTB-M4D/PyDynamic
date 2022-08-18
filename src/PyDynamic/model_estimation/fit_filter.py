@@ -284,7 +284,6 @@ def LSIIR(
 
     appendable_return_values = [b_res, a_res, final_tau]
 
-    Uab = None
     if _uncertainties_were_provided(UH):
         Uab = np.cov(as_and_bs, rowvar=False)
     appendable_return_values.append(Uab)
