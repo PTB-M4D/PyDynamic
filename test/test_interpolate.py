@@ -168,7 +168,7 @@ def values_uncertainties_kind(
             ],
         )
         if np.array_equal(x, np.zeros(1)):
-            x_first_order_diffs = 1
+            x_first_order_diffs = np.ones(1)
         elif len(x) == 1:
             x_first_order_diffs = np.abs(x.copy())
         else:
