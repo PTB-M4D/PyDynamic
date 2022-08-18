@@ -48,7 +48,7 @@ def LSIIR(
     inv: Optional[bool] = False,
     UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = 1000,
-) -> Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None]]:
+) -> Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None], Union[float, None]]:
     """Least-squares (time-discrete) IIR filter fit to frequency response or reciprocal
 
     For fitting an IIR filter model to the reciprocal of the frequency response values
