@@ -354,7 +354,7 @@ def test_extrapolate_above_without_fill_value_interp1d_unc(interp_inputs):
     # fill_value=="extrapolate", which means constant extrapolation from the boundaries.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all x _newabove the original bound.
+    # value of y is taken for all x_new above the original bound.
     assert np.all(
         y_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["y"][-1]
@@ -398,7 +398,7 @@ def test_extrapolate_below_without_fill_unc_interp1d_unc(interp_inputs):
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all x _newbelow the original bound.
+    # value of y is taken for all x_new below the original bound.
     assert np.all(
         uy_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["uy"][0]
@@ -421,7 +421,7 @@ def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(extrapolate="below", restrict_fill_unc="tuple"))
 @pytest.mark.slow
 def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis below the minimum of x and
+    # Deal with those cases where at least one of x_new is below the minimum of x and
     # fill_unc is a tuple, which means constant extrapolation with its first element.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
@@ -438,11 +438,11 @@ def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
 )
 @pytest.mark.slow
 def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis above the maximum of x and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all x _newabove the original bound.
+    # value of y is taken for all x_new above the original bound.
     assert np.all(
         uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["uy"][-1]
@@ -452,7 +452,7 @@ def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(extrapolate="above", restrict_fill_unc="float"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis above the maximum of x and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_unc is a float, which means constant extrapolation with this value.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
@@ -465,7 +465,7 @@ def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(extrapolate="above", restrict_fill_unc="tuple"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis above the maximum of x and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_unc is a tuple, which means constant extrapolation with its second element.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
