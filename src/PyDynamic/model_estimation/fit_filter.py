@@ -429,7 +429,7 @@ def _compute_x(
 def _compute_and_print_rms(
     residuals_real_imag: np.ndarray, suppress_print=False
 ) -> np.ndarray:
-    rms = np.sqrt(np.sum(residuals_real_imag ** 2) / (len(residuals_real_imag) // 2))
+    rms = np.sqrt(np.sum(residuals_real_imag**2) / (len(residuals_real_imag) // 2))
     if not suppress_print:
         print(
             f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
