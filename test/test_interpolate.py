@@ -285,8 +285,12 @@ def test_trivial_in_interp1d_unc(interp_inputs):
 def test_linear_in_interp1d_unc(interp_inputs):
     y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
-    y_in_max, y_out_max = np.max(interp_inputs["y"]), np.max(y_new)
-    y_in_min, y_out_min = np.min(interp_inputs["y"]), np.min(y_new)
+    _assert_bounded_mini_and_maxima(interp_inputs["y"], y_new)
+
+
+def _assert_bounded_mini_and_maxima(inputs: np.ndarray, outputs: np.ndarray):
+    y_in_max, y_out_max = np.max(inputs), np.max(outputs)
+    y_in_min, y_out_min = np.min(inputs), np.min(outputs)
     assert np.logical_or(y_in_min <= y_out_min, np.isclose(y_in_min, y_out_min))
     assert np.logical_or(y_in_max >= y_out_max, np.isclose(y_in_max, y_out_max))
 
@@ -709,8 +713,7 @@ def test_prev_in_make_equidistant(interp_inputs):
 def test_linear_in_make_equidistant(interp_inputs):
     y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
     # Check if all interpolated values lie in the range of the original values.
-    assert np.all(np.amin(interp_inputs["y"]) <= y_new)
-    assert np.all(np.amax(interp_inputs["y"]) >= y_new)
+    _assert_bounded_mini_and_maxima(interp_inputs["y"], y_new)
 
 
 @given(hst.integers(min_value=3, max_value=1000))
