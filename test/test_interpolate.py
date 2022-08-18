@@ -216,6 +216,8 @@ def values_uncertainties_kind(
 
         # Draw values to evaluate the interpolant at.
         x_new = draw(hnp.arrays(**strategy_params))
+        if np.max(np.abs(x)) < 1e-300:
+            assume(np.min(np.abs(x_new[x_new != 0])) / np.min(np.abs(x[x != 0])) >= 1)
 
         if extrapolate:
             # In case we want to extrapolate, make sure we actually do after having
