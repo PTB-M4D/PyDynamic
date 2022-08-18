@@ -107,7 +107,7 @@ def LSIIR(
         Uncertainties associated with `[a[1:],b]`. Will be None if UH is not
         provided or is None.
     rms : float
-        The root-mean-square error of the fit. Only returned, if `rms_value == True`.
+        The root-mean-square error of the fit. Only returned, if `return_rms == True`.
 
     References
     ----------
