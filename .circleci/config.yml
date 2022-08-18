@@ -23,7 +23,7 @@ executors:
   publisher:
     working_directory: ~/repo
     docker:
-      - image: circleci/python:3.9
+      - image: cimg/python:3.9
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
@@ -397,8 +397,8 @@ jobs:
                 set -e
                 gh pr create --base=main --title "Update deps" \
                   --body "This PR provides recompiled deps for all outdated \
-                  package versions. It was opened after the commited deps \
-                  were succesfully compiled and all tests passed with the \
+                  package versions. It was opened after the committed deps \
+                  were successfully compiled and all tests passed with the \
                   new versions. It should be merged as soon as possible to \
                   avoid any security issues due to outdated dependencies."
             else

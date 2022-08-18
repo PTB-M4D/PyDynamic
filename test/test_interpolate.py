@@ -167,7 +167,9 @@ def values_uncertainties_kind(
                 )
             ],
         )
-        if len(x) == 1:
+        if np.array_equal(x, np.zeros(1)):
+            x_first_order_diffs = np.ones(1)
+        elif len(x) == 1:
             x_first_order_diffs = np.abs(x.copy())
         else:
             x_first_order_diffs = np.diff(x)
@@ -214,6 +216,8 @@ def values_uncertainties_kind(
 
         # Draw values to evaluate the interpolant at.
         x_new = draw(hnp.arrays(**strategy_params))
+        if np.max(np.abs(x)) < 1e-300:
+            assume(np.min(np.abs(x_new[x_new != 0])) / np.min(np.abs(x[x != 0])) >= 1)
 
         if extrapolate:
             # In case we want to extrapolate, make sure we actually do after having
@@ -279,10 +283,14 @@ def test_trivial_in_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(kind_tuple=["linear"], keep_ranges_reasonable=True))
 @pytest.mark.slow
 def test_linear_in_interp1d_unc(interp_inputs):
-    y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
+    y_new = interp1d_unc(**interp_inputs)[1]
     # Check if all interpolated values lie in the range of the original values.
-    y_in_max, y_out_max = np.max(interp_inputs["y"]), np.max(y_new)
-    y_in_min, y_out_min = np.min(interp_inputs["y"]), np.min(y_new)
+    _assert_bounded_mini_and_maxima(interp_inputs["y"], y_new)
+
+
+def _assert_bounded_mini_and_maxima(inputs: np.ndarray, outputs: np.ndarray):
+    y_in_max, y_out_max = np.max(inputs), np.max(outputs)
+    y_in_min, y_out_min = np.min(inputs), np.min(outputs)
     assert np.logical_or(y_in_min <= y_out_min, np.isclose(y_in_min, y_out_min))
     assert np.logical_or(y_in_max >= y_out_max, np.isclose(y_in_max, y_out_max))
 
@@ -350,7 +358,7 @@ def test_extrapolate_above_without_fill_value_interp1d_unc(interp_inputs):
     # fill_value=="extrapolate", which means constant extrapolation from the boundaries.
     y_new = interp1d_unc(**interp_inputs)[1]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all x _newabove the original bound.
+    # value of y is taken for all x_new above the original bound.
     assert np.all(
         y_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["y"][-1]
@@ -394,7 +402,7 @@ def test_extrapolate_below_without_fill_unc_interp1d_unc(interp_inputs):
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all x _newbelow the original bound.
+    # value of y is taken for all x_new below the original bound.
     assert np.all(
         uy_new[interp_inputs["x_new"] < np.min(interp_inputs["x"])]
         == interp_inputs["uy"][0]
@@ -417,7 +425,7 @@ def test_extrapolate_below_with_fill_unc_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(extrapolate="below", restrict_fill_unc="tuple"))
 @pytest.mark.slow
 def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis below the minimum of x and
+    # Deal with those cases where at least one of x_new is below the minimum of x and
     # fill_unc is a tuple, which means constant extrapolation with its first element.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
@@ -434,11 +442,11 @@ def test_extrapolate_below_with_fill_uncs_interp1d_unc(interp_inputs):
 )
 @pytest.mark.slow
 def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis above the maximum of x and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_unc=="extrapolate", which means constant extrapolation from the boundaries.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works, meaning in the present case, that the boundary
-    # value of y is taken for all x _newabove the original bound.
+    # value of y is taken for all x_new above the original bound.
     assert np.all(
         uy_new[interp_inputs["x_new"] > np.max(interp_inputs["x"])]
         == interp_inputs["uy"][-1]
@@ -448,7 +456,7 @@ def test_extrapolate_above_without_fill_unc_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(extrapolate="above", restrict_fill_unc="float"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis above the maximum of x and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_unc is a float, which means constant extrapolation with this value.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
@@ -461,7 +469,7 @@ def test_extrapolate_above_with_fill_unc_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(extrapolate="above", restrict_fill_unc="tuple"))
 @pytest.mark.slow
 def test_extrapolate_above_with_fill_uncs_interp1d_unc(interp_inputs):
-    # Deal with those cases where at least one of x _newis above the maximum of x and
+    # Deal with those cases where at least one of x_new is above the maximum of x and
     # fill_unc is a tuple, which means constant extrapolation with its second element.
     uy_new = interp1d_unc(**interp_inputs)[2]
     # Check that extrapolation works.
@@ -703,10 +711,9 @@ def test_prev_in_make_equidistant(interp_inputs):
 @given(values_uncertainties_kind(kind_tuple=["linear"], for_make_equidistant=True))
 @pytest.mark.slow
 def test_linear_in_make_equidistant(interp_inputs):
-    y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
+    y_new = make_equidistant(**interp_inputs)[1]
     # Check if all interpolated values lie in the range of the original values.
-    assert np.all(np.amin(interp_inputs["y"]) <= y_new)
-    assert np.all(np.amax(interp_inputs["y"]) >= y_new)
+    _assert_bounded_mini_and_maxima(interp_inputs["y"], y_new)
 
 
 @given(hst.integers(min_value=3, max_value=1000))

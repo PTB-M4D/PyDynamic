@@ -43,11 +43,15 @@ def LSIIR(
     Fs: float,
     tau: Optional[int] = 0,
     verbose: Optional[bool] = True,
+    return_rms: Optional[bool] = False,
     max_stab_iter: Optional[int] = 50,
     inv: Optional[bool] = False,
     UH: Optional[np.ndarray] = None,
     mc_runs: Optional[int] = 1000,
-) -> Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None]]:
+) -> Union[
+    Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None], float],
+    Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None]],
+]:
     """Least-squares (time-discrete) IIR filter fit to frequency response or reciprocal
 
     For fitting an IIR filter model to the reciprocal of the frequency response values
@@ -74,6 +78,9 @@ def LSIIR(
     verbose : bool, optional
         If True (default) be more talkative on stdout. Otherwise no output is written
         anywhere.
+    return_rms : bool, optional
+        If True (default is False), the root-mean-square (rms) value of the fit
+        is returned as an additional output value.
     max_stab_iter : int, optional
         Maximum count of iterations for stabilizing the resulting filter. If no
         stabilization should be carried out, this parameter can be set to 0 (default =
@@ -99,6 +106,8 @@ def LSIIR(
     Uab : np.ndarray of shape (Nb+Na+1, Nb+Na+1)
         Uncertainties associated with `[a[1:],b]`. Will be None if UH is not
         provided or is None.
+    rms : float
+        The root-mean-square error of the fit. Only returned, if `return_rms == True`.
 
     References
     ----------
@@ -268,16 +277,32 @@ def LSIIR(
                 f"{f'on average ' if mc_runs > 1 else ''}{final_stabilization_msg}"
                 f"(final tau = {final_tau})."
             )
+    appendable_return_values = [b_res, a_res, final_tau]
+
+    if _uncertainties_were_provided(UH):
+        Uab = np.cov(as_and_bs, rowvar=False)
+    else:
+        Uab = None
+    appendable_return_values.append(Uab)
+
+    if _rms_is_required(return_rms, verbose):
         Hd = _compute_delayed_filters_freq_resp_via_scipys_freqz(
             b_res, a_res, tau, omega
         )
         residuals_real_imag = complex_2_real_imag(Hd - H)
-        _compute_and_print_rms(residuals_real_imag)
+        rms = _compute_rms(residuals_real_imag)
+        if verbose:
+            _print_rms(rms)
+        if return_rms:
+            appendable_return_values.append(rms)
 
-    if _uncertainties_were_provided(UH):
-        Uab = np.cov(as_and_bs, rowvar=False)
-        return b_res, a_res, final_tau, Uab
-    return b_res, a_res, final_tau, None
+    return cast(
+        Union[
+            Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None], float],
+            Tuple[np.ndarray, np.ndarray, int, Union[np.ndarray, None]],
+        ],
+        tuple(appendable_return_values),
+    )
 
 
 def _print_iir_welcome_msg(
@@ -411,13 +436,19 @@ def _compute_x(
     return x
 
 
-def _compute_and_print_rms(residuals_real_imag: np.ndarray) -> np.ndarray:
-    rms = np.sqrt(np.sum(residuals_real_imag**2) / (len(residuals_real_imag) // 2))
+def _rms_is_required(return_rms: bool, verbose: bool) -> bool:
+    return verbose or return_rms
+
+
+def _compute_rms(residuals_real_imag: np.ndarray) -> float:
+    return np.sqrt(np.sum(residuals_real_imag**2) / (len(residuals_real_imag) // 2))
+
+
+def _print_rms(rms: float):
     print(
         f"{_get_first_public_caller()}: Calculation of filter coefficients finished. "
         f"Final rms error = {rms}"
     )
-    return rms
 
 
 def invLSIIR(H, Nb, Na, f, Fs, tau, justFit=False, verbose=True):
@@ -975,7 +1006,7 @@ def _print_fir_result_msg(
     )
     complex_residuals = delayed_filters_freq_resp - original_values
     residuals_real_imag = complex_2_real_imag(complex_residuals)
-    _compute_and_print_rms(residuals_real_imag)
+    _print_rms(_compute_rms(residuals_real_imag))
 
 
 def invLSFIR(
