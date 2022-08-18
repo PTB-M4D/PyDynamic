@@ -283,7 +283,7 @@ def test_trivial_in_interp1d_unc(interp_inputs):
 @given(values_uncertainties_kind(kind_tuple=["linear"], keep_ranges_reasonable=True))
 @pytest.mark.slow
 def test_linear_in_interp1d_unc(interp_inputs):
-    y_new, uy_new = interp1d_unc(**interp_inputs)[1:3]
+    y_new = interp1d_unc(**interp_inputs)[1]
     # Check if all interpolated values lie in the range of the original values.
     y_in_max, y_out_max = np.max(interp_inputs["y"]), np.max(y_new)
     y_in_min, y_out_min = np.min(interp_inputs["y"]), np.min(y_new)
