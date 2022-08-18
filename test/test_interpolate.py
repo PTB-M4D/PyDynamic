@@ -707,7 +707,7 @@ def test_prev_in_make_equidistant(interp_inputs):
 @given(values_uncertainties_kind(kind_tuple=["linear"], for_make_equidistant=True))
 @pytest.mark.slow
 def test_linear_in_make_equidistant(interp_inputs):
-    y_new, uy_new = make_equidistant(**interp_inputs)[1:3]
+    y_new = make_equidistant(**interp_inputs)[1]
     # Check if all interpolated values lie in the range of the original values.
     assert np.all(np.amin(interp_inputs["y"]) <= y_new)
     assert np.all(np.amax(interp_inputs["y"]) >= y_new)
