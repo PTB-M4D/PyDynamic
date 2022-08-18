@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v2.3.0 (2022-08-18)
+### Feature
+* **LSIIR:** Return the RMS value backwards compatible (see #288) ([`c5c484e`](https://github.com/PTB-M4D/PyDynamic/commit/c5c484e991748641d3596462516e69161c896482))
+
+### Fix
+* **test_interpolate:** Ensure interpolation nodes not becoming too small in orders of magnitude ([`f3bf886`](https://github.com/PTB-M4D/PyDynamic/commit/f3bf88662eb8379fb201e610827739c84558913d))
+* **test_interpolate:** Avoid only zeros as interpolation nodes in strategy for test case generation ([`2596f24`](https://github.com/PTB-M4D/PyDynamic/commit/2596f245122f9e82132e3cd058e22c6b38291b1c))
+* **_compute_stabilized_filter_through_time_delay_iteration:** Correct implementation ([`6286c75`](https://github.com/PTB-M4D/PyDynamic/commit/6286c754d7aad93ca903270b74b9cef15c494207))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.2.0...v2.3.0)**
+
 ## v2.2.0 (2022-04-22)
 ### Feature
 * **convolve_unc:** Allow 1D array of stdunc as input ([`ae5335a`](https://github.com/PTB-M4D/PyDynamic/commit/ae5335a54e2452f0e936cb50263865d4b4916a87))
