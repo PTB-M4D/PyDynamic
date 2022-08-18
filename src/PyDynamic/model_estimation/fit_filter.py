@@ -282,17 +282,17 @@ def LSIIR(
         residuals_real_imag = complex_2_real_imag(Hd - H)
         rms = _compute_and_print_rms(residuals_real_imag, suppress_print=not verbose)
 
-    return_list = [b_res, a_res, final_tau]
+    appendable_return_values = [b_res, a_res, final_tau]
 
     Uab = None
     if _uncertainties_were_provided(UH):
         Uab = np.cov(as_and_bs, rowvar=False)
-    return_list.append(Uab)
+    appendable_return_values.append(Uab)
 
     if return_rms:
-        return_list.append(rms)
+        appendable_return_values.append(rms)
 
-    return tuple(return_list)
+    return tuple(appendable_return_values)
 
 
 def _print_iir_welcome_msg(
