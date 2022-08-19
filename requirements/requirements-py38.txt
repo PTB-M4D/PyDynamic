@@ -16,7 +16,7 @@ matplotlib==3.5.3
     # via PyDynamic (setup.py)
 mpmath==1.2.1
     # via sympy
-numpy==1.23.2
+numpy==1.22.0
     # via
     #   PyDynamic (setup.py)
     #   matplotlib
