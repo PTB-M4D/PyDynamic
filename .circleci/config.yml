@@ -130,6 +130,9 @@ workflows:
             - Docker publishing as bludoc
 
   quick_test:
+    when:
+      not:
+        equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
       - test:
           tag: "3.10"
