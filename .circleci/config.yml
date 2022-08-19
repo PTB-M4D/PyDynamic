@@ -56,12 +56,10 @@ executors:
 workflows:
 
   check_for_upgraded_deps:
-    triggers:
-      - schedule:
-          cron: "0 0 1 * *"
-          filters:
-            branches:
-              only: /main/
+    when:
+      and:
+        - equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+        - equal: [ "Recompile and test deps", << pipeline.schedule.name >> ]
     jobs:
       - test_with_updated_deps:
           name: "test_with_updated_deps_py37"
@@ -98,12 +96,10 @@ workflows:
             - GitHub pushes to BjoernLudwigPTB's public_repos
 
   nightly_test:
-    triggers:
-      - schedule:
-          cron: "0 0 8,15,22 * *"
-          filters:
-            branches:
-              only: /main/
+    when:
+      and:
+        - equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+        - equal: [ "Weekly nightly tests", << pipeline.schedule.name >> ]
     jobs:
       - test:
           name: "nightly_test_python_py37"
@@ -144,6 +140,9 @@ workflows:
             - Docker publishing as bludoc
 
   test_and_deploy:
+    when:
+      not:
+        equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
       - test:
           name: "test_python_py37"
