@@ -62,7 +62,7 @@ decorator==5.1.1
     # via ipython
 defusedxml==0.7.1
     # via nbconvert
-distlib==0.3.5
+distlib==0.3.6
     # via virtualenv
 docutils==0.17.1
     # via
@@ -74,9 +74,7 @@ docutils==0.17.1
 dotty-dict==1.3.1
     # via python-semantic-release
 entrypoints==0.4
-    # via
-    #   jupyter-client
-    #   nbconvert
+    # via jupyter-client
 exceptiongroup==1.0.0rc8
     # via hypothesis
 fastjsonschema==2.16.1
@@ -85,7 +83,7 @@ filelock==3.8.0
     # via
     #   tox
     #   virtualenv
-fonttools==4.36.0
+fonttools==4.37.1
     # via
     #   -c requirements/requirements-py37.txt
     #   matplotlib
@@ -108,6 +106,7 @@ importlib-metadata==4.12.0
     #   click
     #   jsonschema
     #   keyring
+    #   nbconvert
     #   pluggy
     #   pytest
     #   sphinx
@@ -145,7 +144,7 @@ jinja2==3.1.2
     #   sphinx
 jsonschema==4.14.0
     # via nbformat
-jupyter-client==7.3.4
+jupyter-client==7.3.5
     # via
     #   ipykernel
     #   nbclient
@@ -178,7 +177,7 @@ matplotlib-inline==0.1.6
     # via
     #   ipykernel
     #   ipython
-mistune==0.8.4
+mistune==2.0.4
     # via nbconvert
 mpmath==1.2.1
     # via
@@ -186,9 +185,9 @@ mpmath==1.2.1
     #   sympy
 mypy-extensions==0.4.3
     # via black
-nbclient==0.6.6
+nbclient==0.6.7
     # via nbconvert
-nbconvert==6.5.3
+nbconvert==7.0.0
     # via
     #   nbsphinx
     #   notebook
@@ -307,7 +306,7 @@ python-dateutil==2.8.2
     #   pandas
 python-gitlab==3.8.1
     # via python-semantic-release
-python-semantic-release==7.31.2
+python-semantic-release==7.31.4
     # via -r requirements/dev-requirements.in
 pytz==2022.2.1
     # via
@@ -409,7 +408,7 @@ tomli==2.0.1
     #   black
     #   coverage
     #   pytest
-tomlkit==0.10.2
+tomlkit==0.11.4
     # via python-semantic-release
 tornado==6.2
     # via
@@ -433,7 +432,7 @@ traitlets==5.3.0
     #   nbformat
     #   nbsphinx
     #   notebook
-tweepy==4.10.0
+tweepy==4.10.1
     # via -r requirements/dev-requirements.in
 twine==3.8.0
     # via python-semantic-release
@@ -452,7 +451,7 @@ uncertainties==3.1.7
     # via
     #   -c requirements/requirements-py37.txt
     #   time-series-buffer
-urllib3==1.26.11
+urllib3==1.26.12
     # via
     #   requests
     #   twine
