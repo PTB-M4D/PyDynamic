@@ -11,6 +11,7 @@ from test.test_signal_class.conftest import signal_inputs
     suppress_health_check=[
         *settings.default.suppress_health_check,
         HealthCheck.too_slow,
+        HealthCheck.data_too_large
     ],
 )
 @pytest.mark.slow
