@@ -491,8 +491,8 @@ jobs:
             fi
             source $HOME/conda/etc/profile.d/conda.sh
             conda activate PyDynamic_conda_env
-            conda install pytest pytest-cov hypothesis
-            pip install pytest-custom-exit-code
+            conda install pytest pytest-cov
+            pip install --upgrade pytest-custom-exit-code hypothesis
 
       - save_cache:
           paths:

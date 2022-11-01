@@ -129,6 +129,7 @@ def values_uncertainties_kind(
     float_generic_params = {
         "allow_nan": False,
         "allow_infinity": False,
+        "allow_subnormal": False,
     }
     # Set all common parameters for x and y values and associated uncertainties.
     shape_for_x = hnp.array_shapes(max_dims=1, min_side=min_count, max_side=max_count)
