@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v2.3.1 (2022-11-08)
+### Fix
+* **test_interpolate:** Ensure interpolation nodes generally not becoming too small around zero ([`b2bec0d`](https://github.com/PTB-M4D/PyDynamic/commit/b2bec0d3852f2fd8b103f14fd72611414001a4cc))
+
+### Documentation
+* **module diagram:** Update module diagram to reflect signals.py module character to resolve #266 ([`f49a679`](https://github.com/PTB-M4D/PyDynamic/commit/f49a679a67c092ef0c00de608e00ea9fa2df2e0a))
+* **module diagram:** Update module diagram with signals.py to resolve #266 ([`aa80faa`](https://github.com/PTB-M4D/PyDynamic/commit/aa80faaff6cefd7c7d196ac35573949ed03781aa))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.3.0...v2.3.1)**
+
 ## v2.3.0 (2022-08-18)
 ### Feature
 * **LSIIR:** Return the RMS value backwards compatible (see #288) ([`c5c484e`](https://github.com/PTB-M4D/PyDynamic/commit/c5c484e991748641d3596462516e69161c896482))
