@@ -3,12 +3,12 @@ black[jupyter]
 hypothesis
 ipykernel
 ipython
+myst-parser
 nbsphinx
 pytest
 pytest-cov
 pytest-custom-exit-code
 python-semantic-release
-recommonmark
 sphinx
 sphinx-rtd-theme
 tox
