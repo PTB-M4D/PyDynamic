@@ -279,8 +279,9 @@ commands:
         no_output_timeout: 60m
         command: |
           source venv/bin/activate
-          tox -e << parameters.toxenvs >> << parameters.posargs >> \
-            << parameters.tests >>
+          tox << parameters.tests >> \
+              -e << parameters.toxenvs >> << parameters.posargs >>
+            
 
   store_results:
     description: "Store test results."
