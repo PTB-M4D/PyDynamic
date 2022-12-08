@@ -53,8 +53,6 @@ click-log==0.4.0
     # via python-semantic-release
 colorama==0.4.6
     # via twine
-commonmark==0.9.1
-    # via recommonmark
 contourpy==1.0.6
     # via
     #   -c requirements/requirements-py310.txt
@@ -77,9 +75,9 @@ distlib==0.3.6
     # via virtualenv
 docutils==0.17.1
     # via
+    #   myst-parser
     #   nbsphinx
     #   readme-renderer
-    #   recommonmark
     #   sphinx
     #   sphinx-rtd-theme
 dotty-dict==1.3.1
@@ -151,6 +149,7 @@ jeepney==0.8.0
 jinja2==3.1.2
     # via
     #   jupyter-server
+    #   myst-parser
     #   nbclassic
     #   nbconvert
     #   nbsphinx
@@ -186,6 +185,10 @@ kiwisolver==1.4.4
     # via
     #   -c requirements/requirements-py310.txt
     #   matplotlib
+markdown-it-py==2.1.0
+    # via
+    #   mdit-py-plugins
+    #   myst-parser
 markupsafe==2.1.1
     # via
     #   jinja2
@@ -198,6 +201,10 @@ matplotlib-inline==0.1.6
     # via
     #   ipykernel
     #   ipython
+mdit-py-plugins==0.3.3
+    # via myst-parser
+mdurl==0.1.2
+    # via markdown-it-py
 mistune==2.0.4
     # via nbconvert
 more-itertools==9.0.0
@@ -208,6 +215,8 @@ mpmath==1.2.1
     #   sympy
 mypy-extensions==0.4.3
     # via black
+myst-parser==0.18.1
+    # via -r requirements/dev-requirements.in
 nbclassic==0.4.8
     # via notebook
 nbclient==0.7.2
@@ -352,6 +361,8 @@ pywavelets==1.4.1
     # via
     #   -c requirements/requirements-py310.txt
     #   pydynamic
+pyyaml==6.0
+    # via myst-parser
 pyzmq==24.0.1
     # via
     #   ipykernel
@@ -361,8 +372,6 @@ pyzmq==24.0.1
     #   notebook
 readme-renderer==37.3
     # via twine
-recommonmark==0.7.1
-    # via -r requirements/dev-requirements.in
 requests==2.28.1
     # via
     #   python-gitlab
@@ -413,8 +422,8 @@ soupsieve==2.3.2.post1
 sphinx==5.3.0
     # via
     #   -r requirements/dev-requirements.in
+    #   myst-parser
     #   nbsphinx
-    #   recommonmark
     #   sphinx-rtd-theme
 sphinx-rtd-theme==1.1.1
     # via -r requirements/dev-requirements.in
@@ -487,6 +496,8 @@ tweepy==4.12.1
     # via -r requirements/dev-requirements.in
 twine==3.8.0
     # via python-semantic-release
+typing-extensions==4.4.0
+    # via myst-parser
 uncertainties==3.1.7
     # via
     #   -c requirements/requirements-py310.txt
