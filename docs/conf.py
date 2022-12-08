@@ -38,8 +38,9 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.intersphinx",
-    "recommonmark",
+    "myst_parser",
     "nbsphinx",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 
 # ReadTheDocs Sphinx theme option taken from
@@ -58,7 +59,7 @@ intersphinx_mapping = {
     ),
     "np": ("https://numpy.org/doc/stable/", None),
     "Python": ("https://docs.python.org/3", None),
-    "pywt": (" https://pywavelets.readthedocs.io/en/latest/", None),
+    "pywt": ("https://pywavelets.readthedocs.io/en/latest/", None),
 }
 # We keep the objects.inv files in our docs folder to get hints on how to specify the
 # cross-references. More on the topic can be found here:
@@ -134,6 +135,7 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 source_suffix = [".rst", ".md"]
 # source_suffix = ".rst"
+myst_heading_anchors = 4
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'

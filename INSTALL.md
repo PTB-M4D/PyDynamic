@@ -3,7 +3,7 @@
 There is a [quick way](#quick-setup-not-recommended) to get started, but we advise 
 setting up a virtual environment and guide through the process in the section
 [Proper Python setup with virtual environment
-](#proper-python-setup-with-virtual-environment-recommended)
+](#proper-python-setup-with-virtual-environment--recommended)
 
 ## Quick setup (**not recommended**)
 
@@ -56,7 +56,7 @@ motivation and an insight into the mechanism in the
 You have the option to set up PyDynamic using _Anaconda_, if you already have it 
 installed, or use the Python built-in tool `venv`. The commands differ slightly 
 between [Windows](#create-a-venv-python-environment-on-windows) and [Mac/Linux
-](#create-a-venv-python-environment-on-mac-linux) or if you use [Anaconda
+](#create-a-venv-python-environment-on-mac--linux) or if you use [Anaconda
 ](#create-an-anaconda-python-environment).
 
 #### Create a `venv` Python environment on Windows

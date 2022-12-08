@@ -137,7 +137,7 @@ workflows:
       - test:
           tag: "3.10"
           toxenvs: "py310-without_requirements"
-          posargs: "-- -m 'not slow'"
+          posargs: "-m 'not slow'"
           parallelism: 4
           context:
             - Docker publishing as bludoc
@@ -279,7 +279,7 @@ commands:
         no_output_timeout: 60m
         command: |
           source venv/bin/activate
-          tox -e << parameters.toxenvs >> << parameters.posargs >> \
+          tox -e << parameters.toxenvs >> -- << parameters.posargs >> \
             << parameters.tests >>
 
   store_results:
