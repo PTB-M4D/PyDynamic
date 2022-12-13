@@ -39,10 +39,10 @@ and the <a href="https://www.npl.co.uk">National Physical Laboratory</a>.
 </p>
 
 <p align="justify">
-Further development and explicit use of PyDynamic is part of the European research
+Further development and explicit use of PyDynamic was part of the European research
 project <a href="https://www.ptb.de/empir2018/met4fof/home/">EMPIR 17IND12 
 Met4FoF</a> and the German research project <a href="https://famous-project.
-eu">FAMOUS</a>.
+eu">FAMOUS</a>. Since the end of these two projects, development of PyDynamic continues mostly based on feature requests and smaller collaborations.
 </p>
 
 ## Table of content
