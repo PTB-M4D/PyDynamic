@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v2.3.2 (2022-12-20)
+### Fix
+* **interpolate:** Replace deprecated np.float by in-built float ([`8188315`](https://github.com/PTB-M4D/PyDynamic/commit/8188315c3dee34ee52425295020d3a8ca6ec9e47))
+
+### Documentation
+* **INSTALL:** Fix two references ([`d5ff79c`](https://github.com/PTB-M4D/PyDynamic/commit/d5ff79cc2c00dfe752214e68a022b250bd77b85c))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.3.1...v2.3.2)**
+
 ## v2.3.1 (2022-11-08)
 ### Fix
 * **test_interpolate:** Ensure interpolation nodes generally not becoming too small around zero ([`b2bec0d`](https://github.com/PTB-M4D/PyDynamic/commit/b2bec0d3852f2fd8b103f14fd72611414001a4cc))
