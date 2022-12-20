@@ -134,7 +134,7 @@ def values_uncertainties_kind(
     # Set all common parameters for x and y values and associated uncertainties.
     shape_for_x = hnp.array_shapes(max_dims=1, min_side=min_count, max_side=max_count)
     strategy_params = {
-        "dtype": np.float,
+        "dtype": float,
         "shape": shape_for_x,
         "elements": hst.floats(
             min_value=-float_abs_max, max_value=float_abs_max, **float_generic_params
@@ -158,10 +158,10 @@ def values_uncertainties_kind(
             x[0],
             x[1:][
                 np.logical_and(
-                    np.logical_not(np.diff(x) < np.finfo(np.float).eps),
+                    np.logical_not(np.diff(x) < np.finfo(float).eps),
                     np.logical_not(
                         np.logical_and(
-                            np.abs(x[1:]) / np.max(np.abs(x)) < np.finfo(np.float).eps,
+                            np.abs(x[1:]) / np.max(np.abs(x)) < np.finfo(float).eps,
                             x[1:] != 0,
                         ),
                     ),
