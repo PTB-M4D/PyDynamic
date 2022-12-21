@@ -79,7 +79,7 @@ def test_power_law_acf():
         assert Rxx.shape == (N,)
 
         if color_value == 0.0:
-            assert Rxx[0] == pytest.approx(std ** 2)
+            assert Rxx[0] == pytest.approx(std**2)
             assert np.mean(Rxx[1:]) == pytest.approx(0)
 
 

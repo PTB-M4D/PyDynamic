@@ -378,7 +378,7 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
         # check, where subsampling needs to start
         # (to remain consistency over multiple calls of wave_dec with argument-lengths
         # not equal to 2^n)
-        i_n = i0 // 2 ** level
+        i_n = i0 // 2**level
         subsample_start = (i_n + 1) % 2
 
         # execute wavelet block
@@ -406,7 +406,7 @@ def wave_dec_realtime(x, Ux, lowpass, highpass, n=1, level_states=None):
             Ucoeffs.insert(0, Uc_approx)
 
     # update total counter modulo 2^n
-    level_states["counter"] = (level_states["counter"] + len(x)) % 2 ** n
+    level_states["counter"] = (level_states["counter"] + len(x)) % 2**n
 
     return coeffs, Ucoeffs, original_length, level_states
 

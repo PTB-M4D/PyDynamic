@@ -43,7 +43,7 @@ class DftDeconvolutionExample:
         y = meas[:, 1]
         # assumed noise std
         noise_std = 4e-4
-        Uy = noise_std ** 2
+        Uy = noise_std**2
 
         #%% hydrophone calibration data
         calib = np.loadtxt(

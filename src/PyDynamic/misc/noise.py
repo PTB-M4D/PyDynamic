@@ -172,7 +172,7 @@ def power_law_acf(N, color_value="white", std=1.0):
     # inverse Fourier-transform to get Autocorrelation from PSD/Sww
     Rww = np.fft.irfft(Sww)
     Rww = (
-        std ** 2 * Rww / Rww[0]
+        std**2 * Rww / Rww[0]
     )  # This normalization ensures the given standard-deviation
 
     return Rww[:N]

@@ -26,7 +26,7 @@ for kind in ["corr", "diag"]:
 
         if kind == "corr":
             c = np.exp(-np.arange(1, 10))
-            Ux = sigma_noise ** 2 * c / c[0]
+            Ux = sigma_noise**2 * c / c[0]
         else:
             Ux = sigma_noise * np.ones_like(x)
 

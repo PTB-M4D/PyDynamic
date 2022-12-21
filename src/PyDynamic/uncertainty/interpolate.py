@@ -283,7 +283,7 @@ def interp1d_unc(
                 # all information can be found on the diagonal of the covariance
                 # and thus the result matrix.
                 uy_new[interp_range] = np.sqrt(
-                    np.sum(C[interp_range] ** 2 * uy ** 2, 1)
+                    np.sum(C[interp_range] ** 2 * uy**2, 1)
                 )
 
             elif kind == "cubic":

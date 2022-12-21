@@ -37,7 +37,7 @@ class DftAmplitudePhaseExample:
         plt.ylabel("signal amplitude in a.u.")
 
         # uncertainty propagation from time domain to frequency domain
-        A, P, UAP = Time2AmpPhase(testsignal, measure_noise_std_sigma ** 2)
+        A, P, UAP = Time2AmpPhase(testsignal, measure_noise_std_sigma**2)
         f = GUM_DFTfreq(len(time), time_step)
 
         plt.figure(2, figsize=(12, 6))
@@ -88,7 +88,7 @@ class DftAmplitudePhaseExample:
         indices = np.argsort(A)[: len(A) // 10]
         # propagate from time to frequency domain and select specified frequencies
         A_multi, P_multi, UAP_multi = Time2AmpPhase_multi(
-            testsignals, np.ones(M) * measure_noise_std_sigma ** 2, selector=indices
+            testsignals, np.ones(M) * measure_noise_std_sigma**2, selector=indices
         )
 
         plt.figure(4, figsize=(12, 6))

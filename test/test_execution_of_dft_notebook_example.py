@@ -34,7 +34,7 @@ def test_run_copy_of_notebook_code():
     )
 
     # Apply DFT with propagation of uncertainties
-    X, UX = GUM_DFT(x, noise_std ** 2)
+    X, UX = GUM_DFT(x, noise_std**2)
     f = fft.rfftfreq(N, Ts)  # frequency values
 
     figure()

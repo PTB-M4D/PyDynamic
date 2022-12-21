@@ -359,7 +359,7 @@ def FIRuncFilter(
     ):
 
         if isinstance(sigma_noise, float):
-            Uy_diag = np.full_like(y, sigma_noise ** 2)
+            Uy_diag = np.full_like(y, sigma_noise**2)
         elif isinstance(sigma_noise, np.ndarray):
             Uy_diag = np.square(sigma_noise)
         else:
@@ -391,13 +391,13 @@ def FIRuncFilter(
 
         # check which case of sigma_noise is necessary
         if isinstance(sigma_noise, float):
-            Uy = np.diag(np.full(len(y), sigma_noise ** 2))
+            Uy = np.diag(np.full(len(y), sigma_noise**2))
 
         elif isinstance(sigma_noise, np.ndarray):
 
             if len(sigma_noise.shape) == 1:
                 if kind == "diag":
-                    Uy = np.diag(sigma_noise ** 2)
+                    Uy = np.diag(sigma_noise**2)
                 elif kind == "corr":
                     Uy = toeplitz(trimOrPad(sigma_noise, len(y)))
                 else:
@@ -686,7 +686,7 @@ def IIR_get_initial_state(b, a, Uab=None, x0=1.0, U0=1.0, Ux=None):
 
     # stationary uncertainty of internal state
     # A * Ps * A^T - Ps + u^2 * B * B^T = 0
-    Ps = solve_discrete_lyapunov(A, U0 ** 2 * np.outer(B, B))
+    Ps = solve_discrete_lyapunov(A, U0**2 * np.outer(B, B))
 
     if isinstance(Ux, np.ndarray):
         corr_unc = _get_corr_unc(b, a, Ux)

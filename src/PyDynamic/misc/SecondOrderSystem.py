@@ -52,19 +52,19 @@ def sos_FreqResp(S, d, f0, freqs):
     """
 
     om0 = 2 * np.pi * f0
-    rho = S * (om0 ** 2)
+    rho = S * (om0**2)
     w = 2 * np.pi * freqs
 
     if isinstance(S, np.ndarray):
         H = np.tile(rho, (len(w), 1)) * (
-            om0 ** 2
+            om0**2
             + 2j
             * np.tile(d * om0, (len(w), 1))
             * np.tile(w[:, np.newaxis], (1, len(S)))
             - np.tile(w[:, np.newaxis] ** 2, (1, len(S)))
         ) ** (-1)
     else:
-        H = rho / (om0 ** 2 + 2j * d * om0 * w - w ** 2)
+        H = rho / (om0**2 + 2j * d * om0 * w - w**2)
 
     return H
 

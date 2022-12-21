@@ -69,11 +69,11 @@ def test(fir_unc_filter_input):
 
         # check which case of sigma_noise is necessary
         if isinstance(sigma_noise, float):
-            sigma2 = sigma_noise ** 2
+            sigma2 = sigma_noise**2
 
         elif isinstance(sigma_noise, np.ndarray) and len(sigma_noise.shape) == 1:
             if kind == "diag":
-                sigma2 = sigma_noise ** 2
+                sigma2 = sigma_noise**2
             elif kind == "corr":
                 sigma2 = sigma_noise
             else:

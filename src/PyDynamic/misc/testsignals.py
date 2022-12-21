@@ -61,7 +61,7 @@ def shocklikeGaussian(time, t0, m0, sigma, noise=0.0):
         * (time - t0)
         / sigma
         * np.exp(0.5)
-        * np.exp(-((time - t0) ** 2) / (2 * sigma ** 2))
+        * np.exp(-((time - t0) ** 2) / (2 * sigma**2))
     )
     if noise > 0:
         x = white_gaussian(len(x), x, noise)
@@ -90,7 +90,7 @@ def GaussianPulse(time, t0, m0, sigma, noise=0.0):
         signal amplitudes at time instants
     """
 
-    x = m0 * np.exp(-((time - t0) ** 2) / (2 * sigma ** 2))
+    x = m0 * np.exp(-((time - t0) ** 2) / (2 * sigma**2))
     if noise > 0:
         x = white_gaussian(len(x), x, noise)
     return x
@@ -239,8 +239,8 @@ class corr_noise:
         noise = (
             diff(
                 diff(
-                    diff(diff(z * self.w ** 4) - 4 * z[1:] * self.w ** 3)
-                    + 6 * z[2:] * self.w ** 2
+                    diff(diff(z * self.w**4) - 4 * z[1:] * self.w**3)
+                    + 6 * z[2:] * self.w**2
                 )
                 - 4 * z[3:] * self.w
             )
@@ -287,13 +287,13 @@ class corr_noise:
                     for el in range(5 - np.abs(k))
                 ]
             )
-            return c / self.Cw ** 2
+            return c / self.Cw**2
 
         N = len(self.noise)
         Sigma = np.zeros((N, N))
         for m in range(N):
             for n in range(m, N):
-                Sigma[m, n] = self.sigma ** 2 * cw(n - m)
+                Sigma[m, n] = self.sigma**2 * cw(n - m)
         self.Sigma = Sigma + Sigma.T - np.diag(np.diag(Sigma))
         return self.Sigma
 

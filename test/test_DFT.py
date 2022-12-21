@@ -164,7 +164,7 @@ class TestDFT:
     def test_DFT_iDFT(self, multisine_testsignal):
         """Test GUM_DFT and GUM_iDFT with noise variance as uncertainty"""
         x, ux = multisine_testsignal
-        X, UX = GUM_DFT(x, ux ** 2)
+        X, UX = GUM_DFT(x, ux**2)
         xh, uxh = GUM_iDFT(X, UX)
         assert_almost_equal(np.max(np.abs(x - xh)), 0)
         assert_almost_equal(np.max(ux - np.sqrt(np.diag(uxh))), 0)
@@ -181,7 +181,7 @@ class TestDFT:
     def test_AmpPhasePropagation(self, multisine_testsignal):
         """Test Time2AmpPhase and AmpPhase2Time with noise variance as uncertainty"""
         testsignal, noise_std = multisine_testsignal
-        A, P, UAP = Time2AmpPhase(testsignal, noise_std ** 2)
+        A, P, UAP = Time2AmpPhase(testsignal, noise_std**2)
         x, ux = AmpPhase2Time(A, P, UAP)
         assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
 
@@ -190,7 +190,7 @@ class TestDFT:
 def test_compose_DFT_and_iDFT_with_full_covariance(multisine_testsignal, corrmatrix):
     """Test GUM_DFT and GUM_iDFT with full covariance matrix"""
     x, ux = multisine_testsignal
-    ux = np.ones_like(x) * 0.01 ** 2
+    ux = np.ones_like(x) * 0.01**2
     cx = corrmatrix(0.95, len(x))
     Ux = np.diag(ux)
     Ux = Ux.dot(cx.dot(Ux))

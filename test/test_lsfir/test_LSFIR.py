@@ -37,7 +37,7 @@ def simulated_measurement_input_and_output(
         * (time - t0)
         / sigma
         * np.exp(0.5)
-        * np.exp(-((time - t0) ** 2) / (2 * sigma ** 2))
+        * np.exp(-((time - t0) ** 2) / (2 * sigma**2))
     )
     assert_allclose(
         x,

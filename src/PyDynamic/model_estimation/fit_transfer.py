@@ -161,7 +161,7 @@ def fit_som(
             for i_monte_carlo_run in range(MCruns):
                 iri = inverted_h_mc[i_monte_carlo_run, :]
                 om = 2 * np.pi * f * scaling
-                E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
+                E = np.c_[np.ones(n), 2j * om, -(om**2)]
                 X = np.r_[np.real(E), np.imag(E)]
 
                 XVX = X.T.dot(np.linalg.solve(W, X))
@@ -176,7 +176,7 @@ def fit_som(
                         prefix="Monte Carlo for fit_som() running:",
                     )
             MU[:, 1] *= scaling
-            MU[:, 2] *= scaling ** 2
+            MU[:, 2] *= scaling**2
 
             # Calculate S0, delta and f0
             PARS = np.c_[
@@ -190,7 +190,7 @@ def fit_som(
         else:  # MCruns == None, so apply GUM S2 linear propagation
             iri = np.r_[np.real(1 / h_complex), np.imag(1 / h_complex)]
             om = 2 * np.pi * f
-            E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
+            E = np.c_[np.ones(n), 2j * om, -(om**2)]
             X = np.r_[np.real(E), np.imag(E)]
 
             XVX = X.T.dot(np.linalg.solve(W, X))
@@ -231,7 +231,7 @@ def fit_som(
     # UH is None, so apply GUM S2 linear propagation
     iri = np.r_[np.real(1 / h_complex), np.imag(1 / h_complex)]
     om = 2 * np.pi * f * scaling
-    E = np.c_[np.ones(n), 2j * om, -(om ** 2)]
+    E = np.c_[np.ones(n), 2j * om, -(om**2)]
     X = np.r_[np.real(E), np.imag(E)]
 
     XVX = X.T.dot(np.linalg.solve(W, X))
@@ -239,7 +239,7 @@ def fit_som(
 
     mu = np.linalg.solve(XVX, XVy)
     mu[1] *= scaling
-    mu[2] *= scaling ** 2
+    mu[2] *= scaling**2
     pars = np.r_[
         1 / mu[0],
         mu[1] / np.sqrt(np.abs(mu[0] * mu[2])),

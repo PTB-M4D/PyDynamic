@@ -33,7 +33,7 @@ def main():
         level for level in list(range(1, n_levels + 1))[::-1]
     ]  # highest level twice because we store detail + approx
     output_multi_buffer_maxlen = [
-        buffer_length // 2 ** level for level in output_multi_level
+        buffer_length // 2**level for level in output_multi_level
     ]
     output_multi = [
         Buffer(maxlen=maxlen, return_type="arrays")
@@ -90,14 +90,14 @@ def main():
             )
 
             # assign correct timestamps to the coefficients
-            i0_old = (level_states["counter"] - len(t)) % 2 ** n_levels
+            i0_old = (level_states["counter"] - len(t)) % 2**n_levels
             time_indices = np.arange(i0_old, i0_old + len(t))
 
             # save results to data structure
             for c, u, buffer, level in zip(
                 coeffs, Ucoeffs, output_multi, output_multi_level
             ):
-                time_indices_level = (time_indices + 1) % 2 ** level == 0
+                time_indices_level = (time_indices + 1) % 2**level == 0
                 if (
                     time_indices_level.sum() > 0
                 ):  # otherwise error from time-series-buffer
