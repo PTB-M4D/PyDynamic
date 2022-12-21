@@ -51,7 +51,6 @@ import warnings
 from typing import Dict, Optional, Tuple, Union
 
 import numpy as np
-from numpy._typing import NDArray
 from scipy import sparse
 
 from ..misc.tools import (
@@ -62,20 +61,20 @@ from ..misc.tools import (
 
 
 def GUM_DFT(
-    x: NDArray,
-    Ux: Union[NDArray, float],
+    x: np.ndarray,
+    Ux: Union[np.ndarray, float],
     N: Optional[int] = None,
-    window: Optional[NDArray] = None,
-    CxCos: Optional[NDArray] = None,
-    CxSin: Optional[NDArray] = None,
+    window: Optional[np.ndarray] = None,
+    CxCos: Optional[np.ndarray] = None,
+    CxSin: Optional[np.ndarray] = None,
     returnC: bool = False,
-    mask: Optional[NDArray] = None,
+    mask: Optional[np.ndarray] = None,
 ) -> Union[
-    Tuple[NDArray, Union[Tuple[NDArray, NDArray, NDArray], NDArray]],
+    Tuple[np.ndarray, Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray]],
     Tuple[
-        NDArray,
-        Union[Tuple[NDArray, NDArray, NDArray], NDArray],
-        Dict[str, NDArray],
+        np.ndarray,
+        Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray],
+        Dict[str, np.ndarray],
     ],
 ]:
     """Calculation of the DFT with propagation of uncertainty
@@ -86,18 +85,18 @@ def GUM_DFT(
 
     Parameters
     ----------
-    x : NDArray of shape (M,)
+    x : np.ndarray of shape (M,)
         vector of time domain signal values
-    Ux : NDArray of shape (M,) or of shape (M,M) or float
+    Ux : np.ndarray of shape (M,) or of shape (M,M) or float
         covariance matrix associated with x, or vector of squared standard
         uncertainties, or noise variance as float
     N : int, optional
         length of time domain signal for DFT; N>=len(x)
-    window : NDArray of shape (M,), optional
+    window : np.ndarray of shape (M,), optional
         vector of the time domain window values
-    CxCos : NDArray, optional
+    CxCos : np.ndarray, optional
         cosine part of sensitivity matrix
-    CxSin : NDArray, optional
+    CxSin : np.ndarray, optional
         sine part of sensitivity matrix
     returnC : bool, optional
         if True, return sensitivity matrix blocks, if False (default) do not return them
@@ -107,9 +106,9 @@ def GUM_DFT(
 
     Returns
     -------
-    F : NDArray
+    F : np.ndarray
         vector of complex valued DFT values or of its real and imaginary parts
-    UF : NDArray
+    UF : np.ndarray
         covariance matrix associated with real and imaginary part of F
     CxCos and CxSin : Dict
         Keys are "CxCos", "CxSin" and values the respective sensitivity matrix entries
@@ -198,9 +197,9 @@ def GUM_DFT(
         UFCS = np.dot(CxCos, np.dot(Ux, CxSin.T))
         UFSS = np.dot(CxSin, np.dot(Ux, CxSin.T))
         try:
-            UF: Union[Tuple[NDArray, NDArray, NDArray], NDArray] = np.vstack(
-                (np.hstack((UFCC, UFCS)), np.hstack((UFCS.T, UFSS)))
-            )
+            UF: Union[
+                Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray
+            ] = np.vstack((np.hstack((UFCC, UFCS)), np.hstack((UFCS.T, UFSS))))
         except MemoryError:
             print("Could not put covariance matrix together due to memory constraints.")
             print(
@@ -208,7 +207,11 @@ def GUM_DFT(
                 "[B.T,C]] instead."
             )
             # Return blocks only because of lack of memory.
-            UF: Union[Tuple[NDArray, NDArray, NDArray], NDArray] = (UFCC, UFCS, UFSS)
+            UF: Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray] = (
+                UFCC,
+                UFCS,
+                UFSS,
+            )
 
     if returnC:
         # Return sensitivities if requested.
@@ -218,22 +221,22 @@ def GUM_DFT(
 
 
 def _apply_window(
-    x: NDArray, Ux: Union[NDArray, float], window: NDArray
-) -> Tuple[NDArray, NDArray]:
+    x: np.ndarray, Ux: Union[np.ndarray, float], window: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
     """Apply time domain window to signal x of equal length and propagate uncertainties
 
     Parameters
     ----------
-    x : NDArray of shape (N, )
+    x : np.ndarray of shape (N, )
         vector of time domain signal values
-    Ux : NDArray of shape (N, N) or float
+    Ux : np.ndarray of shape (N, N) or float
         covariance matrix associated with x or noise variance as float
-    window : NDArray of shape (N, )
+    window : np.ndarray of shape (N, )
         vector of time domain window (same length as x)
 
     Returns
     -------
-    xw, Uxw : NDArray of shape (N, ) and (N, N)
+    xw, Uxw : np.ndarray of shape (N, ) and (N, N)
         transformed signal and associated uncertainties
 
     Raises
@@ -252,7 +255,7 @@ def _apply_window(
     return xw, Uxw
 
 
-def _prod(a: NDArray, b: NDArray) -> NDArray:
+def _prod(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     r"""Calculate the product of a matrix with a diagonal matrix of a vector
 
     Calculate the product that corresponds to :math:`diag(a) \cdot b` if :math:`a`
@@ -260,13 +263,13 @@ def _prod(a: NDArray, b: NDArray) -> NDArray:
 
     Parameters
     ----------
-    a, b : NDArray of shape (N,M) and NDArray of shape (N,) on of shape  (M,)
+    a, b : np.ndarray of shape (N,M) and np.ndarray of shape (N,) on of shape  (M,)
         one is a vector from which the diagonal matrix is build and the other a
         matrix where the order does not matter
 
     Returns
     -------
-    NDArray
+    np.ndarray
         The product of the matrices
 
     Raises
@@ -290,7 +293,7 @@ def _prod(a: NDArray, b: NDArray) -> NDArray:
         )
 
 
-def _check_matrix_vector_dimension_match(a: NDArray, b: NDArray) -> bool:
+def _check_matrix_vector_dimension_match(a: np.ndarray, b: np.ndarray) -> bool:
     return (
         is_vector(a)
         and is_2d_matrix(b)
@@ -302,19 +305,19 @@ def _check_matrix_vector_dimension_match(a: NDArray, b: NDArray) -> bool:
     )
 
 
-def _number_of_cols_equals_vector_dim(matrix: NDArray, vector: NDArray) -> bool:
+def _number_of_cols_equals_vector_dim(matrix: np.ndarray, vector: np.ndarray) -> bool:
     return len(vector) == matrix.shape[1]
 
 
 def _multiply_diagonal_matrix_from_vector_with_matrix_from_right(
-    matrix: NDArray, vector: NDArray
-) -> NDArray:
+    matrix: np.ndarray, vector: np.ndarray
+) -> np.ndarray:
     return matrix @ np.diag(v=vector)
 
 
 def _multiply_diagonal_matrix_from_vector_with_matrix_from_left(
-    matrix: NDArray, vector: NDArray
-) -> NDArray:
+    matrix: np.ndarray, vector: np.ndarray
+) -> np.ndarray:
     return np.diag(v=vector) @ matrix
 
 
@@ -327,18 +330,18 @@ def _compute_sensitivity_matrix_wrt_sine_part(_k, _beta):
 
 
 def GUM_iDFT(
-    F: NDArray,
-    UF: NDArray,
+    F: np.ndarray,
+    UF: np.ndarray,
     Nx: Optional[int] = None,
-    Cc: Optional[NDArray] = None,
-    Cs: Optional[NDArray] = None,
+    Cc: Optional[np.ndarray] = None,
+    Cs: Optional[np.ndarray] = None,
     returnC: bool = False,
 ) -> Union[
-    Tuple[NDArray, NDArray],
+    Tuple[np.ndarray, np.ndarray],
     Tuple[
-        NDArray,
-        NDArray,
-        Dict[str, NDArray],
+        np.ndarray,
+        np.ndarray,
+        Dict[str, np.ndarray],
     ],
 ]:
     """Propagation of squared uncertainties UF associated with the DFT values F
@@ -353,15 +356,15 @@ def GUM_iDFT(
 
     Parameters
     ----------
-    F : NDArray of shape (2M,)
+    F : np.ndarray of shape (2M,)
         vector of real and imaginary parts of a DFT result
-    UF: NDArray of shape (2M,2M)
+    UF: np.ndarray of shape (2M,2M)
         covariance matrix associated with real and imaginary parts of F
     Nx: int, optional
         number of samples of iDFT result
-    Cc: NDArray, optional
+    Cc: np.ndarray, optional
         cosine part of sensitivities (without scaling factor 1/N)
-    Cs: NDArray, optional
+    Cs: np.ndarray, optional
         sine part of sensitivities (without scaling factor 1/N)
     returnC : bool, optional
         If True, return sensitivity matrix blocks (without scaling factor 1/N),
@@ -369,9 +372,9 @@ def GUM_iDFT(
 
     Returns
     -------
-    x : NDArray
+    x : np.ndarray
         vector of time domain signal values
-    Ux : NDArray
+    Ux : np.ndarray
         covariance matrix associated with x
     Cc and Cs : Dict
         Keys are "Cc", "Cs" and values the respective sensitivity matrix entries
@@ -458,12 +461,12 @@ def GUM_DFTfreq(N, dt=1):
 
 
 def DFT2AmpPhase(
-    F: NDArray,
-    UF: NDArray,
+    F: np.ndarray,
+    UF: np.ndarray,
     keep_sparse: bool = False,
     tol: float = 1.0,
     return_type: str = "separate",
-) -> Union[Tuple[NDArray, NDArray], Tuple[NDArray, NDArray, NDArray]]:
+) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray]]:
     """Transformation from real and imaginary parts to magnitude and phase
 
     Calculate the matrix
@@ -473,9 +476,9 @@ def DFT2AmpPhase(
 
     Parameters
     ----------
-    F : NDArray of shape (2M,)
+    F : np.ndarray of shape (2M,)
         vector of real and imaginary parts of a DFT result
-    UF : NDArray of shape (2M,2M)
+    UF : np.ndarray of shape (2M,2M)
         covariance matrix associated with F
     keep_sparse : bool, optional
         if true then UAP will be sparse if UF is one-dimensional
@@ -490,21 +493,21 @@ def DFT2AmpPhase(
 
     Returns
     -------
-    A : NDArray
+    A : np.ndarray
         vector of magnitude values
-    P : NDArray
+    P : np.ndarray
         vector of phase values in radians, in the range [-pi, pi], but only
         present if ``return_type = 'separate'``
-    UAP : NDArray
+    UAP : np.ndarray
         covariance matrix associated with (A,P)
 
     Otherwise:
 
     Returns
     -------
-    AP : NDArray
+    AP : np.ndarray
         vector of magnitude and phase values
-    UAP : NDArray
+    UAP : np.ndarray
         covariance matrix associated with AP
     """
     # calculate inverse DFT
@@ -575,8 +578,8 @@ def DFT2AmpPhase(
 
 
 def AmpPhase2DFT(
-    A: NDArray, P: NDArray, UAP: NDArray, keep_sparse: bool = False
-) -> Tuple[NDArray, NDArray]:
+    A: np.ndarray, P: np.ndarray, UAP: np.ndarray, keep_sparse: bool = False
+) -> Tuple[np.ndarray, np.ndarray]:
     """Transformation from magnitude and phase to real and imaginary parts
 
     Calculate the vector F=[real,imag] and propagate the covariance matrix UAP
@@ -584,11 +587,11 @@ def AmpPhase2DFT(
 
     Parameters
     ----------
-    A : NDArray of shape (N,)
+    A : np.ndarray of shape (N,)
         vector of magnitude values
-    P : NDArray of shape (N,)
+    P : np.ndarray of shape (N,)
         vector of phase values (in radians)
-    UAP : NDArray of shape (2N,2N) or of shape (2N,)
+    UAP : np.ndarray of shape (2N,2N) or of shape (2N,)
         covariance matrix associated with (A,P) or vector of squared standard
         uncertainties [u^2(A),u^2(P)]
     keep_sparse : bool, optional
@@ -596,9 +599,9 @@ def AmpPhase2DFT(
 
     Returns
     -------
-    F : NDArray of shape (2N,)
+    F : np.ndarray of shape (2N,)
         vector of real and imaginary parts of DFT result
-    UF : NDArray of shape (2N,2N)
+    UF : np.ndarray of shape (2N,2N)
         covariance matrix associated with F
 
     Raises
@@ -691,25 +694,25 @@ def AmpPhase2DFT(
 
 
 def Time2AmpPhase(
-    x: NDArray, Ux: Union[NDArray, float]
-) -> Tuple[NDArray, NDArray, NDArray]:
+    x: np.ndarray, Ux: Union[np.ndarray, float]
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Transformation from time domain to amplitude and phase via DFT
 
     Parameters
     ----------
-    x : NDArray of shape (N,)
+    x : np.ndarray of shape (N,)
         time domain signal
-    Ux : NDArray of shape (N,) or of shape (N,N) or float
+    Ux : np.ndarray of shape (N,) or of shape (N,N) or float
         covariance matrix associated with x, or vector of squared standard
         uncertainties, or noise variance as float
 
     Returns
     -------
-    A : NDArray
+    A : np.ndarray
         amplitude values
-    P : NDArray
+    P : np.ndarray
         phase values
-    UAP : NDArray
+    UAP : np.ndarray
         covariance matrix associated with [A,P]
     """
     F, UF = GUM_DFT(x, Ux)  # propagate to DFT domain
@@ -725,22 +728,22 @@ def Time2AmpPhase_multi(x, Ux, selector=None):
 
     Parameters
     ----------
-    x : NDArray of shape (M, nx)
+    x : np.ndarray of shape (M, nx)
         M time domain signals of length nx
-    Ux : NDArray of shape (M,)
+    Ux : np.ndarray of shape (M,)
         squared standard deviations representing noise variances of the
         signals x
-    selector : NDArray of shape (L,), optional
+    selector : np.ndarray of shape (L,), optional
         indices of amplitude and phase values that should be returned;
         default is 0:N-1
 
     Returns
     -------
-    A : NDArray of shape (M,N)
+    A : np.ndarray of shape (M,N)
         amplitude values
-    P : NDArray of shape (M,N)
+    P : np.ndarray of shape (M,N)
         phase values
-    UAP : NDArray of shape (M, 3N)
+    UAP : np.ndarray of shape (M, 3N)
         diagonals of the covariance matrices: [diag(UAA), diag(UAP),
         diag(UPP)]
     """
@@ -774,8 +777,8 @@ def Time2AmpPhase_multi(x, Ux, selector=None):
 
 
 def AmpPhase2Time(
-    A: NDArray, P: NDArray, UAP: NDArray
-) -> Tuple[NDArray, NDArray]:
+    A: np.ndarray, P: np.ndarray, UAP: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
     """Transformation from amplitude and phase to time domain
 
     GUM propagation of covariance matrix UAP associated with DFT amplitude A and
@@ -785,18 +788,18 @@ def AmpPhase2Time(
 
     Parameters
     ----------
-    A : NDArray of shape (N, )
+    A : np.ndarray of shape (N, )
         vector of amplitude values
-    P : NDArray of shape (N, )
+    P : np.ndarray of shape (N, )
         vector of phase values (in rad)
-    UAP : NDArray of shape (2N, 2N)
+    UAP : np.ndarray of shape (2N, 2N)
         covariance matrix associated with [A,P]
 
     Returns
     -------
-    x : NDArray of shape (N, )
+    x : np.ndarray of shape (N, )
         vector of time domain values
-    Ux : NDArray of shape (2N, 2N)
+    Ux : np.ndarray of shape (2N, 2N)
         covariance matrix associated with x
 
     Raises
@@ -877,20 +880,20 @@ def DFT_transferfunction(X, Y, UX, UY):
 
     Parameters
     ----------
-    X : NDArray
+    X : np.ndarray
         real and imaginary parts of the system's input signal
-    Y : NDArray
+    Y : np.ndarray
         real and imaginary parts of the system's output signal
-    UX : NDArray
+    UX : np.ndarray
         covariance matrix associated with X
-    UY : NDArray
+    UY : np.ndarray
         covariance matrix associated with Y
 
     Returns
     -------
-    H : NDArray
+    H : np.ndarray
         real and imaginary parts of the system's frequency response
-    UH : NDArray
+    UH : np.ndarray
         covariance matrix associated with H
 
     This function only calls `DFT_deconv`.
@@ -899,8 +902,8 @@ def DFT_transferfunction(X, Y, UX, UY):
 
 
 def DFT_deconv(
-    H: NDArray, Y: NDArray, UH: NDArray, UY: NDArray
-) -> Tuple[NDArray, Union[Tuple[NDArray, NDArray, NDArray], NDArray]]:
+    H: np.ndarray, Y: np.ndarray, UH: np.ndarray, UY: np.ndarray
+) -> Tuple[np.ndarray, Union[Tuple[np.ndarray, np.ndarray, np.ndarray], np.ndarray]]:
     """Deconvolution in the frequency domain
 
     GUM propagation of uncertainties for the deconvolution X = Y/H with Y and
@@ -912,20 +915,20 @@ def DFT_deconv(
 
     Parameters
     ----------
-    H : NDArray of shape (2M,)
+    H : np.ndarray of shape (2M,)
         real and imaginary parts of frequency response values (M an even integer)
-    Y : NDArray of shape (2M,)
+    Y : np.ndarray of shape (2M,)
         real and imaginary parts of DFT values
-    UH : NDArray of shape (2M,2M) or (2M,)
+    UH : np.ndarray of shape (2M,2M) or (2M,)
         full covariance or diagonal of the covariance matrix associated with H
-    UY : NDArray of shape (2M,2M) or (2M,)
+    UY : np.ndarray of shape (2M,2M) or (2M,)
         full covariance or diagonal of the covariance matrix associated with Y
 
     Returns
     -------
-    X : NDArray of shape (2M,)
+    X : np.ndarray of shape (2M,)
         real and imaginary parts of DFT values of deconv result
-    UX : NDArray of shape (2M,2M) or 3-tuple of NDArray of shape (M,M)
+    UX : np.ndarray of shape (2M,2M) or 3-tuple of np.ndarray of shape (M,M)
         Covariance matrix associated with real and imaginary part of X. If the matrix
         fully assembled does not fit the memory, we return the auto-covariance for the
         real parts ``URRX`` and the imaginary parts ``UIIX`` and the covariance between
@@ -974,7 +977,7 @@ def DFT_deconv(
 
     Yc = Y[: N // 2 + 1] + 1j * Y[N // 2 + 1 :]
     Hc = H[: N // 2 + 1] + 1j * H[N // 2 + 1 :]
-    X: NDArray = np.r_[np.real(Yc / Hc), np.imag(Yc / Hc)]
+    X: np.ndarray = np.r_[np.real(Yc / Hc), np.imag(Yc / Hc)]
 
     # sensitivities
     norm = rH**2 + iH**2
@@ -994,35 +997,35 @@ def DFT_deconv(
     UIIX = _matprod(UY, IY, IY) + _matprod(UH, IH, IH)
 
     try:
-        UX: NDArray = np.vstack((np.hstack((URRX, URIX)), np.hstack((URIX.T, UIIX))))
+        UX: np.ndarray = np.vstack((np.hstack((URRX, URIX)), np.hstack((URIX.T, UIIX))))
     except MemoryError:
         print(
             "DFT_deconv: Could not put covariance matrix together due to memory "
             "constraints.\nReturning the three blocks (A,B,C) such that U = [[A,B],"
             "[B.T,C]] instead."
         )
-        UX: Tuple[NDArray, NDArray, NDArray] = (URRX, URIX, UIIX)
+        UX: Tuple[np.ndarray, np.ndarray, np.ndarray] = (URRX, URIX, UIIX)
 
     return X, UX
 
 
 def _matprod(
-    M: NDArray, V: NDArray, W: NDArray, return_as_matrix: bool = True
-) -> NDArray:
+    M: np.ndarray, V: np.ndarray, W: np.ndarray, return_as_matrix: bool = True
+) -> np.ndarray:
     """Calculate the matrix-matrix-matrix product (V1,V2)M(W1,W2)
 
     Calculate the product for V=(V1,V2) and W=(W1,W2).
 
     Parameters
     ----------
-    M : NDArray
+    M : np.ndarray
         M can be sparse, one-dimensional or a full (quadratic) matrix.
-    V, W : NDArray
+    V, W : np.ndarray
         V=(V1,V2) and W=(W1,W2)
 
     Returns
     -------
-    NDArray
+    np.ndarray
         matrix product (V1,V2)M(W1,W2)
 
     Raises
@@ -1071,8 +1074,8 @@ GUMdeconv = DFT_deconv
 
 
 def DFT_multiply(
-    Y: NDArray, F: NDArray, UY: NDArray, UF: Optional[NDArray] = None
-) -> Tuple[NDArray, NDArray]:
+    Y: np.ndarray, F: np.ndarray, UY: np.ndarray, UF: Optional[np.ndarray] = None
+) -> Tuple[np.ndarray, np.ndarray]:
     """Multiplication in the frequency domain
 
     GUM uncertainty propagation for multiplication in the frequency domain,
@@ -1083,20 +1086,20 @@ def DFT_multiply(
 
     Parameters
     ----------
-    Y : NDArray of shape (2M,)
+    Y : np.ndarray of shape (2M,)
         real and imaginary parts of the first factor
-    F : NDArray of shape (2M,)
+    F : np.ndarray of shape (2M,)
         real and imaginary parts of the second factor
-    UY : NDArray either of shape (2M,) or of shape (2M,2M)
+    UY : np.ndarray either of shape (2M,) or of shape (2M,2M)
         covariance matrix or squared uncertainty associated with Y
-    UF : NDArray of shape (2M,2M), optional
+    UF : np.ndarray of shape (2M,2M), optional
         covariance matrix associated with F
 
     Returns
     -------
-    YF : NDArray of shape (2M,)
+    YF : np.ndarray of shape (2M,)
         the product of Y and F
-    UYF : NDArray of shape (2M,2M)
+    UYF : np.ndarray of shape (2M,2M)
         the uncertainty associated with YF
 
     Raises

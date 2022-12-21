@@ -9,7 +9,6 @@ import scipy.stats as stats
 from hypothesis import assume, HealthCheck, settings, strategies as hst
 from hypothesis.extra import numpy as hnp
 from hypothesis.strategies import composite, DrawFn, SearchStrategy
-from numpy._typing import NDArray
 from numpy.linalg import LinAlgError
 from scipy.signal import correlate
 
@@ -137,8 +136,8 @@ def check_no_nans_and_infs(*args: Tuple[np.ndarray]) -> bool:
 
 
 class VectorAndCompatibleMatrix(NamedTuple):
-    vector: NDArray
-    matrix: NDArray
+    vector: np.ndarray
+    matrix: np.ndarray
 
 
 @composite
@@ -239,7 +238,7 @@ def hypothesis_float_matrix(
     draw: Callable,
     number_of_rows: Optional[int] = None,
     number_of_cols: Optional[int] = None,
-) -> NDArray:
+) -> np.ndarray:
     number_of_rows = draw(
         hypothesis_dimension(min_value=number_of_rows, max_value=number_of_rows)
     )
@@ -256,7 +255,7 @@ def hypothesis_float_matrix(
 @composite
 def hypothesis_float_square_matrix(
     draw: Callable, number_of_rows: Optional[int] = None
-) -> NDArray:
+) -> np.ndarray:
     number_of_rows_and_columns = (
         number_of_rows if number_of_rows is not None else draw(hypothesis_dimension())
     )
@@ -273,7 +272,7 @@ def hypothesis_nonzero_complex_vector(
     length: Optional[int] = None,
     min_magnitude: float = 1e-4,
     max_magnitude: float = 1e4,
-) -> SearchStrategy[NDArray]:
+) -> SearchStrategy[np.ndarray]:
     number_of_elements = draw(hypothesis_dimension(min_value=length, max_value=length))
     complex_vector = draw(
         hnp.arrays(
@@ -288,12 +287,12 @@ def hypothesis_nonzero_complex_vector(
         )
     )
     assume(np.all(np.real(complex_vector) != 0))
-    return cast(SearchStrategy[NDArray], complex_vector)
+    return cast(SearchStrategy[np.ndarray], complex_vector)
 
 
 @pytest.fixture
 def random_complex_vector() -> Callable:
-    def create_random_complex_vector(length: int) -> NDArray:
+    def create_random_complex_vector(length: int) -> np.ndarray:
         return np.random.random(length) + 1j * np.random.random(length)
 
     return create_random_complex_vector
@@ -307,10 +306,10 @@ def hypothesis_float_vector(
     max_value: Optional[float] = None,
     exclude_min: bool = False,
     exclude_max: bool = False,
-) -> SearchStrategy[NDArray]:
+) -> SearchStrategy[np.ndarray]:
     number_of_elements = draw(hypothesis_dimension(min_value=length, max_value=length))
     return cast(
-        SearchStrategy[NDArray],
+        SearchStrategy[np.ndarray],
         draw(
             hnp.arrays(
                 dtype=float,
@@ -403,7 +402,7 @@ def hypothesis_covariance_matrix(
     number_of_rows: Optional[int] = None,
     min_value: float = 0.0,
     max_value: float = 1.0,
-) -> SearchStrategy[NDArray]:
+) -> SearchStrategy[np.ndarray]:
     number_of_rows_and_columns = draw(
         hypothesis_dimension(min_value=number_of_rows, max_value=number_of_rows)
     )
@@ -435,15 +434,15 @@ def hypothesis_covariance_matrix(
         nonzero_diagonal_cov, range_min=min_value, range_max=max_value
     )
     assume(np.all(np.linalg.eigvals(scaled_cov) >= 0))
-    return cast(SearchStrategy[NDArray], scaled_cov)
+    return cast(SearchStrategy[np.ndarray], scaled_cov)
 
 
 @composite
 def ensure_hypothesis_nonzero_diagonal(
-    draw: DrawFn, square_matrix: NDArray
-) -> SearchStrategy[NDArray]:
+    draw: DrawFn, square_matrix: np.ndarray
+) -> SearchStrategy[np.ndarray]:
     return cast(
-        SearchStrategy[NDArray],
+        SearchStrategy[np.ndarray],
         square_matrix
         + np.diag(
             draw(
@@ -456,24 +455,24 @@ def ensure_hypothesis_nonzero_diagonal(
 
 
 def scale_matrix_or_vector_to_range(
-    array: NDArray, range_min: float = 0.0, range_max: float = 1.0
-) -> NDArray:
+    array: np.ndarray, range_min: float = 0.0, range_max: float = 1.0
+) -> np.ndarray:
     return normalize_vector_or_matrix(array) * (range_max - range_min) + range_min
 
 
-def scale_matrix_or_vector_to_convex_combination(array: NDArray) -> NDArray:
+def scale_matrix_or_vector_to_convex_combination(array: np.ndarray) -> np.ndarray:
     return array / np.sum(array)
 
 
 @composite
 def hypothesis_covariance_matrix_with_zero_correlation(
     draw: DrawFn, number_of_rows: Optional[int] = None
-) -> SearchStrategy[NDArray]:
+) -> SearchStrategy[np.ndarray]:
     cov = np.diag(
         np.diag(draw(hypothesis_covariance_matrix(number_of_rows=number_of_rows)))
     )
     assume(np.all(np.linalg.eigvals(cov) >= 0))
-    return cast(SearchStrategy[NDArray], cov)
+    return cast(SearchStrategy[np.ndarray], cov)
 
 
 @composite
@@ -482,7 +481,7 @@ def hypothesis_covariance_matrix_for_complex_vectors(
     length: int,
     min_value: float = 0.0,
     max_value: float = 1.0,
-) -> SearchStrategy[NDArray]:
+) -> SearchStrategy[np.ndarray]:
 
     uy_rr = draw(
         hypothesis_covariance_matrix(
@@ -502,10 +501,10 @@ def hypothesis_covariance_matrix_for_complex_vectors(
     uy = np.block([[uy_rr, uy_ri], [uy_ri.T, uy_ii]])
     uy_positive_semi_definite = make_semiposdef(uy)
     assume(np.all(np.linalg.eigvals(uy_positive_semi_definite) >= 0))
-    return cast(SearchStrategy[NDArray], uy_positive_semi_definite)
+    return cast(SearchStrategy[np.ndarray], uy_positive_semi_definite)
 
 
-def random_covariance_matrix(length: int) -> NDArray:
+def random_covariance_matrix(length: int) -> np.ndarray:
     """Construct a valid (but random) covariance matrix with good condition number"""
 
     # because np.cov estimates the mean from data, the returned covariance matrix
@@ -529,7 +528,7 @@ def random_covariance_matrix(length: int) -> NDArray:
     return cov_positive_semi_definite
 
 
-def _discard_smallest_singular_value(matrix: NDArray) -> NDArray:
+def _discard_smallest_singular_value(matrix: np.ndarray) -> np.ndarray:
     u, s, vh = np.linalg.svd(matrix, full_matrices=False, hermitian=True)
     cov_after_discarding_smallest_singular_value = (u[:-1, :-1] * s[:-1]) @ vh[:-1, :-1]
     return cov_after_discarding_smallest_singular_value
@@ -537,7 +536,7 @@ def _discard_smallest_singular_value(matrix: NDArray) -> NDArray:
 
 @pytest.fixture
 def random_covariance_matrix_for_complex_vectors() -> Callable:
-    def _create_random_covariance_matrix_for_complex_vectors(length: int) -> NDArray:
+    def _create_random_covariance_matrix_for_complex_vectors(length: int) -> np.ndarray:
         uy_rr = make_semiposdef(random_covariance_matrix(length=length), maxiter=100)
         uy_ii = make_semiposdef(random_covariance_matrix(length=length), maxiter=100)
         uy_ri = make_semiposdef(random_covariance_matrix(length=length), maxiter=100)
@@ -559,7 +558,7 @@ def hypothesis_positive_powers_of_two(
 def corrmatrix() -> Callable:
     def _create_corrmatrix(
         rho: float, Nx: int, nu: float = 0.5, phi: float = 0.3
-    ) -> NDArray:
+    ) -> np.ndarray:
         """Additional helper function to create a correlation matrix"""
         corrmat = np.zeros((Nx, Nx))
         if rho > 1:
