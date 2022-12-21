@@ -66,7 +66,7 @@ def test_convolution(input_1, input_2, mode):
     # compare results
     assert len(y) == len(Uy)
     assert len(y) == len(y_ref)
-    assert_allclose(y + 1, y_ref + 1)
+    assert_allclose(y + 1, y_ref + 1, rtol=2.1e-7)
 
 
 @given(x_and_Ux(reduced_set=True), x_and_Ux(reduced_set=True))
