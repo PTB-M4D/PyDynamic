@@ -1,11 +1,13 @@
 """Test PyDynamic.uncertainty.propagate_DFT.DFT_deconv"""
+from typing import Callable, cast, Tuple
+
 import numpy as np
 import pytest
 import scipy.stats as stats
 from hypothesis import given, HealthCheck, settings
-from hypothesis.strategies import composite
+from hypothesis.strategies import composite, DrawFn, SearchStrategy
+from numpy._typing import NDArray
 from numpy.testing import assert_allclose
-from typing import Callable, Tuple
 
 from PyDynamic.uncertainty.propagate_DFT import DFT_deconv
 from .conftest import (
@@ -17,7 +19,9 @@ from .conftest import (
 
 
 @composite
-def deconvolution_input(draw: Callable, reveal_bug: bool = False):
+def deconvolution_input(
+    draw: DrawFn, reveal_bug: bool = False
+) -> SearchStrategy[dict[str, NDArray]]:
     n = draw(hypothesis_positive_powers_of_two(min_k=2, max_k=4))
     if reveal_bug:
         y = np.r_[
@@ -51,7 +55,9 @@ def deconvolution_input(draw: Callable, reveal_bug: bool = False):
                 length=n, **covariance_bounds
             ),
         )
-    return {"Y": y, "UY": uy, "H": h, "UH": uh}
+    return cast(
+        SearchStrategy[dict[str, NDArray]], {"Y": y, "UY": uy, "H": h, "UH": uh}
+    )
 
 
 @given(deconvolution_input())
