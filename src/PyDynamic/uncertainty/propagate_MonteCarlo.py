@@ -749,7 +749,7 @@ def UMC_generic(
 
         if m == 0:  # first block
             y = np.mean(Y, axis=0)
-            Uy = np.matmul((Y - y).T, (Y - y))
+            Uy = np.matmul((Y - y).T, (Y - y)) / curr_block
 
         else:  # updating y and Uy from results of current block
             K0 = m * blocksize
