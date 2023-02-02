@@ -785,7 +785,7 @@ def UMC_generic(
                     + np.sum(np.square(Y - y), axis=0)
                 ) / (K0 + K_seq - 1)
 
-        if return_historgams:
+        if return_histograms:
             # update histogram values
             for k in range(np.prod(output_shape)):
                 for h in happr.values():
