@@ -606,7 +606,7 @@ def UMC_generic(
     blocksize=8,
     runs_init=10,
     nbins=100,
-    return_historgams=True,
+    return_histograms=True,
     return_samples=False,
     compute_full_covariance=True,
     n_cpu=multiprocessing.cpu_count(),
