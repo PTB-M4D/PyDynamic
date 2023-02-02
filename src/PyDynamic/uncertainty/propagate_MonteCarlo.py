@@ -720,7 +720,7 @@ def UMC_generic(
     ymax = np.max(Y_init, axis=0).ravel()
 
     happr = {}
-    if return_historgams:
+    if return_histograms:
         for nbin in nbins:
             happr[nbin] = {}
             happr[nbin]["bin-edges"] = np.linspace(
