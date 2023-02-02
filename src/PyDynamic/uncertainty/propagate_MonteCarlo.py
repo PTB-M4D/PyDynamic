@@ -814,7 +814,7 @@ def UMC_generic(
 
     # ----------------- post-calculation steps -----------------------
 
-    if return_historgams:
+    if return_histograms:
         # replace edge limits by ymin and ymax, resp.
         for h in happr.values():
             h["bin-edges"][0, :] = np.min(
