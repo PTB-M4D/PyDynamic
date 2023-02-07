@@ -66,25 +66,25 @@ workflows:
           tag: "3.7"
           toxenvs: "py37"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test_with_updated_deps:
           name: "test_with_updated_deps_py38"
           tag: "3.8"
           toxenvs: "py38"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test_with_updated_deps:
           name: "test_with_updated_deps_py39"
           tag: "3.9"
           toxenvs: "py39"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test_with_updated_deps:
           name: "test_with_updated_deps_py310"
           tag: "3.10"
           toxenvs: "py310"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - commit_push_open_pr:
           requires:
             - test_with_updated_deps_py37
@@ -92,7 +92,7 @@ workflows:
             - test_with_updated_deps_py39
             - test_with_updated_deps_py310
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
             - GitHub pushes to BjoernLudwigPTB's public_repos
 
   nightly_test:
@@ -106,28 +106,28 @@ workflows:
           tag: "3.7"
           toxenvs: "py37 -e py37-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test:
           name: "nightly_test_python_py38"
           tag: "3.8"
           toxenvs: "py38 -e py38-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test:
           name: "nightly_test_python_py39"
           tag: "3.9"
           toxenvs: "py39 -e py39-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test:
           name: "nightly_test_python_py310"
           tag: "3.10"
           toxenvs: "py310 -e py310-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test_conda_py39:
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
 
   quick_test:
     when:
@@ -140,7 +140,7 @@ workflows:
           posargs: "-m 'not slow'"
           parallelism: 4
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
 
   test_and_deploy:
     when:
@@ -152,28 +152,28 @@ workflows:
           tag: "3.7"
           toxenvs: "py37-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test:
           name: "test_python_py38"
           tag: "3.8"
           toxenvs: "py38-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test:
           name: "test_python_py39"
           tag: "3.9"
           toxenvs: "py39-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test:
           name: "test_python_py310"
           tag: "3.10"
           toxenvs: "py310-without_requirements"
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - test_conda_py39:
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - preview_release:
           requires:
             - test_python_py37
@@ -185,7 +185,7 @@ workflows:
             branches:
               ignore: /.*dev$/
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - confirm_previewed_release_actions:
           # This job allows for checking that the release we will create in the
           # next step actually is the desired release, by observing the result of
@@ -197,7 +197,7 @@ workflows:
             branches:
               only: /main/
           context:
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
       - release:
           # Job to potentially create a release based on python-semantic-release's
           # decision and publish it on GitHub, Zenodo and PyPI.org. This requires manual
@@ -206,13 +206,13 @@ workflows:
           context:
             - pypi.org publishing for PyDynamic
             - GitHub pushes to BjoernLudwigPTB's public_repos
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
           requires:
             - confirm_previewed_release_actions
       - tweet:
           context:
             - Twitter.com publish release
-            - Docker publishing as bludoc
+            - Docker pulling as bludoc
           requires:
             - release
 
