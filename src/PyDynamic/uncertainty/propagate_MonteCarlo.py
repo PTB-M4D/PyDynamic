@@ -606,10 +606,10 @@ def UMC_generic(
     blocksize=8,
     runs_init=10,
     nbins=100,
-    return_histograms=True,
     return_samples=False,
-    compute_full_covariance=True,
     n_cpu=multiprocessing.cpu_count(),
+    return_histograms=True,
+    compute_full_covariance=True,
 ):
     """
     Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
@@ -632,14 +632,14 @@ def UMC_generic(
             how many samples to evaluate to form initial guess about limits
         nbins: int, list of int, optional
             number of bins for histogram
-        return_histograms: bool, optional
-            whether to compute a histogram for each entry of the result at all
         return_samples: bool, optional
             see return-value of documentation
-        compute_full_covariance: bool, optional
-            whether to compute the full covariance matrix or just its diagonal
         n_cpu: int, optional
             number of CPUs to use for multiprocessing, defaults to all available CPUs
+        return_histograms: bool, optional
+            whether to compute a histogram for each entry of the result at all
+        compute_full_covariance: bool, optional
+            whether to compute the full covariance matrix or just its diagonal
 
     Example
     -------
