@@ -120,7 +120,7 @@ def test_UMC(visualizeOutput=False):
         plt.show()
 
 
-def test_UMC_generic():
+def test_UMC_generic_multiprocessing():
 
     x_shape = (5, 6, 7)
     draw_samples = lambda size: np.random.rand(size, *x_shape)
@@ -160,6 +160,60 @@ def test_UMC_generic():
     assert isinstance(sims, dict)
     assert sims["samples"][0].shape == x_shape
     assert sims["results"][0].shape == output_shape
+
+
+def test_UMC_generic_cov_diag():
+    x_shape = (2, 3, 4)
+    draw_samples = lambda size: np.random.rand(size, *x_shape)
+    evaluate = functools.partial(np.mean, axis=1)
+
+    # evaluate only diag covariance + return samples (to check against)
+    y, Uy, happr, output_shape, sims = UMC_generic(
+        draw_samples,
+        evaluate,
+        runs=5,
+        blocksize=2,
+        runs_init=2,
+        return_histograms=False,
+        compute_full_covariance=False,
+        return_samples=True
+    )
+
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, )
+
+    y_sims = np.mean(sims["results"], axis=0).flatten()
+    Uy_sims = np.diag(np.cov(sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False))
+
+    assert_allclose(y, y_sims)
+    assert_allclose(Uy, Uy_sims)
+
+
+def test_UMC_generic_cov_full():
+    x_shape = (2, 3, 4)
+    draw_samples = lambda size: np.random.rand(size, *x_shape)
+    evaluate = functools.partial(np.mean, axis=1)
+
+    # evaluate only diag covariance + return samples (to check against)
+    y, Uy, happr, output_shape, sims = UMC_generic(
+        draw_samples,
+        evaluate,
+        runs=5,
+        blocksize=2,
+        runs_init=2,
+        return_histograms=False,
+        compute_full_covariance=True,
+        return_samples=True
+    )
+
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+
+    y_sims = np.mean(sims["results"], axis=0).flatten()
+    Uy_sims = np.cov(sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False)
+
+    assert_allclose(y, y_sims)
+    assert_allclose(Uy, Uy_sims)
 
 
 @pytest.mark.slow
