@@ -758,9 +758,13 @@ def UMC_generic(
             y = np.mean(Y, axis=0)
 
             if compute_full_covariance:
-                Uy = np.matmul((Y - y).T, (Y - y)) / (number_of_samples_in_current_block - 1)
+                Uy = np.matmul((Y - y).T, (Y - y)) / (
+                    number_of_samples_in_current_block - 1
+                )
             else:
-                Uy = np.sum(np.square(Y - y), axis=0) / (number_of_samples_in_current_block - 1)
+                Uy = np.sum(np.square(Y - y), axis=0) / (
+                    number_of_samples_in_current_block - 1
+                )
 
         else:  # updating y and Uy from results of current block
             K0 = m * blocksize

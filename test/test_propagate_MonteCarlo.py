@@ -176,14 +176,16 @@ def test_UMC_generic_cov_diag():
         runs_init=2,
         return_histograms=False,
         compute_full_covariance=False,
-        return_samples=True
+        return_samples=True,
     )
 
     assert y.size == Uy.shape[0]
-    assert Uy.shape == (y.size, )
+    assert Uy.shape == (y.size,)
 
     y_sims = np.mean(sims["results"], axis=0).flatten()
-    Uy_sims = np.diag(np.cov(sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False))
+    Uy_sims = np.diag(
+        np.cov(sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False)
+    )
 
     assert_allclose(y, y_sims)
     assert_allclose(Uy, Uy_sims)
@@ -203,14 +205,16 @@ def test_UMC_generic_cov_full():
         runs_init=2,
         return_histograms=False,
         compute_full_covariance=True,
-        return_samples=True
+        return_samples=True,
     )
 
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
 
     y_sims = np.mean(sims["results"], axis=0).flatten()
-    Uy_sims = np.cov(sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False)
+    Uy_sims = np.cov(
+        sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False
+    )
 
     assert_allclose(y, y_sims)
     assert_allclose(Uy, Uy_sims)
