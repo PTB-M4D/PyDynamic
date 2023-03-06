@@ -742,7 +742,7 @@ def UMC_generic(
         }
 
     for m in range(nblocks):
-        if m == nblocks:
+        if m == nblocks - 1:
             number_of_samples_in_current_block = runs % blocksize
         else:
             number_of_samples_in_current_block = blocksize
