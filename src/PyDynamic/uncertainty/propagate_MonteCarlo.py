@@ -743,12 +743,12 @@ def UMC_generic(
 
     for m in range(nblocks):
         if m == nblocks:
-            curr_block = runs % blocksize
+            number_of_samples_in_current_block = runs % blocksize
         else:
-            curr_block = blocksize
+            number_of_samples_in_current_block = blocksize
 
-        Y = np.empty((curr_block, np.prod(output_shape)))
-        samples = draw_samples(curr_block)
+        Y = np.empty((number_of_samples_in_current_block, np.prod(output_shape)))
+        samples = draw_samples(number_of_samples_in_current_block)
 
         # evaluate samples in parallel loop
         for k, result in enumerate(map_func(evaluate, samples)):
@@ -758,13 +758,13 @@ def UMC_generic(
             y = np.mean(Y, axis=0)
 
             if compute_full_covariance:
-                Uy = np.matmul((Y - y).T, (Y - y)) / (curr_block - 1)
+                Uy = np.matmul((Y - y).T, (Y - y)) / (number_of_samples_in_current_block - 1)
             else:
-                Uy = np.sum(np.square(Y - y), axis=0) / (curr_block - 1)
+                Uy = np.sum(np.square(Y - y), axis=0) / (number_of_samples_in_current_block - 1)
 
         else:  # updating y and Uy from results of current block
             K0 = m * blocksize
-            K_seq = curr_block
+            K_seq = number_of_samples_in_current_block
 
             # update mean (formula 7 in [Eichst2012])
             y0 = y
@@ -801,7 +801,7 @@ def UMC_generic(
         # save results if wanted
         if return_samples:
             block_start = m * blocksize
-            block_end = block_start + curr_block
+            block_end = block_start + number_of_samples_in_current_block
             sims["samples"][block_start:block_end] = samples
             sims["results"][block_start:block_end] = np.asarray(
                 [element.reshape(output_shape) for element in Y]
