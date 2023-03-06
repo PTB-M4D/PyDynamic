@@ -716,11 +716,11 @@ def UMC_generic(
     Y_init = np.asarray(Y_init)
 
     # prepare histograms
-    ymin = np.min(Y_init, axis=0).ravel()
-    ymax = np.max(Y_init, axis=0).ravel()
-
     happr = {}
     if return_histograms:
+        ymin = np.min(Y_init, axis=0).ravel()
+        ymax = np.max(Y_init, axis=0).ravel()
+
         for nbin in nbins:
             happr[nbin] = {}
             happr[nbin]["bin-edges"] = np.linspace(
@@ -795,8 +795,9 @@ def UMC_generic(
                         0
                     ]  # numpy histogram returns (bin-counts, bin-edges)
 
-        ymin = np.min(np.vstack((ymin, Y)), axis=0)
-        ymax = np.max(np.vstack((ymax, Y)), axis=0)
+        if return_histograms:
+            ymin = np.min(np.vstack((ymin, Y)), axis=0)
+            ymax = np.max(np.vstack((ymax, Y)), axis=0)
 
         # save results if wanted
         if return_samples:
