@@ -57,6 +57,7 @@ from ..misc.tools import (
     is_2d_matrix,
     is_vector,
     number_of_rows_equals_vector_dim,
+    trimOrPad_ND,
 )
 
 
@@ -388,30 +389,32 @@ def GUM_iDFT(
     ValueError
         If Nx is not smaller than dimension of UF - 2
     """
+    # (complex) input length
+    N_in = F.size // 2
+
+    # default output length, assumes even output length
     N = UF.shape[0] - 2
 
     if Nx is None:
         Nx = N
-    elif Nx > UF.shape[0] - 2:
-        raise ValueError(
-            f"GUM_iDFT: Nx if provided is expected to be smaller or equal to number "
-            f"of rows and columns of UF - 2, but UF is of shape {UF.shape} and Nx ="
-            f" {Nx}."
-        )
-
+    
+    # TODO: continue here, length=Nx probably wrong
+    F = trimOrPad_ND(F, length=Nx, real_imag_type=True)
+    UF = trimOrPad_ND(UF, length=Nx, real_imag_type=True)
+    
     beta = 2 * np.pi * np.arange(Nx) / N
 
     # calculate inverse DFT; Note: scaling factor 1/N is accounted for at the end
-    x = np.fft.irfft(F[: N // 2 + 1] + 1j * F[N // 2 + 1 :])[:Nx]
+    x = np.fft.irfft(F[: N_in] + 1j * F[N_in :], n=Nx)
     if not isinstance(Cc, np.ndarray):  # calculate sensitivities
-        Cc = np.zeros((Nx, N // 2 + 1))
+        Cc = np.zeros((Nx, N_in))
         Cc[:, 0] = 1.0
         Cc[:, -1] = np.cos(np.pi * np.arange(Nx))
         for k in range(1, N // 2):
             Cc[:, k] = 2 * np.cos(k * beta)
 
     if not isinstance(Cs, np.ndarray):
-        Cs = np.zeros((Nx, N // 2 + 1))
+        Cs = np.zeros((Nx, N_in))
         Cs[:, 0] = 0.0
         Cs[:, -1] = -np.sin(np.pi * np.arange(Nx))
         for k in range(1, N // 2):
@@ -419,16 +422,16 @@ def GUM_iDFT(
 
     # calculate blocks of uncertainty matrix
     if len(UF.shape) == 2:
-        RR = UF[: N // 2 + 1, : N // 2 + 1]
-        RI = UF[: N // 2 + 1, N // 2 + 1 :]
-        II = UF[N // 2 + 1 :, N // 2 + 1 :]
+        RR = UF[: N_in, : N_in]
+        RI = UF[: N_in, N_in :]
+        II = UF[N_in :, N_in :]
         # propagate uncertainties
         Ux = np.dot(Cc, np.dot(RR, Cc.T))
         Ux = Ux + 2 * np.dot(Cc, np.dot(RI, Cs.T))
         Ux += np.dot(Cs, np.dot(II, Cs.T))
     else:
-        RR = UF[: N // 2 + 1]
-        II = UF[N // 2 + 1 :]
+        RR = UF[: N_in]
+        II = UF[N_in :]
         Ux = np.dot(Cc, _prod(RR, Cc.T)) + np.dot(Cs, _prod(II, Cs.T))
 
     if returnC:
