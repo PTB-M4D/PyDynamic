@@ -19,6 +19,8 @@ from PyDynamic.misc.tools import (
     real_imag_2_complex,
     separate_real_imag_of_mc_samples,
     separate_real_imag_of_vector,
+    trimOrPad,
+    trimOrPad_ND,
 )
 from .conftest import (
     hypothesis_covariance_matrix,
@@ -335,3 +337,34 @@ def test_real_imag_2_complex_array_wrong_len(array):
         r"imaginary parts but the first one is of odd length=.*",
     ):
         real_imag_2_complex(array)
+
+
+def test_trimOrPad():
+    N = 10
+    a = np.arange(N)
+
+    assert np.all(trimOrPad(a, 8) == a[:8])
+    assert np.all(trimOrPad(a, 12) == np.r_[a, [0,0]])
+
+
+def test_trimOrPad_ND():
+    N = 10
+    a = np.arange(N)
+
+    # compare against old implementation
+    assert np.all(trimOrPad(a, 8) == trimOrPad_ND(a, 8))
+    assert np.all(trimOrPad(a, 12) == trimOrPad_ND(a, 12))
+
+    # test multidim capabilities
+    a = np.ones((3,4,5))
+    b = trimOrPad_ND(a, length=(3,4,5))
+
+    assert np.all(a == b)
+
+    # test real/imag capabilities
+    ri2c = real_imag_2_complex
+    a = np.arange(N)
+    tmp1 = ri2c(trimOrPad_ND(a, N+2, real_imag_type=True))
+    tmp2 = trimOrPad_ND(ri2c(a), N+2, real_imag_type=False)
+
+    assert np.all(tmp1 == tmp2)
