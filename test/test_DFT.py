@@ -347,3 +347,44 @@ def test__prod_against_known_result_for_vector_b():
         ),
         np.array([[0, 1, 4, 9], [0, 5, 12, 21], [0, 9, 20, 33]]),
     )
+
+
+def test_DFT_identity_even_input():
+
+    x, x_cov = np.arange(10), np.eye(10)
+
+    # get spectrum
+    X, X_cov = GUM_DFT(x, x_cov)
+
+    # recover signal
+    x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(X, X_cov, Nx=x.size, returnC=True)
+
+    # check identity of signal and covariance
+    assert np.allclose(x, x_reconstructed)
+    assert np.allclose(x_cov, x_reconstructed_cov)
+
+    # check if sensitivties match the numpy implementation
+    C = np.hstack((sens["Cc"], sens["Cs"])) / x.size
+    assert np.allclose(x_reconstructed, C@X)
+
+
+def test_DFT_identity_odd_input():
+
+    x, x_cov = np.arange(11), np.eye(11)
+
+    # get spectrum
+    X, X_cov = GUM_DFT(x, x_cov)
+
+    # recover signal
+    x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(X, X_cov, Nx=x.size, returnC=True)
+
+    # check identity of signal and covariance
+    assert np.allclose(x, x_reconstructed)
+    assert np.allclose(x_cov, x_reconstructed_cov)
+    
+    # check if sensitivties match the numpy implementation
+    C = np.hstack((sens["Cc"], sens["Cs"])) / x.size
+    assert np.allclose(x_reconstructed, C@X)
+
+def test_iDFT_Monte_Carlo():
+    pass
