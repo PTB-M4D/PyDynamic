@@ -362,7 +362,7 @@ def GUM_iDFT(
     UF: np.ndarray of shape (2M,2M)
         covariance matrix associated with real and imaginary parts of F
     Nx: int, optional
-        number of samples of iDFT result
+        length of iDFT result
     Cc: np.ndarray, optional
         cosine part of sensitivities (without scaling factor 1/N)
     Cs: np.ndarray, optional
@@ -384,41 +384,38 @@ def GUM_iDFT(
     ----------
     * Eichstädt and Wilkens [Eichst2016]_
 
-    Raises
-    ------
-    ValueError
-        If Nx is not smaller than dimension of UF - 2
     """
     # (complex) input length
     N_in = F.size // 2
 
     # default output length, assumes even output length
-    N = UF.shape[0] - 2
-
+    N_out = Nx
     if Nx is None:
-        Nx = N
+        N_out = UF.shape[0] - 2
     
-    # TODO: continue here, length=Nx probably wrong
-    F = trimOrPad_ND(F, length=Nx, real_imag_type=True)
-    UF = trimOrPad_ND(UF, length=Nx, real_imag_type=True)
-    
-    beta = 2 * np.pi * np.arange(Nx) / N
+    # calculate discrete angular frequency
+    beta = 2 * np.pi * np.arange(N_out) / N_out
 
-    # calculate inverse DFT; Note: scaling factor 1/N is accounted for at the end
-    x = np.fft.irfft(F[: N_in] + 1j * F[N_in :], n=Nx)
-    if not isinstance(Cc, np.ndarray):  # calculate sensitivities
-        Cc = np.zeros((Nx, N_in))
-        Cc[:, 0] = 1.0
-        Cc[:, -1] = np.cos(np.pi * np.arange(Nx))
-        for k in range(1, N // 2):
-            Cc[:, k] = 2 * np.cos(k * beta)
+    # calculate inverse DFT
+    x = np.fft.irfft(F[: N_in] + 1j * F[N_in :], n=N_out)
+
+    # propagate uncertainty 
+    if not isinstance(Cc, np.ndarray) or not isinstance(Cs, np.ndarray):
+        k = np.arange(N_in)
+        bk = np.outer(beta, k)
+
+    # calculate sensitivities (scaling factor 1/N is accounted for at the end)
+    if not isinstance(Cc, np.ndarray):  
+        Cc = np.cos(bk)
+        Cc[:,1:-1] = 2*Cc[:,1:-1]
+        if N_out % 2 == 1:
+            Cc[:,-1] = 2*Cc[:,-1]
 
     if not isinstance(Cs, np.ndarray):
-        Cs = np.zeros((Nx, N_in))
-        Cs[:, 0] = 0.0
-        Cs[:, -1] = -np.sin(np.pi * np.arange(Nx))
-        for k in range(1, N // 2):
-            Cs[:, k] = -2 * np.sin(k * beta)
+        Cs = - np.sin(bk)
+        Cs[:,1:-1] = 2*Cs[:,1:-1]
+        if N_out % 2 == 1:
+            Cs[:,-1] = 2*Cs[:,-1]
 
     # calculate blocks of uncertainty matrix
     if len(UF.shape) == 2:
@@ -427,7 +424,7 @@ def GUM_iDFT(
         II = UF[N_in :, N_in :]
         # propagate uncertainties
         Ux = np.dot(Cc, np.dot(RR, Cc.T))
-        Ux = Ux + 2 * np.dot(Cc, np.dot(RI, Cs.T))
+        Ux += 2 * np.dot(Cc, np.dot(RI, Cs.T))
         Ux += np.dot(Cs, np.dot(II, Cs.T))
     else:
         RR = UF[: N_in]
@@ -435,9 +432,9 @@ def GUM_iDFT(
         Ux = np.dot(Cc, _prod(RR, Cc.T)) + np.dot(Cs, _prod(II, Cs.T))
 
     if returnC:
-        return x, Ux / N**2, {"Cc": Cc, "Cs": Cs}
+        return x, Ux / N_out**2, {"Cc": Cc, "Cs": Cs}
     else:
-        return x, Ux / N**2
+        return x, Ux / N_out**2
 
 
 def GUM_DFTfreq(N, dt=1):
