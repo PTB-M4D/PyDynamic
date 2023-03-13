@@ -217,7 +217,7 @@ class TestDFT:
         C = np.hstack((sens["Cc"], sens["Cs"]))
         assert np.allclose(x_reconstructed, C @ X / Nx)
 
-    def test_iDFT_Monte_Carlo():
+    def test_iDFT_Monte_Carlo(self):
         pass
 
 
