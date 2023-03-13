@@ -329,6 +329,25 @@ def _compute_sensitivity_matrix_wrt_cosine_part(_k, _beta):
 def _compute_sensitivity_matrix_wrt_sine_part(_k, _beta):
     return -np.sin(_k * _beta)[np.newaxis, :]
 
+def _adjust_sensitivity_matrix_iDFT(C, N_out, N_out_default):
+    # multiply by two because to compensate missing left side of spectrum
+    C[:,1:] *= 2
+
+    # in case of undersampling, remove higher frequencies
+    highest_non_zero_entry = -1
+    if N_out < N_out_default:
+
+        # N_out corresponds only to the first l items of spectrum
+        highest_non_zero_entry = N_out // 2
+
+        # erase influence of spectrum above highest_non_zero_entry
+        C[:,highest_non_zero_entry+1:] = 0
+
+    # undo factor two for even signal lengths
+    if N_out % 2 == 0 and N_out <= N_out_default:
+        C[:, highest_non_zero_entry] *= 0.5
+    
+    return C
 
 def GUM_iDFT(
     F: np.ndarray,
@@ -408,54 +427,12 @@ def GUM_iDFT(
     # calculate sensitivities (scaling factor 1/N_out is accounted for at the end)
     if not isinstance(Cc, np.ndarray):  
         Cc = np.cos(bk)
-        Cc[:,1:-1] = 2*Cc[:,1:-1]
-        if N_out % 2 == 1:
-            Cc[:,-1] = 2*Cc[:,-1]
+        Cc = _adjust_sensitivity_matrix_iDFT(Cc, N_out, N_out_default)
 
     if not isinstance(Cs, np.ndarray):
         Cs = - np.sin(bk)
-        Cs[:,1:-1] = 2*Cs[:,1:-1]
-        if N_out % 2 == 1:
-            Cs[:,-1] = 2*Cs[:,-1]
-
-    ########### TESTING
-    Cc = np.cos(bk)
-    Cs = - np.sin(bk)
-    
-    # multiply by two because to compensate missing left side of spectrum
-    Cc[:,1:] *= 2
-    Cs[:,1:] *= 2
-
-    highest_non_zero_entry = -1
-    if N_out % 2 == 0 and N_out == N_out_default:
-       Cc[:,-1] *= 0.5
-       Cs[:,-1] *= 0.5
-    
-    if N_out < 2 * (N_in - 1):
-        # N_out corresponds only to the first l items of spectrum
-        l = (N_out + 1) // 2 
-
-        # erase influence of spectrum above l
-        if N_out % 2 == 0:
-            Cc[:,l+1:] = 0
-            Cs[:,l+1:] = 0
-
-            Cc[:,l] *= 0.5
-            Cs[:,l] *= 0.5
-
-        else: 
-            Cc[:,l:] = 0
-            Cs[:,l:] = 0
-
-    
-    C = np.hstack((Cc, Cs))
-    A = C @ F / N_out
-    B = x
-
-
-
-    ####################
-
+        Cs = _adjust_sensitivity_matrix_iDFT(Cs, N_out, N_out_default)
+        
     # calculate blocks of uncertainty matrix
     if len(UF.shape) == 2:
         RR = UF[: N_in, : N_in]
