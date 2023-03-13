@@ -390,8 +390,9 @@ def GUM_iDFT(
 
     # default output length, assumes even output length
     N_out = Nx
+    N_out_default = UF.shape[0] - 2
     if Nx is None:
-        N_out = UF.shape[0] - 2
+        N_out = N_out_default
     
     # calculate discrete angular frequency
     beta = 2 * np.pi * np.arange(N_out) / N_out
@@ -404,7 +405,7 @@ def GUM_iDFT(
         k = np.arange(N_in)
         bk = np.outer(beta, k)
 
-    # calculate sensitivities (scaling factor 1/N is accounted for at the end)
+    # calculate sensitivities (scaling factor 1/N_out is accounted for at the end)
     if not isinstance(Cc, np.ndarray):  
         Cc = np.cos(bk)
         Cc[:,1:-1] = 2*Cc[:,1:-1]
@@ -416,6 +417,44 @@ def GUM_iDFT(
         Cs[:,1:-1] = 2*Cs[:,1:-1]
         if N_out % 2 == 1:
             Cs[:,-1] = 2*Cs[:,-1]
+
+    ########### TESTING
+    Cc = np.cos(bk)
+    Cs = - np.sin(bk)
+    
+    # multiply by two because to compensate missing left side of spectrum
+    Cc[:,1:] *= 2
+    Cs[:,1:] *= 2
+
+    highest_non_zero_entry = -1
+    if N_out % 2 == 0 and N_out == N_out_default:
+       Cc[:,-1] *= 0.5
+       Cs[:,-1] *= 0.5
+    
+    if N_out < 2 * (N_in - 1):
+        # N_out corresponds only to the first l items of spectrum
+        l = (N_out + 1) // 2 
+
+        # erase influence of spectrum above l
+        if N_out % 2 == 0:
+            Cc[:,l+1:] = 0
+            Cs[:,l+1:] = 0
+
+            Cc[:,l] *= 0.5
+            Cs[:,l] *= 0.5
+
+        else: 
+            Cc[:,l:] = 0
+            Cs[:,l:] = 0
+
+    
+    C = np.hstack((Cc, Cs))
+    A = C @ F / N_out
+    B = x
+
+
+
+    ####################
 
     # calculate blocks of uncertainty matrix
     if len(UF.shape) == 2:
