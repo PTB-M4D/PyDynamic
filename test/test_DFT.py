@@ -192,7 +192,7 @@ class TestDFT:
         x, ux = AmpPhase2Time(A, P, UAP)
         assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
 
-    #@given(DFT_identity_input_output_lengths())
+    # @given(DFT_identity_input_output_lengths())
     @pytest.mark.parametrize("N", [9, 10, 11, 12, 15, 20])
     @pytest.mark.parametrize("Nx", [9, 10, 11, 12, 15, 20])
     def test_DFT_identity(self, N, Nx):
