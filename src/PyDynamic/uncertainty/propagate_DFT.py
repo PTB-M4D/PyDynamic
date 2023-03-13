@@ -329,9 +329,10 @@ def _compute_sensitivity_matrix_wrt_cosine_part(_k, _beta):
 def _compute_sensitivity_matrix_wrt_sine_part(_k, _beta):
     return -np.sin(_k * _beta)[np.newaxis, :]
 
+
 def _adjust_sensitivity_matrix_iDFT(C, N_out, N_out_default):
     # multiply by two because to compensate missing left side of spectrum
-    C[:,1:] *= 2
+    C[:, 1:] *= 2
 
     # in case of undersampling, remove higher frequencies
     highest_non_zero_entry = -1
@@ -341,13 +342,14 @@ def _adjust_sensitivity_matrix_iDFT(C, N_out, N_out_default):
         highest_non_zero_entry = N_out // 2
 
         # erase influence of spectrum above highest_non_zero_entry
-        C[:,highest_non_zero_entry+1:] = 0
+        C[:, highest_non_zero_entry + 1 :] = 0
 
     # undo factor two for even signal lengths
     if N_out % 2 == 0 and N_out <= N_out_default:
         C[:, highest_non_zero_entry] *= 0.5
-    
+
     return C
+
 
 def GUM_iDFT(
     F: np.ndarray,
@@ -412,39 +414,39 @@ def GUM_iDFT(
     N_out_default = UF.shape[0] - 2
     if Nx is None:
         N_out = N_out_default
-    
+
     # calculate discrete angular frequency
     beta = 2 * np.pi * np.arange(N_out) / N_out
 
     # calculate inverse DFT
-    x = np.fft.irfft(F[: N_in] + 1j * F[N_in :], n=N_out)
+    x = np.fft.irfft(F[:N_in] + 1j * F[N_in:], n=N_out)
 
-    # propagate uncertainty 
+    # propagate uncertainty
     if not isinstance(Cc, np.ndarray) or not isinstance(Cs, np.ndarray):
         k = np.arange(N_in)
         bk = np.outer(beta, k)
 
     # calculate sensitivities (scaling factor 1/N_out is accounted for at the end)
-    if not isinstance(Cc, np.ndarray):  
+    if not isinstance(Cc, np.ndarray):
         Cc = np.cos(bk)
         Cc = _adjust_sensitivity_matrix_iDFT(Cc, N_out, N_out_default)
 
     if not isinstance(Cs, np.ndarray):
-        Cs = - np.sin(bk)
+        Cs = -np.sin(bk)
         Cs = _adjust_sensitivity_matrix_iDFT(Cs, N_out, N_out_default)
-        
+
     # calculate blocks of uncertainty matrix
     if len(UF.shape) == 2:
-        RR = UF[: N_in, : N_in]
-        RI = UF[: N_in, N_in :]
-        II = UF[N_in :, N_in :]
+        RR = UF[:N_in, :N_in]
+        RI = UF[:N_in, N_in:]
+        II = UF[N_in:, N_in:]
         # propagate uncertainties
         Ux = np.dot(Cc, np.dot(RR, Cc.T))
         Ux += 2 * np.dot(Cc, np.dot(RI, Cs.T))
         Ux += np.dot(Cs, np.dot(II, Cs.T))
     else:
-        RR = UF[: N_in]
-        II = UF[N_in :]
+        RR = UF[:N_in]
+        II = UF[N_in:]
         Ux = np.dot(Cc, _prod(RR, Cc.T)) + np.dot(Cs, _prod(II, Cs.T))
 
     if returnC:
