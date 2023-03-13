@@ -160,6 +160,13 @@ def random_vector_and_matrix_with_matching_number_of_columns(
     return VectorAndCompatibleMatrix(vector=x, matrix=A)
 
 
+@composite
+def DFT_identity_input_output_lengths(draw: Callable):
+    input_length = draw(hst.integers(min_value=10, max_value=12))
+    output_length = draw(hst.integers(min_value=9, max_value=13))
+    return {"input_length": input_length, "output_length": output_length}
+
+
 class TestDFT:
     def test_DFT_iDFT(self, multisine_testsignal):
         """Test GUM_DFT and GUM_iDFT with noise variance as uncertainty"""
@@ -184,6 +191,34 @@ class TestDFT:
         A, P, UAP = Time2AmpPhase(testsignal, noise_std**2)
         x, ux = AmpPhase2Time(A, P, UAP)
         assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
+
+    #@given(DFT_identity_input_output_lengths())
+    @pytest.mark.parametrize("N", [9, 10, 11, 12, 15, 20])
+    @pytest.mark.parametrize("Nx", [9, 10, 11, 12, 15, 20])
+    def test_DFT_identity(self, N, Nx):
+
+        x, x_cov = np.arange(N) + 2, np.eye(N)
+
+        # get spectrum
+        X, X_cov = GUM_DFT(x, x_cov)
+
+        # recover signal
+        x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(
+            X, X_cov, Nx=Nx, returnC=True
+        )
+
+        # check signal and covariance in case of reconstruction to identity
+        if N == Nx:
+            assert np.allclose(x, x_reconstructed)
+            assert np.allclose(x_cov, x_reconstructed_cov)
+
+        # check against numpy implementation using the sensitivties
+        # x_reconstructed is internally calculated using numpy, so this is not tested here
+        C = np.hstack((sens["Cc"], sens["Cs"]))
+        assert np.allclose(x_reconstructed, C @ X / Nx)
+
+    def test_iDFT_Monte_Carlo():
+        pass
 
 
 @pytest.mark.slow
@@ -347,44 +382,3 @@ def test__prod_against_known_result_for_vector_b():
         ),
         np.array([[0, 1, 4, 9], [0, 5, 12, 21], [0, 9, 20, 33]]),
     )
-
-
-def test_DFT_identity_even_input():
-
-    x, x_cov = np.arange(10), np.eye(10)
-
-    # get spectrum
-    X, X_cov = GUM_DFT(x, x_cov)
-
-    # recover signal
-    x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(X, X_cov, Nx=x.size, returnC=True)
-
-    # check identity of signal and covariance
-    assert np.allclose(x, x_reconstructed)
-    assert np.allclose(x_cov, x_reconstructed_cov)
-
-    # check if sensitivties match the numpy implementation
-    C = np.hstack((sens["Cc"], sens["Cs"])) / x.size
-    assert np.allclose(x_reconstructed, C@X)
-
-
-def test_DFT_identity_odd_input():
-
-    x, x_cov = np.arange(11), np.eye(11)
-
-    # get spectrum
-    X, X_cov = GUM_DFT(x, x_cov)
-
-    # recover signal
-    x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(X, X_cov, Nx=x.size, returnC=True)
-
-    # check identity of signal and covariance
-    assert np.allclose(x, x_reconstructed)
-    assert np.allclose(x_cov, x_reconstructed_cov)
-    
-    # check if sensitivties match the numpy implementation
-    C = np.hstack((sens["Cc"], sens["Cs"])) / x.size
-    assert np.allclose(x_reconstructed, C@X)
-
-def test_iDFT_Monte_Carlo():
-    pass
