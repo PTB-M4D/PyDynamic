@@ -151,6 +151,8 @@ def test_UMC_generic_multiprocessing():
     assert isinstance(happr, dict)
     assert output_shape == (sample_shape[0], sample_shape[2])
 
+
+def test_UMC_generic_no_multiprocessing():
     # run without parallel computation
     y, Uy, happr, output_shape = UMC_generic(**UMC_generic_multiprocess_kwargs, n_cpu=1)
     assert y.size == Uy.shape[0]
@@ -158,6 +160,8 @@ def test_UMC_generic_multiprocessing():
     assert isinstance(happr, dict)
     assert output_shape == (sample_shape[0], sample_shape[2])
 
+
+def test_UMC_generic_check_sample_shape():
     # run again, but only return all simulations
     y, Uy, happr, output_shape, sims = UMC_generic(
         **UMC_generic_multiprocess_kwargs, return_samples=True
