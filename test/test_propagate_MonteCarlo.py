@@ -173,6 +173,7 @@ def test_UMC_generic_check_sample_shape():
     assert isinstance(sims, dict)
     assert sims["samples"][0].shape == sample_shape
     assert sims["results"][0].shape == output_shape
+    assert len(sims["samples"]) == UMC_generic_multiprocess_kwargs["runs"]
 
 
 def test_UMC_generic_cov_diag():
