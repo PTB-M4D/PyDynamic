@@ -167,58 +167,59 @@ def DFT_identity_input_output_lengths(draw: Callable):
     return {"input_length": input_length, "output_length": output_length}
 
 
-class TestDFT:
-    def test_DFT_iDFT(self, multisine_testsignal):
-        """Test GUM_DFT and GUM_iDFT with noise variance as uncertainty"""
-        x, ux = multisine_testsignal
-        X, UX = GUM_DFT(x, ux**2)
-        xh, uxh = GUM_iDFT(X, UX)
-        assert_almost_equal(np.max(np.abs(x - xh)), 0)
-        assert_almost_equal(np.max(ux - np.sqrt(np.diag(uxh))), 0)
+def test_DFT_iDFT(multisine_testsignal):
+    """Test GUM_DFT and GUM_iDFT with noise variance as uncertainty"""
+    x, ux = multisine_testsignal
+    X, UX = GUM_DFT(x, ux**2)
+    xh, uxh = GUM_iDFT(X, UX)
+    assert_almost_equal(np.max(np.abs(x - xh)), 0)
+    assert_almost_equal(np.max(ux - np.sqrt(np.diag(uxh))), 0)
 
-    def test_DFT_iDFT_vector(self, multisine_testsignal):
-        """Test GUM_DFT and GUM_iDFT with uncertainty vector"""
-        x, ux = multisine_testsignal
-        ux = (0.1 * x) ** 2
-        X, UX = GUM_DFT(x, ux)
-        xh, uxh = GUM_iDFT(X, UX)
-        assert_almost_equal(np.max(np.abs(x - xh)), 0)
-        assert_almost_equal(np.max(np.sqrt(ux) - np.sqrt(np.diag(uxh))), 0)
 
-    def test_AmpPhasePropagation(self, multisine_testsignal):
-        """Test Time2AmpPhase and AmpPhase2Time with noise variance as uncertainty"""
-        testsignal, noise_std = multisine_testsignal
-        A, P, UAP = Time2AmpPhase(testsignal, noise_std**2)
-        x, ux = AmpPhase2Time(A, P, UAP)
-        assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
+def test_DFT_iDFT_vector(multisine_testsignal):
+    """Test GUM_DFT and GUM_iDFT with uncertainty vector"""
+    x, ux = multisine_testsignal
+    ux = (0.1 * x) ** 2
+    X, UX = GUM_DFT(x, ux)
+    xh, uxh = GUM_iDFT(X, UX)
+    assert_almost_equal(np.max(np.abs(x - xh)), 0)
+    assert_almost_equal(np.max(np.sqrt(ux) - np.sqrt(np.diag(uxh))), 0)
 
-    # @given(DFT_identity_input_output_lengths())
-    @pytest.mark.parametrize("N", [9, 10, 11, 12, 15, 20])
-    @pytest.mark.parametrize("Nx", [9, 10, 11, 12, 15, 20])
-    def test_DFT_identity(self, N, Nx):
 
-        x, x_cov = np.arange(N) + 2, np.eye(N)
+def test_AmpPhasePropagation(multisine_testsignal):
+    """Test Time2AmpPhase and AmpPhase2Time with noise variance as uncertainty"""
+    testsignal, noise_std = multisine_testsignal
+    A, P, UAP = Time2AmpPhase(testsignal, noise_std**2)
+    x, ux = AmpPhase2Time(A, P, UAP)
+    assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
 
-        # get spectrum
-        X, X_cov = GUM_DFT(x, x_cov)
 
-        # recover signal
-        x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(
-            X, X_cov, Nx=Nx, returnC=True
-        )
+# @given(DFT_identity_input_output_lengths())
+@pytest.mark.parametrize("N", [9, 10, 11, 12, 15, 20])
+@pytest.mark.parametrize("Nx", [9, 10, 11, 12, 15, 20])
+def test_DFT_identity(N, Nx):
 
-        # check signal and covariance in case of reconstruction to identity
-        if N == Nx:
-            assert np.allclose(x, x_reconstructed)
-            assert np.allclose(x_cov, x_reconstructed_cov)
+    x, x_cov = np.arange(N) + 2, np.eye(N)
 
-        # check against numpy implementation using the sensitivties
-        # x_reconstructed is internally calculated using numpy, so this is not tested here
-        C = np.hstack((sens["Cc"], sens["Cs"]))
-        assert np.allclose(x_reconstructed, C @ X / Nx)
+    # get spectrum
+    X, X_cov = GUM_DFT(x, x_cov)
 
-    def test_iDFT_Monte_Carlo(self):
-        pass
+    # recover signal
+    x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(X, X_cov, Nx=Nx, returnC=True)
+
+    # check signal and covariance in case of reconstruction to identity
+    if N == Nx:
+        assert np.allclose(x, x_reconstructed)
+        assert np.allclose(x_cov, x_reconstructed_cov)
+
+    # check against numpy implementation using the sensitivties
+    # x_reconstructed is internally calculated using numpy, so this is not tested here
+    C = np.hstack((sens["Cc"], sens["Cs"]))
+    assert np.allclose(x_reconstructed, C @ X / Nx)
+
+
+def test_iDFT_Monte_Carlo():
+    pass
 
 
 @pytest.mark.slow
