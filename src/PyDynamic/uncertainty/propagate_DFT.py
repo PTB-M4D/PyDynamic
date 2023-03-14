@@ -329,27 +329,6 @@ def _compute_sensitivity_matrix_wrt_sine_part(_k, _beta):
     return -np.sin(_k * _beta)[np.newaxis, :]
 
 
-def _adjust_sensitivity_matrix_iDFT(C, N_out, N_out_default):
-    # multiply by two because to compensate missing left side of spectrum
-    C[:, 1:] *= 2
-
-    # in case of undersampling, remove higher frequencies
-    highest_non_zero_entry = -1
-    if N_out < N_out_default:
-
-        # N_out corresponds only to the first l items of spectrum
-        highest_non_zero_entry = N_out // 2
-
-        # erase influence of spectrum above highest_non_zero_entry
-        C[:, highest_non_zero_entry + 1 :] = 0
-
-    # undo factor two for even signal lengths
-    if N_out % 2 == 0 and N_out <= N_out_default:
-        C[:, highest_non_zero_entry] *= 0.5
-
-    return C
-
-
 def GUM_iDFT(
     F: np.ndarray,
     UF: np.ndarray,
@@ -452,6 +431,27 @@ def GUM_iDFT(
         return x, Ux / N_out**2, {"Cc": Cc, "Cs": Cs}
     else:
         return x, Ux / N_out**2
+
+
+def _adjust_sensitivity_matrix_iDFT(C, N_out, N_out_default):
+    # multiply by two because to compensate missing left side of spectrum
+    C[:, 1:] *= 2
+
+    # in case of undersampling, remove higher frequencies
+    highest_non_zero_entry = -1
+    if N_out < N_out_default:
+
+        # N_out corresponds only to the first l items of spectrum
+        highest_non_zero_entry = N_out // 2
+
+        # erase influence of spectrum above highest_non_zero_entry
+        C[:, highest_non_zero_entry + 1 :] = 0
+
+    # undo factor two for even signal lengths
+    if N_out % 2 == 0 and N_out <= N_out_default:
+        C[:, highest_non_zero_entry] *= 0.5
+
+    return C
 
 
 def GUM_DFTfreq(N, dt=1):
