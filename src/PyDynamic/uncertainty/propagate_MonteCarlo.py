@@ -798,11 +798,8 @@ def UMC_generic(
                 for h in happr.values():
                     h["bin-counts"][:, k] += np.histogram(
                         Y[:, k], bins=h["bin-edges"][:, k]
-                    )[
-                        0
-                    ]  # numpy histogram returns (bin-counts, bin-edges)
+                    )[0]
 
-        if return_histograms:
             ymin = np.min(np.vstack((ymin, Y)), axis=0)
             ymax = np.max(np.vstack((ymax, Y)), axis=0)
 
