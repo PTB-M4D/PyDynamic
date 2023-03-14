@@ -203,9 +203,9 @@ def trimOrPad_ND(
         }
 
         if len(array.shape) == 1:
-            R = trimOrPad_ND(array[:N], **kwargs)
-            I = trimOrPad_ND(array[N:], **kwargs)
-            return np.r_[R, I]
+            REAL = trimOrPad_ND(array[:N], **kwargs)
+            IMAG = trimOrPad_ND(array[N:], **kwargs)
+            return np.r_[REAL, IMAG]
 
         elif is_2d_square_matrix(array):
             RR = trimOrPad_ND(array[:N, :N], **kwargs)
