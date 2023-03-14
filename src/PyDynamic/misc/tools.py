@@ -131,9 +131,7 @@ def _shift_2d_matrix(matrix: np.ndarray, shift: int) -> np.ndarray:
     return np.roll(matrix, (shift, shift), axis=(0, 1))
 
 
-def trimOrPad(
-    array: Union[List, np.ndarray], length: int, mode: Optional[str] = "constant"
-):
+def trimOrPad(array: Union[List, np.ndarray], length: int, mode: str = "constant"):
     """Trim or pad (with zeros) a vector to the desired length
 
     Either trim or zero-pad an array to achieve the required `length`. Both actions
@@ -179,8 +177,8 @@ def trimOrPad_ND(
         length of output
     mode : str, optional
         handed over to np.pad, default "constant"
-    real_imag_type : bool
-        if array is to be interpreted as PyDynamic real-imag-type
+    real_imag_type : bool, optional
+        if array is to be interpreted as PyDynamic real-imag-type, defaults to False
         only works for 1D and square-2D arrays
 
     Returns
