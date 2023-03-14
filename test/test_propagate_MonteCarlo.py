@@ -51,9 +51,9 @@ evaluate_sample = functools.partial(np.mean, axis=1)
 UMC_generic_multiprocess_kwargs = {
     "draw_samples": draw_samples,
     "evaluate": evaluate_sample,
-    "runs": 100,
-    "blocksize": 20,
-    "runs_init": 10,
+    "runs": 10,
+    "blocksize": 3,
+    "runs_init": 3,
 }
 
 UMC_generic_cov_kwargs = {
