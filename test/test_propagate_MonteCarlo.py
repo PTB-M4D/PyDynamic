@@ -178,7 +178,9 @@ def test_UMC_generic_check_sample_shape():
 
 def test_UMC_generic_cov_diag():
     # evaluate only diag covariance + return samples (to check against)
-    y, Uy, _, _, sims = UMC_generic(**UMC_generic_cov_kwargs, compute_full_covariance=False)
+    y, Uy, _, _, sims = UMC_generic(
+        **UMC_generic_cov_kwargs, compute_full_covariance=False
+    )
 
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size,)
@@ -194,7 +196,9 @@ def test_UMC_generic_cov_diag():
 
 def test_UMC_generic_cov_full():
     # evaluate only diag covariance + return samples (to check against)
-    y, Uy, _, _, sims = UMC_generic(**UMC_generic_cov_kwargs, compute_full_covariance=True)
+    y, Uy, _, _, sims = UMC_generic(
+        **UMC_generic_cov_kwargs, compute_full_covariance=True
+    )
 
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
