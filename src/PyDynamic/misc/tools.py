@@ -161,7 +161,10 @@ def trimOrPad(
 
 
 def trimOrPad_ND(
-    array: Union[List, np.ndarray], length: Union[int, tuple], mode: Optional[str] = "constant", real_imag_type=False
+    array: Union[List, np.ndarray],
+    length: Union[int, tuple],
+    mode: Optional[str] = "constant",
+    real_imag_type=False,
 ):
     """Trim or pad (with zeros) a vector/array to the desired length(s)
 
@@ -189,31 +192,33 @@ def trimOrPad_ND(
     # force numpy array
     array = np.array(array)
 
-    # split and reassemble if vector/covariance is in real-imag representation 
+    # split and reassemble if vector/covariance is in real-imag representation
     # (only works for 1D and 2D-square arrays of even length)
     if real_imag_type:
         N = array.shape[0] // 2
         kwargs = {
-            "length" : length, 
-            "mode" : "constant", 
-            "real_imag_type" : False,
+            "length": length,
+            "mode": "constant",
+            "real_imag_type": False,
         }
 
         if len(array.shape) == 1:
             R = trimOrPad_ND(array[:N], **kwargs)
             I = trimOrPad_ND(array[N:], **kwargs)
             return np.r_[R, I]
-        
-        elif is_2d_square_matrix(array):
-            RR = trimOrPad_ND(array[:N,:N], **kwargs)
-            RI = trimOrPad_ND(array[:N,N:], **kwargs)
-            IR = trimOrPad_ND(array[N:,:N], **kwargs)
-            II = trimOrPad_ND(array[N:,N:], **kwargs)
 
-            return np.block([[RR, RI],[IR, II]])
+        elif is_2d_square_matrix(array):
+            RR = trimOrPad_ND(array[:N, :N], **kwargs)
+            RI = trimOrPad_ND(array[:N, N:], **kwargs)
+            IR = trimOrPad_ND(array[N:, :N], **kwargs)
+            II = trimOrPad_ND(array[N:, N:], **kwargs)
+
+            return np.block([[RR, RI], [IR, II]])
 
         else:
-            raise ValueError(f"Array of shape {array.shape} cannot be interpreted as real/imag representation.")
+            raise ValueError(
+                f"Array of shape {array.shape} cannot be interpreted as real/imag representation."
+            )
 
     # just trim/pad at the end otherwise
     else:
@@ -224,18 +229,18 @@ def trimOrPad_ND(
         # prepare padding and trimming arguments
         pad_lengths = []
         trim_slices = []
-        for i, (axis_length, axis_new_length) in enumerate(zip(array.shape, length)): 
+        for axis_length, axis_new_length in zip(array.shape, length):
             diff = axis_new_length - axis_length
 
             # prepare padding
             if diff > 0:
                 pad_lengths.append((0, diff))
             else:
-                pad_lengths.append((0,0))
+                pad_lengths.append((0, 0))
 
             # prepare trimming
-            trim_slices.append(slice(0,axis_new_length))
-        
+            trim_slices.append(slice(0, axis_new_length))
+
         # first pad, what needs to be padded
         # then trim (does nothing, if all axis have been padded)
         return np.pad(array, pad_lengths, mode=mode)[tuple(trim_slices)]
