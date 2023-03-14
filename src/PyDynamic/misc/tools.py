@@ -162,7 +162,7 @@ def trimOrPad_ND(
     array: Union[List, np.ndarray],
     length: Union[int, tuple],
     mode: str = "constant",
-    real_imag_type=False,
+    real_imag_type: bool = False,
 ):
     """Trim or pad (with zeros) a vector/array to the desired length(s)
 
