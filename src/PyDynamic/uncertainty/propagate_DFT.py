@@ -57,7 +57,6 @@ from ..misc.tools import (
     is_2d_matrix,
     is_vector,
     number_of_rows_equals_vector_dim,
-    trimOrPad_ND,
 )
 
 
