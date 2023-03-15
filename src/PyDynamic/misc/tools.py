@@ -139,7 +139,7 @@ def trimOrPad(
 ):
     """Trim or pad (with zeros) a vector/array to the desired length(s)
 
-    Either trim or zero-pad each axis of an array to achieve a specified `length`. 
+    Either trim or zero-pad each axis of an array to achieve a specified `length`.
     The trimming/padding is applied at the end of (each axis of) the array.
     The implementation allows for some axis to be trimmed, while others can be padded
     at the same time.
