@@ -131,34 +131,7 @@ def _shift_2d_matrix(matrix: np.ndarray, shift: int) -> np.ndarray:
     return np.roll(matrix, (shift, shift), axis=(0, 1))
 
 
-def trimOrPad(array: Union[List, np.ndarray], length: int, mode: str = "constant"):
-    """Trim or pad (with zeros) a vector to the desired length
-
-    Either trim or zero-pad an array to achieve the required `length`. Both actions
-    are applied to the end of the array.
-
-    Parameters
-    ----------
-    array : list, 1D np.ndarray
-        original data
-    length : int
-        length of output
-    mode : str, optional
-        handed over to np.pad, default "constant"
-
-    Returns
-    -------
-    array_modified : np.ndarray of shape (length,)
-        An either trimmed or zero-padded array
-    """
-
-    if len(array) < length:  # pad zeros to the right if too short
-        return np.pad(array, (0, length - len(array)), mode=mode)
-    else:  # trim to given length otherwise
-        return array[0:length]
-
-
-def trimOrPad_ND(
+def trimOrPad(
     array: Union[List, np.ndarray],
     length: Union[int, tuple],
     mode: str = "constant",
@@ -166,24 +139,26 @@ def trimOrPad_ND(
 ):
     """Trim or pad (with zeros) a vector/array to the desired length(s)
 
-    Either trim or zero-pad an array to achieve the required `length`. Both actions
-    are applied to the end of (each axis of) the array.
+    Either trim or zero-pad each axis of an array to achieve a specified `length`. 
+    The trimming/padding is applied at the end of (each axis of) the array.
+    The implementation allows for some axis to be trimmed, while others can be padded
+    at the same time.
 
     Parameters
     ----------
     array : list, ND np.ndarray
         original data
     length : int, tuple of int
-        length of output
+        length or shape of output
     mode : str, optional
         handed over to np.pad, default "constant"
     real_imag_type : bool, optional
         if array is to be interpreted as PyDynamic real-imag-type, defaults to False
-        only works for 1D and square-2D arrays
+        only works for 1D and square-2D arrays (of even length)
 
     Returns
     -------
-    array_modified : np.ndarray of shape (length,)
+    array_modified : np.ndarray of shape similar to length
         An either trimmed or zero-padded array
     """
 
@@ -201,21 +176,24 @@ def trimOrPad_ND(
         }
 
         if len(array.shape) == 1:
-            REAL = trimOrPad_ND(array[:N], **kwargs)
-            IMAG = trimOrPad_ND(array[N:], **kwargs)
+            REAL = trimOrPad(array[:N], **kwargs)
+            IMAG = trimOrPad(array[N:], **kwargs)
             return np.r_[REAL, IMAG]
 
         elif is_2d_square_matrix(array):
-            RR = trimOrPad_ND(array[:N, :N], **kwargs)
-            RI = trimOrPad_ND(array[:N, N:], **kwargs)
-            IR = trimOrPad_ND(array[N:, :N], **kwargs)
-            II = trimOrPad_ND(array[N:, N:], **kwargs)
+            RR = trimOrPad(array[:N, :N], **kwargs)
+            RI = trimOrPad(array[:N, N:], **kwargs)
+            IR = trimOrPad(array[N:, :N], **kwargs)
+            II = trimOrPad(array[N:, N:], **kwargs)
 
             return np.block([[RR, RI], [IR, II]])
 
         else:
             raise ValueError(
-                f"Array of shape {array.shape} cannot be interpreted as real/imag representation."
+                f"Array of shape {array.shape} cannot "
+                "be interpreted as real/imag representation. "
+                "Only 1D arrays of even length or 2D square arrays "
+                "of even length can be interpreted as real/imag."
             )
 
     # just trim/pad at the end otherwise
@@ -445,7 +423,7 @@ def progress_bar(
     prefix: Optional[str] = "",
     done_indicator: Optional[str] = "#",
     todo_indicator: Optional[str] = ".",
-    fout: Optional = None,
+    fout: Optional[bytes] = None,
 ):
     """A simple and reusable progress-bar
 
