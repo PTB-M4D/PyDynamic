@@ -20,7 +20,6 @@ from PyDynamic.misc.tools import (
     separate_real_imag_of_mc_samples,
     separate_real_imag_of_vector,
     trimOrPad,
-    trimOrPad_ND,
 )
 from .conftest import (
     hypothesis_covariance_matrix,
@@ -344,27 +343,61 @@ def test_trimOrPad():
     a = np.arange(N)
 
     assert np.all(trimOrPad(a, 8) == a[:8])
-    assert np.all(trimOrPad(a, 12) == np.r_[a, [0,0]])
+    assert np.all(trimOrPad(a, 12) == np.r_[a, [0, 0]])
 
 
-def test_trimOrPad_ND():
+def test_trimOrPad_against_old_implementation():
+    def trimOrPad_old(
+        array: Union[List, np.ndarray], length: int, mode: str = "constant"
+    ):
+        """Trim or pad (with zeros) a vector to the desired length
+
+        Either trim or zero-pad an array to achieve the required `length`. Both actions
+        are applied to the end of the array.
+
+        Parameters
+        ----------
+        array : list, 1D np.ndarray
+            original data
+        length : int
+            length of output
+        mode : str, optional
+            handed over to np.pad, default "constant"
+
+        Returns
+        -------
+        array_modified : np.ndarray of shape (length,)
+            An either trimmed or zero-padded array
+        """
+
+        if len(array) < length:  # pad zeros to the right if too short
+            return np.pad(array, (0, length - len(array)), mode=mode)
+        else:  # trim to given length otherwise
+            return array[0:length]
+
     N = 10
     a = np.arange(N)
 
     # compare against old implementation
-    assert np.all(trimOrPad(a, 8) == trimOrPad_ND(a, 8))
-    assert np.all(trimOrPad(a, 12) == trimOrPad_ND(a, 12))
+    assert np.all(trimOrPad_old(a, 8) == trimOrPad(a, 8))
+    assert np.all(trimOrPad_old(a, 12) == trimOrPad(a, 12))
 
+
+def test_trimOrPad_ndarray():
     # test multidim capabilities
-    a = np.ones((3,4,5))
-    b = trimOrPad_ND(a, length=(3,4,5))
+    a = np.ones((3, 4, 5))
+    b = trimOrPad(a, length=(3, 4, 5))
+    c = trimOrPad(a, length=4)
 
     assert np.all(a == b)
+    assert c.shape == (4, 4, 4)
 
+
+def test_trimOrPad_realimag():
     # test real/imag capabilities
-    ri2c = real_imag_2_complex
+    N = 10
     a = np.arange(N)
-    tmp1 = ri2c(trimOrPad_ND(a, N+2, real_imag_type=True))
-    tmp2 = trimOrPad_ND(ri2c(a), N+2, real_imag_type=False)
+    tmp1 = real_imag_2_complex(trimOrPad(a, N + 2, real_imag_type=True))
+    tmp2 = trimOrPad(real_imag_2_complex(a), N + 2, real_imag_type=False)
 
     assert np.all(tmp1 == tmp2)
