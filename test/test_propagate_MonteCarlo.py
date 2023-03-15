@@ -230,7 +230,6 @@ def test_UMC_generic_cov_full(umc_generic_cov_kwargs):
 
 @pytest.mark.slow
 def test_compare_MC_UMC():
-
     np.random.seed(12345)
 
     y_MC, Uy_MC = MC(x, sigma_noise, b1, np.ones(1), Ub, runs=2 * runs, blow=b2)
