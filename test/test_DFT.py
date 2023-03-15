@@ -9,6 +9,7 @@ from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
 
 from PyDynamic.misc.testsignals import multi_sine
+from PyDynamic.misc.tools import real_imag_2_complex as ri2c
 
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_DFT import (
@@ -200,32 +201,49 @@ def test_AmpPhasePropagation(multisine_testsignal):
     assert_almost_equal(np.max(np.abs(testsignal - x)), 0)
 
 
-# @given(DFT_identity_input_output_lengths())
-@pytest.mark.parametrize("N", [9, 10, 11, 12, 15, 20])
-@pytest.mark.parametrize("Nx", [9, 10, 11, 12, 15, 20])
-def test_DFT_identity(N, Nx):
+@given(iDFT_input_output_lengths(equal_lengths=True))
+def test_DFT_iDFT_identity(params):
+    N = params["input_length"]
+    Nx = params["output_length"]
+    assert N == Nx
 
+    # create time signal and corresponding covariance matrix
     x, x_cov = np.arange(N) + 2, np.eye(N)
 
     # get spectrum
     X, X_cov = GUM_DFT(x, x_cov)
 
     # recover signal
-    x_reconstructed, x_reconstructed_cov, sens = GUM_iDFT(X, X_cov, Nx=Nx, returnC=True)
+    x_reconstructed, x_reconstructed_cov = GUM_iDFT(X, X_cov, Nx=Nx)
 
     # check signal and covariance in case of reconstruction to identity
-    if N == Nx:
-        assert np.allclose(x, x_reconstructed)
-        assert np.allclose(x_cov, x_reconstructed_cov)
+    assert_allclose(x, x_reconstructed, atol=1e-14)
+    assert_allclose(x_cov, x_reconstructed_cov, atol=1e-14)
 
-    # check against numpy implementation using the sensitivties
-    # x_reconstructed is internally calculated using numpy, so this is not tested here
+
+@given(iDFT_input_output_lengths())
+def test_iDFT_resampling_sensitivity(params):
+    N = params["input_length"]
+    Nx = params["output_length"]
+
+    # create time signal and corresponding covariance matrix
+    x, x_cov = np.arange(N) + 2, np.eye(N)
+
+    # get spectrum
+    X, X_cov = GUM_DFT(x, x_cov)
+
+    # resample signal
+    x_resampled, x_resampled_cov, sens = GUM_iDFT(X, X_cov, Nx=Nx, returnC=True)
+    x_resampled_numpy = np.fft.irfft(ri2c(X), n=Nx)
+
+    # check resampled signal against numpy implementation
+    assert_allclose(x_resampled_numpy, x_resampled, atol=1e-14)
+
+    # check sensitivities against numpy implementation
     C = np.hstack((sens["Cc"], sens["Cs"]))
-    assert np.allclose(x_reconstructed, C @ X / Nx)
+    assert_allclose(x_resampled_numpy, C @ X / Nx, atol=1e-14)
 
 
-def test_iDFT_Monte_Carlo():
-    pass
 
 
 @pytest.mark.slow
