@@ -400,15 +400,15 @@ def GUM_iDFT(
     # propagate uncertainty
     if not isinstance(Cc, np.ndarray) or not isinstance(Cs, np.ndarray):
         k = np.arange(N_in)
-        bk = np.outer(beta, k)
+        k_beta = np.outer(beta, k)
 
     # calculate sensitivities (scaling factor 1/N_out is accounted for at the end)
     if not isinstance(Cc, np.ndarray):
-        Cc = np.cos(bk)
+        Cc = np.cos(k_beta)
         Cc = _adjust_sensitivity_matrix_to_match_irfft(Cc, N_out, N_out_default)
 
     if not isinstance(Cs, np.ndarray):
-        Cs = -np.sin(bk)
+        Cs = -np.sin(k_beta)
         Cs = _adjust_sensitivity_matrix_to_match_irfft(Cs, N_out, N_out_default)
 
     # calculate blocks of uncertainty matrix
