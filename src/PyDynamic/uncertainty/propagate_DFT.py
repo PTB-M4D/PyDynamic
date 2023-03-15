@@ -405,11 +405,11 @@ def GUM_iDFT(
     # calculate sensitivities (scaling factor 1/N_out is accounted for at the end)
     if not isinstance(Cc, np.ndarray):
         Cc = np.cos(bk)
-        Cc = _adjust_sensitivity_matrix_iDFT(Cc, N_out, N_out_default)
+        Cc = _adjust_sensitivity_matrix_to_match_irfft(Cc, N_out, N_out_default)
 
     if not isinstance(Cs, np.ndarray):
         Cs = -np.sin(bk)
-        Cs = _adjust_sensitivity_matrix_iDFT(Cs, N_out, N_out_default)
+        Cs = _adjust_sensitivity_matrix_to_match_irfft(Cs, N_out, N_out_default)
 
     # calculate blocks of uncertainty matrix
     if len(UF.shape) == 2:
@@ -431,7 +431,7 @@ def GUM_iDFT(
         return x, Ux / N_out**2
 
 
-def _adjust_sensitivity_matrix_iDFT(C, N_out, N_out_default):
+def _adjust_sensitivity_matrix_to_match_irfft(C, N_out, N_out_default):
     # multiply by two because to compensate missing left side of spectrum
     C[:, 1:] *= 2
 
