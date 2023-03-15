@@ -161,9 +161,15 @@ def random_vector_and_matrix_with_matching_number_of_columns(
 
 
 @composite
-def DFT_identity_input_output_lengths(draw: Callable):
-    input_length = draw(hst.integers(min_value=10, max_value=12))
-    output_length = draw(hst.integers(min_value=9, max_value=13))
+def iDFT_input_output_lengths(draw: Callable, equal_lengths: bool = False):
+
+    input_length =  draw(hst.integers(min_value=5, max_value=15))
+
+    if equal_lengths:
+        output_length = input_length
+    else:
+        output_length = draw(hst.integers(min_value=5, max_value=15))
+    
     return {"input_length": input_length, "output_length": output_length}
 
 
