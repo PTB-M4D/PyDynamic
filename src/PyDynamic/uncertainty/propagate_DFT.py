@@ -388,10 +388,8 @@ def GUM_iDFT(
     N_in = F.size // 2
 
     # default output length, assumes even output length
-    N_out = Nx
     N_out_default = UF.shape[0] - 2
-    if Nx is None:
-        N_out = N_out_default
+    N_out = N_out_default if Nx is None else Nx
 
     # calculate discrete angular frequency
     beta = 2 * np.pi * np.arange(N_out) / N_out
