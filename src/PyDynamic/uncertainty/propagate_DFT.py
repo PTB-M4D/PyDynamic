@@ -436,18 +436,18 @@ def _adjust_sensitivity_matrix_to_match_irfft(C, N_out, N_out_default):
     C[:, 1:] *= 2
 
     # in case of undersampling, remove higher frequencies
-    highest_non_zero_entry = -1
+    highest_non_zero_idx = -1
     if N_out < N_out_default:
 
-        # N_out corresponds only to the first l items of spectrum
-        highest_non_zero_entry = N_out // 2
+        # N_out corresponds only to the first highest_non_zero_idx items of spectrum
+        highest_non_zero_idx = N_out // 2
 
-        # erase influence of spectrum above highest_non_zero_entry
-        C[:, highest_non_zero_entry + 1 :] = 0
+        # erase influence of spectrum above highest_non_zero_idx
+        C[:, highest_non_zero_idx + 1 :] = 0
 
     # undo factor two for even signal lengths
     if N_out % 2 == 0 and N_out <= N_out_default:
-        C[:, highest_non_zero_entry] *= 0.5
+        C[:, highest_non_zero_idx] *= 0.5
 
     return C
 
