@@ -164,13 +164,13 @@ def random_vector_and_matrix_with_matching_number_of_columns(
 @composite
 def iDFT_input_output_lengths(draw: Callable, equal_lengths: bool = False):
 
-    input_length =  draw(hst.integers(min_value=5, max_value=15))
+    input_length = draw(hst.integers(min_value=5, max_value=15))
 
     if equal_lengths:
         output_length = input_length
     else:
         output_length = draw(hst.integers(min_value=5, max_value=15))
-    
+
     return {"input_length": input_length, "output_length": output_length}
 
 
@@ -233,7 +233,7 @@ def test_iDFT_resampling_sensitivity(params):
     X, X_cov = GUM_DFT(x, x_cov)
 
     # resample signal
-    x_resampled, x_resampled_cov, sens = GUM_iDFT(X, X_cov, Nx=Nx, returnC=True)
+    x_resampled, _, sens = GUM_iDFT(X, X_cov, Nx=Nx, returnC=True)
     x_resampled_numpy = np.fft.irfft(ri2c(X), n=Nx)
 
     # check resampled signal against numpy implementation
@@ -242,8 +242,6 @@ def test_iDFT_resampling_sensitivity(params):
     # check sensitivities against numpy implementation
     C = np.hstack((sens["Cc"], sens["Cs"]))
     assert_allclose(x_resampled_numpy, C @ X / Nx, atol=1e-14)
-
-
 
 
 @pytest.mark.slow
