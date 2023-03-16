@@ -608,6 +608,8 @@ def UMC_generic(
     nbins=100,
     return_samples=False,
     n_cpu=multiprocessing.cpu_count(),
+    return_histograms=True,
+    compute_full_covariance=True,
 ):
     """
     Generic Batch Monte Carlo using update formulae for mean, variance and (approximated) histogram.
@@ -634,6 +636,10 @@ def UMC_generic(
             see return-value of documentation
         n_cpu: int, optional
             number of CPUs to use for multiprocessing, defaults to all available CPUs
+        return_histograms: bool, optional
+            whether to compute a histogram for each entry of the result at all
+        compute_full_covariance: bool, optional
+            whether to compute the full covariance matrix or just its diagonal
 
     Example
     -------
@@ -710,18 +716,19 @@ def UMC_generic(
     Y_init = np.asarray(Y_init)
 
     # prepare histograms
-    ymin = np.min(Y_init, axis=0).ravel()
-    ymax = np.max(Y_init, axis=0).ravel()
-
     happr = {}
-    for nbin in nbins:
-        happr[nbin] = {}
-        happr[nbin]["bin-edges"] = np.linspace(
-            ymin, ymax, num=nbin + 1
-        )  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
-        happr[nbin]["bin-counts"] = np.zeros(
-            (nbin, np.prod(output_shape))
-        )  # init. bin-counts
+    if return_histograms:
+        ymin = np.min(Y_init, axis=0).ravel()
+        ymax = np.max(Y_init, axis=0).ravel()
+
+        for nbin in nbins:
+            happr[nbin] = {}
+            happr[nbin]["bin-edges"] = np.linspace(
+                ymin, ymax, num=nbin + 1
+            )  # define bin-edges (generates array for all [ymin,ymax] (assume ymin is already an array))
+            happr[nbin]["bin-counts"] = np.zeros(
+                (nbin, np.prod(output_shape))
+            )  # init. bin-counts
 
     # ----------------- run MC block-wise -----------------------
 
@@ -735,13 +742,16 @@ def UMC_generic(
         }
 
     for m in range(nblocks):
-        if m == nblocks:
-            curr_block = runs % blocksize
+        if m == nblocks - 1:
+            if runs % blocksize == 0:
+                number_of_samples_in_current_block = blocksize
+            else:
+                number_of_samples_in_current_block = runs % blocksize
         else:
-            curr_block = blocksize
+            number_of_samples_in_current_block = blocksize
 
-        Y = np.empty((curr_block, np.prod(output_shape)))
-        samples = draw_samples(curr_block)
+        Y = np.empty((number_of_samples_in_current_block, np.prod(output_shape)))
+        samples = draw_samples(number_of_samples_in_current_block)
 
         # evaluate samples in parallel loop
         for k, result in enumerate(map_func(evaluate, samples)):
@@ -749,39 +759,54 @@ def UMC_generic(
 
         if m == 0:  # first block
             y = np.mean(Y, axis=0)
-            Uy = np.matmul((Y - y).T, (Y - y))
+
+            if compute_full_covariance:
+                Uy = np.matmul((Y - y).T, (Y - y)) / (
+                    number_of_samples_in_current_block - 1
+                )
+            else:
+                Uy = np.sum(np.square(Y - y), axis=0) / (
+                    number_of_samples_in_current_block - 1
+                )
 
         else:  # updating y and Uy from results of current block
             K0 = m * blocksize
-            K_seq = curr_block
+            K_seq = number_of_samples_in_current_block
 
             # update mean (formula 7 in [Eichst2012])
             y0 = y
             y = y0 + np.sum(Y - y0, axis=0) / (K0 + K_seq)
 
-            # update covariance (formula 8 in [Eichst2012])
-            Uy = (
-                (K0 - 1) * Uy
-                + K0 * np.outer(y - y0, y - y0)
-                + np.matmul((Y - y).T, (Y - y))
-            ) / (K0 + K_seq - 1)
+            if compute_full_covariance:
+                # update covariance (formula 8 in [Eichst2012])
+                Uy = (
+                    (K0 - 1) * Uy
+                    + K0 * np.outer(y - y0, y - y0)
+                    + np.matmul((Y - y).T, (Y - y))
+                ) / (K0 + K_seq - 1)
+            else:
+                # update main diag of covariance (based on formula 8 in [Eichst2012])
+                Uy = (
+                    (K0 - 1) * Uy
+                    + K0 * np.square(y - y0)
+                    + np.sum(np.square(Y - y), axis=0)
+                ) / (K0 + K_seq - 1)
 
-        # update histogram values
-        for k in range(np.prod(output_shape)):
-            for h in happr.values():
-                h["bin-counts"][:, k] += np.histogram(
-                    Y[:, k], bins=h["bin-edges"][:, k]
-                )[
-                    0
-                ]  # numpy histogram returns (bin-counts, bin-edges)
+        if return_histograms:
+            # update histogram values
+            for k in range(np.prod(output_shape)):
+                for h in happr.values():
+                    h["bin-counts"][:, k] += np.histogram(
+                        Y[:, k], bins=h["bin-edges"][:, k]
+                    )[0]
 
-        ymin = np.min(np.vstack((ymin, Y)), axis=0)
-        ymax = np.max(np.vstack((ymax, Y)), axis=0)
+            ymin = np.min(np.vstack((ymin, Y)), axis=0)
+            ymax = np.max(np.vstack((ymax, Y)), axis=0)
 
         # save results if wanted
         if return_samples:
             block_start = m * blocksize
-            block_end = block_start + curr_block
+            block_end = block_start + number_of_samples_in_current_block
             sims["samples"][block_start:block_end] = samples
             sims["results"][block_start:block_end] = np.asarray(
                 [element.reshape(output_shape) for element in Y]
@@ -794,10 +819,15 @@ def UMC_generic(
 
     # ----------------- post-calculation steps -----------------------
 
-    # replace edge limits by ymin and ymax, resp.
-    for h in happr.values():
-        h["bin-edges"][0, :] = np.min(np.vstack((ymin, h["bin-edges"][0, :])), axis=0)
-        h["bin-edges"][-1, :] = np.min(np.vstack((ymax, h["bin-edges"][-1, :])), axis=0)
+    if return_histograms:
+        # replace edge limits by ymin and ymax, resp.
+        for h in happr.values():
+            h["bin-edges"][0, :] = np.min(
+                np.vstack((ymin, h["bin-edges"][0, :])), axis=0
+            )
+            h["bin-edges"][-1, :] = np.min(
+                np.vstack((ymax, h["bin-edges"][-1, :])), axis=0
+            )
 
     if return_samples:
         return y, Uy, happr, output_shape, sims

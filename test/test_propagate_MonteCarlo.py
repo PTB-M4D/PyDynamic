@@ -44,6 +44,45 @@ sigma_noise = 1e-5
 x = rect(time, 100 * Ts, 250 * Ts, 1.0, noise=sigma_noise)
 
 
+@pytest.fixture(scope="module")
+def sample_shape():
+    return 2, 3, 4
+
+
+@pytest.fixture(scope="module")
+def draw_samples(sample_shape):
+    return lambda size: np.random.rand(size, *sample_shape)
+
+
+@pytest.fixture(scope="module")
+def evaluate_sample():
+    return functools.partial(np.mean, axis=1)
+
+
+@pytest.fixture(scope="module")
+def umc_generic_multiprocess_kwargs(draw_samples, evaluate_sample):
+    return {
+        "draw_samples": draw_samples,
+        "evaluate": evaluate_sample,
+        "runs": 10,
+        "blocksize": 3,
+        "runs_init": 3,
+    }
+
+
+@pytest.fixture(scope="module")
+def umc_generic_cov_kwargs(draw_samples, evaluate_sample):
+    return {
+        "draw_samples": draw_samples,
+        "evaluate": evaluate_sample,
+        "runs": 5,
+        "blocksize": 2,
+        "runs_init": 2,
+        "return_samples": True,
+        "return_histograms": False,
+    }
+
+
 def test_MC(visualizeOutput=False):
     # run method
     y, Uy = MC(x, sigma_noise, b1, np.ones(1), Ub, runs=runs, blow=b2)
@@ -84,7 +123,15 @@ def test_SMC():
 def test_UMC(visualizeOutput=False):
     # run method
     y, Uy, p025, p975, happr = UMC(
-        x, b1, [1.0], Ub, blow=b2, sigma=sigma_noise, runs=runs, runs_init=10, nbins=10
+        x,
+        b1,
+        np.ones(1),
+        Ub,
+        blow=b2,
+        sigma=sigma_noise,
+        runs=runs,
+        runs_init=10,
+        nbins=10,
     )
 
     assert len(y) == len(x)
@@ -120,56 +167,82 @@ def test_UMC(visualizeOutput=False):
         plt.show()
 
 
-def test_UMC_generic():
-
-    x_shape = (5, 6, 7)
-    draw_samples = lambda size: np.random.rand(size, *x_shape)
-    evaluate = functools.partial(np.mean, axis=1)
-
+def test_UMC_generic_multiprocessing(umc_generic_multiprocess_kwargs, sample_shape):
     # run UMC
-    y, Uy, happr, output_shape = UMC_generic(
-        draw_samples, evaluate, runs=100, blocksize=20, runs_init=10
-    )
+    y, Uy, happr, output_shape = UMC_generic(**umc_generic_multiprocess_kwargs)
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
     assert isinstance(happr, dict)
-    assert output_shape == (5, 7)
+    assert output_shape == (sample_shape[0], sample_shape[2])
 
+
+def test_UMC_generic_no_multiprocessing(umc_generic_multiprocess_kwargs, sample_shape):
     # run without parallel computation
-    y, Uy, happr, output_shape = UMC_generic(
-        draw_samples, evaluate, runs=100, blocksize=20, runs_init=10, n_cpu=1
-    )
+    y, Uy, happr, output_shape = UMC_generic(**umc_generic_multiprocess_kwargs, n_cpu=1)
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
     assert isinstance(happr, dict)
-    assert output_shape == (5, 7)
+    assert output_shape == (sample_shape[0], sample_shape[2])
 
+
+def test_UMC_generic_check_sample_shape(umc_generic_multiprocess_kwargs, sample_shape):
     # run again, but only return all simulations
     y, Uy, happr, output_shape, sims = UMC_generic(
-        draw_samples,
-        evaluate,
-        runs=100,
-        blocksize=20,
-        runs_init=10,
-        return_samples=True,
+        **umc_generic_multiprocess_kwargs, return_samples=True
     )
     assert y.size == Uy.shape[0]
     assert Uy.shape == (y.size, y.size)
     assert isinstance(happr, dict)
-    assert output_shape == (5, 7)
+    assert output_shape == (sample_shape[0], sample_shape[2])
     assert isinstance(sims, dict)
-    assert sims["samples"][0].shape == x_shape
+    assert sims["samples"][0].shape == sample_shape
     assert sims["results"][0].shape == output_shape
+    assert len(sims["samples"]) == umc_generic_multiprocess_kwargs["runs"]
+
+
+def test_UMC_generic_cov_diag(umc_generic_cov_kwargs):
+    # evaluate only diag covariance + return samples (to check against)
+    y, Uy, _, _, sims = UMC_generic(
+        **umc_generic_cov_kwargs, compute_full_covariance=False
+    )
+
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size,)
+
+    y_sims = np.mean(sims["results"], axis=0).flatten()
+    Uy_sims = np.diag(
+        np.cov(sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False)
+    )
+
+    assert_allclose(y, y_sims)
+    assert_allclose(Uy, Uy_sims)
+
+
+def test_UMC_generic_cov_full(umc_generic_cov_kwargs):
+    # evaluate only diag covariance + return samples (to check against)
+    y, Uy, _, _, sims = UMC_generic(
+        **umc_generic_cov_kwargs, compute_full_covariance=True
+    )
+
+    assert y.size == Uy.shape[0]
+    assert Uy.shape == (y.size, y.size)
+
+    y_sims = np.mean(sims["results"], axis=0).flatten()
+    Uy_sims = np.cov(
+        sims["results"].reshape((sims["results"].shape[0], -1)), rowvar=False
+    )
+
+    assert_allclose(y, y_sims)
+    assert_allclose(Uy, Uy_sims)
 
 
 @pytest.mark.slow
 def test_compare_MC_UMC():
-
     np.random.seed(12345)
 
     y_MC, Uy_MC = MC(x, sigma_noise, b1, np.ones(1), Ub, runs=2 * runs, blow=b2)
     y_UMC, Uy_UMC, _, _, _ = UMC(
-        x, b1, [1.0], Ub, blow=b2, sigma=sigma_noise, runs=2 * runs, runs_init=10
+        x, b1, np.ones(1), Ub, blow=b2, sigma=sigma_noise, runs=2 * runs, runs_init=10
     )
 
     # both methods should yield roughly the same results
