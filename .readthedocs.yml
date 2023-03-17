@@ -4,8 +4,9 @@
 
 version: 2
 
-# Build all formats
-formats: all
+formats:
+  - epub
+  - htmlzip
 
 # Docker image to use for build process
 build:
