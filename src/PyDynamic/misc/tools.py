@@ -20,7 +20,7 @@ This module contains the following functions:
 * :func:`progress_bar`: A simple and reusable progress-bar
 * :func:`shift_uncertainty`: Shift the elements in the vector x and associated
   uncertainties ux
-* :func:`trimOrPad`: trim or pad (with zeros) a vector to desired length
+* :func:`trimOrPad`: Trim or pad (with zeros) a vector/array to the desired length(s)
 * :func:`complex_2_real_imag`: Take a np.ndarray with dtype complex and return
   real and imaginary parts
 * :func:`real_imag_2_complex`: Take a np.ndarray with real and imaginary parts
