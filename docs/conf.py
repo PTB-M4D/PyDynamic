@@ -156,7 +156,7 @@ author = "S. Eichstädt, M. Gruber, B. Ludwig, T. Bruns, M. Weber, I. Smith"
 # built documents.K
 #
 # The short X.Y version.
-version = "2.3.2"
+version = "2.4.0"
 # The full version, including alpha/beta/rc tags.
 # release = "1.3.1"
 

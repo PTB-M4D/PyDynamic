@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.0 (2023-03-20)
+### Feature
+* **tools:** Add support for multidimensional arrays and PyDynamics real-imag-type in trimOrPad ([`1d4acfc`](https://github.com/PTB-M4D/PyDynamic/commit/1d4acfc03fd7dea230354922de33640a2dd2b13c))
+* **GUM_iDFT:** Add full support for under and oversampling of inverse DFT ([`c15fc1c`](https://github.com/PTB-M4D/PyDynamic/commit/c15fc1c8b7d4fc17c638a6df7947d10249b3afc5))
+* **GUM_iDFT:** Handle odd and even signals ([`974c1ae`](https://github.com/PTB-M4D/PyDynamic/commit/974c1aeffc535ad0c38baaece81aa1033be9c4e4))
+* **tools:** Add trimOrPad for ND-arrays with support for real-imag type ([`f504a6b`](https://github.com/PTB-M4D/PyDynamic/commit/f504a6b3b02d7393032b987790cce884b0d033b1))
+* **UMC_generic:** Enable computational savings ([`fe1e99e`](https://github.com/PTB-M4D/PyDynamic/commit/fe1e99e2eb77842cd388dfb5cee26ddd63f866dc))
+
+### Fix
+* **UMC_generic:** Adjust empirical covariance formula ([`1d62e3a`](https://github.com/PTB-M4D/PyDynamic/commit/1d62e3a4201507bf64213c89cef4b7c79b537c0f))
+* **UMC_generic:** Divide by block size in first run ([`0be6a40`](https://github.com/PTB-M4D/PyDynamic/commit/0be6a40c208df5f87f66cb30941cd33bc68467a0))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.3.2...v2.4.0)**
+
 ## v2.3.2 (2022-12-20)
 ### Fix
 * **interpolate:** Replace deprecated np.float by in-built float ([`8188315`](https://github.com/PTB-M4D/PyDynamic/commit/8188315c3dee34ee52425295020d3a8ca6ec9e47))
