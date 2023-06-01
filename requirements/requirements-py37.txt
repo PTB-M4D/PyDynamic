@@ -48,7 +48,7 @@ sympy==1.10.1
     # via PyDynamic (setup.py)
 time-series-buffer==0.1.4b0
     # via PyDynamic (setup.py)
-typing-extensions==4.5.0
+typing-extensions==4.6.2
     # via kiwisolver
 uncertainties==3.1.7
     # via time-series-buffer
