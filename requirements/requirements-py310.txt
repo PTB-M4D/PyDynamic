@@ -8,7 +8,7 @@ contourpy==1.0.7
     # via matplotlib
 cycler==0.11.0
     # via matplotlib
-fonttools==4.39.3
+fonttools==4.39.4
     # via matplotlib
 future==0.18.3
     # via uncertainties
@@ -29,7 +29,7 @@ numpy==1.24.3
     #   time-series-buffer
 packaging==23.1
     # via matplotlib
-pandas==2.0.1
+pandas==2.0.2
     # via PyDynamic (setup.py)
 pillow==9.5.0
     # via matplotlib
@@ -47,7 +47,7 @@ scipy==1.10.1
     # via PyDynamic (setup.py)
 six==1.16.0
     # via python-dateutil
-sympy==1.11.1
+sympy==1.12
     # via PyDynamic (setup.py)
 time-series-buffer==0.1.4b0
     # via PyDynamic (setup.py)
