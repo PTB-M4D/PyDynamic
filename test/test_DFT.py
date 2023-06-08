@@ -253,7 +253,7 @@ def test_DFT_MC(params):
         return_samples=False,
         return_histograms=False,
         compute_full_covariance=True,
-        n_cpu = 1,
+        n_cpu=1,
     )
 
     # compare analytical and numerical result
@@ -296,7 +296,7 @@ def test_iDFT_MC(params):
         return_samples=False,
         return_histograms=False,
         compute_full_covariance=True,
-        n_cpu = 1,
+        n_cpu=1,
     )
 
     # compare analytical and numerical result
