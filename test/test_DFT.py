@@ -166,7 +166,6 @@ def random_vector_and_matrix_with_matching_number_of_columns(
 
 @composite
 def iDFT_input_output_lengths(draw: Callable, equal_lengths: bool = False):
-
     input_length = draw(hst.integers(min_value=5, max_value=15))
 
     if equal_lengths:
@@ -263,6 +262,46 @@ def test_DFT_MC(params):
 
 def evaluate_idft_mc(X, Nx):
     return np.fft.irfft(ri2c(X), Nx)
+
+
+@pytest.mark.slow
+@given(iDFT_input_output_lengths(equal_lengths=True))
+def test_iDFT_MC(params):
+    N = params["input_length"]
+    Nx = params["output_length"]
+    NX = evaluate_dft_mc(np.zeros(N)).size  # corresponding spectrum size
+    assert N == Nx
+
+    # create spectrum and corresponding covariance matrix
+    X = np.arange(NX) + 2
+    X_cov = scl.toeplitz(0.01 * np.arange(NX)[::-1])
+
+    # get spectrum
+    x, x_cov = GUM_iDFT(X, X_cov, Nx=Nx)
+
+    # get spectrum (Monte Carlo)
+    draw_samples = lambda size: np.random.multivariate_normal(
+        mean=X, cov=X_cov, size=size
+    )
+    import functools
+
+    evaluate = functools.partial(evaluate_idft_mc, Nx=Nx)
+    x_MC, x_MC_cov, _, _ = UMC_generic(
+        draw_samples,
+        evaluate,
+        runs=1000,
+        blocksize=100,
+        runs_init=10,
+        return_samples=False,
+        return_histograms=False,
+        compute_full_covariance=True,
+    )
+
+    # compare analytical and numerical result
+    assert_allclose(x, x_MC, atol=1e-1)
+    assert_allclose(x_cov, x_MC_cov, atol=1e-1)
+
+
 @given(iDFT_input_output_lengths())
 def test_iDFT_resampling_sensitivity(params):
     N = params["input_length"]
