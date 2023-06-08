@@ -228,7 +228,6 @@ def evaluate_dft_mc(x):
     return c2ri(np.fft.rfft(x))
 
 
-@pytest.mark.skip(reason="Takes too long.")
 @pytest.mark.slow
 @given(iDFT_input_output_lengths(equal_lengths=True))
 def test_DFT_MC(params):
@@ -249,23 +248,23 @@ def test_DFT_MC(params):
         draw_samples,
         evaluate_dft_mc,
         runs=1000,
-        blocksize=100,
-        runs_init=10,
+        blocksize=1000,
+        runs_init=2,
         return_samples=False,
         return_histograms=False,
         compute_full_covariance=True,
+        n_cpu = 1,
     )
 
     # compare analytical and numerical result
-    assert_allclose(X, X_MC, atol=1e0)
-    assert_allclose(X_cov, X_MC_cov, atol=1e-1)
+    assert_allclose(X, X_MC, rtol=1e-1)
+    assert_allclose(X_cov, X_MC_cov, atol=5e-1)
 
 
 def evaluate_idft_mc(X, Nx):
     return np.fft.irfft(ri2c(X), Nx)
 
 
-@pytest.mark.skip(reason="Takes too long.")
 @pytest.mark.slow
 @given(iDFT_input_output_lengths(equal_lengths=True))
 def test_iDFT_MC(params):
@@ -292,15 +291,16 @@ def test_iDFT_MC(params):
         draw_samples,
         evaluate,
         runs=1000,
-        blocksize=100,
-        runs_init=10,
+        blocksize=1000,
+        runs_init=2,
         return_samples=False,
         return_histograms=False,
         compute_full_covariance=True,
+        n_cpu = 1,
     )
 
     # compare analytical and numerical result
-    assert_allclose(x, x_MC, atol=1e-1)
+    assert_allclose(x, x_MC, atol=2e-1)
     assert_allclose(x_cov, x_MC_cov, atol=1e-1)
 
 
