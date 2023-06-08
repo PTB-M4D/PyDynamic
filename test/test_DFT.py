@@ -208,7 +208,8 @@ def test_DFT_iDFT_identity(params):
     assert N == Nx
 
     # create time signal and corresponding covariance matrix
-    x, x_cov = np.arange(N) + 2, np.eye(N)
+    x = np.arange(N) + 2
+    x_cov = scl.toeplitz(np.arange(N)[::-1])
 
     # get spectrum
     X, X_cov = GUM_DFT(x, x_cov)
