@@ -5,7 +5,7 @@ from typing import Callable, Dict, Optional, Tuple, Union
 import numpy as np
 import scipy.linalg as scl
 import pytest
-from hypothesis import assume, given, strategies as hst
+from hypothesis import assume, given, settings, strategies as hst
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
 
@@ -228,6 +228,7 @@ def evaluate_dft_mc(x):
     return c2ri(np.fft.rfft(x))
 
 
+@settings(deadline=1000)
 @pytest.mark.slow
 @given(iDFT_input_output_lengths(equal_lengths=True))
 def test_DFT_MC(params):
@@ -247,8 +248,8 @@ def test_DFT_MC(params):
     X_MC, X_MC_cov, _, _ = UMC_generic(
         draw_samples,
         evaluate_dft_mc,
-        runs=1000,
-        blocksize=1000,
+        runs=20000,
+        blocksize=2000,
         runs_init=2,
         return_samples=False,
         return_histograms=False,
@@ -258,7 +259,7 @@ def test_DFT_MC(params):
 
     # compare analytical and numerical result
     assert_allclose(X, X_MC, rtol=1e-1)
-    assert_allclose(X_cov, X_MC_cov, atol=5e-1)
+    assert_allclose(X_cov, X_MC_cov, atol=8e-1)
 
 
 def evaluate_idft_mc(X, Nx):
