@@ -3,7 +3,7 @@
 There is a [quick way](#quick-setup-not-recommended) to get started, but we advise 
 setting up a virtual environment and guide through the process in the section
 [Proper Python setup with virtual environment
-x](#proper-python-setup-with-virtual-environment-recommended)
+](#proper-python-setup-with-virtual-environment-recommended).
 
 ## Quick setup (**not recommended**)
 
