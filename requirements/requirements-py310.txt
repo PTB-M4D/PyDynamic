@@ -43,7 +43,7 @@ pytz==2023.3
     # via pandas
 pywavelets==1.4.1
     # via PyDynamic (setup.py)
-scipy==1.11.1
+scipy==1.10.0
     # via PyDynamic (setup.py)
 six==1.16.0
     # via python-dateutil
