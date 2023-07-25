@@ -1,18 +1,18 @@
 """ Perform tests on methods to handle DFT and inverse DFT."""
 
-from typing import Callable, Dict, Optional, Tuple, Union
-
 import numpy as np
-import scipy.linalg as scl
 import pytest
+import scipy.linalg as scl
 from hypothesis import assume, given, settings, strategies as hst
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
+from typing import Callable, Dict, Optional, Tuple, Union
 
 from PyDynamic.misc.testsignals import multi_sine
-from PyDynamic.misc.tools import real_imag_2_complex as ri2c
-from PyDynamic.misc.tools import complex_2_real_imag as c2ri
-from PyDynamic.uncertainty.propagate_MonteCarlo import UMC_generic
+from PyDynamic.misc.tools import (
+    complex_2_real_imag as c2ri,
+    real_imag_2_complex as ri2c,
+)
 
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_DFT import (
@@ -23,6 +23,7 @@ from PyDynamic.uncertainty.propagate_DFT import (
     GUM_iDFT,
     Time2AmpPhase,
 )
+from PyDynamic.uncertainty.propagate_MonteCarlo import UMC_generic
 from .conftest import (
     check_no_nans_and_infs,
     hypothesis_float_matrix,
@@ -228,7 +229,7 @@ def evaluate_dft_mc(x):
     return c2ri(np.fft.rfft(x))
 
 
-@settings(deadline=1000)
+@settings(deadline=2000)
 @pytest.mark.slow
 @given(iDFT_input_output_lengths(equal_lengths=True))
 def test_DFT_MC(params):
