@@ -564,8 +564,8 @@ jobs:
       - run:
           name: Generate file with tweet's content
           command: |
-#            source venv/bin/activate
-            new_version=v99.0.0
+            source venv/bin/activate
+            new_version=$(semantic-release print-version)
             if [ -z $new_version ]; then
               rm -f tweet.txt
               touch tweet.txt
