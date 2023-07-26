@@ -20,10 +20,12 @@ def read(rel_path):
 
 
 class Tweet(Command):
-
     filename: str
 
-    bearer_token: str
+    consumer_key: str
+    consumer_secret: str
+    access_token: str
+    access_token_secret: str
 
     description = "Send new tweets to the Twitter API to announce releases"
 
@@ -40,26 +42,43 @@ class Tweet(Command):
         import tweepy
         from tweepy import Client
 
-        def _set_twitter_api_bearer_token():
-            self.bearer_token = os.getenv("BEARER_TOKEN")
-            if self.bearer_token is None:
-                raise ValueError(
-                        "ValueError: Environment variable 'BEARER_TOKEN' has to be set."
-                    )
+        def _set_twitter_api_secrets():
+            self.consumer_key = os.getenv("CONSUMER_KEY")
+            self.consumer_secret = os.getenv("CONSUMER_SECRET")
+            self.access_token = os.getenv("ACCESS_TOKEN")
+            self.access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
 
         def _tweet():
             # _get_twitter_api_handle().create_tweet(text=read_tweet_from_file())
-            _get_twitter_api_handle().search_recent_tweets(query="metrology", max_results=1)
+            _get_twitter_api_auth_handle().search_recent_tweets(
+                query="metrology", max_results=1
+            )
 
-        def _get_twitter_api_handle() -> Client:
-            return tweepy.Client(self.bearer_token)
+        def _get_twitter_api_auth_handle() -> Client:
+            try:
+                auth = tweepy.Client(
+                    consumer_key=self.consumer_key,
+                    consumer_secret=self.consumer_secret,
+                    access_token=self.access_token,
+                    access_token_secret=self.access_token_secret,
+                )
+                return auth
+            except TypeError as e:
+                if "Consumer key must be" in str(e):
+                    raise ValueError(
+                        "ValueError: Environment variables 'CONSUMER_KEY', "
+                        "'CONSUMER_SECRET', 'ACCESS_TOKEN' and 'ACCESS_TOKEN_SECRET' "
+                        "have to be set."
+                    )
+
+                raise TypeError(str(e))
 
         def read_tweet_from_file() -> str:
             with open(self.filename, "r") as f:
                 content: str = f.read()
             return content
 
-        _set_twitter_api_bearer_token()
+        _set_twitter_api_secrets()
         _tweet()
 
 
