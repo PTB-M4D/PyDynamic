@@ -23,6 +23,8 @@ class Tweet(Command):
 
     filename: str
 
+    bearer_token: str
+
     description = "Send new tweets to the Twitter API to announce releases"
 
     user_options = [("filename=", "f", "filename containing the tweet")]
@@ -36,35 +38,28 @@ class Tweet(Command):
 
     def run(self):
         import tweepy
+        from tweepy import Client
+
+        def _set_twitter_api_bearer_token():
+            self.bearer_token = os.getenv("BEARER_TOKEN")
+            if self.bearer_token is None:
+                raise ValueError(
+                        "ValueError: Environment variable 'BEARER_TOKEN' has to be set."
+                    )
 
         def _tweet():
-            _get_twitter_api_handle().update_status(read_tweet_from_file())
+            # _get_twitter_api_handle().create_tweet(text=read_tweet_from_file())
+            _get_twitter_api_handle().search_recent_tweets(query="metrology", max_results=1)
 
-        def _get_twitter_api_handle():
-            return tweepy.API(_get_twitter_api_auth_handle())
-
-        def _get_twitter_api_auth_handle():
-            try:
-                auth = tweepy.OAuthHandler(
-                    os.getenv("consumer_key"), os.getenv("consumer_secret")
-                )
-                auth.set_access_token(
-                    os.getenv("access_token"), os.getenv("access_token_secret")
-                )
-                return auth
-            except TypeError as e:
-                if "Consumer key must be" in str(e):
-                    raise ValueError(
-                        "ValueError: Environment variables 'consumer_key', "
-                        "'consumer_secret', 'access_token' and 'access_token_secret' "
-                        "have to be set."
-                    )
+        def _get_twitter_api_handle() -> Client:
+            return tweepy.Client(self.bearer_token)
 
         def read_tweet_from_file() -> str:
             with open(self.filename, "r") as f:
                 content: str = f.read()
             return content
 
+        _set_twitter_api_bearer_token()
         _tweet()
 
 
