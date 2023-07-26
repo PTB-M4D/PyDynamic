@@ -52,7 +52,7 @@ class Tweet(Command):
         self._filename = "tweet.txt"
 
     def finalize_options(self):
-        """React to invalid circumstance that no filename is set to extract the tweet's content"""
+        """React to invalid circumstance that no filename is set"""
         if self._filename is None:
             raise RuntimeError("Parameter --filename is missing")
 
