@@ -1,15 +1,18 @@
 """ Perform tests on methods to handle DFT and inverse DFT."""
 
-from typing import Callable, Dict, Optional, Tuple, Union
-
 import numpy as np
 import pytest
-from hypothesis import assume, given, strategies as hst
+import scipy.linalg as scl
+from hypothesis import assume, given, settings, strategies as hst
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
+from typing import Callable, Dict, Optional, Tuple, Union
 
 from PyDynamic.misc.testsignals import multi_sine
-from PyDynamic.misc.tools import real_imag_2_complex as ri2c
+from PyDynamic.misc.tools import (
+    complex_2_real_imag as c2ri,
+    real_imag_2_complex as ri2c,
+)
 
 # noinspection PyProtectedMember
 from PyDynamic.uncertainty.propagate_DFT import (
@@ -20,6 +23,7 @@ from PyDynamic.uncertainty.propagate_DFT import (
     GUM_iDFT,
     Time2AmpPhase,
 )
+from PyDynamic.uncertainty.propagate_MonteCarlo import UMC_generic
 from .conftest import (
     check_no_nans_and_infs,
     hypothesis_float_matrix,
@@ -163,7 +167,6 @@ def random_vector_and_matrix_with_matching_number_of_columns(
 
 @composite
 def iDFT_input_output_lengths(draw: Callable, equal_lengths: bool = False):
-
     input_length = draw(hst.integers(min_value=5, max_value=15))
 
     if equal_lengths:
@@ -208,7 +211,8 @@ def test_DFT_iDFT_identity(params):
     assert N == Nx
 
     # create time signal and corresponding covariance matrix
-    x, x_cov = np.arange(N) + 2, np.eye(N)
+    x = np.arange(N) + 2
+    x_cov = scl.toeplitz(np.arange(N)[::-1])
 
     # get spectrum
     X, X_cov = GUM_DFT(x, x_cov)
@@ -217,8 +221,89 @@ def test_DFT_iDFT_identity(params):
     x_reconstructed, x_reconstructed_cov = GUM_iDFT(X, X_cov, Nx=Nx)
 
     # check signal and covariance in case of reconstruction to identity
-    assert_allclose(x, x_reconstructed, atol=1e-14)
-    assert_allclose(x_cov, x_reconstructed_cov, atol=1e-14)
+    assert_allclose(x, x_reconstructed, atol=1e-13)
+    assert_allclose(x_cov, x_reconstructed_cov, atol=1e-13)
+
+
+def evaluate_dft_mc(x):
+    return c2ri(np.fft.rfft(x))
+
+
+@settings(deadline=2000)
+@pytest.mark.slow
+@given(iDFT_input_output_lengths(equal_lengths=True))
+def test_DFT_MC(params):
+    N = params["input_length"]
+
+    # create time signal and corresponding covariance matrix
+    x = np.arange(N) + 2
+    x_cov = scl.toeplitz(0.01 * np.arange(N)[::-1])
+
+    # get spectrum
+    X, X_cov = GUM_DFT(x, x_cov)
+
+    # get spectrum (Monte Carlo)
+    draw_samples = lambda size: np.random.multivariate_normal(
+        mean=x, cov=x_cov, size=size
+    )
+    X_MC, X_MC_cov, _, _ = UMC_generic(
+        draw_samples,
+        evaluate_dft_mc,
+        runs=20000,
+        blocksize=2000,
+        runs_init=2,
+        return_samples=False,
+        return_histograms=False,
+        compute_full_covariance=True,
+        n_cpu=1,
+    )
+
+    # compare analytical and numerical result
+    assert_allclose(X, X_MC, rtol=1e-1)
+    assert_allclose(X_cov, X_MC_cov, atol=8e-1)
+
+
+def evaluate_idft_mc(X, Nx):
+    return np.fft.irfft(ri2c(X), Nx)
+
+
+@pytest.mark.slow
+@given(iDFT_input_output_lengths(equal_lengths=True))
+def test_iDFT_MC(params):
+    N = params["input_length"]
+    Nx = params["output_length"]
+    NX = evaluate_dft_mc(np.zeros(N)).size  # corresponding spectrum size
+    assert N == Nx
+
+    # create spectrum and corresponding covariance matrix
+    X = np.arange(NX) + 2
+    X_cov = scl.toeplitz(0.01 * np.arange(NX)[::-1])
+
+    # get spectrum
+    x, x_cov = GUM_iDFT(X, X_cov, Nx=Nx)
+
+    # get spectrum (Monte Carlo)
+    draw_samples = lambda size: np.random.multivariate_normal(
+        mean=X, cov=X_cov, size=size
+    )
+    import functools
+
+    evaluate = functools.partial(evaluate_idft_mc, Nx=Nx)
+    x_MC, x_MC_cov, _, _ = UMC_generic(
+        draw_samples,
+        evaluate,
+        runs=1000,
+        blocksize=1000,
+        runs_init=2,
+        return_samples=False,
+        return_histograms=False,
+        compute_full_covariance=True,
+        n_cpu=1,
+    )
+
+    # compare analytical and numerical result
+    assert_allclose(x, x_MC, atol=2e-1)
+    assert_allclose(x_cov, x_MC_cov, atol=1e-1)
 
 
 @given(iDFT_input_output_lengths())

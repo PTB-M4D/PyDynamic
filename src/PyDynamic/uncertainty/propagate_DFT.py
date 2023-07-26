@@ -418,7 +418,9 @@ def GUM_iDFT(
         II = UF[N_in:, N_in:]
         # propagate uncertainties
         Ux = np.dot(Cc, np.dot(RR, Cc.T))
-        Ux += 2 * np.dot(Cc, np.dot(RI, Cs.T))
+        term2 = np.dot(Cc, np.dot(RI, Cs.T))
+        Ux += term2
+        Ux += term2.T
         Ux += np.dot(Cs, np.dot(II, Cs.T))
     else:
         RR = UF[:N_in]

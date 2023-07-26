@@ -2,6 +2,7 @@
 import codecs
 import os
 from os import path
+from typing import List, Tuple
 
 from setuptools import Command, find_packages, setup
 
@@ -9,72 +10,96 @@ from setuptools import Command, find_packages, setup
 def get_readme():
     """Get README.md's content"""
     this_directory = path.abspath(path.dirname(__file__))
-    with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
-        return f.read()
+    with open(path.join(this_directory, "README.md"), encoding="utf-8") as file:
+        return file.read()
 
 
-def read(rel_path):
-    here = path.abspath(path.dirname(__file__))
-    with codecs.open(path.join(here, rel_path), "r") as fp:
-        return fp.read()
-
-
-class Tweet(Command):
-
-    filename: str
-
-    description = "Send new tweets to the Twitter API to announce releases"
-
-    user_options = [("filename=", "f", "filename containing the tweet")]
-
-    def initialize_options(self):
-        self.filename = "tweet.txt"
-
-    def finalize_options(self):
-        if self.filename is None:
-            raise RuntimeError("Parameter --filename is missing")
-
-    def run(self):
-        import tweepy
-
-        def _tweet():
-            _get_twitter_api_handle().update_status(read_tweet_from_file())
-
-        def _get_twitter_api_handle():
-            return tweepy.API(_get_twitter_api_auth_handle())
-
-        def _get_twitter_api_auth_handle():
-            try:
-                auth = tweepy.OAuthHandler(
-                    os.getenv("consumer_key"), os.getenv("consumer_secret")
-                )
-                auth.set_access_token(
-                    os.getenv("access_token"), os.getenv("access_token_secret")
-                )
-                return auth
-            except TypeError as e:
-                if "Consumer key must be" in str(e):
-                    raise ValueError(
-                        "ValueError: Environment variables 'consumer_key', "
-                        "'consumer_secret', 'access_token' and 'access_token_secret' "
-                        "have to be set."
-                    )
-
-        def read_tweet_from_file() -> str:
-            with open(self.filename, "r") as f:
-                content: str = f.read()
-            return content
-
-        _tweet()
-
-
-def get_version(rel_path):
-    for line in read(rel_path).splitlines():
+def get_version(rel_path: str) -> str:
+    """Extract __version__ variable's value from a file's content"""
+    for line in read_file_content(rel_path).splitlines():
         if line.startswith("__version__"):
             delim = '"' if '"' in line else "'"
             return line.split(delim)[1]
-    else:
-        raise RuntimeError("Unable to find version string.")
+    raise RuntimeError("Unable to find version string.")
+
+
+def read_file_content(rel_path: str) -> str:
+    """Extract a file's content and provide a variable to access it"""
+    here = path.abspath(path.dirname(__file__))
+    with codecs.open(path.join(here, rel_path), "r") as file:
+        return file.read()
+
+
+class Tweet(Command):
+    """Handle the tweeting on executing setup.py tweet"""
+
+    _filename: str
+
+    _consumer_key: str
+    _consumer_secret: str
+    _access_token: str
+    _access_token_secret: str
+    _twitter_api_auth_handle = None
+
+    description: str = "Send new tweets to the Twitter API to announce releases"
+
+    user_options: List[Tuple[str, str, str]] = [
+        ("filename=", "f", "filename containing the tweet")
+    ]
+
+    def initialize_options(self):
+        """Set filename to default value"""
+        self._filename = "tweet.txt"
+
+    def finalize_options(self):
+        """React to invalid circumstance that no filename is set"""
+        if self._filename is None:
+            raise RuntimeError("Parameter --filename is missing")
+
+    def run(self):
+        """Actually organize and conduct the tweeting"""
+        from tweepy import Client
+
+        def set_twitter_api_secrets_from_environment():
+            self._consumer_key = os.getenv("CONSUMER_KEY")
+            self._consumer_secret = os.getenv("CONSUMER_SECRET")
+            self._access_token = os.getenv("ACCESS_TOKEN")
+            self._access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
+
+        def set_twitter_api_auth_handle():
+            self._twitter_api_auth_handle = raise_error_or_retrieve_handle()
+
+        def raise_error_or_retrieve_handle() -> Client:
+            try:
+                return initialize_twitter_api_auth_handle()
+            except TypeError as type_error_message:
+                if "must be string or bytes" in str(type_error_message):
+                    raise ValueError(
+                        "ValueError: Environment variables 'CONSUMER_KEY', "
+                        "'CONSUMER_SECRET', 'ACCESS_TOKEN' and 'ACCESS_TOKEN_SECRET' "
+                        "have to be set."
+                    )
+                raise TypeError from type_error_message
+
+        def initialize_twitter_api_auth_handle() -> Client:
+            return Client(
+                consumer_key=self._consumer_key,
+                consumer_secret=self._consumer_secret,
+                access_token=self._access_token,
+                access_token_secret=self._access_token_secret,
+            )
+
+        def tweet():
+            self._twitter_api_auth_handle.create_tweet(text=read_tweet_from_file())
+
+        def read_tweet_from_file() -> str:
+            with open(self._filename, "r", encoding="utf-8") as file:
+                content: str = file.read()
+            return content
+
+        set_twitter_api_secrets_from_environment()
+        set_twitter_api_auth_handle()
+        tweet()
 
 
 current_release_version = get_version("src/PyDynamic/__init__.py")
@@ -86,10 +111,13 @@ setup(
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     url="https://ptb-m4d.github.io/PyDynamic/",
-    download_url="https://github.com/PTB-M4D/PyDynamic/releases/download/v{0}/"
-    "PyDynamic-{0}.tar.gz".format(current_release_version),
-    author="Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
-    "Martin Weber",
+    download_url=(
+        f"https://github.com/PTB-M4D/PyDynamic/releases/download/"
+        f"v{current_release_version}/PyDynamic-{current_release_version}.tar.gz"
+    ),
+    author=(
+        "Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, Martin Weber"
+    ),
     author_email="sascha.eichstaedt@ptb.de",
     keywords="measurement uncertainty, dynamic measurements, metrology, GUM",
     packages=find_packages(where="src"),
