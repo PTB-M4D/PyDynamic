@@ -115,8 +115,9 @@ setup(
         f"https://github.com/PTB-M4D/PyDynamic/releases/download/"
         f"v{current_release_version}/PyDynamic-{current_release_version}.tar.gz"
     ),
-    author="Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
-    "Martin Weber",
+    author=(
+        "Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, Martin Weber"
+    ),
     author_email="sascha.eichstaedt@ptb.de",
     keywords="measurement uncertainty, dynamic measurements, metrology, GUM",
     packages=find_packages(where="src"),
