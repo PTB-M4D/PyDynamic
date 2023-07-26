@@ -20,15 +20,13 @@ def read(rel_path):
 
 
 class Tweet(Command):
-    from tweepy import Client
-
     _filename: str
 
     _consumer_key: str
     _consumer_secret: str
     _access_token: str
     _access_token_secret: str
-    _twitter_api_auth_handle: Client
+    _twitter_api_auth_handle: "Client"
 
     description: str = "Send new tweets to the Twitter API to announce releases"
 
