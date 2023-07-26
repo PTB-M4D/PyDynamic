@@ -110,9 +110,10 @@ setup(
     long_description=get_readme(),
     long_description_content_type="text/markdown",
     url="https://ptb-m4d.github.io/PyDynamic/",
-    download_url=f"https://github.com/PTB-M4D/PyDynamic/releases/download/"
-    f"v{current_release_version}/"
-    f"PyDynamic-{current_release_version}.tar.gz",
+    download_url=(
+        f"https://github.com/PTB-M4D/PyDynamic/releases/download/"
+        f"v{current_release_version}/PyDynamic-{current_release_version}.tar.gz"
+    ),
     author="Sascha Eichstädt, Maximilian Gruber, Björn Ludwig, Thomas Bruns, "
     "Martin Weber",
     author_email="sascha.eichstaedt@ptb.de",
