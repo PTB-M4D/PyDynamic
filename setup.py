@@ -4,7 +4,6 @@ import os
 from os import path
 
 from setuptools import Command, find_packages, setup
-from tweepy import Client
 
 
 def get_readme():
@@ -21,6 +20,8 @@ def read(rel_path):
 
 
 class Tweet(Command):
+    from tweepy import Client
+
     _filename: str
 
     _consumer_key: str
@@ -41,6 +42,8 @@ class Tweet(Command):
             raise RuntimeError("Parameter --filename is missing")
 
     def run(self):
+        from tweepy import Client
+
         def _set_twitter_api_secrets_from_environment():
             self._consumer_key = os.getenv("CONSUMER_KEY")
             self._consumer_secret = os.getenv("CONSUMER_SECRET")
