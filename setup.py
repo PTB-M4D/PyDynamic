@@ -51,7 +51,7 @@ class Tweet(Command):
         def _tweet():
             # _get_twitter_api_handle().create_tweet(text=read_tweet_from_file())
             _get_twitter_api_auth_handle().search_recent_tweets(
-                query="metrology", max_results=1
+                query="metrology", max_results=1, user_auth=True
             )
 
         def _get_twitter_api_auth_handle() -> Client:
