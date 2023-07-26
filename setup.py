@@ -66,11 +66,11 @@ class Tweet(Command):
             self._access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
 
         def set_twitter_api_auth_handle():
-            self._twitter_api_auth_handle = _raise_error_or_retrieve_handle()
+            self._twitter_api_auth_handle = raise_error_or_retrieve_handle()
 
-        def _raise_error_or_retrieve_handle() -> Client:
+        def raise_error_or_retrieve_handle() -> Client:
             try:
-                return _initialize_twitter_api_auth_handle()
+                return initialize_twitter_api_auth_handle()
             except TypeError as type_error_message:
                 if "must be string or bytes" in str(type_error_message):
                     raise ValueError(
@@ -80,7 +80,7 @@ class Tweet(Command):
                     )
                 raise TypeError from type_error_message
 
-        def _initialize_twitter_api_auth_handle() -> Client:
+        def initialize_twitter_api_auth_handle() -> Client:
             return Client(
                 consumer_key=self._consumer_key,
                 consumer_secret=self._consumer_secret,
