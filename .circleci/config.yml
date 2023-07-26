@@ -212,6 +212,7 @@ workflows:
   test_tweets:
     jobs:
       - preview_release:
+          requires:
           filters:
             branches:
               ignore: /.*dev$/
