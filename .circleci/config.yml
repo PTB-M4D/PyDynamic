@@ -210,7 +210,6 @@ workflows:
 #          requires:
 #            - confirm_previewed_release_actions
   test_tweets:
-    jobs:
       - preview_release:
           requires:
           filters:
