@@ -4,6 +4,7 @@ import os
 from os import path
 
 from setuptools import Command, find_packages, setup
+from tweepy import Client
 
 
 def get_readme():
@@ -20,65 +21,65 @@ def read(rel_path):
 
 
 class Tweet(Command):
-    filename: str
+    _filename: str
 
-    consumer_key: str
-    consumer_secret: str
-    access_token: str
-    access_token_secret: str
+    _consumer_key: str
+    _consumer_secret: str
+    _access_token: str
+    _access_token_secret: str
+    _twitter_api_auth_handle: Client
 
-    description = "Send new tweets to the Twitter API to announce releases"
+    description: str = "Send new tweets to the Twitter API to announce releases"
 
-    user_options = [("filename=", "f", "filename containing the tweet")]
+    user_options: str = [("filename=", "f", "filename containing the tweet")]
 
     def initialize_options(self):
-        self.filename = "tweet.txt"
+        self._filename = "tweet.txt"
 
     def finalize_options(self):
-        if self.filename is None:
+        if self._filename is None:
             raise RuntimeError("Parameter --filename is missing")
 
     def run(self):
-        import tweepy
-        from tweepy import Client
-
-        def _set_twitter_api_secrets():
-            self.consumer_key = os.getenv("CONSUMER_KEY")
-            self.consumer_secret = os.getenv("CONSUMER_SECRET")
-            self.access_token = os.getenv("ACCESS_TOKEN")
-            self.access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
+        def _set_twitter_api_secrets_from_environment():
+            self._consumer_key = os.getenv("CONSUMER_KEY")
+            self._consumer_secret = os.getenv("CONSUMER_SECRET")
+            self._access_token = os.getenv("ACCESS_TOKEN")
+            self._access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
 
         def _tweet():
-            # _get_twitter_api_handle().create_tweet(text=read_tweet_from_file())
-            _get_twitter_api_auth_handle().search_recent_tweets(
-                query="metrology", max_results=1, user_auth=True
-            )
+            self._twitter_api_auth_handle.create_tweet(text=read_tweet_from_file())
 
-        def _get_twitter_api_auth_handle() -> Client:
+        def _set_twitter_api_auth_handle():
+            self._twitter_api_auth_handle = _raise_error_or_retrieve_handle()
+
+        def _raise_error_or_retrieve_handle() -> Client:
             try:
-                auth = tweepy.Client(
-                    consumer_key=self.consumer_key,
-                    consumer_secret=self.consumer_secret,
-                    access_token=self.access_token,
-                    access_token_secret=self.access_token_secret,
-                )
-                return auth
-            except TypeError as e:
-                if "Consumer key must be" in str(e):
+                return _initialize_twitter_api_auth_handle()
+            except TypeError as type_error_message:
+                if "must be string or bytes" in str(type_error_message):
                     raise ValueError(
                         "ValueError: Environment variables 'CONSUMER_KEY', "
                         "'CONSUMER_SECRET', 'ACCESS_TOKEN' and 'ACCESS_TOKEN_SECRET' "
                         "have to be set."
                     )
+                raise TypeError(str(type_error_message))
 
-                raise TypeError(str(e))
+        def _initialize_twitter_api_auth_handle() -> Client:
+            return Client(
+                consumer_key=self._consumer_key,
+                consumer_secret=self._consumer_secret,
+                access_token=self._access_token,
+                access_token_secret=self._access_token_secret,
+            )
 
         def read_tweet_from_file() -> str:
-            with open(self.filename, "r") as f:
+            with open(self._filename, "r") as f:
                 content: str = f.read()
             return content
 
-        _set_twitter_api_secrets()
+        _set_twitter_api_secrets_from_environment()
+        _set_twitter_api_auth_handle()
         _tweet()
 
 
