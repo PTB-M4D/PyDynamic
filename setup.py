@@ -2,6 +2,7 @@
 import codecs
 import os
 from os import path
+from typing import List, Tuple
 
 from setuptools import Command, find_packages, setup
 
@@ -42,7 +43,7 @@ class Tweet(Command):
 
     description: str = "Send new tweets to the Twitter API to announce releases"
 
-    user_options: list[tuple[str, str, str]] = [
+    user_options: List[Tuple[str, str, str]] = [
         ("filename=", "f", "filename containing the tweet")
     ]
 
