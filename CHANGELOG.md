@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.1 (2023-07-27)
+
+### Fix
+
+* **GUM_iDFT:** Replace 2 * A with A + A^T ([`682cd4b`](https://github.com/PTB-M4D/PyDynamic/commit/682cd4b05b8380c516931464d67f5a8b8c8d3dd6))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.4.0...v2.4.1)**
+
 ## v2.4.0 (2023-03-20)
 ### Feature
 * **tools:** Add support for multidimensional arrays and PyDynamics real-imag-type in trimOrPad ([`1d4acfc`](https://github.com/PTB-M4D/PyDynamic/commit/1d4acfc03fd7dea230354922de33640a2dd2b13c))
