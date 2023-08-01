@@ -141,6 +141,22 @@ setup(
     ],
     extras_require={
         "examples": ["notebook"],
+        "dev": [
+            "black[jupyter]",
+            "hypothesis",
+            "ipykernel",
+            "ipython",
+            "myst-parser",
+            "nbsphinx",
+            "pytest",
+            "pytest-cov",
+            "pytest-custom-exit-code",
+            "python-semantic-release",
+            "sphinx",
+            "sphinx-rtd-theme",
+            "tox",
+            "tweepy",
+        ],
     },
     python_requires=">=3.7",
     classifiers=[
