@@ -8,30 +8,32 @@
     # via -r requirements/dev-requirements.in
 alabaster==0.7.13
     # via sphinx
-anyio==3.7.0
+anyio==3.7.1
     # via jupyter-server
 argon2-cffi==21.3.0
-    # via
-    #   jupyter-server
-    #   nbclassic
-    #   notebook
+    # via jupyter-server
 argon2-cffi-bindings==21.2.0
     # via argon2-cffi
 arrow==1.2.3
     # via isoduration
 asttokens==2.2.1
     # via stack-data
+async-lru==2.0.4
+    # via jupyterlab
 attrs==23.1.0
     # via
     #   hypothesis
     #   jsonschema
+    #   referencing
 babel==2.12.1
-    # via sphinx
+    # via
+    #   jupyterlab-server
+    #   sphinx
 backcall==0.2.0
     # via ipython
 beautifulsoup4==4.12.2
     # via nbconvert
-black[jupyter]==23.3.0
+black[jupyter]==23.7.0
     # via -r requirements/dev-requirements.in
 bleach==6.0.0
     # via
@@ -39,7 +41,7 @@ bleach==6.0.0
     #   readme-renderer
 cachetools==5.3.1
     # via tox
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 cffi==1.15.1
     # via
@@ -47,9 +49,9 @@ cffi==1.15.1
     #   cryptography
 chardet==5.1.0
     # via tox
-charset-normalizer==3.1.0
+charset-normalizer==3.2.0
     # via requests
-click==8.1.3
+click==8.1.6
     # via
     #   black
     #   click-log
@@ -68,7 +70,7 @@ contourpy==1.1.0
     #   matplotlib
 coverage[toml]==7.2.7
     # via pytest-cov
-cryptography==41.0.1
+cryptography==41.0.2
     # via secretstorage
 cycler==0.11.0
     # via
@@ -80,7 +82,7 @@ decorator==5.1.1
     # via ipython
 defusedxml==0.7.1
     # via nbconvert
-distlib==0.3.6
+distlib==0.3.7
     # via virtualenv
 docutils==0.18.1
     # via
@@ -91,20 +93,20 @@ docutils==0.18.1
     #   sphinx-rtd-theme
 dotty-dict==1.3.1
     # via python-semantic-release
-exceptiongroup==1.1.1
+exceptiongroup==1.1.2
     # via
     #   anyio
     #   hypothesis
     #   pytest
 executing==1.2.0
     # via stack-data
-fastjsonschema==2.17.1
+fastjsonschema==2.18.0
     # via nbformat
 filelock==3.12.2
     # via
     #   tox
     #   virtualenv
-fonttools==4.40.0
+fonttools==4.41.1
     # via
     #   -c requirements/requirements-py38.txt
     #   matplotlib
@@ -116,9 +118,9 @@ future==0.18.3
     #   uncertainties
 gitdb==4.0.10
     # via gitpython
-gitpython==3.1.31
+gitpython==3.1.32
     # via python-semantic-release
-hypothesis==6.80.0
+hypothesis==6.82.0
     # via -r requirements/dev-requirements.in
 idna==3.4
     # via
@@ -127,42 +129,43 @@ idna==3.4
     #   requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==6.7.0
+importlib-metadata==6.8.0
     # via
     #   jupyter-client
+    #   jupyter-lsp
+    #   jupyterlab
+    #   jupyterlab-server
     #   keyring
     #   nbconvert
     #   sphinx
     #   twine
-importlib-resources==5.12.0
+importlib-resources==6.0.0
     # via
     #   -c requirements/requirements-py38.txt
     #   jsonschema
+    #   jsonschema-specifications
+    #   jupyterlab
     #   keyring
     #   matplotlib
+    #   notebook
 iniconfig==2.0.0
     # via pytest
-invoke==2.1.3
+invoke==2.2.0
     # via python-semantic-release
-ipykernel==6.23.3
+ipykernel==6.25.0
     # via
     #   -r requirements/dev-requirements.in
-    #   nbclassic
-    #   notebook
+    #   jupyterlab
 ipython==8.12.2
     # via
     #   -r requirements/dev-requirements.in
     #   black
     #   ipykernel
-ipython-genutils==0.2.0
-    # via
-    #   nbclassic
-    #   notebook
 isoduration==20.11.0
     # via jsonschema
-jaraco-classes==3.2.3
+jaraco-classes==3.3.0
     # via keyring
-jedi==0.18.2
+jedi==0.19.0
     # via ipython
 jeepney==0.8.0
     # via
@@ -171,45 +174,58 @@ jeepney==0.8.0
 jinja2==3.1.2
     # via
     #   jupyter-server
+    #   jupyterlab
+    #   jupyterlab-server
     #   myst-parser
-    #   nbclassic
     #   nbconvert
     #   nbsphinx
-    #   notebook
     #   sphinx
+json5==0.9.14
+    # via jupyterlab-server
 jsonpointer==2.4
     # via jsonschema
-jsonschema[format-nongpl]==4.17.3
+jsonschema[format-nongpl]==4.18.4
     # via
     #   jupyter-events
+    #   jupyterlab-server
     #   nbformat
+jsonschema-specifications==2023.7.1
+    # via jsonschema
 jupyter-client==8.3.0
     # via
     #   ipykernel
     #   jupyter-server
-    #   nbclassic
     #   nbclient
-    #   notebook
 jupyter-core==5.3.1
     # via
     #   ipykernel
     #   jupyter-client
     #   jupyter-server
-    #   nbclassic
+    #   jupyterlab
     #   nbclient
     #   nbconvert
     #   nbformat
-    #   notebook
-jupyter-events==0.6.3
+jupyter-events==0.7.0
     # via jupyter-server
+jupyter-lsp==2.2.0
+    # via jupyterlab
 jupyter-server==2.7.0
     # via
-    #   nbclassic
+    #   jupyter-lsp
+    #   jupyterlab
+    #   jupyterlab-server
+    #   notebook
     #   notebook-shim
 jupyter-server-terminals==0.4.4
     # via jupyter-server
+jupyterlab==4.0.3
+    # via notebook
 jupyterlab-pygments==0.2.2
     # via nbconvert
+jupyterlab-server==2.24.0
+    # via
+    #   jupyterlab
+    #   notebook
 keyring==24.2.0
     # via twine
 kiwisolver==1.4.4
@@ -224,7 +240,7 @@ markupsafe==2.1.3
     # via
     #   jinja2
     #   nbconvert
-matplotlib==3.7.1
+matplotlib==3.7.2
     # via
     #   -c requirements/requirements-py38.txt
     #   pydynamic
@@ -238,7 +254,7 @@ mdurl==0.1.2
     # via markdown-it-py
 mistune==3.0.1
     # via nbconvert
-more-itertools==9.1.0
+more-itertools==10.0.0
     # via jaraco-classes
 mpmath==1.3.0
     # via
@@ -248,35 +264,28 @@ mypy-extensions==1.0.0
     # via black
 myst-parser==2.0.0
     # via -r requirements/dev-requirements.in
-nbclassic==1.0.0
-    # via notebook
 nbclient==0.8.0
     # via nbconvert
-nbconvert==7.6.0
+nbconvert==7.7.3
     # via
     #   jupyter-server
-    #   nbclassic
     #   nbsphinx
-    #   notebook
-nbformat==5.9.0
+nbformat==5.9.2
     # via
     #   jupyter-server
-    #   nbclassic
     #   nbclient
     #   nbconvert
     #   nbsphinx
-    #   notebook
 nbsphinx==0.9.2
     # via -r requirements/dev-requirements.in
-nest-asyncio==1.5.6
-    # via
-    #   ipykernel
-    #   nbclassic
-    #   notebook
-notebook==6.5.4
+nest-asyncio==1.5.7
+    # via ipykernel
+notebook==7.0.1
     # via pydynamic
 notebook-shim==0.2.3
-    # via nbclassic
+    # via
+    #   jupyterlab
+    #   notebook
 numpy==1.24.4
     # via
     #   -c requirements/requirements-py38.txt
@@ -299,6 +308,8 @@ packaging==23.1
     #   black
     #   ipykernel
     #   jupyter-server
+    #   jupyterlab
+    #   jupyterlab-server
     #   matplotlib
     #   nbconvert
     #   pyproject-api
@@ -314,13 +325,13 @@ pandocfilters==1.5.0
     # via nbconvert
 parso==0.8.3
     # via jedi
-pathspec==0.11.1
+pathspec==0.11.2
     # via black
 pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pillow==9.5.0
+pillow==10.0.0
     # via
     #   -c requirements/requirements-py38.txt
     #   matplotlib
@@ -328,7 +339,7 @@ pkginfo==1.9.6
     # via twine
 pkgutil-resolve-name==1.3.10
     # via jsonschema
-platformdirs==3.8.0
+platformdirs==3.10.0
     # via
     #   black
     #   jupyter-core
@@ -338,12 +349,9 @@ pluggy==1.2.0
     # via
     #   pytest
     #   tox
-prometheus-client==0.17.0
-    # via
-    #   jupyter-server
-    #   nbclassic
-    #   notebook
-prompt-toolkit==3.0.38
+prometheus-client==0.17.1
+    # via jupyter-server
+prompt-toolkit==3.0.39
     # via ipython
 psutil==5.9.5
     # via ipykernel
@@ -361,14 +369,12 @@ pygments==2.15.1
     #   nbconvert
     #   readme-renderer
     #   sphinx
-pyparsing==3.1.0
+pyparsing==3.0.9
     # via
     #   -c requirements/requirements-py38.txt
     #   matplotlib
-pyproject-api==1.5.2
+pyproject-api==1.5.3
     # via tox
-pyrsistent==0.19.3
-    # via jsonschema
 pytest==7.4.0
     # via
     #   -r requirements/dev-requirements.in
@@ -381,6 +387,7 @@ pytest-custom-exit-code==0.3.0
 python-dateutil==2.8.2
     # via
     #   -c requirements/requirements-py38.txt
+    #   arrow
     #   jupyter-client
     #   matplotlib
     #   pandas
@@ -399,7 +406,7 @@ pywavelets==1.4.1
     # via
     #   -c requirements/requirements-py38.txt
     #   pydynamic
-pyyaml==6.0
+pyyaml==6.0.1
     # via
     #   jupyter-events
     #   myst-parser
@@ -408,12 +415,16 @@ pyzmq==25.1.0
     #   ipykernel
     #   jupyter-client
     #   jupyter-server
-    #   nbclassic
-    #   notebook
 readme-renderer==40.0
     # via twine
+referencing==0.30.0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
+    #   jupyter-events
 requests==2.31.0
     # via
+    #   jupyterlab-server
     #   python-gitlab
     #   python-semantic-release
     #   requests-oauthlib
@@ -437,6 +448,10 @@ rfc3986-validator==0.1.1
     # via
     #   jsonschema
     #   jupyter-events
+rpds-py==0.9.2
+    # via
+    #   jsonschema
+    #   referencing
 scipy==1.10.1
     # via
     #   -c requirements/requirements-py38.txt
@@ -446,10 +461,7 @@ secretstorage==3.3.3
 semver==2.13.0
     # via python-semantic-release
 send2trash==1.8.2
-    # via
-    #   jupyter-server
-    #   nbclassic
-    #   notebook
+    # via jupyter-server
 six==1.16.0
     # via
     #   -c requirements/requirements-py38.txt
@@ -500,34 +512,33 @@ terminado==0.17.1
     # via
     #   jupyter-server
     #   jupyter-server-terminals
-    #   nbclassic
-    #   notebook
 time-series-buffer==0.1.4b0
     # via
     #   -c requirements/requirements-py38.txt
     #   pydynamic
 tinycss2==1.2.1
     # via nbconvert
-tokenize-rt==5.1.0
+tokenize-rt==5.2.0
     # via black
 tomli==2.0.1
     # via
     #   black
     #   coverage
+    #   jupyterlab
     #   pyproject-api
     #   pytest
     #   tox
-tomlkit==0.11.8
+tomlkit==0.12.1
     # via python-semantic-release
 tornado==6.3.2
     # via
     #   ipykernel
     #   jupyter-client
     #   jupyter-server
-    #   nbclassic
+    #   jupyterlab
     #   notebook
     #   terminado
-tox==4.6.3
+tox==4.6.4
     # via -r requirements/dev-requirements.in
 tqdm==4.65.0
     # via twine
@@ -540,19 +551,19 @@ traitlets==5.9.0
     #   jupyter-core
     #   jupyter-events
     #   jupyter-server
+    #   jupyterlab
     #   matplotlib-inline
-    #   nbclassic
     #   nbclient
     #   nbconvert
     #   nbformat
     #   nbsphinx
-    #   notebook
 tweepy==4.14.0
     # via -r requirements/dev-requirements.in
 twine==3.8.0
     # via python-semantic-release
-typing-extensions==4.7.0
+typing-extensions==4.7.1
     # via
+    #   async-lru
     #   black
     #   ipython
 tzdata==2023.3
@@ -565,11 +576,11 @@ uncertainties==3.1.7
     #   time-series-buffer
 uri-template==1.3.0
     # via jsonschema
-urllib3==2.0.3
+urllib3==2.0.4
     # via
     #   requests
     #   twine
-virtualenv==20.23.1
+virtualenv==20.24.2
     # via tox
 wcwidth==0.2.6
     # via prompt-toolkit
@@ -581,9 +592,9 @@ webencodings==0.5.1
     #   tinycss2
 websocket-client==1.6.1
     # via jupyter-server
-wheel==0.40.0
+wheel==0.41.0
     # via python-semantic-release
-zipp==3.15.0
+zipp==3.16.2
     # via
     #   -c requirements/requirements-py38.txt
     #   importlib-metadata
