@@ -151,7 +151,7 @@ setup(
             "pytest",
             "pytest-cov",
             "pytest-custom-exit-code",
-            "python-semantic-release",
+            "python-semantic-release<8",
             "sphinx",
             "sphinx-rtd-theme",
             "tox",
