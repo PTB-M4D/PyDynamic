@@ -1,15 +1,1 @@
--e file:.[examples]
-black[jupyter]
-hypothesis
-ipykernel
-ipython
-myst-parser
-nbsphinx
-pytest
-pytest-cov
-pytest-custom-exit-code
-python-semantic-release
-sphinx
-sphinx-rtd-theme
-tox
-tweepy
+-e file:.[examples,dev]

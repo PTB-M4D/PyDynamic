@@ -25,7 +25,7 @@ fi
 # environments and update the corresponding two requirements files by issuing the
 # appropriate pip-tools command pip-compile from within the specific environments.
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-for PYVENV in "7" "8" "9" "10"
+for PYVENV in "8" "9" "10" "11"
 do
     echo "
 Compile dependencies for Python 3.$PYVENV

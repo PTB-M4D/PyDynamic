@@ -62,12 +62,6 @@ workflows:
         - equal: [ "Recompile and test deps", << pipeline.schedule.name >> ]
     jobs:
       - test_with_updated_deps:
-          name: "test_with_updated_deps_py37"
-          tag: "3.7"
-          toxenvs: "py37"
-          context:
-            - Docker pulling as bludoc
-      - test_with_updated_deps:
           name: "test_with_updated_deps_py38"
           tag: "3.8"
           toxenvs: "py38"
@@ -85,12 +79,18 @@ workflows:
           toxenvs: "py310"
           context:
             - Docker pulling as bludoc
+      - test_with_updated_deps:
+          name: "test_with_updated_deps_py311"
+          tag: "3.11"
+          toxenvs: "py311"
+          context:
+            - Docker pulling as bludoc
       - commit_push_open_pr:
           requires:
-            - test_with_updated_deps_py37
             - test_with_updated_deps_py38
             - test_with_updated_deps_py39
             - test_with_updated_deps_py310
+            - test_with_updated_deps_py311
           context:
             - Docker pulling as bludoc
             - GitHub pushes to BjoernLudwigPTB's public_repos
@@ -101,12 +101,6 @@ workflows:
         - equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
         - equal: [ "Weekly nightly tests", << pipeline.schedule.name >> ]
     jobs:
-      - test:
-          name: "nightly_test_python_py37"
-          tag: "3.7"
-          toxenvs: "py37 -e py37-without_requirements"
-          context:
-            - Docker pulling as bludoc
       - test:
           name: "nightly_test_python_py38"
           tag: "3.8"
@@ -123,6 +117,12 @@ workflows:
           name: "nightly_test_python_py310"
           tag: "3.10"
           toxenvs: "py310 -e py310-without_requirements"
+          context:
+            - Docker pulling as bludoc
+      - test:
+          name: "nightly_test_python_py311"
+          tag: "3.11"
+          toxenvs: "py311 -e py311-without_requirements"
           context:
             - Docker pulling as bludoc
       - test_conda_py39:
@@ -148,12 +148,6 @@ workflows:
         equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
       - test:
-          name: "test_python_py37"
-          tag: "3.7"
-          toxenvs: "py37-without_requirements"
-          context:
-            - Docker pulling as bludoc
-      - test:
           name: "test_python_py38"
           tag: "3.8"
           toxenvs: "py38-without_requirements"
@@ -171,15 +165,21 @@ workflows:
           toxenvs: "py310-without_requirements"
           context:
             - Docker pulling as bludoc
+      - test:
+          name: "test_python_py311"
+          tag: "3.11"
+          toxenvs: "py311-without_requirements"
+          context:
+            - Docker pulling as bludoc
       - test_conda_py39:
           context:
             - Docker pulling as bludoc
       - preview_release:
           requires:
-            - test_python_py37
             - test_python_py38
             - test_python_py39
             - test_python_py310
+            - test_python_py311
             - test_conda_py39
           filters:
             branches:
