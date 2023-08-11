@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.2 (2023-08-11)
+
+### Fix
+
+* **Python versions:** Ensure PyDynamic only gets used with compatible versions as documented ([`88bb993`](https://github.com/PTB-M4D/PyDynamic/commit/88bb9930c0b254df6e2eee0332c721d6ac67e994))
+
+### Documentation
+
+* **README:** Include badge with compatible Python versions into header ([`bce77e1`](https://github.com/PTB-M4D/PyDynamic/commit/bce77e14ae789f941e272284a3075f4ac8f28779))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.4.1...v2.4.2)**
+
 ## v2.4.1 (2023-07-27)
 
 ### Fix
