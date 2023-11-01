@@ -1,6 +1,6 @@
 :github_url: https://github.com/PTB-M4D/PyDynamic
 
-.. image:: https://raw.githubusercontent.com/PTB-M4D/PyDynamic/main/docs/PyDynamic_logo.svg
+.. image:: https://raw.githubusercontent.com/PTB-M4D/PyDynamic/main/docs/PyDynamic_logo.*
   :alt: PyDynamic logo
 
 Python library for the analysis of dynamic measurements
