@@ -7,21 +7,21 @@ version: 2
 formats:
   - epub
   - htmlzip
+  - pdf
 
 # Docker image to use for build process
 build:
-  image: latest
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
 
 # Python environment to build the docs for and install the library in
 python:
-  version: "3.8"
   install:
-    - requirements: requirements/requirements-py38.txt
-    - requirements: requirements/dev-requirements-py38.txt
     - method: pip
       path: .
-    - method: setuptools
-      path: .
+      extra_requirements:
+        - dev
 
 # Sphinx configuration
 sphinx:
