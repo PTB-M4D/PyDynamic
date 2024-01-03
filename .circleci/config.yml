@@ -23,7 +23,7 @@ executors:
   publisher:
     working_directory: ~/repo
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.10
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
