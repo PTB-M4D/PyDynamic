@@ -6,10 +6,12 @@
 #
 -e file:.
     # via file:///-
-alabaster==0.7.13
+alabaster==0.7.16
     # via sphinx
-anyio==4.2.0
-    # via jupyter-server
+anyio==4.3.0
+    # via
+    #   httpx
+    #   jupyter-server
 argon2-cffi==23.1.0
     # via jupyter-server
 argon2-cffi-bindings==21.2.0
@@ -29,16 +31,19 @@ babel==2.14.0
     # via
     #   jupyterlab-server
     #   sphinx
-beautifulsoup4==4.12.2
+beautifulsoup4==4.12.3
     # via nbconvert
-black[jupyter]==23.12.1
+black[jupyter]==24.2.0
     # via pydynamic
 bleach==6.1.0
     # via nbconvert
-cachetools==5.3.2
+cachetools==5.3.3
     # via tox
-certifi==2023.11.17
-    # via requests
+certifi==2024.2.2
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
 cffi==1.16.0
     # via
     #   argon2-cffi-bindings
@@ -58,23 +63,21 @@ colorama==0.4.6
     # via
     #   tox
     #   twine
-comm==0.2.0
+comm==0.2.1
     # via ipykernel
 contourpy==1.2.0
     # via
     #   -c requirements/requirements-py311.txt
     #   matplotlib
-coverage[toml]==7.4.0
-    # via
-    #   coverage
-    #   pytest-cov
-cryptography==41.0.7
+coverage[toml]==7.4.3
+    # via pytest-cov
+cryptography==42.0.5
     # via secretstorage
 cycler==0.12.1
     # via
     #   -c requirements/requirements-py311.txt
     #   matplotlib
-debugpy==1.8.0
+debugpy==1.8.1
     # via ipykernel
 decorator==5.1.1
     # via ipython
@@ -99,25 +102,32 @@ filelock==3.13.1
     # via
     #   tox
     #   virtualenv
-fonttools==4.47.0
+fonttools==4.49.0
     # via
     #   -c requirements/requirements-py311.txt
     #   matplotlib
 fqdn==1.5.1
     # via jsonschema
-future==0.18.3
+future==1.0.0
     # via
     #   -c requirements/requirements-py311.txt
     #   uncertainties
 gitdb==4.0.11
     # via gitpython
-gitpython==3.1.40
+gitpython==3.1.42
     # via python-semantic-release
-hypothesis==6.92.2
+h11==0.14.0
+    # via httpcore
+httpcore==1.0.4
+    # via httpx
+httpx==0.27.0
+    # via jupyterlab
+hypothesis==6.98.15
     # via pydynamic
 idna==3.6
     # via
     #   anyio
+    #   httpx
     #   jsonschema
     #   requests
 imagesize==1.4.1
@@ -130,18 +140,18 @@ iniconfig==2.0.0
     # via pytest
 invoke==2.2.0
     # via python-semantic-release
-ipykernel==6.28.0
+ipykernel==6.29.3
     # via
     #   jupyterlab
     #   pydynamic
-ipython==8.19.0
+ipython==8.22.1
     # via
     #   black
     #   ipykernel
     #   pydynamic
 isoduration==20.11.0
     # via jsonschema
-jaraco-classes==3.3.0
+jaraco-classes==3.3.1
     # via keyring
 jedi==0.19.1
     # via ipython
@@ -149,7 +159,7 @@ jeepney==0.8.0
     # via
     #   keyring
     #   secretstorage
-jinja2==3.1.2
+jinja2==3.1.3
     # via
     #   jupyter-server
     #   jupyterlab
@@ -158,11 +168,11 @@ jinja2==3.1.2
     #   nbconvert
     #   nbsphinx
     #   sphinx
-json5==0.9.14
+json5==0.9.17
     # via jupyterlab-server
 jsonpointer==2.4
     # via jsonschema
-jsonschema[format-nongpl]==4.20.0
+jsonschema[format-nongpl]==4.21.1
     # via
     #   jupyter-events
     #   jupyterlab-server
@@ -174,7 +184,7 @@ jupyter-client==8.6.0
     #   ipykernel
     #   jupyter-server
     #   nbclient
-jupyter-core==5.5.1
+jupyter-core==5.7.1
     # via
     #   ipykernel
     #   jupyter-client
@@ -185,26 +195,26 @@ jupyter-core==5.5.1
     #   nbformat
 jupyter-events==0.9.0
     # via jupyter-server
-jupyter-lsp==2.2.1
+jupyter-lsp==2.2.3
     # via jupyterlab
-jupyter-server==2.12.1
+jupyter-server==2.12.5
     # via
     #   jupyter-lsp
     #   jupyterlab
     #   jupyterlab-server
     #   notebook
     #   notebook-shim
-jupyter-server-terminals==0.5.1
+jupyter-server-terminals==0.5.2
     # via jupyter-server
-jupyterlab==4.0.10
+jupyterlab==4.1.2
     # via notebook
 jupyterlab-pygments==0.3.0
     # via nbconvert
-jupyterlab-server==2.25.2
+jupyterlab-server==2.25.3
     # via
     #   jupyterlab
     #   notebook
-keyring==24.3.0
+keyring==24.3.1
     # via twine
 kiwisolver==1.4.5
     # via
@@ -214,11 +224,11 @@ markdown-it-py==3.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.3
+markupsafe==2.1.5
     # via
     #   jinja2
     #   nbconvert
-matplotlib==3.8.2
+matplotlib==3.8.3
     # via
     #   -c requirements/requirements-py311.txt
     #   pydynamic
@@ -232,7 +242,7 @@ mdurl==0.1.2
     # via markdown-it-py
 mistune==3.0.2
     # via nbconvert
-more-itertools==10.1.0
+more-itertools==10.2.0
     # via jaraco-classes
 mpmath==1.3.0
     # via
@@ -244,7 +254,7 @@ myst-parser==2.0.0
     # via pydynamic
 nbclient==0.9.0
     # via nbconvert
-nbconvert==7.13.1
+nbconvert==7.16.1
     # via
     #   jupyter-server
     #   nbsphinx
@@ -256,17 +266,17 @@ nbformat==5.9.2
     #   nbsphinx
 nbsphinx==0.9.3
     # via pydynamic
-nest-asyncio==1.5.8
+nest-asyncio==1.6.0
     # via ipykernel
 nh3==0.2.15
     # via readme-renderer
-notebook==7.0.6
+notebook==7.1.1
     # via pydynamic
-notebook-shim==0.2.3
+notebook-shim==0.2.4
     # via
     #   jupyterlab
     #   notebook
-numpy==1.26.2
+numpy==1.26.4
     # via
     #   -c requirements/requirements-py311.txt
     #   contourpy
@@ -280,7 +290,7 @@ oauthlib==3.2.2
     # via
     #   requests-oauthlib
     #   tweepy
-overrides==7.4.0
+overrides==7.7.0
     # via jupyter-server
 packaging==23.2
     # via
@@ -297,11 +307,11 @@ packaging==23.2
     #   python-semantic-release
     #   sphinx
     #   tox
-pandas==2.1.4
+pandas==2.2.1
     # via
     #   -c requirements/requirements-py311.txt
     #   pydynamic
-pandocfilters==1.5.0
+pandocfilters==1.5.1
     # via nbconvert
 parso==0.8.3
     # via jedi
@@ -309,27 +319,27 @@ pathspec==0.12.1
     # via black
 pexpect==4.9.0
     # via ipython
-pillow==10.1.0
+pillow==10.2.0
     # via
     #   -c requirements/requirements-py311.txt
     #   matplotlib
 pkginfo==1.9.6
     # via twine
-platformdirs==4.1.0
+platformdirs==4.2.0
     # via
     #   black
     #   jupyter-core
     #   tox
     #   virtualenv
-pluggy==1.3.0
+pluggy==1.4.0
     # via
     #   pytest
     #   tox
-prometheus-client==0.19.0
+prometheus-client==0.20.0
     # via jupyter-server
 prompt-toolkit==3.0.43
     # via ipython
-psutil==5.9.7
+psutil==5.9.8
     # via ipykernel
 ptyprocess==0.7.0
     # via
@@ -351,7 +361,7 @@ pyparsing==3.1.1
     #   matplotlib
 pyproject-api==1.6.1
     # via tox
-pytest==7.4.4
+pytest==8.0.2
     # via
     #   pydynamic
     #   pytest-cov
@@ -373,7 +383,7 @@ python-json-logger==2.0.7
     # via jupyter-events
 python-semantic-release==7.34.6
     # via pydynamic
-pytz==2023.3.post1
+pytz==2024.1
     # via
     #   -c requirements/requirements-py311.txt
     #   pandas
@@ -390,9 +400,9 @@ pyzmq==25.1.2
     #   ipykernel
     #   jupyter-client
     #   jupyter-server
-readme-renderer==42.0
+readme-renderer==43.0
     # via twine
-referencing==0.32.0
+referencing==0.33.0
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -423,11 +433,11 @@ rfc3986-validator==0.1.1
     # via
     #   jsonschema
     #   jupyter-events
-rpds-py==0.16.2
+rpds-py==0.18.0
     # via
     #   jsonschema
     #   referencing
-scipy==1.11.4
+scipy==1.12.0
     # via
     #   -c requirements/requirements-py311.txt
     #   pydynamic
@@ -446,8 +456,10 @@ six==1.16.0
     #   rfc3339-validator
 smmap==5.0.1
     # via gitdb
-sniffio==1.3.0
-    # via anyio
+sniffio==1.3.1
+    # via
+    #   anyio
+    #   httpx
 snowballstemmer==2.2.0
     # via sphinx
 sortedcontainers==2.4.0
@@ -460,27 +472,22 @@ sphinx==7.2.6
     #   nbsphinx
     #   pydynamic
     #   sphinx-rtd-theme
-    #   sphinxcontrib-applehelp
-    #   sphinxcontrib-devhelp
-    #   sphinxcontrib-htmlhelp
     #   sphinxcontrib-jquery
-    #   sphinxcontrib-qthelp
-    #   sphinxcontrib-serializinghtml
 sphinx-rtd-theme==2.0.0
     # via pydynamic
-sphinxcontrib-applehelp==1.0.7
+sphinxcontrib-applehelp==1.0.8
     # via sphinx
-sphinxcontrib-devhelp==1.0.5
+sphinxcontrib-devhelp==1.0.6
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.4
+sphinxcontrib-htmlhelp==2.0.5
     # via sphinx
 sphinxcontrib-jquery==4.1
     # via sphinx-rtd-theme
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-qthelp==1.0.6
+sphinxcontrib-qthelp==1.0.7
     # via sphinx
-sphinxcontrib-serializinghtml==1.1.9
+sphinxcontrib-serializinghtml==1.1.10
     # via sphinx
 stack-data==0.6.3
     # via ipython
@@ -500,7 +507,7 @@ tinycss2==1.2.1
     # via nbconvert
 tokenize-rt==5.2.0
     # via black
-tomlkit==0.12.3
+tomlkit==0.12.4
     # via python-semantic-release
 tornado==6.4
     # via
@@ -510,11 +517,11 @@ tornado==6.4
     #   jupyterlab
     #   notebook
     #   terminado
-tox==4.11.4
+tox==4.13.0
     # via pydynamic
-tqdm==4.66.1
+tqdm==4.66.2
     # via twine
-traitlets==5.14.0
+traitlets==5.14.1
     # via
     #   comm
     #   ipykernel
@@ -533,9 +540,9 @@ tweepy==4.14.0
     # via pydynamic
 twine==3.8.0
     # via python-semantic-release
-types-python-dateutil==2.8.19.14
+types-python-dateutil==2.8.19.20240106
     # via arrow
-tzdata==2023.4
+tzdata==2024.1
     # via
     #   -c requirements/requirements-py311.txt
     #   pandas
@@ -545,13 +552,13 @@ uncertainties==3.1.7
     #   time-series-buffer
 uri-template==1.3.0
     # via jsonschema
-urllib3==2.1.0
+urllib3==2.2.1
     # via
     #   requests
     #   twine
-virtualenv==20.25.0
+virtualenv==20.25.1
     # via tox
-wcwidth==0.2.12
+wcwidth==0.2.13
     # via prompt-toolkit
 webcolors==1.13
     # via jsonschema
