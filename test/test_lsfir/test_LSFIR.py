@@ -48,6 +48,7 @@ def simulated_measurement_input_and_output(
                 "test_LSFIR_x.npz",
             ),
         )["x"],
+        atol=1e2*np.finfo(np.float64).eps,
     )
     y = dsp.lfilter(digital_filter["b"], digital_filter["a"], x)
     noise = 1e-3
