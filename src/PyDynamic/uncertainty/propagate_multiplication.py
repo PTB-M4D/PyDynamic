@@ -13,12 +13,18 @@ __all__ = ["hadamar_product", "window_application"]
 
 import numpy as np
 from scipy.linalg import block_diag
+from typing import Optional
 
 from PyDynamic.uncertainty.propagate_convolution import _ensure_cov_matrix
 
-def hadamar_product(x1, U1, x2, U2, real_valued=False):
-    """Hadamar product of two signals with uncertainty propagation, also known as
-    elementwise multiplication.
+
+def hadamar_product(
+    x1: np.ndarray,
+    U1: Optional[np.ndarray],
+    x2: np.ndarray,
+    U2: Optional[np.ndarray],
+    real_valued: bool = False,
+):
 
     By default, both input signals are assumed to represent a complex signal, in the
     where the real and imaginary part are concatenated into a single vector:
