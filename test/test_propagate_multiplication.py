@@ -62,6 +62,7 @@ def hadamar_product_slow_reference(x1, U1, x2, U2, real_valued=False):
         cov_prod += C2 @ U2 @ C2.T
     return prod, cov_prod
 
+
 def window_application_slow_reference(A, W, cov_A=None, cov_W=None):
     """
     A \in R^2N uses PyDynamic real-imag representation of a complex vector \in C^N
@@ -79,7 +80,7 @@ def window_application_slow_reference(A, W, cov_A=None, cov_W=None):
     if isinstance(cov_A, np.ndarray):
         # this results from applying GUM
         CA = scl.block_diag(np.diag(W), np.diag(W))
-        cov_R = CA @ cov_A @ CA.T
+        cov_R += CA @ cov_A @ CA.T
 
     if isinstance(cov_W, np.ndarray):
         # this results from applying GUM
@@ -88,18 +89,21 @@ def window_application_slow_reference(A, W, cov_A=None, cov_W=None):
 
     return R, cov_R
 
+
 @composite
 def two_x_and_Ux_of_same_length(draw: Callable, reduced_set=False):
-    dim = draw(hypothesis_dimension(min_value=4, max_value=6))
-    fixed_length_x_and_Ux = x_and_Ux(reduced_set=reduced_set, given_dim=2 * dim)
-    return (draw(fixed_length_x_and_Ux), draw(fixed_length_x_and_Ux))
+    dim = 2 * draw(hypothesis_dimension(min_value=4, max_value=6))
+    fixed_length_x_and_Ux = x_and_Ux(reduced_set=reduced_set, given_dim=dim)
+    return draw(fixed_length_x_and_Ux), draw(fixed_length_x_and_Ux)
+
 
 @composite
 def complex_x_and_Ux_and_real_window(draw: Callable, reduced_set=False):
-    dim = draw(hypothesis_dimension(min_value=4, max_value=6))
-    complex_x_and_Ux = x_and_Ux(reduced_set=reduced_set, given_dim=2 * dim)
-    real_window = x_and_Ux(reduced_set=reduced_set, given_dim=dim)
-    return (draw(complex_x_and_Ux), draw(real_window))
+    real_dim = draw(hypothesis_dimension(min_value=4, max_value=6))
+    complex_x_and_Ux = x_and_Ux(reduced_set=reduced_set, given_dim=2 * real_dim)
+    real_window = x_and_Ux(reduced_set=reduced_set, given_dim=real_dim)
+    return draw(complex_x_and_Ux), draw(real_window)
+
 
 @given(two_x_and_Ux_of_same_length(reduced_set=True))
 def test_hadamar(inputs):
@@ -115,26 +119,27 @@ def test_hadamar(inputs):
     assert len(y_slow) == len(Uy_slow)
 
     # compare results
-    assert_allclose(y, y_slow, atol=1e2*np.finfo(np.float64).eps)
-    assert_allclose(Uy, Uy_slow, atol=1e2*np.finfo(np.float64).eps)
+    assert_allclose(y, y_slow, atol=1e2 * np.finfo(np.float64).eps)
+    assert_allclose(Uy, Uy_slow, atol=1e2 * np.finfo(np.float64).eps)
 
 
 @given(two_x_and_Ux_of_same_length(reduced_set=True))
-@pytest.mark.slow
 def test_hadamar_real_valued(inputs):
     input_1, input_2 = inputs
 
     # calculate the convolution of x1 and x2
     y, Uy = hadamar_product(*input_1, *input_2, real_valued=True)
-    y_slow, Uy_slow = hadamar_product_slow_reference(*input_1, *input_2, real_valued=True)
+    y_slow, Uy_slow = hadamar_product_slow_reference(
+        *input_1, *input_2, real_valued=True
+    )
 
     # compare results
     assert len(y) == len(Uy)
     assert len(y) == len(y_slow)
     assert len(y_slow) == len(Uy_slow)
 
-    assert_allclose(y, y_slow, atol=1e2*np.finfo(np.float64).eps)
-    assert_allclose(Uy, Uy_slow, atol=1e2*np.finfo(np.float64).eps)
+    assert_allclose(y, y_slow, atol=1e2 * np.finfo(np.float64).eps)
+    assert_allclose(Uy, Uy_slow, atol=1e2 * np.finfo(np.float64).eps)
 
 
 @given(two_x_and_Ux_of_same_length())
@@ -161,8 +166,8 @@ def test_window_application(inputs):
     assert len(y_alt) == len(Uy_alt)
 
     # compare results
-    assert_allclose(y, y_alt, atol=1e2*np.finfo(np.float64).eps)
-    assert_allclose(Uy, Uy_alt, atol=1e2*np.finfo(np.float64).eps)
+    assert_allclose(y, y_alt, atol=1e2 * np.finfo(np.float64).eps)
+    assert_allclose(Uy, Uy_alt, atol=1e2 * np.finfo(np.float64).eps)
 
 
 @given(complex_x_and_Ux_and_real_window())
