@@ -152,8 +152,13 @@ def hadamar_product(
     return prod, cov_prod
 
 
-def window_application(A, W, cov_A=None, cov_W=None):
-    """Application of a real window to a complex signal.
+def window_application(
+    A: np.ndarray,
+    W: np.ndarray,
+    cov_A: Optional[np.ndarray] = None,
+    cov_W: Optional[np.ndarray] = None,
+):
+    """Application of a real window to a complex signal
 
     Parameters
     ----------
