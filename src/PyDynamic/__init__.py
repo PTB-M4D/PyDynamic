@@ -71,6 +71,8 @@ __all__ = [
     "separate_real_imag_of_mc_samples",
     "separate_real_imag_of_vector",
     "complex_2_real_imag",
+    "hadamar_product",
+    "window_application",
 ]
 
 from .misc import *
