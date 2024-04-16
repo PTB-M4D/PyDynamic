@@ -15,7 +15,8 @@ import numpy as np
 from scipy.linalg import block_diag
 from typing import Optional
 
-from PyDynamic.uncertainty.propagate_convolution import _ensure_cov_matrix
+from .propagate_convolution import _ensure_cov_matrix
+from ..misc.tools import complex_2_real_imag
 
 
 def hadamar_product(
@@ -191,14 +192,10 @@ def window_application(
     cov_A, cov_W = _ensure_cov_matrix(cov_A), _ensure_cov_matrix(cov_W)
 
     # map to variables of hadamar product
-    x1 = A
-    U1 = cov_A
-    x2 = np.r_[W, np.zeros_like(W)]
+    x2 = complex_2_real_imag(W)
     if isinstance(cov_W, np.ndarray):
         U2 = block_diag(cov_W, np.zeros_like(cov_W))
     else:
         U2 = None
 
-    R, cov_R = hadamar_product(x1, U1, x2, U2)
-
-    return R, cov_R
+    return hadamar_product(A, cov_A, x2, U2)
