@@ -74,7 +74,6 @@ def hadamar_product(
     # deal with std-unc-only case
     U1, U2 = _ensure_cov_matrix(U1), _ensure_cov_matrix(U2)
 
-
     # simplified calculations for real-valued signals
     if real_valued:
         N = len(x1)
@@ -185,7 +184,7 @@ def window_application(A, W, cov_A=None, cov_W=None):
     .. seealso::
         :func:`numpy.multiply`
     """
-    
+
     # deal with std-unc-only case
     cov_A, cov_W = _ensure_cov_matrix(cov_A), _ensure_cov_matrix(cov_W)
 
@@ -201,7 +200,3 @@ def window_application(A, W, cov_A=None, cov_W=None):
     R, cov_R = hadamar_product(x1, U1, x2, U2)
 
     return R, cov_R
-
-
-def matrix_vector_product(A, x, Ux):
-    return 0
