@@ -25,8 +25,11 @@ def hadamar_product(
     U2: Optional[np.ndarray],
     real_valued: bool = False,
 ):
+    """Hadamar product of two signals with uncertainty propagation
 
-    By default, both input signals are assumed to represent a complex signal, in the
+    This is also known as elementwise multiplication.
+
+    By default, both input signals are assumed to represent a complex signal,
     where the real and imaginary part are concatenated into a single vector:
     [Re(x), Im(x)]
 
@@ -48,14 +51,14 @@ def hadamar_product(
         By default, both input signals are assumed to represent a complex signal,
         where the real and imaginary part are concatenated into a single vector
         [Re(x), Im(x)].
-        Alternativly, if both represent purely real signals, performance gains can be
-        achieved by using enabling this switch.
+        Alternatively, if both represent purely real signals, performance gains can be
+        achieved by enabling this switch.
 
     Returns
     -------
-    prod : np.ndarray
+    prod : np.ndarray, (2N,) or (N,)
         multiplied output signal
-    Uprod : np.ndarray
+    Uprod : np.ndarray, (2N, 2N) or (N, N)
         full 2D-covariance matrix of output prod
 
     References
