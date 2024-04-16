@@ -3,7 +3,7 @@
 The multiplication of signals is a common operation in signal and data
 processing.
 
-This module contains the following function:
+This module contains the following functions:
 
 * :func:`hadamar_product`: Elementwise Multiplication of two signals
 * :func:`window_application`: Application of a real-valued window to a complex signal
@@ -25,7 +25,7 @@ def hadamar_product(
     U2: Optional[np.ndarray],
     real_valued: bool = False,
 ):
-    """Hadamar product of two signals with uncertainty propagation
+    """Hadamar product of two uncorrelated signals with uncertainty propagation
 
     This is also known as elementwise multiplication.
 
@@ -63,8 +63,7 @@ def hadamar_product(
 
     References
     ----------
-    .. seealso::
-        :func:`numpy.multiply`
+    .. seealso:: :func:`np.multiply`
     """
 
     # check input lengths?
@@ -164,13 +163,13 @@ def window_application(A, W, cov_A=None, cov_W=None):
     W : np.ndarray, (N,)
         window
     cov_A : np.ndarray, (2N,2N) or (2N,)
-        - 2D-array: full 2D-covariance matrix associated with x1
-        - 1D-array: standard uncertainties associated with x1 (corresponding to uncorrelated entries of x1)
-        - None: corresponds to a fully certain signal x1, results in more efficient calculation (compared to using np.zeros(...))
+        - 2D-array: full 2D-covariance matrix associated with A
+        - 1D-array: standard uncertainties associated with A (corresponding to uncorrelated entries of A)
+        - None: corresponds to a fully certain signal A, results in more efficient calculation (compared to using np.zeros(...))
     cov_W : np.ndarray, (N, N) or (N,)
-        - 2D-array: full 2D-covariance matrix associated with x2
-        - 1D-array: standard uncertainties associated with x2 (corresponding to uncorrelated entries of x2)
-        - None: corresponds to a fully certain signal x2, results in more efficient calculation (compared to using np.zeros(...))
+        - 2D-array: full 2D-covariance matrix associated with W
+        - 1D-array: standard uncertainties associated with W (corresponding to uncorrelated entries of W)
+        - None: corresponds to a fully certain signal W, results in more efficient calculation (compared to using np.zeros(...))
 
     Returns
     -------
@@ -181,8 +180,7 @@ def window_application(A, W, cov_A=None, cov_W=None):
 
     References
     ----------
-    .. seealso::
-        :func:`numpy.multiply`
+    .. seealso:: :func:`np.multiply`
     """
 
     # deal with std-unc-only case
