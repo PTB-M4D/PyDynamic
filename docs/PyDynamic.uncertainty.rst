@@ -56,3 +56,9 @@ Uncertainty evaluation for interpolation
 
 .. automodule:: PyDynamic.uncertainty.interpolate
     :members:
+
+Uncertainty evaluation for multiplication
+----------------------------------------
+
+.. automodule:: PyDynamic.uncertainty.propagate_multiplication
+    :members:
