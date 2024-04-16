@@ -66,9 +66,8 @@ def hadamar_product(
     .. seealso:: :func:`np.multiply`
     """
 
-    # check input lengths?
-    if len(x1) != len(x2):
-        raise ValueError("Inputs signals need to be equal in length.")
+    # check input lengths
+    assert len(x1) == len(x2)
 
     # deal with std-unc-only case
     U1, U2 = _ensure_cov_matrix(U1), _ensure_cov_matrix(U2)
