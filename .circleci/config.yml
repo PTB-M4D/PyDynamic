@@ -13,6 +13,7 @@ executors:
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
+    resource_class: large
   conda_tester:
     working_directory: ~/repo
     docker:
@@ -20,6 +21,7 @@ executors:
         auth:
           username: $DOCKER_USER
           password: $DOCKER_PASS
+    resource_class: large
   publisher:
     working_directory: ~/repo
     docker:
