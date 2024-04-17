@@ -38,6 +38,8 @@ __all__ = [
     "wave_rec",
     "filter_design",
     "dwt_max_level",
+    "hadamar_product",
+    "window_application",
 ]
 
 from .interpolate import interp1d_unc
@@ -62,4 +64,5 @@ from .propagate_DWT import (
 )
 from .propagate_filter import FIRuncFilter, IIR_get_initial_state, IIRuncFilter
 from .propagate_MonteCarlo import MC, SMC, UMC, UMC_generic
+from .propagate_multiplication import hadamar_product, window_application
 from ..misc.noise import ARMA

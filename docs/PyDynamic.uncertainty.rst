@@ -20,6 +20,8 @@ The package consists of the following modules:
 * :mod:`PyDynamic.uncertainty.propagate_MonteCarlo`: Monte Carlo methods for digital
   filtering
 * :mod:`PyDynamic.uncertainty.interpolate`: Uncertainty evaluation for interpolation
+* :mod:`PyDynamic.uncertainty.propagate_multiplication`: Uncertainty evaluation for 
+  element-wise multiplication
 
 Uncertainty evaluation for convolutions
 ---------------------------------------
@@ -55,4 +57,10 @@ Uncertainty evaluation for interpolation
 ----------------------------------------
 
 .. automodule:: PyDynamic.uncertainty.interpolate
+    :members:
+
+Uncertainty evaluation for multiplication
+-----------------------------------------
+
+.. automodule:: PyDynamic.uncertainty.propagate_multiplication
     :members:
