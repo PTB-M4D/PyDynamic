@@ -33,7 +33,7 @@ babel==2.14.0
     #   sphinx
 beautifulsoup4==4.12.3
     # via nbconvert
-black[jupyter]==24.2.0
+black[jupyter]==24.3.0
     # via pydynamic
 bleach==6.1.0
     # via nbconvert
@@ -63,13 +63,13 @@ colorama==0.4.6
     # via
     #   tox
     #   twine
-comm==0.2.1
+comm==0.2.2
     # via ipykernel
 contourpy==1.2.0
     # via
     #   -c requirements/requirements-py310.txt
     #   matplotlib
-coverage[toml]==7.4.3
+coverage[toml]==7.4.4
     # via pytest-cov
 cryptography==42.0.5
     # via secretstorage
@@ -104,11 +104,11 @@ executing==2.0.1
     # via stack-data
 fastjsonschema==2.19.1
     # via nbformat
-filelock==3.13.1
+filelock==3.13.3
     # via
     #   tox
     #   virtualenv
-fonttools==4.49.0
+fonttools==4.50.0
     # via
     #   -c requirements/requirements-py310.txt
     #   matplotlib
@@ -120,15 +120,15 @@ future==1.0.0
     #   uncertainties
 gitdb==4.0.11
     # via gitpython
-gitpython==3.1.42
+gitpython==3.1.43
     # via python-semantic-release
 h11==0.14.0
     # via httpcore
-httpcore==1.0.4
+httpcore==1.0.5
     # via httpx
 httpx==0.27.0
     # via jupyterlab
-hypothesis==6.98.15
+hypothesis==6.100.0
     # via pydynamic
 idna==3.6
     # via
@@ -138,7 +138,7 @@ idna==3.6
     #   requests
 imagesize==1.4.1
     # via sphinx
-importlib-metadata==7.0.1
+importlib-metadata==7.1.0
     # via
     #   keyring
     #   twine
@@ -146,18 +146,22 @@ iniconfig==2.0.0
     # via pytest
 invoke==2.2.0
     # via python-semantic-release
-ipykernel==6.29.3
+ipykernel==6.29.4
     # via
     #   jupyterlab
     #   pydynamic
-ipython==8.22.1
+ipython==8.23.0
     # via
     #   black
     #   ipykernel
     #   pydynamic
 isoduration==20.11.0
     # via jsonschema
-jaraco-classes==3.3.1
+jaraco-classes==3.4.0
+    # via keyring
+jaraco-context==4.3.0
+    # via keyring
+jaraco-functools==4.0.0
     # via keyring
 jedi==0.19.1
     # via ipython
@@ -174,7 +178,7 @@ jinja2==3.1.3
     #   nbconvert
     #   nbsphinx
     #   sphinx
-json5==0.9.17
+json5==0.9.24
     # via jupyterlab-server
 jsonpointer==2.4
     # via jsonschema
@@ -185,12 +189,12 @@ jsonschema[format-nongpl]==4.21.1
     #   nbformat
 jsonschema-specifications==2023.12.1
     # via jsonschema
-jupyter-client==8.6.0
+jupyter-client==8.6.1
     # via
     #   ipykernel
     #   jupyter-server
     #   nbclient
-jupyter-core==5.7.1
+jupyter-core==5.7.2
     # via
     #   ipykernel
     #   jupyter-client
@@ -199,28 +203,28 @@ jupyter-core==5.7.1
     #   nbclient
     #   nbconvert
     #   nbformat
-jupyter-events==0.9.0
+jupyter-events==0.10.0
     # via jupyter-server
-jupyter-lsp==2.2.3
+jupyter-lsp==2.2.4
     # via jupyterlab
-jupyter-server==2.12.5
+jupyter-server==2.13.0
     # via
     #   jupyter-lsp
     #   jupyterlab
     #   jupyterlab-server
     #   notebook
     #   notebook-shim
-jupyter-server-terminals==0.5.2
+jupyter-server-terminals==0.5.3
     # via jupyter-server
-jupyterlab==4.1.2
+jupyterlab==4.1.5
     # via notebook
 jupyterlab-pygments==0.3.0
     # via nbconvert
-jupyterlab-server==2.25.3
+jupyterlab-server==2.25.4
     # via
     #   jupyterlab
     #   notebook
-keyring==24.3.1
+keyring==25.0.0
     # via twine
 kiwisolver==1.4.5
     # via
@@ -249,7 +253,9 @@ mdurl==0.1.2
 mistune==3.0.2
     # via nbconvert
 more-itertools==10.2.0
-    # via jaraco-classes
+    # via
+    #   jaraco-classes
+    #   jaraco-functools
 mpmath==1.3.0
     # via
     #   -c requirements/requirements-py310.txt
@@ -258,13 +264,13 @@ mypy-extensions==1.0.0
     # via black
 myst-parser==2.0.0
     # via pydynamic
-nbclient==0.9.0
+nbclient==0.10.0
     # via nbconvert
-nbconvert==7.16.1
+nbconvert==7.16.3
     # via
     #   jupyter-server
     #   nbsphinx
-nbformat==5.9.2
+nbformat==5.10.3
     # via
     #   jupyter-server
     #   nbclient
@@ -274,9 +280,9 @@ nbsphinx==0.9.3
     # via pydynamic
 nest-asyncio==1.6.0
     # via ipykernel
-nh3==0.2.15
+nh3==0.2.17
     # via readme-renderer
-notebook==7.1.1
+notebook==7.1.2
     # via pydynamic
 notebook-shim==0.2.4
     # via
@@ -298,7 +304,7 @@ oauthlib==3.2.2
     #   tweepy
 overrides==7.7.0
     # via jupyter-server
-packaging==23.2
+packaging==24.0
     # via
     #   -c requirements/requirements-py310.txt
     #   black
@@ -329,7 +335,7 @@ pillow==10.2.0
     # via
     #   -c requirements/requirements-py310.txt
     #   matplotlib
-pkginfo==1.9.6
+pkginfo==1.10.0
     # via twine
 platformdirs==4.2.0
     # via
@@ -353,7 +359,7 @@ ptyprocess==0.7.0
     #   terminado
 pure-eval==0.2.2
     # via stack-data
-pycparser==2.21
+pycparser==2.22
     # via cffi
 pygments==2.17.2
     # via
@@ -361,22 +367,22 @@ pygments==2.17.2
     #   nbconvert
     #   readme-renderer
     #   sphinx
-pyparsing==3.1.1
+pyparsing==3.1.2
     # via
     #   -c requirements/requirements-py310.txt
     #   matplotlib
 pyproject-api==1.6.1
     # via tox
-pytest==8.0.2
+pytest==8.1.1
     # via
     #   pydynamic
     #   pytest-cov
     #   pytest-custom-exit-code
-pytest-cov==4.1.0
+pytest-cov==5.0.0
     # via pydynamic
 pytest-custom-exit-code==0.3.0
     # via pydynamic
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via
     #   -c requirements/requirements-py310.txt
     #   arrow
@@ -408,7 +414,7 @@ pyzmq==25.1.2
     #   jupyter-server
 readme-renderer==43.0
     # via twine
-referencing==0.33.0
+referencing==0.34.0
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -501,7 +507,7 @@ sympy==1.12
     # via
     #   -c requirements/requirements-py310.txt
     #   pydynamic
-terminado==0.18.0
+terminado==0.18.1
     # via
     #   jupyter-server
     #   jupyter-server-terminals
@@ -531,11 +537,11 @@ tornado==6.4
     #   jupyterlab
     #   notebook
     #   terminado
-tox==4.13.0
+tox==4.14.2
     # via pydynamic
 tqdm==4.66.2
     # via twine
-traitlets==5.14.1
+traitlets==5.14.2
     # via
     #   comm
     #   ipykernel
@@ -554,13 +560,14 @@ tweepy==4.14.0
     # via pydynamic
 twine==3.8.0
     # via python-semantic-release
-types-python-dateutil==2.8.19.20240106
+types-python-dateutil==2.9.0.20240316
     # via arrow
 typing-extensions==4.10.0
     # via
     #   anyio
     #   async-lru
     #   black
+    #   ipython
 tzdata==2024.1
     # via
     #   -c requirements/requirements-py310.txt
@@ -587,7 +594,7 @@ webencodings==0.5.1
     #   tinycss2
 websocket-client==1.7.0
     # via jupyter-server
-wheel==0.42.0
+wheel==0.43.0
     # via python-semantic-release
-zipp==3.17.0
+zipp==3.18.1
     # via importlib-metadata
