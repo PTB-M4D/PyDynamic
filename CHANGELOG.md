@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v2.5.0 (2024-04-18)
+
+### Feature
+
+* **propagate_multiplication:** Addition of multiplication-based operations ([`ef5e8d6`](https://github.com/PTB-M4D/PyDynamic/commit/ef5e8d604f19e2f937178b4766499252f952f4ab))
+
+### Documentation
+
+* **propagate_multiplication:** Enable docs of new submodule ([`3cf2270`](https://github.com/PTB-M4D/PyDynamic/commit/3cf2270c3ec0514b7a24a8840918147b01cb0029))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.4.2...v2.5.0)**
+
 ## v2.4.2 (2023-08-11)
 
 ### Fix
