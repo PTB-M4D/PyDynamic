@@ -151,6 +151,56 @@ def test_hadamar_common_call(inputs):
     assert hadamar_product(*input_1, *input_2)
 
 
+def test_hadamar_known_result():
+    # test against a result calculated by hand (on paper)
+
+    x1 = np.array([1, 2, 3, 4], dtype=np.double)
+    U1 = scl.toeplitz(np.flip(x1))
+    x2 = x1 + 4
+    U2 = U1 - 2
+
+    r_known = np.array([-16, -20, 22, 40], dtype=np.double)
+    Ur_known = np.array(
+        [
+            [176, 104, -48, -160],
+            [104, 248, 56, -56],
+            [-48, 56, 456, 432],
+            [-160, -56, 432, 632],
+        ],
+        dtype=np.double,
+    )
+
+    r, Ur = hadamar_product(x1=x1, U1=U1, x2=x2, U2=U2)
+    # check common execution of convolve_unc
+    assert_allclose(r, r_known)
+    assert_allclose(Ur, Ur_known)
+
+
+def test_hadamar_known_result_real():
+    # test against a result calculated by hand (on paper)
+
+    x1 = np.array([1, 2, 3, 4], dtype=np.double)
+    U1 = scl.toeplitz(np.flip(x1))
+    x2 = x1 + 4
+    U2 = U1 - 2
+
+    r_known = np.array([5, 12, 21, 32], dtype=np.double)
+    Ur_known = np.array(
+        [
+            [102, 92, 70, 36],
+            [92, 152, 132, 96],
+            [70, 132, 214, 180],
+            [36, 96, 180, 288],
+        ],
+        dtype=np.double,
+    )
+
+    r, Ur = hadamar_product(x1=x1, U1=U1, x2=x2, U2=U2, real_valued=True)
+    # check common execution of convolve_unc
+    assert_allclose(r, r_known)
+    assert_allclose(Ur, Ur_known)
+
+
 @given(complex_x_and_Ux_and_real_window(reduced_set=True))
 def test_window_application(inputs):
     x, Ux = inputs[0]
