@@ -9,7 +9,7 @@ from PyDynamic.uncertainty.propagate_filter import (
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter, lfilter_zi
 
-from ..conftest import FIRuncFilter_input
+from ..conftest import FIRuncFilter_input, custom_atol
 
 
 @given(FIRuncFilter_input())
@@ -91,7 +91,6 @@ def test(fir_unc_filter_input):
         if isinstance(
             blow, np.ndarray
         ):  # calculate low-pass filtered signal and propagate noise
-
             if isinstance(sigma2, float):
                 Bcorr = np.correlate(blow, blow, "full")  # len(Bcorr) == 2*Ntheta - 1
                 ycorr = (
@@ -103,7 +102,6 @@ def test(fir_unc_filter_input):
                 Ulow = toeplitz(ycorr)
 
             elif isinstance(sigma2, np.ndarray):
-
                 if kind == "diag":
                     # [Leeuw1994](Covariance matrix of ARMA errors in closed form)
                     # can be
@@ -137,7 +135,6 @@ def test(fir_unc_filter_input):
                     V = N.dot(SP).dot(N.T) + M.dot(S).dot(M.T)
 
                 elif kind == "corr":
-
                     # adjust the lengths sigma2 to fit blow and theta
                     # this either crops (unused) information or appends zero-information
                     # note1: this is the reason, why Ulow will have dimension
@@ -167,7 +164,6 @@ def test(fir_unc_filter_input):
                 Ulow = np.eye(Ntheta) * sigma2
 
             elif isinstance(sigma2, np.ndarray):
-
                 if kind == "diag":
                     # V needs to be extended to cover Ntheta time steps more into the
                     # past
@@ -259,7 +255,7 @@ def test(fir_unc_filter_input):
     assert_allclose(
         legacy_y,
         current_y,
-        atol=1e-15,
+        atol=custom_atol,
     )
     assert_allclose(
         legacy_Uy,

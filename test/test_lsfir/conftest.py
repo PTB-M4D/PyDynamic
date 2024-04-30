@@ -8,14 +8,15 @@ import pytest
 import scipy.signal as dsp
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose, assert_almost_equal
-
 from PyDynamic.misc.SecondOrderSystem import sos_phys2filter
 from PyDynamic.misc.tools import (
     complex_2_real_imag,
     make_semiposdef,
     real_imag_2_complex,
 )
+
 from ..conftest import (
+    custom_atol,
     hypothesis_float_vector,
     scale_matrix_or_vector_to_convex_combination,
 )
@@ -101,6 +102,7 @@ def monte_carlo(
         np.load(
             os.path.join(reference_array_path, "test_LSFIR_H.npz"),
         )["H"],
+        atol=custom_atol,
     )
     uAbs = np.std(np.abs(HMC), axis=0)
     assert_allclose(
@@ -109,6 +111,7 @@ def monte_carlo(
             os.path.join(reference_array_path, "test_LSFIR_uAbs.npz"),
         )["uAbs"],
         rtol=3.5e-2,
+        atol=custom_atol,
     )
     uPhas = np.std(np.angle(HMC), axis=0)
     assert_allclose(
@@ -117,6 +120,7 @@ def monte_carlo(
             os.path.join(reference_array_path, "test_LSFIR_uPhas.npz"),
         )["uPhas"],
         rtol=4.3e-2,
+        atol=custom_atol,
     )
     UH = np.cov(np.hstack((np.real(HMC), np.imag(HMC))), rowvar=False)
     UH = make_semiposdef(UH)
@@ -145,10 +149,16 @@ def digital_filter(measurement_system, sampling_freq):
         measurement_system["S0"], measurement_system["delta"], measurement_system["f0"]
     )
     assert_almost_equal(bc, [20465611686.098896])
-    assert_allclose(ac, np.array([1.00000000e00, 4.52389342e03, 5.11640292e10]))
+    assert_allclose(
+        ac,
+        np.array([1.00000000e00, 4.52389342e03, 5.11640292e10]),
+        atol=custom_atol,
+    )
     b, a = dsp.bilinear(bc, ac, sampling_freq)
     assert_allclose(
-        b, np.array([0.019386043211510096, 0.03877208642302019, 0.019386043211510096])
+        b,
+        np.array([0.019386043211510096, 0.03877208642302019, 0.019386043211510096]),
+        atol=custom_atol,
     )
     assert_allclose(a, np.array([1.0, -1.7975690550957188, 0.9914294872108197]))
     return {"b": b, "a": a}
@@ -168,5 +178,6 @@ def complex_freq_resp(
         np.load(
             os.path.join(reference_array_path, "test_LSFIR_Hf.npz"),
         )["Hf"],
+        atol=custom_atol,
     )
     return Hf

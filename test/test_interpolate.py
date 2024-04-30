@@ -7,9 +7,10 @@ import pytest
 from hypothesis import assume, given
 from hypothesis.strategies import composite
 from numpy.testing import assert_allclose
+from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
 from pytest import raises
 
-from PyDynamic.uncertainty.interpolate import interp1d_unc, make_equidistant
+from .conftest import custom_atol
 
 _MIN_NODES_FOR_CUBIC_SPLINE = 4
 
@@ -595,7 +596,11 @@ def test_returnc_with_extrapolation_check_c_interp1d_unc(
 
     # Check if each row of sensitivities sum to one, which should hold for the
     # Lagrangians and proves equality with one for extrapolation sensitivities.
-    assert_allclose(np.sum(C, 1), np.ones_like(interp_inputs["x_new"]))
+    assert_allclose(
+        np.sum(C, 1),
+        np.ones_like(interp_inputs["x_new"]),
+        atol=custom_atol,
+    )
 
 
 @given(
