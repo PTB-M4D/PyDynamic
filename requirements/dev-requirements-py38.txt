@@ -33,9 +33,11 @@ babel==2.14.0
     #   sphinx
 backcall==0.2.0
     # via ipython
+backports-tarfile==1.1.1
+    # via jaraco-context
 beautifulsoup4==4.12.3
     # via nbconvert
-black[jupyter]==24.3.0
+black[jupyter]==24.4.2
     # via pydynamic
 bleach==6.1.0
     # via nbconvert
@@ -71,7 +73,7 @@ contourpy==1.1.1
     # via
     #   -c requirements/requirements-py38.txt
     #   matplotlib
-coverage[toml]==7.4.4
+coverage[toml]==7.5.0
     # via pytest-cov
 cryptography==42.0.5
     # via secretstorage
@@ -96,7 +98,7 @@ docutils==0.20.1
     #   sphinx-rtd-theme
 dotty-dict==1.3.1
     # via python-semantic-release
-exceptiongroup==1.2.0
+exceptiongroup==1.2.1
     # via
     #   anyio
     #   hypothesis
@@ -105,11 +107,11 @@ executing==2.0.1
     # via stack-data
 fastjsonschema==2.19.1
     # via nbformat
-filelock==3.13.3
+filelock==3.14.0
     # via
     #   tox
     #   virtualenv
-fonttools==4.50.0
+fonttools==4.51.0
     # via
     #   -c requirements/requirements-py38.txt
     #   matplotlib
@@ -129,9 +131,9 @@ httpcore==1.0.5
     # via httpx
 httpx==0.27.0
     # via jupyterlab
-hypothesis==6.100.0
+hypothesis==6.100.2
     # via pydynamic
-idna==3.6
+idna==3.7
     # via
     #   anyio
     #   httpx
@@ -174,9 +176,9 @@ isoduration==20.11.0
     # via jsonschema
 jaraco-classes==3.4.0
     # via keyring
-jaraco-context==4.3.0
+jaraco-context==5.3.0
     # via keyring
-jaraco-functools==4.0.0
+jaraco-functools==4.0.1
     # via keyring
 jedi==0.19.1
     # via ipython
@@ -193,11 +195,11 @@ jinja2==3.1.3
     #   nbconvert
     #   nbsphinx
     #   sphinx
-json5==0.9.24
+json5==0.9.25
     # via jupyterlab-server
 jsonpointer==2.4
     # via jsonschema
-jsonschema[format-nongpl]==4.21.1
+jsonschema[format-nongpl]==4.22.0
     # via
     #   jupyter-events
     #   jupyterlab-server
@@ -220,9 +222,9 @@ jupyter-core==5.7.2
     #   nbformat
 jupyter-events==0.10.0
     # via jupyter-server
-jupyter-lsp==2.2.4
+jupyter-lsp==2.2.5
     # via jupyterlab
-jupyter-server==2.13.0
+jupyter-server==2.14.0
     # via
     #   jupyter-lsp
     #   jupyterlab
@@ -231,15 +233,15 @@ jupyter-server==2.13.0
     #   notebook-shim
 jupyter-server-terminals==0.5.3
     # via jupyter-server
-jupyterlab==4.1.5
+jupyterlab==4.1.8
     # via notebook
 jupyterlab-pygments==0.3.0
     # via nbconvert
-jupyterlab-server==2.25.4
+jupyterlab-server==2.27.1
     # via
     #   jupyterlab
     #   notebook
-keyring==25.0.0
+keyring==25.2.0
     # via twine
 kiwisolver==1.4.5
     # via
@@ -257,7 +259,7 @@ matplotlib==3.7.5
     # via
     #   -c requirements/requirements-py38.txt
     #   pydynamic
-matplotlib-inline==0.1.6
+matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
@@ -277,15 +279,15 @@ mpmath==1.3.0
     #   sympy
 mypy-extensions==1.0.0
     # via black
-myst-parser==2.0.0
+myst-parser==3.0.1
     # via pydynamic
 nbclient==0.10.0
     # via nbconvert
-nbconvert==7.16.3
+nbconvert==7.16.4
     # via
     #   jupyter-server
     #   nbsphinx
-nbformat==5.10.3
+nbformat==5.10.4
     # via
     #   jupyter-server
     #   nbclient
@@ -297,7 +299,7 @@ nest-asyncio==1.6.0
     # via ipykernel
 nh3==0.2.17
     # via readme-renderer
-notebook==7.1.2
+notebook==7.1.3
     # via pydynamic
 notebook-shim==0.2.4
     # via
@@ -340,7 +342,7 @@ pandas==2.0.3
     #   pydynamic
 pandocfilters==1.5.1
     # via nbconvert
-parso==0.8.3
+parso==0.8.4
     # via jedi
 pathspec==0.12.1
     # via black
@@ -348,7 +350,7 @@ pexpect==4.9.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pillow==10.2.0
+pillow==10.3.0
     # via
     #   -c requirements/requirements-py38.txt
     #   matplotlib
@@ -356,13 +358,13 @@ pkginfo==1.10.0
     # via twine
 pkgutil-resolve-name==1.3.10
     # via jsonschema
-platformdirs==4.2.0
+platformdirs==4.2.1
     # via
     #   black
     #   jupyter-core
     #   tox
     #   virtualenv
-pluggy==1.4.0
+pluggy==1.5.0
     # via
     #   pytest
     #   tox
@@ -392,7 +394,7 @@ pyparsing==3.1.2
     #   matplotlib
 pyproject-api==1.6.1
     # via tox
-pytest==8.1.1
+pytest==8.2.0
     # via
     #   pydynamic
     #   pytest-cov
@@ -427,14 +429,14 @@ pyyaml==6.0.1
     # via
     #   jupyter-events
     #   myst-parser
-pyzmq==25.1.2
+pyzmq==26.0.2
     # via
     #   ipykernel
     #   jupyter-client
     #   jupyter-server
 readme-renderer==43.0
     # via twine
-referencing==0.34.0
+referencing==0.35.0
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -477,7 +479,7 @@ secretstorage==3.3.3
     # via keyring
 semver==2.13.0
     # via python-semantic-release
-send2trash==1.8.2
+send2trash==1.8.3
     # via jupyter-server
 six==1.16.0
     # via
@@ -535,7 +537,7 @@ time-series-buffer==0.1.4b0
     # via
     #   -c requirements/requirements-py38.txt
     #   pydynamic
-tinycss2==1.2.1
+tinycss2==1.3.0
     # via nbconvert
 tokenize-rt==5.2.0
     # via black
@@ -557,11 +559,11 @@ tornado==6.4
     #   jupyterlab
     #   notebook
     #   terminado
-tox==4.14.2
+tox==4.15.0
     # via pydynamic
 tqdm==4.66.2
     # via twine
-traitlets==5.14.2
+traitlets==5.14.3
     # via
     #   comm
     #   ipykernel
@@ -582,7 +584,7 @@ twine==3.8.0
     # via python-semantic-release
 types-python-dateutil==2.9.0.20240316
     # via arrow
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via
     #   anyio
     #   async-lru
@@ -602,7 +604,7 @@ urllib3==2.2.1
     # via
     #   requests
     #   twine
-virtualenv==20.25.1
+virtualenv==20.26.1
     # via tox
 wcwidth==0.2.13
     # via prompt-toolkit
@@ -612,7 +614,7 @@ webencodings==0.5.1
     # via
     #   bleach
     #   tinycss2
-websocket-client==1.7.0
+websocket-client==1.8.0
     # via jupyter-server
 wheel==0.43.0
     # via python-semantic-release
