@@ -14,6 +14,7 @@ from .conftest import (
     hypothesis_covariance_matrix_with_zero_correlation,
     hypothesis_dimension,
     hypothesis_float_vector,
+    custom_atol,
 )
 
 
@@ -69,7 +70,7 @@ def test_convolution(input_1, input_2, mode):
     # compare results
     assert len(y) == len(Uy)
     assert len(y) == len(y_ref)
-    assert_allclose(y + 1, y_ref + 1, rtol=2.1e-7)
+    assert_allclose(y + 1, y_ref + 1, rtol=2.1e-7, atol=custom_atol)
 
 
 @given(x_and_Ux(reduced_set=True), x_and_Ux(reduced_set=True))

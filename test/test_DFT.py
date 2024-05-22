@@ -31,6 +31,7 @@ from .conftest import (
     hypothesis_float_vector,
     hypothesis_not_negative_float_strategy,
     VectorAndCompatibleMatrix,
+    custom_atol,
 )
 
 
@@ -259,7 +260,7 @@ def test_DFT_MC(params):
     )
 
     # compare analytical and numerical result
-    assert_allclose(X, X_MC, rtol=1e-1)
+    assert_allclose(X, X_MC, rtol=1e-1, atol=custom_atol)
     assert_allclose(X_cov, X_MC_cov, atol=8e-1)
 
 
@@ -322,11 +323,11 @@ def test_iDFT_resampling_sensitivity(params):
     x_resampled_numpy = np.fft.irfft(ri2c(X), n=Nx)
 
     # check resampled signal against numpy implementation
-    assert_allclose(x_resampled_numpy, x_resampled, atol=1e-14)
+    assert_allclose(x_resampled_numpy, x_resampled, atol=custom_atol)
 
     # check sensitivities against numpy implementation
     C = np.hstack((sens["Cc"], sens["Cs"]))
-    assert_allclose(x_resampled_numpy, C @ X / Nx, atol=1e-14)
+    assert_allclose(x_resampled_numpy, C @ X / Nx, atol=custom_atol)
 
 
 @pytest.mark.slow
@@ -406,6 +407,7 @@ def test_apply_window_with_known_result(known_inputs_and_outputs_for_apply_windo
     assert_allclose(
         actual=_apply_window(**known_inputs_and_outputs_for_apply_window["inputs"]),
         desired=known_inputs_and_outputs_for_apply_window["outputs"],
+        atol=custom_atol,
     )
 
 

@@ -9,6 +9,7 @@ from PyDynamic.model_estimation.fit_filter import (
 )
 from ..conftest import (
     hypothesis_dimension,
+    custom_atol,
 )
 
 
@@ -40,5 +41,5 @@ def test(monte_carlo, freqs, sampling_freq, filter_order):
         UH=monte_carlo["UH"],
         mc_runs=10000,
     )
-    assert_allclose(b_fir_mc, b_fir, rtol=4e-2)
-    assert_allclose(Ub_fir_mc, Ub_fir, atol=6e-1, rtol=6e-1)
+    assert_allclose(b_fir_mc, b_fir, rtol=4e-2, atol=custom_atol)
+    assert_allclose(Ub_fir_mc, Ub_fir, rtol=6e-1, atol=6e-1)

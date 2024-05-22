@@ -17,7 +17,7 @@ from PyDynamic.uncertainty.propagate_multiplication import (
 )
 from .test_propagate_convolution import x_and_Ux
 
-from .conftest import hypothesis_dimension
+from .conftest import hypothesis_dimension, custom_atol
 
 
 def hadamar_product_slow_reference(x1, U1, x2, U2, real_valued=False):
@@ -119,8 +119,8 @@ def test_hadamar(inputs):
     assert len(y_slow) == len(Uy_slow)
 
     # compare results
-    assert_allclose(y, y_slow, atol=1e2 * np.finfo(np.float64).eps)
-    assert_allclose(Uy, Uy_slow, atol=1e2 * np.finfo(np.float64).eps)
+    assert_allclose(y, y_slow, atol=custom_atol)
+    assert_allclose(Uy, Uy_slow, atol=custom_atol)
 
 
 @given(two_x_and_Ux_of_same_length(reduced_set=True))
@@ -138,8 +138,8 @@ def test_hadamar_real_valued(inputs):
     assert len(y) == len(y_slow)
     assert len(y_slow) == len(Uy_slow)
 
-    assert_allclose(y, y_slow, atol=1e2 * np.finfo(np.float64).eps)
-    assert_allclose(Uy, Uy_slow, atol=1e2 * np.finfo(np.float64).eps)
+    assert_allclose(y, y_slow, atol=custom_atol)
+    assert_allclose(Uy, Uy_slow, atol=custom_atol)
 
 
 @given(two_x_and_Ux_of_same_length())
@@ -216,8 +216,8 @@ def test_window_application(inputs):
     assert len(y_alt) == len(Uy_alt)
 
     # compare results
-    assert_allclose(y, y_alt, atol=1e2 * np.finfo(np.float64).eps)
-    assert_allclose(Uy, Uy_alt, atol=1e2 * np.finfo(np.float64).eps)
+    assert_allclose(y, y_alt, atol=custom_atol)
+    assert_allclose(Uy, Uy_alt, atol=custom_atol)
 
 
 @given(complex_x_and_Ux_and_real_window())

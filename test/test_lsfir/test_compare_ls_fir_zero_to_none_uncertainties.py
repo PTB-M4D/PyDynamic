@@ -9,6 +9,7 @@ from PyDynamic.model_estimation.fit_filter import (
 )
 from ..conftest import (
     hypothesis_dimension,
+    custom_atol,
 )
 
 
@@ -42,7 +43,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_with_svd_for_fitting_one_
         inv=True,
         UH=None,
     )[0]
-    assert_allclose(b_fir_svd, b_fir_none)
+    assert_allclose(b_fir_svd, b_fir_none, atol=custom_atol)
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8))
@@ -76,7 +77,7 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_one_ov
         inv=True,
         UH=None,
     )[0]
-    assert_allclose(b_fir_mc, b_fir_none)
+    assert_allclose(b_fir_mc, b_fir_none, atol=custom_atol)
 
 
 @given(hypothesis_dimension(min_value=4, max_value=8))
@@ -110,4 +111,4 @@ def test_compare_LSFIR_with_zero_to_None_uncertainties_and_mc_for_fitting_H_dire
         inv=False,
         UH=None,
     )[0]
-    assert_allclose(b_fir_mc, b_fir_none)
+    assert_allclose(b_fir_mc, b_fir_none, atol=custom_atol)

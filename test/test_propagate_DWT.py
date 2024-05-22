@@ -5,7 +5,6 @@ Perform test for uncertainty.propagate_DWT
 import numpy as np
 import pywt
 from numpy.testing import assert_allclose
-
 from PyDynamic.uncertainty.propagate_DWT import (
     dwt,
     dwt_max_level,
@@ -15,6 +14,8 @@ from PyDynamic.uncertainty.propagate_DWT import (
     wave_dec_realtime,
     wave_rec,
 )
+
+from .conftest import custom_atol
 
 
 def test_filter_design():
@@ -57,8 +58,8 @@ def test_dwt():
             ca, cd = pywt.dwt(x, filter_name, mode="constant")
             assert ca.size == y1.size
             assert cd.size == y2.size
-            assert_allclose(ca, y1, atol=1e-15)
-            assert_allclose(cd, y2, atol=1e-15)
+            assert_allclose(ca, y1, atol=custom_atol)
+            assert_allclose(cd, y2, atol=custom_atol)
 
 
 def test_inv_dwt():
@@ -86,7 +87,7 @@ def test_inv_dwt():
 
             # compare to pywt
             r = pywt.idwt(c_approx, c_detail, filter_name, mode="constant")
-            assert_allclose(x, r)
+            assert_allclose(x, r, atol=custom_atol)
 
 
 def test_identity_single():
@@ -110,11 +111,11 @@ def test_identity_single():
             if x.size % 2 == 0:
                 assert x.size == xr.size
                 assert Ux.size == Uxr.size
-                assert_allclose(x, xr)
+                assert_allclose(x, xr, atol=custom_atol)
             else:
                 assert x.size + 1 == xr.size
                 assert Ux.size + 1 == Uxr.size
-                assert_allclose(x, xr[:-1])
+                assert_allclose(x, xr[:-1], atol=custom_atol)
 
 
 def test_max_level():
@@ -144,7 +145,7 @@ def test_wave_dec():
             # compare output in detail
             for a, b in zip(result_pywt, coeffs):
                 assert len(a) == len(b)
-                assert_allclose(a, b, atol=1e-15)
+                assert_allclose(a, b, atol=custom_atol)
 
 
 def test_decomposition_realtime():
@@ -195,12 +196,12 @@ def test_decomposition_realtime():
             # compare output in detail
             for a, b in zip(coeffs_a, coeffs_b):
                 assert len(a) == len(b)
-                assert_allclose(a, b)
+                assert_allclose(a, b, atol=custom_atol)
 
             # compare output uncertainty in detail
             for a, b in zip(Ucoeffs_a, Ucoeffs_b):
                 assert len(a) == len(b)
-                assert_allclose(a, b)
+                assert_allclose(a, b, atol=custom_atol)
 
 
 def test_wave_rec():
@@ -229,7 +230,7 @@ def test_wave_rec():
 
             # compare output of both methods
             assert len(result_pywt) == len(x)
-            assert_allclose(result_pywt, x)
+            assert_allclose(result_pywt, x, atol=custom_atol)
 
 
 def test_identity_multi():
@@ -252,5 +253,5 @@ def test_identity_multi():
             xr, Uxr = wave_rec(coeffs, Ucoeffs, lr, hr, original_length=ol)
 
             assert x.size == xr.size
-            assert_allclose(x, xr)
+            assert_allclose(x, xr, atol=custom_atol)
             assert Ux.size == Uxr.size

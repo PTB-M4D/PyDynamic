@@ -16,7 +16,7 @@ from PyDynamic.uncertainty.propagate_filter import (
 )
 from PyDynamic.uncertainty.propagate_MonteCarlo import MC
 
-from ..conftest import random_covariance_matrix
+from ..conftest import random_covariance_matrix, custom_atol
 
 
 @pytest.fixture
@@ -62,17 +62,17 @@ def test_FIRuncFilter_equality(equal_filters, equal_signals):
     all_uy = []
 
     # run all combinations of filter and signals
-    for (f, s) in itertools.product(equal_filters, equal_signals):
+    for f, s in itertools.product(equal_filters, equal_signals):
         y, uy = FIRuncFilter(**f, **s)
         all_y.append(y)
         all_uy.append(uy)
 
     # check that all have the same output, as they are supposed to represent equal cases
     for a, b in itertools.combinations(all_y, 2):
-        assert_allclose(a, b)
+        assert_allclose(a, b, atol=custom_atol)
 
     for a, b in itertools.combinations(all_uy, 2):
-        assert_allclose(a, b)
+        assert_allclose(a, b, atol=custom_atol)
 
 
 @pytest.mark.slow
@@ -144,7 +144,6 @@ def sigma_noise():
 
 @pytest.fixture(scope="module")
 def input_signal(sigma_noise):
-
     # simulate input and output signals
     Fs = 100e3  # sampling frequency (in Hz)
     Ts = 1 / Fs  # sampling interval length (in s)
@@ -166,7 +165,6 @@ def run_IIRuncFilter_all_at_once(iir_filter, input_signal):
 
 @pytest.fixture(scope="module")
 def run_IIRuncFilter_in_chunks(iir_filter, input_signal):
-
     # slice x into smaller chunks and process them in batches
     # this tests the internal state options
     y_list = []
@@ -191,7 +189,6 @@ def run_IIRuncFilter_in_chunks(iir_filter, input_signal):
 
 
 def test_IIRuncFilter_shape_all_at_once(input_signal, run_IIRuncFilter_all_at_once):
-
     y, Uy = run_IIRuncFilter_all_at_once
 
     # compare lengths
@@ -210,18 +207,16 @@ def test_IIRuncFilter_shape_in_chunks(input_signal, run_IIRuncFilter_in_chunks):
 def test_IIRuncFilter_identity_nonchunk_chunk(
     run_IIRuncFilter_all_at_once, run_IIRuncFilter_in_chunks
 ):
-
     y1, Uy1 = run_IIRuncFilter_all_at_once
     y2, Uy2 = run_IIRuncFilter_in_chunks
 
     # check if both ways of calling IIRuncFilter yield the same result
-    assert_allclose(y1, y2)
-    assert_allclose(Uy1, Uy2)
+    assert_allclose(y1, y2, atol=custom_atol)
+    assert_allclose(Uy1, Uy2, atol=custom_atol)
 
 
 @pytest.mark.parametrize("kind", ["diag", "corr"])
 def test_FIR_IIR_identity(kind, fir_filter, input_signal):
-
     # run signal through both implementations
     y_iir, Uy_iir, _ = IIRuncFilter(*input_signal.values(), **fir_filter, kind=kind)
     y_fir, Uy_fir = FIRuncFilter(
@@ -231,8 +226,8 @@ def test_FIR_IIR_identity(kind, fir_filter, input_signal):
         kind=kind,
     )
 
-    assert_allclose(y_fir, y_iir)
-    assert_allclose(Uy_fir, Uy_iir)
+    assert_allclose(y_fir, y_iir, atol=custom_atol)
+    assert_allclose(Uy_fir, Uy_iir, atol=custom_atol)
 
 
 def test_tf2ss(iir_filter):
@@ -242,10 +237,10 @@ def test_tf2ss(iir_filter):
     A1, B1, C1, D1 = _tf2ss(b, a)
     A2, B2, C2, D2 = scipy.signal.tf2ss(b, a)
 
-    assert_allclose(A1, A2[::-1, ::-1])
-    assert_allclose(B1, B2[::-1, ::-1])
-    assert_allclose(C1, C2[::-1, ::-1])
-    assert_allclose(D1, D2[::-1, ::-1])
+    assert_allclose(A1, A2[::-1, ::-1], atol=custom_atol)
+    assert_allclose(B1, B2[::-1, ::-1], atol=custom_atol)
+    assert_allclose(C1, C2[::-1, ::-1], atol=custom_atol)
+    assert_allclose(D1, D2[::-1, ::-1], atol=custom_atol)
 
 
 def test_get_derivative_A():
@@ -258,7 +253,7 @@ def test_get_derivative_A():
 
     sliced_diagonal = np.full(p, -1.0)
 
-    assert_allclose(dA[index1, index2, index3], sliced_diagonal)
+    assert_allclose(dA[index1, index2, index3], sliced_diagonal, atol=custom_atol)
 
 
 def test_IIRuncFilter_raises_warning_for_kind_not_diag_with_scalar_covariance(

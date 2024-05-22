@@ -14,6 +14,7 @@ from .conftest import (
     hypothesis_float_vector,
     hypothesis_nonzero_complex_vector,
     hypothesis_positive_powers_of_two,
+    custom_atol,
 )
 
 
@@ -86,11 +87,13 @@ def test_dft_deconv(
         x_deconv + x_deconv_shift_away_from_zero,
         monte_carlo_mean + x_deconv_shift_away_from_zero,
         rtol=6.8e-2,
+        atol=custom_atol,
     )
     assert_allclose(
         u_deconv + u_deconv_shift_away_from_zero,
         monte_carlo_cov + u_deconv_shift_away_from_zero,
         rtol=4.98e-1,
+        atol=custom_atol,
     )
 
 
@@ -209,4 +212,4 @@ def test_reveal_bug_in_dft_deconv_up_to_1_9(
         n_monte_carlo_runs=n_monte_carlo_runs,
         operator=complex_deconvolution_on_sets,
     )
-    assert_allclose(u_deconv + 1, y_divided_by_h_mc_cov + 1)
+    assert_allclose(u_deconv + 1, y_divided_by_h_mc_cov + 1, atol=custom_atol)

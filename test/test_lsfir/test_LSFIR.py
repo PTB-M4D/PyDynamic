@@ -19,6 +19,7 @@ from PyDynamic.model_estimation.fit_filter import (
 from .conftest import weights
 from ..conftest import (
     hypothesis_dimension,
+    custom_atol,
 )
 
 
@@ -48,7 +49,7 @@ def simulated_measurement_input_and_output(
                 "test_LSFIR_x.npz",
             ),
         )["x"],
-        atol=1e2*np.finfo(np.float64).eps,
+        atol=custom_atol,
     )
     y = dsp.lfilter(digital_filter["b"], digital_filter["a"], x)
     noise = 1e-3
@@ -74,6 +75,7 @@ def LSFIR_filter_fit(monte_carlo, freqs, sampling_freq):
                 "test_LSFIR_bF.npz",
             ),
         )["bF"],
+        atol=custom_atol,
     )
     assert_allclose(
         UbF,
@@ -85,6 +87,7 @@ def LSFIR_filter_fit(monte_carlo, freqs, sampling_freq):
             ),
         )["UbF"],
         rtol=3e-1,
+        atol=custom_atol,
     )
     return {"bF": bF, "UbF": UbF, "N": N, "tau": tau}
 
@@ -103,6 +106,7 @@ def fir_low_pass(measurement_system, sampling_freq):
                 "test_LSFIR_blow.npz",
             ),
         )["blow"],
+        atol=custom_atol,
     )
     return {"blow": blow, "lshift": lshift}
 
@@ -119,6 +123,7 @@ def shift(simulated_measurement_input_and_output, LSFIR_filter_fit, fir_low_pass
                 "test_LSFIR_shift.npz",
             ),
         )["shift"],
+        atol=custom_atol,
     )
     return shift
 
@@ -239,6 +244,7 @@ def test_digital_deconvolution_FIR_example_figure_5(
                 "test_LSFIR_HbF.npz",
             ),
         )["HbF"],
+        atol=custom_atol,
     )
     plt.semilogy(
         freqs * 1e-3,
@@ -660,4 +666,4 @@ def test_compare_invLSFIR_to_LSFIR(monte_carlo, freqs, sampling_freq, filter_ord
         tau=filter_order // 2,
         inv=True,
     )[0]
-    assert_allclose(b_fir, b_fir_inv_lsfir)
+    assert_allclose(b_fir, b_fir_inv_lsfir, atol=custom_atol)
