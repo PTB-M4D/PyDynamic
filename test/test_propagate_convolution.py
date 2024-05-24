@@ -20,7 +20,7 @@ from .conftest import (
 
 @composite
 def x_and_Ux(
-    draw: Callable, reduced_set: bool = False, given_dim = None
+    draw: Callable, reduced_set: bool = False, given_dim=None
 ) -> Tuple[np.ndarray, np.ndarray]:
     if given_dim:
         dim = given_dim
