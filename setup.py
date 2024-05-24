@@ -1,4 +1,5 @@
 """Install PyDynamic in Python path and provide all packaging metadata."""
+
 import codecs
 import os
 from os import path
@@ -160,7 +161,7 @@ setup(
     },
     python_requires=">=3.8",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 7 - Inactive",
         "Topic :: Utilities",
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development :: Libraries :: Python Modules",
