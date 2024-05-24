@@ -33,6 +33,13 @@
 
 # Python library for the analysis of dynamic measurements
 
+## Archived
+
+This project is archived since May 2024. It will not receive any security related or 
+other patches anymore and we cannot guarantee any form of support in the future.
+
+## Original description
+
 <p align="justify">
 The goal of this library is to provide a starting point for users in metrology and
 related areas who deal with time-dependent i.e., <i>dynamic</i>, measurements. The
@@ -58,7 +65,6 @@ eu">FAMOUS</a>. Since the end of these two projects, development of PyDynamic co
 - [Installation](#installation)
 - [Contributing](#contributing)
 - [Examples](#examples)
-- [Roadmap](#roadmap)
 - [Citation](#citation)
 - [Acknowledgement](#acknowledgement)
 - [Disclaimer](#disclaimer)
@@ -175,17 +181,6 @@ with an example from the beginning if feasible. We are currently moving this sup
 collection to an external repository on GitHub. They will be available at
 [github.com/PTB-M4D/PyDynamic_tutorials](https://github.com/PTB-M4D/PyDynamic_tutorials) 
 in the near future.
-
-## Roadmap
-
-1. Implementation of robust measurement (sensor) models
-1. Extension to more complex noise and uncertainty models
-1. Introducing uncertainty propagation for Kalman filters
-
-For a comprehensive overview of current development activities and upcoming tasks,
-take a look at the [project board](https://github.com/PTB-M4D/PyDynamic/projects/1),
-[issues](https://github.com/PTB-M4D/PyDynamic/issues) and
-[pull requests](https://github.com/PTB-M4D/PyDynamic/pulls).
 
 ## Citation
 
