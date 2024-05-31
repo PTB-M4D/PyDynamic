@@ -17,6 +17,7 @@ from PyDynamic.misc.tools import normalize_vector_or_matrix
 
 custom_atol = 1e2 * np.finfo(np.float64).eps
 
+
 def _check_for_ci_to_switch_off_performance_related_healthchecks():
     if _running_in_ci():
         _register_and_load_hypothesis_profile_for_slow_ci_machines()

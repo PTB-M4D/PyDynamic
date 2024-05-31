@@ -6,6 +6,12 @@
 Python library for the analysis of dynamic measurements
 =======================================================
 
+Archived
+--------
+
+This project is archived since May 2024. It will not receive any security related or
+other patches anymore and we cannot guarantee any form of support in the future.
+
 .. toctree::
    :maxdepth: 2
    :caption: Getting started:
