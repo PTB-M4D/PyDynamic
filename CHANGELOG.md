@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v2.5.1 (2024-05-31)
+### Fix
+* Merge pull request #335 from PTB-M4D/chore/archive-pydynamic ([`ba5ff10`](https://github.com/PTB-M4D/PyDynamic/commit/ba5ff10da6854a415740bf8049584e7ecbe85437))
+
+### Documentation
+* **RTD:** Introduce archived message ([`ab489c6`](https://github.com/PTB-M4D/PyDynamic/commit/ab489c60621d8671c950fa16d71ebf9b19c842ca))
+
+**[See all commits in this version](https://github.com/PTB-M4D/PyDynamic/compare/v2.5.0...v2.5.1)**
+
 ## v2.5.0 (2024-04-18)
 
 ### Feature
